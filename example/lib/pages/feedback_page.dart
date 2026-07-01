@@ -51,7 +51,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
             ),
             M3ECommunication.badge(
               label: '8',
-              child: const Icon(M3EIcons.calendarToday, size: 28),
+              child: const Icon(M3EIcons.calendar_today, size: 28),
             ),
             M3ECommunication.badge(
               label: '99+',

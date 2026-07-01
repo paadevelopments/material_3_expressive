@@ -27,7 +27,7 @@ class _NavigationPageState extends State<NavigationPage> {
       showBadge: true,
     ),
     M3ENavigationDestination(
-      icon: Icon(M3EIcons.calendarToday),
+      icon: Icon(M3EIcons.calendar_today),
       label: 'Agenda',
       badgeLabel: '3',
     ),
@@ -82,7 +82,7 @@ class _NavigationPageState extends State<NavigationPage> {
             centerTitle: true,
             density: M3EAppBarDensity.compact,
             shapeFamily: M3EAppBarShapeFamily.square,
-            actions: const <Widget>[Icon(M3EIcons.moreVert)],
+            actions: const <Widget>[Icon(M3EIcons.file_copy)],
           ),
         ),
         const SizedBox(height: 12),
@@ -124,7 +124,7 @@ class _NavigationPageState extends State<NavigationPage> {
           selectedIndex: _secondaryTab,
           onTabSelected: (int i) => setState(() => _secondaryTab = i),
           tabs: const <M3ETab>[
-            M3ETab(label: 'Photos', icon: Icon(M3EIcons.calendarToday)),
+            M3ETab(label: 'Photos', icon: Icon(M3EIcons.calendar_today)),
             M3ETab(label: 'Albums', icon: Icon(M3EIcons.menu)),
           ],
         ),
@@ -202,7 +202,7 @@ class _NavigationPageState extends State<NavigationPage> {
             M3ENavigation.toolbar(
               children: <Widget>[
                 M3EActions.iconButton(
-                  icon: const Icon(M3EIcons.arrowBack),
+                  icon: const Icon(M3EIcons.arrow_back),
                   onPressed: () {},
                 ),
                 M3EActions.iconButton(
@@ -210,7 +210,7 @@ class _NavigationPageState extends State<NavigationPage> {
                   onPressed: () {},
                 ),
                 M3EActions.iconButton(
-                  icon: const Icon(M3EIcons.arrowForward),
+                  icon: const Icon(M3EIcons.arrow_forward),
                   onPressed: () {},
                 ),
               ],
@@ -238,7 +238,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 return M3EActions.button(
                   label: 'Open menu',
                   style: M3EButtonStyle.outlined,
-                  icon: const Icon(M3EIcons.arrowDropDown),
+                  icon: const Icon(M3EIcons.arrow_drop_down),
                   onPressed: open,
                 );
               },

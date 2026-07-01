@@ -207,10 +207,10 @@ class _ActionsPageState extends State<ActionsPage> {
               onSelectedIndexChanged: (int? index) =>
                   setState(() => _groupIndex = index ?? _groupIndex),
               actions: const <M3EButtonGroupAction>[
-                M3EButtonGroupAction(icon: Icon(M3EIcons.arrowBack)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_back)),
                 M3EButtonGroupAction(icon: Icon(M3EIcons.remove)),
                 M3EButtonGroupAction(icon: Icon(M3EIcons.add)),
-                M3EButtonGroupAction(icon: Icon(M3EIcons.arrowForward)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_forward)),
               ],
             ),
           ],
@@ -224,9 +224,9 @@ class _ActionsPageState extends State<ActionsPage> {
               onSelectedIndexChanged: (int? index) =>
                   setState(() => _connectedGroupIndex = index ?? _connectedGroupIndex),
               actions: const <M3EButtonGroupAction>[
-                M3EButtonGroupAction(icon: Icon(M3EIcons.chevronLeft)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_left)),
                 M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),
-                M3EButtonGroupAction(icon: Icon(M3EIcons.chevronRight)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_right)),
               ],
             ),
           ],

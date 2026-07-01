@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -79,7 +80,7 @@ class _Gallery extends StatelessWidget {
     M3ENavigationDestination(icon: Icon(M3EIcons.add), label: 'Actions'),
     M3ENavigationDestination(icon: Icon(M3EIcons.check), label: 'Selection'),
     M3ENavigationDestination(
-      icon: Icon(M3EIcons.calendarToday),
+      icon: Icon(M3EIcons.calendar_today),
       label: 'Containment',
     ),
     M3ENavigationDestination(icon: Icon(M3EIcons.menu), label: 'Navigation'),

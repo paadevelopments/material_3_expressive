@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
 import 'enums/m3e_refresh_status.dart';
@@ -227,15 +228,16 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   void _setupColorTween() {
-    _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
+    _effectiveValueColor =
+        widget.color ?? M3ETheme.of(context).colorScheme.primary;
     final Color color = _effectiveValueColor;
     if (color.alpha == 0x00) {
       _valueColor = AlwaysStoppedAnimation<Color>(color);
     } else {
       _valueColor = _positionController.drive(
         ColorTween(
-          begin: color.withAlpha(0),
-          end: color.withAlpha(color.alpha),
+          begin: color,
+          end: color,
         ).chain(CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
       );
     }
@@ -519,7 +521,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       // Show the contained expressive loading indicator during refresh
       return _ContainedExpressiveLoadingIndicator(
         color: _effectiveValueColor,
-        backgroundColor: widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+        backgroundColor: widget.backgroundColor ??
+            M3ETheme.of(context).colorScheme.secondaryContainer,
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,
         semanticsLabel: widget.semanticsLabel,
@@ -528,9 +531,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     } else {
       // Show a contained morphing shape during drag
       return _ContainedDragExpressiveIndicator(
-        color: _valueColor.value ?? _effectiveValueColor,
-        backgroundColor: (widget.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest)
-            .withAlpha((_valueColor.value?.alpha ?? 0) ~/ 2),
+        color: _effectiveValueColor,
+        backgroundColor:
+            (widget.backgroundColor ??
+                    M3ETheme.of(context).colorScheme.secondaryContainer),
         progress: _value.value,
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,

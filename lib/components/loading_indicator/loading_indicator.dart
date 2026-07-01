@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
+import '../../foundations/foundations.dart';
 import 'components/m3e_expressive_loading_indicator.dart';
 import 'components/m3e_loading_tokens_adapter.dart';
 import 'enums/m3e_loading_indicator_variant.dart';
@@ -44,21 +45,21 @@ class M3ELoadingIndicator extends StatelessWidget {
 
     final cons = constraints ?? BoxConstraints.tight(size);
 
-    final activeColor = switch (variant) {
-      M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
-      M3ELoadingIndicatorVariant.contained =>
-        color ?? tokens.containedActiveColor(),
-    };
-
-    final containerBg = switch (variant) {
-      M3ELoadingIndicatorVariant.defaultStyle =>
-        containerColor ?? tokens.containerColorDefault(),
-      M3ELoadingIndicatorVariant.contained =>
-        containerColor ?? tokens.containedContainerColor(),
-    };
+    // final activeColor = switch (variant) {
+    //   M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
+    //   M3ELoadingIndicatorVariant.contained =>
+    //     color ?? tokens.containedActiveColor(),
+    // };
+    //
+    // final containerBg = switch (variant) {
+    //   M3ELoadingIndicatorVariant.defaultStyle =>
+    //     containerColor ?? tokens.containerColorDefault(),
+    //   M3ELoadingIndicatorVariant.contained =>
+    //     containerColor ?? tokens.containedContainerColor(),
+    // };
 
     final indicator = M3EExpressiveLoadingIndicator(
-      color: activeColor,
+      color: M3ETheme.of(context).colorScheme.primary,
       polygons: polygons,
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,
@@ -67,7 +68,7 @@ class M3ELoadingIndicator extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: containerBg,
+        color: M3ETheme.of(context).colorScheme.secondaryContainer,
         borderRadius: tokens.containerRadius(),
       ),
       child: Padding(

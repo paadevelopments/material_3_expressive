@@ -77,8 +77,8 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
                 theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
           ),
         ),
-        _buildArrow(scheme, M3EIcons.chevronLeft, () => _shiftMonth(-1)),
-        _buildArrow(scheme, M3EIcons.chevronRight, () => _shiftMonth(1)),
+        _buildArrow(scheme, M3EIcons.chevron_left, () => _shiftMonth(-1)),
+        _buildArrow(scheme, M3EIcons.chevron_right, () => _shiftMonth(1)),
       ],
     );
   }
