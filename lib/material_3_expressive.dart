@@ -1,0 +1,42 @@
+/// Material 3 Expressive: a faithful Flutter implementation of the Material 3
+/// component set, exposed through grouped `M3E*` facades.
+library;
+
+export 'components/app_bars/app_bars.dart';
+export 'components/badges/badges.dart';
+export 'components/bottom_sheets/bottom_sheets.dart';
+export 'components/button_groups/button_groups.dart';
+export 'components/buttons/buttons.dart';
+export 'components/cards/cards.dart';
+export 'components/carousel/carousel.dart';
+export 'components/checkbox/checkbox.dart';
+export 'components/chips/chips.dart';
+export 'components/date_pickers/date_pickers.dart';
+export 'components/dialogs/dialogs.dart';
+export 'components/divider/divider.dart';
+export 'components/extended_fabs/extended_fabs.dart';
+export 'components/fab_menu/fab_menu.dart';
+export 'components/floating_action_buttons/floating_action_buttons.dart';
+export 'components/icon_buttons/icon_buttons.dart';
+export 'components/lists/lists.dart';
+export 'components/loading_indicator/loading_indicator.dart';
+export 'components/menus/menus.dart';
+export 'components/navigation_bar/navigation_bar.dart';
+export 'components/navigation_drawer/navigation_drawer.dart';
+export 'components/navigation_rail/navigation_rail.dart';
+export 'components/progress_indicators/progress_indicators.dart';
+export 'components/radio_button/radio_button.dart';
+export 'components/search/search.dart';
+export 'components/segmented_buttons/segmented_buttons.dart';
+export 'components/side_sheets/side_sheets.dart';
+export 'components/sliders/sliders.dart';
+export 'components/snackbar/snackbar.dart';
+export 'components/split_buttons/split_buttons.dart';
+export 'components/switch_control/switch_control.dart';
+export 'components/tabs/tabs.dart';
+export 'components/text_fields/text_fields.dart';
+export 'components/time_pickers/time_pickers.dart';
+export 'components/toolbars/toolbars.dart';
+export 'components/tooltips/tooltips.dart';
+export 'facades/facades.dart';
+export 'foundations/foundations.dart';

@@ -1,0 +1,21 @@
+name: material_3_expressive
+description: "A faithful Flutter implementation of the Material 3 Expressive component set, exposed through grouped M3E facades."
+version: 1.0.0
+homepage: https://github.com/paadevelopments/material_3_expressive
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  custom_lint: ^0.7.5
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  klin_dart: ^1.3.1
+
+flutter:
