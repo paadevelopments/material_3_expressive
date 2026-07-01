@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';
@@ -73,33 +75,37 @@ class ContainmentPage extends StatelessWidget {
   }
 
   Widget _carousel(M3EThemeData theme) {
-    final List<Color> colors = <Color>[
-      theme.colorScheme.primaryContainer,
-      theme.colorScheme.secondaryContainer,
-      theme.colorScheme.tertiaryContainer,
-      theme.colorScheme.surfaceContainerHighest,
-    ];
     return GallerySection(
       title: 'Carousel',
       children: <Widget>[
-        M3EContainment.carousel(
+        SizedBox(
+          height: 200,
+          child: M3EContainment.carousel(
+            type: M3ECarouselType.hero,
+            heroAlignment: M3ECarouselHeroAlignment.center,
+            onTap: (int tapIndex) => log(tapIndex.toString()),
+            children: List<Widget>.generate(10, (int index) {
+              return ColoredBox(
+                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.8),
+                child: const SizedBox.expand(),
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
           height: 160,
-          items: <Widget>[
-            for (int i = 0; i < colors.length; i++)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors[i],
-                  borderRadius: M3EShapes.radiusLarge,
-                ),
-                child: Center(
-                  child: Text(
-                    'Item ${i + 1}',
-                    style: theme.typeScale.titleMedium
-                        .copyWith(color: theme.colorScheme.onSurface),
-                  ),
-                ),
-              ),
-          ],
+          child: M3EContainment.carousel(
+            type: M3ECarouselType.uncontained,
+            heroAlignment: M3ECarouselHeroAlignment.center,
+            onTap: (int tapIndex) => log(tapIndex.toString()),
+            children: List<Widget>.generate(10, (int index) {
+              return ColoredBox(
+                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.8),
+                child: const SizedBox.expand(),
+              );
+            }),
+          ),
         ),
       ],
     );
@@ -168,22 +174,22 @@ class ContainmentPage extends StatelessWidget {
           children: <Widget>[
             M3EActions.button(
               label: 'Dialog',
-              variant: M3EButtonVariant.filledTonal,
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showDialog(context),
             ),
             M3EActions.button(
               label: 'Full screen',
-              variant: M3EButtonVariant.filledTonal,
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showFullScreen(context),
             ),
             M3EActions.button(
               label: 'Bottom sheet',
-              variant: M3EButtonVariant.filledTonal,
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showBottomSheet(context),
             ),
             M3EActions.button(
               label: 'Side sheet',
-              variant: M3EButtonVariant.filledTonal,
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showSideSheet(context),
             ),
           ],
@@ -204,7 +210,7 @@ class ContainmentPage extends StatelessWidget {
         actions: <Widget>[
           M3EActions.button(
             label: 'Cancel',
-            variant: M3EButtonVariant.text,
+            style: M3EButtonStyle.text,
             onPressed: () => Navigator.of(context).pop(),
           ),
           M3EActions.button(
@@ -222,7 +228,7 @@ class ContainmentPage extends StatelessWidget {
       title: 'New event',
       action: M3EActions.button(
         label: 'Save',
-        variant: M3EButtonVariant.text,
+        style: M3EButtonStyle.text,
         onPressed: () => Navigator.of(context).pop(),
       ),
       body: const Padding(

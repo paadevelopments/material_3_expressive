@@ -15,6 +15,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   double _progress = 0.6;
+  int _refreshCount = 0;
 
   @override
   void dispose() {
@@ -31,6 +32,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       children: <Widget>[
         _badges(theme),
         _progressSection(),
+        _pullToRefresh(),
         _tooltipAndSnackbar(context),
         _inputs(),
       ],
@@ -71,6 +73,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
             SizedBox(width: 200, child: M3ECommunication.linearProgress()),
             M3ECommunication.circularProgress(),
             M3ECommunication.loadingIndicator(),
+            M3ECommunication.loadingIndicator(
+              variant: M3ELoadingIndicatorVariant.contained,
+            ),
           ],
         ),
         DemoRow(
@@ -78,7 +83,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
           children: <Widget>[
             SizedBox(
               width: 200,
-              child: M3ECommunication.linearProgress(value: _progress),
+              child: M3ECommunication.linearProgress(
+                value: _progress,
+                shape: M3EProgressShape.flat,
+              ),
             ),
             M3ECommunication.circularProgress(value: _progress),
             SizedBox(
@@ -87,6 +95,55 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 value: _progress,
                 onChanged: (double value) =>
                     setState(() => _progress = value),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleRefresh() async {
+    await Future<void>.delayed(const Duration(seconds: 5));
+    if (mounted) {
+      setState(() => _refreshCount++);
+    }
+  }
+
+  Widget _pullToRefresh() {
+    return GallerySection(
+      title: 'Pull to refresh',
+      children: <Widget>[
+        DemoRow(
+          label: 'Drag the lists down to refresh (count: $_refreshCount)',
+          children: <Widget>[
+            SizedBox(
+              width: 200,
+              height: 180,
+              child: M3ECommunication.refreshIndicator(
+                onRefresh: _handleRefresh,
+                child: ListView.builder(
+                  itemCount: 12,
+                  itemBuilder: (BuildContext context, int index) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text('Expressive item ${index + 1}'),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 180,
+              child: M3ECommunication.refreshIndicator(
+                onRefresh: _handleRefresh,
+                contained: true,
+                child: ListView.builder(
+                  itemCount: 12,
+                  itemBuilder: (BuildContext context, int index) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text('Contained item ${index + 1}'),
+                  ),
+                ),
               ),
             ),
           ],

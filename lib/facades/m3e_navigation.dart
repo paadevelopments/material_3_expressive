@@ -13,20 +13,79 @@ import '../components/toolbars/toolbars.dart';
 class M3ENavigation {
   const M3ENavigation._();
 
-  /// Creates a top app bar. See [M3ETopAppBar].
+  /// Creates a fixed top app bar. See [M3ETopAppBar].
+  ///
+  /// Pass [title] for a plain text title or [titleWidget] for a custom title.
   static Widget topAppBar({
-    required String title,
+    String? title,
+    Widget? titleWidget,
     Widget? leading,
-    List<Widget> actions = const <Widget>[],
-    M3ETopAppBarVariant variant = M3ETopAppBarVariant.small,
+    List<Widget>? actions,
+    bool centerTitle = false,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    double? elevation,
+    M3EAppBarShapeFamily shapeFamily = M3EAppBarShapeFamily.round,
+    M3EAppBarDensity density = M3EAppBarDensity.regular,
+    double? toolbarHeight,
+    bool automaticallyImplyLeading = true,
+    Clip clipBehavior = Clip.none,
+    String? semanticLabel,
     Key? key,
   }) {
     return M3ETopAppBar(
       key: key,
-      title: title,
       leading: leading,
+      title: titleWidget,
+      titleText: title,
       actions: actions,
+      centerTitle: centerTitle,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      shapeFamily: shapeFamily,
+      density: density,
+      toolbarHeight: toolbarHeight,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      clipBehavior: clipBehavior,
+      semanticLabel: semanticLabel,
+    );
+  }
+
+  /// Creates a scrolling top app bar. See [M3ESliverAppBar].
+  static Widget sliverAppBar({
+    String? title,
+    Widget? titleWidget,
+    Widget? leading,
+    List<Widget>? actions,
+    bool centerTitle = false,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    bool pinned = true,
+    bool floating = false,
+    bool snap = false,
+    M3EAppBarShapeFamily shapeFamily = M3EAppBarShapeFamily.round,
+    M3EAppBarDensity density = M3EAppBarDensity.regular,
+    M3EAppBarVariant variant = M3EAppBarVariant.medium,
+    String? semanticLabel,
+    Key? key,
+  }) {
+    return M3ESliverAppBar(
+      key: key,
+      leading: leading,
+      title: titleWidget,
+      titleText: title,
+      actions: actions,
+      centerTitle: centerTitle,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      pinned: pinned,
+      floating: floating,
+      snap: snap,
+      shapeFamily: shapeFamily,
+      density: density,
       variant: variant,
+      semanticLabel: semanticLabel,
     );
   }
 

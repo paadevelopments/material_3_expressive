@@ -26,6 +26,7 @@ export 'components/navigation_drawer/navigation_drawer.dart';
 export 'components/navigation_rail/navigation_rail.dart';
 export 'components/progress_indicators/progress_indicators.dart';
 export 'components/radio_button/radio_button.dart';
+export 'components/refresh_indicator/refresh_indicator.dart';
 export 'components/search/search.dart';
 export 'components/segmented_buttons/segmented_buttons.dart';
 export 'components/side_sheets/side_sheets.dart';

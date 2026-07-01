@@ -47,4 +47,42 @@ abstract final class M3EShapes {
   static BorderRadius resolve(double token) {
     return BorderRadius.all(Radius.circular(token));
   }
+
+  /// The expressive *round* shape set (mirrors `m3e_design`'s round family).
+  static const M3EShapeSet roundSet = M3EShapeSet(
+    xs: BorderRadius.all(Radius.circular(999)),
+    sm: BorderRadius.all(Radius.circular(20)),
+    md: BorderRadius.all(Radius.circular(28)),
+    lg: BorderRadius.all(Radius.circular(44)),
+    xl: BorderRadius.all(Radius.circular(64)),
+  );
+
+  /// The expressive *square* shape set (mirrors `m3e_design`'s square family).
+  static const M3EShapeSet squareSet = M3EShapeSet(
+    xs: BorderRadius.all(Radius.circular(6)),
+    sm: BorderRadius.all(Radius.circular(8)),
+    md: BorderRadius.all(Radius.circular(12)),
+    lg: BorderRadius.all(Radius.circular(16)),
+    xl: BorderRadius.all(Radius.circular(20)),
+  );
+}
+
+/// A five-step [BorderRadius] scale for a single shape family.
+///
+/// Mirrors the `M3EShapeSet` from the `m3e_design` package.
+@immutable
+class M3EShapeSet {
+  const M3EShapeSet({
+    required this.xs,
+    required this.sm,
+    required this.md,
+    required this.lg,
+    required this.xl,
+  });
+
+  final BorderRadius xs;
+  final BorderRadius sm;
+  final BorderRadius md;
+  final BorderRadius lg;
+  final BorderRadius xl;
 }

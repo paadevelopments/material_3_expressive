@@ -44,6 +44,15 @@ class M3EColorScheme {
     required this.shadow,
     required this.scrim,
     required this.surfaceTint,
+    required this.emphasis,
+    required this.onEmphasis,
+    required this.info,
+    required this.success,
+    required this.warning,
+    required this.danger,
+    required this.surfaceStrong,
+    required this.onSurfaceStrong,
+    required this.outlineStrong,
   });
 
   /// Builds a scheme from a single [seed] color.
@@ -57,9 +66,25 @@ class M3EColorScheme {
   }
 
   /// Adapts a framework [ColorScheme] into an [M3EColorScheme].
+  ///
+  /// The expressive/semantic roles (`emphasis`, `info`, `success`, `warning`,
+  /// `danger`, `surfaceStrong`, `outlineStrong`) mirror the token logic from
+  /// the `m3e_design` package, derived from the base scheme.
   factory M3EColorScheme.fromColorScheme(ColorScheme scheme) {
+    final isDark = scheme.brightness == Brightness.dark;
+    final surfaceStrong =
+        Color.alphaBlend(scheme.primary.withValues(alpha: 0.06), scheme.surface);
     return M3EColorScheme(
       brightness: scheme.brightness,
+      emphasis: scheme.primary,
+      onEmphasis: scheme.onPrimary,
+      info: scheme.tertiary,
+      success: isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32),
+      warning: isDark ? const Color(0xFFFFB74D) : const Color(0xFFEF6C00),
+      danger: scheme.error,
+      surfaceStrong: surfaceStrong,
+      onSurfaceStrong: scheme.onSurface,
+      outlineStrong: scheme.outline,
       primary: scheme.primary,
       onPrimary: scheme.onPrimary,
       primaryContainer: scheme.primaryContainer,
@@ -142,4 +167,86 @@ class M3EColorScheme {
   final Color shadow;
   final Color scrim;
   final Color surfaceTint;
+
+  /// High-emphasis accent (defaults to [primary]).
+  final Color emphasis;
+
+  /// Content color on top of [emphasis].
+  final Color onEmphasis;
+
+  /// Informational semantic role (defaults to [tertiary]).
+  final Color info;
+
+  /// Success semantic role.
+  final Color success;
+
+  /// Warning semantic role.
+  final Color warning;
+
+  /// Danger semantic role (defaults to [error]).
+  final Color danger;
+
+  /// A slightly emphasized surface for grouped containers.
+  final Color surfaceStrong;
+
+  /// Content color on top of [surfaceStrong].
+  final Color onSurfaceStrong;
+
+  /// A stronger outline for high-contrast separators.
+  final Color outlineStrong;
+
+  /// A framework [ColorScheme] mirroring these roles.
+  ///
+  /// Lets components written against Material's [ColorScheme] consume the
+  /// expressive palette carried by `M3EThemeData`. The result is memoised per
+  /// instance, so a stable theme yields a stable identity (important for
+  /// downstream `identical`-based caches).
+  ColorScheme toColorScheme() {
+    final ColorScheme? cached = _colorSchemeCache[this];
+    if (cached != null) {
+      return cached;
+    }
+    final scheme = ColorScheme(
+      brightness: brightness,
+      primary: primary,
+      onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: onPrimaryContainer,
+      secondary: secondary,
+      onSecondary: onSecondary,
+      secondaryContainer: secondaryContainer,
+      onSecondaryContainer: onSecondaryContainer,
+      tertiary: tertiary,
+      onTertiary: onTertiary,
+      tertiaryContainer: tertiaryContainer,
+      onTertiaryContainer: onTertiaryContainer,
+      error: error,
+      onError: onError,
+      errorContainer: errorContainer,
+      onErrorContainer: onErrorContainer,
+      surface: surface,
+      onSurface: onSurface,
+      onSurfaceVariant: onSurfaceVariant,
+      surfaceContainerLowest: surfaceContainerLowest,
+      surfaceContainerLow: surfaceContainerLow,
+      surfaceContainer: surfaceContainer,
+      surfaceContainerHigh: surfaceContainerHigh,
+      surfaceContainerHighest: surfaceContainerHighest,
+      surfaceDim: surfaceDim,
+      surfaceBright: surfaceBright,
+      inverseSurface: inverseSurface,
+      onInverseSurface: onInverseSurface,
+      inversePrimary: inversePrimary,
+      outline: outline,
+      outlineVariant: outlineVariant,
+      shadow: shadow,
+      scrim: scrim,
+      surfaceTint: surfaceTint,
+    );
+    _colorSchemeCache[this] = scheme;
+    return scheme;
+  }
 }
+
+/// Memoises [M3EColorScheme.toColorScheme] results per instance.
+final Expando<ColorScheme> _colorSchemeCache = Expando<ColorScheme>();

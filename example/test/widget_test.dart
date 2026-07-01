@@ -50,12 +50,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 
+    final Finder dialogTrigger = find.text('Dialog');
     await tester.scrollUntilVisible(
-      find.text('Dialog'),
+      dialogTrigger,
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Dialog'));
+    await tester.ensureVisible(dialogTrigger);
+    await tester.pump();
+    await tester.tap(dialogTrigger);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('Reset settings?'), findsOneWidget);

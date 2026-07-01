@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'm3e_color_scheme.dart';
+import 'm3e_spacing.dart';
 import 'm3e_typography.dart';
 
 /// Immutable bundle of the design tokens shared by every expressive component.
@@ -9,6 +10,7 @@ class M3EThemeData {
   M3EThemeData({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    this.spacing = const M3ESpacing.regular(),
     this.visualDensity = 0,
   })  : colorScheme = colorScheme ?? M3EColorScheme.light(),
         typeScale = typeScale ?? M3ETypeScale.baseline();
@@ -34,17 +36,22 @@ class M3EThemeData {
   final M3EColorScheme colorScheme;
   final M3ETypeScale typeScale;
 
+  /// The spacing scale used for gaps and padding.
+  final M3ESpacing spacing;
+
   /// Additional density applied to touch targets, in logical pixels per axis.
   final double visualDensity;
 
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    M3ESpacing? spacing,
     double? visualDensity,
   }) {
     return M3EThemeData(
       colorScheme: colorScheme ?? this.colorScheme,
       typeScale: typeScale ?? this.typeScale,
+      spacing: spacing ?? this.spacing,
       visualDensity: visualDensity ?? this.visualDensity,
     );
   }

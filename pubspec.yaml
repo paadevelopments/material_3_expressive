@@ -8,8 +8,11 @@ environment:
   flutter: '>=3.3.0'
 
 dependencies:
+  collection: ^1.19.1
   flutter:
     sdk: flutter
+  material_new_shapes: ^1.0.0
+  motor: ^1.1.0
 
 dev_dependencies:
   custom_lint: ^0.7.5

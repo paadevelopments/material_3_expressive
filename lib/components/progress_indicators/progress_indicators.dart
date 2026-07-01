@@ -4,96 +4,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_circular_progress_painter.dart';
-import 'components/m3e_linear_progress_painter.dart';
 
-/// A Material 3 Expressive linear progress indicator.
-///
-/// Pass a [value] in 0..1 for a determinate bar, or leave it null for a
-/// continuously animating indeterminate bar.
-class M3ELinearProgress extends StatefulWidget {
-  const M3ELinearProgress({this.value, this.height = 4, super.key});
-
-  final double? value;
-  final double height;
-
-  @override
-  State<M3ELinearProgress> createState() => _M3ELinearProgressState();
-}
-
-class _M3ELinearProgressState extends State<M3ELinearProgress>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: M3EMotion.extraLong4,
-    );
-    if (widget.value == null) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(M3ELinearProgress oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
-    return SizedBox(
-      height: widget.height,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (BuildContext context, Widget? child) {
-          final _Segment segment = _resolveSegment();
-          return CustomPaint(
-            painter: M3ELinearProgressPainter(
-              trackColor: scheme.secondaryContainer,
-              activeColor: scheme.primary,
-              fractionStart: segment.start,
-              fractionEnd: segment.end,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  _Segment _resolveSegment() {
-    final double? value = widget.value;
-    if (value != null) {
-      return _Segment(0, value.clamp(0, 1).toDouble());
-    }
-    final double t = _controller.value;
-    final double head = M3EMotion.emphasized.transform((t * 2).clamp(0, 1));
-    final double tail =
-        M3EMotion.emphasized.transform(((t - 0.4) * 2).clamp(0, 1));
-    return _Segment(tail, head);
-  }
-}
-
-@immutable
-class _Segment {
-  const _Segment(this.start, this.end);
-
-  final double start;
-  final double end;
-}
+export 'components/m3e_linear_progress_view.dart';
+export 'enums/m3e_progress_enums.dart';
 
 /// A Material 3 Expressive circular progress indicator.
 ///

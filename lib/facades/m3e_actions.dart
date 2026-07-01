@@ -16,29 +16,40 @@ class M3EActions {
   const M3EActions._();
 
   /// Creates a common button. See [M3EButton].
+  ///
+  /// When [enabled] is omitted the button is enabled whenever [onPressed] is
+  /// non-null.
   static Widget button({
     required String label,
     VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    M3EButtonVariant variant = M3EButtonVariant.filled,
-    M3EButtonSize size = M3EButtonSize.small,
-    M3EButtonShape shape = M3EButtonShape.round,
     Widget? icon,
-    FocusNode? focusNode,
-    bool autofocus = false,
+    M3EButtonStyle style = M3EButtonStyle.filled,
+    M3EButtonSize size = M3EButtonSize.sm,
+    M3EButtonShape shape = M3EButtonShape.round,
+    bool? enabled,
     Key? key,
   }) {
+    final bool resolvedEnabled = enabled ?? (onPressed != null);
+    if (icon != null) {
+      return M3EButton.icon(
+        key: key,
+        onPressed: onPressed,
+        icon: icon,
+        label: Text(label),
+        style: style,
+        size: size,
+        shape: shape,
+        enabled: resolvedEnabled,
+      );
+    }
     return M3EButton(
       key: key,
-      label: label,
       onPressed: onPressed,
-      onLongPress: onLongPress,
-      variant: variant,
+      style: style,
       size: size,
       shape: shape,
-      icon: icon,
-      focusNode: focusNode,
-      autofocus: autofocus,
+      enabled: resolvedEnabled,
+      child: Text(label),
     );
   }
 
@@ -136,16 +147,32 @@ class M3EActions {
 
   /// Creates a button group. See [M3EButtonGroup].
   static Widget buttonGroup({
-    required List<M3EButtonGroupItem> items,
-    double height = 48,
-    double spacing = 4,
+    required List<M3EButtonGroupAction> actions,
+    M3EButtonGroupType type = M3EButtonGroupType.standard,
+    M3EButtonShape shape = M3EButtonShape.round,
+    M3EButtonSize size = M3EButtonSize.sm,
+    M3EButtonStyle style = M3EButtonStyle.filled,
+    M3EButtonGroupDensity density = M3EButtonGroupDensity.regular,
+    Axis direction = Axis.horizontal,
+    int? selectedIndex,
+    ValueChanged<int?>? onSelectedIndexChanged,
+    M3EButtonGroupOverflow overflow = M3EButtonGroupOverflow.scroll,
+    String? semanticLabel,
     Key? key,
   }) {
     return M3EButtonGroup(
       key: key,
-      items: items,
-      height: height,
-      spacing: spacing,
+      actions: actions,
+      type: type,
+      shape: shape,
+      size: size,
+      style: style,
+      density: density,
+      direction: direction,
+      selectedIndex: selectedIndex,
+      onSelectedIndexChanged: onSelectedIndexChanged,
+      overflow: overflow,
+      semanticLabel: semanticLabel,
     );
   }
 
@@ -169,23 +196,29 @@ class M3EActions {
   }
 
   /// Creates a split button. See [M3ESplitButton].
-  static Widget splitButton({
-    required String label,
-    Widget? leadingIcon,
+  static Widget splitButton<T>({
+    required List<M3ESplitButtonItem<T>> items,
+    ValueChanged<T>? onSelected,
     VoidCallback? onPressed,
-    VoidCallback? onMenuPressed,
-    bool expanded = false,
-    M3ESplitButtonVariant variant = M3ESplitButtonVariant.filled,
+    String? label,
+    IconData? leadingIcon,
+    M3EButtonStyle style = M3EButtonStyle.filled,
+    M3EButtonSize size = M3EButtonSize.sm,
+    M3EButtonShape shape = M3EButtonShape.round,
+    bool enabled = true,
     Key? key,
   }) {
-    return M3ESplitButton(
+    return M3ESplitButton<T>(
       key: key,
+      items: items,
+      onSelected: onSelected,
+      onPressed: onPressed,
       label: label,
       leadingIcon: leadingIcon,
-      onPressed: onPressed,
-      onMenuPressed: onMenuPressed,
-      expanded: expanded,
-      variant: variant,
+      style: style,
+      size: size,
+      shape: shape,
+      enabled: enabled,
     );
   }
 }

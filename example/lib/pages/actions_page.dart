@@ -15,6 +15,8 @@ class _ActionsPageState extends State<ActionsPage> {
   bool _favorite = false;
   Set<String> _singleView = <String>{'grid'};
   Set<String> _filters = <String>{'new'};
+  int _groupIndex = 0;
+  int _connectedGroupIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class _ActionsPageState extends State<ActionsPage> {
           children: <Widget>[
             M3EActions.button(
               label: 'Elevated',
-              variant: M3EButtonVariant.elevated,
+              style: M3EButtonStyle.elevated,
               onPressed: () {},
             ),
             M3EActions.button(
@@ -49,17 +51,17 @@ class _ActionsPageState extends State<ActionsPage> {
             ),
             M3EActions.button(
               label: 'Tonal',
-              variant: M3EButtonVariant.filledTonal,
+              style: M3EButtonStyle.tonal,
               onPressed: () {},
             ),
             M3EActions.button(
               label: 'Outlined',
-              variant: M3EButtonVariant.outlined,
+              style: M3EButtonStyle.outlined,
               onPressed: () {},
             ),
             M3EActions.button(
               label: 'Text',
-              variant: M3EButtonVariant.text,
+              style: M3EButtonStyle.text,
               onPressed: () {},
             ),
           ],
@@ -70,7 +72,7 @@ class _ActionsPageState extends State<ActionsPage> {
             M3EActions.button(
               label: 'Add',
               icon: const Icon(M3EIcons.add),
-              size: M3EButtonSize.extraSmall,
+              size: M3EButtonSize.xs,
               onPressed: () {},
             ),
             M3EActions.button(
@@ -81,7 +83,7 @@ class _ActionsPageState extends State<ActionsPage> {
             M3EActions.button(
               label: 'Add',
               icon: const Icon(M3EIcons.add),
-              size: M3EButtonSize.large,
+              size: M3EButtonSize.lg,
               onPressed: () {},
             ),
             M3EActions.button(
@@ -193,24 +195,39 @@ class _ActionsPageState extends State<ActionsPage> {
   Widget _groups() {
     return GallerySection(
       title: 'Button group',
+      description:
+          'Standard groups squish neighbours on press; connected groups morph '
+          'their inner corners.',
       children: <Widget>[
-        M3EActions.buttonGroup(
-          items: <M3EButtonGroupItem>[
-            M3EButtonGroupItem(
-              icon: const Icon(M3EIcons.arrowBack),
-              onPressed: () {},
+        DemoRow(
+          label: 'Standard (neighbour squish)',
+          children: <Widget>[
+            M3EActions.buttonGroup(
+              selectedIndex: _groupIndex,
+              onSelectedIndexChanged: (int? index) =>
+                  setState(() => _groupIndex = index ?? _groupIndex),
+              actions: const <M3EButtonGroupAction>[
+                M3EButtonGroupAction(icon: Icon(M3EIcons.arrowBack)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.remove)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.add)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.arrowForward)),
+              ],
             ),
-            M3EButtonGroupItem(
-              icon: const Icon(M3EIcons.remove),
-              onPressed: () {},
-            ),
-            M3EButtonGroupItem(
-              icon: const Icon(M3EIcons.add),
-              onPressed: () {},
-            ),
-            M3EButtonGroupItem(
-              icon: const Icon(M3EIcons.arrowForward),
-              onPressed: () {},
+          ],
+        ),
+        DemoRow(
+          label: 'Connected (corner morph)',
+          children: <Widget>[
+            M3EActions.buttonGroup(
+              type: M3EButtonGroupType.connected,
+              selectedIndex: _connectedGroupIndex,
+              onSelectedIndexChanged: (int? index) =>
+                  setState(() => _connectedGroupIndex = index ?? _connectedGroupIndex),
+              actions: const <M3EButtonGroupAction>[
+                M3EButtonGroupAction(icon: Icon(M3EIcons.chevronLeft)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),
+                M3EButtonGroupAction(icon: Icon(M3EIcons.chevronRight)),
+              ],
             ),
           ],
         ),
@@ -255,11 +272,21 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Split button',
           children: <Widget>[
-            M3EActions.splitButton(
+            M3EActions.splitButton<String>(
               label: 'Save',
-              leadingIcon: const Icon(M3EIcons.check),
+              leadingIcon: M3EIcons.check,
               onPressed: () {},
-              onMenuPressed: () {},
+              onSelected: (String value) {},
+              items: const <M3ESplitButtonItem<String>>[
+                M3ESplitButtonItem<String>(
+                  value: 'draft',
+                  child: Text('Save as draft'),
+                ),
+                M3ESplitButtonItem<String>(
+                  value: 'copy',
+                  child: Text('Save a copy'),
+                ),
+              ],
             ),
           ],
         ),

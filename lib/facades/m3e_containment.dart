@@ -32,18 +32,36 @@ class M3EContainment {
 
   /// Creates a carousel. See [M3ECarousel].
   static Widget carousel({
-    required List<Widget> items,
-    double height = 200,
-    double viewportFraction = 0.8,
-    ValueChanged<int>? onItemSelected,
+    required List<Widget> children,
+    double? width,
+    double? height,
+    M3ECarouselType type = M3ECarouselType.hero,
+    bool isExtended = false,
+    bool freeScroll = false,
+    M3ECarouselHeroAlignment heroAlignment = M3ECarouselHeroAlignment.center,
+    double uncontainedItemExtent = 270,
+    double uncontainedShrinkExtent = 150,
+    double childElementBorderRadius = 28,
+    int scrollAnimationDuration = 500,
+    int singleSwipeGestureSensitivityRange = 300,
+    void Function(int selectedIndex)? onTap,
     Key? key,
   }) {
     return M3ECarousel(
       key: key,
-      items: items,
+      width: width,
       height: height,
-      viewportFraction: viewportFraction,
-      onItemSelected: onItemSelected,
+      type: type,
+      isExtended: isExtended,
+      freeScroll: freeScroll,
+      heroAlignment: heroAlignment,
+      uncontainedItemExtent: uncontainedItemExtent,
+      uncontainedShrinkExtent: uncontainedShrinkExtent,
+      childElementBorderRadius: childElementBorderRadius,
+      scrollAnimationDuration: scrollAnimationDuration,
+      singleSwipeGestureSensitivityRange: singleSwipeGestureSensitivityRange,
+      onTap: onTap,
+      children: children,
     );
   }
 

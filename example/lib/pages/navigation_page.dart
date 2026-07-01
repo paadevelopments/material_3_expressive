@@ -78,8 +78,10 @@ class _NavigationPageState extends State<NavigationPage> {
         _framed(
           theme,
           M3ENavigation.topAppBar(
-            title: 'Large title',
-            variant: M3ETopAppBarVariant.large,
+            title: 'Centered • compact',
+            centerTitle: true,
+            density: M3EAppBarDensity.compact,
+            shapeFamily: M3EAppBarShapeFamily.square,
             actions: const <Widget>[Icon(M3EIcons.moreVert)],
           ),
         ),
@@ -235,7 +237,7 @@ class _NavigationPageState extends State<NavigationPage> {
               anchorBuilder: (BuildContext context, VoidCallback open) {
                 return M3EActions.button(
                   label: 'Open menu',
-                  variant: M3EButtonVariant.outlined,
+                  style: M3EButtonStyle.outlined,
                   icon: const Icon(M3EIcons.arrowDropDown),
                   onPressed: open,
                 );

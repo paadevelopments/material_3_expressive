@@ -1,87 +1,79 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_new_shapes/material_new_shapes.dart';
 
-import '../../foundations/foundations.dart';
-import 'components/m3e_loading_painter.dart';
+import 'components/m3e_expressive_loading_indicator.dart';
+import 'components/m3e_loading_tokens_adapter.dart';
+import 'enums/m3e_loading_indicator_variant.dart';
 
-/// A Material 3 Expressive loading indicator.
+export 'components/m3e_expressive_loading_indicator.dart';
+export 'enums/m3e_loading_indicator_variant.dart';
+
+/// Material 3 Expressive loading indicator.
 ///
-/// A compact, continuously rotating shape that morphs between lobe counts to
-/// signal a short, indeterminate wait. Provide [color] to override the default
-/// primary color role.
-class M3ELoadingIndicator extends StatefulWidget {
+/// Port of the reference `LoadingIndicatorM3E`:
+///  * [M3ELoadingIndicatorVariant.defaultStyle] draws a floating morphing shape
+///    on the surface.
+///  * [M3ELoadingIndicatorVariant.contained] draws the shape inside a filled
+///    container, using the on-container color for the shape.
+class M3ELoadingIndicator extends StatelessWidget {
   const M3ELoadingIndicator({
-    this.size = 48,
-    this.color,
-    this.contained = false,
     super.key,
+    this.variant = M3ELoadingIndicatorVariant.defaultStyle,
+    this.color,
+    this.containerColor,
+    this.polygons,
+    this.constraints,
+    this.padding,
+    this.semanticLabel,
+    this.semanticValue,
   });
 
-  final double size;
+  final M3ELoadingIndicatorVariant variant;
   final Color? color;
-
-  /// When true the shape sits on a filled surface container.
-  final bool contained;
-
-  @override
-  State<M3ELoadingIndicator> createState() => _M3ELoadingIndicatorState();
-}
-
-class _M3ELoadingIndicatorState extends State<M3ELoadingIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: M3EMotion.extraLong4,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final Color? containerColor;
+  final List<RoundedPolygon>? polygons;
+  final BoxConstraints? constraints;
+  final EdgeInsetsGeometry? padding;
+  final String? semanticLabel;
+  final String? semanticValue;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
-    final Color shapeColor = widget.color ?? scheme.primary;
+    final tokens = M3ELoadingTokensAdapter(context);
+    final size = Size(tokens.containerWidth(), tokens.containerHeight());
 
-    Widget indicator = AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        final double t = _controller.value;
-        return CustomPaint(
-          size: Size.square(widget.size * 0.7),
-          painter: M3ELoadingPainter(
-            color: shapeColor,
-            rotation: t * 2 * 3.1415926535 * 2,
-            lobes: 4 + (t * 3).roundToDouble(),
-            amplitude: 0.25,
-          ),
-        );
-      },
+    final cons = constraints ?? BoxConstraints.tight(size);
+
+    final activeColor = switch (variant) {
+      M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
+      M3ELoadingIndicatorVariant.contained =>
+        color ?? tokens.containedActiveColor(),
+    };
+
+    final containerBg = switch (variant) {
+      M3ELoadingIndicatorVariant.defaultStyle =>
+        containerColor ?? tokens.containerColorDefault(),
+      M3ELoadingIndicatorVariant.contained =>
+        containerColor ?? tokens.containedContainerColor(),
+    };
+
+    final indicator = M3EExpressiveLoadingIndicator(
+      color: activeColor,
+      polygons: polygons,
+      semanticsLabel: semanticLabel,
+      semanticsValue: semanticValue,
+      constraints: cons,
     );
 
-    if (widget.contained) {
-      indicator = Container(
-        width: widget.size,
-        height: widget.size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: scheme.secondaryContainer,
-          shape: BoxShape.circle,
-        ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: containerBg,
+        borderRadius: tokens.containerRadius(),
+      ),
+      child: Padding(
+        padding: padding ?? EdgeInsets.zero,
         child: indicator,
-      );
-    }
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: Center(child: indicator),
+      ),
     );
   }
 }

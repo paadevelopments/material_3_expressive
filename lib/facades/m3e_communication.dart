@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_new_shapes/material_new_shapes.dart';
 
 import '../components/badges/badges.dart';
 import '../components/loading_indicator/loading_indicator.dart';
 import '../components/progress_indicators/progress_indicators.dart';
+import '../components/refresh_indicator/refresh_indicator.dart';
 import '../components/snackbar/snackbar.dart';
 import '../components/tooltips/tooltips.dart';
 
@@ -29,8 +31,26 @@ class M3ECommunication {
   }
 
   /// Creates a linear progress indicator. See [M3ELinearProgress].
-  static Widget linearProgress({double? value, double height = 4, Key? key}) {
-    return M3ELinearProgress(key: key, value: value, height: height);
+  static Widget linearProgress({
+    double? value,
+    M3ELinearProgressSize size = M3ELinearProgressSize.m,
+    M3EProgressShape shape = M3EProgressShape.wavy,
+    Color? activeColor,
+    Color? trackColor,
+    double phase = 0,
+    double inset = 4,
+    Key? key,
+  }) {
+    return M3ELinearProgress(
+      key: key,
+      value: value,
+      size: size,
+      shape: shape,
+      activeColor: activeColor,
+      trackColor: trackColor,
+      phase: phase,
+      inset: inset,
+    );
   }
 
   /// Creates a circular progress indicator. See [M3ECircularProgress].
@@ -50,16 +70,83 @@ class M3ECommunication {
 
   /// Creates a loading indicator. See [M3ELoadingIndicator].
   static Widget loadingIndicator({
-    double size = 48,
+    M3ELoadingIndicatorVariant variant = M3ELoadingIndicatorVariant.defaultStyle,
     Color? color,
-    bool contained = false,
+    Color? containerColor,
+    List<RoundedPolygon>? polygons,
+    BoxConstraints? constraints,
+    EdgeInsetsGeometry? padding,
+    String? semanticLabel,
+    String? semanticValue,
     Key? key,
   }) {
     return M3ELoadingIndicator(
       key: key,
-      size: size,
+      variant: variant,
       color: color,
-      contained: contained,
+      containerColor: containerColor,
+      polygons: polygons,
+      constraints: constraints,
+      padding: padding,
+      semanticLabel: semanticLabel,
+      semanticValue: semanticValue,
+    );
+  }
+
+  /// Wraps a scrollable [child] with pull-to-refresh. See [M3ERefreshIndicator].
+  ///
+  /// When [contained] is true the morphing shape sits on a filled circular
+  /// surface. Supply [polygons] to customise the shapes it morphs between.
+  static Widget refreshIndicator({
+    required Widget child,
+    required M3ERefreshCallback onRefresh,
+    bool contained = false,
+    double displacement = 40,
+    double edgeOffset = 0,
+    Color? color,
+    Color? backgroundColor,
+    List<RoundedPolygon>? polygons,
+    BoxConstraints? indicatorConstraints,
+    M3ERefreshTriggerMode triggerMode = M3ERefreshTriggerMode.onEdge,
+    ValueChanged<M3ERefreshStatus?>? onStatusChange,
+    String? semanticsLabel,
+    String? semanticsValue,
+    double elevation = 2,
+    Key? key,
+  }) {
+    if (contained) {
+      return M3ERefreshIndicator.contained(
+        key: key,
+        onRefresh: onRefresh,
+        displacement: displacement,
+        edgeOffset: edgeOffset,
+        color: color,
+        backgroundColor: backgroundColor,
+        polygons: polygons,
+        indicatorConstraints: indicatorConstraints,
+        triggerMode: triggerMode,
+        onStatusChange: onStatusChange,
+        semanticsLabel: semanticsLabel,
+        semanticsValue: semanticsValue,
+        elevation: elevation,
+        child: child,
+      );
+    }
+    return M3ERefreshIndicator(
+      key: key,
+      onRefresh: onRefresh,
+      displacement: displacement,
+      edgeOffset: edgeOffset,
+      color: color,
+      backgroundColor: backgroundColor,
+      polygons: polygons,
+      indicatorConstraints: indicatorConstraints,
+      triggerMode: triggerMode,
+      onStatusChange: onStatusChange,
+      semanticsLabel: semanticsLabel,
+      semanticsValue: semanticsValue,
+      elevation: elevation,
+      child: child,
     );
   }
 

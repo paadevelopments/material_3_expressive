@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show TextTheme;
 import 'package:flutter/widgets.dart';
 
 /// The Material 3 type scale.
@@ -80,6 +81,40 @@ class M3ETypeScale {
   final TextStyle labelMedium;
   final TextStyle labelSmall;
 
+  /// The per-size label font sizes used by expressive buttons.
+  M3EButtonFontSize get buttonFontSize => const M3EButtonFontSize();
+
+  /// A framework [TextTheme] mirroring these roles.
+  ///
+  /// Lets components written against Material's [TextTheme] consume the
+  /// expressive type scale carried by `M3EThemeData`. Memoised per instance so
+  /// a stable theme yields a stable identity.
+  TextTheme toTextTheme() {
+    final TextTheme? cached = _textThemeCache[this];
+    if (cached != null) {
+      return cached;
+    }
+    final textTheme = TextTheme(
+      displayLarge: displayLarge,
+      displayMedium: displayMedium,
+      displaySmall: displaySmall,
+      headlineLarge: headlineLarge,
+      headlineMedium: headlineMedium,
+      headlineSmall: headlineSmall,
+      titleLarge: titleLarge,
+      titleMedium: titleMedium,
+      titleSmall: titleSmall,
+      bodyLarge: bodyLarge,
+      bodyMedium: bodyMedium,
+      bodySmall: bodySmall,
+      labelLarge: labelLarge,
+      labelMedium: labelMedium,
+      labelSmall: labelSmall,
+    );
+    _textThemeCache[this] = textTheme;
+    return textTheme;
+  }
+
   /// Returns a copy with [color] applied to every role.
   M3ETypeScale withColor(Color color) {
     TextStyle apply(TextStyle style) => style.copyWith(color: color);
@@ -102,3 +137,26 @@ class M3ETypeScale {
     );
   }
 }
+
+/// Per-size label font sizes for expressive buttons.
+///
+/// Mirrors the `ButtonFontSize` token from the `m3e_design` package.
+@immutable
+class M3EButtonFontSize {
+  const M3EButtonFontSize({
+    this.xs = 14,
+    this.sm = 14,
+    this.md = 16,
+    this.lg = 20,
+    this.xl = 24,
+  });
+
+  final double xs;
+  final double sm;
+  final double md;
+  final double lg;
+  final double xl;
+}
+
+/// Memoises [M3ETypeScale.toTextTheme] results per instance.
+final Expando<TextTheme> _textThemeCache = Expando<TextTheme>();
