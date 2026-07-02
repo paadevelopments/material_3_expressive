@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import '../navigation_bar/models/m3e_navigation_destination.dart';
+import 'models/m3e_navigation_destination.dart';
+
+export 'models/m3e_navigation_destination.dart';
 
 /// A Material 3 Expressive navigation drawer.
 ///

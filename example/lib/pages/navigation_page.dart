@@ -18,7 +18,42 @@ class _NavigationPageState extends State<NavigationPage> {
   int _primaryTab = 0;
   int _secondaryTab = 0;
 
-  static const List<M3ENavigationDestination> _destinations =
+  static const List<M3ENavigationBarDestination> _barDestinations =
+      <M3ENavigationBarDestination>[
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
+    M3ENavigationBarDestination(
+      icon: Icon(M3EIcons.search),
+      label: 'Search',
+      badgeDot: true,
+    ),
+    M3ENavigationBarDestination(
+      icon: Icon(M3EIcons.calendar_today),
+      label: 'Agenda',
+      badgeCount: 3,
+    ),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ];
+
+  static const List<M3ENavigationRailSection> _railSections =
+      <M3ENavigationRailSection>[
+    M3ENavigationRailSection(
+      destinations: <M3ENavigationRailDestination>[
+        M3ENavigationRailDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
+        M3ENavigationRailDestination(
+          icon: Icon(M3EIcons.search),
+          label: 'Search',
+        ),
+        M3ENavigationRailDestination(
+          icon: Icon(M3EIcons.calendar_today),
+          label: 'Agenda',
+          badgeCount: 3,
+        ),
+        M3ENavigationRailDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+      ],
+    ),
+  ];
+
+  static const List<M3ENavigationDestination> _drawerDestinations =
       <M3ENavigationDestination>[
     M3ENavigationDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
     M3ENavigationDestination(
@@ -139,7 +174,7 @@ class _NavigationPageState extends State<NavigationPage> {
         _framed(
           theme,
           M3ENavigation.bar(
-            destinations: _destinations,
+            destinations: _barDestinations,
             selectedIndex: _barIndex,
             onDestinationSelected: (int i) => setState(() => _barIndex = i),
           ),
@@ -161,13 +196,13 @@ class _NavigationPageState extends State<NavigationPage> {
               child: _framed(
                 theme,
                 M3ENavigation.rail(
-                  destinations: _destinations,
+                  sections: _railSections,
                   selectedIndex: _railIndex,
                   onDestinationSelected: (int i) =>
                       setState(() => _railIndex = i),
-                  leading: M3EActions.fab(
+                  fab: M3ENavigationRailFabSlot(
                     icon: const Icon(M3EIcons.add),
-                    size: M3EFabSize.small,
+                    label: 'Compose',
                     onPressed: () {},
                   ),
                 ),
@@ -179,7 +214,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 theme,
                 M3ENavigation.drawer(
                   headline: 'Mail',
-                  destinations: _destinations,
+                  destinations: _drawerDestinations,
                   selectedIndex: _drawerIndex,
                   onDestinationSelected: (int i) =>
                       setState(() => _drawerIndex = i),

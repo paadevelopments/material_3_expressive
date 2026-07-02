@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import 'pages/actions_page.dart';
@@ -32,15 +31,13 @@ class _ExampleAppState extends State<ExampleApp> {
     final theme = _dark
         ? M3EThemeData.dark(seedColor: _seed)
         : M3EThemeData.light(seedColor: _seed);
-    return WidgetsApp(
+    // The expressive foundation is the single source of truth: it both drives
+    // the Material theme (so Material widgets, localizations and overlays are
+    // consistent) and is provided to the tree for the `M3E*` components.
+    return MaterialApp(
       title: 'Material 3 Expressive',
-      color: theme.colorScheme.primary,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-        return PageRouteBuilder<T>(
-          settings: settings,
-          pageBuilder: (BuildContext context, _, _) => builder(context),
-        );
-      },
+      debugShowCheckedModeBanner: false,
+      theme: theme.toThemeData(),
       home: M3ETheme(
         data: theme,
         child: _Gallery(
@@ -75,16 +72,16 @@ class _Gallery extends StatelessWidget {
     FeedbackPage(),
   ];
 
-  static const List<M3ENavigationDestination> _destinations =
-      <M3ENavigationDestination>[
-    M3ENavigationDestination(icon: Icon(M3EIcons.add), label: 'Actions'),
-    M3ENavigationDestination(icon: Icon(M3EIcons.check), label: 'Selection'),
-    M3ENavigationDestination(
+  static const List<M3ENavigationBarDestination> _destinations =
+      <M3ENavigationBarDestination>[
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.add), label: 'Actions'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.check), label: 'Selection'),
+    M3ENavigationBarDestination(
       icon: Icon(M3EIcons.calendar_today),
       label: 'Containment',
     ),
-    M3ENavigationDestination(icon: Icon(M3EIcons.menu), label: 'Navigation'),
-    M3ENavigationDestination(icon: Icon(M3EIcons.search), label: 'Feedback'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Navigation'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Feedback'),
   ];
 
   @override

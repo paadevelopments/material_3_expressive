@@ -104,9 +104,13 @@ class M3ENavigation {
 
   /// Creates a navigation bar. See [M3ENavigationBar].
   static Widget bar({
-    required List<M3ENavigationDestination> destinations,
+    required List<M3ENavigationBarDestination> destinations,
     required int selectedIndex,
     required ValueChanged<int> onDestinationSelected,
+    M3ENavBarLabelBehavior labelBehavior = M3ENavBarLabelBehavior.alwaysShow,
+    M3ENavBarSize size = M3ENavBarSize.medium,
+    M3ENavBarShapeFamily shapeFamily = M3ENavBarShapeFamily.round,
+    M3ENavBarIndicatorStyle indicatorStyle = M3ENavBarIndicatorStyle.pill,
     Key? key,
   }) {
     return M3ENavigationBar(
@@ -114,27 +118,36 @@ class M3ENavigation {
       destinations: destinations,
       selectedIndex: selectedIndex,
       onDestinationSelected: onDestinationSelected,
+      labelBehavior: labelBehavior,
+      size: size,
+      shapeFamily: shapeFamily,
+      indicatorStyle: indicatorStyle,
     );
   }
 
   /// Creates a navigation rail. See [M3ENavigationRail].
   static Widget rail({
-    required List<M3ENavigationDestination> destinations,
+    required List<M3ENavigationRailSection> sections,
     required int selectedIndex,
     required ValueChanged<int> onDestinationSelected,
-    Widget? leading,
+    M3ENavigationRailType type = M3ENavigationRailType.expanded,
+    M3ENavigationRailModality modality = M3ENavigationRailModality.standard,
+    M3ENavigationRailLabelBehavior labelBehavior =
+        M3ENavigationRailLabelBehavior.alwaysShow,
+    M3ENavigationRailFabSlot? fab,
     Widget? trailing,
-    M3ENavigationRailLabelType labelType = M3ENavigationRailLabelType.all,
     Key? key,
   }) {
     return M3ENavigationRail(
       key: key,
-      destinations: destinations,
+      sections: sections,
       selectedIndex: selectedIndex,
       onDestinationSelected: onDestinationSelected,
-      leading: leading,
+      type: type,
+      modality: modality,
+      labelBehavior: labelBehavior,
+      fab: fab,
       trailing: trailing,
-      labelType: labelType,
     );
   }
 

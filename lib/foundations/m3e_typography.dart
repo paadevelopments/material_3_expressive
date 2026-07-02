@@ -81,6 +81,32 @@ class M3ETypeScale {
   final TextStyle labelMedium;
   final TextStyle labelSmall;
 
+  /// Adapts a framework [TextTheme] into an [M3ETypeScale].
+  ///
+  /// Each role is taken from [textTheme] when present, falling back to the
+  /// [M3ETypeScale.baseline] value otherwise. Lets the expressive foundation
+  /// inherit the typography of an ambient Material `ThemeData`.
+  factory M3ETypeScale.fromTextTheme(TextTheme textTheme) {
+    final base = M3ETypeScale.baseline();
+    return M3ETypeScale(
+      displayLarge: textTheme.displayLarge ?? base.displayLarge,
+      displayMedium: textTheme.displayMedium ?? base.displayMedium,
+      displaySmall: textTheme.displaySmall ?? base.displaySmall,
+      headlineLarge: textTheme.headlineLarge ?? base.headlineLarge,
+      headlineMedium: textTheme.headlineMedium ?? base.headlineMedium,
+      headlineSmall: textTheme.headlineSmall ?? base.headlineSmall,
+      titleLarge: textTheme.titleLarge ?? base.titleLarge,
+      titleMedium: textTheme.titleMedium ?? base.titleMedium,
+      titleSmall: textTheme.titleSmall ?? base.titleSmall,
+      bodyLarge: textTheme.bodyLarge ?? base.bodyLarge,
+      bodyMedium: textTheme.bodyMedium ?? base.bodyMedium,
+      bodySmall: textTheme.bodySmall ?? base.bodySmall,
+      labelLarge: textTheme.labelLarge ?? base.labelLarge,
+      labelMedium: textTheme.labelMedium ?? base.labelMedium,
+      labelSmall: textTheme.labelSmall ?? base.labelSmall,
+    );
+  }
+
   /// The per-size label font sizes used by expressive buttons.
   M3EButtonFontSize get buttonFontSize => const M3EButtonFontSize();
 

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// A destination shown in a navigation bar, rail or drawer.
+/// A destination shown in a navigation drawer.
 @immutable
 class M3ENavigationDestination {
   const M3ENavigationDestination({
