@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/chips/enums/m3e_chip_type.dart';
+import 'package:material_3_expressive/components/time_pickers/models/m3e_time.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';

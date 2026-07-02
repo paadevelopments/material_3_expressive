@@ -1,10 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'enums/m3e_text_field_variant.dart';
-
-export 'enums/m3e_text_field_variant.dart';
+import 'styles/m3e_text_field_tokens.dart';
 
 /// A Material 3 Expressive text field.
 ///
@@ -104,7 +103,11 @@ class _M3ETextFieldState extends State<M3ETextField> {
 
   Widget _buildContainer(M3EThemeData theme) {
     final scheme = theme.colorScheme;
-    final accent = _accentColor(scheme);
+    final accent = M3ETextFieldTokens.accentColor(
+      scheme,
+      enabled: widget.enabled,
+      hasError: widget.hasError,
+    );
     final outlined = widget.variant == M3ETextFieldVariant.outlined;
 
     return GestureDetector(
@@ -113,9 +116,15 @@ class _M3ETextFieldState extends State<M3ETextField> {
       child: AnimatedContainer(
         duration: M3EMotion.short3,
         curve: M3EMotion.standard,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        constraints: const BoxConstraints(minHeight: 56),
-        decoration: _decoration(scheme, accent, outlined),
+        padding: M3ETextFieldTokens.horizontalPadding,
+        constraints: const BoxConstraints(minHeight: M3ETextFieldTokens.minHeight),
+        decoration: M3ETextFieldTokens.decoration(
+          scheme,
+          accent: accent,
+          outlined: outlined,
+          focused: _focused,
+          hasError: widget.hasError,
+        ),
         child: Row(
           children: _buildRowChildren(theme, scheme, accent),
         ),
@@ -124,25 +133,28 @@ class _M3ETextFieldState extends State<M3ETextField> {
   }
 
   List<Widget> _buildRowChildren(
-    M3EThemeData theme,
-    M3EColorScheme scheme,
-    Color accent,
-  ) {
+      M3EThemeData theme,
+      M3EColorScheme scheme,
+      Color accent,
+      ) {
     return <Widget>[
       if (widget.leading != null) ...<Widget>[
         IconTheme.merge(
-          data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
+          data: IconThemeData(
+            color: scheme.onSurfaceVariant,
+            size: M3ETextFieldTokens.iconSize,
+          ),
           child: widget.leading!,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: M3ETextFieldTokens.iconGap),
       ],
       Expanded(child: _buildField(theme, scheme, accent)),
       if (widget.trailing != null) ...<Widget>[
-        const SizedBox(width: 12),
+        const SizedBox(width: M3ETextFieldTokens.iconGap),
         IconTheme.merge(
           data: IconThemeData(
             color: widget.hasError ? scheme.error : scheme.onSurfaceVariant,
-            size: 24,
+            size: M3ETextFieldTokens.iconSize,
           ),
           child: widget.trailing!,
         ),
@@ -151,10 +163,10 @@ class _M3ETextFieldState extends State<M3ETextField> {
   }
 
   Widget _buildField(
-    M3EThemeData theme,
-    M3EColorScheme scheme,
-    Color accent,
-  ) {
+      M3EThemeData theme,
+      M3EColorScheme scheme,
+      Color accent,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -179,10 +191,10 @@ class _M3ETextFieldState extends State<M3ETextField> {
   }
 
   Widget _buildLabel(
-    M3EThemeData theme,
-    M3EColorScheme scheme,
-    Color accent,
-  ) {
+      M3EThemeData theme,
+      M3EColorScheme scheme,
+      Color accent,
+      ) {
     final TextStyle style = _floating
         ? theme.typeScale.bodySmall.copyWith(color: accent)
         : theme.typeScale.bodyLarge.copyWith(color: scheme.onSurfaceVariant);
@@ -191,7 +203,12 @@ class _M3ETextFieldState extends State<M3ETextField> {
       curve: M3EMotion.standard,
       style: style,
       child: Padding(
-        padding: EdgeInsets.only(top: _floating ? 8 : 16, bottom: 2),
+        padding: EdgeInsets.only(
+          top: _floating
+              ? M3ETextFieldTokens.labelFloatingTopPadding
+              : M3ETextFieldTokens.labelRestingTopPadding,
+          bottom: M3ETextFieldTokens.labelBottomPadding,
+        ),
         child: Text(widget.label!),
       ),
     );
@@ -204,7 +221,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 4, right: 16),
+      padding: M3ETextFieldTokens.supportingTextPadding,
       child: Text(
         text,
         style: theme.typeScale.bodySmall.copyWith(
@@ -212,38 +229,5 @@ class _M3ETextFieldState extends State<M3ETextField> {
         ),
       ),
     );
-  }
-
-  BoxDecoration _decoration(
-    M3EColorScheme scheme,
-    Color accent,
-    bool outlined,
-  ) {
-    if (outlined) {
-      return BoxDecoration(
-        borderRadius: M3EShapes.radiusExtraSmall,
-        border: Border.all(
-          color: _focused || widget.hasError ? accent : scheme.outline,
-          width: _focused ? 2 : 1,
-        ),
-      );
-    }
-    return BoxDecoration(
-      color: scheme.surfaceContainerHighest,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-      border: Border(
-        bottom: BorderSide(
-          color: _focused || widget.hasError ? accent : scheme.onSurfaceVariant,
-          width: _focused ? 2 : 1,
-        ),
-      ),
-    );
-  }
-
-  Color _accentColor(M3EColorScheme scheme) {
-    if (!widget.enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return widget.hasError ? scheme.error : scheme.primary;
   }
 }

@@ -13,38 +13,26 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
-import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
+import '../../../foundations/foundations.dart';
 import 'enums/m3e_refresh_status.dart';
-
-export 'enums/m3e_refresh_status.dart';
+import 'styles/m3e_refresh_tokens.dart';
 
 enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 
-// Constants from original RefreshIndicator
-const double _kDragContainerExtentPercentage = 0.25;
-const double _kDragSizeFactorLimit = 1.5;
-const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
-const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
-
 /// A Material Design 3 expressive refresh indicator that supports morphing shapes.
-///
-/// This combines the functionality of Flutter's [RefreshIndicator] with the
-/// expressive loading animation from Material 3, featuring morphing polygonal shapes.
 class M3ERefreshIndicator extends StatefulWidget {
-  /// Creates an expressive refresh indicator with morphing shapes.
   const M3ERefreshIndicator({
     super.key,
     required this.child,
-    this.displacement = 40.0,
-    this.edgeOffset = 0.0,
+    this.displacement = M3ERefreshTokens.defaultDisplacement,
+    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -52,21 +40,20 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = 2.0,
+    this.elevation = M3ERefreshTokens.defaultElevation,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.expressive,
-        strokeWidth = 0.0, // Not used in expressive mode
+        strokeWidth = 0.0,
         assert(elevation >= 0.0),
         assert(polygons != null ? polygons.length > 1 : true);
 
-  /// Creates an expressive refresh indicator with a circular background container.
   const M3ERefreshIndicator.contained({
     super.key,
     required this.child,
-    this.displacement = 40.0,
-    this.edgeOffset = 0.0,
+    this.displacement = M3ERefreshTokens.defaultDisplacement,
+    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -74,21 +61,20 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = 2.0,
+    this.elevation = M3ERefreshTokens.defaultElevation,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.contained,
-        strokeWidth = 0.0, // Not used in expressive mode
+        strokeWidth = 0.0,
         assert(elevation >= 0.0),
         assert(polygons != null ? polygons.length > 1 : true);
 
-  /// Creates a standard Material refresh indicator (fallback).
   const M3ERefreshIndicator.material({
     super.key,
     required this.child,
-    this.displacement = 40.0,
-    this.edgeOffset = 0.0,
+    this.displacement = M3ERefreshTokens.defaultDisplacement,
+    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -97,19 +83,18 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = 2.0,
+    this.elevation = M3ERefreshTokens.defaultElevation,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.material,
         polygons = null,
         indicatorConstraints = null,
         assert(elevation >= 0.0);
 
-  /// Creates an adaptive refresh indicator.
   const M3ERefreshIndicator.adaptive({
     super.key,
     required this.child,
-    this.displacement = 40.0,
-    this.edgeOffset = 0.0,
+    this.displacement = M3ERefreshTokens.defaultDisplacement,
+    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -118,14 +103,13 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = 2.0,
+    this.elevation = M3ERefreshTokens.defaultElevation,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.adaptive,
         polygons = null,
         indicatorConstraints = null,
         assert(elevation >= 0.0);
 
-  /// Creates a refresh indicator with no spinner.
   const M3ERefreshIndicator.noSpinner({
     super.key,
     required this.child,
@@ -135,7 +119,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = 2.0,
+    this.elevation = M3ERefreshTokens.defaultElevation,
   }) : _indicatorType = _IndicatorType.noSpinner,
         displacement = 0.0,
         edgeOffset = 0.0,
@@ -160,13 +144,7 @@ class M3ERefreshIndicator extends StatefulWidget {
   final M3ERefreshTriggerMode triggerMode;
   final double elevation;
   final _IndicatorType _indicatorType;
-
-  /// List of polygons for the expressive loading indicator to morph between.
-  /// Only used when [_indicatorType] is [_IndicatorType.expressive].
   final List<RoundedPolygon>? polygons;
-
-  /// Constraints for the expressive loading indicator.
-  /// Only used when [_indicatorType] is [_IndicatorType.expressive].
   final BoxConstraints? indicatorConstraints;
 
   @override
@@ -192,7 +170,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
     begin: 0.0,
-    end: _kDragSizeFactorLimit,
+    end: M3ERefreshTokens.dragSizeFactorLimit,
   );
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
 
@@ -238,7 +216,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         ColorTween(
           begin: color,
           end: color,
-        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
+        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / M3ERefreshTokens.dragSizeFactorLimit))),
       );
     }
   }
@@ -349,9 +327,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   void _checkDragOffset(double containerExtent) {
     assert(_status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed);
-    double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
+    double newValue = _dragOffset! / (containerExtent * M3ERefreshTokens.dragContainerExtentPercentage);
     if (_status == M3ERefreshStatus.armed) {
-      newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
+      newValue = math.max(newValue, 1.0 / M3ERefreshTokens.dragSizeFactorLimit);
     }
     _positionController.value = clampDouble(newValue, 0.0, 1.0);
     if (_status == M3ERefreshStatus.drag &&
@@ -370,9 +348,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     });
     switch (_status!) {
       case M3ERefreshStatus.done:
-        await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
+        await _scaleController.animateTo(1.0, duration: M3ERefreshTokens.indicatorScaleDuration);
       case M3ERefreshStatus.canceled:
-        await _positionController.animateTo(0.0, duration: _kIndicatorScaleDuration);
+        await _positionController.animateTo(0.0, duration: M3ERefreshTokens.indicatorScaleDuration);
       case M3ERefreshStatus.armed:
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.refresh:
@@ -396,7 +374,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _status = M3ERefreshStatus.snap;
     widget.onStatusChange?.call(_status);
     _positionController
-        .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
+        .animateTo(1.0 / M3ERefreshTokens.dragSizeFactorLimit, duration: M3ERefreshTokens.indicatorSnapDuration)
         .then<void>((void value) {
       if (mounted && _status == M3ERefreshStatus.snap) {
         setState(() {
@@ -415,7 +393,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     });
   }
 
-  /// Show the refresh indicator programmatically.
   Future<void> show({bool atTop = true}) {
     if (_status != M3ERefreshStatus.refresh && _status != M3ERefreshStatus.snap) {
       if (_status == null) {
@@ -495,7 +472,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   Widget _buildExpressiveIndicator(bool showIndeterminateIndicator) {
     if (showIndeterminateIndicator) {
-      // Show the full expressive loading indicator during refresh
       return _ExpressiveLoadingIndicatorImpl(
         color: _effectiveValueColor,
         polygons: widget.polygons,
@@ -504,7 +480,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         semanticsValue: widget.semanticsValue,
       );
     } else {
-      // Show a morphing shape during drag based on drag progress
       return _DragExpressiveIndicator(
         color: _valueColor.value ?? _effectiveValueColor,
         progress: _value.value,
@@ -518,23 +493,21 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   Widget _buildContainedExpressiveIndicator(bool showIndeterminateIndicator) {
     if (showIndeterminateIndicator) {
-      // Show the contained expressive loading indicator during refresh
       return _ContainedExpressiveLoadingIndicator(
         color: _effectiveValueColor,
         backgroundColor: widget.backgroundColor ??
-            M3ETheme.of(context).colorScheme.secondaryContainer,
+            M3ERefreshTokens.containedBackgroundColor(context),
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,
         semanticsLabel: widget.semanticsLabel,
         semanticsValue: widget.semanticsValue,
       );
     } else {
-      // Show a contained morphing shape during drag
       return _ContainedDragExpressiveIndicator(
         color: _effectiveValueColor,
         backgroundColor:
-            (widget.backgroundColor ??
-                    M3ETheme.of(context).colorScheme.secondaryContainer),
+        (widget.backgroundColor ??
+            M3ERefreshTokens.containedBackgroundColor(context)),
         progress: _value.value,
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,
@@ -574,7 +547,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 }
 
-/// Full implementation of expressive loading indicator for refresh state
 class _ExpressiveLoadingIndicatorImpl extends StatefulWidget {
   const _ExpressiveLoadingIndicatorImpl({
     required this.color,
@@ -615,7 +587,6 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
     maxHeight: 48.0,
   );
 
-  // Constants from Kotlin source
   static const int _globalRotationDurationMs = 4666;
   static const int _morphIntervalMs = 650;
   static const double _fullRotation = 360.0;
@@ -630,13 +601,12 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
   double _morphRotationTargetAngle = _quarterRotation;
   Timer? _morphTimer;
 
-  // Spring animation spec matching Kotlin (dampingRatio: 0.6, stiffness: 200, visibilityThreshold: 0.1)
   final _morphAnimationSpec = SpringSimulation(
     SpringDescription.withDampingRatio(ratio: 0.6, stiffness: 200.0, mass: 1.0),
     0.0,
     1.0,
     5.0,
-    tolerance: const Tolerance(velocity: 0.1, distance: 0.1), // Higher threshold
+    tolerance: const Tolerance(velocity: 0.1, distance: 0.1),
   );
 
   @override
@@ -647,8 +617,6 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
     _morphSequence = _createMorphSequence(_polygons, circularSequence: true);
 
     _morphController = AnimationController.unbounded(vsync: this);
-
-    // Continuous linear rotation matching Kotlin
     _globalRotationController = AnimationController(
       duration: const Duration(milliseconds: _globalRotationDurationMs),
       vsync: this,
@@ -678,29 +646,22 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
   }
 
   void _startAnimations() {
-    // Start infinite global rotation (restart mode like Kotlin)
     _globalRotationController.repeat();
-
-    // Start morph cycle timer
     _morphTimer = Timer.periodic(
       const Duration(milliseconds: _morphIntervalMs),
           (_) => _startMorphCycle(),
     );
-
     _startMorphCycle();
   }
 
   void _startMorphCycle() {
     if (!mounted) return;
 
-    // Move to next morph and accumulate rotation (matching Kotlin logic)
     _currentMorphIndex = (_currentMorphIndex + 1) % _morphSequence.length;
     _morphRotationTargetAngle = (_morphRotationTargetAngle + _quarterRotation) % _fullRotation;
 
-    // Reset and start morph animation with proper completion handling
     _morphController.reset();
     _morphController.animateWith(_morphAnimationSpec).then((_) {
-      // Ensure we snap to exact end value to prevent flickering
       if (mounted && _morphController.value != 1.0) {
         _morphController.value = 1.0;
       }
@@ -729,7 +690,7 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
   @override
   Widget build(BuildContext context) {
     final constraints = widget.constraints ?? _defaultConstraints;
-    final activeIndicatorScale = 38.0 / math.min(constraints.maxWidth, constraints.maxHeight); // From Kotlin
+    final activeIndicatorScale = 38.0 / math.min(constraints.maxWidth, constraints.maxHeight);
     final shapesScaleFactor = _calculateScaleFactor(_polygons) * activeIndicatorScale;
 
     return Semantics.fromProperties(
@@ -748,7 +709,6 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
                 final morphProgress = _morphController.value.clamp(0.0, 1.0);
                 final globalRotationDegrees = _globalRotationController.value * _fullRotation;
 
-                // Clockwise rotation matching Kotlin (progress * 90 + target + global)
                 final totalRotationDegrees = morphProgress * 90 +
                     _morphRotationTargetAngle + globalRotationDegrees;
                 final totalRotationRadians = totalRotationDegrees * (math.pi / 180.0);
@@ -761,7 +721,6 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
                       progress: morphProgress,
                       color: widget.color,
                       scaleFactor: shapesScaleFactor,
-                      // Add key to prevent flickering
                       morphIndex: _currentMorphIndex,
                     ),
                     child: const SizedBox.expand(),
@@ -776,7 +735,6 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
   }
 }
 
-/// Drag feedback indicator that morphs through shapes based on progress
 class _DragExpressiveIndicator extends StatelessWidget {
   const _DragExpressiveIndicator({
     required this.color,
@@ -795,7 +753,6 @@ class _DragExpressiveIndicator extends StatelessWidget {
   final String? semanticsValue;
 
   static final List<RoundedPolygon> _defaultPolygons = [
-    // Using same default as determinate indicator in Kotlin (circle to softburst)
     MaterialShapes.circle,
     MaterialShapes.softBurst,
   ];
@@ -814,19 +771,16 @@ class _DragExpressiveIndicator extends StatelessWidget {
 
     if (shapes.length < 2) return Container();
 
-    // Create morph sequence for drag feedback
     final morphSequence = <Morph>[];
     for (int i = 0; i < shapes.length - 1; i++) {
       morphSequence.add(Morph(shapes[i], shapes[i + 1]));
     }
 
-    // Calculate which morph to use based on progress (matching Kotlin logic)
     final activeMorphIndex = (morphSequence.length * progress).floor().clamp(0, morphSequence.length - 1);
     final adjustedProgress = progress == 1.0 && activeMorphIndex == morphSequence.length - 1
         ? 1.0
         : (progress * morphSequence.length) % 1.0;
 
-    // Counter-clockwise rotation for drag (matching Kotlin determinate logic)
     final rotation = -progress * 180 * (math.pi / 180.0);
 
     return Semantics.fromProperties(
@@ -846,7 +800,7 @@ class _DragExpressiveIndicator extends StatelessWidget {
                   morph: morphSequence[activeMorphIndex],
                   progress: adjustedProgress,
                   color: color,
-                  scaleFactor: 0.8, // Scale factor for drag state
+                  scaleFactor: 0.8,
                 ),
                 child: const SizedBox.expand(),
               ),
@@ -863,7 +817,7 @@ class _MorphPainter extends CustomPainter {
   final double progress;
   final Color color;
   final double scaleFactor;
-  final int morphIndex; // Added to help prevent flickering
+  final int morphIndex;
 
   _MorphPainter({
     required this.morph,
@@ -876,19 +830,15 @@ class _MorphPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (progress < 0.0 || color.alpha == 0) return;
-
-    // Clamp progress to prevent over-animation
     final clampedProgress = progress.clamp(0.0, 1.0);
-
     final path = morph.toPath(progress: clampedProgress);
     final processedPath = _processPath(path, size);
-
     canvas.drawPath(
       processedPath,
       Paint()
         ..style = PaintingStyle.fill
         ..color = color
-        ..isAntiAlias = true, // Smooth edges
+        ..isAntiAlias = true,
     );
   }
 
@@ -901,27 +851,20 @@ class _MorphPainter extends CustomPainter {
         oldDelegate.morphIndex != morphIndex;
   }
 
-  /// Process a given path to scale it and center it inside the given size.
-  /// Matches the Kotlin implementation's processPath function.
   Path _processPath(Path path, Size size) {
-    // Scale the path uniformly
     final Matrix4 scaleMatrix = Matrix4.diagonal3Values(
       size.width * scaleFactor,
       size.height * scaleFactor,
       1,
     );
     final Path scaledPath = path.transform(scaleMatrix.storage);
-
-    // Translate the path so that its center aligns with the available size center
     final Rect bounds = scaledPath.getBounds();
     final Offset translation = Offset(size.width / 2, size.height / 2) - bounds.center;
     final Path finalPath = scaledPath.shift(translation);
-
     return finalPath;
   }
 }
 
-/// Contained variant of the expressive loading indicator for refresh state
 class _ContainedExpressiveLoadingIndicator extends StatefulWidget {
   const _ContainedExpressiveLoadingIndicator({
     required this.color,
@@ -964,7 +907,6 @@ class _ContainedExpressiveLoadingIndicatorState extends State<_ContainedExpressi
     maxHeight: 48.0,
   );
 
-  // Constants from Kotlin source
   static const int _globalRotationDurationMs = 4666;
   static const int _morphIntervalMs = 650;
   static const double _fullRotation = 360.0;
@@ -1119,7 +1061,6 @@ class _ContainedExpressiveLoadingIndicatorState extends State<_ContainedExpressi
   }
 }
 
-/// Contained drag feedback indicator
 class _ContainedDragExpressiveIndicator extends StatelessWidget {
   const _ContainedDragExpressiveIndicator({
     required this.color,

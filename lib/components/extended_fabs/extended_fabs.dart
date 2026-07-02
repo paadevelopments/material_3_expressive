@@ -1,11 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
-import '../floating_action_buttons/models/m3e_fab_spec.dart';
+import '../floating_action_buttons/styles/m3e_fab_tokens.dart';
 import 'styles/m3e_extended_fab_tokens.dart';
-
-export 'styles/m3e_extended_fab_tokens.dart';
 
 /// A Material 3 Expressive extended floating action button.
 ///
@@ -39,13 +37,13 @@ class M3EExtendedFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final spec = M3EFabSpec.resolve(
+    final tokens = M3EFabTokens.resolve(
       size: M3EFabSize.medium,
       color: color,
       scheme: theme.colorScheme,
     );
     final borderRadius =
-        M3EShapes.resolve(M3EExtendedFabTokens.cornerRadius);
+    M3EShapes.resolve(M3EExtendedFabTokens.cornerRadius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
     return M3ETappable(
@@ -69,7 +67,7 @@ class M3EExtendedFab extends StatelessWidget {
                 : M3EExtendedFabTokens.collapsedHorizontalPadding,
           ),
           decoration: BoxDecoration(
-            color: spec.background,
+            color: tokens.background,
             borderRadius: borderRadius,
             boxShadow: M3EElevation.shadows(
               elevation,
@@ -81,10 +79,10 @@ class M3EExtendedFab extends StatelessWidget {
             children: <Widget>[
               M3EStateLayerOverlay(
                 state: state,
-                color: spec.foreground,
+                color: tokens.foreground,
                 shape: border,
               ),
-              _buildContent(theme, spec),
+              _buildContent(theme, tokens),
             ],
           ),
         );
@@ -92,13 +90,13 @@ class M3EExtendedFab extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(M3EThemeData theme, M3EFabSpec spec) {
+  Widget _buildContent(M3EThemeData theme, M3EFabTokens tokens) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         IconTheme.merge(
           data: IconThemeData(
-            color: spec.foreground,
+            color: tokens.foreground,
             size: M3EExtendedFabTokens.iconSize,
           ),
           child: icon,
@@ -108,19 +106,19 @@ class M3EExtendedFab extends StatelessWidget {
           curve: M3EMotion.emphasized,
           child: extended
               ? Padding(
-                  padding: const EdgeInsets.only(
-                    left: M3EExtendedFabTokens.iconLabelGap,
-                  ),
-                  child: Text(
-                    label,
-                    style: M3EExtendedFabTokens.labelStyle(
-                      theme.typeScale,
-                      spec.foreground,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
+            padding: const EdgeInsets.only(
+              left: M3EExtendedFabTokens.iconLabelGap,
+            ),
+            child: Text(
+              label,
+              style: M3EExtendedFabTokens.labelStyle(
+                theme.typeScale,
+                tokens.foreground,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
               : const SizedBox.shrink(),
         ),
       ],

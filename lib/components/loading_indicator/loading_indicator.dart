@@ -3,11 +3,12 @@ import 'package:material_new_shapes/material_new_shapes.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_expressive_loading_indicator.dart';
-import 'components/m3e_loading_tokens_adapter.dart';
 import 'enums/m3e_loading_indicator_variant.dart';
+import 'styles/m3e_loading_tokens.dart';
 
 export 'components/m3e_expressive_loading_indicator.dart';
 export 'enums/m3e_loading_indicator_variant.dart';
+export 'styles/m3e_loading_tokens.dart';
 
 /// Material 3 Expressive loading indicator.
 ///
@@ -40,26 +41,29 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = M3ELoadingTokensAdapter(context);
-    final size = Size(tokens.containerWidth(), tokens.containerHeight());
+    final tokens = M3ELoadingTokens(context);
+    final size = const Size(
+      M3ELoadingTokens.containerWidth,
+      M3ELoadingTokens.containerHeight,
+    );
 
     final cons = constraints ?? BoxConstraints.tight(size);
 
-    // final activeColor = switch (variant) {
-    //   M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
-    //   M3ELoadingIndicatorVariant.contained =>
-    //     color ?? tokens.containedActiveColor(),
-    // };
-    //
-    // final containerBg = switch (variant) {
-    //   M3ELoadingIndicatorVariant.defaultStyle =>
-    //     containerColor ?? tokens.containerColorDefault(),
-    //   M3ELoadingIndicatorVariant.contained =>
-    //     containerColor ?? tokens.containedContainerColor(),
-    // };
+    final activeColor = switch (variant) {
+      M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
+      M3ELoadingIndicatorVariant.contained =>
+        color ?? tokens.containedActiveColor(),
+    };
+
+    final containerBg = switch (variant) {
+      M3ELoadingIndicatorVariant.defaultStyle =>
+        containerColor ?? tokens.containerColorDefault(),
+      M3ELoadingIndicatorVariant.contained =>
+        containerColor ?? tokens.containedContainerColor(),
+    };
 
     final indicator = M3EExpressiveLoadingIndicator(
-      color: M3ETheme.of(context).colorScheme.primary,
+      color: activeColor,
       polygons: polygons,
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,
@@ -68,8 +72,8 @@ class M3ELoadingIndicator extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: M3ETheme.of(context).colorScheme.secondaryContainer,
-        borderRadius: tokens.containerRadius(),
+        color: containerBg,
+        borderRadius: M3ELoadingTokens.containerRadius,
       ),
       child: Padding(
         padding: padding ?? EdgeInsets.zero,

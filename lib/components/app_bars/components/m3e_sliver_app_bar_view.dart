@@ -16,7 +16,7 @@ import 'package:flutter/semantics.dart' show SemanticsConfiguration;
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_app_bar_enums.dart';
-import 'm3e_app_bar_tokens.dart';
+import '../styles/m3e_app_bar_tokens.dart';
 
 class M3ESliverAppBar extends StatelessWidget {
   const M3ESliverAppBar({

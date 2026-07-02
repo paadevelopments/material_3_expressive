@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'enums/m3e_chip_type.dart';
-
-export 'enums/m3e_chip_type.dart';
+import 'styles/m3e_chip_tokens.dart';
 
 /// A Material 3 Expressive chip.
 ///
@@ -21,8 +20,6 @@ class M3EChip extends StatelessWidget {
     this.onDeleted,
     super.key,
   });
-
-  static const double _height = 32;
 
   final String label;
   final M3EChipType type;
@@ -51,18 +48,28 @@ class M3EChip extends StatelessWidget {
   }
 
   Widget _buildSurface(
-    M3EThemeData theme,
-    BorderRadius borderRadius,
-    RoundedRectangleBorder border,
-    M3EInteractionState state,
-  ) {
+      M3EThemeData theme,
+      BorderRadius borderRadius,
+      RoundedRectangleBorder border,
+      M3EInteractionState state,
+      ) {
     final scheme = theme.colorScheme;
-    final Color container = _container(scheme);
-    final Color foreground = _foreground(scheme);
+    final Color container = M3EChipTokens.containerColor(
+      scheme,
+      enabled: _enabled,
+      selected: selected,
+      elevated: elevated,
+      type: type,
+    );
+    final Color foreground = M3EChipTokens.foregroundColor(
+      scheme,
+      enabled: _enabled,
+      selected: selected,
+    );
     final bool outlined = !selected && !elevated;
 
     return Container(
-      height: _height,
+      height: M3EChipTokens.height,
       padding: EdgeInsets.only(left: leading == null ? 16 : 8, right: 12),
       decoration: BoxDecoration(
         color: container,
@@ -92,7 +99,7 @@ class M3EChip extends StatelessWidget {
       children: <Widget>[
         if (leading != null) ...<Widget>[
           IconTheme.merge(
-            data: IconThemeData(color: foreground, size: 18),
+            data: IconThemeData(color: foreground, size: M3EChipTokens.iconSize),
             child: leading!,
           ),
           const SizedBox(width: 8),
@@ -107,32 +114,10 @@ class M3EChip extends StatelessWidget {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: onDeleted,
-            child: Icon(M3EIcons.close, size: 18, color: foreground),
+            child: Icon(M3EIcons.close, size: M3EChipTokens.iconSize, color: foreground),
           ),
         ],
       ],
     );
-  }
-
-  Color _container(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return selected
-          ? M3EColorUtils.withOpacity(scheme.onSurface, 0.12)
-          : const Color(0x00000000);
-    }
-    if (selected) {
-      return scheme.secondaryContainer;
-    }
-    if (elevated) {
-      return scheme.surfaceContainerLow;
-    }
-    return const Color(0x00000000);
-  }
-
-  Color _foreground(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return selected ? scheme.onSecondaryContainer : scheme.onSurfaceVariant;
   }
 }

@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
+import 'styles/m3e_carousel_tokens.dart';
 
 export 'enums/m3e_carousel_type.dart';
 
@@ -40,11 +41,12 @@ class M3ECarousel extends StatefulWidget {
     this.isExtended = false,
     this.freeScroll = false,
     this.heroAlignment = M3ECarouselHeroAlignment.center,
-    this.uncontainedItemExtent = 270.0,
-    this.uncontainedShrinkExtent = 150.0,
-    this.childElementBorderRadius = 28.0,
-    this.scrollAnimationDuration = 500,
-    this.singleSwipeGestureSensitivityRange = 300,
+    this.uncontainedItemExtent = M3ECarouselTokens.uncontainedItemExtent,
+    this.uncontainedShrinkExtent = M3ECarouselTokens.uncontainedShrinkExtent,
+    this.childElementBorderRadius = M3ECarouselTokens.borderRadiusValue,
+    this.scrollAnimationDuration = M3ECarouselTokens.scrollAnimationDuration,
+    this.singleSwipeGestureSensitivityRange =
+        M3ECarouselTokens.singleSwipeGestureSensitivityRange,
     this.onTap,
     required this.children,
   });

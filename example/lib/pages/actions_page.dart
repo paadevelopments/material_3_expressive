@@ -1,4 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
+import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
+import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
+import 'package:material_3_expressive/components/segmented_buttons/models/m3e_segment.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';

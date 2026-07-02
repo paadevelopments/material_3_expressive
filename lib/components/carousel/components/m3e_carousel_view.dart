@@ -22,6 +22,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../styles/m3e_carousel_tokens.dart';
+
 /// A Material Design carousel widget.
 ///
 /// The [M3ECarouselView] presents a scrollable list of items, each of which can
@@ -362,13 +364,12 @@ class _CarouselViewState extends State<M3ECarouselView> {
         widget.padding ?? carouselTheme.padding ?? const EdgeInsets.all(4.0);
     final Color effectiveBackgroundColor = widget.backgroundColor ??
         carouselTheme.backgroundColor ??
-        colorScheme.surface;
+        M3ECarouselTokens.backgroundColor(context);
     final double effectiveElevation =
         widget.elevation ?? carouselTheme.elevation ?? 0.0;
     final ShapeBorder effectiveShape = widget.shape ??
         carouselTheme.shape ??
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(28.0)));
+        M3ECarouselTokens.shape;
     final Clip effectiveItemClipBehavior = widget.itemClipBehavior ??
         carouselTheme.itemClipBehavior ??
         Clip.antiAlias;

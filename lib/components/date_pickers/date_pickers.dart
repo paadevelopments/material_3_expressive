@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'models/m3e_calendar_labels.dart';
+import 'styles/m3e_date_picker_tokens.dart';
 
 /// A Material 3 Expressive date picker.
 ///
@@ -46,11 +47,11 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      width: 328,
-      padding: const EdgeInsets.all(12),
+      width: M3EDatePickerTokens.width,
+      padding: M3EDatePickerTokens.padding,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: M3EShapes.radiusExtraLarge,
+        color: M3EDatePickerTokens.containerColor(scheme),
+        borderRadius: M3EDatePickerTokens.borderRadius,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -74,7 +75,7 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
               _visibleMonth.month,
             ),
             style:
-                theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
+            theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
           ),
         ),
         _buildArrow(scheme, M3EIcons.chevron_left, () => _shiftMonth(-1)),
@@ -89,7 +90,7 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
       builder: (BuildContext context, M3EInteractionState state) {
         return Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: scheme.onSurfaceVariant, size: 24),
+          child: Icon(icon, color: scheme.onSurfaceVariant, size: M3EDatePickerTokens.arrowIconSize),
         );
       },
     );
@@ -143,7 +144,11 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
     final bool selected = _isSameDay(date, widget.selectedDate);
     final bool today = _isSameDay(date, DateTime.now());
     final bool enabled = _isEnabled(date);
-    final Color foreground = _dayColor(scheme, selected, enabled);
+    final Color foreground = M3EDatePickerTokens.dayForegroundColor(
+      scheme,
+      selected: selected,
+      enabled: enabled,
+    );
 
     return M3ETappable(
       enabled: enabled,
@@ -151,8 +156,8 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
       builder: (BuildContext context, M3EInteractionState state) {
         return Center(
           child: Container(
-            width: 40,
-            height: 40,
+            width: M3EDatePickerTokens.daySize,
+            height: M3EDatePickerTokens.daySize,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -164,19 +169,12 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
             child: Text(
               '${date.day}',
               style:
-                  theme.typeScale.bodyMedium.copyWith(color: foreground),
+              theme.typeScale.bodyMedium.copyWith(color: foreground),
             ),
           ),
         );
       },
     );
-  }
-
-  Color _dayColor(M3EColorScheme scheme, bool selected, bool enabled) {
-    if (!enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return selected ? scheme.onPrimary : scheme.onSurface;
   }
 
   bool _isEnabled(DateTime date) {

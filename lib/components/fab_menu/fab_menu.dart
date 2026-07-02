@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import '../floating_action_buttons/enums/m3e_fab.dart';
 import '../floating_action_buttons/floating_action_buttons.dart';
 import 'models/m3e_fab_menu_item.dart';
 import 'styles/m3e_fab_menu_tokens.dart';

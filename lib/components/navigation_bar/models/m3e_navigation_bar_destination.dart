@@ -10,7 +10,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../m3e_nav_badge.dart';
+import '../components/m3e_nav_badge_view.dart';
 
 class M3ENavigationBarDestination {
   const M3ENavigationBarDestination({

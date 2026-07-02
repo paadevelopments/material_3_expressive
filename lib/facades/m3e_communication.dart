@@ -3,7 +3,9 @@ import 'package:material_new_shapes/material_new_shapes.dart';
 
 import '../components/badges/badges.dart';
 import '../components/loading_indicator/loading_indicator.dart';
+import '../components/progress_indicators/enums/m3e_progress_enums.dart';
 import '../components/progress_indicators/progress_indicators.dart';
+import '../components/refresh_indicator/enums/m3e_refresh_status.dart';
 import '../components/refresh_indicator/refresh_indicator.dart';
 import '../components/snackbar/snackbar.dart';
 import '../components/tooltips/tooltips.dart';

@@ -1,4 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
+import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
+import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
+import 'package:material_3_expressive/components/navigation_drawer/models/m3e_navigation_destination.dart';
+import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
+import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_fab_slot.dart';
+import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';

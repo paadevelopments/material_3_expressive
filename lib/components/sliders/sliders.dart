@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'components/m3e_slider_track_painter.dart';
+import 'styles/m3e_slider_tokens.dart';
 
 /// A Material 3 Expressive slider.
 ///
@@ -29,7 +30,8 @@ class M3ESlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final scheme = theme.colorScheme;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double width = constraints.maxWidth;
@@ -42,14 +44,26 @@ class M3ESlider extends StatelessWidget {
               ? (TapDownDetails d) => _update(d.localPosition.dx, width)
               : null,
           child: SizedBox(
-            height: 44,
+            height: M3ESliderTokens.height,
             width: width,
             child: CustomPaint(
               painter: M3ESliderTrackPainter(
                 fraction: _fraction,
-                activeColor: _color(scheme, scheme.primary),
-                inactiveColor: _color(scheme, scheme.secondaryContainer),
-                handleColor: _color(scheme, scheme.primary),
+                activeColor: M3ESliderTokens.color(
+                  scheme,
+                  enabledColor: scheme.primary,
+                  enabled: _enabled,
+                ),
+                inactiveColor: M3ESliderTokens.color(
+                  scheme,
+                  enabledColor: scheme.secondaryContainer,
+                  enabled: _enabled,
+                ),
+                handleColor: M3ESliderTokens.color(
+                  scheme,
+                  enabledColor: scheme.primary,
+                  enabled: _enabled,
+                ),
               ),
             ),
           ),
@@ -69,12 +83,5 @@ class M3ESlider extends StatelessWidget {
       next = min + (((next - min) / step).round()) * step;
     }
     onChanged!(next);
-  }
-
-  Color _color(M3EColorScheme scheme, Color enabledColor) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return enabledColor;
   }
 }

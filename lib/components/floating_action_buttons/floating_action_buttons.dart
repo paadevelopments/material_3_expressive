@@ -1,10 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'enums/m3e_fab.dart';
-import 'models/m3e_fab_spec.dart';
-
-export 'enums/m3e_fab.dart';
+import 'styles/m3e_fab_tokens.dart';
 
 /// A Material 3 Expressive floating action button.
 ///
@@ -36,12 +34,12 @@ class M3EFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final spec = M3EFabSpec.resolve(
+    final tokens = M3EFabTokens.resolve(
       size: size,
       color: color,
       scheme: theme.colorScheme,
     );
-    final borderRadius = M3EShapes.resolve(spec.radius);
+    final borderRadius = M3EShapes.resolve(tokens.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
     return M3ETappable(
@@ -53,14 +51,14 @@ class M3EFab extends StatelessWidget {
       pressedScale: 0.95,
       builder: (BuildContext context, M3EInteractionState state) {
         final double elevation =
-            state.hovered ? M3EElevation.level4 : M3EElevation.level3;
+        state.hovered ? M3EElevation.level4 : M3EElevation.level3;
         return AnimatedContainer(
           duration: M3EMotion.short4,
           curve: M3EMotion.standard,
-          width: spec.container,
-          height: spec.container,
+          width: tokens.container,
+          height: tokens.container,
           decoration: BoxDecoration(
-            color: spec.background,
+            color: tokens.background,
             borderRadius: borderRadius,
             boxShadow: M3EElevation.shadows(
               elevation,
@@ -72,13 +70,13 @@ class M3EFab extends StatelessWidget {
             children: <Widget>[
               M3EStateLayerOverlay(
                 state: state,
-                color: spec.foreground,
+                color: tokens.foreground,
                 shape: border,
               ),
               IconTheme.merge(
                 data: IconThemeData(
-                  color: spec.foreground,
-                  size: spec.iconSize,
+                  color: tokens.foreground,
+                  size: tokens.iconSize,
                 ),
                 child: icon,
               ),

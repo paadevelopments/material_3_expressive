@@ -2,22 +2,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import '../../foundations/foundations.dart';
+import '../../../foundations/foundations.dart';
 import 'components/m3e_time_dial_painter.dart';
+import 'enums/m3e_time_picker_enums.dart';
 import 'models/m3e_time.dart';
-
-export 'models/m3e_time.dart';
+import 'styles/m3e_time_picker_tokens.dart';
 
 const String _amLabel = 'AM';
 const String _pmLabel = 'PM';
 const String _timeSeparator = ':';
 const String _zeroPad = '0';
-
-/// Which unit the time picker dial is currently editing.
-enum M3ETimePickerMode {
-  hour,
-  minute,
-}
 
 /// A Material 3 Expressive time picker.
 ///
@@ -45,16 +39,16 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: M3ETimePickerTokens.padding,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: M3EShapes.radiusExtraLarge,
+        color: M3ETimePickerTokens.containerColor(scheme),
+        borderRadius: M3ETimePickerTokens.borderRadius,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _buildHeader(theme),
-          const SizedBox(height: 24),
+          const SizedBox(height: M3ETimePickerTokens.headerDialGap),
           _buildDial(theme),
         ],
       ),
@@ -73,7 +67,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
               .copyWith(color: theme.colorScheme.onSurface),
         ),
         _buildField(theme, widget.value.minuteLabel, M3ETimePickerMode.minute),
-        const SizedBox(width: 12),
+        const SizedBox(width: M3ETimePickerTokens.fieldPeriodGap),
         _buildPeriodToggle(theme),
       ],
     );
@@ -86,20 +80,18 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
       onTap: () => setState(() => _mode = mode),
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          width: 96,
-          height: 80,
+          width: M3ETimePickerTokens.fieldSize.width,
+          height: M3ETimePickerTokens.fieldSize.height,
           alignment: Alignment.center,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          margin: M3ETimePickerTokens.fieldMargin,
           decoration: BoxDecoration(
-            color: active
-                ? scheme.primaryContainer
-                : scheme.surfaceContainerHighest,
+            color: M3ETimePickerTokens.fieldBackgroundColor(scheme, active: active),
             borderRadius: M3EShapes.radiusSmall,
           ),
           child: Text(
             text,
             style: theme.typeScale.displayMedium.copyWith(
-              color: active ? scheme.onPrimaryContainer : scheme.onSurface,
+              color: M3ETimePickerTokens.fieldForegroundColor(scheme, active: active),
             ),
           ),
         );
@@ -129,15 +121,14 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
       onTap: () => _setPeriod(label == _pmLabel),
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          width: 48,
-          height: 40,
+          width: M3ETimePickerTokens.periodOptionSize.width,
+          height: M3ETimePickerTokens.periodOptionSize.height,
           alignment: Alignment.center,
-          color: selected ? scheme.tertiaryContainer : const Color(0x00000000),
+          color: M3ETimePickerTokens.periodOptionBackgroundColor(scheme, selected: selected),
           child: Text(
             label,
             style: theme.typeScale.titleMedium.copyWith(
-              color:
-                  selected ? scheme.onTertiaryContainer : scheme.onSurfaceVariant,
+              color: M3ETimePickerTokens.periodOptionForegroundColor(scheme, selected: selected),
             ),
           ),
         );
@@ -148,8 +139,8 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
   Widget _buildDial(M3EThemeData theme) {
     final scheme = theme.colorScheme;
     return SizedBox(
-      width: 256,
-      height: 256,
+      width: M3ETimePickerTokens.dialSize,
+      height: M3ETimePickerTokens.dialSize,
       child: GestureDetector(
         onTapDown: (TapDownDetails d) => _handleDial(d.localPosition),
         onPanUpdate: (DragUpdateDetails d) => _handleDial(d.localPosition),
@@ -188,7 +179,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
   }
 
   void _handleDial(Offset position) {
-    const double dimension = 256;
+    const double dimension = M3ETimePickerTokens.dialSize;
     const center = Offset(dimension / 2, dimension / 2);
     final Offset delta = position - center;
     final double fraction =

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../components/search/search.dart';
+import '../components/text_fields/enums/m3e_text_field_variant.dart';
 import '../components/text_fields/text_fields.dart';
 
 /// Static factories for the Material 3 *Text input* components, such as

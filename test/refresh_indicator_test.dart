@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/components/refresh_indicator/enums/m3e_refresh_status.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 Widget _host(Widget child) {
