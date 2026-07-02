@@ -1,13 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'enums/m3e_card_variant.dart';
+import 'styles/m3e_card_tokens.dart';
 
-/// The three card variants defined by Material 3.
-enum M3ECardVariant {
-  elevated,
-  filled,
-  outlined,
-}
+export 'enums/m3e_card_variant.dart';
+export 'styles/m3e_card_tokens.dart';
 
 /// A Material 3 Expressive card.
 ///
@@ -19,7 +17,7 @@ class M3ECard extends StatelessWidget {
     required this.child,
     this.variant = M3ECardVariant.elevated,
     this.onPressed,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = M3ECardTokens.contentPadding,
     this.clipBehavior = Clip.antiAlias,
     super.key,
   });
@@ -33,7 +31,7 @@ class M3ECard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final borderRadius = M3EShapes.radiusMedium;
+    final borderRadius = M3ECardTokens.borderRadius;
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
     if (onPressed == null) {
@@ -59,16 +57,17 @@ class M3ECard extends StatelessWidget {
     M3EInteractionState state,
   ) {
     final scheme = theme.colorScheme;
-    final double elevation = _resolveElevation(state);
+    final double elevation =
+        M3ECardTokens.elevation(variant, hovered: state.hovered);
     return AnimatedContainer(
       duration: M3EMotion.short4,
       curve: M3EMotion.standard,
       clipBehavior: clipBehavior,
       decoration: BoxDecoration(
-        color: _background(scheme),
+        color: M3ECardTokens.backgroundColor(scheme, variant),
         borderRadius: borderRadius,
         border: variant == M3ECardVariant.outlined
-            ? Border.all(color: scheme.outlineVariant)
+            ? Border.all(color: M3ECardTokens.outlineColor(scheme))
             : null,
         boxShadow: M3EElevation.shadows(elevation, shadowColor: scheme.shadow),
       ),
@@ -83,23 +82,5 @@ class M3ECard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _background(M3EColorScheme scheme) {
-    switch (variant) {
-      case M3ECardVariant.elevated:
-        return scheme.surfaceContainerLow;
-      case M3ECardVariant.filled:
-        return scheme.surfaceContainerHighest;
-      case M3ECardVariant.outlined:
-        return scheme.surface;
-    }
-  }
-
-  double _resolveElevation(M3EInteractionState state) {
-    if (variant != M3ECardVariant.elevated) {
-      return M3EElevation.level0;
-    }
-    return state.hovered ? M3EElevation.level2 : M3EElevation.level1;
   }
 }

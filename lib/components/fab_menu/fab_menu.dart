@@ -3,8 +3,10 @@ import 'package:flutter/widgets.dart';
 import '../../foundations/foundations.dart';
 import '../floating_action_buttons/floating_action_buttons.dart';
 import 'models/m3e_fab_menu_item.dart';
+import 'styles/m3e_fab_menu_tokens.dart';
 
 export 'models/m3e_fab_menu_item.dart';
+export 'styles/m3e_fab_menu_tokens.dart';
 
 /// A Material 3 Expressive FAB menu.
 ///
@@ -99,7 +101,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
           link: _link,
           targetAnchor: Alignment.topRight,
           followerAnchor: Alignment.bottomRight,
-          offset: const Offset(0, -16),
+          offset: const Offset(0, -M3EFabMenuTokens.menuOffset),
           child: _buildMenu(context),
         ),
       ],
@@ -114,7 +116,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
         child: FadeTransition(
           opacity: _controller,
           child: ColoredBox(
-            color: scheme.scrim.withValues(alpha: 0.32),
+            color: M3EFabMenuTokens.scrimColor(scheme),
           ),
         ),
       ),
@@ -129,7 +131,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       children: <Widget>[
         for (int i = 0; i < widget.items.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: M3EFabMenuTokens.itemGap),
             child: _buildItem(theme, widget.items[i], i),
           ),
       ],
@@ -172,13 +174,15 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   ) {
     final border = M3EShapes.stadium;
     return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      height: M3EFabMenuTokens.itemHeight,
+      padding: const EdgeInsets.symmetric(
+        horizontal: M3EFabMenuTokens.itemHorizontalPadding,
+      ),
       decoration: ShapeDecoration(
         shape: border,
-        color: scheme.primaryContainer,
+        color: M3EFabMenuTokens.itemContainerColor(scheme),
         shadows: M3EElevation.shadows(
-          M3EElevation.level3,
+          M3EFabMenuTokens.itemElevation,
           shadowColor: scheme.shadow,
         ),
       ),
@@ -187,7 +191,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
         children: <Widget>[
           M3EStateLayerOverlay(
             state: state,
-            color: scheme.onPrimaryContainer,
+            color: M3EFabMenuTokens.itemForegroundColor(scheme),
             shape: border,
           ),
           Row(
@@ -195,16 +199,15 @@ class _M3EFabMenuState extends State<M3EFabMenu>
             children: <Widget>[
               IconTheme.merge(
                 data: IconThemeData(
-                  color: scheme.onPrimaryContainer,
-                  size: 24,
+                  color: M3EFabMenuTokens.itemForegroundColor(scheme),
+                  size: M3EFabMenuTokens.iconSize,
                 ),
                 child: item.icon,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: M3EFabMenuTokens.iconLabelGap),
               Text(
                 item.label,
-                style: theme.typeScale.titleMedium
-                    .copyWith(color: scheme.onPrimaryContainer),
+                style: M3EFabMenuTokens.itemLabelStyle(theme.typeScale, scheme),
               ),
             ],
           ),

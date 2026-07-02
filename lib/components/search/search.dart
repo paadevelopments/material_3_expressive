@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_search_bar_tokens.dart';
+
+export 'styles/m3e_search_bar_tokens.dart';
 
 /// A Material 3 Expressive search bar.
 ///
@@ -68,14 +71,16 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
       onTap: widget.onTap ?? _focusNode.requestFocus,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        height: M3ESearchBarTokens.height,
+        padding: const EdgeInsets.symmetric(
+          horizontal: M3ESearchBarTokens.horizontalPadding,
+        ),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHigh,
-          borderRadius: M3EShapes.resolve(28),
+          color: M3ESearchBarTokens.containerColor(scheme),
+          borderRadius: M3EShapes.resolve(M3ESearchBarTokens.cornerRadius),
           boxShadow: widget.elevated
               ? M3EElevation.shadows(
-                  M3EElevation.level1,
+                  M3ESearchBarTokens.elevation,
                   shadowColor: scheme.shadow,
                 )
               : null,
@@ -83,14 +88,20 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
         child: Row(
           children: <Widget>[
             IconTheme.merge(
-              data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
+              data: IconThemeData(
+                color: M3ESearchBarTokens.iconColor(scheme),
+                size: M3ESearchBarTokens.iconSize,
+              ),
               child: widget.leading ?? const Icon(M3EIcons.search),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: M3ESearchBarTokens.leadingGap),
             Expanded(child: _buildInput(theme, scheme)),
             for (final Widget action in widget.trailing)
               IconTheme.merge(
-                data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
+                data: IconThemeData(
+                  color: M3ESearchBarTokens.iconColor(scheme),
+                  size: M3ESearchBarTokens.iconSize,
+                ),
                 child: action,
               ),
           ],
@@ -103,8 +114,7 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
     if (widget.onTap != null) {
       return Text(
         widget.hintText,
-        style:
-            theme.typeScale.bodyLarge.copyWith(color: scheme.onSurfaceVariant),
+        style: M3ESearchBarTokens.hintStyle(theme.typeScale, scheme),
       );
     }
     return Stack(
@@ -113,18 +123,17 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
         if (_controller.text.isEmpty)
           Text(
             widget.hintText,
-            style: theme.typeScale.bodyLarge
-                .copyWith(color: scheme.onSurfaceVariant),
+            style: M3ESearchBarTokens.hintStyle(theme.typeScale, scheme),
           ),
         EditableText(
           controller: _controller,
           focusNode: _focusNode,
           onChanged: widget.onChanged,
           onSubmitted: widget.onSubmitted,
-          style: theme.typeScale.bodyLarge.copyWith(color: scheme.onSurface),
-          cursorColor: scheme.primary,
+          style: M3ESearchBarTokens.inputStyle(theme.typeScale, scheme),
+          cursorColor: M3ESearchBarTokens.cursorColor(scheme),
           backgroundCursorColor: scheme.outlineVariant,
-          selectionColor: scheme.primary.withValues(alpha: 0.4),
+          selectionColor: M3ESearchBarTokens.selectionColor(scheme),
         ),
       ],
     );

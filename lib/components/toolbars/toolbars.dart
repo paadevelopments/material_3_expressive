@@ -1,15 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'enums/m3e_toolbar_color.dart';
+import 'styles/m3e_toolbar_tokens.dart';
 
-/// The color emphasis of a floating toolbar.
-enum M3EToolbarColor {
-  /// Standard surface container background.
-  standard,
-
-  /// Vibrant primary-container background.
-  vibrant,
-}
+export 'enums/m3e_toolbar_color.dart';
+export 'styles/m3e_toolbar_tokens.dart';
 
 /// A Material 3 Expressive floating toolbar.
 ///
@@ -30,24 +26,24 @@ class M3EToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = M3ETheme.of(context).colorScheme;
-    final vibrant = color == M3EToolbarColor.vibrant;
-    final Color background =
-        vibrant ? scheme.primaryContainer : scheme.surfaceContainer;
-    final Color foreground =
-        vibrant ? scheme.onPrimaryContainer : scheme.onSurfaceVariant;
+    final Color background = M3EToolbarTokens.backgroundColor(scheme, color);
+    final Color foreground = M3EToolbarTokens.foregroundColor(scheme, color);
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: M3EToolbarTokens.padding,
       decoration: ShapeDecoration(
         shape: M3EShapes.stadium,
         color: background,
         shadows: M3EElevation.shadows(
-          M3EElevation.level2,
+          M3EToolbarTokens.elevation,
           shadowColor: scheme.shadow,
         ),
       ),
       child: IconTheme.merge(
-        data: IconThemeData(color: foreground, size: 24),
+        data: IconThemeData(
+          color: foreground,
+          size: M3EToolbarTokens.iconSize,
+        ),
         child: Flex(
           direction: axis,
           mainAxisSize: MainAxisSize.min,

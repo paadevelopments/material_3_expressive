@@ -2,6 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_snackbar_host.dart';
+import 'styles/m3e_snackbar_tokens.dart';
+
+export 'components/m3e_snackbar_host.dart';
+export 'styles/m3e_snackbar_tokens.dart';
 
 /// A Material 3 Expressive snackbar.
 ///
@@ -26,7 +30,7 @@ class M3ESnackbar extends StatelessWidget {
     required String message,
     String? actionLabel,
     VoidCallback? onAction,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = M3ESnackbarTokens.defaultDuration,
   }) {
     final OverlayState overlay = Overlay.of(context, rootOverlay: true);
     final M3EThemeData theme = M3ETheme.of(context);
@@ -55,13 +59,16 @@ class M3ESnackbar extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      constraints: const BoxConstraints(minHeight: 48, maxWidth: 600),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      constraints: const BoxConstraints(
+        minHeight: M3ESnackbarTokens.minHeight,
+        maxWidth: M3ESnackbarTokens.maxWidth,
+      ),
+      padding: M3ESnackbarTokens.contentPadding,
       decoration: BoxDecoration(
-        color: scheme.inverseSurface,
-        borderRadius: M3EShapes.radiusExtraSmall,
+        color: M3ESnackbarTokens.containerColor(scheme),
+        borderRadius: M3ESnackbarTokens.borderRadius,
         boxShadow: M3EElevation.shadows(
-          M3EElevation.level3,
+          M3ESnackbarTokens.elevation,
           shadowColor: scheme.shadow,
         ),
       ),
@@ -70,26 +77,24 @@ class M3ESnackbar extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: theme.typeScale.bodyMedium
-                  .copyWith(color: scheme.onInverseSurface),
+              style: M3ESnackbarTokens.messageStyle(theme.typeScale, scheme),
             ),
           ),
           if (actionLabel != null)
             Padding(
-              padding: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: M3ESnackbarTokens.actionGap),
               child: M3ETappable(
                 onTap: onAction,
                 semanticLabel: actionLabel,
                 builder: (BuildContext context, M3EInteractionState state) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: M3ESnackbarTokens.actionPadding,
                     child: Text(
                       actionLabel!,
-                      style: theme.typeScale.labelLarge
-                          .copyWith(color: scheme.inversePrimary),
+                      style: M3ESnackbarTokens.actionStyle(
+                        theme.typeScale,
+                        scheme,
+                      ),
                     ),
                   );
                 },

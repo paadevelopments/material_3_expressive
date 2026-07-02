@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'enums/m3e_divider_axis.dart';
+import 'styles/m3e_divider_tokens.dart';
 
-/// The orientation of an [M3EDivider].
-enum M3EDividerAxis {
-  horizontal,
-  vertical,
-}
+export 'enums/m3e_divider_axis.dart';
+export 'styles/m3e_divider_tokens.dart';
 
 /// A Material 3 Expressive divider.
 ///
@@ -15,7 +14,7 @@ enum M3EDividerAxis {
 class M3EDivider extends StatelessWidget {
   const M3EDivider({
     this.axis = M3EDividerAxis.horizontal,
-    this.thickness = 1,
+    this.thickness = M3EDividerTokens.thickness,
     this.indent = 0,
     this.endIndent = 0,
     this.color,
@@ -30,7 +29,8 @@ class M3EDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color line = color ?? M3ETheme.of(context).colorScheme.outlineVariant;
+    final Color line =
+        color ?? M3EDividerTokens.color(M3ETheme.of(context).colorScheme);
     if (axis == M3EDividerAxis.vertical) {
       return Padding(
         padding: EdgeInsets.only(top: indent, bottom: endIndent),

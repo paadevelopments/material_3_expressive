@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_checkbox_tokens.dart';
+
+export 'styles/m3e_checkbox_tokens.dart';
 
 /// A Material 3 Expressive checkbox.
 ///
@@ -21,9 +24,6 @@ class M3ECheckbox extends StatelessWidget {
           tristate || value != null,
           'value may only be null when tristate is true.',
         );
-
-  static const double _boxSize = 18;
-  static const double _hitSize = 40;
 
   /// The current value. Null represents the indeterminate state.
   final bool? value;
@@ -64,8 +64,8 @@ class M3ECheckbox extends StatelessWidget {
       semanticLabel: semanticLabel,
       builder: (BuildContext context, M3EInteractionState state) {
         return SizedBox(
-          width: _hitSize,
-          height: _hitSize,
+          width: M3ECheckboxTokens.hitSize,
+          height: M3ECheckboxTokens.hitSize,
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
@@ -83,14 +83,14 @@ class M3ECheckbox extends StatelessWidget {
     M3EInteractionState state,
     bool active,
   ) {
-    final Color base = error
-        ? scheme.error
-        : active
-            ? scheme.primary
-            : scheme.onSurface;
+    final Color base = M3ECheckboxTokens.stateLayerColor(
+      scheme,
+      active: active,
+      error: error,
+    );
     return Container(
-      width: _hitSize,
-      height: _hitSize,
+      width: M3ECheckboxTokens.hitSize,
+      height: M3ECheckboxTokens.hitSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: base.withValues(alpha: state.opacity),
@@ -99,61 +99,53 @@ class M3ECheckbox extends StatelessWidget {
   }
 
   Widget _buildBox(M3EColorScheme scheme, bool active) {
-    final Color fill = _resolveFill(scheme, active);
-    final Color border = _resolveBorder(scheme, active);
+    final Color fill = M3ECheckboxTokens.fillColor(
+      scheme,
+      enabled: _enabled,
+      active: active,
+      error: error,
+    );
+    final Color border = M3ECheckboxTokens.borderColor(
+      scheme,
+      enabled: _enabled,
+      active: active,
+      error: error,
+    );
     return AnimatedContainer(
       duration: M3EMotion.short3,
       curve: M3EMotion.standard,
-      width: _boxSize,
-      height: _boxSize,
+      width: M3ECheckboxTokens.boxSize,
+      height: M3ECheckboxTokens.boxSize,
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: M3EShapes.radiusExtraSmall,
-        border: Border.all(color: border, width: 2),
+        borderRadius: M3ECheckboxTokens.borderRadius,
+        border: Border.all(
+          color: border,
+          width: M3ECheckboxTokens.borderWidth,
+        ),
       ),
       child: _buildMark(scheme),
     );
   }
 
   Widget _buildMark(M3EColorScheme scheme) {
+    final Color color = M3ECheckboxTokens.markColor(scheme, error: error);
     if (value == null && tristate) {
       return Center(
         child: Container(
-          width: 10,
-          height: 2,
-          color: error ? scheme.onError : scheme.onPrimary,
+          width: M3ECheckboxTokens.indeterminateWidth,
+          height: M3ECheckboxTokens.indeterminateHeight,
+          color: color,
         ),
       );
     }
     if (value ?? false) {
       return Icon(
         M3EIcons.check,
-        size: 16,
-        color: error ? scheme.onError : scheme.onPrimary,
+        size: M3ECheckboxTokens.markSize,
+        color: color,
       );
     }
     return const SizedBox.shrink();
-  }
-
-  Color _resolveFill(M3EColorScheme scheme, bool active) {
-    if (!_enabled) {
-      return active
-          ? M3EColorUtils.withOpacity(scheme.onSurface, 0.38)
-          : const Color(0x00000000);
-    }
-    if (!active) {
-      return const Color(0x00000000);
-    }
-    return error ? scheme.error : scheme.primary;
-  }
-
-  Color _resolveBorder(M3EColorScheme scheme, bool active) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    if (active) {
-      return error ? scheme.error : scheme.primary;
-    }
-    return error ? scheme.error : scheme.onSurfaceVariant;
   }
 }

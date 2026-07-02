@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_tooltip_tokens.dart';
+
+export 'styles/m3e_tooltip_tokens.dart';
 
 /// A Material 3 Expressive tooltip.
 ///
@@ -60,7 +63,7 @@ class _M3ETooltipState extends State<M3ETooltip> {
       return;
     }
     _timer?.cancel();
-    _timer = Timer(M3EMotion.extraLong4, _hide);
+    _timer = Timer(M3ETooltipTokens.plainDismissDelay, _hide);
   }
 
   @override
@@ -100,7 +103,7 @@ class _M3ETooltipState extends State<M3ETooltip> {
           link: _link,
           targetAnchor: Alignment.bottomCenter,
           followerAnchor: Alignment.topCenter,
-          offset: const Offset(0, 4),
+          offset: const Offset(0, M3ETooltipTokens.anchorOffset),
           child: widget._isRich ? _buildRich(theme) : _buildPlain(theme),
         ),
       ],
@@ -111,16 +114,17 @@ class _M3ETooltipState extends State<M3ETooltip> {
     final scheme = theme.colorScheme;
     return _fade(
       Container(
-        constraints: const BoxConstraints(maxWidth: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        constraints: const BoxConstraints(
+          maxWidth: M3ETooltipTokens.plainMaxWidth,
+        ),
+        padding: M3ETooltipTokens.plainPadding,
         decoration: BoxDecoration(
-          color: scheme.inverseSurface,
-          borderRadius: M3EShapes.radiusExtraSmall,
+          color: M3ETooltipTokens.plainContainerColor(scheme),
+          borderRadius: M3ETooltipTokens.plainBorderRadius,
         ),
         child: Text(
           widget.message!,
-          style: theme.typeScale.bodySmall
-              .copyWith(color: scheme.onInverseSurface),
+          style: M3ETooltipTokens.plainMessageStyle(theme.typeScale, scheme),
         ),
       ),
     );
@@ -130,13 +134,15 @@ class _M3ETooltipState extends State<M3ETooltip> {
     final scheme = theme.colorScheme;
     return _fade(
       Container(
-        constraints: const BoxConstraints(maxWidth: 320),
-        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(
+          maxWidth: M3ETooltipTokens.richMaxWidth,
+        ),
+        padding: M3ETooltipTokens.richPadding,
         decoration: BoxDecoration(
-          color: scheme.surfaceContainer,
-          borderRadius: M3EShapes.radiusMedium,
+          color: M3ETooltipTokens.richContainerColor(scheme),
+          borderRadius: M3ETooltipTokens.richBorderRadius,
           boxShadow: M3EElevation.shadows(
-            M3EElevation.level2,
+            M3ETooltipTokens.richElevation,
             shadowColor: scheme.shadow,
           ),
         ),
@@ -147,18 +153,19 @@ class _M3ETooltipState extends State<M3ETooltip> {
             if (widget.richTitle != null) ...<Widget>[
               Text(
                 widget.richTitle!,
-                style: theme.typeScale.titleSmall
-                    .copyWith(color: scheme.onSurface),
+                style: M3ETooltipTokens.richTitleStyle(
+                  theme.typeScale,
+                  scheme,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: M3ETooltipTokens.richTitleGap),
             ],
             Text(
               widget.richMessage!,
-              style: theme.typeScale.bodyMedium
-                  .copyWith(color: scheme.onSurfaceVariant),
+              style: M3ETooltipTokens.richBodyStyle(theme.typeScale, scheme),
             ),
             if (widget.actions.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 12),
+              const SizedBox(height: M3ETooltipTokens.richActionsGap),
               Row(children: widget.actions),
             ],
           ],

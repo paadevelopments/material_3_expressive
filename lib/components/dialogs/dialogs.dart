@@ -2,6 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../divider/divider.dart';
+import 'styles/m3e_dialog_tokens.dart';
+
+export 'styles/m3e_dialog_tokens.dart';
 
 const String _closeSemanticLabel = 'Close';
 
@@ -34,7 +37,7 @@ class M3EDialog extends StatelessWidget {
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: 'Dismiss',
-      barrierColor: theme.colorScheme.scrim.withValues(alpha: 0.32),
+      barrierColor: M3EDialogTokens.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
         return M3ETheme(
@@ -114,11 +117,14 @@ class M3EDialog extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      constraints: const BoxConstraints(minWidth: 280, maxWidth: 560),
-      padding: const EdgeInsets.all(24),
+      constraints: const BoxConstraints(
+        minWidth: M3EDialogTokens.minWidth,
+        maxWidth: M3EDialogTokens.maxWidth,
+      ),
+      padding: M3EDialogTokens.padding,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: M3EShapes.radiusExtraLarge,
+        color: M3EDialogTokens.containerColor(scheme),
+        borderRadius: M3EDialogTokens.borderRadius,
         boxShadow: M3EElevation.shadows(
           M3EElevation.level3,
           shadowColor: scheme.shadow,
@@ -138,10 +144,13 @@ class M3EDialog extends StatelessWidget {
     return <Widget>[
       if (icon != null) ...<Widget>[
         IconTheme.merge(
-          data: IconThemeData(color: scheme.secondary, size: 24),
+          data: IconThemeData(
+            color: scheme.secondary,
+            size: M3EDialogTokens.iconSize,
+          ),
           child: icon!,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: M3EDialogTokens.gapAfterIcon),
       ],
       Text(
         title,
@@ -149,7 +158,7 @@ class M3EDialog extends StatelessWidget {
         style: theme.typeScale.headlineSmall.copyWith(color: scheme.onSurface),
       ),
       if (content != null) ...<Widget>[
-        const SizedBox(height: 16),
+        const SizedBox(height: M3EDialogTokens.gapAfterTitle),
         DefaultTextStyle(
           style: theme.typeScale.bodyMedium
               .copyWith(color: scheme.onSurfaceVariant),
@@ -157,13 +166,13 @@ class M3EDialog extends StatelessWidget {
         ),
       ],
       if (actions.isNotEmpty) ...<Widget>[
-        const SizedBox(height: 24),
+        const SizedBox(height: M3EDialogTokens.gapBeforeActions),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             for (final Widget action in actions) ...<Widget>[
               action,
-              const SizedBox(width: 8),
+              const SizedBox(width: M3EDialogTokens.actionGap),
             ],
           ],
         ),
@@ -188,7 +197,7 @@ class _FullScreenDialog extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return ColoredBox(
-      color: scheme.surface,
+      color: M3EDialogTokens.fullScreenBackground(scheme),
       child: SafeArea(
         child: Column(
           children: <Widget>[
@@ -204,7 +213,7 @@ class _FullScreenDialog extends StatelessWidget {
   Widget _buildHeader(BuildContext context, M3EThemeData theme) {
     final scheme = theme.colorScheme;
     return SizedBox(
-      height: 64,
+      height: M3EDialogTokens.fullScreenHeaderHeight,
       child: Row(
         children: <Widget>[
           const SizedBox(width: 4),
@@ -214,7 +223,11 @@ class _FullScreenDialog extends StatelessWidget {
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
                 padding: const EdgeInsets.all(12),
-                child: Icon(M3EIcons.close, color: scheme.onSurface, size: 24),
+                child: Icon(
+                  M3EIcons.close,
+                  color: scheme.onSurface,
+                  size: M3EDialogTokens.iconSize,
+                ),
               );
             },
           ),

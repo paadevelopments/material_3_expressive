@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_list_item_tokens.dart';
+
+export 'styles/m3e_list_item_tokens.dart';
 
 /// A Material 3 Expressive list item.
 ///
@@ -55,18 +58,21 @@ class M3EListItem extends StatelessWidget {
           child: IgnorePointer(
             child: ColoredBox(
               color: selected
-                  ? scheme.secondaryContainer
+                  ? M3EListItemTokens.selectedColor(scheme)
                   : scheme.onSurface.withValues(alpha: state.opacity),
             ),
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: threeLine ? 12 : 8,
+            horizontal: M3EListItemTokens.horizontalPadding,
+            vertical: threeLine
+                ? M3EListItemTokens.threeLineVerticalPadding
+                : M3EListItemTokens.verticalPadding,
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 40),
+            constraints:
+                const BoxConstraints(minHeight: M3EListItemTokens.minHeight),
             child: Row(
               crossAxisAlignment: alignment,
               children: _buildChildren(theme),
@@ -82,16 +88,22 @@ class M3EListItem extends StatelessWidget {
     return <Widget>[
       if (leading != null) ...<Widget>[
         IconTheme.merge(
-          data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
+          data: IconThemeData(
+            color: M3EListItemTokens.iconColor(scheme),
+            size: M3EListItemTokens.iconSize,
+          ),
           child: leading!,
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: M3EListItemTokens.gap),
       ],
       Expanded(child: _buildText(theme)),
       if (trailing != null) ...<Widget>[
-        const SizedBox(width: 16),
+        const SizedBox(width: M3EListItemTokens.gap),
         IconTheme.merge(
-          data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
+          data: IconThemeData(
+            color: M3EListItemTokens.iconColor(scheme),
+            size: M3EListItemTokens.iconSize,
+          ),
           child: trailing!,
         ),
       ],
@@ -100,6 +112,7 @@ class M3EListItem extends StatelessWidget {
 
   Widget _buildText(M3EThemeData theme) {
     final scheme = theme.colorScheme;
+    final type = theme.typeScale;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -107,20 +120,18 @@ class M3EListItem extends StatelessWidget {
         if (overline != null)
           Text(
             overline!,
-            style: theme.typeScale.labelSmall
-                .copyWith(color: scheme.onSurfaceVariant),
+            style: M3EListItemTokens.overlineStyle(type, scheme),
           ),
         Text(
           headline,
-          style: theme.typeScale.bodyLarge.copyWith(color: scheme.onSurface),
+          style: M3EListItemTokens.headlineStyle(type, scheme),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         if (supportingText != null)
           Text(
             supportingText!,
-            style: theme.typeScale.bodyMedium
-                .copyWith(color: scheme.onSurfaceVariant),
+            style: M3EListItemTokens.supportingStyle(type, scheme),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -128,6 +139,5 @@ class M3EListItem extends StatelessWidget {
     );
   }
 
-  bool get _isThreeLine =>
-      supportingText != null && overline != null;
+  bool get _isThreeLine => supportingText != null && overline != null;
 }

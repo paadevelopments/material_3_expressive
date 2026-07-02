@@ -1,18 +1,13 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'enums/m3e_tabs_variant.dart';
 import 'models/m3e_tab.dart';
+import 'styles/m3e_tabs_tokens.dart';
 
+export 'enums/m3e_tabs_variant.dart';
 export 'models/m3e_tab.dart';
-
-/// The two tab emphasis levels defined by Material 3.
-enum M3ETabsVariant {
-  /// Primary tabs sit at the top level of the hierarchy.
-  primary,
-
-  /// Secondary tabs sit within a content area.
-  secondary,
-}
+export 'styles/m3e_tabs_tokens.dart';
 
 /// A Material 3 Expressive tab bar.
 ///
@@ -26,8 +21,6 @@ class M3ETabs extends StatelessWidget {
     this.variant = M3ETabsVariant.primary,
     super.key,
   }) : assert(tabs.length >= 2, 'A tab bar needs 2+ tabs.');
-
-  static const double _height = 48;
 
   final List<M3ETab> tabs;
   final int selectedIndex;
@@ -43,11 +36,13 @@ class M3ETabs extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: scheme.surface,
-        border: Border(bottom: BorderSide(color: scheme.surfaceContainerHighest)),
+        color: M3ETabsTokens.backgroundColor(scheme),
+        border: Border(
+          bottom: BorderSide(color: M3ETabsTokens.dividerColor(scheme)),
+        ),
       ),
       child: SizedBox(
-        height: _height,
+        height: M3ETabsTokens.height,
         child: Stack(
           children: <Widget>[
             Row(children: _buildTabs(theme)),
@@ -68,8 +63,6 @@ class M3ETabs extends StatelessWidget {
   Widget _buildTab(M3EThemeData theme, int index) {
     final scheme = theme.colorScheme;
     final selected = index == selectedIndex;
-    final Color color =
-        selected ? scheme.primary : scheme.onSurfaceVariant;
     final M3ETab tab = tabs[index];
 
     return M3ETappable(
@@ -85,24 +78,32 @@ class M3ETabs extends StatelessWidget {
                 ),
               ),
             ),
-            Center(child: _buildTabContent(theme, tab, color)),
+            Center(child: _buildTabContent(theme, tab, selected)),
           ],
         );
       },
     );
   }
 
-  Widget _buildTabContent(M3EThemeData theme, M3ETab tab, Color color) {
+  Widget _buildTabContent(M3EThemeData theme, M3ETab tab, bool selected) {
+    final scheme = theme.colorScheme;
     final children = <Widget>[
       if (tab.icon != null)
         IconTheme.merge(
-          data: IconThemeData(color: color, size: 24),
+          data: IconThemeData(
+            color: M3ETabsTokens.tabColor(scheme, selected: selected),
+            size: M3ETabsTokens.iconSize,
+          ),
           child: tab.icon!,
         ),
       if (tab.label != null)
         Text(
           tab.label!,
-          style: theme.typeScale.titleSmall.copyWith(color: color),
+          style: M3ETabsTokens.labelStyle(
+            theme.typeScale,
+            scheme,
+            selected: selected,
+          ),
         ),
     ];
     return Column(
@@ -113,6 +114,7 @@ class M3ETabs extends StatelessWidget {
   }
 
   Widget _buildIndicator(M3EColorScheme scheme, double align) {
+    final bool fullWidth = M3ETabsTokens.indicatorFullWidth(variant);
     return AnimatedAlign(
       duration: M3EMotion.medium2,
       curve: M3EMotion.emphasized,
@@ -122,11 +124,13 @@ class M3ETabs extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 3,
-            width: variant == M3ETabsVariant.primary ? 32 : null,
+            height: M3ETabsTokens.indicatorHeight,
+            width: fullWidth ? null : M3ETabsTokens.primaryIndicatorWidth,
             decoration: BoxDecoration(
-              color: scheme.primary,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+              color: M3ETabsTokens.indicatorColor(scheme),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(M3ETabsTokens.indicatorCornerRadius),
+              ),
             ),
           ),
         ),

@@ -2,6 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../divider/divider.dart';
+import 'styles/m3e_side_sheet_tokens.dart';
+
+export 'styles/m3e_side_sheet_tokens.dart';
 
 const String _closeSemanticLabel = 'Close';
 
@@ -34,7 +37,7 @@ class M3ESideSheet extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss',
-      barrierColor: theme.colorScheme.scrim.withValues(alpha: 0.32),
+      barrierColor: M3ESideSheetTokens.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
         return M3ETheme(
@@ -62,11 +65,13 @@ class M3ESideSheet extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      width: 320,
+      width: M3ESideSheetTokens.width,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: const BorderRadius.horizontal(left: Radius.circular(28)),
+        color: M3ESideSheetTokens.containerColor(scheme),
+        borderRadius: const BorderRadius.horizontal(
+          left: Radius.circular(M3ESideSheetTokens.cornerRadius),
+        ),
       ),
       child: SafeArea(
         child: Column(
@@ -84,14 +89,13 @@ class M3ESideSheet extends StatelessWidget {
   Widget _buildHeader(BuildContext context, M3EThemeData theme) {
     final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 8, 16),
+      padding: M3ESideSheetTokens.headerPadding,
       child: Row(
         children: <Widget>[
           Expanded(
             child: Text(
               title,
-              style:
-                  theme.typeScale.titleLarge.copyWith(color: scheme.onSurface),
+              style: M3ESideSheetTokens.titleStyle(theme.typeScale, scheme),
             ),
           ),
           M3ETappable(
@@ -99,8 +103,12 @@ class M3ESideSheet extends StatelessWidget {
             semanticLabel: _closeSemanticLabel,
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
-                padding: const EdgeInsets.all(12),
-                child: Icon(M3EIcons.close, color: scheme.onSurface, size: 24),
+                padding: M3ESideSheetTokens.closeButtonPadding,
+                child: Icon(
+                  M3EIcons.close,
+                  color: scheme.onSurface,
+                  size: M3ESideSheetTokens.iconSize,
+                ),
               );
             },
           ),
@@ -113,9 +121,9 @@ class M3ESideSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        M3EDivider(color: scheme.outlineVariant),
+        M3EDivider(color: M3ESideSheetTokens.dividerColor(scheme)),
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: M3ESideSheetTokens.actionsPadding,
           child: Row(children: actions),
         ),
       ],

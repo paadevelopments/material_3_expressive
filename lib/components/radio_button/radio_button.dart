@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_radio_tokens.dart';
+
+export 'styles/m3e_radio_tokens.dart';
 
 /// A Material 3 Expressive radio button.
 ///
@@ -17,9 +20,6 @@ class M3ERadio<T> extends StatelessWidget {
     this.semanticLabel,
     super.key,
   });
-
-  static const double _ringSize = 20;
-  static const double _hitSize = 40;
 
   final T value;
   final T? groupValue;
@@ -44,8 +44,8 @@ class M3ERadio<T> extends StatelessWidget {
       semanticLabel: semanticLabel,
       builder: (BuildContext context, M3EInteractionState state) {
         return SizedBox(
-          width: _hitSize,
-          height: _hitSize,
+          width: M3ERadioTokens.hitSize,
+          height: M3ERadioTokens.hitSize,
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
@@ -59,10 +59,11 @@ class M3ERadio<T> extends StatelessWidget {
   }
 
   Widget _buildStateLayer(M3EColorScheme scheme, M3EInteractionState state) {
-    final Color base = _selected ? scheme.primary : scheme.onSurface;
+    final Color base =
+        M3ERadioTokens.stateLayerColor(scheme, selected: _selected);
     return Container(
-      width: _hitSize,
-      height: _hitSize,
+      width: M3ERadioTokens.hitSize,
+      height: M3ERadioTokens.hitSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: base.withValues(alpha: state.opacity),
@@ -71,13 +72,18 @@ class M3ERadio<T> extends StatelessWidget {
   }
 
   Widget _buildRing(M3EColorScheme scheme) {
-    final Color color = _resolveColor(scheme);
+    final Color color = M3ERadioTokens.color(
+      scheme,
+      enabled: _enabled,
+      error: error,
+      selected: _selected,
+    );
     return Container(
-      width: _ringSize,
-      height: _ringSize,
+      width: M3ERadioTokens.ringSize,
+      height: M3ERadioTokens.ringSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: color, width: 2),
+        border: Border.all(color: color, width: M3ERadioTokens.borderWidth),
       ),
       child: Center(
         child: AnimatedScale(
@@ -85,22 +91,12 @@ class M3ERadio<T> extends StatelessWidget {
           duration: M3EMotion.short4,
           curve: M3EMotion.emphasizedDecelerate,
           child: Container(
-            width: 10,
-            height: 10,
+            width: M3ERadioTokens.dotSize,
+            height: M3ERadioTokens.dotSize,
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
         ),
       ),
     );
-  }
-
-  Color _resolveColor(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    if (error) {
-      return scheme.error;
-    }
-    return _selected ? scheme.primary : scheme.onSurfaceVariant;
   }
 }

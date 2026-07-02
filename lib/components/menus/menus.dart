@@ -2,8 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'models/m3e_menu_entry.dart';
+import 'styles/m3e_menu_tokens.dart';
 
 export 'models/m3e_menu_entry.dart';
+export 'styles/m3e_menu_tokens.dart';
 
 /// Builds the anchor for an [M3EMenu], given a callback to open the menu.
 typedef M3EMenuAnchorBuilder = Widget Function(
@@ -89,7 +91,7 @@ class _M3EMenuState extends State<M3EMenu>
         CompositedTransformFollower(
           link: _link,
           targetAnchor: Alignment.bottomLeft,
-          offset: const Offset(0, 4),
+          offset: const Offset(0, M3EMenuTokens.anchorOffset),
           child: _buildMenu(theme),
         ),
       ],
@@ -107,13 +109,18 @@ class _M3EMenuState extends State<M3EMenu>
       child: FadeTransition(
         opacity: _controller,
         child: Container(
-          constraints: const BoxConstraints(minWidth: 112, maxWidth: 280),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          constraints: const BoxConstraints(
+            minWidth: M3EMenuTokens.minWidth,
+            maxWidth: M3EMenuTokens.maxWidth,
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: M3EMenuTokens.verticalPadding,
+          ),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainer,
-            borderRadius: M3EShapes.radiusExtraSmall,
+            color: M3EMenuTokens.containerColor(scheme),
+            borderRadius: M3EMenuTokens.borderRadius,
             boxShadow: M3EElevation.shadows(
-              M3EElevation.level2,
+              M3EMenuTokens.elevation,
               shadowColor: scheme.shadow,
             ),
           ),
@@ -131,9 +138,10 @@ class _M3EMenuState extends State<M3EMenu>
 
   Widget _buildEntry(M3EThemeData theme, M3EMenuEntry entry) {
     final scheme = theme.colorScheme;
-    final Color foreground = entry.enabled
-        ? scheme.onSurface
-        : M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
+    final Color foreground = M3EMenuTokens.entryForegroundColor(
+      scheme,
+      enabled: entry.enabled,
+    );
     return M3ETappable(
       enabled: entry.enabled,
       onTap: () {
@@ -143,30 +151,42 @@ class _M3EMenuState extends State<M3EMenu>
       semanticLabel: entry.label,
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: M3EMenuTokens.entryHeight,
+          padding: const EdgeInsets.symmetric(
+            horizontal: M3EMenuTokens.entryHorizontalPadding,
+          ),
           color: scheme.onSurface.withValues(alpha: state.opacity),
           child: Row(
             children: <Widget>[
               if (entry.leading != null) ...<Widget>[
                 IconTheme.merge(
-                  data: IconThemeData(color: foreground, size: 24),
+                  data: IconThemeData(
+                    color: foreground,
+                    size: M3EMenuTokens.iconSize,
+                  ),
                   child: entry.leading!,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: M3EMenuTokens.iconGap),
               ],
               Expanded(
                 child: Text(
                   entry.label,
-                  style: theme.typeScale.labelLarge.copyWith(color: foreground),
+                  style: M3EMenuTokens.entryLabelStyle(
+                    theme.typeScale,
+                    scheme,
+                    enabled: entry.enabled,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (entry.trailing != null) ...<Widget>[
-                const SizedBox(width: 12),
+                const SizedBox(width: M3EMenuTokens.iconGap),
                 IconTheme.merge(
-                  data: IconThemeData(color: foreground, size: 24),
+                  data: IconThemeData(
+                    color: foreground,
+                    size: M3EMenuTokens.iconSize,
+                  ),
                   child: entry.trailing!,
                 ),
               ],

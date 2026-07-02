@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'styles/m3e_switch_tokens.dart';
+
+export 'styles/m3e_switch_tokens.dart';
 
 /// A Material 3 Expressive switch.
 ///
@@ -18,9 +21,6 @@ class M3ESwitch extends StatelessWidget {
     this.semanticLabel,
     super.key,
   });
-
-  static const double _trackWidth = 52;
-  static const double _trackHeight = 32;
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -46,15 +46,25 @@ class M3ESwitch extends StatelessWidget {
         return AnimatedContainer(
           duration: M3EMotion.short4,
           curve: M3EMotion.emphasized,
-          width: _trackWidth,
-          height: _trackHeight,
-          padding: const EdgeInsets.all(4),
+          width: M3ESwitchTokens.trackWidth,
+          height: M3ESwitchTokens.trackHeight,
+          padding: const EdgeInsets.all(M3ESwitchTokens.trackPadding),
           decoration: BoxDecoration(
-            color: _trackColor(scheme),
-            borderRadius: M3EShapes.resolve(_trackHeight / 2),
+            color: M3ESwitchTokens.trackColor(
+              scheme,
+              enabled: _enabled,
+              value: value,
+            ),
+            borderRadius: M3EShapes.resolve(M3ESwitchTokens.trackHeight / 2),
             border: value
                 ? null
-                : Border.all(color: _outlineColor(scheme), width: 2),
+                : Border.all(
+                    color: M3ESwitchTokens.outlineColor(
+                      scheme,
+                      enabled: _enabled,
+                    ),
+                    width: M3ESwitchTokens.borderWidth,
+                  ),
           ),
           child: _buildThumb(scheme, state),
         );
@@ -63,7 +73,10 @@ class M3ESwitch extends StatelessWidget {
   }
 
   Widget _buildThumb(M3EColorScheme scheme, M3EInteractionState state) {
-    final double size = _thumbSize(state);
+    final double size = M3ESwitchTokens.thumbSize(
+      pressed: state.pressed,
+      grown: value || selectedIcon != null || unselectedIcon != null,
+    );
     return AnimatedAlign(
       duration: M3EMotion.short4,
       curve: M3EMotion.emphasized,
@@ -75,7 +88,11 @@ class M3ESwitch extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _thumbColor(scheme),
+          color: M3ESwitchTokens.thumbColor(
+            scheme,
+            enabled: _enabled,
+            value: value,
+          ),
         ),
         child: _buildThumbIcon(scheme),
       ),
@@ -87,47 +104,14 @@ class M3ESwitch extends StatelessWidget {
     if (icon == null) {
       return const SizedBox.shrink();
     }
-    final Color color =
-        value ? scheme.onPrimaryContainer : scheme.surfaceContainerHighest;
     return Center(
       child: IconTheme.merge(
-        data: IconThemeData(color: color, size: 16),
+        data: IconThemeData(
+          color: M3ESwitchTokens.iconColor(scheme, value: value),
+          size: M3ESwitchTokens.iconSize,
+        ),
         child: icon,
       ),
     );
-  }
-
-  double _thumbSize(M3EInteractionState state) {
-    if (state.pressed) {
-      return 28;
-    }
-    if (value || selectedIcon != null || unselectedIcon != null) {
-      return 24;
-    }
-    return 16;
-  }
-
-  Color _trackColor(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(
-        value ? scheme.onSurface : scheme.surfaceContainerHighest,
-        0.12,
-      );
-    }
-    return value ? scheme.primary : scheme.surfaceContainerHighest;
-  }
-
-  Color _thumbColor(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return value ? scheme.onPrimary : scheme.outline;
-  }
-
-  Color _outlineColor(M3EColorScheme scheme) {
-    if (!_enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.12);
-    }
-    return scheme.outline;
   }
 }
