@@ -116,6 +116,7 @@ class ContainmentPage extends StatelessWidget {
     return GallerySection(
       title: 'Lists',
       children: <Widget>[
+        const _ListLabel('Standard list items'),
         M3EContainment.listItem(
           headline: 'Wireless charging',
           supportingText: 'On · Fast charge enabled',
@@ -130,6 +131,37 @@ class ContainmentPage extends StatelessWidget {
           leading: const Icon(M3EIcons.calendar_today),
           trailing: const Icon(M3EIcons.chevron_right),
           onTap: () {},
+        ),
+        const SizedBox(height: 24),
+        const _ListLabel('Card list items'),
+        M3EContainment.cardList(
+          itemCount: 3,
+          onTap: (index) => log('Tapped card $index'),
+          itemBuilder: (context, index) {
+            final labels = ['Inbox', 'Drafts', 'Sent'];
+            final icons = [M3EIcons.schedule, M3EIcons.calendar_today, M3EIcons.check];
+            return M3EContainment.listItem(
+              headline: labels[index],
+              supportingText: 'Dynamic rounding based on position',
+              leading: Icon(icons[index]),
+              trailing: const Icon(M3EIcons.chevron_right),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        const _ListLabel('Card list builder (scrollable)'),
+        SizedBox(
+          height: 200,
+          child: M3EContainment.cardListBuilder(
+            itemCount: 20,
+            shrinkWrap: true,
+            onTap: (index) => log('Tapped item $index'),
+            itemBuilder: (context, index) => M3EContainment.listItem(
+              headline: 'Scrollable Item $index',
+              supportingText: 'Supports many items with lazy loading',
+              leading: const Icon(M3EIcons.schedule),
+            ),
+          ),
         ),
       ],
     );
@@ -256,6 +288,26 @@ class ContainmentPage extends StatelessWidget {
       body: const Padding(
         padding: EdgeInsets.all(24),
         child: Text('Side sheet content for detailed options.'),
+      ),
+    );
+  }
+}
+
+class _ListLabel extends StatelessWidget {
+  const _ListLabel(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = M3ETheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        label,
+        style: theme.typeScale.labelLarge.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

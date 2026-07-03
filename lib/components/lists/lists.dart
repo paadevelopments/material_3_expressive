@@ -1,8 +1,13 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import '../buttons/enums/m3e_button_enums.dart';
+import 'components/m3e_card_list_item.dart';
+import 'styles/m3e_card_list_tokens.dart';
 import 'styles/m3e_list_item_tokens.dart';
 
+export 'enums/m3e_list_enums.dart';
+export 'styles/m3e_card_list_tokens.dart';
 export 'styles/m3e_list_item_tokens.dart';
 
 /// A Material 3 Expressive list item.
@@ -140,4 +145,208 @@ class M3EListItem extends StatelessWidget {
   }
 
   bool get _isThreeLine => supportingText != null && overline != null;
+}
+
+/// A Material 3 interactive card list with dynamically rounded corners.
+///
+/// `M3ECardList` renders a vertical list of items, where the first and last
+/// items automatically have a larger outer radius, and the inner items have
+/// a smaller inner radius, adhering to Material 3's expressive list design.
+class M3ECardList extends StatelessWidget {
+  /// The number of items in the list.
+  final int itemCount;
+
+  /// Signature for a function that creates a widget for a given index.
+  final IndexedWidgetBuilder itemBuilder;
+
+  /// The radius used for the top corners of the first item, the bottom corners
+  /// of the last item, and all corners of a single item.
+  ///
+  /// Defaults to [M3ECardListTokens.outerRadius].
+  final double outerRadius;
+
+  /// The radius used for the inner corners of adjoining items.
+  ///
+  /// Defaults to [M3ECardListTokens.innerRadius].
+  final double innerRadius;
+
+  /// The gap space between adjacent items.
+  ///
+  /// Defaults to [M3ECardListTokens.gap].
+  final double gap;
+
+  /// The background color for each card.
+  ///
+  /// Defaults to [M3ECardListTokens.backgroundColor] if null.
+  final Color? color;
+
+  /// The inner padding applied to the [itemBuilder] child of each item.
+  ///
+  /// Defaults to [M3ECardListTokens.itemPadding] via [M3ECardListItem].
+  final EdgeInsetsGeometry? padding;
+
+  /// The outer margin applied around the entire list of cards.
+  ///
+  /// Defaults to [EdgeInsets.zero].
+  final EdgeInsetsGeometry? margin;
+
+  /// Optional callback invoked when an item is tapped.
+  ///
+  /// Provides the `index` of the tapped item.
+  final void Function(int index)? onTap;
+
+  /// Optional callback invoked when an item is long-pressed.
+  ///
+  /// Provides the `index` of the long-pressed item.
+  final void Function(int index)? onLongPress;
+
+  /// Optional semantic label builder for accessibility.
+  ///
+  /// Each card's label is derived from this builder for screen readers.
+  final String Function(int index)? semanticLabelBuilder;
+
+  /// The cursor for a mouse pointer when it enters a card's bounds.
+  final MouseCursor? mouseCursor;
+
+  /// The haptic feedback to provide on tap.
+  ///
+  /// Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
+
+  /// Widget displayed when the list is empty (itemCount is 0).
+  ///
+  /// If null, an empty container is shown.
+  final Widget? emptyBuilder;
+
+  /// Whether this list uses [ListView.builder] (true) or [Column] (false).
+  final bool _isBuilder;
+
+  /// Controls the scroll position of the list.
+  ///
+  /// Only used by [M3ECardList.builder].
+  final ScrollController? controller;
+
+  /// How the scroll view should respond to user input.
+  ///
+  /// Only used by [M3ECardList.builder].
+  final ScrollPhysics? physics;
+
+  /// Whether the scroll view should size itself to fit its children.
+  ///
+  /// When `false` (the default), the list expands to fill the available space.
+  /// Set to `true` when embedding in another scrollable.
+  ///
+  /// Only used by [M3ECardList.builder].
+  final bool shrinkWrap;
+
+  /// Padding for the scrollable list itself.
+  ///
+  /// Adds empty space at the edges of the list. Distinct from [margin], which
+  /// wraps the entire list, and [padding], which goes inside each card.
+  ///
+  /// Only used by [M3ECardList.builder].
+  final EdgeInsetsGeometry? listPadding;
+
+  /// Creates a [M3ECardList] that uses a [Column] internally.
+  ///
+  /// Best for short lists where lazy loading is not required.
+  const M3ECardList({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.outerRadius = M3ECardListTokens.outerRadius,
+    this.innerRadius = M3ECardListTokens.innerRadius,
+    this.gap = M3ECardListTokens.gap,
+    this.color,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.onLongPress,
+    this.semanticLabelBuilder,
+    this.mouseCursor,
+    this.haptic = M3EHapticFeedback.none,
+    this.emptyBuilder,
+  })  : _isBuilder = false,
+        controller = null,
+        physics = null,
+        shrinkWrap = false,
+        listPadding = null;
+
+  /// Creates a [M3ECardList] that uses a [ListView.builder] internally.
+  const M3ECardList.builder({
+    super.key,
+    required this.itemCount,
+    required this.itemBuilder,
+    this.outerRadius = M3ECardListTokens.outerRadius,
+    this.innerRadius = M3ECardListTokens.innerRadius,
+    this.gap = M3ECardListTokens.gap,
+    this.color,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.onLongPress,
+    this.semanticLabelBuilder,
+    this.mouseCursor,
+    this.haptic = M3EHapticFeedback.none,
+    this.emptyBuilder,
+    this.controller,
+    this.physics,
+    this.shrinkWrap = false,
+    this.listPadding,
+  }) : _isBuilder = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final EdgeInsetsGeometry? localMargin = margin;
+    final Widget? localEmptyBuilder = emptyBuilder;
+
+    if (itemCount == 0 && localEmptyBuilder != null) {
+      return localMargin != null
+          ? Padding(padding: localMargin, child: localEmptyBuilder)
+          : localEmptyBuilder;
+    }
+
+    if (_isBuilder) {
+      final Widget list = ListView.builder(
+        controller: controller,
+        physics: physics,
+        shrinkWrap: shrinkWrap,
+        padding: listPadding,
+        itemCount: itemCount,
+        itemBuilder: (context, index) => _buildItem(context, index, itemCount),
+      );
+      return localMargin != null
+          ? Padding(padding: localMargin, child: list)
+          : list;
+    }
+
+    final Widget column = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        itemCount,
+        (index) => _buildItem(context, index, itemCount),
+      ),
+    );
+    return localMargin != null
+        ? Padding(padding: localMargin, child: column)
+        : column;
+  }
+
+  Widget _buildItem(BuildContext context, int index, int total) {
+    return M3ECardListItem(
+      index: index,
+      position: calculateCardPosition(index, total),
+      outerRadius: outerRadius,
+      innerRadius: innerRadius,
+      gap: gap,
+      color: color,
+      padding: padding,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      semanticLabel: semanticLabelBuilder?.call(index),
+      mouseCursor: mouseCursor,
+      haptic: haptic,
+      child: itemBuilder(context, index),
+    );
+  }
 }

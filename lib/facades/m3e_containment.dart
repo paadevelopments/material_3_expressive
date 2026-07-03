@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../components/buttons/enums/m3e_button_enums.dart';
 import '../components/bottom_sheets/bottom_sheets.dart';
 import '../components/cards/cards.dart';
 import '../components/carousel/carousel.dart';
@@ -104,6 +105,88 @@ class M3EContainment {
       trailing: trailing,
       onTap: onTap,
       selected: selected,
+    );
+  }
+
+  /// Creates a card-based list. See [M3ECardList].
+  static Widget cardList({
+    required int itemCount,
+    required IndexedWidgetBuilder itemBuilder,
+    double outerRadius = M3ECardListTokens.outerRadius,
+    double innerRadius = M3ECardListTokens.innerRadius,
+    double gap = M3ECardListTokens.gap,
+    Color? color,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? margin,
+    void Function(int index)? onTap,
+    void Function(int index)? onLongPress,
+    String Function(int index)? semanticLabelBuilder,
+    MouseCursor? mouseCursor,
+    M3EHapticFeedback haptic = M3EHapticFeedback.none,
+    Widget? emptyBuilder,
+    Key? key,
+  }) {
+    return M3ECardList(
+      key: key,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+      outerRadius: outerRadius,
+      innerRadius: innerRadius,
+      gap: gap,
+      color: color,
+      padding: padding,
+      margin: margin,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      semanticLabelBuilder: semanticLabelBuilder,
+      mouseCursor: mouseCursor,
+      haptic: haptic,
+      emptyBuilder: emptyBuilder,
+    );
+  }
+
+  /// Creates a card-based list using a scrollable builder. See [M3ECardList.builder].
+  static Widget cardListBuilder({
+    required int itemCount,
+    required IndexedWidgetBuilder itemBuilder,
+    double outerRadius = M3ECardListTokens.outerRadius,
+    double innerRadius = M3ECardListTokens.innerRadius,
+    double gap = M3ECardListTokens.gap,
+    Color? color,
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? margin,
+    void Function(int index)? onTap,
+    void Function(int index)? onLongPress,
+    String Function(int index)? semanticLabelBuilder,
+    MouseCursor? mouseCursor,
+    M3EHapticFeedback haptic = M3EHapticFeedback.none,
+    Widget? emptyBuilder,
+    ScrollController? controller,
+    ScrollPhysics? physics,
+    bool shrinkWrap = false,
+    EdgeInsetsGeometry? listPadding,
+    Key? key,
+  }) {
+    return M3ECardList.builder(
+      key: key,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+      outerRadius: outerRadius,
+      innerRadius: innerRadius,
+      gap: gap,
+      color: color,
+      padding: padding,
+      margin: margin,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      semanticLabelBuilder: semanticLabelBuilder,
+      mouseCursor: mouseCursor,
+      haptic: haptic,
+      emptyBuilder: emptyBuilder,
+      controller: controller,
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      listPadding: listPadding,
     );
   }
 
