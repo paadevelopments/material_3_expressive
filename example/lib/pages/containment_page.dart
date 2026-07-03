@@ -18,7 +18,7 @@ class ContainmentPage extends StatelessWidget {
       children: <Widget>[
         _cards(theme),
         _carousel(theme),
-        _lists(),
+        _lists(theme),
         _dividers(theme),
         _overlays(context),
       ],
@@ -112,7 +112,7 @@ class ContainmentPage extends StatelessWidget {
     );
   }
 
-  Widget _lists() {
+  Widget _lists(M3EThemeData theme) {
     return GallerySection(
       title: 'Lists',
       children: <Widget>[
@@ -162,6 +162,38 @@ class ContainmentPage extends StatelessWidget {
               leading: const Icon(M3EIcons.schedule),
             ),
           ),
+        ),
+        const SizedBox(height: 24),
+        const _ListLabel('Dismissible list (swipe to dismiss)'),
+        M3EContainment.dismissibleColumn(
+          itemCount: 3,
+          onDismiss: (index, direction) async {
+            log('Dismissed item $index in direction $direction');
+            return true;
+          },
+          onTap: (index) => log('Tapped dismissible item $index'),
+          style: M3EDismissibleListStyle(
+            background: Container(
+              color: theme.colorScheme.success,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Icon(M3EIcons.check, color: theme.colorScheme.onSurface),
+            ),
+            secondaryBackground: Container(
+              color: theme.colorScheme.danger,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Icon(M3EIcons.close, color: theme.colorScheme.onSurface),
+            ),
+          ),
+          itemBuilder: (context, index) {
+            final labels = ['Swipe right to archive', 'Swipe left to delete', 'Expressive physics'];
+            return M3EContainment.listItem(
+              headline: labels[index],
+              supportingText: 'Physics-based dismissible card',
+              leading: const Icon(M3EIcons.schedule),
+            );
+          },
         ),
       ],
     );

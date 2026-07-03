@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import '../components/buttons/enums/m3e_button_enums.dart';
 import '../components/bottom_sheets/bottom_sheets.dart';
+import '../components/buttons/enums/m3e_button_enums.dart';
 import '../components/cards/cards.dart';
 import '../components/carousel/carousel.dart';
 import '../components/dialogs/dialogs.dart';
@@ -187,6 +187,54 @@ class M3EContainment {
       physics: physics,
       shrinkWrap: shrinkWrap,
       listPadding: listPadding,
+    );
+  }
+
+  /// Creates a dismissible list. See [M3EDismissibleList].
+  static Widget dismissibleList({
+    required int itemCount,
+    required IndexedWidgetBuilder itemBuilder,
+    Future<bool> Function(int index, DismissDirection direction)? onDismiss,
+    void Function(int index)? onTap,
+    M3EDismissibleListStyle style = const M3EDismissibleListStyle(),
+    ScrollPhysics? physics,
+    ScrollController? scrollController,
+    EdgeInsetsGeometry? listPadding,
+    bool shrinkWrap = false,
+    Clip clipBehavior = Clip.hardEdge,
+    Key? key,
+  }) {
+    return M3EDismissibleList(
+      key: key,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+      onDismiss: onDismiss,
+      onTap: onTap,
+      style: style,
+      physics: physics,
+      scrollController: scrollController,
+      listPadding: listPadding,
+      shrinkWrap: shrinkWrap,
+      clipBehavior: clipBehavior,
+    );
+  }
+
+  /// Creates a dismissible column. See [M3EDismissibleColumn].
+  static Widget dismissibleColumn({
+    required int itemCount,
+    required IndexedWidgetBuilder itemBuilder,
+    Future<bool> Function(int index, DismissDirection direction)? onDismiss,
+    void Function(int index)? onTap,
+    M3EDismissibleListStyle style = const M3EDismissibleListStyle(),
+    Key? key,
+  }) {
+    return M3EDismissibleColumn(
+      key: key,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+      onDismiss: onDismiss,
+      onTap: onTap,
+      style: style,
     );
   }
 
