@@ -8,10 +8,19 @@ import 'styles/m3e_card_list_tokens.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_list_item_tokens.dart';
 
+export 'components/m3e_expandable_card_column.dart';
+export 'components/m3e_expandable_card_list.dart';
+export 'components/m3e_expandable_data.dart';
+export 'components/m3e_expandable_item.dart';
+export 'components/sliver_m3e_expandable_card_list.dart';
+export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
 export 'styles/m3e_card_list_tokens.dart';
 export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_dismissible_list_tokens.dart';
+export 'styles/m3e_expandable_list_tokens.dart';
+export 'styles/m3e_expandable_style.dart';
+export 'styles/m3e_expandable_theme.dart';
 export 'styles/m3e_list_item_tokens.dart';
 
 /// A Material 3 Expressive list item.

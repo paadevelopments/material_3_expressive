@@ -8,6 +8,7 @@ import '../components/dialogs/dialogs.dart';
 import '../components/divider/divider.dart';
 import '../components/lists/lists.dart';
 import '../components/side_sheets/side_sheets.dart';
+import '../foundations/m3e_motion.dart';
 
 /// Static factories for the Material 3 *Containment* components, such as
 /// `M3EContainment.card(...)` and `M3EContainment.showBottomSheet(...)`.
@@ -235,6 +236,60 @@ class M3EContainment {
       onDismiss: onDismiss,
       onTap: onTap,
       style: style,
+    );
+  }
+
+  /// Creates an expandable card list. See [M3EExpandableCardList].
+  static Widget expandableCardList({
+    required List<M3EExpandableData> data,
+    bool? allowMultipleExpanded,
+    Set<int> initiallyExpanded = const {},
+    M3EExpandableStyle? style,
+    M3ESpring? expandMotion,
+    M3ESpring? collapseMotion,
+    void Function(int index, bool isExpanded)? onExpansionChanged,
+    ScrollController? controller,
+    ScrollPhysics? physics,
+    bool shrinkWrap = false,
+    EdgeInsetsGeometry? padding,
+    Key? key,
+  }) {
+    return M3EExpandableCardList(
+      key: key,
+      data: data,
+      allowMultipleExpanded: allowMultipleExpanded,
+      initiallyExpanded: initiallyExpanded,
+      style: style,
+      expandMotion: expandMotion,
+      collapseMotion: collapseMotion,
+      onExpansionChanged: onExpansionChanged,
+      controller: controller,
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      padding: padding,
+    );
+  }
+
+  /// Creates an expandable card column. See [M3EExpandableCardColumn].
+  static Widget expandableCardColumn({
+    required List<M3EExpandableData> data,
+    bool? allowMultipleExpanded,
+    Set<int> initiallyExpanded = const {},
+    M3EExpandableStyle? style,
+    M3ESpring? expandMotion,
+    M3ESpring? collapseMotion,
+    void Function(int index, bool isExpanded)? onExpansionChanged,
+    Key? key,
+  }) {
+    return M3EExpandableCardColumn(
+      key: key,
+      data: data,
+      allowMultipleExpanded: allowMultipleExpanded,
+      initiallyExpanded: initiallyExpanded,
+      style: style,
+      expandMotion: expandMotion,
+      collapseMotion: collapseMotion,
+      onExpansionChanged: onExpansionChanged,
     );
   }
 

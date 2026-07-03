@@ -195,6 +195,38 @@ class ContainmentPage extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(height: 24),
+        const _ListLabel('Expandable list (expressive motions)'),
+        M3EContainment.expandableCardColumn(
+          data: [
+            M3EExpandableData(
+              title: 'Battery level low',
+              subtitle: 'Plug in your device to avoid losing your work.',
+              leading: const Icon(Icons.battery_alert),
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Your battery is at 10% and will run out soon.'),
+                  const SizedBox(height: 8),
+                  M3EActions.button(
+                    label: 'Enable battery saver',
+                    style: M3EButtonStyle.tonal,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+            M3EExpandableData(
+              title: 'System update available',
+              subtitle: 'Version 2.4.0 is ready to install.',
+              leading: const Icon(Icons.system_update),
+              body: const Text(
+                'This update includes important security fixes and performance improvements. '
+                'It will take approximately 10 minutes to complete.',
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
