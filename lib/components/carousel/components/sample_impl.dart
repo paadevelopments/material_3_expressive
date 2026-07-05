@@ -129,7 +129,6 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
       return Alignment.center;
     }
 
-    // 1. Standard layout mapping path
     if (widget.itemExtent != null) {
       final int totalItems = widget.children.length;
       final bool leftPresent = index > 0;
@@ -149,18 +148,13 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
       return Alignment.center;
     }
 
-    // 2. Weighted layout mapping path
     if (_activeIndex != null) {
       if (index == _activeIndex) {
         if (_hasLeftNeighborDataset && !_hasRightNeighborDataset) return Alignment.centerRight;
         if (_hasRightNeighborDataset && !_hasLeftNeighborDataset) return Alignment.centerLeft;
         return Alignment.center;
       }
-
-      // FIX: Corrected neighbor compression anchors
-      // Left neighbor shrinks leftward -> Anchor CenterLeft
       if (index == _activeIndex! - 1) return Alignment.centerLeft;
-      // Right neighbor shrinks rightward -> Anchor CenterRight
       if (index == _activeIndex! + 1) return Alignment.centerRight;
     }
 
@@ -242,6 +236,10 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
             }
           }
 
+          final BorderRadius finalRadius = widget.shape is RoundedRectangleBorder
+              ? ((widget.shape as RoundedRectangleBorder).borderRadius as BorderRadius)
+              : BorderRadius.zero;
+
           return Container(
             key: _itemKeys[index],
             child: Transform(
@@ -249,7 +247,31 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
               alignment: individualAlignment,
               child: Padding(
                 padding: dynamicPadding,
-                child: widget.children[index],
+                child: ClipRRect(
+                  borderRadius: finalRadius,
+                  clipBehavior: widget.itemClipBehavior != Clip.none
+                      ? widget.itemClipBehavior
+                      : Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // FIX: IgnorePointer encapsulated internally so child graphics never swallow touch events
+                      IgnorePointer(
+                        child: widget.children[index],
+                      ),
+
+                      // Catch-all interactive splash layer running on top of the layout matrix
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          enableFeedback: widget.enableSplash,
+                          onTap: () => _handleTap(index),
+                          overlayColor: widget.overlayColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -262,18 +284,18 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,
             shape: widget.shape,
-            itemClipBehavior: widget.itemClipBehavior,
+            itemClipBehavior: Clip.none,
             overlayColor: widget.overlayColor,
             itemSnapping: widget.itemSnapping,
             shrinkExtent: widget.shrinkExtent,
             controller: _internalController,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
-            enableSplash: widget.enableSplash,
+            enableSplash: false,
             infinite: widget.infinite,
             flexWeights: widget.flexWeights!,
             onIndexChanged: widget.onIndexChanged,
-            onTap: _handleTap,
+            onTap: null,
             children: carouselChildren,
           );
         } else {
@@ -283,18 +305,18 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,
             shape: widget.shape,
-            itemClipBehavior: widget.itemClipBehavior,
+            itemClipBehavior: Clip.none,
             overlayColor: widget.overlayColor,
             itemSnapping: widget.itemSnapping,
             shrinkExtent: widget.shrinkExtent,
             controller: _internalController,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
-            enableSplash: widget.enableSplash,
+            enableSplash: false,
             infinite: widget.infinite,
             itemExtent: widget.itemExtent!,
             onIndexChanged: widget.onIndexChanged,
-            onTap: _handleTap,
+            onTap: null,
             children: carouselChildren,
           );
         }
@@ -302,3 +324,4 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
     );
   }
 }
+
