@@ -162,6 +162,9 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
   }
 
   Future<void> _handleTap(int index) async {
+    if (widget.onTap != null) {
+      widget.onTap?.call(index);
+    }
     if (_pulseController.isAnimating) return;
 
     final parentContext = _carouselKey.currentContext;
@@ -193,7 +196,6 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
 
     if (mounted) {
       setState(() => _activeIndex = null);
-      widget.onTap?.call(index);
     }
   }
 
@@ -324,4 +326,3 @@ class _MaterialPulseCarouselViewState extends State<MaterialPulseCarouselView>
     );
   }
 }
-
