@@ -9,18 +9,20 @@ export 'enums/m3e_carousel_type.dart';
 
 /// Creates a Material Design carousel.
 ///
-/// Material Design 3 introduces 4 carousel layouts:
+/// Material Design 3 introduces 3 carousel layouts:
 ///  * Multi-browse: shows at least one large, medium, and small item at a time.
 ///  * Uncontained (default): shows items that scroll to the edge of the
 ///    container.
 ///  * Hero: shows at least one large and one small item at a time.
-///  * Full-screen: shows one edge-to-edge large item at a time and scrolls
-///    vertically.
 ///
 /// For more info checkout the
 /// [Official Docs](https://m3.material.io/components/carousel).
+///
+/// .
 class M3ECarousel extends StatefulWidget {
   /// Creates a Material Design carousel.
+  ///
+  /// .
   const M3ECarousel({
     super.key,
     this.width,
@@ -40,32 +42,74 @@ class M3ECarousel extends StatefulWidget {
     required this.children,
   });
 
+  /// The explicit bounded width allocation applied to the root carousel container wrapper.
+  ///
+  /// .
   final double? width;
 
+  /// The explicit bounded height allocation applied to the root carousel container wrapper.
+  ///
+  /// .
   final double? height;
 
+  /// Specifies the structural layout rule type determining element sizes and scaling constraints.
+  ///
+  /// .
   final M3ECarouselType type;
 
+  /// Flag indicating whether item bounding sizes shift into altered or expanded aspect footprints.
+  ///
+  /// .
   final bool isExtended;
 
+  /// True if item canvas movements can glide smoothly without forcing standard snap boundary stops.
+  ///
+  /// .
   final bool freeScroll;
 
+  /// The alignment anchor profile positioning focal items when running inside hero layouts.
+  ///
+  /// .
   final M3ECarouselHeroAlignment heroAlignment;
 
+  /// The baseline horizontal dimension assigned to items inside uncontained structural layouts.
+  ///
+  /// .
   final double uncontainedItemExtent;
 
+  /// The minimal compressed dimension boundary applied to items scaling down near container thresholds.
+  ///
+  /// .
   final double uncontainedShrinkExtent;
 
+  /// The curvature factor mapping circular corner clipping arcs over nested item view layouts.
+  ///
+  /// .
   final double childElementBorderRadius;
 
+  /// The total lifespan millisecond count allocated to complete layout transition slide curves.
+  ///
+  /// .
   final int scrollAnimationDuration;
 
+  /// The dimensional drag delta requirement needed to trigger single-item sweep navigation actions.
+  ///
+  /// .
   final int singleSwipeGestureSensitivityRange;
 
+  /// A precise stepping constant utilized to offset position indexes inside elastic layout computations.
+  ///
+  /// .
   final double fixedPulseDelta;
 
+  /// Click event notification pipe exposing the zero-based list tracking index of the interacted element.
+  ///
+  /// .
   final void Function(int selectedIndex)? onTap;
 
+  /// The continuous structured row sequence of elements rendered inside the carousel container scroll track.
+  ///
+  /// .
   final List<Widget> children;
 
   @override
