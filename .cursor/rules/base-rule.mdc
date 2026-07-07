@@ -1,0 +1,51 @@
+---
+description: The base rule - core conventions for building components in this project (folder structure, naming, complexity, theming, workflow). Applies to this project only.
+alwaysApply: true
+---
+
+# The Base Rule
+
+Core conventions for every component in this project. Reference these as "The base rule".
+
+## 1. Component folder structure
+Each component lives in its own folder and may contain (only if needed):
+- `components/` - sub-components that make up the main component
+- `enums/` - enumerator classes for the component and sub-components
+- `styles/` - token/style files for the component and sub-components
+- `models/` - objects for the component and sub-components
+- `controllers/` - controllers for the component
+- `utils/` - helper-function classes for the component and sub-components
+- `res/` - static values (strings, constants that are not enums)
+- the entry `.dart` file holding the main class(es) and variations (e.g. `M3ETopAppBar`, `M3EBottomAppBar`, `M3ESliverAppBar`)
+
+## 2. File naming
+Every file in a component (including the entry `.dart` file) is prefixed `m3e_`.
+
+## 3. Class naming
+All logic classes are prefixed `M3E` (e.g. `M3ETopAppBar`, `M3EAppBarVariant`).
+
+## 4. Complexity and class separation
+Keep classes and functions small and simple. One class per file, EXCEPT:
+- private `State` classes belonging to their base widget
+- everything in the `foundations/` folder (keep all its logic in its respective file)
+
+## 5. Local theme, typography, shapes
+Extract any value that should come from the package `foundation` into its respective component class (if not done already). Use the package theme and related `foundations` where relevant.
+
+## 6. Per-prompt: dart analysis
+Run `dart analyze` as part of every prompt's execution and fix any errors that arise. Do NOT run lint/format-only ("klin dart") unless explicitly told to in that prompt.
+
+## 7. Example app sync
+Any change to a component's entry-file objects must be reflected in the example app: add sample usage if missing, or update it to use the correct fields (pass required fields where necessary).
+
+## 8. Variations -> single base object
+For components with variations (e.g. app_bar: `M3ETopAppBar`, `M3EBottomAppBar`, `M3ESliverAppBar`), refactor to one base object with named constructors (e.g. `M3EAppBar.top`, `M3EAppBar.bottom`) ONLY IF POSSIBLE. If variants differ significantly in fields/logic, leave them separated.
+
+## 9. No facades
+Do not use `facades`. Components can and should be used directly (including in example usage).
+
+## 10. Comments and format
+Keep all comments short, simple, and precise. Keep all logic inline with the Dart format.
+
+## 11. Ask when unclear
+Always ask for clarification when a requirement is ambiguous.
