@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:material_3_expressive/components/app_bars/styles/m3e_app_bar_tokens.dart';
 
 import '../../foundations/foundations.dart';
+import 'components/m3e_app_bar_semantics.dart';
 import 'enums/m3e_app_bar_enums.dart';
 
 export 'enums/m3e_app_bar_enums.dart';
@@ -18,7 +19,7 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.foregroundColor,
     this.elevation,
-    this.shapeFamily = M3EAppBarShapeFamily.round,
+    this.shapeFamily = M3EAppBarShapeFamily.square,
     this.density = M3EAppBarDensity.regular,
     this.toolbarHeight,
     this.automaticallyImplyLeading = true,
@@ -137,10 +138,6 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// A Material 3 Expressive bottom app bar.
-///
-/// Hosts a row of primary actions with an optional trailing floating action
-/// button, anchored to the bottom of the screen.
 class M3EBottomAppBar extends StatelessWidget {
   const M3EBottomAppBar({
     this.actions = const <Widget>[],
@@ -279,37 +276,5 @@ class M3ESliverAppBar extends StatelessWidget {
           1.0, // Typography already larger; avoid scale morph
         );
     }
-  }
-}
-
-/// A helper to wrap a sliver with semantics label.
-class M3ESliverSemantic extends SingleChildRenderObjectWidget {
-  const M3ESliverSemantic({super.key, required this.label, required Widget child})
-      : super(child: child);
-  final String label;
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _M3ESliverSemanticRender(label);
-  @override
-  void updateRenderObject(
-      BuildContext context, covariant _M3ESliverSemanticRender renderObject) {
-    renderObject.label = label;
-  }
-}
-
-class _M3ESliverSemanticRender extends RenderProxySliver {
-  _M3ESliverSemanticRender(this._label);
-  String _label;
-  set label(String v) {
-    if (v == _label) return;
-    _label = v;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.label = _label;
-    config.isSemanticBoundary = true;
   }
 }
