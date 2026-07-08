@@ -231,22 +231,12 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   Widget _buildCollapsedPeekOverlay(BuildContext context) {
-    Widget btn = M3EIconButton(
+    final Widget btn = M3EIconButton(
       icon: const Icon(Icons.menu),
       tooltip: 'Expand',
       onPressed: _canToggle ? () => _setExpanded(true) : null,
+      suppressInk: _suppressInk,
     );
-    if (_suppressInk) {
-      final t = Theme.of(context);
-      btn = Theme(
-        data: t.copyWith(
-          splashFactory: NoSplash.splashFactory,
-          hoverColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: btn,
-      );
-    }
 
     return CompositedTransformFollower(
       link: _anchor,
@@ -274,23 +264,12 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     if (!_canToggle) return const SizedBox.shrink();
 
     final isExpanded = _isExpanded;
-    Widget button = M3EIconButton(
+    final Widget button = M3EIconButton(
       icon: Icon(isExpanded ? Icons.menu_open : Icons.menu),
       tooltip: isExpanded ? 'Collapse' : 'Expand',
       onPressed: () => _setExpanded(!isExpanded),
+      suppressInk: _suppressInk,
     );
-
-    if (_suppressInk) {
-      final t = Theme.of(context);
-      button = Theme(
-        data: t.copyWith(
-          splashFactory: NoSplash.splashFactory,
-          hoverColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: button,
-      );
-    }
 
     return Padding(
       padding: M3ENavigationRailLayout.sectionPadding,

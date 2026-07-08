@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show WidgetState, WidgetStateProperty;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
@@ -19,6 +20,9 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
     this.scrollAnimationDuration = defaultScrollAnimationDuration,
     this.singleSwipeGestureSensitivityRange =
         defaultSingleSwipeGestureSensitivityRange,
+    this.itemPadding = const EdgeInsets.all(4),
+    this.elevation = 0,
+    this.itemClipBehavior = Clip.antiAlias,
   });
 
   static const M3ECarouselTheme defaults = M3ECarouselTheme();
@@ -28,6 +32,9 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
   final double borderRadiusValue;
   final int scrollAnimationDuration;
   final int singleSwipeGestureSensitivityRange;
+  final EdgeInsetsGeometry itemPadding;
+  final double elevation;
+  final Clip itemClipBehavior;
 
   BorderRadius get borderRadius =>
       BorderRadius.all(Radius.circular(borderRadiusValue));
@@ -36,6 +43,21 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
 
   Color backgroundColor(M3EColorScheme scheme) => scheme.surface;
 
+  WidgetStateProperty<Color?> overlayColor(M3EColorScheme scheme) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        return scheme.onSurface.withValues(alpha: 0.1);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return scheme.onSurface.withValues(alpha: 0.08);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return scheme.onSurface.withValues(alpha: 0.1);
+      }
+      return null;
+    });
+  }
+
   @override
   M3ECarouselTheme copyWith({
     double? uncontainedItemExtent,
@@ -43,6 +65,9 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
     double? borderRadiusValue,
     int? scrollAnimationDuration,
     int? singleSwipeGestureSensitivityRange,
+    EdgeInsetsGeometry? itemPadding,
+    double? elevation,
+    Clip? itemClipBehavior,
   }) {
     return M3ECarouselTheme(
       uncontainedItemExtent:
@@ -54,6 +79,9 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
           scrollAnimationDuration ?? this.scrollAnimationDuration,
       singleSwipeGestureSensitivityRange: singleSwipeGestureSensitivityRange ??
           this.singleSwipeGestureSensitivityRange,
+      itemPadding: itemPadding ?? this.itemPadding,
+      elevation: elevation ?? this.elevation,
+      itemClipBehavior: itemClipBehavior ?? this.itemClipBehavior,
     );
   }
 
@@ -82,6 +110,14 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
         other.singleSwipeGestureSensitivityRange,
         t,
       ),
+      itemPadding: EdgeInsets.lerp(
+            itemPadding as EdgeInsets?,
+            other.itemPadding as EdgeInsets?,
+            t,
+          ) ??
+          itemPadding,
+      elevation: _lerpDouble(elevation, other.elevation, t)!,
+      itemClipBehavior: t < 0.5 ? itemClipBehavior : other.itemClipBehavior,
     );
   }
 

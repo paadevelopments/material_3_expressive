@@ -533,7 +533,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       pressed: trailingPressed,
     );
 
-    final theme = Theme.of(context);
     final m3eTheme = M3ETheme.of(context);
     final scheme = _scheme;
     final splitTheme = _splitTheme;
@@ -554,7 +553,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             );
 
     return PopupMenuTheme(
-      data: theme.popupMenuTheme.copyWith(
+      data: PopupMenuThemeData(
         color: menuColor,
         textStyle: m3eTheme.typeScale.labelLarge.copyWith(color: menuTextColor),
         shape: RoundedRectangleBorder(

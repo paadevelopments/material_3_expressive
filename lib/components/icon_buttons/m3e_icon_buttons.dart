@@ -43,6 +43,7 @@ class M3EIconButton extends StatelessWidget {
     this.selectedIcon,
     this.enableFeedback,
     this.badgeValue,
+    this.suppressInk = false,
   });
 
   final Widget icon;
@@ -57,6 +58,9 @@ class M3EIconButton extends StatelessWidget {
   final Widget? selectedIcon;
   final bool? enableFeedback;
   final Object? badgeValue;
+
+  /// When true, suppresses splash/hover ink effects.
+  final bool suppressInk;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +139,10 @@ class M3EIconButton extends StatelessWidget {
         backgroundColor: WidgetStateProperty.all(bg),
         foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
         side: WidgetStateProperty.resolveWith((_) => side),
+        splashFactory: suppressInk ? NoSplash.splashFactory : null,
+        overlayColor: suppressInk
+            ? WidgetStateProperty.all(Colors.transparent)
+            : null,
         // Animate pressed shape morph a bit.
         animationDuration: iconButtonTheme.morphDuration,
         visualDensity: VisualDensity.standard,

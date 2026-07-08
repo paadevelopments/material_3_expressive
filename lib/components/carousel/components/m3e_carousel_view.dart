@@ -359,38 +359,21 @@ class _CarouselViewState extends State<M3ECarouselView> {
     if (widget.infinite && widget.children.isNotEmpty) {
       index = index % widget.children.length;
     }
-    final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final M3EThemeData m3eTheme = M3ETheme.of(context);
-    final ColorScheme colorScheme = m3eTheme.colorScheme.toColorScheme();
-    final M3ECarouselTheme m3eCarouselTheme = m3eTheme.carouselTheme;
+    final M3ECarouselTheme carouselTheme = m3eTheme.carouselTheme;
+    final M3EColorScheme scheme = m3eTheme.colorScheme;
     final EdgeInsets effectivePadding =
-        widget.padding ?? carouselTheme.padding ?? const EdgeInsets.all(4.0);
+        widget.padding ?? carouselTheme.itemPadding as EdgeInsets;
     final Color effectiveBackgroundColor = widget.backgroundColor ??
-        carouselTheme.backgroundColor ??
-        m3eCarouselTheme.backgroundColor(m3eTheme.colorScheme);
+        carouselTheme.backgroundColor(scheme);
     final double effectiveElevation =
-        widget.elevation ?? carouselTheme.elevation ?? 0.0;
-    final ShapeBorder effectiveShape = widget.shape ??
-        carouselTheme.shape ??
-        m3eCarouselTheme.shape;
-    final Clip effectiveItemClipBehavior = widget.itemClipBehavior ??
-        carouselTheme.itemClipBehavior ??
-        Clip.antiAlias;
+        widget.elevation ?? carouselTheme.elevation;
+    final ShapeBorder effectiveShape =
+        widget.shape ?? carouselTheme.shape;
+    final Clip effectiveItemClipBehavior =
+        widget.itemClipBehavior ?? carouselTheme.itemClipBehavior;
     final WidgetStateProperty<Color?> effectiveOverlayColor =
-        widget.overlayColor ??
-            carouselTheme.overlayColor ??
-            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed)) {
-                return colorScheme.onSurface.withValues(alpha: 0.1);
-              }
-              if (states.contains(WidgetState.hovered)) {
-                return colorScheme.onSurface.withValues(alpha: 0.08);
-              }
-              if (states.contains(WidgetState.focused)) {
-                return colorScheme.onSurface.withValues(alpha: 0.1);
-              }
-              return null;
-            });
+        widget.overlayColor ?? carouselTheme.overlayColor(scheme);
 
     Widget contents = widget.children[index];
 
