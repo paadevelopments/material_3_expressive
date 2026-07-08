@@ -1,10 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Brightness, IconThemeData, TargetPlatform, Theme, ThemeData, VisualDensity;
+import 'package:flutter/material.dart' show Brightness, TargetPlatform, ThemeData, VisualDensity;
 import 'package:flutter/widgets.dart';
 
-import 'm3e_color_scheme.dart';
-import 'm3e_spacing.dart';
-import 'm3e_typography.dart';
 import '../components/app_bars/styles/m3e_app_bar_theme.dart';
 import '../components/badges/styles/m3e_badge_theme.dart';
 import '../components/bottom_sheets/styles/m3e_bottom_sheet_theme.dart';
@@ -42,6 +38,9 @@ import '../components/toggle_button/styles/m3e_toggle_button_theme.dart';
 import '../components/toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
 import '../components/toolbars/styles/m3e_toolbar_theme.dart';
 import '../components/tooltips/styles/m3e_tooltip_theme.dart';
+import 'm3e_color_scheme.dart';
+import 'm3e_spacing.dart';
+import 'm3e_typography.dart';
 
 /// Immutable bundle of expressive design tokens and per-component themes.
 @immutable

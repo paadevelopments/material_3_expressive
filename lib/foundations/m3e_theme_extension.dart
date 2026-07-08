@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// Base type for overridable component themes registered on [M3EThemeData].
 abstract class M3EThemeExtension<T extends M3EThemeExtension<T>> {

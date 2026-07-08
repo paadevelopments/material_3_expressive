@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show InheritedTheme, Theme, ThemeData;
+import 'package:flutter/material.dart' show InheritedTheme, Theme;
 import 'package:flutter/widgets.dart';
 
 import 'm3e_theme_data.dart';
