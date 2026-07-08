@@ -21,7 +21,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
-import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 
 /// A Material Design loading indicator.
@@ -55,13 +54,13 @@ class _M3EExpressiveLoadingIndicatorState
     extends State<M3EExpressiveLoadingIndicator>
     with TickerProviderStateMixin {
   static final List<RoundedPolygon> _defaultPolygons = [
-    MaterialShapes.softBurst,
-    MaterialShapes.cookie9Sided,
-    MaterialShapes.pentagon,
-    MaterialShapes.pill,
-    MaterialShapes.sunny,
-    MaterialShapes.cookie4Sided,
-    MaterialShapes.oval,
+    M3EMaterialNewShapes.softBurst,
+    M3EMaterialNewShapes.cookie9Sided,
+    M3EMaterialNewShapes.pentagon,
+    M3EMaterialNewShapes.pill,
+    M3EMaterialNewShapes.sunny,
+    M3EMaterialNewShapes.cookie4Sided,
+    M3EMaterialNewShapes.oval,
   ];
 
   static final BoxConstraints _defaultConstraints = BoxConstraints(

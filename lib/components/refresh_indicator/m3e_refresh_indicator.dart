@@ -18,7 +18,6 @@ import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
-import 'package:material_new_shapes/material_new_shapes.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_refresh_status.dart';
@@ -573,14 +572,14 @@ class _ExpressiveLoadingIndicatorImplState extends State<_ExpressiveLoadingIndic
     with TickerProviderStateMixin {
 
   static final List<RoundedPolygon> _defaultPolygons = [
-    MaterialShapes.softBurst,
-    MaterialShapes.cookie9Sided,
-    MaterialShapes.gem,
-    MaterialShapes.flower,
-    MaterialShapes.sunny,
-    MaterialShapes.cookie4Sided,
-    MaterialShapes.oval,
-    MaterialShapes.cookie12Sided
+    M3EMaterialNewShapes.softBurst,
+    M3EMaterialNewShapes.cookie9Sided,
+    M3EMaterialNewShapes.gem,
+    M3EMaterialNewShapes.flower,
+    M3EMaterialNewShapes.sunny,
+    M3EMaterialNewShapes.cookie4Sided,
+    M3EMaterialNewShapes.oval,
+    M3EMaterialNewShapes.cookie12Sided
   ];
 
   static final BoxConstraints _defaultConstraints = BoxConstraints(
@@ -756,8 +755,8 @@ class _DragExpressiveIndicator extends StatelessWidget {
   final String? semanticsValue;
 
   static final List<RoundedPolygon> _defaultPolygons = [
-    MaterialShapes.circle,
-    MaterialShapes.softBurst,
+    M3EMaterialNewShapes.circle,
+    M3EMaterialNewShapes.softBurst,
   ];
 
   static final BoxConstraints _defaultConstraints = BoxConstraints(
@@ -893,14 +892,14 @@ class _ContainedExpressiveLoadingIndicatorState extends State<_ContainedExpressi
     with TickerProviderStateMixin {
 
   static final List<RoundedPolygon> _defaultPolygons = [
-    MaterialShapes.softBurst,
-    MaterialShapes.cookie9Sided,
-    MaterialShapes.gem,
-    MaterialShapes.flower,
-    MaterialShapes.sunny,
-    MaterialShapes.cookie4Sided,
-    MaterialShapes.oval,
-    MaterialShapes.cookie12Sided
+    M3EMaterialNewShapes.softBurst,
+    M3EMaterialNewShapes.cookie9Sided,
+    M3EMaterialNewShapes.gem,
+    M3EMaterialNewShapes.flower,
+    M3EMaterialNewShapes.sunny,
+    M3EMaterialNewShapes.cookie4Sided,
+    M3EMaterialNewShapes.oval,
+    M3EMaterialNewShapes.cookie12Sided
   ];
 
   static final BoxConstraints _defaultConstraints = BoxConstraints(
@@ -1084,8 +1083,8 @@ class _ContainedDragExpressiveIndicator extends StatelessWidget {
   final String? semanticsValue;
 
   static final List<RoundedPolygon> _defaultPolygons = [
-    MaterialShapes.circle,
-    MaterialShapes.softBurst,
+    M3EMaterialNewShapes.circle,
+    M3EMaterialNewShapes.softBurst,
   ];
 
   static final BoxConstraints _defaultConstraints = BoxConstraints(
