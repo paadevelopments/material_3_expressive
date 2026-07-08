@@ -85,6 +85,14 @@ class _M3ETappableState extends State<M3ETappable>
     widget.onStateChanged?.call(next);
   }
 
+  void _snapScale(double target) {
+    if (widget.pressedScale == 1) {
+      return;
+    }
+    _scaleController.stop();
+    _scaleController.value = target;
+  }
+
   void _animateScale(double target) {
     if (widget.pressedScale == 1) {
       return;
@@ -99,17 +107,15 @@ class _M3ETappableState extends State<M3ETappable>
     );
   }
 
-  void _handleTapDown(TapDownDetails _) {
+  void _handlePointerDown() {
     _update(_state.copyWith(pressed: true));
-    _animateScale(widget.pressedScale);
+    _snapScale(widget.pressedScale);
   }
 
-  void _handleTapUp([TapUpDetails? _]) {
+  void _handlePointerUp() {
     _update(_state.copyWith(pressed: false));
     _animateScale(1);
   }
-
-  void _handleTapCancel() => _handleTapUp();
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +139,7 @@ class _M3ETappableState extends State<M3ETappable>
   }
 
   Widget _wrapPointer(Widget child, bool interactive) {
-    return MouseRegion(
+    Widget wrapped = MouseRegion(
       cursor: _resolveCursor(interactive),
       onEnter: (_) => _update(_state.copyWith(hovered: true)),
       onExit: (_) => _update(_state.copyWith(hovered: false)),
@@ -141,11 +147,20 @@ class _M3ETappableState extends State<M3ETappable>
         behavior: HitTestBehavior.opaque,
         onTap: interactive ? widget.onTap : null,
         onLongPress: interactive ? widget.onLongPress : null,
-        onTapDown: interactive ? _handleTapDown : null,
-        onTapUp: interactive ? _handleTapUp : null,
-        onTapCancel: interactive ? _handleTapCancel : null,
         child: child,
       ),
+    );
+
+    if (!interactive) {
+      return wrapped;
+    }
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _handlePointerDown(),
+      onPointerUp: (_) => _handlePointerUp(),
+      onPointerCancel: (_) => _handlePointerUp(),
+      child: wrapped,
     );
   }
 
