@@ -24,8 +24,37 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   bool _ownsController = false;
 
   late final ValueNotifier<bool> isPressedNotifier;
+  late final ValueNotifier<bool> isPointerDownNotifier;
   late final ValueNotifier<bool> isHoveredNotifier;
   late final ValueNotifier<bool> isFocusedNotifier;
+
+  @protected
+  Widget wrapWithPointerPressTracking({
+    required bool enabled,
+    required Widget child,
+  }) {
+    if (!enabled) return child;
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) {
+        if (!isPointerDownNotifier.value) {
+          isPointerDownNotifier.value = true;
+        }
+      },
+      onPointerUp: (_) {
+        if (isPointerDownNotifier.value) {
+          isPointerDownNotifier.value = false;
+        }
+      },
+      onPointerCancel: (_) {
+        if (isPointerDownNotifier.value) {
+          isPointerDownNotifier.value = false;
+        }
+      },
+      child: child,
+    );
+  }
 
   @protected
   Widget buildAnimatedContent({
@@ -41,12 +70,23 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
       valueListenable: isPressedNotifier,
       builder: (context, isPressed, _) {
         return ValueListenableBuilder<bool>(
-          valueListenable: isHoveredNotifier,
-          builder: (context, isHovered, _) {
+          valueListenable: isPointerDownNotifier,
+          builder: (context, isPointerDown, _) {
             return ValueListenableBuilder<bool>(
-              valueListenable: isFocusedNotifier,
-              builder: (context, isFocused, _) {
-                return builder(context, isPressed, isHovered, isFocused);
+              valueListenable: isHoveredNotifier,
+              builder: (context, isHovered, _) {
+                return ValueListenableBuilder<bool>(
+                  valueListenable: isFocusedNotifier,
+                  builder: (context, isFocused, _) {
+                    final effectivePressed = isPressed || isPointerDown;
+                    return builder(
+                      context,
+                      effectivePressed,
+                      isHovered,
+                      isFocused,
+                    );
+                  },
+                );
               },
             );
           },
@@ -69,6 +109,7 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
     isPressedNotifier = ValueNotifier(
       statesController.value.contains(WidgetState.pressed),
     );
+    isPointerDownNotifier = ValueNotifier(false);
     isHoveredNotifier = ValueNotifier(
       statesController.value.contains(WidgetState.hovered),
     );
@@ -153,6 +194,7 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
     effectiveFocusNode.removeListener(_onFocusChanged);
     _internalFocusNode?.dispose();
     isPressedNotifier.dispose();
+    isPointerDownNotifier.dispose();
     isHoveredNotifier.dispose();
     isFocusedNotifier.dispose();
   }

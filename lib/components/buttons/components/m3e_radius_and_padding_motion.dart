@@ -118,6 +118,9 @@ class M3ERadiusAndPaddingMotion extends StatefulWidget {
   final bool freezeBottomLeft;
   final bool freezeBottomRight;
 
+  /// When true, target changes apply instantly instead of springing in.
+  final bool snapToTarget;
+
   final Widget Function(EdgeInsets padding, BorderRadius radius) builder;
 
   const M3ERadiusAndPaddingMotion({
@@ -132,6 +135,7 @@ class M3ERadiusAndPaddingMotion extends StatefulWidget {
     this.freezeTopRight = false,
     this.freezeBottomLeft = false,
     this.freezeBottomRight = false,
+    this.snapToTarget = false,
     required this.builder,
   });
 
@@ -218,6 +222,11 @@ class _M3ERadiusAndPaddingMotionState extends State<M3ERadiusAndPaddingMotion> {
 
       _lastKeys = newKeys;
 
+      if (widget.snapToTarget) {
+        _applyTargetImmediately();
+        return;
+      }
+
       _srcTopLeft = _curTopLeft;
       _srcTopRight = _curTopRight;
       _srcBottomLeft = _curBottomLeft;
@@ -264,6 +273,33 @@ class _M3ERadiusAndPaddingMotionState extends State<M3ERadiusAndPaddingMotion> {
     if (widget.freezeBottomRight) {
       _curBottomRight = _srcBottomRight = widget.targetRadius.bottomRight.x;
     }
+  }
+
+  void _applyTargetImmediately() {
+    _curTopLeft = _srcTopLeft = widget.targetRadius.topLeft.x;
+    _curTopRight = _srcTopRight = widget.targetRadius.topRight.x;
+    _curBottomLeft = _srcBottomLeft = widget.targetRadius.bottomLeft.x;
+    _curBottomRight = _srcBottomRight = widget.targetRadius.bottomRight.x;
+
+    _curLeft = _srcLeft = widget.internalLeft;
+    _curRight = _srcRight = widget.internalRight;
+    _curTop = _srcTop = widget.internalTop;
+    _curBottom = _srcBottom = widget.internalBottom;
+
+    _progressTarget = 1.0;
+
+    _lastFrame.cachedInsets = EdgeInsets.fromLTRB(
+      _curLeft,
+      _curTop,
+      _curRight,
+      _curBottom,
+    );
+    _lastFrame.cachedRadius = BorderRadius.only(
+      topLeft: Radius.circular(_curTopLeft),
+      topRight: Radius.circular(_curTopRight),
+      bottomLeft: Radius.circular(_curBottomLeft),
+      bottomRight: Radius.circular(_curBottomRight),
+    );
   }
 
   bool _targetsChanged(M3ERadiusAndPaddingMotion old) {

@@ -580,7 +580,9 @@ class _M3EButtonState extends State<M3EButton>
 
     final baseStyle = _buildBaseStyle();
 
-    return buildAnimatedContent(
+    return wrapWithPointerPressTracking(
+      enabled: widget.enabled && widget.onPressed != null,
+      child: buildAnimatedContent(
       builder: (context, pressed, hovered, focused) {
         final effectivelyEnabled = widget.enabled && widget.onPressed != null;
         final targetRadius = (effectivelyEnabled && pressed)
@@ -591,6 +593,7 @@ class _M3EButtonState extends State<M3EButton>
 
         Widget core = RepaintBoundary(
           child: M3ERadiusAndPaddingMotion(
+            snapToTarget: effectivelyEnabled && pressed,
             motion: (effectivelyEnabled && pressed)
                 ? _kPressedRadiusMotion
                 : springMotion,
@@ -632,6 +635,7 @@ class _M3EButtonState extends State<M3EButton>
 
         return core;
       },
+    ),
     );
   }
 

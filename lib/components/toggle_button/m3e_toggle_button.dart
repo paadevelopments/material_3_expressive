@@ -461,7 +461,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
     final double hPad = _hasLabel ? m.hPadding : m.hPadding / 2;
 
-    return buildAnimatedContent(
+    return wrapWithPointerPressTracking(
+      enabled: widget.enabled,
+      child: buildAnimatedContent(
       builder: (context, pressed, hovered, focused) {
         final BorderRadius targetRadius;
         final effectivelyEnabled = widget.enabled;
@@ -519,6 +521,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
         Widget core = RepaintBoundary(
           child: M3ERadiusAndPaddingMotion(
+            snapToTarget: effectivelyEnabled && pressed,
             motion: (effectivelyEnabled && pressed)
                 ? _kPressedRadiusMotion
                 : springMotion,
@@ -547,6 +550,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
         return core;
       },
+    ),
     );
   }
 
