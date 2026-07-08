@@ -261,6 +261,7 @@ class M3ESplitButton<T> extends StatefulWidget {
 class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     with M3EBaseButtonState<M3ESplitButton<T>> {
   bool _menuOpen = false;
+  bool _leadingPressed = false;
   bool _trailingPressed = false;
   bool _isTrailingHovered = false;
   bool _isTrailingFocused = false;
@@ -408,7 +409,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final leadingEnabled = widget.enabled && widget.onPressed != null;
     final trailingEnabled = widget.enabled;
 
-    final leadingPressed = leadingEnabled && pressed;
+    final leadingPressed = leadingEnabled && (pressed || _leadingPressed);
     final trailingPressed = trailingEnabled && (_trailingPressed || _menuOpen);
     final leadingHovered = leadingEnabled && hovered && !leadingPressed;
     final trailingHovered =
@@ -602,7 +603,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
 
     final animatedButton = AnimatedContainer(
-      duration: const Duration(milliseconds: 120),
+      duration: pressed
+          ? Duration.zero
+          : const Duration(milliseconds: 120),
       curve: Curves.easeOut,
       height: height,
       decoration: BoxDecoration(
@@ -647,6 +650,15 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
                 : null,
             onLongPress: widget.enabled ? widget.onLongPress : null,
             onHover: widget.onHover,
+            onTapDown: widget.enabled && widget.onPressed != null
+                ? (_) => setState(() => _leadingPressed = true)
+                : null,
+            onTapUp: widget.enabled && widget.onPressed != null
+                ? (_) => setState(() => _leadingPressed = false)
+                : null,
+            onTapCancel: widget.enabled && widget.onPressed != null
+                ? () => setState(() => _leadingPressed = false)
+                : null,
             statesController: statesController,
             canRequestFocus: false,
             mouseCursor:
@@ -743,7 +755,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     );
 
     final animatedButton = AnimatedContainer(
-      duration: const Duration(milliseconds: 120),
+      duration: pressed
+          ? Duration.zero
+          : const Duration(milliseconds: 120),
       curve: Curves.easeOut,
       width: effectiveWidth,
       height: height,

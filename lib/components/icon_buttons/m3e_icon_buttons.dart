@@ -28,7 +28,7 @@ export 'styles/m3e_icon_button_theme.dart';
 /// - Widths: default, narrow, wide
 /// - Toggle: [isSelected] + [selectedIcon]
 ///  - Badge: [String] or [num]
-class M3EIconButton extends StatelessWidget {
+class M3EIconButton extends StatefulWidget {
   const M3EIconButton({
     super.key,
     required this.icon,
@@ -63,24 +63,56 @@ class M3EIconButton extends StatelessWidget {
   final bool suppressInk;
 
   @override
+  State<M3EIconButton> createState() => _M3EIconButtonState();
+}
+
+class _M3EIconButtonState extends State<M3EIconButton> {
+  late final WidgetStatesController _statesController;
+  bool _isPointerDown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _statesController = WidgetStatesController();
+  }
+
+  @override
+  void dispose() {
+    _statesController.dispose();
+    super.dispose();
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.onPressed == null) return;
+    setState(() => _isPointerDown = true);
+    _statesController.update(WidgetState.pressed, true);
+  }
+
+  void _handlePointerUp() {
+    if (!_isPointerDown) return;
+    setState(() => _isPointerDown = false);
+    _statesController.update(WidgetState.pressed, false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
 
-    final Size visual = iconButtonTheme.visual(size, width);
-    final Size target = iconButtonTheme.target(size, width);
-    final double iconPx = iconButtonTheme.iconSize(size);
+    final Size visual = iconButtonTheme.visual(widget.size, widget.width);
+    final Size target = iconButtonTheme.target(widget.size, widget.width);
+    final double iconPx = iconButtonTheme.iconSize(widget.size);
 
-    final bool selected = isSelected ?? false;
+    final bool selected = widget.isSelected ?? false;
     // Consider it a toggle control if selection can be represented.
-    final bool isToggle = isSelected != null || selectedIcon != null;
+    final bool isToggle = widget.isSelected != null || widget.selectedIcon != null;
 
     // Colors per variant (selected tint for standard).
     Color bg;
     Color fg;
     BorderSide? side;
-    switch (variant) {
+    switch (widget.variant) {
       case M3EIconButtonVariant.standard:
         bg = Colors.transparent;
         fg = selected ? scheme.primary : scheme.onSurfaceVariant;
@@ -110,8 +142,8 @@ class M3EIconButton extends StatelessWidget {
     OutlinedBorder shapeFor(Set<WidgetState> states) {
       final r = M3EIconButtonShapes.effectiveRadius(
         theme: iconButtonTheme,
-        size: size,
-        baseVariant: shape,
+        size: widget.size,
+        baseVariant: widget.shape,
         isToggle: isToggle,
         isSelected: selected,
         states: states,
@@ -121,16 +153,19 @@ class M3EIconButton extends StatelessWidget {
 
     final Widget innerIcon = IconTheme.merge(
       data: IconThemeData(size: iconPx, color: fg),
-      child: (selected && selectedIcon != null) ? selectedIcon! : icon,
+      child: (selected && widget.selectedIcon != null)
+          ? widget.selectedIcon!
+          : widget.icon,
     );
 
     final Widget button = IconButton(
-      onPressed: onPressed,
-      isSelected: isSelected,
-      selectedIcon: selectedIcon,
+      onPressed: widget.onPressed,
+      isSelected: widget.isSelected,
+      selectedIcon: widget.selectedIcon,
       icon: innerIcon,
-      tooltip: tooltip,
-      enableFeedback: enableFeedback,
+      tooltip: widget.tooltip,
+      enableFeedback: widget.enableFeedback,
+      statesController: _statesController,
       style: ButtonStyle(
         // Visual (painted) size
         fixedSize: WidgetStateProperty.all(visual),
@@ -139,77 +174,88 @@ class M3EIconButton extends StatelessWidget {
         backgroundColor: WidgetStateProperty.all(bg),
         foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
         side: WidgetStateProperty.resolveWith((_) => side),
-        splashFactory: suppressInk ? NoSplash.splashFactory : null,
-        overlayColor: suppressInk
+        splashFactory: widget.suppressInk ? NoSplash.splashFactory : null,
+        overlayColor: widget.suppressInk
             ? WidgetStateProperty.all(Colors.transparent)
             : null,
-        // Animate pressed shape morph a bit.
-        animationDuration: iconButtonTheme.morphDuration,
+        animationDuration: _isPointerDown
+            ? Duration.zero
+            : iconButtonTheme.morphDuration,
         visualDensity: VisualDensity.standard,
       ),
     );
+
+    Widget paintedButton = SizedBox(
+      width: visual.width,
+      height: visual.height,
+      child: () {
+        final Object? v = widget.badgeValue;
+        Widget? badge;
+        if (v == null) {
+          badge = null;
+        } else if (v is num) {
+          final int c = v.round().clamp(0, 999999);
+          if (c == 0) {
+            badge = Badge(
+              smallSize: 8,
+              backgroundColor: scheme.primary,
+              textColor: scheme.onPrimary,
+            );
+          } else {
+            badge = Badge.count(
+              count: c,
+              backgroundColor: scheme.primary,
+              textColor: scheme.onPrimary,
+            );
+          }
+        } else if (v is String) {
+          if (v.isEmpty) {
+            badge = null;
+          } else {
+            badge = Badge(
+              label: Text(v),
+              backgroundColor: scheme.primary,
+              textColor: scheme.onPrimary,
+            );
+          }
+        } else {
+          assert(() {
+            throw FlutterError(
+              'M3EIconButton.badgeValue must be a String or num, but got \'${v.runtimeType}\'.',
+            );
+          }());
+          badge = null;
+        }
+        return badge == null
+            ? button
+            : Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  button,
+                  PositionedDirectional(top: 0, end: 0, child: badge),
+                ],
+              );
+      }(),
+    );
+
+    if (widget.onPressed != null) {
+      paintedButton = Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: _handlePointerDown,
+        onPointerUp: (_) => _handlePointerUp(),
+        onPointerCancel: (_) => _handlePointerUp(),
+        child: paintedButton,
+      );
+    }
 
     // Compose into an outer box sized to the minimum interactive target.
     final Widget core = SizedBox(
       width: target.width,
       height: target.height,
-      child: Center(
-        child: SizedBox(
-          width: visual.width,
-          height: visual.height,
-          child: () {
-            final Object? v = badgeValue;
-            Widget? badge;
-            if (v == null) {
-              badge = null;
-            } else if (v is num) {
-              final int c = v.round().clamp(0, 999999);
-              if (c == 0) {
-                badge = Badge(
-                  smallSize: 8,
-                  backgroundColor: scheme.primary,
-                  textColor: scheme.onPrimary,
-                );
-              } else {
-                badge = Badge.count(
-                  count: c,
-                  backgroundColor: scheme.primary,
-                  textColor: scheme.onPrimary,
-                );
-              }
-            } else if (v is String) {
-              if (v.isEmpty) {
-                badge = null;
-              } else {
-                badge = Badge(
-                  label: Text(v),
-                  backgroundColor: scheme.primary,
-                  textColor: scheme.onPrimary,
-                );
-              }
-            } else {
-              assert(() {
-                throw FlutterError(
-                  'M3EIconButton.badgeValue must be a String or num, but got \'${v.runtimeType}\'.',
-                );
-              }());
-              badge = null;
-            }
-            return badge == null
-                ? button
-                : Stack(
-              clipBehavior: Clip.none,
-              children: [
-                button,
-                PositionedDirectional(top: 0, end: 0, child: badge),
-              ],
-            );
-          }(),
-        ),
-      ),
+      child: Center(child: paintedButton),
     );
 
-    final semanticsText = semanticLabel ?? tooltip;
+    final semanticsText = widget.semanticLabel ?? widget.tooltip;
     return Semantics(
       button: true,
       selected: selected,

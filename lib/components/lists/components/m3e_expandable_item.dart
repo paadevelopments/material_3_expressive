@@ -192,7 +192,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     );
 
     return TweenAnimationBuilder(
-      duration: const Duration(milliseconds: 40),
+      duration: _isPressed
+          ? Duration.zero
+          : const Duration(milliseconds: 40),
       curve: Curves.easeOut,
       tween: BorderRadiusTween(
         begin: _buildEffectiveRadius(),
@@ -428,9 +430,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: onTap,
-        onTapDown: isHeader ? (_) => _handleTapDown() : null,
-        onTapUp: isHeader ? (_) => _handleTapUp() : null,
-        onTapCancel: isHeader ? () => _handleTapCancel() : null,
+        onTapDown: (_) => _handleTapDown(),
+        onTapUp: (_) => _handleTapUp(),
+        onTapCancel: _handleTapCancel,
         child: Semantics(
           label: semanticLabel,
           hint: semanticHint,
@@ -449,9 +451,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       enableFeedback: d.enableFeedback,
       onTap: onTap,
       onHover: isHeader ? (h) => _handleHoverChanged(h) : null,
-      onTapDown: isHeader ? (_) => _handleTapDown() : null,
-      onTapUp: isHeader ? (_) => _handleTapUp() : null,
-      onTapCancel: isHeader ? () => _handleTapCancel() : null,
+      onTapDown: (_) => _handleTapDown(),
+      onTapUp: (_) => _handleTapUp(),
+      onTapCancel: _handleTapCancel,
       child: Semantics(
         label: semanticLabel,
         hint: semanticHint,
