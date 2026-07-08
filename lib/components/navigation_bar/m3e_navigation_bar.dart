@@ -76,7 +76,11 @@ class M3ENavigationBar extends StatelessWidget {
       shape: shape,
       child: SizedBox(
         height: height,
-        child: NavigationBar(
+        child: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          removeBottom: safeArea,
+          child: NavigationBar(
           height: height,
           elevation: elevation ?? 0,
           indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
@@ -110,6 +114,7 @@ class M3ENavigationBar extends StatelessWidget {
             );
           }),
           onDestinationSelected: onDestinationSelected,
+        ),
         ),
       ),
     );
