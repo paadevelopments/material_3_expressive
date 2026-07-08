@@ -202,7 +202,7 @@ class ContainmentPage extends StatelessWidget {
             M3EExpandableData(
               title: 'Battery level low',
               subtitle: 'Plug in your device to avoid losing your work.',
-              leading: const Icon(Icons.battery_alert),
+              leading: const Icon(M3EIcons.battery_alert),
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -219,7 +219,7 @@ class ContainmentPage extends StatelessWidget {
             M3EExpandableData(
               title: 'System update available',
               subtitle: 'Version 2.4.0 is ready to install.',
-              leading: const Icon(Icons.system_update),
+              leading: const Icon(M3EIcons.system_update),
               body: const Text(
                 'This update includes important security fixes and performance improvements. '
                 'It will take approximately 10 minutes to complete.',

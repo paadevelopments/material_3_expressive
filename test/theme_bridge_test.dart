@@ -104,7 +104,7 @@ void main() {
               M3ENavigationRailSection(
                 destinations: <M3ENavigationRailDestination>[
                   M3ENavigationRailDestination(
-                    icon: Icon(Icons.inbox),
+                    icon: Icon(M3EIcons.inbox),
                     label: 'Inbox',
                   ),
                 ],

@@ -232,7 +232,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
   Widget _buildCollapsedPeekOverlay(BuildContext context) {
     final Widget btn = M3EIconButton(
-      icon: const Icon(Icons.menu),
+      icon: const Icon(M3EIcons.menu),
       tooltip: 'Expand',
       onPressed: _canToggle ? () => _setExpanded(true) : null,
       suppressInk: _suppressInk,
@@ -265,7 +265,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
     final isExpanded = _isExpanded;
     final Widget button = M3EIconButton(
-      icon: Icon(isExpanded ? Icons.menu_open : Icons.menu),
+      icon: Icon(isExpanded ? M3EIcons.menu_open : M3EIcons.menu),
       tooltip: isExpanded ? 'Collapse' : 'Expand',
       onPressed: () => _setExpanded(!isExpanded),
       suppressInk: _suppressInk,

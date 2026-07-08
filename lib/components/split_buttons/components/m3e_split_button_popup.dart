@@ -353,7 +353,7 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Icon(
-                      Icons.check_rounded,
+                      M3EIcons.check_rounded,
                       size: widget.iconSize * 0.9,
                       color: effectiveColor,
                     ),

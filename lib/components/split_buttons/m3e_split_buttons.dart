@@ -745,7 +745,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       child: Transform.translate(
         offset: Offset(chevronDxOffset, 0.0),
         child: Icon(
-          Icons.keyboard_arrow_down,
+          M3EIcons.keyboard_arrow_down,
           size:
           customSize?.iconSize ??
               _splitTheme.splitTrailingIconSize(widget.size),

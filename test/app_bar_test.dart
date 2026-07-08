@@ -24,13 +24,13 @@ void main() {
       _host(
         const M3EAppBar.top(
           title: Text(_custom),
-          actions: <Widget>[Icon(Icons.search)],
+          actions: <Widget>[Icon(M3EIcons.search)],
         ),
       ),
     );
 
     expect(find.text(_custom), findsOneWidget);
-    expect(find.byIcon(Icons.search), findsOneWidget);
+    expect(find.byIcon(M3EIcons.search), findsOneWidget);
   });
 
   testWidgets('compact density reduces the bar height', (tester) async {

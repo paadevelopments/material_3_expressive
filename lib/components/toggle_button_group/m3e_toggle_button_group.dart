@@ -1267,8 +1267,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
           ? _overflowController.windowStartIndex.value - 1
           : widget.actions.length - 1,
       icon: isBack
-          ? const Icon(Icons.arrow_back_rounded)
-          : (widget.overflowIcon ?? const Icon(Icons.more_horiz)),
+          ? const Icon(M3EIcons.arrow_back_rounded)
+          : (widget.overflowIcon ?? const Icon(M3EIcons.more_horiz)),
       semanticLabel: isBack
           ? MaterialLocalizations.of(context).previousPageTooltip
           : 'More options',
@@ -1290,7 +1290,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       context,
       start: firstHiddenIndex,
       end: widget.actions.length - 1,
-      icon: widget.overflowIcon ?? const Icon(Icons.more_horiz),
+      icon: widget.overflowIcon ?? const Icon(M3EIcons.more_horiz),
       semanticLabel: MaterialLocalizations.of(context).showMenuTooltip,
       isFirst: isFirst,
       isLast: isLast,

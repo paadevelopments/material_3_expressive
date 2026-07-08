@@ -301,7 +301,7 @@ class _MultiSelectBottomSheetState<T>
     final nonActiveBorderRadius =
         checkboxStyle?.nonActiveBorderRadius ?? BorderRadius.circular(4);
     final checkboxSize = _resolveCheckboxSize(item, child, context);
-    final selectedIcon = checkboxStyle?.icon ?? const Icon(Icons.check_rounded);
+    final selectedIcon = checkboxStyle?.icon ?? const Icon(M3EIcons.check_rounded);
 
     return InkWell(
       autofocus: autofocus,

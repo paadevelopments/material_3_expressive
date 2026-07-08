@@ -15,14 +15,14 @@ void main() {
     await tester.pumpWidget(
       _host(
         M3EIconButton(
-          icon: const Icon(Icons.favorite),
+          icon: const Icon(M3EIcons.favorite),
           onPressed: () => taps++,
         ),
       ),
     );
 
-    expect(find.byIcon(Icons.favorite), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.favorite));
+    expect(find.byIcon(M3EIcons.favorite), findsOneWidget);
+    await tester.tap(find.byIcon(M3EIcons.favorite));
     expect(taps, 1);
   });
 
@@ -37,9 +37,9 @@ void main() {
             selectedIndex: 0,
             onDestinationSelected: (i) => selected = i,
             destinations: const <M3ENavigationBarDestination>[
-              M3ENavigationBarDestination(icon: Icon(Icons.home), label: 'Home'),
+              M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
               M3ENavigationBarDestination(
-                icon: Icon(Icons.search),
+                icon: Icon(M3EIcons.search),
                 label: 'Search',
               ),
             ],
@@ -64,11 +64,11 @@ void main() {
             M3ENavigationRailSection(
               destinations: <M3ENavigationRailDestination>[
                 M3ENavigationRailDestination(
-                  icon: Icon(Icons.inbox),
+                  icon: Icon(M3EIcons.inbox),
                   label: 'Inbox',
                 ),
                 M3ENavigationRailDestination(
-                  icon: Icon(Icons.send),
+                  icon: Icon(M3EIcons.send),
                   label: 'Sent',
                 ),
               ],
@@ -80,7 +80,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Inbox'), findsWidgets);
-    expect(find.byIcon(Icons.inbox), findsOneWidget);
+    expect(find.byIcon(M3EIcons.inbox), findsOneWidget);
   });
 
   testWidgets('M3ESlider reports value changes', (tester) async {
@@ -127,9 +127,9 @@ void main() {
           child: M3ENavigationBar(
             selectedIndex: 0,
             destinations: <M3ENavigationBarDestination>[
-              M3ENavigationBarDestination(icon: Icon(Icons.home), label: 'Home'),
+              M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
               M3ENavigationBarDestination(
-                icon: Icon(Icons.search),
+                icon: Icon(M3EIcons.search),
                 label: 'Search',
               ),
             ],

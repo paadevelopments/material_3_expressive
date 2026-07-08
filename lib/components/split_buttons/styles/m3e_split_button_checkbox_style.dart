@@ -2,6 +2,7 @@
 // Adapted for material_3_expressive: import paths + M3E naming only.
 // ignore_for_file: type=lint
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 
 /// Styling options for the checkbox shown in multi-select bottom sheets.
 @immutable
@@ -13,7 +14,7 @@ class M3ESplitButtonCheckboxStyle {
     this.borderColor,
     this.activeBorderRadius,
     this.nonActiveBorderRadius,
-    this.icon = const Icon(Icons.check_rounded),
+    this.icon = const Icon(M3EIcons.check_rounded),
   });
 
   final Color? activeColor;

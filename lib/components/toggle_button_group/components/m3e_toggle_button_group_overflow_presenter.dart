@@ -274,7 +274,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               if (selected)
                 dec.trailing ??
                     Icon(
-                      Icons.check_rounded,
+                      M3EIcons.check_rounded,
                       color: cs.onSecondaryContainer,
                       size: 20,
                     ),
@@ -367,7 +367,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 ),
                 if (selected)
                   dec.trailing ??
-                      Icon(Icons.check_rounded, color: fgColor, size: 20),
+                      Icon(M3EIcons.check_rounded, color: fgColor, size: 20),
               ],
             ),
           ),
@@ -543,7 +543,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               if (selected)
                 dec.trailing ??
                     Icon(
-                      Icons.check_rounded,
+                      M3EIcons.check_rounded,
                       color: cs.onSecondaryContainer,
                       size: 20,
                     ),
@@ -636,7 +636,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 ),
                 if (selected)
                   dec.trailing ??
-                      Icon(Icons.check_rounded, color: fgColor, size: 20),
+                      Icon(M3EIcons.check_rounded, color: fgColor, size: 20),
               ],
             ),
           ),

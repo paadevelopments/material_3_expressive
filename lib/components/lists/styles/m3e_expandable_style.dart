@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_expandable_enums.dart';
 import 'm3e_list_theme.dart';
@@ -132,8 +134,8 @@ class M3EExpandableStyle {
     this.margin,
     this.iconPadding = M3EListExpandableTheme.defaultIconPadding,
     this.iconRotationAngle = M3EListExpandableTheme.defaultIconRotationAngle,
-    this.expandIcon = const Icon(Icons.expand_more_rounded),
-    this.collapseIcon = const Icon(Icons.expand_more_rounded),
+    this.expandIcon = const Icon(M3EIcons.expand_more_rounded),
+    this.collapseIcon = const Icon(M3EIcons.expand_more_rounded),
     this.iconPlacement = M3EExpandableIconPlacement.right,
     this.useInkWell = true,
     this.tapHeaderToToggle = true,
