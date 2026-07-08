@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
+import '../../../foundations/foundations.dart';
 import '../../../foundations/m3e_motion.dart';
 import '../styles/m3e_expandable_style.dart';
-import '../styles/m3e_expandable_theme.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
-import '../../buttons/styles/m3e_button_tokens.dart';
+import '../../buttons/res/m3e_button_constants.dart';
 import 'm3e_expandable_item.dart';
 
 abstract class M3EExpandableListBase extends StatefulWidget {
@@ -63,13 +63,14 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
   bool isExpanded(int index) => _expandedIndices.contains(index);
 
   Widget buildItem(BuildContext context, int index) {
-    final theme = M3EExpandableTheme.of(context);
-    final effectiveStyle = widget.style ?? theme.style;
-    final effectiveExpandMotion = widget.expandMotion ?? theme.expandMotion;
+    final expandable = M3ETheme.of(context).listTheme.expandable;
+    final effectiveStyle =
+        widget.style ?? M3EExpandableStyle.fromTheme(expandable);
+    final effectiveExpandMotion = widget.expandMotion ?? expandable.expandMotion;
     final effectiveCollapseMotion =
-        widget.collapseMotion ?? theme.collapseMotion;
+        widget.collapseMotion ?? expandable.collapseMotion;
     final effectiveAllowMultiple =
-        widget.allowMultipleExpanded ?? theme.allowMultipleExpanded;
+        widget.allowMultipleExpanded ?? expandable.allowMultipleExpanded;
 
     return M3EExpandableItem(
       index: index,

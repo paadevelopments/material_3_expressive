@@ -2,10 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'models/m3e_menu_entry.dart';
-import 'styles/m3e_menu_tokens.dart';
 
 export 'models/m3e_menu_entry.dart';
-export 'styles/m3e_menu_tokens.dart';
 
 /// Builds the anchor for an [M3EMenu], given a callback to open the menu.
 typedef M3EMenuAnchorBuilder = Widget Function(
@@ -80,6 +78,7 @@ class _M3EMenuState extends State<M3EMenu>
 
   Widget _buildOverlay(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final menuTheme = theme.menuTheme;
     return Stack(
       children: <Widget>[
         Positioned.fill(
@@ -91,7 +90,7 @@ class _M3EMenuState extends State<M3EMenu>
         CompositedTransformFollower(
           link: _link,
           targetAnchor: Alignment.bottomLeft,
-          offset: const Offset(0, M3EMenuTokens.anchorOffset),
+          offset: Offset(0, menuTheme.anchorOffset),
           child: _buildMenu(theme),
         ),
       ],
@@ -99,6 +98,7 @@ class _M3EMenuState extends State<M3EMenu>
   }
 
   Widget _buildMenu(M3EThemeData theme) {
+    final menuTheme = theme.menuTheme;
     final scheme = theme.colorScheme;
     return ScaleTransition(
       scale: CurvedAnimation(
@@ -109,18 +109,18 @@ class _M3EMenuState extends State<M3EMenu>
       child: FadeTransition(
         opacity: _controller,
         child: Container(
-          constraints: const BoxConstraints(
-            minWidth: M3EMenuTokens.minWidth,
-            maxWidth: M3EMenuTokens.maxWidth,
+          constraints: BoxConstraints(
+            minWidth: menuTheme.minWidth,
+            maxWidth: menuTheme.maxWidth,
           ),
-          padding: const EdgeInsets.symmetric(
-            vertical: M3EMenuTokens.verticalPadding,
+          padding: EdgeInsets.symmetric(
+            vertical: menuTheme.verticalPadding,
           ),
           decoration: BoxDecoration(
-            color: M3EMenuTokens.containerColor(scheme),
-            borderRadius: M3EMenuTokens.borderRadius,
+            color: menuTheme.containerColor(scheme),
+            borderRadius: menuTheme.borderRadius,
             boxShadow: M3EElevation.shadows(
-              M3EMenuTokens.elevation,
+              menuTheme.elevation,
               shadowColor: scheme.shadow,
             ),
           ),
@@ -137,8 +137,9 @@ class _M3EMenuState extends State<M3EMenu>
   }
 
   Widget _buildEntry(M3EThemeData theme, M3EMenuEntry entry) {
+    final menuTheme = theme.menuTheme;
     final scheme = theme.colorScheme;
-    final Color foreground = M3EMenuTokens.entryForegroundColor(
+    final Color foreground = menuTheme.entryForegroundColor(
       scheme,
       enabled: entry.enabled,
     );
@@ -151,9 +152,9 @@ class _M3EMenuState extends State<M3EMenu>
       semanticLabel: entry.label,
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          height: M3EMenuTokens.entryHeight,
-          padding: const EdgeInsets.symmetric(
-            horizontal: M3EMenuTokens.entryHorizontalPadding,
+          height: menuTheme.entryHeight,
+          padding: EdgeInsets.symmetric(
+            horizontal: menuTheme.entryHorizontalPadding,
           ),
           color: scheme.onSurface.withValues(alpha: state.opacity),
           child: Row(
@@ -162,16 +163,16 @@ class _M3EMenuState extends State<M3EMenu>
                 IconTheme.merge(
                   data: IconThemeData(
                     color: foreground,
-                    size: M3EMenuTokens.iconSize,
+                    size: menuTheme.iconSize,
                   ),
                   child: entry.leading!,
                 ),
-                const SizedBox(width: M3EMenuTokens.iconGap),
+                SizedBox(width: menuTheme.iconGap),
               ],
               Expanded(
                 child: Text(
                   entry.label,
-                  style: M3EMenuTokens.entryLabelStyle(
+                  style: menuTheme.entryLabelStyle(
                     theme.typeScale,
                     scheme,
                     enabled: entry.enabled,
@@ -181,11 +182,11 @@ class _M3EMenuState extends State<M3EMenu>
                 ),
               ),
               if (entry.trailing != null) ...<Widget>[
-                const SizedBox(width: M3EMenuTokens.iconGap),
+                SizedBox(width: menuTheme.iconGap),
                 IconTheme.merge(
                   data: IconThemeData(
                     color: foreground,
-                    size: M3EMenuTokens.iconSize,
+                    size: menuTheme.iconSize,
                   ),
                   child: entry.trailing!,
                 ),

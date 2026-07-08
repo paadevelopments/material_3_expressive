@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_tooltip_tokens.dart';
+import 'styles/m3e_tooltip_theme.dart';
 
-export 'styles/m3e_tooltip_tokens.dart';
+export 'styles/m3e_tooltip_theme.dart';
 
 /// A Material 3 Expressive tooltip.
 ///
@@ -58,16 +58,17 @@ class _M3ETooltipState extends State<M3ETooltip> {
     _portal.hide();
   }
 
-  void _scheduleHide() {
+  void _scheduleHide(M3ETooltipTheme tooltipTheme) {
     if (widget._isRich) {
       return;
     }
     _timer?.cancel();
-    _timer = Timer(M3ETooltipTokens.plainDismissDelay, _hide);
+    _timer = Timer(tooltipTheme.plainDismissDelay, _hide);
   }
 
   @override
   Widget build(BuildContext context) {
+    final tooltipTheme = M3ETheme.of(context).tooltipTheme;
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: _buildOverlay,
@@ -79,7 +80,7 @@ class _M3ETooltipState extends State<M3ETooltip> {
           child: GestureDetector(
             onLongPress: () {
               _show();
-              _scheduleHide();
+              _scheduleHide(tooltipTheme);
             },
             child: widget.child,
           ),
@@ -90,6 +91,7 @@ class _M3ETooltipState extends State<M3ETooltip> {
 
   Widget _buildOverlay(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final tooltipTheme = theme.tooltipTheme;
     return Stack(
       children: <Widget>[
         if (widget._isRich)
@@ -103,46 +105,44 @@ class _M3ETooltipState extends State<M3ETooltip> {
           link: _link,
           targetAnchor: Alignment.bottomCenter,
           followerAnchor: Alignment.topCenter,
-          offset: const Offset(0, M3ETooltipTokens.anchorOffset),
-          child: widget._isRich ? _buildRich(theme) : _buildPlain(theme),
+          offset: Offset(0, tooltipTheme.anchorOffset),
+          child: widget._isRich
+              ? _buildRich(theme, tooltipTheme)
+              : _buildPlain(theme, tooltipTheme),
         ),
       ],
     );
   }
 
-  Widget _buildPlain(M3EThemeData theme) {
+  Widget _buildPlain(M3EThemeData theme, M3ETooltipTheme tooltipTheme) {
     final scheme = theme.colorScheme;
     return _fade(
       Container(
-        constraints: const BoxConstraints(
-          maxWidth: M3ETooltipTokens.plainMaxWidth,
-        ),
-        padding: M3ETooltipTokens.plainPadding,
+        constraints: BoxConstraints(maxWidth: tooltipTheme.plainMaxWidth),
+        padding: tooltipTheme.plainPadding,
         decoration: BoxDecoration(
-          color: M3ETooltipTokens.plainContainerColor(scheme),
-          borderRadius: M3ETooltipTokens.plainBorderRadius,
+          color: tooltipTheme.plainContainerColor(scheme),
+          borderRadius: tooltipTheme.plainBorderRadius,
         ),
         child: Text(
           widget.message!,
-          style: M3ETooltipTokens.plainMessageStyle(theme.typeScale, scheme),
+          style: tooltipTheme.plainMessageStyle(theme.typeScale, scheme),
         ),
       ),
     );
   }
 
-  Widget _buildRich(M3EThemeData theme) {
+  Widget _buildRich(M3EThemeData theme, M3ETooltipTheme tooltipTheme) {
     final scheme = theme.colorScheme;
     return _fade(
       Container(
-        constraints: const BoxConstraints(
-          maxWidth: M3ETooltipTokens.richMaxWidth,
-        ),
-        padding: M3ETooltipTokens.richPadding,
+        constraints: BoxConstraints(maxWidth: tooltipTheme.richMaxWidth),
+        padding: tooltipTheme.richPadding,
         decoration: BoxDecoration(
-          color: M3ETooltipTokens.richContainerColor(scheme),
-          borderRadius: M3ETooltipTokens.richBorderRadius,
+          color: tooltipTheme.richContainerColor(scheme),
+          borderRadius: tooltipTheme.richBorderRadius,
           boxShadow: M3EElevation.shadows(
-            M3ETooltipTokens.richElevation,
+            tooltipTheme.richElevation,
             shadowColor: scheme.shadow,
           ),
         ),
@@ -153,19 +153,16 @@ class _M3ETooltipState extends State<M3ETooltip> {
             if (widget.richTitle != null) ...<Widget>[
               Text(
                 widget.richTitle!,
-                style: M3ETooltipTokens.richTitleStyle(
-                  theme.typeScale,
-                  scheme,
-                ),
+                style: tooltipTheme.richTitleStyle(theme.typeScale, scheme),
               ),
-              const SizedBox(height: M3ETooltipTokens.richTitleGap),
+              SizedBox(height: tooltipTheme.richTitleGap),
             ],
             Text(
               widget.richMessage!,
-              style: M3ETooltipTokens.richBodyStyle(theme.typeScale, scheme),
+              style: tooltipTheme.richBodyStyle(theme.typeScale, scheme),
             ),
             if (widget.actions.isNotEmpty) ...<Widget>[
-              const SizedBox(height: M3ETooltipTokens.richActionsGap),
+              SizedBox(height: tooltipTheme.richActionsGap),
               Row(children: widget.actions),
             ],
           ],

@@ -3,11 +3,11 @@ import 'package:flutter/widgets.dart';
 import '../../foundations/foundations.dart';
 import 'enums/m3e_tabs_variant.dart';
 import 'models/m3e_tab.dart';
-import 'styles/m3e_tabs_tokens.dart';
+import 'styles/m3e_tab_theme.dart';
 
 export 'enums/m3e_tabs_variant.dart';
 export 'models/m3e_tab.dart';
-export 'styles/m3e_tabs_tokens.dart';
+export 'styles/m3e_tab_theme.dart';
 
 /// A Material 3 Expressive tab bar.
 ///
@@ -30,37 +30,38 @@ class M3ETabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final tabTheme = theme.tabTheme;
     final scheme = theme.colorScheme;
     final double align =
         tabs.length == 1 ? 0 : -1 + 2 * selectedIndex / (tabs.length - 1);
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: M3ETabsTokens.backgroundColor(scheme),
+        color: tabTheme.backgroundColor(scheme),
         border: Border(
-          bottom: BorderSide(color: M3ETabsTokens.dividerColor(scheme)),
+          bottom: BorderSide(color: tabTheme.dividerColor(scheme)),
         ),
       ),
       child: SizedBox(
-        height: M3ETabsTokens.height,
+        height: tabTheme.height,
         child: Stack(
           children: <Widget>[
-            Row(children: _buildTabs(theme)),
-            _buildIndicator(scheme, align),
+            Row(children: _buildTabs(theme, tabTheme)),
+            _buildIndicator(tabTheme, scheme, align),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _buildTabs(M3EThemeData theme) {
+  List<Widget> _buildTabs(M3EThemeData theme, M3ETabTheme tabTheme) {
     return <Widget>[
       for (int i = 0; i < tabs.length; i++)
-        Expanded(child: _buildTab(theme, i)),
+        Expanded(child: _buildTab(theme, tabTheme, i)),
     ];
   }
 
-  Widget _buildTab(M3EThemeData theme, int index) {
+  Widget _buildTab(M3EThemeData theme, M3ETabTheme tabTheme, int index) {
     final scheme = theme.colorScheme;
     final selected = index == selectedIndex;
     final M3ETab tab = tabs[index];
@@ -78,28 +79,33 @@ class M3ETabs extends StatelessWidget {
                 ),
               ),
             ),
-            Center(child: _buildTabContent(theme, tab, selected)),
+            Center(child: _buildTabContent(theme, tabTheme, tab, selected)),
           ],
         );
       },
     );
   }
 
-  Widget _buildTabContent(M3EThemeData theme, M3ETab tab, bool selected) {
+  Widget _buildTabContent(
+    M3EThemeData theme,
+    M3ETabTheme tabTheme,
+    M3ETab tab,
+    bool selected,
+  ) {
     final scheme = theme.colorScheme;
     final children = <Widget>[
       if (tab.icon != null)
         IconTheme.merge(
           data: IconThemeData(
-            color: M3ETabsTokens.tabColor(scheme, selected: selected),
-            size: M3ETabsTokens.iconSize,
+            color: tabTheme.tabColor(scheme, selected: selected),
+            size: tabTheme.iconSize,
           ),
           child: tab.icon!,
         ),
       if (tab.label != null)
         Text(
           tab.label!,
-          style: M3ETabsTokens.labelStyle(
+          style: tabTheme.labelStyle(
             theme.typeScale,
             scheme,
             selected: selected,
@@ -113,8 +119,8 @@ class M3ETabs extends StatelessWidget {
     );
   }
 
-  Widget _buildIndicator(M3EColorScheme scheme, double align) {
-    final bool fullWidth = M3ETabsTokens.indicatorFullWidth(variant);
+  Widget _buildIndicator(M3ETabTheme tabTheme, M3EColorScheme scheme, double align) {
+    final bool fullWidth = tabTheme.indicatorFullWidth(variant);
     return AnimatedAlign(
       duration: M3EMotion.medium2,
       curve: M3EMotion.emphasized,
@@ -124,12 +130,12 @@ class M3ETabs extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: M3ETabsTokens.indicatorHeight,
-            width: fullWidth ? null : M3ETabsTokens.primaryIndicatorWidth,
+            height: tabTheme.indicatorHeight,
+            width: fullWidth ? null : tabTheme.primaryIndicatorWidth,
             decoration: BoxDecoration(
-              color: M3ETabsTokens.indicatorColor(scheme),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(M3ETabsTokens.indicatorCornerRadius),
+              color: tabTheme.indicatorColor(scheme),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(tabTheme.indicatorCornerRadius),
               ),
             ),
           ),

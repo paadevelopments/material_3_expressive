@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
-import 'm3e_dismissible_list_tokens.dart';
+import 'm3e_list_theme.dart';
 
 /// Immutable visual and interaction configuration for dismissible M3E lists.
 class M3EDismissibleListStyle {
@@ -73,29 +73,31 @@ class M3EDismissibleListStyle {
   final int neighbourReach;
 
   const M3EDismissibleListStyle({
-    this.outerRadius = M3EDismissibleListTokens.outerRadius,
+    this.outerRadius = M3EListDismissibleTheme.defaultOuterRadius,
     this.selectedBorderRadius,
-    this.innerRadius = M3EDismissibleListTokens.innerRadius,
-    this.gap = M3EDismissibleListTokens.gap,
+    this.innerRadius = M3EListDismissibleTheme.defaultInnerRadius,
+    this.gap = M3EListDismissibleTheme.defaultGap,
     this.color,
-    this.padding = M3EDismissibleListTokens.itemPadding,
+    this.padding = M3EListDismissibleTheme.defaultItemPadding,
     this.margin,
     this.border,
     this.elevation = 0.0,
     this.background,
     this.secondaryBackground,
-    this.backgroundBorderRadius = M3EDismissibleListTokens.backgroundBorderRadius,
-    this.secondaryBackgroundBorderRadius = M3EDismissibleListTokens.backgroundBorderRadius,
-    this.collapseSpeed = M3EDismissibleListTokens.collapseSpeed,
+    this.backgroundBorderRadius =
+        M3EListDismissibleTheme.defaultBackgroundBorderRadius,
+    this.secondaryBackgroundBorderRadius =
+        M3EListDismissibleTheme.defaultBackgroundBorderRadius,
+    this.collapseSpeed = M3EListDismissibleTheme.defaultCollapseSpeed,
     this.splashColor,
     this.highlightColor,
     this.splashFactory,
     this.enableFeedback = true,
     this.hapticOnTap = M3EHapticFeedback.none,
-    this.dismissThreshold = M3EDismissibleListTokens.dismissThreshold,
+    this.dismissThreshold = M3EListDismissibleTheme.defaultDismissThreshold,
     this.hapticOnThreshold = M3EHapticFeedback.light,
     this.dismissHapticStream = false,
-    this.neighbourPull = M3EDismissibleListTokens.neighbourPull,
-    this.neighbourReach = M3EDismissibleListTokens.neighbourReach,
+    this.neighbourPull = M3EListDismissibleTheme.defaultNeighbourPull,
+    this.neighbourReach = M3EListDismissibleTheme.defaultNeighbourReach,
   });
 }

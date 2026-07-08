@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_badge_tokens.dart';
 
-export 'styles/m3e_badge_tokens.dart';
+export 'styles/m3e_badge_theme.dart';
 
 /// A Material 3 Expressive badge.
 ///
@@ -14,7 +13,7 @@ class M3EBadge extends StatelessWidget {
     this.child,
     this.label,
     this.visible = true,
-    this.alignment = M3EBadgeTokens.defaultAlignment,
+    this.alignment = const Alignment(0.75, -0.75),
     super.key,
   });
 
@@ -28,8 +27,9 @@ class M3EBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
-    final Widget marker = _buildMarker(context, scheme);
+    final theme = M3ETheme.of(context);
+    final scheme = theme.colorScheme;
+    final Widget marker = _buildMarker(theme, scheme);
     if (child == null) {
       return visible ? marker : const SizedBox.shrink();
     }
@@ -44,32 +44,32 @@ class M3EBadge extends StatelessWidget {
     );
   }
 
-  Widget _buildMarker(BuildContext context, M3EColorScheme scheme) {
+  Widget _buildMarker(M3EThemeData theme, M3EColorScheme scheme) {
+    final badgeTheme = theme.badgeTheme;
     if (label == null) {
       return Container(
-        width: M3EBadgeTokens.dotSize,
-        height: M3EBadgeTokens.dotSize,
+        width: badgeTheme.dotSize,
+        height: badgeTheme.dotSize,
         decoration: BoxDecoration(
-          color: M3EBadgeTokens.containerColor(scheme),
+          color: badgeTheme.containerColor(scheme),
           shape: BoxShape.circle,
         ),
       );
     }
-    final typeScale = M3ETheme.of(context).typeScale;
     return Container(
-      constraints: const BoxConstraints(minWidth: M3EBadgeTokens.largeSize),
-      height: M3EBadgeTokens.largeSize,
-      padding: const EdgeInsets.symmetric(
-        horizontal: M3EBadgeTokens.largeHorizontalPadding,
+      constraints: BoxConstraints(minWidth: badgeTheme.largeSize),
+      height: badgeTheme.largeSize,
+      padding: EdgeInsets.symmetric(
+        horizontal: badgeTheme.largeHorizontalPadding,
       ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: M3EBadgeTokens.containerColor(scheme),
-        borderRadius: M3EShapes.resolve(M3EBadgeTokens.largeCornerRadius),
+        color: badgeTheme.containerColor(scheme),
+        borderRadius: badgeTheme.largeBorderRadius,
       ),
       child: Text(
         label!,
-        style: M3EBadgeTokens.labelStyle(typeScale, scheme),
+        style: badgeTheme.labelStyle(theme.typeScale, scheme),
         maxLines: 1,
       ),
     );

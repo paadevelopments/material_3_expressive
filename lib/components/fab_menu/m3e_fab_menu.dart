@@ -4,10 +4,8 @@ import '../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
 import '../floating_action_buttons/m3e_floating_action_buttons.dart';
 import 'models/m3e_fab_menu_item.dart';
-import 'styles/m3e_fab_menu_tokens.dart';
 
 export 'models/m3e_fab_menu_item.dart';
-export 'styles/m3e_fab_menu_tokens.dart';
 
 /// A Material 3 Expressive FAB menu.
 ///
@@ -102,7 +100,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
           link: _link,
           targetAnchor: Alignment.topRight,
           followerAnchor: Alignment.bottomRight,
-          offset: const Offset(0, -M3EFabMenuTokens.menuOffset),
+          offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
           child: _buildMenu(context),
         ),
       ],
@@ -110,14 +108,15 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   }
 
   Widget _buildScrim(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final fabMenuTheme = theme.fabMenuTheme;
     return Positioned.fill(
       child: GestureDetector(
         onTap: _close,
         child: FadeTransition(
           opacity: _controller,
           child: ColoredBox(
-            color: M3EFabMenuTokens.scrimColor(scheme),
+            color: fabMenuTheme.scrimColor(theme.colorScheme),
           ),
         ),
       ),
@@ -126,13 +125,14 @@ class _M3EFabMenuState extends State<M3EFabMenu>
 
   Widget _buildMenu(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final fabMenuTheme = theme.fabMenuTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         for (int i = 0; i < widget.items.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: M3EFabMenuTokens.itemGap),
+            padding: EdgeInsets.only(bottom: fabMenuTheme.itemGap),
             child: _buildItem(theme, widget.items[i], i),
           ),
       ],
@@ -173,17 +173,18 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     M3EColorScheme scheme,
     M3EInteractionState state,
   ) {
+    final fabMenuTheme = theme.fabMenuTheme;
     final border = M3EShapes.stadium;
     return Container(
-      height: M3EFabMenuTokens.itemHeight,
-      padding: const EdgeInsets.symmetric(
-        horizontal: M3EFabMenuTokens.itemHorizontalPadding,
+      height: fabMenuTheme.itemHeight,
+      padding: EdgeInsets.symmetric(
+        horizontal: fabMenuTheme.itemHorizontalPadding,
       ),
       decoration: ShapeDecoration(
         shape: border,
-        color: M3EFabMenuTokens.itemContainerColor(scheme),
+        color: fabMenuTheme.itemContainerColor(scheme),
         shadows: M3EElevation.shadows(
-          M3EFabMenuTokens.itemElevation,
+          fabMenuTheme.itemElevation,
           shadowColor: scheme.shadow,
         ),
       ),
@@ -192,7 +193,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
         children: <Widget>[
           M3EStateLayerOverlay(
             state: state,
-            color: M3EFabMenuTokens.itemForegroundColor(scheme),
+            color: fabMenuTheme.itemForegroundColor(scheme),
             shape: border,
           ),
           Row(
@@ -200,15 +201,15 @@ class _M3EFabMenuState extends State<M3EFabMenu>
             children: <Widget>[
               IconTheme.merge(
                 data: IconThemeData(
-                  color: M3EFabMenuTokens.itemForegroundColor(scheme),
-                  size: M3EFabMenuTokens.iconSize,
+                  color: fabMenuTheme.itemForegroundColor(scheme),
+                  size: fabMenuTheme.iconSize,
                 ),
                 child: item.icon,
               ),
-              const SizedBox(width: M3EFabMenuTokens.iconLabelGap),
+              SizedBox(width: fabMenuTheme.iconLabelGap),
               Text(
                 item.label,
-                style: M3EFabMenuTokens.itemLabelStyle(theme.typeScale, scheme),
+                style: fabMenuTheme.itemLabelStyle(theme.typeScale, scheme),
               ),
             ],
           ),

@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_text_field_variant.dart';
-import 'styles/m3e_text_field_tokens.dart';
 
 /// A Material 3 Expressive text field.
 ///
@@ -103,7 +102,8 @@ class _M3ETextFieldState extends State<M3ETextField> {
 
   Widget _buildContainer(M3EThemeData theme) {
     final scheme = theme.colorScheme;
-    final accent = M3ETextFieldTokens.accentColor(
+    final textFieldTheme = theme.textFieldTheme;
+    final accent = textFieldTheme.accentColor(
       scheme,
       enabled: widget.enabled,
       hasError: widget.hasError,
@@ -116,9 +116,9 @@ class _M3ETextFieldState extends State<M3ETextField> {
       child: AnimatedContainer(
         duration: M3EMotion.short3,
         curve: M3EMotion.standard,
-        padding: M3ETextFieldTokens.horizontalPadding,
-        constraints: const BoxConstraints(minHeight: M3ETextFieldTokens.minHeight),
-        decoration: M3ETextFieldTokens.decoration(
+        padding: textFieldTheme.horizontalPadding,
+        constraints: BoxConstraints(minHeight: textFieldTheme.minHeight),
+        decoration: textFieldTheme.decoration(
           scheme,
           accent: accent,
           outlined: outlined,
@@ -137,24 +137,25 @@ class _M3ETextFieldState extends State<M3ETextField> {
       M3EColorScheme scheme,
       Color accent,
       ) {
+    final textFieldTheme = theme.textFieldTheme;
     return <Widget>[
       if (widget.leading != null) ...<Widget>[
         IconTheme.merge(
           data: IconThemeData(
             color: scheme.onSurfaceVariant,
-            size: M3ETextFieldTokens.iconSize,
+            size: textFieldTheme.iconSize,
           ),
           child: widget.leading!,
         ),
-        const SizedBox(width: M3ETextFieldTokens.iconGap),
+        SizedBox(width: textFieldTheme.iconGap),
       ],
       Expanded(child: _buildField(theme, scheme, accent)),
       if (widget.trailing != null) ...<Widget>[
-        const SizedBox(width: M3ETextFieldTokens.iconGap),
+        SizedBox(width: textFieldTheme.iconGap),
         IconTheme.merge(
           data: IconThemeData(
             color: widget.hasError ? scheme.error : scheme.onSurfaceVariant,
-            size: M3ETextFieldTokens.iconSize,
+            size: textFieldTheme.iconSize,
           ),
           child: widget.trailing!,
         ),
@@ -185,7 +186,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
           cursorColor: accent,
           backgroundCursorColor: scheme.outlineVariant,
           selectionColor: scheme.primary
-              .withValues(alpha: M3ETextFieldTokens.selectionOpacity),
+              .withValues(alpha: theme.textFieldTheme.selectionOpacity),
         ),
       ],
     );
@@ -206,9 +207,9 @@ class _M3ETextFieldState extends State<M3ETextField> {
       child: Padding(
         padding: EdgeInsets.only(
           top: _floating
-              ? M3ETextFieldTokens.labelFloatingTopPadding
-              : M3ETextFieldTokens.labelRestingTopPadding,
-          bottom: M3ETextFieldTokens.labelBottomPadding,
+              ? theme.textFieldTheme.labelFloatingTopPadding
+              : theme.textFieldTheme.labelRestingTopPadding,
+          bottom: theme.textFieldTheme.labelBottomPadding,
         ),
         child: Text(widget.label!),
       ),
@@ -222,7 +223,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: M3ETextFieldTokens.supportingTextPadding,
+      padding: theme.textFieldTheme.supportingTextPadding,
       child: Text(
         text,
         style: theme.typeScale.bodySmall.copyWith(

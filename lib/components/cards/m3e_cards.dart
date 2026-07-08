@@ -2,10 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'enums/m3e_card_variant.dart';
-import 'styles/m3e_card_tokens.dart';
+import 'styles/m3e_card_theme.dart';
 
 export 'enums/m3e_card_variant.dart';
-export 'styles/m3e_card_tokens.dart';
+export 'styles/m3e_card_theme.dart';
 
 /// A Material 3 Expressive card.
 ///
@@ -17,7 +17,7 @@ class M3ECard extends StatelessWidget {
     required this.child,
     this.variant = M3ECardVariant.elevated,
     this.onPressed,
-    this.padding = M3ECardTokens.contentPadding,
+    this.padding = const EdgeInsets.all(16),
     this.clipBehavior = Clip.antiAlias,
     super.key,
   });
@@ -31,12 +31,14 @@ class M3ECard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final borderRadius = M3ECardTokens.borderRadius;
+    final cardTheme = theme.cardTheme;
+    final borderRadius = cardTheme.borderRadius;
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
     if (onPressed == null) {
       return _buildSurface(
         theme,
+        cardTheme,
         borderRadius,
         border,
         const M3EInteractionState(),
@@ -45,29 +47,30 @@ class M3ECard extends StatelessWidget {
     return M3ETappable(
       onTap: onPressed,
       builder: (BuildContext context, M3EInteractionState state) {
-        return _buildSurface(theme, borderRadius, border, state);
+        return _buildSurface(theme, cardTheme, borderRadius, border, state);
       },
     );
   }
 
   Widget _buildSurface(
     M3EThemeData theme,
+    M3ECardTheme cardTheme,
     BorderRadius borderRadius,
     RoundedRectangleBorder border,
     M3EInteractionState state,
   ) {
     final scheme = theme.colorScheme;
     final double elevation =
-        M3ECardTokens.elevation(variant, hovered: state.hovered);
+        cardTheme.elevation(variant, hovered: state.hovered);
     return AnimatedContainer(
       duration: M3EMotion.short4,
       curve: M3EMotion.standard,
       clipBehavior: clipBehavior,
       decoration: BoxDecoration(
-        color: M3ECardTokens.backgroundColor(scheme, variant),
+        color: cardTheme.backgroundColor(scheme, variant),
         borderRadius: borderRadius,
         border: variant == M3ECardVariant.outlined
-            ? Border.all(color: M3ECardTokens.outlineColor(scheme))
+            ? Border.all(color: cardTheme.outlineColor(scheme))
             : null,
         boxShadow: M3EElevation.shadows(elevation, shadowColor: scheme.shadow),
       ),

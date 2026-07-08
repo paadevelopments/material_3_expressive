@@ -314,8 +314,9 @@ class _FocusRingGapRenderer {
     required int? focusedIndex,
     required int beforeIndex,
     required double spacing,
+    required double connectedGap,
   }) {
-    double gap = connected ? M3EButtonGroupTokens.kConnectedGap : spacing;
+    double gap = connected ? connectedGap : spacing;
     if (connected) {
       final bool isFocusedLeft = focusedIndex == beforeIndex;
       final bool isFocusedRight = focusedIndex == beforeIndex + 1;

@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_nav_bar_enums.dart';
 import 'models/m3e_navigation_bar_destination.dart';
-import 'styles/m3e_nav_bar_tokens.dart';
+import 'styles/m3e_navigation_bar_theme.dart';
 
 class M3ENavigationBar extends StatelessWidget {
   const M3ENavigationBar({
@@ -60,15 +60,15 @@ class M3ENavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(destinations.isNotEmpty, 'Provide at least one destination');
 
-    final tokens = M3ENavBarTokens(context);
-    final metrics = tokens.metrics(density);
     final m3e = M3ETheme.of(context);
+    final navTheme = m3e.navigationBarTheme;
+    final metrics = navTheme.metrics(density, m3e.spacing);
 
     final height = size == M3ENavBarSize.small
         ? metrics.heightSmall
         : metrics.heightMedium;
-    final bg = backgroundColor ?? tokens.containerColor();
-    final shape = tokens.containerShape(shapeFamily);
+    final bg = backgroundColor ?? navTheme.containerColor(m3e.colorScheme);
+    final shape = navTheme.containerShape(shapeFamily);
 
     final nav = Material(
       color: bg,
@@ -81,9 +81,9 @@ class M3ENavigationBar extends StatelessWidget {
           elevation: elevation ?? 0,
           indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
               ? Colors.transparent
-              : (indicatorColor ?? tokens.indicatorColor()),
+              : (indicatorColor ?? navTheme.indicatorColor(m3e.colorScheme)),
           indicatorShape: switch (indicatorStyle) {
-            M3ENavBarIndicatorStyle.pill => tokens.indicatorShapePill(),
+            M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
             M3ENavBarIndicatorStyle.underline =>
             const StadiumBorder(), // we'll fake underline via decoration below
             M3ENavBarIndicatorStyle.none => const StadiumBorder(),
@@ -104,7 +104,7 @@ class M3ENavigationBar extends StatelessWidget {
             return NavigationDestination(
               icon: _icon(context, false, d, metrics.iconSize),
               selectedIcon: _selectedIcon(
-                  context, true, d, metrics.iconSize, tokens, indicatorStyle),
+                  context, true, d, metrics.iconSize, navTheme, indicatorStyle),
               label: d.label,
               tooltip: d.semanticLabel,
             );
@@ -120,7 +120,7 @@ class M3ENavigationBar extends StatelessWidget {
     );
 
     final content = DefaultTextStyle.merge(
-      style: tokens.labelStyle().copyWith(
+      style: navTheme.labelStyle(m3e.typeScale).copyWith(
         color: m3e.colorScheme.onSurfaceVariant,
       ),
       child: IconTheme.merge(
@@ -156,15 +156,16 @@ class M3ENavigationBar extends StatelessWidget {
       bool selected,
       M3ENavigationBarDestination d,
       double iconSize,
-      M3ENavBarTokens tokens,
+      M3ENavigationBarTheme navTheme,
       M3ENavBarIndicatorStyle style,
       ) {
     final w = _icon(context, selected, d, iconSize);
     if (style != M3ENavBarIndicatorStyle.underline) return w;
 
-    final metrics = tokens.metrics(density);
-    final deco = tokens.underlineDecoration(
-        tokens.indicatorColor(), metrics.indicatorThickness);
+    final metrics = navTheme.metrics(density, M3ETheme.of(context).spacing);
+    final deco = navTheme.underlineDecoration(
+        navTheme.indicatorColor(M3ETheme.of(context).colorScheme),
+        metrics.indicatorThickness);
     return DecoratedBox(
       decoration: deco,
       child: w,

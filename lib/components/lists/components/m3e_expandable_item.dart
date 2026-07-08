@@ -5,7 +5,6 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_expandable_enums.dart';
-import '../styles/m3e_expandable_list_tokens.dart';
 import '../styles/m3e_expandable_style.dart';
 import '../utils/m3e_measure_size.dart';
 
@@ -222,7 +221,8 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     required bool isEntirelyTappable,
   }) {
     final headerContent = Padding(
-      padding: d.headerPadding ?? M3EExpandableListTokens.headerPadding,
+      padding: d.headerPadding ??
+          M3ETheme.of(context).listTheme.expandable.headerPadding,
       child: Row(
         crossAxisAlignment: d.headerAlignment == CrossAxisAlignment.stretch
             ? CrossAxisAlignment.center
@@ -306,7 +306,8 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     double progress, {
     required bool isEntirelyTappable,
   }) {
-    final effectivePadding = d.bodyPadding ?? M3EExpandableListTokens.bodyPadding;
+    final effectivePadding = d.bodyPadding ??
+        M3ETheme.of(context).listTheme.expandable.bodyPadding;
     final resolvedPadding = effectivePadding.resolve(Directionality.of(context));
     final contentShift = math.min(12.0, resolvedPadding.bottom * 0.6 + 4.0);
     final needsMeasurement = _collapsedHeight == null || _expandedHeight == null;

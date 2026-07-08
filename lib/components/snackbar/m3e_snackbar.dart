@@ -2,10 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_snackbar_host.dart';
-import 'styles/m3e_snackbar_tokens.dart';
 
 export 'components/m3e_snackbar_host.dart';
-export 'styles/m3e_snackbar_tokens.dart';
+export 'styles/m3e_snackbar_theme.dart';
 
 /// A Material 3 Expressive snackbar.
 ///
@@ -30,17 +29,19 @@ class M3ESnackbar extends StatelessWidget {
     required String message,
     String? actionLabel,
     VoidCallback? onAction,
-    Duration duration = M3ESnackbarTokens.defaultDuration,
+    Duration? duration,
   }) {
     final OverlayState overlay = Overlay.of(context, rootOverlay: true);
     final M3EThemeData theme = M3ETheme.of(context);
+    final Duration resolvedDuration =
+        duration ?? theme.snackBarTheme.defaultDuration;
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (BuildContext context) {
         return M3ETheme(
           data: theme,
           child: M3ESnackbarHost(
-            duration: duration,
+            duration: resolvedDuration,
             entry: entry,
             child: M3ESnackbar(
               message: message,
@@ -58,17 +59,18 @@ class M3ESnackbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
+    final snackTheme = theme.snackBarTheme;
     return Container(
-      constraints: const BoxConstraints(
-        minHeight: M3ESnackbarTokens.minHeight,
-        maxWidth: M3ESnackbarTokens.maxWidth,
+      constraints: BoxConstraints(
+        minHeight: snackTheme.minHeight,
+        maxWidth: snackTheme.maxWidth,
       ),
-      padding: M3ESnackbarTokens.contentPadding,
+      padding: snackTheme.contentPadding,
       decoration: BoxDecoration(
-        color: M3ESnackbarTokens.containerColor(scheme),
-        borderRadius: M3ESnackbarTokens.borderRadius,
+        color: snackTheme.containerColor(scheme),
+        borderRadius: snackTheme.borderRadius,
         boxShadow: M3EElevation.shadows(
-          M3ESnackbarTokens.elevation,
+          snackTheme.elevation,
           shadowColor: scheme.shadow,
         ),
       ),
@@ -77,21 +79,21 @@ class M3ESnackbar extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: M3ESnackbarTokens.messageStyle(theme.typeScale, scheme),
+              style: snackTheme.messageStyle(theme.typeScale, scheme),
             ),
           ),
           if (actionLabel != null)
             Padding(
-              padding: const EdgeInsets.only(left: M3ESnackbarTokens.actionGap),
+              padding: EdgeInsets.only(left: snackTheme.actionGap),
               child: M3ETappable(
                 onTap: onAction,
                 semanticLabel: actionLabel,
                 builder: (BuildContext context, M3EInteractionState state) {
                   return Padding(
-                    padding: M3ESnackbarTokens.actionPadding,
+                    padding: snackTheme.actionPadding,
                     child: Text(
                       actionLabel!,
-                      style: M3ESnackbarTokens.actionStyle(
+                      style: snackTheme.actionStyle(
                         theme.typeScale,
                         scheme,
                       ),

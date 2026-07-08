@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'models/m3e_calendar_labels.dart';
-import 'styles/m3e_date_picker_tokens.dart';
 
 /// A Material 3 Expressive date picker.
 ///
@@ -46,12 +45,13 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
+    final dateTheme = theme.datePickerTheme;
     return Container(
-      width: M3EDatePickerTokens.width,
-      padding: M3EDatePickerTokens.padding,
+      width: dateTheme.width,
+      padding: dateTheme.padding,
       decoration: BoxDecoration(
-        color: M3EDatePickerTokens.containerColor(scheme),
-        borderRadius: M3EDatePickerTokens.borderRadius,
+        color: dateTheme.containerColor(scheme),
+        borderRadius: dateTheme.borderRadius,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -85,12 +85,17 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
   }
 
   Widget _buildArrow(M3EColorScheme scheme, IconData icon, VoidCallback onTap) {
+    final dateTheme = M3ETheme.of(context).datePickerTheme;
     return M3ETappable(
       onTap: onTap,
       builder: (BuildContext context, M3EInteractionState state) {
         return Padding(
-          padding: M3EDatePickerTokens.arrowPadding,
-          child: Icon(icon, color: scheme.onSurfaceVariant, size: M3EDatePickerTokens.arrowIconSize),
+          padding: dateTheme.arrowPadding,
+          child: Icon(
+            icon,
+            color: scheme.onSurfaceVariant,
+            size: dateTheme.arrowIconSize,
+          ),
         );
       },
     );
@@ -115,20 +120,21 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
   }
 
   Widget _buildGrid(M3EThemeData theme) {
+    final dateTheme = theme.datePickerTheme;
     final int year = _visibleMonth.year;
     final int month = _visibleMonth.month;
     final int days = M3ECalendarLabels.daysInMonth(year, month);
     final int offset = M3ECalendarLabels.firstWeekday(year, month);
     final int cellCount =
-        ((days + offset) / M3EDatePickerTokens.daysPerWeek).ceil() *
-        M3EDatePickerTokens.daysPerWeek;
+        ((days + offset) / dateTheme.daysPerWeek).ceil() *
+        dateTheme.daysPerWeek;
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: M3EDatePickerTokens.gridPadding,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: M3EDatePickerTokens.daysPerWeek,
+      padding: dateTheme.gridPadding,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: dateTheme.daysPerWeek,
       ),
       itemCount: cellCount,
       itemBuilder: (BuildContext context, int index) {
@@ -143,10 +149,11 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
 
   Widget _buildDay(M3EThemeData theme, DateTime date) {
     final scheme = theme.colorScheme;
+    final dateTheme = theme.datePickerTheme;
     final bool selected = _isSameDay(date, widget.selectedDate);
     final bool today = _isSameDay(date, DateTime.now());
     final bool enabled = _isEnabled(date);
-    final Color foreground = M3EDatePickerTokens.dayForegroundColor(
+    final Color foreground = dateTheme.dayForegroundColor(
       scheme,
       selected: selected,
       enabled: enabled,
@@ -158,8 +165,8 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
       builder: (BuildContext context, M3EInteractionState state) {
         return Center(
           child: Container(
-            width: M3EDatePickerTokens.daySize,
-            height: M3EDatePickerTokens.daySize,
+            width: dateTheme.daySize,
+            height: dateTheme.daySize,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,

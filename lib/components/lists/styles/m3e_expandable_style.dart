@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_expandable_enums.dart';
-import 'm3e_expandable_list_tokens.dart';
+import 'm3e_list_theme.dart';
 
 /// Visual style configuration for [M3EExpandableList].
 @immutable
@@ -117,21 +117,21 @@ class M3EExpandableStyle {
   final String? collapseTooltip;
 
   const M3EExpandableStyle({
-    this.outerRadius = M3EExpandableListTokens.outerRadius,
-    this.innerRadius = M3EExpandableListTokens.innerRadius,
-    this.hoverRadius = M3EExpandableListTokens.hoverRadius,
-    this.pressedRadius = M3EExpandableListTokens.pressedRadius,
-    this.gap = M3EExpandableListTokens.gap,
+    this.outerRadius = M3EListExpandableTheme.defaultOuterRadius,
+    this.innerRadius = M3EListExpandableTheme.defaultInnerRadius,
+    this.hoverRadius = M3EListExpandableTheme.defaultHoverRadius,
+    this.pressedRadius = M3EListExpandableTheme.defaultPressedRadius,
+    this.gap = M3EListExpandableTheme.defaultGap,
     this.expandedRadius,
     this.color,
     this.border,
     this.elevation = 0,
     this.headerPadding,
     this.bodyPadding,
-    this.titleSubtitleGap = M3EExpandableListTokens.titleSubtitleGap,
+    this.titleSubtitleGap = M3EListExpandableTheme.defaultTitleSubtitleGap,
     this.margin,
-    this.iconPadding = M3EExpandableListTokens.iconPadding,
-    this.iconRotationAngle = M3EExpandableListTokens.iconRotationAngle,
+    this.iconPadding = M3EListExpandableTheme.defaultIconPadding,
+    this.iconRotationAngle = M3EListExpandableTheme.defaultIconRotationAngle,
     this.expandIcon = const Icon(Icons.expand_more_rounded),
     this.collapseIcon = const Icon(Icons.expand_more_rounded),
     this.iconPlacement = M3EExpandableIconPlacement.right,
@@ -147,9 +147,25 @@ class M3EExpandableStyle {
     this.splashFactory,
     this.enableFeedback = true,
     this.tapIconToToggle = false,
-    this.expandTooltip = M3EExpandableListTokens.expandTooltip,
-    this.collapseTooltip = M3EExpandableListTokens.collapseTooltip,
+    this.expandTooltip = M3EListExpandableTheme.defaultExpandTooltip,
+    this.collapseTooltip = M3EListExpandableTheme.defaultCollapseTooltip,
   });
+
+  /// Builds a style from the given [M3EListExpandableTheme].
+  factory M3EExpandableStyle.fromTheme(M3EListExpandableTheme theme) {
+    return M3EExpandableStyle(
+      outerRadius: theme.outerRadius,
+      innerRadius: theme.innerRadius,
+      hoverRadius: theme.hoverRadius,
+      pressedRadius: theme.pressedRadius,
+      gap: theme.gap,
+      titleSubtitleGap: theme.titleSubtitleGap,
+      iconPadding: theme.iconPadding,
+      iconRotationAngle: theme.iconRotationAngle,
+      expandTooltip: theme.expandTooltip,
+      collapseTooltip: theme.collapseTooltip,
+    );
+  }
 
   /// Creates a copy of this decoration with the given fields replaced.
   M3EExpandableStyle copyWith({

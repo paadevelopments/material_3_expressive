@@ -11,9 +11,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../foundations/foundations.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
 import '../models/m3e_navigation_rail_destination.dart';
-import '../styles/m3e_nav_rail_theme.dart';
 import 'm3e_rail_item_button.dart';
 
 /// Single rail item (private to package). One class per file.
@@ -49,8 +49,7 @@ class M3ERailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>() ??
-        const M3ENavigationRailTheme();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final height =
         expanded ? theme.itemExpandedHeight : theme.itemCollapsedHeight;
 

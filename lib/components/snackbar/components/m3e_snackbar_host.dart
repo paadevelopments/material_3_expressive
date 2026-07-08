@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../styles/m3e_snackbar_tokens.dart';
 
 /// Animates a snackbar in from the bottom, holds it, then removes [entry].
 class M3ESnackbarHost extends StatefulWidget {
@@ -63,10 +62,11 @@ class M3ESnackbarHostState extends State<M3ESnackbarHost>
 
   @override
   Widget build(BuildContext context) {
+    final snackTheme = M3ETheme.of(context).snackBarTheme;
     return Positioned(
-      left: M3ESnackbarTokens.overlayHorizontalInset,
-      right: M3ESnackbarTokens.overlayHorizontalInset,
-      bottom: M3ESnackbarTokens.overlayBottomInset +
+      left: snackTheme.overlayHorizontalInset,
+      right: snackTheme.overlayHorizontalInset,
+      bottom: snackTheme.overlayBottomInset +
           MediaQuery.viewInsetsOf(context).bottom,
       child: SafeArea(
         child: Align(

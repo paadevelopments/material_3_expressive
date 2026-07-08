@@ -16,23 +16,22 @@ import '../../foundations/foundations.dart';
 import 'package:motor/motor.dart';
 
 import '../buttons/enums/m3e_button_enums.dart';
+import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_overflow_bottom_sheet_decoration.dart';
 import '../buttons/styles/m3e_overflow_popup_decoration.dart';
-import '../buttons/styles/m3e_button_tokens.dart';
 import '../buttons/components/m3e_overflow_strategy.dart';
 import '../toggle_button/m3e_toggle_button.dart';
 import 'controllers/m3e_button_group_overflow_controller.dart';
 import 'enums/m3e_toggle_button_group_enums.dart';
 import 'models/m3e_button_group_action.dart';
 import 'models/m3e_button_group_overflow_paging_window.dart';
-import 'styles/m3e_toggle_button_group_tokens.dart';
 import 'components/m3e_toggle_button_group_item_scope.dart';
 import 'components/m3e_toggle_button_group_provider.dart';
 import 'components/m3e_toggle_button_group_scope.dart';
 export 'enums/m3e_toggle_button_group_enums.dart';
-export 'styles/m3e_toggle_button_group_tokens.dart';
+export 'styles/m3e_toggle_button_group_theme.dart';
 export 'components/m3e_toggle_button_group_scope.dart';
 
 part 'components/m3e_button_group_align.dart';
@@ -278,9 +277,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   void _updateIconOnlyNaturalSizeCache() {
-    final tokens = M3EButtonTokens(context);
-    tokens.didChangeDependencies();
-    final m = tokens.measurements(_mapSize(widget.size));
+    final buttonTheme = M3ETheme.of(context).buttonTheme;
+    final m = buttonTheme.measurements(_mapSize(widget.size));
     _iconOnlyNaturalSizeCache = m.height;
   }
 
@@ -689,7 +687,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   @override
   Widget build(BuildContext context) {
-    final metrics = M3EButtonGroupTokens.metricsFor(
+    final groupTheme = M3ETheme.of(context).toggleButtonGroupTheme;
+    final metrics = groupTheme.metricsFor(
       widget.size,
       widget.density,
       isConnected: widget._connected,
@@ -741,7 +740,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     if (widget.clipBehavior != Clip.none) {
       result = ClipRRect(
         clipBehavior: widget.clipBehavior,
-        borderRadius: M3EButtonGroupTokens.groupRadiusFor(widget.shape, widget.size),
+        borderRadius: groupTheme.groupRadiusFor(widget.shape, widget.size),
         child: result,
       );
     }
@@ -1188,6 +1187,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
           focusedIndex: focusedIndex,
           beforeIndex: beforeIndex,
           spacing: spacing,
+          connectedGap:
+              M3ETheme.of(context).toggleButtonGroupTheme.connectedGap,
         );
 
         final double width = widget.direction == Axis.horizontal ? gap : 0;        final double height = widget.direction == Axis.vertical ? gap : 0;
@@ -1203,10 +1204,13 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     );
   }
 
-  double _separatorMainExtent(double spacing) =>
-      M3EButtonGroupOverflowController.roundConsumed(
-        widget._connected ? M3EButtonGroupTokens.kConnectedGap : spacing,
-      );
+  double _separatorMainExtent(double spacing) {
+    final connectedGap =
+        M3ETheme.of(context).toggleButtonGroupTheme.connectedGap;
+    return M3EButtonGroupOverflowController.roundConsumed(
+      widget._connected ? connectedGap : spacing,
+    );
+  }
 
   bool _allOverflowExtentsMeasured() {
     for (int i = 0; i < widget.actions.length; i++) {
@@ -1224,9 +1228,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
         _naturalSizeForButton(context, index),
       );
     }
-    final tokens = M3EButtonTokens(context);
-    tokens.didChangeDependencies();
-    final measurements = tokens.measurements(
+    final buttonTheme = M3ETheme.of(context).buttonTheme;
+    final measurements = buttonTheme.measurements(
       _mapSize(widget.size, actionWidth: widget.actions[index].width),
     );
     return M3EButtonGroupOverflowController.roundConsumed(

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/styles/m3e_button_tokens.dart';
+import '../../buttons/res/m3e_button_constants.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 

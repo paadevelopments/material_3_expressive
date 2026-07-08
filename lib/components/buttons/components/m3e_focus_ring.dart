@@ -35,7 +35,7 @@ class M3EFocusRing extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!focused) return RepaintBoundary(child: child);
 
-    final color = m3eMaterialTheme(context).colorScheme.primary;
+    final color = M3ETheme.of(context).colorScheme.primary;
 
     const double gap = _ConstProperties.focusRingGap;
     const double width = _ConstProperties.focusRingWidth;

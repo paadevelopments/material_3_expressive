@@ -6,7 +6,7 @@ import '../../../foundations/foundations.dart';
 import 'components/m3e_time_dial_painter.dart';
 import 'enums/m3e_time_picker_enums.dart';
 import 'models/m3e_time.dart';
-import 'styles/m3e_time_picker_tokens.dart';
+import 'styles/m3e_time_picker_theme.dart';
 
 const String _amLabel = 'AM';
 const String _pmLabel = 'PM';
@@ -38,17 +38,18 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
+    final timeTheme = theme.timePickerTheme;
     return Container(
-      padding: M3ETimePickerTokens.padding,
+      padding: timeTheme.padding,
       decoration: BoxDecoration(
-        color: M3ETimePickerTokens.containerColor(scheme),
-        borderRadius: M3ETimePickerTokens.borderRadius,
+        color: timeTheme.containerColor(scheme),
+        borderRadius: timeTheme.borderRadius,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _buildHeader(theme),
-          const SizedBox(height: M3ETimePickerTokens.headerDialGap),
+          SizedBox(height: timeTheme.headerDialGap),
           _buildDial(theme),
         ],
       ),
@@ -56,6 +57,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
   }
 
   Widget _buildHeader(M3EThemeData theme) {
+    final timeTheme = theme.timePickerTheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -67,7 +69,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
               .copyWith(color: theme.colorScheme.onSurface),
         ),
         _buildField(theme, widget.value.minuteLabel, M3ETimePickerMode.minute),
-        const SizedBox(width: M3ETimePickerTokens.fieldPeriodGap),
+        SizedBox(width: timeTheme.fieldPeriodGap),
         _buildPeriodToggle(theme),
       ],
     );
@@ -75,23 +77,24 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
 
   Widget _buildField(M3EThemeData theme, String text, M3ETimePickerMode mode) {
     final scheme = theme.colorScheme;
+    final timeTheme = theme.timePickerTheme;
     final active = _mode == mode;
     return M3ETappable(
       onTap: () => setState(() => _mode = mode),
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          width: M3ETimePickerTokens.fieldSize.width,
-          height: M3ETimePickerTokens.fieldSize.height,
+          width: timeTheme.fieldSize.width,
+          height: timeTheme.fieldSize.height,
           alignment: Alignment.center,
-          margin: M3ETimePickerTokens.fieldMargin,
+          margin: timeTheme.fieldMargin,
           decoration: BoxDecoration(
-            color: M3ETimePickerTokens.fieldBackgroundColor(scheme, active: active),
+            color: timeTheme.fieldBackgroundColor(scheme, active: active),
             borderRadius: M3EShapes.radiusSmall,
           ),
           child: Text(
             text,
             style: theme.typeScale.displayMedium.copyWith(
-              color: M3ETimePickerTokens.fieldForegroundColor(scheme, active: active),
+              color: timeTheme.fieldForegroundColor(scheme, active: active),
             ),
           ),
         );
@@ -117,18 +120,22 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
 
   Widget _buildPeriodOption(M3EThemeData theme, String label, bool selected) {
     final scheme = theme.colorScheme;
+    final timeTheme = theme.timePickerTheme;
     return M3ETappable(
       onTap: () => _setPeriod(label == _pmLabel),
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          width: M3ETimePickerTokens.periodOptionSize.width,
-          height: M3ETimePickerTokens.periodOptionSize.height,
+          width: timeTheme.periodOptionSize.width,
+          height: timeTheme.periodOptionSize.height,
           alignment: Alignment.center,
-          color: M3ETimePickerTokens.periodOptionBackgroundColor(scheme, selected: selected),
+          color: timeTheme.periodOptionBackgroundColor(scheme, selected: selected),
           child: Text(
             label,
             style: theme.typeScale.titleMedium.copyWith(
-              color: M3ETimePickerTokens.periodOptionForegroundColor(scheme, selected: selected),
+              color: timeTheme.periodOptionForegroundColor(
+                scheme,
+                selected: selected,
+              ),
             ),
           ),
         );
@@ -138,12 +145,14 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
 
   Widget _buildDial(M3EThemeData theme) {
     final scheme = theme.colorScheme;
+    final timeTheme = theme.timePickerTheme;
     return SizedBox(
-      width: M3ETimePickerTokens.dialSize,
-      height: M3ETimePickerTokens.dialSize,
+      width: timeTheme.dialSize,
+      height: timeTheme.dialSize,
       child: GestureDetector(
-        onTapDown: (TapDownDetails d) => _handleDial(d.localPosition),
-        onPanUpdate: (DragUpdateDetails d) => _handleDial(d.localPosition),
+        onTapDown: (TapDownDetails d) => _handleDial(d.localPosition, timeTheme),
+        onPanUpdate: (DragUpdateDetails d) =>
+            _handleDial(d.localPosition, timeTheme),
         child: CustomPaint(
           painter: M3ETimeDialPainter(
             labels: _dialLabels(),
@@ -153,6 +162,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
             onAccentColor: scheme.onPrimary,
             labelColor: scheme.onSurface,
             textDirection: Directionality.of(context),
+            timeTheme: timeTheme,
           ),
         ),
       ),
@@ -178,9 +188,9 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
     return (widget.value.minute / 5).round() % 12;
   }
 
-  void _handleDial(Offset position) {
-    const double dimension = M3ETimePickerTokens.dialSize;
-    const center = Offset(dimension / 2, dimension / 2);
+  void _handleDial(Offset position, M3ETimePickerTheme timeTheme) {
+    final double dimension = timeTheme.dialSize;
+    final center = Offset(dimension / 2, dimension / 2);
     final Offset delta = position - center;
     final double fraction =
         ((math.atan2(delta.dy, delta.dx) + math.pi / 2) / (2 * math.pi)) % 1;

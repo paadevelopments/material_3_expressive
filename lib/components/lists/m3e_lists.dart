@@ -4,9 +4,8 @@ import '../../foundations/foundations.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import 'components/m3e_card_list_item.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
-import 'styles/m3e_card_list_tokens.dart';
 import 'styles/m3e_dismissible_list_style.dart';
-import 'styles/m3e_list_item_tokens.dart';
+import 'styles/m3e_list_theme.dart';
 
 export 'components/m3e_expandable_card_column.dart';
 export 'components/m3e_expandable_card_list.dart';
@@ -15,13 +14,9 @@ export 'components/m3e_expandable_item.dart';
 export 'components/m3e_sliver_expandable_card_list.dart';
 export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
-export 'styles/m3e_card_list_tokens.dart';
 export 'styles/m3e_dismissible_list_style.dart';
-export 'styles/m3e_dismissible_list_tokens.dart';
-export 'styles/m3e_expandable_list_tokens.dart';
 export 'styles/m3e_expandable_style.dart';
-export 'styles/m3e_expandable_theme.dart';
-export 'styles/m3e_list_item_tokens.dart';
+export 'styles/m3e_list_theme.dart';
 
 /// A Material 3 Expressive list item.
 ///
@@ -66,6 +61,7 @@ class M3EListItem extends StatelessWidget {
 
   Widget _buildRow(M3EThemeData theme, M3EInteractionState state) {
     final scheme = theme.colorScheme;
+    final listTheme = theme.listTheme.item;
     final bool threeLine = _isThreeLine;
     final CrossAxisAlignment alignment =
         threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center;
@@ -76,21 +72,20 @@ class M3EListItem extends StatelessWidget {
           child: IgnorePointer(
             child: ColoredBox(
               color: selected
-                  ? M3EListItemTokens.selectedColor(scheme)
+                  ? listTheme.selectedColor(scheme)
                   : scheme.onSurface.withValues(alpha: state.opacity),
             ),
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: M3EListItemTokens.horizontalPadding,
+            horizontal: listTheme.horizontalPadding,
             vertical: threeLine
-                ? M3EListItemTokens.threeLineVerticalPadding
-                : M3EListItemTokens.verticalPadding,
+                ? listTheme.threeLineVerticalPadding
+                : listTheme.verticalPadding,
           ),
           child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(minHeight: M3EListItemTokens.minHeight),
+            constraints: BoxConstraints(minHeight: listTheme.minHeight),
             child: Row(
               crossAxisAlignment: alignment,
               children: _buildChildren(theme),
@@ -103,24 +98,25 @@ class M3EListItem extends StatelessWidget {
 
   List<Widget> _buildChildren(M3EThemeData theme) {
     final scheme = theme.colorScheme;
+    final listTheme = theme.listTheme.item;
     return <Widget>[
       if (leading != null) ...<Widget>[
         IconTheme.merge(
           data: IconThemeData(
-            color: M3EListItemTokens.iconColor(scheme),
-            size: M3EListItemTokens.iconSize,
+            color: listTheme.iconColor(scheme),
+            size: listTheme.iconSize,
           ),
           child: leading!,
         ),
-        const SizedBox(width: M3EListItemTokens.gap),
+        SizedBox(width: listTheme.gap),
       ],
       Expanded(child: _buildText(theme)),
       if (trailing != null) ...<Widget>[
-        const SizedBox(width: M3EListItemTokens.gap),
+        SizedBox(width: listTheme.gap),
         IconTheme.merge(
           data: IconThemeData(
-            color: M3EListItemTokens.iconColor(scheme),
-            size: M3EListItemTokens.iconSize,
+            color: listTheme.iconColor(scheme),
+            size: listTheme.iconSize,
           ),
           child: trailing!,
         ),
@@ -131,6 +127,7 @@ class M3EListItem extends StatelessWidget {
   Widget _buildText(M3EThemeData theme) {
     final scheme = theme.colorScheme;
     final type = theme.typeScale;
+    final listTheme = theme.listTheme.item;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -138,18 +135,18 @@ class M3EListItem extends StatelessWidget {
         if (overline != null)
           Text(
             overline!,
-            style: M3EListItemTokens.overlineStyle(type, scheme),
+            style: listTheme.overlineStyle(type, scheme),
           ),
         Text(
           headline,
-          style: M3EListItemTokens.headlineStyle(type, scheme),
+          style: listTheme.headlineStyle(type, scheme),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         if (supportingText != null)
           Text(
             supportingText!,
-            style: M3EListItemTokens.supportingStyle(type, scheme),
+            style: listTheme.supportingStyle(type, scheme),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -175,27 +172,27 @@ class M3ECardList extends StatelessWidget {
   /// The radius used for the top corners of the first item, the bottom corners
   /// of the last item, and all corners of a single item.
   ///
-  /// Defaults to [M3ECardListTokens.outerRadius].
+  /// Defaults to [M3EListCardListTheme.defaultOuterRadius].
   final double outerRadius;
 
   /// The radius used for the inner corners of adjoining items.
   ///
-  /// Defaults to [M3ECardListTokens.innerRadius].
+  /// Defaults to [M3EListCardListTheme.defaultInnerRadius].
   final double innerRadius;
 
   /// The gap space between adjacent items.
   ///
-  /// Defaults to [M3ECardListTokens.gap].
+  /// Defaults to [M3EListCardListTheme.defaultGap].
   final double gap;
 
   /// The background color for each card.
   ///
-  /// Defaults to [M3ECardListTokens.backgroundColor] if null.
+  /// Defaults to [M3EListCardListTheme.defaults.backgroundColor] if null.
   final Color? color;
 
   /// The inner padding applied to the [itemBuilder] child of each item.
   ///
-  /// Defaults to [M3ECardListTokens.itemPadding] via [M3ECardListItem].
+  /// Defaults to [M3EListCardListTheme.defaultItemPadding] via [M3ECardListItem].
   final EdgeInsetsGeometry? padding;
 
   /// The outer margin applied around the entire list of cards.
@@ -267,9 +264,9 @@ class M3ECardList extends StatelessWidget {
     super.key,
     required this.itemCount,
     required this.itemBuilder,
-    this.outerRadius = M3ECardListTokens.outerRadius,
-    this.innerRadius = M3ECardListTokens.innerRadius,
-    this.gap = M3ECardListTokens.gap,
+    this.outerRadius = M3EListCardListTheme.defaultOuterRadius,
+    this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
+    this.gap = M3EListCardListTheme.defaultGap,
     this.color,
     this.padding,
     this.margin,
@@ -290,9 +287,9 @@ class M3ECardList extends StatelessWidget {
     super.key,
     required this.itemCount,
     required this.itemBuilder,
-    this.outerRadius = M3ECardListTokens.outerRadius,
-    this.innerRadius = M3ECardListTokens.innerRadius,
-    this.gap = M3ECardListTokens.gap,
+    this.outerRadius = M3EListCardListTheme.defaultOuterRadius,
+    this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
+    this.gap = M3EListCardListTheme.defaultGap,
     this.color,
     this.padding,
     this.margin,

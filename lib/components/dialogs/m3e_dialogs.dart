@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../divider/m3e_divider.dart';
-import 'styles/m3e_dialog_tokens.dart';
+import 'styles/m3e_dialog_theme.dart';
 
-export 'styles/m3e_dialog_tokens.dart';
+export 'styles/m3e_dialog_theme.dart';
 
 const String _closeSemanticLabel = 'Close';
 
@@ -33,24 +33,26 @@ class M3EDialog extends StatelessWidget {
     bool barrierDismissible = true,
   }) {
     final M3EThemeData theme = M3ETheme.of(context);
+    final dialogTheme = theme.dialogTheme;
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: 'Dismiss',
-      barrierColor: M3EDialogTokens.scrimColor(theme.colorScheme),
+      barrierColor: dialogTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
         return M3ETheme(
           data: theme,
           child: Center(
             child: Padding(
-              padding: M3EDialogTokens.screenMargin,
+              padding: dialogTheme.screenMargin,
               child: dialog,
             ),
           ),
         );
       },
-      transitionBuilder: _transition,
+      transitionBuilder: (context, animation, secondary, child) =>
+          _transition(context, animation, secondary, child, dialogTheme),
     );
   }
 
@@ -81,6 +83,7 @@ class M3EDialog extends StatelessWidget {
     Animation<double> animation,
     Animation<double> secondary,
     Widget child,
+    M3EDialogTheme dialogTheme,
   ) {
     final curved = CurvedAnimation(
       parent: animation,
@@ -89,7 +92,7 @@ class M3EDialog extends StatelessWidget {
     return FadeTransition(
       opacity: curved,
       child: ScaleTransition(
-        scale: Tween<double>(begin: M3EDialogTokens.entranceScale, end: 1)
+        scale: Tween<double>(begin: dialogTheme.entranceScale, end: 1)
             .animate(curved),
         child: child,
       ),
@@ -116,16 +119,17 @@ class M3EDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
     return Container(
-      constraints: const BoxConstraints(
-        minWidth: M3EDialogTokens.minWidth,
-        maxWidth: M3EDialogTokens.maxWidth,
+      constraints: BoxConstraints(
+        minWidth: dialogTheme.minWidth,
+        maxWidth: dialogTheme.maxWidth,
       ),
-      padding: M3EDialogTokens.padding,
+      padding: dialogTheme.padding,
       decoration: BoxDecoration(
-        color: M3EDialogTokens.containerColor(scheme),
-        borderRadius: M3EDialogTokens.borderRadius,
+        color: dialogTheme.containerColor(scheme),
+        borderRadius: dialogTheme.borderRadius,
         boxShadow: M3EElevation.shadows(
           M3EElevation.level3,
           shadowColor: scheme.shadow,
@@ -135,23 +139,23 @@ class M3EDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment:
             icon == null ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: _buildChildren(theme),
+        children: _buildChildren(theme, dialogTheme),
       ),
     );
   }
 
-  List<Widget> _buildChildren(M3EThemeData theme) {
+  List<Widget> _buildChildren(M3EThemeData theme, M3EDialogTheme dialogTheme) {
     final scheme = theme.colorScheme;
     return <Widget>[
       if (icon != null) ...<Widget>[
         IconTheme.merge(
           data: IconThemeData(
             color: scheme.secondary,
-            size: M3EDialogTokens.iconSize,
+            size: dialogTheme.iconSize,
           ),
           child: icon!,
         ),
-        const SizedBox(height: M3EDialogTokens.gapAfterIcon),
+        SizedBox(height: dialogTheme.gapAfterIcon),
       ],
       Text(
         title,
@@ -159,7 +163,7 @@ class M3EDialog extends StatelessWidget {
         style: theme.typeScale.headlineSmall.copyWith(color: scheme.onSurface),
       ),
       if (content != null) ...<Widget>[
-        const SizedBox(height: M3EDialogTokens.gapAfterTitle),
+        SizedBox(height: dialogTheme.gapAfterTitle),
         DefaultTextStyle(
           style: theme.typeScale.bodyMedium
               .copyWith(color: scheme.onSurfaceVariant),
@@ -167,13 +171,13 @@ class M3EDialog extends StatelessWidget {
         ),
       ],
       if (actions.isNotEmpty) ...<Widget>[
-        const SizedBox(height: M3EDialogTokens.gapBeforeActions),
+        SizedBox(height: dialogTheme.gapBeforeActions),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             for (final Widget action in actions) ...<Widget>[
               action,
-              const SizedBox(width: M3EDialogTokens.actionGap),
+              SizedBox(width: dialogTheme.actionGap),
             ],
           ],
         ),
@@ -196,13 +200,14 @@ class _FullScreenDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
     return ColoredBox(
-      color: M3EDialogTokens.fullScreenBackground(scheme),
+      color: dialogTheme.fullScreenBackground(scheme),
       child: SafeArea(
         child: Column(
           children: <Widget>[
-            _buildHeader(context, theme),
+            _buildHeader(context, theme, dialogTheme),
             M3EDivider(color: scheme.outlineVariant),
             Expanded(child: body),
           ],
@@ -211,28 +216,32 @@ class _FullScreenDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, M3EThemeData theme) {
+  Widget _buildHeader(
+    BuildContext context,
+    M3EThemeData theme,
+    M3EDialogTheme dialogTheme,
+  ) {
     final scheme = theme.colorScheme;
     return SizedBox(
-      height: M3EDialogTokens.fullScreenHeaderHeight,
+      height: dialogTheme.fullScreenHeaderHeight,
       child: Row(
         children: <Widget>[
-          const SizedBox(width: M3EDialogTokens.headerEdgeGap),
+          SizedBox(width: dialogTheme.headerEdgeGap),
           M3ETappable(
             onTap: () => Navigator.of(context).pop(),
             semanticLabel: _closeSemanticLabel,
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
-                padding: M3EDialogTokens.closeButtonPadding,
+                padding: dialogTheme.closeButtonPadding,
                 child: Icon(
                   M3EIcons.close,
                   color: scheme.onSurface,
-                  size: M3EDialogTokens.iconSize,
+                  size: dialogTheme.iconSize,
                 ),
               );
             },
           ),
-          const SizedBox(width: M3EDialogTokens.headerEdgeGap),
+          SizedBox(width: dialogTheme.headerEdgeGap),
           Expanded(
             child: Text(
               title,
@@ -244,7 +253,7 @@ class _FullScreenDialog extends StatelessWidget {
           ),
           if (action != null) ...<Widget>[
             action!,
-            const SizedBox(width: M3EDialogTokens.headerActionGap),
+            SizedBox(width: dialogTheme.headerActionGap),
           ],
         ],
       ),

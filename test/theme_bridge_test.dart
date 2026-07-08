@@ -64,4 +64,14 @@ void main() {
     final second = M3ETheme.of(tester.element(find.byType(SizedBox)));
     expect(identical(first, second), isTrue);
   });
+
+  testWidgets('component theme override via copyWith', (tester) async {
+    const customCheckbox = M3ECheckboxTheme(boxSize: 24);
+    final tokens = M3EThemeData.light().copyWith(checkboxTheme: customCheckbox);
+    final resolved = await _resolve(
+      tester,
+      _capture(ThemeData(), tokens: tokens),
+    );
+    expect(resolved.checkboxTheme.boxSize, 24);
+  });
 }

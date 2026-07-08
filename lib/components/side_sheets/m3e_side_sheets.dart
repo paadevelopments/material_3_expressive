@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../divider/m3e_divider.dart';
-import 'styles/m3e_side_sheet_tokens.dart';
+import 'styles/m3e_side_sheet_theme.dart';
 
-export 'styles/m3e_side_sheet_tokens.dart';
+export 'styles/m3e_side_sheet_theme.dart';
 
 const String _closeSemanticLabel = 'Close';
 
@@ -33,11 +33,12 @@ class M3ESideSheet extends StatelessWidget {
     List<Widget> actions = const <Widget>[],
   }) {
     final M3EThemeData theme = M3ETheme.of(context);
+    final sheetTheme = theme.sideSheetTheme;
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss',
-      barrierColor: M3ESideSheetTokens.scrimColor(theme.colorScheme),
+      barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
         return M3ETheme(
@@ -63,39 +64,44 @@ class M3ESideSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final sheetTheme = theme.sideSheetTheme;
     final scheme = theme.colorScheme;
     return Container(
-      width: M3ESideSheetTokens.width,
+      width: sheetTheme.width,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: M3ESideSheetTokens.containerColor(scheme),
-        borderRadius: const BorderRadius.horizontal(
-          left: Radius.circular(M3ESideSheetTokens.cornerRadius),
+        color: sheetTheme.containerColor(scheme),
+        borderRadius: BorderRadius.horizontal(
+          left: Radius.circular(sheetTheme.cornerRadius),
         ),
       ),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            _buildHeader(context, theme),
+            _buildHeader(context, theme, sheetTheme),
             Expanded(child: body),
-            if (actions.isNotEmpty) _buildActions(scheme),
+            if (actions.isNotEmpty) _buildActions(scheme, sheetTheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, M3EThemeData theme) {
+  Widget _buildHeader(
+    BuildContext context,
+    M3EThemeData theme,
+    M3ESideSheetTheme sheetTheme,
+  ) {
     final scheme = theme.colorScheme;
     return Padding(
-      padding: M3ESideSheetTokens.headerPadding,
+      padding: sheetTheme.headerPadding,
       child: Row(
         children: <Widget>[
           Expanded(
             child: Text(
               title,
-              style: M3ESideSheetTokens.titleStyle(theme.typeScale, scheme),
+              style: sheetTheme.titleStyle(theme.typeScale, scheme),
             ),
           ),
           M3ETappable(
@@ -103,11 +109,11 @@ class M3ESideSheet extends StatelessWidget {
             semanticLabel: _closeSemanticLabel,
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
-                padding: M3ESideSheetTokens.closeButtonPadding,
+                padding: sheetTheme.closeButtonPadding,
                 child: Icon(
                   M3EIcons.close,
                   color: scheme.onSurface,
-                  size: M3ESideSheetTokens.iconSize,
+                  size: sheetTheme.iconSize,
                 ),
               );
             },
@@ -117,13 +123,13 @@ class M3ESideSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildActions(M3EColorScheme scheme) {
+  Widget _buildActions(M3EColorScheme scheme, M3ESideSheetTheme sheetTheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        M3EDivider(color: M3ESideSheetTokens.dividerColor(scheme)),
+        M3EDivider(color: sheetTheme.dividerColor(scheme)),
         Padding(
-          padding: M3ESideSheetTokens.actionsPadding,
+          padding: sheetTheme.actionsPadding,
           child: Row(children: actions),
         ),
       ],

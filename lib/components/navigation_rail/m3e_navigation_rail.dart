@@ -23,7 +23,6 @@ import 'models/m3e_navigation_rail_destination.dart';
 import 'models/m3e_navigation_rail_fab_slot.dart';
 import 'models/m3e_navigation_rail_section.dart';
 import 'res/m3e_navigation_rail_layout.dart';
-import 'styles/m3e_nav_rail_theme.dart';
 
 /// Material 3 Expressive Navigation Rail — single widget that animates between states.
 class M3ENavigationRail extends StatefulWidget {
@@ -212,7 +211,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               child: AnimatedContainer(
                 duration: M3ENavigationRailLayout.expandDuration,
                 curve: Curves.easeOutCubic,
-                color: Theme.of(context)
+                color: M3ETheme.of(context)
                     .colorScheme
                     .scrim
                     .withValues(alpha: _isExpanded ? 0.32 : 0.0),
@@ -261,8 +260,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   double _targetWidth(BuildContext context) {
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>() ??
-        const M3ENavigationRailTheme();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final isExpanded = _isExpanded;
     return isExpanded
         ? (widget.expandedWidth ?? theme.expandedMinWidth)
@@ -341,8 +339,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
   List<Widget> _buildChildren(BuildContext context,
       {required bool showLabels}) {
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>() ??
-        const M3ENavigationRailTheme();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final isExpanded = _isExpanded;
 
     final children = <Widget>[];
@@ -363,8 +360,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               bottom: theme.sectionHeaderSpacingBottom,
             ),
             child: DefaultTextStyle(
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: M3ETheme.of(context).typeScale.titleSmall.copyWith(
+                  color: M3ETheme.of(context).colorScheme.onSurfaceVariant),
               child: section.header!,
             ),
           ));
@@ -417,8 +414,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   Widget _buildRailCore(BuildContext context) {
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>() ??
-        const M3ENavigationRailTheme();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
     final width = _targetWidth(context);
     final Color containerColor = widget.background ?? theme.containerColor ?? m3e.colorScheme.surface;

@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
+import '../../foundations/foundations.dart';
 import 'components/m3e_expressive_loading_indicator.dart';
 import 'enums/m3e_loading_indicator_variant.dart';
-import 'styles/m3e_loading_tokens.dart';
 
 export 'components/m3e_expressive_loading_indicator.dart';
 export 'enums/m3e_loading_indicator_variant.dart';
-export 'styles/m3e_loading_tokens.dart';
+export 'styles/m3e_loading_indicator_theme.dart';
 
 /// Material 3 Expressive loading indicator.
 ///
@@ -40,26 +40,18 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = M3ELoadingTokens(context);
-    final size = const Size(
-      M3ELoadingTokens.containerWidth,
-      M3ELoadingTokens.containerHeight,
-    );
+    final theme = M3ETheme.of(context);
+    final scheme = theme.colorScheme;
+    final loadingTheme = theme.loadingIndicatorTheme;
+    final size = Size(loadingTheme.containerWidth, loadingTheme.containerHeight);
 
     final cons = constraints ?? BoxConstraints.tight(size);
 
-    final activeColor = switch (variant) {
-      M3ELoadingIndicatorVariant.defaultStyle => color ?? tokens.activeColor(),
-      M3ELoadingIndicatorVariant.contained =>
-        color ?? tokens.containedActiveColor(),
-    };
+    final activeColor = color ??
+        loadingTheme.resolveActiveColor(scheme, variant);
 
-    final containerBg = switch (variant) {
-      M3ELoadingIndicatorVariant.defaultStyle =>
-        containerColor ?? tokens.containerColorDefault(),
-      M3ELoadingIndicatorVariant.contained =>
-        containerColor ?? tokens.containedContainerColor(),
-    };
+    final containerBg = containerColor ??
+        loadingTheme.resolveContainerColor(scheme, variant);
 
     final indicator = M3EExpressiveLoadingIndicator(
       color: activeColor,
@@ -72,7 +64,7 @@ class M3ELoadingIndicator extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: containerBg,
-        borderRadius: M3ELoadingTokens.containerRadius,
+        borderRadius: loadingTheme.containerRadius,
       ),
       child: Padding(
         padding: padding ?? EdgeInsets.zero,

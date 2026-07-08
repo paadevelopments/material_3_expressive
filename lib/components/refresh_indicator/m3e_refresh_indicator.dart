@@ -22,7 +22,7 @@ import 'package:material_new_shapes/material_new_shapes.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_refresh_status.dart';
-import 'styles/m3e_refresh_tokens.dart';
+import 'styles/m3e_refresh_indicator_theme.dart';
 
 enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 
@@ -31,8 +31,8 @@ class M3ERefreshIndicator extends StatefulWidget {
   const M3ERefreshIndicator({
     super.key,
     required this.child,
-    this.displacement = M3ERefreshTokens.defaultDisplacement,
-    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
+    this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -40,7 +40,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = M3ERefreshTokens.defaultElevation,
+    this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
@@ -52,8 +52,8 @@ class M3ERefreshIndicator extends StatefulWidget {
   const M3ERefreshIndicator.contained({
     super.key,
     required this.child,
-    this.displacement = M3ERefreshTokens.defaultDisplacement,
-    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
+    this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -61,7 +61,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = M3ERefreshTokens.defaultElevation,
+    this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
@@ -73,8 +73,8 @@ class M3ERefreshIndicator extends StatefulWidget {
   const M3ERefreshIndicator.material({
     super.key,
     required this.child,
-    this.displacement = M3ERefreshTokens.defaultDisplacement,
-    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
+    this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -83,7 +83,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = M3ERefreshTokens.defaultElevation,
+    this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.material,
         polygons = null,
@@ -93,8 +93,8 @@ class M3ERefreshIndicator extends StatefulWidget {
   const M3ERefreshIndicator.adaptive({
     super.key,
     required this.child,
-    this.displacement = M3ERefreshTokens.defaultDisplacement,
-    this.edgeOffset = M3ERefreshTokens.defaultEdgeOffset,
+    this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -103,7 +103,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = M3ERefreshTokens.defaultElevation,
+    this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.adaptive,
         polygons = null,
@@ -119,7 +119,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
-    this.elevation = M3ERefreshTokens.defaultElevation,
+    this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
   }) : _indicatorType = _IndicatorType.noSpinner,
         displacement = 0.0,
         edgeOffset = 0.0,
@@ -170,7 +170,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
     begin: 0.0,
-    end: M3ERefreshTokens.dragSizeFactorLimit,
+    end: M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
   );
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
 
@@ -206,8 +206,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   void _setupColorTween() {
-    _effectiveValueColor =
-        widget.color ?? M3ETheme.of(context).colorScheme.primary;
+    final scheme = M3ETheme.of(context).colorScheme;
+    final refreshTheme = M3ETheme.of(context).refreshIndicatorTheme;
+    _effectiveValueColor = widget.color ?? refreshTheme.color(scheme);
     final Color color = _effectiveValueColor;
     if (color.alpha == 0x00) {
       _valueColor = AlwaysStoppedAnimation<Color>(color);
@@ -216,7 +217,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         ColorTween(
           begin: color,
           end: color,
-        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / M3ERefreshTokens.dragSizeFactorLimit))),
+        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit))),
       );
     }
   }
@@ -327,9 +328,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   void _checkDragOffset(double containerExtent) {
     assert(_status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed);
-    double newValue = _dragOffset! / (containerExtent * M3ERefreshTokens.dragContainerExtentPercentage);
+    double newValue = _dragOffset! / (containerExtent * M3ERefreshIndicatorTheme.kDragContainerExtentPercentage);
     if (_status == M3ERefreshStatus.armed) {
-      newValue = math.max(newValue, 1.0 / M3ERefreshTokens.dragSizeFactorLimit);
+      newValue = math.max(newValue, 1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit);
     }
     _positionController.value = clampDouble(newValue, 0.0, 1.0);
     if (_status == M3ERefreshStatus.drag &&
@@ -348,9 +349,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     });
     switch (_status!) {
       case M3ERefreshStatus.done:
-        await _scaleController.animateTo(1.0, duration: M3ERefreshTokens.indicatorScaleDuration);
+        await _scaleController.animateTo(1.0, duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration);
       case M3ERefreshStatus.canceled:
-        await _positionController.animateTo(0.0, duration: M3ERefreshTokens.indicatorScaleDuration);
+        await _positionController.animateTo(0.0, duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration);
       case M3ERefreshStatus.armed:
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.refresh:
@@ -374,7 +375,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _status = M3ERefreshStatus.snap;
     widget.onStatusChange?.call(_status);
     _positionController
-        .animateTo(1.0 / M3ERefreshTokens.dragSizeFactorLimit, duration: M3ERefreshTokens.indicatorSnapDuration)
+        .animateTo(1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit, duration: M3ERefreshIndicatorTheme.defaults.indicatorSnapDuration)
         .then<void>((void value) {
       if (mounted && _status == M3ERefreshStatus.snap) {
         setState(() {
@@ -496,7 +497,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       return _ContainedExpressiveLoadingIndicator(
         color: _effectiveValueColor,
         backgroundColor: widget.backgroundColor ??
-            M3ERefreshTokens.containedBackgroundColor(context),
+            M3ETheme.of(context)
+                .refreshIndicatorTheme
+                .containedBackgroundColor(M3ETheme.of(context).colorScheme),
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,
         semanticsLabel: widget.semanticsLabel,
@@ -505,9 +508,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     } else {
       return _ContainedDragExpressiveIndicator(
         color: _effectiveValueColor,
-        backgroundColor:
-        (widget.backgroundColor ??
-            M3ERefreshTokens.containedBackgroundColor(context)),
+        backgroundColor: widget.backgroundColor ??
+            M3ETheme.of(context)
+                .refreshIndicatorTheme
+                .containedBackgroundColor(M3ETheme.of(context).colorScheme),
         progress: _value.value,
         polygons: widget.polygons,
         constraints: widget.indicatorConstraints,
@@ -531,8 +535,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   Widget _buildAdaptiveIndicator(BuildContext context, bool showIndeterminateIndicator) {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
+    switch (M3ETheme.platformOf(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

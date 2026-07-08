@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_checkbox_tokens.dart';
+import 'styles/m3e_checkbox_theme.dart';
 
-export 'styles/m3e_checkbox_tokens.dart';
+export 'styles/m3e_checkbox_theme.dart';
 
 /// A Material 3 Expressive checkbox.
 ///
@@ -52,7 +52,9 @@ class M3ECheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final checkboxTheme = theme.checkboxTheme;
+    final scheme = theme.colorScheme;
     final bool checked = value ?? false;
     final bool active = value == null || checked;
 
@@ -64,13 +66,13 @@ class M3ECheckbox extends StatelessWidget {
       semanticLabel: semanticLabel,
       builder: (BuildContext context, M3EInteractionState state) {
         return SizedBox(
-          width: M3ECheckboxTokens.hitSize,
-          height: M3ECheckboxTokens.hitSize,
+          width: checkboxTheme.hitSize,
+          height: checkboxTheme.hitSize,
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
-              _buildStateLayer(scheme, state, active),
-              _buildBox(scheme, active),
+              _buildStateLayer(checkboxTheme, scheme, state, active),
+              _buildBox(checkboxTheme, scheme, active),
             ],
           ),
         );
@@ -79,18 +81,19 @@ class M3ECheckbox extends StatelessWidget {
   }
 
   Widget _buildStateLayer(
+    M3ECheckboxTheme checkboxTheme,
     M3EColorScheme scheme,
     M3EInteractionState state,
     bool active,
   ) {
-    final Color base = M3ECheckboxTokens.stateLayerColor(
+    final Color base = checkboxTheme.stateLayerColor(
       scheme,
       active: active,
       error: error,
     );
     return Container(
-      width: M3ECheckboxTokens.hitSize,
-      height: M3ECheckboxTokens.hitSize,
+      width: checkboxTheme.hitSize,
+      height: checkboxTheme.hitSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: base.withValues(alpha: state.opacity),
@@ -98,14 +101,18 @@ class M3ECheckbox extends StatelessWidget {
     );
   }
 
-  Widget _buildBox(M3EColorScheme scheme, bool active) {
-    final Color fill = M3ECheckboxTokens.fillColor(
+  Widget _buildBox(
+    M3ECheckboxTheme checkboxTheme,
+    M3EColorScheme scheme,
+    bool active,
+  ) {
+    final Color fill = checkboxTheme.fillColor(
       scheme,
       enabled: _enabled,
       active: active,
       error: error,
     );
-    final Color border = M3ECheckboxTokens.borderColor(
+    final Color border = checkboxTheme.borderColor(
       scheme,
       enabled: _enabled,
       active: active,
@@ -114,27 +121,27 @@ class M3ECheckbox extends StatelessWidget {
     return AnimatedContainer(
       duration: M3EMotion.short3,
       curve: M3EMotion.standard,
-      width: M3ECheckboxTokens.boxSize,
-      height: M3ECheckboxTokens.boxSize,
+      width: checkboxTheme.boxSize,
+      height: checkboxTheme.boxSize,
       decoration: BoxDecoration(
         color: fill,
-        borderRadius: M3ECheckboxTokens.borderRadius,
+        borderRadius: checkboxTheme.borderRadius,
         border: Border.all(
           color: border,
-          width: M3ECheckboxTokens.borderWidth,
+          width: checkboxTheme.borderWidth,
         ),
       ),
-      child: _buildMark(scheme),
+      child: _buildMark(checkboxTheme, scheme),
     );
   }
 
-  Widget _buildMark(M3EColorScheme scheme) {
-    final Color color = M3ECheckboxTokens.markColor(scheme, error: error);
+  Widget _buildMark(M3ECheckboxTheme checkboxTheme, M3EColorScheme scheme) {
+    final Color color = checkboxTheme.markColor(scheme, error: error);
     if (value == null && tristate) {
       return Center(
         child: Container(
-          width: M3ECheckboxTokens.indeterminateWidth,
-          height: M3ECheckboxTokens.indeterminateHeight,
+          width: checkboxTheme.indeterminateWidth,
+          height: checkboxTheme.indeterminateHeight,
           color: color,
         ),
       );
@@ -142,7 +149,7 @@ class M3ECheckbox extends StatelessWidget {
     if (value ?? false) {
       return Icon(
         M3EIcons.check,
-        size: M3ECheckboxTokens.markSize,
+        size: checkboxTheme.markSize,
         color: color,
       );
     }

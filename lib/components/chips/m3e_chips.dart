@@ -2,7 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_chip_type.dart';
-import 'styles/m3e_chip_tokens.dart';
+import 'styles/m3e_chip_theme.dart';
+
+export 'enums/m3e_chip_type.dart';
+export 'styles/m3e_chip_theme.dart';
 
 /// A Material 3 Expressive chip.
 ///
@@ -34,34 +37,36 @@ class M3EChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final borderRadius = M3EShapes.radiusSmall;
-    final border = RoundedRectangleBorder(borderRadius: borderRadius);
+    final chipTheme = theme.chipTheme;
+    final borderRadius = chipTheme.borderRadius;
+    final border = chipTheme.shape as RoundedRectangleBorder;
 
     return M3ETappable(
       onTap: onPressed,
       enabled: onPressed != null,
       semanticLabel: label,
       builder: (BuildContext context, M3EInteractionState state) {
-        return _buildSurface(theme, borderRadius, border, state);
+        return _buildSurface(theme, chipTheme, borderRadius, border, state);
       },
     );
   }
 
   Widget _buildSurface(
-      M3EThemeData theme,
-      BorderRadius borderRadius,
-      RoundedRectangleBorder border,
-      M3EInteractionState state,
-      ) {
+    M3EThemeData theme,
+    M3EChipTheme chipTheme,
+    BorderRadius borderRadius,
+    RoundedRectangleBorder border,
+    M3EInteractionState state,
+  ) {
     final scheme = theme.colorScheme;
-    final Color container = M3EChipTokens.containerColor(
+    final Color container = chipTheme.containerColor(
       scheme,
       enabled: _enabled,
       selected: selected,
       elevated: elevated,
       type: type,
     );
-    final Color foreground = M3EChipTokens.foregroundColor(
+    final Color foreground = chipTheme.foregroundColor(
       scheme,
       enabled: _enabled,
       selected: selected,
@@ -69,12 +74,12 @@ class M3EChip extends StatelessWidget {
     final bool outlined = !selected && !elevated;
 
     return Container(
-      height: M3EChipTokens.height,
+      height: chipTheme.height,
       padding: EdgeInsets.only(
         left: leading == null
-            ? M3EChipTokens.labelStartPadding
-            : M3EChipTokens.iconStartPadding,
-        right: M3EChipTokens.endPadding,
+            ? chipTheme.labelStartPadding
+            : chipTheme.iconStartPadding,
+        right: chipTheme.endPadding,
       ),
       decoration: BoxDecoration(
         color: container,
@@ -92,22 +97,26 @@ class M3EChip extends StatelessWidget {
             color: foreground,
             shape: border,
           ),
-          _buildContent(theme, foreground),
+          _buildContent(theme, chipTheme, foreground),
         ],
       ),
     );
   }
 
-  Widget _buildContent(M3EThemeData theme, Color foreground) {
+  Widget _buildContent(
+    M3EThemeData theme,
+    M3EChipTheme chipTheme,
+    Color foreground,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (leading != null) ...<Widget>[
           IconTheme.merge(
-            data: IconThemeData(color: foreground, size: M3EChipTokens.iconSize),
+            data: IconThemeData(color: foreground, size: chipTheme.iconSize),
             child: leading!,
           ),
-          const SizedBox(width: M3EChipTokens.iconLabelGap),
+          SizedBox(width: chipTheme.iconLabelGap),
         ],
         Text(
           label,
@@ -116,10 +125,14 @@ class M3EChip extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (onDeleted != null) ...<Widget>[
-          const SizedBox(width: M3EChipTokens.iconLabelGap),
+          SizedBox(width: chipTheme.iconLabelGap),
           GestureDetector(
             onTap: onDeleted,
-            child: Icon(M3EIcons.close, size: M3EChipTokens.iconSize, color: foreground),
+            child: Icon(
+              M3EIcons.close,
+              size: chipTheme.iconSize,
+              color: foreground,
+            ),
           ),
         ],
       ],

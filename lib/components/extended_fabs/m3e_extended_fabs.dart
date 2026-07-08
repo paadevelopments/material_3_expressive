@@ -2,8 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
-import '../floating_action_buttons/styles/m3e_fab_tokens.dart';
-import 'styles/m3e_extended_fab_tokens.dart';
+import '../floating_action_buttons/styles/m3e_fab_theme.dart';
 
 /// A Material 3 Expressive extended floating action button.
 ///
@@ -37,13 +36,14 @@ class M3EExtendedFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final tokens = M3EFabTokens.resolve(
+    final fabTheme = theme.fabTheme;
+    final extendedTheme = fabTheme.extended;
+    final metrics = fabTheme.resolve(
       size: M3EFabSize.medium,
       color: color,
       scheme: theme.colorScheme,
     );
-    final borderRadius =
-    M3EShapes.resolve(M3EExtendedFabTokens.cornerRadius);
+    final borderRadius = M3EShapes.resolve(extendedTheme.cornerRadius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
     return M3ETappable(
@@ -52,22 +52,22 @@ class M3EExtendedFab extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       semanticLabel: label,
-      pressedScale: M3EExtendedFabTokens.pressedScale,
+      pressedScale: extendedTheme.pressedScale,
       builder: (BuildContext context, M3EInteractionState state) {
-        final double elevation = M3EExtendedFabTokens.elevation(
+        final double elevation = extendedTheme.elevation(
           hovered: state.hovered,
         );
         return AnimatedContainer(
           duration: M3EMotion.medium2,
           curve: M3EMotion.emphasized,
-          height: M3EExtendedFabTokens.height,
+          height: extendedTheme.height,
           padding: EdgeInsets.symmetric(
             horizontal: extended
-                ? M3EExtendedFabTokens.extendedHorizontalPadding
-                : M3EExtendedFabTokens.collapsedHorizontalPadding,
+                ? extendedTheme.extendedHorizontalPadding
+                : extendedTheme.collapsedHorizontalPadding,
           ),
           decoration: BoxDecoration(
-            color: tokens.background,
+            color: metrics.background,
             borderRadius: borderRadius,
             boxShadow: M3EElevation.shadows(
               elevation,
@@ -79,10 +79,10 @@ class M3EExtendedFab extends StatelessWidget {
             children: <Widget>[
               M3EStateLayerOverlay(
                 state: state,
-                color: tokens.foreground,
+                color: metrics.foreground,
                 shape: border,
               ),
-              _buildContent(theme, tokens),
+              _buildContent(theme, metrics, extendedTheme),
             ],
           ),
         );
@@ -90,14 +90,18 @@ class M3EExtendedFab extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(M3EThemeData theme, M3EFabTokens tokens) {
+  Widget _buildContent(
+    M3EThemeData theme,
+    M3EFabMetrics metrics,
+    M3EExtendedFabTheme extendedTheme,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         IconTheme.merge(
           data: IconThemeData(
-            color: tokens.foreground,
-            size: M3EExtendedFabTokens.iconSize,
+            color: metrics.foreground,
+            size: extendedTheme.iconSize,
           ),
           child: icon,
         ),
@@ -106,19 +110,17 @@ class M3EExtendedFab extends StatelessWidget {
           curve: M3EMotion.emphasized,
           child: extended
               ? Padding(
-            padding: const EdgeInsets.only(
-              left: M3EExtendedFabTokens.iconLabelGap,
-            ),
-            child: Text(
-              label,
-              style: M3EExtendedFabTokens.labelStyle(
-                theme.typeScale,
-                tokens.foreground,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          )
+                  padding: EdgeInsets.only(left: extendedTheme.iconLabelGap),
+                  child: Text(
+                    label,
+                    style: extendedTheme.labelStyle(
+                      theme.typeScale,
+                      metrics.foreground,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
               : const SizedBox.shrink(),
         ),
       ],

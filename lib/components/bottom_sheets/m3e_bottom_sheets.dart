@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_bottom_sheet_tokens.dart';
+import 'styles/m3e_bottom_sheet_theme.dart';
 
-export 'styles/m3e_bottom_sheet_tokens.dart';
+export 'styles/m3e_bottom_sheet_theme.dart';
 
 /// A Material 3 Expressive bottom sheet.
 ///
@@ -27,11 +27,12 @@ class M3EBottomSheet extends StatelessWidget {
     bool showDragHandle = true,
   }) {
     final M3EThemeData theme = M3ETheme.of(context);
+    final sheetTheme = theme.bottomSheetTheme;
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss',
-      barrierColor: M3EBottomSheetTokens.scrimColor(theme.colorScheme),
+      barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
         return M3ETheme(
@@ -60,18 +61,19 @@ class M3EBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final sheetTheme = theme.bottomSheetTheme;
     final scheme = theme.colorScheme;
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: M3EBottomSheetTokens.maxWidth),
+      constraints: BoxConstraints(maxWidth: sheetTheme.maxWidth),
       child: GestureDetector(
         onVerticalDragEnd: (DragEndDetails details) =>
-            _handleDragEnd(context, details),
+            _handleDragEnd(context, details, sheetTheme),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: M3EBottomSheetTokens.containerColor(scheme),
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(M3EBottomSheetTokens.topCornerRadius),
+            color: sheetTheme.containerColor(scheme),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(sheetTheme.topCornerRadius),
             ),
             boxShadow: M3EElevation.shadows(
               M3EElevation.level1,
@@ -83,7 +85,7 @@ class M3EBottomSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (showDragHandle) _buildHandle(scheme),
+                if (showDragHandle) _buildHandle(scheme, sheetTheme),
                 Flexible(child: child),
               ],
             ),
@@ -93,25 +95,29 @@ class M3EBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildHandle(M3EColorScheme scheme) {
+  Widget _buildHandle(M3EColorScheme scheme, M3EBottomSheetTheme sheetTheme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: M3EBottomSheetTokens.handleVerticalPadding,
+      padding: EdgeInsets.symmetric(
+        vertical: sheetTheme.handleVerticalPadding,
       ),
       child: Container(
-        width: M3EBottomSheetTokens.handleWidth,
-        height: M3EBottomSheetTokens.handleHeight,
+        width: sheetTheme.handleWidth,
+        height: sheetTheme.handleHeight,
         decoration: BoxDecoration(
-          color: M3EBottomSheetTokens.handleColor(scheme),
-          borderRadius: M3EShapes.resolve(M3EBottomSheetTokens.handleCornerRadius),
+          color: sheetTheme.handleColor(scheme),
+          borderRadius: M3EShapes.resolve(sheetTheme.handleCornerRadius),
         ),
       ),
     );
   }
 
-  void _handleDragEnd(BuildContext context, DragEndDetails details) {
+  void _handleDragEnd(
+    BuildContext context,
+    DragEndDetails details,
+    M3EBottomSheetTheme sheetTheme,
+  ) {
     final double velocity = details.primaryVelocity ?? 0;
-    if (velocity > M3EBottomSheetTokens.dismissVelocity) {
+    if (velocity > sheetTheme.dismissVelocity) {
       Navigator.of(context).maybePop();
     }
   }

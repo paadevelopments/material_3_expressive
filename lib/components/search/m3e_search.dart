@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_search_bar_tokens.dart';
+import 'styles/m3e_search_bar_theme.dart';
 
-export 'styles/m3e_search_bar_tokens.dart';
+export 'styles/m3e_search_bar_theme.dart';
 
 /// A Material 3 Expressive search bar.
 ///
@@ -67,20 +67,19 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
+    final searchTheme = theme.searchBarTheme;
     return GestureDetector(
       onTap: widget.onTap ?? _focusNode.requestFocus,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        height: M3ESearchBarTokens.height,
-        padding: const EdgeInsets.symmetric(
-          horizontal: M3ESearchBarTokens.horizontalPadding,
-        ),
+        height: searchTheme.height,
+        padding: EdgeInsets.symmetric(horizontal: searchTheme.horizontalPadding),
         decoration: BoxDecoration(
-          color: M3ESearchBarTokens.containerColor(scheme),
-          borderRadius: M3EShapes.resolve(M3ESearchBarTokens.cornerRadius),
+          color: searchTheme.containerColor(scheme),
+          borderRadius: M3EShapes.resolve(searchTheme.cornerRadius),
           boxShadow: widget.elevated
               ? M3EElevation.shadows(
-                  M3ESearchBarTokens.elevation,
+                  searchTheme.elevation,
                   shadowColor: scheme.shadow,
                 )
               : null,
@@ -89,18 +88,18 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
           children: <Widget>[
             IconTheme.merge(
               data: IconThemeData(
-                color: M3ESearchBarTokens.iconColor(scheme),
-                size: M3ESearchBarTokens.iconSize,
+                color: searchTheme.iconColor(scheme),
+                size: searchTheme.iconSize,
               ),
               child: widget.leading ?? const Icon(M3EIcons.search),
             ),
-            const SizedBox(width: M3ESearchBarTokens.leadingGap),
-            Expanded(child: _buildInput(theme, scheme)),
+            SizedBox(width: searchTheme.leadingGap),
+            Expanded(child: _buildInput(theme, scheme, searchTheme)),
             for (final Widget action in widget.trailing)
               IconTheme.merge(
                 data: IconThemeData(
-                  color: M3ESearchBarTokens.iconColor(scheme),
-                  size: M3ESearchBarTokens.iconSize,
+                  color: searchTheme.iconColor(scheme),
+                  size: searchTheme.iconSize,
                 ),
                 child: action,
               ),
@@ -110,11 +109,15 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
     );
   }
 
-  Widget _buildInput(M3EThemeData theme, M3EColorScheme scheme) {
+  Widget _buildInput(
+    M3EThemeData theme,
+    M3EColorScheme scheme,
+    M3ESearchBarTheme searchTheme,
+  ) {
     if (widget.onTap != null) {
       return Text(
         widget.hintText,
-        style: M3ESearchBarTokens.hintStyle(theme.typeScale, scheme),
+        style: searchTheme.hintStyle(theme.typeScale, scheme),
       );
     }
     return Stack(
@@ -123,17 +126,17 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
         if (_controller.text.isEmpty)
           Text(
             widget.hintText,
-            style: M3ESearchBarTokens.hintStyle(theme.typeScale, scheme),
+            style: searchTheme.hintStyle(theme.typeScale, scheme),
           ),
         EditableText(
           controller: _controller,
           focusNode: _focusNode,
           onChanged: widget.onChanged,
           onSubmitted: widget.onSubmitted,
-          style: M3ESearchBarTokens.inputStyle(theme.typeScale, scheme),
-          cursorColor: M3ESearchBarTokens.cursorColor(scheme),
+          style: searchTheme.inputStyle(theme.typeScale, scheme),
+          cursorColor: searchTheme.cursorColor(scheme),
           backgroundCursorColor: scheme.outlineVariant,
-          selectionColor: M3ESearchBarTokens.selectionColor(scheme),
+          selectionColor: searchTheme.selectionColor(scheme),
         ),
       ],
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'styles/m3e_radio_tokens.dart';
+import 'styles/m3e_radio_theme.dart';
 
-export 'styles/m3e_radio_tokens.dart';
+export 'styles/m3e_radio_theme.dart';
 
 /// A Material 3 Expressive radio button.
 ///
@@ -34,7 +34,9 @@ class M3ERadio<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final radioTheme = theme.radioTheme;
+    final scheme = theme.colorScheme;
 
     return M3ETappable(
       onTap: _enabled ? () => onChanged!(value) : null,
@@ -44,13 +46,13 @@ class M3ERadio<T> extends StatelessWidget {
       semanticLabel: semanticLabel,
       builder: (BuildContext context, M3EInteractionState state) {
         return SizedBox(
-          width: M3ERadioTokens.hitSize,
-          height: M3ERadioTokens.hitSize,
+          width: radioTheme.hitSize,
+          height: radioTheme.hitSize,
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
-              _buildStateLayer(scheme, state),
-              _buildRing(scheme),
+              _buildStateLayer(radioTheme, scheme, state),
+              _buildRing(radioTheme, scheme),
             ],
           ),
         );
@@ -58,12 +60,16 @@ class M3ERadio<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildStateLayer(M3EColorScheme scheme, M3EInteractionState state) {
+  Widget _buildStateLayer(
+    M3ERadioTheme radioTheme,
+    M3EColorScheme scheme,
+    M3EInteractionState state,
+  ) {
     final Color base =
-        M3ERadioTokens.stateLayerColor(scheme, selected: _selected);
+        radioTheme.stateLayerColor(scheme, selected: _selected);
     return Container(
-      width: M3ERadioTokens.hitSize,
-      height: M3ERadioTokens.hitSize,
+      width: radioTheme.hitSize,
+      height: radioTheme.hitSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: base.withValues(alpha: state.opacity),
@@ -71,19 +77,19 @@ class M3ERadio<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildRing(M3EColorScheme scheme) {
-    final Color color = M3ERadioTokens.color(
+  Widget _buildRing(M3ERadioTheme radioTheme, M3EColorScheme scheme) {
+    final Color color = radioTheme.color(
       scheme,
       enabled: _enabled,
       error: error,
       selected: _selected,
     );
     return Container(
-      width: M3ERadioTokens.ringSize,
-      height: M3ERadioTokens.ringSize,
+      width: radioTheme.ringSize,
+      height: radioTheme.ringSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: color, width: M3ERadioTokens.borderWidth),
+        border: Border.all(color: color, width: radioTheme.borderWidth),
       ),
       child: Center(
         child: AnimatedScale(
@@ -91,8 +97,8 @@ class M3ERadio<T> extends StatelessWidget {
           duration: M3EMotion.short4,
           curve: M3EMotion.emphasizedDecelerate,
           child: Container(
-            width: M3ERadioTokens.dotSize,
-            height: M3ERadioTokens.dotSize,
+            width: radioTheme.dotSize,
+            height: radioTheme.dotSize,
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
         ),

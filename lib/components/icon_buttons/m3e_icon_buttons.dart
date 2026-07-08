@@ -15,12 +15,14 @@ import 'package:flutter/material.dart';
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_icon_button_enums.dart';
 import 'styles/m3e_icon_button_shapes.dart';
-import 'styles/m3e_icon_button_tokens.dart';
+import 'styles/m3e_icon_button_theme.dart';
+
+export 'styles/m3e_icon_button_theme.dart';
 
 /// Material 3 Expressive Icon Button
 ///
-/// - Visual sizes are defined by [M3EIconButtonTokens.visual] (per size × width)
-/// - Tap target respects [M3EIconButtonTokens.target] with a minimum of 48×48 on XS/SM
+/// - Visual sizes are defined by [M3EIconButtonTheme.visual] (per size × width)
+/// - Tap target respects [M3EIconButtonTheme.target] with a minimum of 48×48 on XS/SM
 /// - Variants: standard, filled, tonal, outlined
 /// - Shapes: round (pill) or square (rounded rect). Toggle can flip shape when selected.
 /// - Widths: default, narrow, wide
@@ -59,11 +61,12 @@ class M3EIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
 
-    final Size visual = size.visual(width);
-    final Size target = size.target(width);
-    final double iconPx = size.icon;
+    final Size visual = iconButtonTheme.visual(size, width);
+    final Size target = iconButtonTheme.target(size, width);
+    final double iconPx = iconButtonTheme.iconSize(size);
 
     final bool selected = isSelected ?? false;
     // Consider it a toggle control if selection can be represented.
@@ -94,7 +97,7 @@ class M3EIconButton extends StatelessWidget {
         fg = scheme.primary;
         side = BorderSide(
           color: scheme.outline,
-          width: M3EIconButtonTokens.outlineWidth,
+          width: iconButtonTheme.outlineWidth,
         );
         break;
     }
@@ -102,6 +105,7 @@ class M3EIconButton extends StatelessWidget {
     // Resolve shape radius based on states (pressed) and toggle/selection.
     OutlinedBorder shapeFor(Set<WidgetState> states) {
       final r = M3EIconButtonShapes.effectiveRadius(
+        theme: iconButtonTheme,
         size: size,
         baseVariant: shape,
         isToggle: isToggle,
@@ -132,7 +136,7 @@ class M3EIconButton extends StatelessWidget {
         foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
         side: WidgetStateProperty.resolveWith((_) => side),
         // Animate pressed shape morph a bit.
-        animationDuration: M3EIconButtonTokens.morphDuration,
+        animationDuration: iconButtonTheme.morphDuration,
         visualDensity: VisualDensity.standard,
       ),
     );

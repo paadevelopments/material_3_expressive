@@ -39,9 +39,9 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     final triggerBottomRight = triggerBox.localToGlobal(
       triggerBox.size.bottomRight(Offset.zero),
     );
-    final theme = m3eMaterialTheme(context);
+    final m3eTheme = M3ETheme.of(context);
 
-    final cs = theme.colorScheme;
+    final cs = m3eTheme.colorScheme;
 
     final dec = widget.overflowPopupDecoration;
 
@@ -173,7 +173,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
     int itemCount,
     M3EOverflowPopupDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     final outerR = dec.outerRadius;
     final innerR = dec.innerRadius;
@@ -207,7 +207,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int listIndex,
     int total,
     M3EOverflowPopupDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
     double outerR,
     double innerR,
     double selectedR,
@@ -265,7 +265,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               const SizedBox(width: 12),
               Expanded(
                 child: DefaultTextStyle.merge(
-                  style: m3eMaterialTheme(context).textTheme.bodyLarge?.copyWith(
+                  style: M3ETheme.of(context).typeScale.bodyLarge.copyWith(
                     color: selected ? cs.onSecondaryContainer : cs.onSurface,
                   ),
                   child: _overflowMenuTitle(actionIndex),
@@ -290,7 +290,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
     int itemCount,
     M3EOverflowPopupDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     return ListView.builder(
       padding: dec.padding,
@@ -307,7 +307,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     BuildContext context,
     int actionIndex,
     M3EOverflowPopupDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     final action = widget.actions[actionIndex];
     final selected = _isToggleActionSelected(actionIndex);
@@ -355,7 +355,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DefaultTextStyle.merge(
-                    style: m3eMaterialTheme(context).textTheme.labelLarge?.copyWith(
+                    style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
                       color: action.enabled
                           ? fgColor
                           : fgColor.withValues(
@@ -381,8 +381,8 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
   ) async {
     final dec = widget.overflowBottomSheetDecoration;
-    final theme = m3eMaterialTheme(context);
-    final cs = theme.colorScheme;
+    final m3eTheme = M3ETheme.of(context);
+    final cs = m3eTheme.colorScheme;
     final itemCount = widget.actions.length - firstHiddenIndex;
 
     return showModalBottomSheet<int>(
@@ -405,7 +405,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                     Padding(
                       padding: dec.titlePadding,
                       child: DefaultTextStyle.merge(
-                        style: m3eMaterialTheme(sheetContext).textTheme.titleMedium,
+                        style: M3ETheme.of(sheetContext).typeScale.titleMedium,
                         child: dec.title!,
                       ),
                     ),
@@ -442,7 +442,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
     int itemCount,
     M3EOverflowBottomSheetDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     final outerR = dec.outerRadius;
     final innerR = dec.innerRadius;
@@ -476,7 +476,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int listIndex,
     int total,
     M3EOverflowBottomSheetDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
     double outerR,
     double innerR,
     double selectedR,
@@ -534,7 +534,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               const SizedBox(width: 12),
               Expanded(
                 child: DefaultTextStyle.merge(
-                  style: m3eMaterialTheme(context).textTheme.bodyLarge?.copyWith(
+                  style: M3ETheme.of(context).typeScale.bodyLarge.copyWith(
                     color: selected ? cs.onSecondaryContainer : cs.onSurface,
                   ),
                   child: _overflowMenuTitle(actionIndex),
@@ -559,7 +559,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
     int itemCount,
     M3EOverflowBottomSheetDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     return ListView.builder(
       shrinkWrap: true,
@@ -576,7 +576,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     BuildContext context,
     int actionIndex,
     M3EOverflowBottomSheetDecoration dec,
-    ColorScheme cs,
+    M3EColorScheme cs,
   ) {
     final action = widget.actions[actionIndex];
     final selected = _isToggleActionSelected(actionIndex);
@@ -624,7 +624,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DefaultTextStyle.merge(
-                    style: m3eMaterialTheme(context).textTheme.labelLarge?.copyWith(
+                    style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
                       color: action.enabled
                           ? fgColor
                           : fgColor.withValues(

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
-import 'styles/m3e_carousel_tokens.dart';
+import 'styles/m3e_carousel_theme.dart';
 export 'enums/m3e_carousel_type.dart';
+export 'styles/m3e_carousel_theme.dart';
 
 /// Creates a Material Design carousel.
 ///
@@ -31,13 +32,16 @@ class M3ECarousel extends StatefulWidget {
     this.isExtended = false,
     this.freeScroll = false,
     this.heroAlignment = M3ECarouselHeroAlignment.center,
-    this.uncontainedItemExtent = M3ECarouselTokens.uncontainedItemExtent,
-    this.uncontainedShrinkExtent = M3ECarouselTokens.uncontainedShrinkExtent,
-    this.childElementBorderRadius = M3ECarouselTokens.borderRadiusValue,
-    this.scrollAnimationDuration = M3ECarouselTokens.scrollAnimationDuration,
+    this.uncontainedItemExtent =
+        M3ECarouselTheme.defaultUncontainedItemExtent,
+    this.uncontainedShrinkExtent =
+        M3ECarouselTheme.defaultUncontainedShrinkExtent,
+    this.childElementBorderRadius = M3ECarouselTheme.defaultBorderRadiusValue,
+    this.scrollAnimationDuration =
+        M3ECarouselTheme.defaultScrollAnimationDuration,
     this.fixedPulseDelta = 4,
     this.singleSwipeGestureSensitivityRange =
-        M3ECarouselTokens.singleSwipeGestureSensitivityRange,
+        M3ECarouselTheme.defaultSingleSwipeGestureSensitivityRange,
     this.onTap,
     required this.children,
   });

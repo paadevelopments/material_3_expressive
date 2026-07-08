@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 import '../enums/m3e_icon_button_enums.dart';
-import 'm3e_icon_button_tokens.dart';
+import 'm3e_icon_button_theme.dart';
 
 /// Shape resolution helpers: resting/pressed radii and toggle behavior.
 class M3EIconButtonShapes {
@@ -27,20 +27,20 @@ class M3EIconButtonShapes {
   }
 
   static double restingRadius({
+    required M3EIconButtonTheme theme,
     required M3EIconButtonSize size,
     required M3EIconButtonShapeVariant variant,
   }) {
     return switch (variant) {
-      M3EIconButtonShapeVariant.round =>
-        M3EIconButtonTokens.radiusRestRound[size]!,
-      M3EIconButtonShapeVariant.square =>
-        M3EIconButtonTokens.radiusRestSquare[size]!,
+      M3EIconButtonShapeVariant.round => theme.radiusRestRound(size),
+      M3EIconButtonShapeVariant.square => theme.radiusRestSquare(size),
     };
   }
 
   /// Effective corner radius for the given material states.
   /// Hover does not change the radius; Pressed uses the shared pressed radius.
   static double effectiveRadius({
+    required M3EIconButtonTheme theme,
     required M3EIconButtonSize size,
     required M3EIconButtonShapeVariant baseVariant,
     required bool isToggle,
@@ -54,8 +54,8 @@ class M3EIconButtonShapes {
     );
 
     if (states.contains(WidgetState.pressed)) {
-      return M3EIconButtonTokens.radiusPressed[size]!;
+      return theme.radiusPressed(size);
     }
-    return restingRadius(size: size, variant: variant);
+    return restingRadius(theme: theme, size: size, variant: variant);
   }
 }

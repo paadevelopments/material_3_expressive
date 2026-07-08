@@ -8,14 +8,21 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/components/buttons/models/m3e_button_measurements.dart';
+import 'package:material_3_expressive/components/buttons/res/m3e_button_constants.dart';
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_decoration.dart';
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_motion.dart';
-import 'package:material_3_expressive/components/buttons/styles/m3e_button_tokens.dart';
+import 'package:material_3_expressive/components/buttons/styles/m3e_button_theme.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 
 import 'components/m3e_base_button_state.dart';
 import 'components/m3e_focus_ring.dart';
 import 'components/m3e_radius_and_padding_motion.dart';
 import 'enums/m3e_button_enums.dart';
+
+export 'models/m3e_button_measurements.dart';
+export 'res/m3e_button_constants.dart';
+export 'styles/m3e_button_theme.dart';
 
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
@@ -317,8 +324,7 @@ class _M3EButtonIconLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = M3EButtonTokens(context);
-    final m = tokens.measurements(size);
+    final m = M3ETheme.of(context).buttonTheme.measurements(size);
     final children = <Widget>[
       RepaintBoundary(
         child: IconTheme.merge(
@@ -351,8 +357,11 @@ class _M3EButtonIconLayout extends StatelessWidget {
 
 class _M3EButtonState extends State<M3EButton>
     with M3EBaseButtonState<M3EButton> {
-  late M3EButtonTokens _tokens;
   late M3EButtonMeasurements _measurements;
+
+  M3EButtonTheme get _buttonTheme => M3ETheme.of(context).buttonTheme;
+
+  M3EColorScheme get _scheme => M3ETheme.of(context).colorScheme;
 
   @override
   M3EButtonSize get buttonSize => widget.size;
@@ -376,15 +385,13 @@ class _M3EButtonState extends State<M3EButton>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _tokens = M3EButtonTokens(context);
-    _tokens.didChangeDependencies();
     _updateMeasurements();
     updateLabelStyle(context);
     updateSpringMotion();
   }
 
   void _updateMeasurements() {
-    _measurements = _tokens.measurements(widget.size);
+    _measurements = _buttonTheme.measurements(widget.size);
   }
 
   @override
@@ -436,7 +443,8 @@ class _M3EButtonState extends State<M3EButton>
         ? WidgetStateProperty.all<EdgeInsetsGeometry>(dec!.padding!)
         : null;
 
-    final defaultMinSize = Size(_tokens.minWidthFloor(), _measurements.height);
+    final defaultMinSize =
+        Size(_buttonTheme.minWidthFloor, _measurements.height);
     final effectiveMinSize = dec?.minimumSize != null
         ? WidgetStateProperty.all(dec!.minimumSize!)
         : WidgetStateProperty.all(defaultMinSize);
@@ -468,11 +476,11 @@ class _M3EButtonState extends State<M3EButton>
           if (color != null) return color;
         }
         if (states.contains(WidgetState.disabled)) {
-          return _tokens.c.onSurface.withValues(
+          return _scheme.onSurface.withValues(
             alpha: M3EButtonConstants.kDisabledForegroundAlpha,
           );
         }
-        return _tokens.foreground(widget.style);
+        return _buttonTheme.foreground(_scheme, widget.style);
       }),
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (dec?.backgroundColor != null) {
@@ -486,20 +494,20 @@ class _M3EButtonState extends State<M3EButton>
         if (states.contains(WidgetState.disabled)) {
           return isTransparent
               ? Colors.transparent
-              : _tokens.c.onSurface.withValues(
+              : _scheme.onSurface.withValues(
             alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
           );
         }
         return (dec?.backgroundBuilder != null || isTransparent)
             ? Colors.transparent
-            : _tokens.container(widget.style);
+            : _buttonTheme.container(_scheme, widget.style);
       }),
       elevation: WidgetStateProperty.resolveWith((states) {
         if (dec?.elevation != null) {
           final e = dec!.elevation!.resolve(states);
           if (e != null) return e;
         }
-        return _tokens.elevation(widget.style, states);
+        return _buttonTheme.elevation(widget.style, states);
       }),
       side: WidgetStateProperty.resolveWith((states) {
         if (dec?.side != null) {
@@ -511,13 +519,13 @@ class _M3EButtonState extends State<M3EButton>
 
         if (states.contains(WidgetState.disabled)) {
           return BorderSide(
-            color: _tokens.c.onSurface.withValues(
+            color: _scheme.onSurface.withValues(
               alpha: M3EButtonConstants.kDisabledOutlineAlpha,
             ),
             width: 1,
           );
         }
-        return BorderSide(color: _tokens.outline(), width: 1);
+        return BorderSide(color: _buttonTheme.outline(_scheme), width: 1);
       }),
       mouseCursor: WidgetStateProperty.resolveWith((states) {
         if (dec?.mouseCursor != null) {
@@ -548,12 +556,12 @@ class _M3EButtonState extends State<M3EButton>
 
     final BorderRadius fullyRound = BorderRadius.circular(m.height / 2);
     final double? explicitBorderRadius = widget.decorationBorderRadius;
-    final double tokenPressed = _tokens.pressedRadius(widget.size);
+    final double tokenPressed = _buttonTheme.pressedRadius(widget.size);
     final BorderRadius defaultShape = explicitBorderRadius != null
         ? BorderRadius.circular(explicitBorderRadius)
         : widget.shape == M3EButtonShape.round
         ? fullyRound
-        : BorderRadius.circular(_tokens.squareRadius(widget.size));
+        : BorderRadius.circular(_buttonTheme.squareRadius(widget.size));
 
     final double? explicitPressed = widget.decorationPressedRadius;
     final BorderRadius pressedShape = explicitPressed != null
@@ -562,7 +570,7 @@ class _M3EButtonState extends State<M3EButton>
         ? BorderRadius.circular(explicitBorderRadius)
         : BorderRadius.circular(tokenPressed);
 
-    final double tokenHovered = _tokens.hoveredRadius(widget.size);
+    final double tokenHovered = _buttonTheme.hoveredRadius(widget.size);
     final double? defaultExplicitHovered = widget.decoration?.hoveredRadius;
     final BorderRadius hoveredShape = defaultExplicitHovered != null
         ? BorderRadius.circular(defaultExplicitHovered)

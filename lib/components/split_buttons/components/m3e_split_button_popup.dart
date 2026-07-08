@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:motor/motor.dart';
 import '../models/m3e_split_button_item.dart';
 import '../styles/m3e_split_button_popup_decoration.dart';
-import '../../buttons/styles/m3e_button_tokens.dart';
+import '../../buttons/res/m3e_button_constants.dart';
 
 Future<T?> showSplitButtonPopup<T>({
   required BuildContext context,
@@ -140,8 +140,9 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
     final triggerBottomRight = widget.triggerRenderBox.localToGlobal(
       widget.triggerRenderBox.size.bottomRight(Offset.zero),
     );
-    final theme = m3eMaterialTheme(context);
-    final cs = theme.colorScheme;
+    final m3eTheme = M3ETheme.of(context);
+    final scheme = m3eTheme.colorScheme;
+    final splitTheme = M3ETheme.of(context).splitButtonTheme;
 
     final menuWidth = (widget.triggerRenderBox.size.width + 176.0).clamp(
       widget.decoration.minWidth,
@@ -197,7 +198,9 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
                   behavior: HitTestBehavior.opaque,
                   onTap: _dismiss,
                   child: Container(
-                    color: theme.colorScheme.scrim.withValues(alpha: 0.26),
+                    color: m3eTheme.colorScheme.scrim.withValues(
+                      alpha: splitTheme.popupScrimAlpha,
+                    ),
                   ),
                 ),
               ),
@@ -226,15 +229,17 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
                         child: SizedBox(
                           width: menuWidth,
                           child: Material(
-                            color:
-                                widget.decoration.backgroundColor ??
-                                cs.surfaceContainer,
+                            color: widget.decoration.backgroundColor ??
+                                splitTheme.popupBackgroundColor(scheme),
                             surfaceTintColor: Colors.transparent,
-                            elevation: widget.decoration.elevation ?? 3,
+                            elevation:
+                                widget.decoration.elevation ??
+                                splitTheme.popupElevation,
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  widget.decoration.borderRadius ??
-                                  BorderRadius.circular(18),
+                              borderRadius: widget.decoration.borderRadius ??
+                                  BorderRadius.circular(
+                                    splitTheme.popupBorderRadius,
+                                  ),
                               side: BorderSide.none,
                             ),
                             clipBehavior: Clip.antiAlias,
@@ -244,9 +249,8 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
                                     .clamp(0.0, widget.decoration.maxHeight),
                               ),
                               child: ListView(
-                                padding:
-                                    widget.decoration.padding ??
-                                    const EdgeInsets.symmetric(vertical: 8),
+                                padding: widget.decoration.padding ??
+                                    splitTheme.popupPadding,
                                 shrinkWrap: true,
                                 children: [
                                   for (int i = 0; i < widget.items.length; i++)
@@ -294,9 +298,10 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
           const SizedBox(width: 12),
           Text(
             item.child.toString(),
-            style: m3eMaterialTheme(
-              context,
-            ).textTheme.labelLarge?.copyWith(color: effectiveColor),
+            style: M3ETheme.of(context)
+                .typeScale
+                .labelLarge
+                .copyWith(color: effectiveColor),
           ),
         ],
       );
@@ -305,9 +310,10 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
     } else {
       child = Text(
         item.child.toString(),
-        style: m3eMaterialTheme(
-          context,
-        ).textTheme.labelLarge?.copyWith(color: effectiveColor),
+        style: M3ETheme.of(context)
+            .typeScale
+            .labelLarge
+            .copyWith(color: effectiveColor),
       );
     }
 

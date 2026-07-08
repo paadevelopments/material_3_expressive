@@ -22,7 +22,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../styles/m3e_carousel_tokens.dart';
+import '../../../foundations/foundations.dart';
+import '../styles/m3e_carousel_theme.dart';
 
 /// A Material Design carousel widget.
 ///
@@ -359,17 +360,19 @@ class _CarouselViewState extends State<M3ECarouselView> {
       index = index % widget.children.length;
     }
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
-    final ColorScheme colorScheme = ColorScheme.of(context);
+    final M3EThemeData m3eTheme = M3ETheme.of(context);
+    final ColorScheme colorScheme = m3eTheme.colorScheme.toColorScheme();
+    final M3ECarouselTheme m3eCarouselTheme = m3eTheme.carouselTheme;
     final EdgeInsets effectivePadding =
         widget.padding ?? carouselTheme.padding ?? const EdgeInsets.all(4.0);
     final Color effectiveBackgroundColor = widget.backgroundColor ??
         carouselTheme.backgroundColor ??
-        M3ECarouselTokens.backgroundColor(context);
+        m3eCarouselTheme.backgroundColor(m3eTheme.colorScheme);
     final double effectiveElevation =
         widget.elevation ?? carouselTheme.elevation ?? 0.0;
     final ShapeBorder effectiveShape = widget.shape ??
         carouselTheme.shape ??
-        M3ECarouselTokens.shape;
+        m3eCarouselTheme.shape;
     final Clip effectiveItemClipBehavior = widget.itemClipBehavior ??
         carouselTheme.itemClipBehavior ??
         Clip.antiAlias;
@@ -422,7 +425,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
     );
   }
 
-  Widget _buildSliverCarousel(ThemeData theme) {
+  Widget _buildSliverCarousel() {
     // Determine the child count and builder based on whether we're using lazy loading
     final int? childCount = widget.infinite
         ? null
@@ -473,7 +476,6 @@ class _CarouselViewState extends State<M3ECarouselView> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final ScrollPhysics physics = widget.itemSnapping
         ? const M3ECarouselScrollPhysics()
         : ScrollConfiguration.of(context).getScrollPhysics(context);
@@ -495,7 +497,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
           physics: widget.physics ?? physics,
           clipBehavior: Clip.antiAlias,
           scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-          slivers: <Widget>[_buildSliverCarousel(theme)],
+          slivers: <Widget>[_buildSliverCarousel()],
         );
       },
     );

@@ -16,7 +16,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_progress_enums.dart';
-import '../styles/m3e_linear_progress_tokens.dart';
+import '../styles/m3e_progress_indicator_theme.dart';
 
 /// Linear indicator that renders two **separate lanes** (active above, track below)
 /// with a fixed vertical gap. Lanes never overlap.
@@ -87,13 +87,17 @@ class _M3ELinearProgressState extends State<M3ELinearProgress>
 
   @override
   Widget build(BuildContext context) {
-    final colors = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final colors = theme.colorScheme;
 
     // Colors sourced from the ambient theme (overridable per props).
     final active = widget.activeColor ?? colors.primary;
     final track = widget.trackColor ?? colors.surfaceContainerHighest;
 
-    final spec = M3ELinearProgressTokens.resolve(size: widget.size, shape: widget.shape);
+    final spec = theme.progressIndicatorTheme.linear.resolve(
+      size: widget.size,
+      shape: widget.shape,
+    );
 
     // Total height equals the taller of the two strokes sharing the same baseline.
     // For wavy, add vertical amplitude; for flat, it's just the trackHeight.
@@ -136,7 +140,7 @@ class _LinearPainter extends CustomPainter {
   });
 
   final double? value;
-  final M3ELinearProgressTokens spec;
+  final M3ELinearProgressLayout spec;
   final Color active;
   final Color track;
   final double phase;

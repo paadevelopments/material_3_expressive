@@ -94,14 +94,14 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   }
 
   void updateLabelStyle(BuildContext context) {
-    final tt = m3eMaterialTheme(context).textTheme;
+    final type = M3ETheme.of(context).typeScale;
     final base = switch (buttonSize.name) {
-      'xs' => tt.labelSmall ?? const TextStyle(fontSize: 11),
-      'sm' => tt.labelMedium ?? const TextStyle(fontSize: 12),
-      'md' => tt.labelLarge ?? const TextStyle(fontSize: 14),
-      'lg' => tt.titleMedium ?? const TextStyle(fontSize: 16),
-      'xl' => tt.titleLarge ?? const TextStyle(fontSize: 22),
-      _ => tt.labelLarge ?? const TextStyle(fontSize: 14),
+      'xs' => type.labelSmall,
+      'sm' => type.labelMedium,
+      'md' => type.labelLarge,
+      'lg' => type.titleMedium,
+      'xl' => type.titleLarge,
+      _ => type.labelLarge,
     };
     labelStyle = base.copyWith(overflow: TextOverflow.ellipsis);
   }

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import '../styles/m3e_time_picker_tokens.dart';
+import '../styles/m3e_time_picker_theme.dart';
 
 /// Paints the clock dial: hour or minute labels, the selection hand and knob.
 class M3ETimeDialPainter extends CustomPainter {
@@ -14,6 +14,7 @@ class M3ETimeDialPainter extends CustomPainter {
     required this.onAccentColor,
     required this.labelColor,
     required this.textDirection,
+    required this.timeTheme,
   });
 
   /// The labels drawn evenly around the ring, starting at the 12 o'clock slot.
@@ -27,15 +28,14 @@ class M3ETimeDialPainter extends CustomPainter {
   final Color onAccentColor;
   final Color labelColor;
   final TextDirection textDirection;
-
-  static const double _knobRadius = M3ETimePickerTokens.dialKnobRadius;
+  final M3ETimePickerTheme timeTheme;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
     final double radius = size.shortestSide / 2;
-    final double ringRadius =
-        radius - _knobRadius - M3ETimePickerTokens.dialRingInset;
+    final double knobRadius = timeTheme.dialKnobRadius;
+    final double ringRadius = radius - knobRadius - timeTheme.dialRingInset;
 
     canvas.drawCircle(center, radius, Paint()..color = dialColor);
 
@@ -48,17 +48,22 @@ class M3ETimeDialPainter extends CustomPainter {
         knob,
         Paint()
           ..color = accentColor
-          ..strokeWidth = M3ETimePickerTokens.dialHandWidth,
+          ..strokeWidth = timeTheme.dialHandWidth,
       )
-      ..drawCircle(center, M3ETimePickerTokens.dialCenterRadius, accent)
-      ..drawCircle(knob, _knobRadius, accent);
+      ..drawCircle(center, timeTheme.dialCenterRadius, accent)
+      ..drawCircle(knob, knobRadius, accent);
 
     for (var i = 0; i < labels.length; i++) {
       _paintLabel(canvas, center, ringRadius, i);
     }
   }
 
-  void _paintLabel(Canvas canvas, Offset center, double ringRadius, int i) {
+  void _paintLabel(
+    Canvas canvas,
+    Offset center,
+    double ringRadius,
+    int i,
+  ) {
     final angle = _angleFor(i);
     final Offset position = center + Offset.fromDirection(angle, ringRadius);
     final selected = i == selectedIndex;
@@ -67,7 +72,7 @@ class M3ETimeDialPainter extends CustomPainter {
         text: labels[i],
         style: TextStyle(
           color: selected ? onAccentColor : labelColor,
-          fontSize: M3ETimePickerTokens.dialLabelFontSize,
+          fontSize: timeTheme.dialLabelFontSize,
         ),
       ),
       textDirection: textDirection,
@@ -87,6 +92,7 @@ class M3ETimeDialPainter extends CustomPainter {
   bool shouldRepaint(M3ETimeDialPainter oldDelegate) {
     return oldDelegate.selectedIndex != selectedIndex ||
         oldDelegate.labels != labels ||
-        oldDelegate.accentColor != accentColor;
+        oldDelegate.accentColor != accentColor ||
+        oldDelegate.timeTheme != timeTheme;
   }
 }

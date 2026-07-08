@@ -1,14 +1,20 @@
 // ignore: file_length
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:motor/motor.dart';
 import '../buttons/components/m3e_base_button_state.dart';
 import '../buttons/components/m3e_focus_ring.dart';
 import '../buttons/components/m3e_radius_and_padding_motion.dart';
 import '../buttons/enums/m3e_button_enums.dart';
+import '../buttons/models/m3e_button_measurements.dart';
+import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
-import '../buttons/styles/m3e_button_tokens.dart';
-import '../toggle_button_group/styles/m3e_toggle_button_group_tokens.dart';
+import '../buttons/styles/m3e_button_theme.dart';
+import '../toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
+import 'styles/m3e_toggle_button_theme.dart';
+
+export 'styles/m3e_toggle_button_theme.dart';
 
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
@@ -16,7 +22,6 @@ const Duration _kDurationZero = Duration.zero;
 const InteractiveInkFeatureFactory _kDefaultSplashFactory =
     InkRipple.splashFactory;
 const bool _kDefaultEnableFeedback = true;
-const double _kLabelSlideDistance = 10.0;
 final SpringMotion _kPressedRadiusMotion = M3EButtonMotion.expressiveEffectsFast.toMotion();
 
 /// Material 3 Expressive Toggle Button.
@@ -292,8 +297,17 @@ class M3EToggleButton extends StatefulWidget {
 class _M3EToggleButtonState extends State<M3EToggleButton>
     with M3EBaseButtonState<M3EToggleButton> {
   late bool _localChecked;
-  late M3EButtonTokens _tokens;
   late M3EButtonMeasurements _measurements;
+
+  M3EButtonTheme get _buttonTheme => M3ETheme.of(context).buttonTheme;
+
+  M3EToggleButtonTheme get _toggleTheme =>
+      M3ETheme.of(context).toggleButtonTheme;
+
+  M3EToggleButtonGroupTheme get _groupTheme =>
+      M3ETheme.of(context).toggleButtonGroupTheme;
+
+  M3EColorScheme get _scheme => M3ETheme.of(context).colorScheme;
 
   Widget? _cachedIcon;
   Widget? _cachedLabel;
@@ -351,15 +365,13 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _tokens = M3EButtonTokens(context);
-    _tokens.didChangeDependencies();
     _updateMeasurements();
     updateLabelStyle(context);
     updateSpringMotion();
   }
 
   void _updateMeasurements() {
-    _measurements = _tokens.measurements(widget.size);
+    _measurements = _buttonTheme.measurements(widget.size);
   }
 
   @override
@@ -412,8 +424,8 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
     final double halfHeight = m.height / 2;
     final double? explicitBorderRadius = widget.decorationBorderRadius;
-    final double squareRad = _tokens.squareRadius(widget.size);
-    final double pressRad = _tokens.pressedRadius(widget.size);
+    final double squareRad = _buttonTheme.squareRadius(widget.size);
+    final double pressRad = _buttonTheme.pressedRadius(widget.size);
     final BorderRadius fullyRound = BorderRadius.circular(halfHeight);
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
@@ -421,11 +433,11 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final double innerRad =
         explicitBorderRadius ??
             widget.decorationConnectedInnerRadius ??
-            M3EButtonGroupTokens.kConnectedInnerRadius;
+            _groupTheme.connectedInnerRadius;
     final double pressInnerRad =
         widget.decorationPressedRadius ??
             explicitBorderRadius ??
-            M3EButtonGroupTokens.kConnectedPressedInnerRadius;
+            _groupTheme.connectedPressedInnerRadius;
 
     final bool freezeStart = widget.isFirstInGroup;
     final bool freezeEnd = widget.isLastInGroup;
@@ -471,7 +483,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
           final double hoverInnerRad =
               widget.decoration?.hoveredRadius ??
                   explicitBorderRadius ??
-                  _tokens.hoveredRadius(widget.size);
+                  _buttonTheme.hoveredRadius(widget.size);
           final BorderRadius hoverRadius = BorderRadiusDirectional.horizontal(
             start: Radius.circular(
               widget.isFirstInGroup ? outerRad : hoverInnerRad,
@@ -494,7 +506,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
               ? BorderRadius.circular(widget.decoration!.hoveredRadius!)
               : explicitBorderRadius != null
               ? BorderRadius.circular(explicitBorderRadius)
-              : BorderRadius.circular(_tokens.hoveredRadius(widget.size));
+              : BorderRadius.circular(_buttonTheme.hoveredRadius(widget.size));
 
           targetRadius = (effectivelyEnabled && pressed)
               ? pressSquish
@@ -639,8 +651,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       WidgetStateProperty<OutlinedBorder> buttonShape,
       WidgetStateProperty<EdgeInsetsGeometry> padding,
       ) {
-    final tokens = _tokens;
-    final cs = tokens.c;
+    final cs = _scheme;
 
     final Color bgColor;
     final Color fgColor;
@@ -723,7 +734,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       }),
       shape: buttonShape,
       elevation: WidgetStateProperty.resolveWith((states) {
-        return tokens.elevation(widget.style, states);
+        return _buttonTheme.elevation(widget.style, states);
       }),
       side: WidgetStateProperty.resolveWith((states) {
         final activeStates = checked
@@ -744,7 +755,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
             width: 1,
           );
         }
-        return BorderSide(color: tokens.outline(), width: 1);
+        return BorderSide(color: _buttonTheme.outline(_scheme), width: 1);
       }),
       mouseCursor: WidgetStateProperty.resolveWith((states) {
         if (widget.decoration?.mouseCursor != null) {
@@ -898,13 +909,14 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
             widget.label == null &&
             widget.checkedIcon == null;
 
-    final outgoingSlide = hasBothLabels ? _kLabelSlideDistance * p : 0.0;
+    final outgoingSlide =
+        hasBothLabels ? _toggleTheme.labelSlideDistance * p : 0.0;
     final incomingSlide =
     (hasBothLabels ||
         (shouldSlideOneSidedCheckedAppear &&
             unchecked == null &&
             checked != null))
-        ? _kLabelSlideDistance * (1.0 - p)
+        ? _toggleTheme.labelSlideDistance * (1.0 - p)
         : 0.0;
 
     final outgoingOpacity = hasBothLabels ? (1.0 - p) : _lingerOpacity(1.0 - p);

@@ -13,7 +13,6 @@ import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
-import '../styles/m3e_nav_rail_theme.dart';
 
 /// Large numeric badgeValue for rail items (0..999+). One class per file.
 class M3ERailBadge extends StatelessWidget {
@@ -39,12 +38,12 @@ class M3ERailBadge extends StatelessWidget {
     if (count == null) {
       return const SizedBox.shrink();
     }
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
     final scheme = m3e.colorScheme;
 
-    final Color background = theme?.badgeBackground ?? scheme.primary;
-    final Color foreground = theme?.badgeLargeLabel ?? scheme.onPrimary;
+    final Color background = theme.badgeBackground ?? scheme.primary;
+    final Color foreground = theme.badgeLargeLabel ?? scheme.onPrimary;
 
     final String text = count! > (10 * (pow10(maxDigits) - 1))
         ? '${pow10(maxDigits) - 1}+'
@@ -66,7 +65,7 @@ class M3ERailBadge extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: DefaultTextStyle(
-              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+              style: m3e.typeScale.labelSmall.copyWith(
                 color: foreground,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_3_expressive/components/app_bars/styles/m3e_app_bar_tokens.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_app_bar_semantics.dart';
 import 'enums/m3e_app_bar_enums.dart';
-import 'styles/m3e_bottom_app_bar_tokens.dart';
 
 export 'enums/m3e_app_bar_enums.dart';
 
@@ -125,12 +123,14 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildTop(BuildContext context) {
-    final metrics = appBarMetricsFor(context, density);
-    final bg = backgroundColor ?? appBarBackgroundFor(context);
-    final fg = foregroundColor ?? M3ETheme.of(context).colorScheme.onSurface;
-    final shape = appBarShapeFor(context, shapeFamily);
+    final theme = M3ETheme.of(context);
+    final appBarTheme = theme.appBarTheme;
+    final metrics = appBarTheme.metrics(density);
+    final bg = backgroundColor ?? appBarTheme.backgroundColor(theme.colorScheme);
+    final fg = foregroundColor ?? theme.colorScheme.onSurface;
+    final shape = appBarTheme.shape(shapeFamily);
     final height = toolbarHeight ?? metrics.smallHeight;
-    final tStyle = appBarTitleStyleFor(context, collapsed: true);
+    final tStyle = appBarTheme.titleStyle(theme.typeScale, collapsed: true);
 
     final resolvedLeading = leading ??
         (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
@@ -193,11 +193,13 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildBottom(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final appBarTheme = theme.appBarTheme;
+    final scheme = theme.colorScheme;
     return Container(
-      height: M3EBottomAppBarTokens.height,
-      color: scheme.surfaceContainer,
-      padding: M3EBottomAppBarTokens.padding,
+      height: appBarTheme.bottomHeight,
+      color: appBarTheme.bottomBackgroundColor(scheme),
+      padding: appBarTheme.bottomPadding,
       child: SafeArea(
         top: false,
         child: Row(
@@ -205,7 +207,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
             IconTheme.merge(
               data: IconThemeData(
                 color: scheme.onSurfaceVariant,
-                size: M3EBottomAppBarTokens.iconSize,
+                size: appBarTheme.bottomIconSize,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -221,13 +223,17 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildSliver(BuildContext context) {
-    final metrics = appBarMetricsFor(context, density);
-    final bg = backgroundColor ?? appBarBackgroundFor(context);
-    final fg = foregroundColor ?? M3ETheme.of(context).colorScheme.onSurface;
-    final shape = appBarShapeFor(context, shapeFamily);
+    final theme = M3ETheme.of(context);
+    final appBarTheme = theme.appBarTheme;
+    final metrics = appBarTheme.metrics(density);
+    final bg = backgroundColor ?? appBarTheme.backgroundColor(theme.colorScheme);
+    final fg = foregroundColor ?? theme.colorScheme.onSurface;
+    final shape = appBarTheme.shape(shapeFamily);
 
-    final collapsedStyle = appBarTitleStyleFor(context, collapsed: true);
-    final expandedStyle = appBarTitleStyleFor(context, collapsed: false);
+    final collapsedStyle =
+        appBarTheme.titleStyle(theme.typeScale, collapsed: true);
+    final expandedStyle =
+        appBarTheme.titleStyle(theme.typeScale, collapsed: false);
 
     final collapsed = metrics.collapsedHeight;
     final expanded = switch (variant) {

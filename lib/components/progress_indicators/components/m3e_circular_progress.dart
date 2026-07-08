@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../styles/m3e_circular_progress_tokens.dart';
 import 'm3e_circular_progress_painter.dart';
 
 /// A Material 3 Expressive circular progress indicator.
@@ -13,14 +12,14 @@ import 'm3e_circular_progress_painter.dart';
 class M3ECircularProgress extends StatefulWidget {
   const M3ECircularProgress({
     this.value,
-    this.size = M3ECircularProgressTokens.defaultSize,
-    this.strokeWidth = M3ECircularProgressTokens.defaultStrokeWidth,
+    this.size,
+    this.strokeWidth,
     super.key,
   });
 
   final double? value;
-  final double size;
-  final double strokeWidth;
+  final double? size;
+  final double? strokeWidth;
 
   @override
   State<M3ECircularProgress> createState() => _M3ECircularProgressState();
@@ -60,19 +59,24 @@ class _M3ECircularProgressState extends State<M3ECircularProgress>
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
+    final theme = M3ETheme.of(context);
+    final scheme = theme.colorScheme;
+    final circularTheme = theme.progressIndicatorTheme.circular;
+    final double resolvedSize = widget.size ?? circularTheme.defaultSize;
+    final double resolvedStrokeWidth =
+        widget.strokeWidth ?? circularTheme.defaultStrokeWidth;
     return SizedBox(
-      width: widget.size,
-      height: widget.size,
+      width: resolvedSize,
+      height: resolvedSize,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
           final _Arc arc = _resolveArc();
           return CustomPaint(
             painter: M3ECircularProgressPainter(
-              trackColor: M3ECircularProgressTokens.trackColor(scheme),
-              activeColor: M3ECircularProgressTokens.activeColor(scheme),
-              strokeWidth: widget.strokeWidth,
+              trackColor: circularTheme.trackColor(scheme),
+              activeColor: circularTheme.activeColor(scheme),
+              strokeWidth: resolvedStrokeWidth,
               startAngle: arc.start,
               sweepAngle: arc.sweep,
             ),

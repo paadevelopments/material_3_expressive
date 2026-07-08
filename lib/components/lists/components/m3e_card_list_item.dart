@@ -2,9 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
-import '../../buttons/styles/m3e_button_tokens.dart';
+import '../../buttons/res/m3e_button_constants.dart';
 import '../enums/m3e_list_enums.dart';
-import '../styles/m3e_card_list_tokens.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
 M3ECardPosition calculateCardPosition(int index, int total) => total == 1
@@ -76,6 +75,7 @@ class M3ECardListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
+    final cardListTheme = theme.listTheme.cardList;
 
     final borderRadius = calculateCardRadius(
       position: position,
@@ -106,7 +106,7 @@ class M3ECardListItem extends StatelessWidget {
         builder: (context, state) {
           return Container(
             decoration: BoxDecoration(
-              color: color ?? M3ECardListTokens.backgroundColor(scheme),
+              color: color ?? cardListTheme.backgroundColor(scheme),
               borderRadius: borderRadius,
             ),
             clipBehavior: Clip.antiAlias,
@@ -118,7 +118,7 @@ class M3ECardListItem extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: borderRadius),
                 ),
                 Padding(
-                  padding: padding ?? M3ECardListTokens.itemPadding,
+                  padding: padding ?? cardListTheme.itemPadding,
                   child: child,
                 ),
               ],

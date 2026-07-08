@@ -7,8 +7,9 @@ import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_base_button_state.dart';
 import '../buttons/components/m3e_focus_ring.dart';
 import '../buttons/enums/m3e_button_enums.dart';
+import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_motion.dart';
-import '../buttons/styles/m3e_button_tokens.dart';
+import '../buttons/styles/m3e_button_theme.dart';
 import 'components/m3e_split_button_bottom_sheet.dart';
 import 'components/m3e_split_button_popup.dart';
 import 'enums/m3e_split_button_menu_style.dart';
@@ -18,7 +19,9 @@ import 'models/m3e_split_button_item.dart';
 import 'styles/m3e_split_button_bottom_sheet_decoration.dart';
 import 'styles/m3e_split_button_decoration.dart';
 import 'styles/m3e_split_button_popup_decoration.dart';
-import 'styles/m3e_split_button_tokens.dart';
+import 'styles/m3e_split_button_theme.dart';
+
+export 'styles/m3e_split_button_theme.dart';
 
 const bool _kDefaultEnableFeedback = true;
 
@@ -288,7 +291,11 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   @override
   M3EButtonMotion? get effectiveMotion => widget.decorationMotion;
 
-  late M3EButtonTokens _tokens;
+  M3EButtonTheme get _buttonTheme => M3ETheme.of(context).buttonTheme;
+
+  M3ESplitButtonTheme get _splitTheme => M3ETheme.of(context).splitButtonTheme;
+
+  M3EColorScheme get _scheme => M3ETheme.of(context).colorScheme;
 
   @override
   void initState() {
@@ -308,8 +315,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _tokens = M3EButtonTokens(context);
-    _tokens.didChangeDependencies();
     updateSpringMotion();
   }
 
@@ -359,40 +364,40 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final trailingCustomSize = widget.decorationTrailingCustomSize;
 
     final leadingHeight =
-        leadingCustomSize?.height ?? M3ESplitButtonTokens.splitHeight(size);
+        leadingCustomSize?.height ?? _splitTheme.splitHeight(size);
     final trailingHeight =
-        trailingCustomSize?.height ?? M3ESplitButtonTokens.splitHeight(size);
+        trailingCustomSize?.height ?? _splitTheme.splitHeight(size);
     final maxSegmentHeight = leadingHeight > trailingHeight
         ? leadingHeight
         : trailingHeight;
-    final minTap = M3ESplitButtonTokens.splitMinTapTarget;
+    final minTap = _splitTheme.minTapTarget;
     final double? explicitBorderRadius = widget.decorationBorderRadius;
     final outerRadius =
         explicitBorderRadius ??
             (widget.shape == M3EButtonShape.round
                 ? maxSegmentHeight / 2
-                : M3ESplitButtonTokens.splitOuterRadiusSquare(size));
+                : _splitTheme.splitOuterRadiusSquare(size));
     final pressedRadius =
         widget.decoration?.pressedRadius ??
             explicitBorderRadius ??
-            M3ESplitButtonTokens.splitPressedRadius(size);
+            _splitTheme.splitPressedRadius(size);
     final innerRadius =
-        explicitBorderRadius ?? M3ESplitButtonTokens.splitInnerCornerRadius(size);
+        explicitBorderRadius ?? _splitTheme.splitInnerCornerRadius(size);
     final hoveredInnerRadius =
         widget.decoration?.hoveredRadius ??
             explicitBorderRadius ??
-            M3ESplitButtonTokens.splitHoveredInnerCornerRadius(size);
+            _splitTheme.splitHoveredInnerCornerRadius(size);
     final trailingSelectedRadius =
         widget.decoration?.trailingSelectedRadius ??
             explicitBorderRadius ??
             trailingHeight *
-                (M3ESplitButtonTokens.splitTrailingInnerSelectedCornerPercent / 100);
+                (_splitTheme.trailingInnerSelectedCornerPercent / 100);
 
     final baseGap =
         widget.decorationGap ??
             (widget.style == M3EButtonStyle.elevated
-                ? M3ESplitButtonTokens.splitElevatedInnerGap
-                : M3ESplitButtonTokens.splitInnerGap);
+                ? _splitTheme.elevatedInnerGap
+                : _splitTheme.innerGap);
 
     const double focusRingOutset =
         M3EButtonConstants.kFocusRingGap + M3EButtonConstants.kFocusRingWidth;
@@ -422,15 +427,15 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
     final trailingWidthUnselected =
         (trailingCustomSize?.hPadding ??
-            M3ESplitButtonTokens.splitTrailingButtonLeadingSpace(size)) +
-            (trailingCustomSize?.iconSize ?? M3ESplitButtonTokens.splitTrailingIconSize(size)) +
+            _splitTheme.splitTrailingButtonLeadingSpace(size)) +
+            (trailingCustomSize?.iconSize ?? _splitTheme.splitTrailingIconSize(size)) +
             (trailingCustomSize?.hPadding ??
-                M3ESplitButtonTokens.splitTrailingButtonTrailingSpace(size));
+                _splitTheme.splitTrailingButtonTrailingSpace(size));
     final trailingWidthSelected =
         (trailingCustomSize?.hPadding ??
-            M3ESplitButtonTokens.splitSidePaddingSelected(size)) *
+            _splitTheme.splitSidePaddingSelected(size)) *
             2 +
-            (trailingCustomSize?.iconSize ?? M3ESplitButtonTokens.splitTrailingIconSize(size));
+            (trailingCustomSize?.iconSize ?? _splitTheme.splitTrailingIconSize(size));
 
     final bool allowCircle =
         size == M3EButtonSize.md ||
@@ -451,16 +456,16 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         ? 0.0
         : (_menuOpen
         ? (trailingCustomSize?.hPadding ??
-        M3ESplitButtonTokens.splitSidePaddingSelected(size))
+        _splitTheme.splitSidePaddingSelected(size))
         : (trailingCustomSize?.hPadding ??
-        M3ESplitButtonTokens.splitTrailingButtonLeadingSpace(size)));
+        _splitTheme.splitTrailingButtonLeadingSpace(size)));
     final trailingRightPad = circleTrailing
         ? 0.0
         : (_menuOpen
         ? (trailingCustomSize?.hPadding ??
-        M3ESplitButtonTokens.splitSidePaddingSelected(size))
+        _splitTheme.splitSidePaddingSelected(size))
         : (trailingCustomSize?.hPadding ??
-        M3ESplitButtonTokens.splitTrailingButtonTrailingSpace(size)));
+        _splitTheme.splitTrailingButtonTrailingSpace(size)));
 
     final trailingRadius = circleTrailing
         ? _CornerRadii(
@@ -482,10 +487,10 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     (widget.trailingAlignment ==
         M3ESplitButtonTrailingAlignment.opticalCenter &&
         !_menuOpen)
-        ? M3ESplitButtonTokens.splitMenuIconOffset(size)
+        ? _splitTheme.splitMenuIconOffset(size)
         : 0.0;
 
-    final chevronTargetTurns = _menuOpen ? M3ESplitButtonTokens.splitChevronOpenTurns : 0.0;
+    final chevronTargetTurns = _menuOpen ? _splitTheme.chevronOpenTurns : 0.0;
 
     final leading = _buildLeadingSegment(
       context: context,
@@ -529,19 +534,29 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     );
 
     final theme = Theme.of(context);
-    final m3e = m3eMaterialTheme(context);
+    final m3eTheme = M3ETheme.of(context);
+    final scheme = _scheme;
+    final splitTheme = _splitTheme;
     final bool contIsTransparent = cont.a == 0.0;
     final Color menuColor =
         widget.decorationMenuBackgroundColor ??
-            (contIsTransparent ? m3e.colorScheme.surfaceContainerHigh : cont);
+            splitTheme.menuBackgroundColor(
+              scheme,
+              containerIsTransparent: contIsTransparent,
+              containerColor: cont,
+            );
     final Color menuTextColor =
         widget.decorationMenuForegroundColor ??
-            (contIsTransparent ? m3e.colorScheme.onSurface : onCont);
+            splitTheme.menuForegroundColor(
+              scheme,
+              containerIsTransparent: contIsTransparent,
+              onContainerColor: onCont,
+            );
 
     return PopupMenuTheme(
       data: theme.popupMenuTheme.copyWith(
         color: menuColor,
-        textStyle: m3e.textTheme.labelLarge?.copyWith(color: menuTextColor),
+        textStyle: m3eTheme.typeScale.labelLarge.copyWith(color: menuTextColor),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(pressedRadius),
         ),
@@ -722,7 +737,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
           Icons.keyboard_arrow_down,
           size:
           customSize?.iconSize ??
-              M3ESplitButtonTokens.splitTrailingIconSize(widget.size),
+              _splitTheme.splitTrailingIconSize(widget.size),
           color: onColor,
         ),
       ),
@@ -740,9 +755,10 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         boxShadow: (elevation != null && elevation > 0)
             ? [
           BoxShadow(
-            color: m3eMaterialTheme(
-              context,
-            ).colorScheme.shadow.withValues(alpha: 0.15),
+            color: M3ETheme.of(context)
+                .colorScheme
+                .shadow
+                .withValues(alpha: 0.15),
             blurRadius: elevation * 2,
             offset: Offset(0, elevation),
           ),
@@ -882,22 +898,22 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       ) {
     Color fgColor =
         widget.decorationForegroundColor?.resolve({}) ??
-            _tokens.foreground(widget.style);
+            _buttonTheme.foreground(_scheme, widget.style);
     Color bgColor =
         widget.decorationBackgroundColor?.resolve({}) ??
             (widget.style == M3EButtonStyle.outlined
                 ? Colors.transparent
-                : _tokens.container(widget.style));
+                : _buttonTheme.container(_scheme, widget.style));
 
     BorderSide? outlineSide;
     if (widget.style == M3EButtonStyle.outlined) {
       outlineSide =
           widget.decorationBorderSide?.resolve({}) ??
-              BorderSide(color: _tokens.outline());
+              BorderSide(color: _buttonTheme.outline(_scheme));
     }
 
     if (!widget.enabled || widget.onPressed == null) {
-      final cs = _tokens.c;
+      final cs = _scheme;
       fgColor =
           widget.decoration?.foregroundColor?.resolve({WidgetState.disabled}) ??
               cs.onSurface.withValues(
@@ -966,7 +982,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       if (hovered) WidgetState.hovered,
       if (pressed) WidgetState.pressed,
     };
-    final value = _tokens.elevation(widget.style, states);
+    final value = _buttonTheme.elevation(widget.style, states);
     return value == 0 ? null : value;
   }
 
@@ -1015,16 +1031,26 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       return;
     }
 
-    final popupDec =
-        widget.decoration?.popupDecoration ??
-            const M3ESplitButtonPopupDecoration();
+    final popupDec = widget.decoration?.popupDecoration ??
+        M3ESplitButtonPopupDecoration(
+          backgroundColor: _splitTheme.popupBackgroundColor(_scheme),
+          elevation: _splitTheme.popupElevation,
+          borderRadius:
+              BorderRadius.circular(_splitTheme.popupBorderRadius),
+          offset: _splitTheme.popupOffset,
+          minWidth: _splitTheme.popupMinWidth,
+          maxWidth: _splitTheme.popupMaxWidth,
+          maxHeight: _splitTheme.popupMaxHeight,
+          padding: _splitTheme.popupPadding,
+          motion: _splitTheme.popupMotion,
+        );
 
     final res = await showSplitButtonPopup<T>(
       context: context,
       items: items,
       decoration: popupDec,
       foregroundColor: widget.decorationMenuForegroundColor ?? onCont,
-      iconSize: M3ESplitButtonTokens.splitIcon(widget.size),
+      iconSize: _splitTheme.splitIcon(widget.size),
       triggerRenderBox: tb,
       selectedValue: widget.selectedValue,
       callerFocusNode: _trailingFocusNode,
@@ -1056,7 +1082,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         items: items,
         decoration: bottomSheetDec,
         foregroundColor: widget.decorationMenuForegroundColor ?? onCont,
-        iconSize: M3ESplitButtonTokens.splitIcon(widget.size),
+        iconSize: _splitTheme.splitIcon(widget.size),
         callerFocusNode: _trailingFocusNode,
         selectedValues: _selectedValues?.cast<T>(),
       );
@@ -1074,7 +1100,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         items: items,
         decoration: bottomSheetDec,
         foregroundColor: widget.decorationMenuForegroundColor ?? onCont,
-        iconSize: M3ESplitButtonTokens.splitIcon(widget.size),
+        iconSize: _splitTheme.splitIcon(widget.size),
         callerFocusNode: _trailingFocusNode,
       );
 
@@ -1100,7 +1126,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     }
     final double minMenuWidth = tSize.width > 0
         ? tSize.width
-        : M3ESplitButtonTokens.splitTrailingWidth(widget.size);
+        : _splitTheme.splitTrailingWidth(widget.size);
 
     final (_, onCont, _, _) = _resolveColorsAndShapes(context);
 
@@ -1118,7 +1144,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         final Widget styledChild = IconTheme.merge(
           data: IconThemeData(
             color: effective,
-            size: M3ESplitButtonTokens.splitIcon(widget.size),
+            size: _splitTheme.splitIcon(widget.size),
           ),
           child: DefaultTextStyle.merge(
             style: TextStyle(color: effective),
@@ -1201,13 +1227,14 @@ class _LeadingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = customSize?.iconSize ?? M3ESplitButtonTokens.splitIcon(size);
+    final splitTheme = M3ETheme.of(context).splitButtonTheme;
+    final iconSize = customSize?.iconSize ?? splitTheme.splitIcon(size);
     final lp =
-        customSize?.hPadding ?? M3ESplitButtonTokens.splitLeadingButtonLeadingSpace(size);
+        customSize?.hPadding ?? splitTheme.splitLeadingButtonLeadingSpace(size);
     final rp =
-        customSize?.hPadding ?? M3ESplitButtonTokens.splitLeadingButtonTrailingSpace(size);
+        customSize?.hPadding ?? splitTheme.splitLeadingButtonTrailingSpace(size);
     final iconBlock = iconSize;
-    final gap = customSize?.iconGap ?? M3ESplitButtonTokens.splitGapIconToLabel(size);
+    final gap = customSize?.iconGap ?? splitTheme.splitGapIconToLabel(size);
 
     final bfs = _getButtonFontSize(size);
     final double? labelFontSize = switch (size.name) {

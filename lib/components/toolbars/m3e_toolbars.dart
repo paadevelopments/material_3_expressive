@@ -2,10 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'enums/m3e_toolbar_color.dart';
-import 'styles/m3e_toolbar_tokens.dart';
 
 export 'enums/m3e_toolbar_color.dart';
-export 'styles/m3e_toolbar_tokens.dart';
+export 'styles/m3e_toolbar_theme.dart';
 
 /// A Material 3 Expressive floating toolbar.
 ///
@@ -25,24 +24,26 @@ class M3EToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
-    final Color background = M3EToolbarTokens.backgroundColor(scheme, color);
-    final Color foreground = M3EToolbarTokens.foregroundColor(scheme, color);
+    final theme = M3ETheme.of(context);
+    final toolbarTheme = theme.toolbarTheme;
+    final scheme = theme.colorScheme;
+    final Color background = toolbarTheme.backgroundColor(scheme, color);
+    final Color foreground = toolbarTheme.foregroundColor(scheme, color);
 
     return Container(
-      padding: M3EToolbarTokens.padding,
+      padding: toolbarTheme.padding,
       decoration: ShapeDecoration(
         shape: M3EShapes.stadium,
         color: background,
         shadows: M3EElevation.shadows(
-          M3EToolbarTokens.elevation,
+          toolbarTheme.elevation,
           shadowColor: scheme.shadow,
         ),
       ),
       child: IconTheme.merge(
         data: IconThemeData(
           color: foreground,
-          size: M3EToolbarTokens.iconSize,
+          size: toolbarTheme.iconSize,
         ),
         child: Flex(
           direction: axis,

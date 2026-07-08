@@ -3,8 +3,8 @@
 // ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
-import '../../buttons/styles/m3e_button_tokens.dart';
 
+import '../../buttons/res/m3e_button_constants.dart';
 import '../enums/m3e_split_button_selection_mode.dart';
 import '../models/m3e_split_button_item.dart';
 import '../styles/m3e_split_button_bottom_sheet_decoration.dart';
@@ -58,7 +58,7 @@ Future<T?> _showSingleSelectBottomSheet<T>({
     elevation: decoration.elevation,
     shape: decoration.shape,
     builder: (sheetContext) {
-      final theme = m3eMaterialTheme(sheetContext);
+      final m3eTheme = M3ETheme.of(sheetContext);
 
       return SafeArea(
         child: SingleChildScrollView(
@@ -72,7 +72,7 @@ Future<T?> _showSingleSelectBottomSheet<T>({
                       decoration.titlePadding ??
                       const EdgeInsets.fromLTRB(24, 16, 24, 8),
                   child: DefaultTextStyle.merge(
-                    style: theme.textTheme.titleMedium,
+                    style: m3eTheme.typeScale.titleMedium,
                     child: decoration.title!,
                   ),
                 ),
@@ -181,7 +181,7 @@ class _MultiSelectBottomSheetState<T>
 
   @override
   Widget build(BuildContext context) {
-    final theme = m3eMaterialTheme(context);
+    final m3eTheme = M3ETheme.of(context);
 
     return SafeArea(
       child: Column(
@@ -194,7 +194,7 @@ class _MultiSelectBottomSheetState<T>
                   widget.decoration.titlePadding ??
                   const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: DefaultTextStyle.merge(
-                style: theme.textTheme.titleMedium,
+                style: m3eTheme.typeScale.titleMedium,
                 child: widget.decoration.title!,
               ),
             ),
@@ -253,8 +253,8 @@ class _MultiSelectBottomSheetState<T>
     M3ESplitButtonCheckboxStyle? checkboxStyle,
     bool autofocus = false,
   }) {
-    final theme = m3eMaterialTheme(context);
-    final cs = theme.colorScheme;
+    final m3eTheme = M3ETheme.of(context);
+    final cs = m3eTheme.colorScheme;
 
     final effectiveColor = item.enabled
         ? widget.foregroundColor
@@ -276,7 +276,7 @@ class _MultiSelectBottomSheetState<T>
           Flexible(
             child: Text(
               item.child.toString(),
-              style: theme.textTheme.bodyLarge?.copyWith(color: effectiveColor),
+              style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
             ),
           ),
         ],
@@ -286,7 +286,7 @@ class _MultiSelectBottomSheetState<T>
     } else {
       child = Text(
         item.child.toString(),
-        style: theme.textTheme.bodyLarge?.copyWith(color: effectiveColor),
+        style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
       );
     }
 
@@ -349,7 +349,7 @@ class _MultiSelectBottomSheetState<T>
       final text = item.child as Text;
       final fontSize =
           text.style?.fontSize ??
-          m3eMaterialTheme(context).textTheme.bodyLarge?.fontSize ??
+          M3ETheme.of(context).typeScale.bodyLarge.fontSize ??
           16.0;
       final size = fontSize * 1.35;
       return size.clamp(_kMinCheckboxSize, _kMaxCheckboxSize);
@@ -416,7 +416,7 @@ Widget _buildBottomSheetItem<T>({
   required double iconSize,
   bool autofocus = false,
 }) {
-  final theme = m3eMaterialTheme(context);
+  final m3eTheme = M3ETheme.of(context);
 
   final Color effectiveColor = item.enabled
       ? foregroundColor
@@ -434,7 +434,7 @@ Widget _buildBottomSheetItem<T>({
         Flexible(
           child: Text(
             item.child.toString(),
-            style: theme.textTheme.bodyLarge?.copyWith(color: effectiveColor),
+            style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
           ),
         ),
       ],
@@ -444,7 +444,7 @@ Widget _buildBottomSheetItem<T>({
   } else {
     child = Text(
       item.child.toString(),
-      style: theme.textTheme.bodyLarge?.copyWith(color: effectiveColor),
+      style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
     );
   }
 

@@ -2,7 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'components/m3e_slider_track_painter.dart';
-import 'styles/m3e_slider_tokens.dart';
+
+export 'styles/m3e_slider_theme.dart';
 
 /// A Material 3 Expressive slider.
 ///
@@ -31,6 +32,7 @@ class M3ESlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final sliderTheme = theme.sliderTheme;
     final scheme = theme.colorScheme;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -44,26 +46,30 @@ class M3ESlider extends StatelessWidget {
               ? (TapDownDetails d) => _update(d.localPosition.dx, width)
               : null,
           child: SizedBox(
-            height: M3ESliderTokens.height,
+            height: sliderTheme.height,
             width: width,
             child: CustomPaint(
               painter: M3ESliderTrackPainter(
                 fraction: _fraction,
-                activeColor: M3ESliderTokens.color(
+                activeColor: sliderTheme.color(
                   scheme,
                   enabledColor: scheme.primary,
                   enabled: _enabled,
                 ),
-                inactiveColor: M3ESliderTokens.color(
+                inactiveColor: sliderTheme.color(
                   scheme,
                   enabledColor: scheme.secondaryContainer,
                   enabled: _enabled,
                 ),
-                handleColor: M3ESliderTokens.color(
+                handleColor: sliderTheme.color(
                   scheme,
                   enabledColor: scheme.primary,
                   enabled: _enabled,
                 ),
+                trackHeight: sliderTheme.trackHeight,
+                handleWidth: sliderTheme.handleWidth,
+                handleHeight: sliderTheme.handleHeight,
+                handleGap: sliderTheme.handleGap,
               ),
             ),
           ),

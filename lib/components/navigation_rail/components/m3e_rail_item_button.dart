@@ -16,7 +16,6 @@ import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
-import '../styles/m3e_nav_rail_theme.dart';
 import 'm3e_rail_badge_view.dart';
 
 /// Internal button used by the NavigationRail item that can look like
@@ -77,8 +76,7 @@ class M3ERailItemButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).extension<M3ENavigationRailTheme>() ??
-        const M3ENavigationRailTheme();
+    final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
     final scheme = m3e.colorScheme;
 
@@ -108,7 +106,7 @@ class M3ERailItemButton extends StatelessWidget {
       final textExpanded = Flexible(
         child: DefaultTextStyle.merge(
           // Use a readable style in expanded mode.
-          style: Theme.of(context).textTheme.labelLarge!,
+          style: m3e.typeScale.labelLarge,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           child: Text(label, semanticsLabel: semanticLabel ?? label),
@@ -139,7 +137,7 @@ class M3ERailItemButton extends StatelessWidget {
     } else {
       final textCollapsed = Flexible(
         child: DefaultTextStyle.merge(
-          style: Theme.of(context).textTheme.labelMedium!,
+          style: m3e.typeScale.labelMedium,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           child: Text(label, semanticsLabel: semanticLabel ?? label),

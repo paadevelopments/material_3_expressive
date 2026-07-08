@@ -2,7 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'models/m3e_segment.dart';
-import 'styles/m3e_segmented_button_tokens.dart';
+import 'styles/m3e_segmented_button_theme.dart';
+
+export 'models/m3e_segment.dart';
+export 'styles/m3e_segmented_button_theme.dart';
 
 /// A Material 3 Expressive segmented button.
 ///
@@ -28,41 +31,52 @@ class M3ESegmentedButton<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final segmentedButtonTheme = theme.segmentedButtonTheme;
     final scheme = theme.colorScheme;
-    final borderRadius = M3ESegmentedButtonTokens.borderRadius(context);
+    final borderRadius = segmentedButtonTheme.borderRadius;
 
     return Container(
-      height: M3ESegmentedButtonTokens.height,
+      height: segmentedButtonTheme.height,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
         border: Border.all(
           color: scheme.outline,
-          width: M3ESegmentedButtonTokens.borderWidth,
+          width: segmentedButtonTheme.borderWidth,
         ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: _buildSegments(theme),
+          children: _buildSegments(theme, segmentedButtonTheme),
         ),
       ),
     );
   }
 
-  List<Widget> _buildSegments(M3EThemeData theme) {
+  List<Widget> _buildSegments(
+    M3EThemeData theme,
+    M3ESegmentedButtonTheme segmentedButtonTheme,
+  ) {
     final children = <Widget>[];
     for (var i = 0; i < segments.length; i++) {
       if (i > 0) {
         children.add(
           Container(
-            width: M3ESegmentedButtonTokens.borderWidth,
+            width: segmentedButtonTheme.borderWidth,
             color: theme.colorScheme.outline,
           ),
         );
       }
       children.add(
-        Flexible(child: _M3ESegmentTile<T>(theme: theme, index: i, parent: this)),
+        Flexible(
+          child: _M3ESegmentTile<T>(
+            theme: theme,
+            segmentedButtonTheme: segmentedButtonTheme,
+            index: i,
+            parent: this,
+          ),
+        ),
       );
     }
     return children;
@@ -88,11 +102,13 @@ class M3ESegmentedButton<T> extends StatelessWidget {
 class _M3ESegmentTile<T> extends StatelessWidget {
   const _M3ESegmentTile({
     required this.theme,
+    required this.segmentedButtonTheme,
     required this.index,
     required this.parent,
   });
 
   final M3EThemeData theme;
+  final M3ESegmentedButtonTheme segmentedButtonTheme;
   final int index;
   final M3ESegmentedButton<T> parent;
 
@@ -101,7 +117,7 @@ class _M3ESegmentTile<T> extends StatelessWidget {
     final M3ESegment<T> segment = parent.segments[index];
     final scheme = theme.colorScheme;
     final bool isSelected = parent.selected.contains(segment.value);
-    final Color foreground = M3ESegmentedButtonTokens.foregroundColor(
+    final Color foreground = segmentedButtonTheme.foregroundColor(
       scheme,
       selected: isSelected,
     );
@@ -111,9 +127,12 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       semanticLabel: segment.label,
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
-          height: M3ESegmentedButtonTokens.height,
+          height: segmentedButtonTheme.height,
           alignment: Alignment.center,
-          color: M3ESegmentedButtonTokens.backgroundColor(scheme, selected: isSelected),
+          color: segmentedButtonTheme.backgroundColor(
+            scheme,
+            selected: isSelected,
+          ),
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
@@ -125,8 +144,8 @@ class _M3ESegmentTile<T> extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: M3ESegmentedButtonTokens.segmentHorizontalPadding,
+                padding: EdgeInsets.symmetric(
+                  horizontal: segmentedButtonTheme.segmentHorizontalPadding,
                 ),
                 child: _buildLabel(segment, foreground, isSelected),
               ),
@@ -142,7 +161,7 @@ class _M3ESegmentTile<T> extends StatelessWidget {
     final children = <Widget>[
       if (leading != null) ...<Widget>[
         leading,
-        const SizedBox(width: M3ESegmentedButtonTokens.iconLabelGap),
+        SizedBox(width: segmentedButtonTheme.iconLabelGap),
       ],
       if (segment.label != null)
         Flexible(
@@ -163,11 +182,18 @@ class _M3ESegmentTile<T> extends StatelessWidget {
 
   Widget? _resolveLeading(M3ESegment<T> segment, Color foreground, bool sel) {
     if (sel && parent.showSelectedIcon) {
-      return Icon(M3EIcons.check, size: M3ESegmentedButtonTokens.iconSize, color: foreground);
+      return Icon(
+        M3EIcons.check,
+        size: segmentedButtonTheme.iconSize,
+        color: foreground,
+      );
     }
     if (segment.icon != null) {
       return IconTheme.merge(
-        data: IconThemeData(color: foreground, size: M3ESegmentedButtonTokens.iconSize),
+        data: IconThemeData(
+          color: foreground,
+          size: segmentedButtonTheme.iconSize,
+        ),
         child: segment.icon!,
       );
     }

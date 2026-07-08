@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'models/m3e_navigation_destination.dart';
-import 'styles/m3e_nav_drawer_tokens.dart';
 
 /// A Material 3 Expressive navigation drawer.
 ///
@@ -26,19 +25,20 @@ class M3ENavigationDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
+    final drawerTheme = theme.navigationDrawerTheme;
     final scheme = theme.colorScheme;
     return Container(
-      width: M3ENavDrawerTokens.width,
-      color: M3ENavDrawerTokens.containerColor(scheme),
+      width: drawerTheme.width,
+      color: drawerTheme.containerColor(scheme),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (headline != null)
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: M3ENavDrawerTokens.headlineHorizontalPadding,
-                  vertical: M3ENavDrawerTokens.headlineVerticalPadding,
+                padding: EdgeInsets.symmetric(
+                  horizontal: drawerTheme.headlineHorizontalPadding,
+                  vertical: drawerTheme.headlineVerticalPadding,
                 ),
                 child: Text(
                   headline!,
@@ -56,27 +56,33 @@ class M3ENavigationDrawer extends StatelessWidget {
 
   Widget _buildDestination(BuildContext context, int index) {
     final theme = M3ETheme.of(context);
+    final drawerTheme = theme.navigationDrawerTheme;
     final scheme = theme.colorScheme;
     final selected = index == selectedIndex;
     final M3ENavigationDestination dest = destinations[index];
-    final Color foreground = M3ENavDrawerTokens.destinationForegroundColor(
+    final Color foreground = drawerTheme.destinationForegroundColor(
       scheme,
       selected: selected,
     );
-    final border = M3ENavDrawerTokens.destinationShape(context);
+    final border = drawerTheme.destinationShape();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      padding: EdgeInsets.symmetric(
+        horizontal: drawerTheme.destinationHorizontalPadding,
+        vertical: drawerTheme.destinationVerticalPadding,
+      ),
       child: M3ETappable(
         onTap: () => onDestinationSelected(index),
         semanticLabel: dest.label,
         builder: (BuildContext context, M3EInteractionState state) {
           return Container(
-            height: M3ENavDrawerTokens.destinationHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: drawerTheme.destinationHeight,
+            padding: EdgeInsets.symmetric(
+              horizontal: drawerTheme.destinationInnerHorizontalPadding,
+            ),
             decoration: ShapeDecoration(
               shape: border,
-              color: M3ENavDrawerTokens.destinationBackgroundColor(
+              color: drawerTheme.destinationBackgroundColor(
                 scheme,
                 selected: selected,
               ),
@@ -92,12 +98,14 @@ class M3ENavigationDrawer extends StatelessWidget {
                   children: <Widget>[
                     IconTheme.merge(
                       data: IconThemeData(
-                          color: foreground, size: M3ENavDrawerTokens.iconSize),
+                        color: foreground,
+                        size: drawerTheme.iconSize,
+                      ),
                       child: selected
                           ? (dest.selectedIcon ?? dest.icon)
                           : dest.icon,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: drawerTheme.iconLabelGap),
                     Expanded(
                       child: Text(
                         dest.label,

@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 
 /// A Material Design loading indicator.
 ///
@@ -101,13 +102,15 @@ class _M3EExpressiveLoadingIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    final indicatorTheme = ProgressIndicatorTheme.of(context);
+    final m3eTheme = M3ETheme.of(context);
     _color =
         widget.color ??
-        indicatorTheme.color ??
-        Theme.of(context).colorScheme.primary;
-    _constraints =
-        widget.constraints ?? indicatorTheme.constraints ?? _defaultConstraints;
+        m3eTheme.loadingIndicatorTheme.activeColor(m3eTheme.colorScheme);
+    _constraints = widget.constraints ??
+        BoxConstraints.tightFor(
+          width: m3eTheme.loadingIndicatorTheme.containerWidth,
+          height: m3eTheme.loadingIndicatorTheme.containerHeight,
+        );
 
     final activeIndicatorScale =
         _activeSize / math.min(_constraints.maxWidth, _constraints.maxHeight);
