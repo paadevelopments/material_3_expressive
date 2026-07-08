@@ -25,7 +25,7 @@ class M3ENavigationBar extends StatelessWidget {
     this.onDestinationSelected,
     this.labelBehavior = M3ENavBarLabelBehavior.alwaysShow,
     this.size = M3ENavBarSize.medium,
-    this.shapeFamily = M3ENavBarShapeFamily.round,
+    this.shapeFamily = M3ENavBarShapeFamily.square,
     this.density = M3ENavBarDensity.regular,
     this.backgroundColor,
     this.elevation,

@@ -58,10 +58,10 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
   TextStyle labelStyle(M3ETypeScale type) => type.labelMedium;
 
   ShapeBorder containerShape(M3ENavBarShapeFamily family) {
-    final set = family == M3ENavBarShapeFamily.round
-        ? M3EShapes.roundSet
-        : M3EShapes.squareSet;
-    return RoundedRectangleBorder(borderRadius: set.lg);
+    if (family == M3ENavBarShapeFamily.round) {
+      return RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.lg);
+    }
+    return const RoundedRectangleBorder();
   }
 
   ShapeBorder indicatorShapePill() => const StadiumBorder();
