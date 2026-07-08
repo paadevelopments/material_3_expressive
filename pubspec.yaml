@@ -1,5 +1,5 @@
 name: material_3_expressive
-description: "A faithful Flutter implementation of the Material 3 Expressive component set, exposed through grouped M3E facades."
+description: "A faithful Flutter implementation of the Material 3 Expressive component set, exposed as direct M3E component widgets."
 version: 1.0.0
 homepage: https://github.com/paadevelopments/material_3_expressive
 

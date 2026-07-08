@@ -44,55 +44,55 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Variants',
           children: <Widget>[
-            M3EActions.button(
-              label: 'Elevated',
+            M3EButton(
               style: M3EButtonStyle.elevated,
               onPressed: () {},
+              child: const Text('Elevated'),
             ),
-            M3EActions.button(
-              label: 'Filled',
+            M3EButton(
               onPressed: () {},
+              child: const Text('Filled'),
             ),
-            M3EActions.button(
-              label: 'Tonal',
+            M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () {},
+              child: const Text('Tonal'),
             ),
-            M3EActions.button(
-              label: 'Outlined',
+            M3EButton(
               style: M3EButtonStyle.outlined,
               onPressed: () {},
+              child: const Text('Outlined'),
             ),
-            M3EActions.button(
-              label: 'Text',
+            M3EButton(
               style: M3EButtonStyle.text,
               onPressed: () {},
+              child: const Text('Text'),
             ),
           ],
         ),
         DemoRow(
           label: 'With icon and sizes',
           children: <Widget>[
-            M3EActions.button(
-              label: 'Add',
+            M3EButton.icon(
               icon: const Icon(M3EIcons.add),
+              label: const Text('Add'),
               size: M3EButtonSize.xs,
               onPressed: () {},
             ),
-            M3EActions.button(
-              label: 'Add',
+            M3EButton.icon(
               icon: const Icon(M3EIcons.add),
+              label: const Text('Add'),
               onPressed: () {},
             ),
-            M3EActions.button(
-              label: 'Add',
+            M3EButton.icon(
               icon: const Icon(M3EIcons.add),
+              label: const Text('Add'),
               size: M3EButtonSize.lg,
               onPressed: () {},
             ),
-            M3EActions.button(
-              label: 'Disabled',
+            const M3EButton(
               onPressed: null,
+              child: Text('Disabled'),
             ),
           ],
         ),
@@ -107,21 +107,21 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Variants',
           children: <Widget>[
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.edit),
               onPressed: () {},
             ),
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.edit),
               variant: M3EIconButtonVariant.filled,
               onPressed: () {},
             ),
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.edit),
               variant: M3EIconButtonVariant.tonal,
               onPressed: () {},
             ),
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.edit),
               variant: M3EIconButtonVariant.outlined,
               onPressed: () {},
@@ -131,11 +131,11 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Toggle',
           children: <Widget>[
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.add),
               selectedIcon: const Icon(M3EIcons.check),
               variant: M3EIconButtonVariant.filled,
-              selected: _favorite,
+              isSelected: _favorite,
               onPressed: () => setState(() => _favorite = !_favorite),
             ),
           ],
@@ -151,16 +151,16 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Sizes',
           children: <Widget>[
-            M3EActions.fab(
+            M3EFab(
               icon: const Icon(M3EIcons.add),
               size: M3EFabSize.small,
               onPressed: () {},
             ),
-            M3EActions.fab(
+            M3EFab(
               icon: const Icon(M3EIcons.add),
               onPressed: () {},
             ),
-            M3EActions.fab(
+            M3EFab(
               icon: const Icon(M3EIcons.add),
               size: M3EFabSize.large,
               color: M3EFabColor.tertiary,
@@ -171,12 +171,12 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Extended & menu',
           children: <Widget>[
-            M3EActions.extendedFab(
+            M3EExtendedFab(
               label: 'Compose',
               icon: const Icon(M3EIcons.edit),
               onPressed: () {},
             ),
-            M3EActions.fabMenu(
+            M3EFabMenu(
               items: <M3EFabMenuItem>[
                 M3EFabMenuItem(
                   icon: const Icon(M3EIcons.edit),
@@ -206,7 +206,7 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Standard (neighbour squish)',
           children: <Widget>[
-            M3EActions.buttonGroup(
+            M3EButtonGroup(
               selectedIndex: _groupIndex,
               onSelectedIndexChanged: (int? index) =>
                   setState(() => _groupIndex = index ?? _groupIndex),
@@ -222,7 +222,7 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Connected (corner morph)',
           children: <Widget>[
-            M3EActions.buttonGroup(
+            M3EButtonGroup(
               type: M3EButtonGroupType.connected,
               selectedIndex: _connectedGroupIndex,
               onSelectedIndexChanged: (int? index) =>
@@ -246,7 +246,7 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Single select',
           children: <Widget>[
-            M3EActions.segmentedButton<String>(
+            M3ESegmentedButton<String>(
               segments: const <M3ESegment<String>>[
                 M3ESegment<String>(value: 'list', label: 'List'),
                 M3ESegment<String>(value: 'grid', label: 'Grid'),
@@ -260,7 +260,7 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Multi select',
           children: <Widget>[
-            M3EActions.segmentedButton<String>(
+            M3ESegmentedButton<String>(
               multiSelect: true,
               segments: const <M3ESegment<String>>[
                 M3ESegment<String>(value: 'new', label: 'New'),
@@ -276,7 +276,7 @@ class _ActionsPageState extends State<ActionsPage> {
         DemoRow(
           label: 'Split button',
           children: <Widget>[
-            M3EActions.splitButton<String>(
+            M3ESplitButton<String>(
               label: 'Save',
               leadingIcon: M3EIcons.check,
               onPressed: () {},

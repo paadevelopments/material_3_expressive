@@ -14,9 +14,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
-import '../extended_fabs/extended_fabs.dart';
-import '../floating_action_buttons/floating_action_buttons.dart';
-import '../icon_buttons/icon_buttons.dart';
+import '../extended_fabs/m3e_extended_fabs.dart';
+import '../floating_action_buttons/m3e_floating_action_buttons.dart';
+import '../icon_buttons/m3e_icon_buttons.dart';
 import 'components/m3e_rail_item.dart';
 import 'enums/m3e_navigation_rail_enums.dart';
 import 'models/m3e_navigation_rail_destination.dart';

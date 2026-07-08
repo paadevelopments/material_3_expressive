@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import '../../buttons/styles/m3e_button_tokens.dart';
 
-import '../split_buttons.dart';
+import '../m3e_split_buttons.dart';
 import '../styles/m3e_split_button_decoration.dart';
 
 Future<Object?> showSplitButtonBottomSheet<T>({

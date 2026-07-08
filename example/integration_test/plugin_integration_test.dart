@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: M3EActions.button(label: 'Tap me', onPressed: () {}),
+        child: M3EButton(onPressed: () {}, child: const Text('Tap me')),
       ),
     );
 

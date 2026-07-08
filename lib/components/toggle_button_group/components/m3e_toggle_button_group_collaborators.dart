@@ -1,7 +1,7 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
 // ignore_for_file: type=lint
-part of '../toggle_button_group.dart';
+part of '../m3e_toggle_button_group.dart';
 
 class _SpringMenuWrapper extends StatefulWidget {
   final Widget child;

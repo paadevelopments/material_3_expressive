@@ -21,7 +21,7 @@ import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_overflow_decoration.dart';
 import '../buttons/styles/m3e_button_tokens.dart';
 import '../buttons/components/m3e_overflow_strategy.dart';
-import '../toggle_button/toggle_button.dart';
+import '../toggle_button/m3e_toggle_button.dart';
 import 'enums/m3e_toggle_button_group_enums.dart';
 import 'styles/m3e_toggle_button_group_tokens.dart';
 import 'components/m3e_toggle_button_group_provider.dart';

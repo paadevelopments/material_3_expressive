@@ -6,15 +6,15 @@ A faithful, dependency-light Flutter implementation of the
 Every widget is built directly on `package:flutter/widgets.dart` — the package
 does **not** depend on the framework's `material` library — and ships with
 M3-accurate motion: spring-driven press feedback, shape morphing, and
-hover/focus/press state layers. All 36 components are reachable through a small
-set of concise, discoverable facades.
+hover/focus/press state layers. All 36 components are used directly as `M3E*`
+widgets.
 
 ## Features
 
 - **36 components** covering the six official Material 3 groups (Actions,
   Communication, Containment, Navigation, Selection, Text inputs).
-- **Grouped facade API** — `M3EActions`, `M3ECommunication`, `M3EContainment`,
-  `M3ENavigation`, `M3ESelection`, `M3ETextInputs`.
+- **Direct component API** — construct each `M3E*` widget directly; enums and
+  models are exported from the single library import.
 - **Expressive motion & interaction** — spring physics, shape morphing, and
   proper state layers on every interactive surface.
 - **Design token foundations** — color schemes, typography, motion, shapes,
@@ -52,8 +52,7 @@ flutter pub add material_3_expressive
 
 ## Setup
 
-Import the library — a single import exposes every component, facade, and
-foundation:
+Import the library — a single import exposes every component and foundation:
 
 ```dart
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -75,46 +74,33 @@ Use `M3EThemeData.dark(...)` for a dark scheme, or build one from an existing
 
 ## Accessing components
 
-Components are grouped into facades that mirror the Material 3 documentation.
-Call the static factory for the component you need:
-
-| Facade             | Components                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| `M3EActions`       | `button`, `iconButton`, `fab`, `extendedFab`, `fabMenu`, `buttonGroup`, `segmentedButton`, `splitButton` |
-| `M3ECommunication` | `badge`, `linearProgress`, `circularProgress`, `loadingIndicator`, `tooltip`, `showSnackbar`           |
-| `M3EContainment`   | `card`, `carousel`, `divider`, `listItem`, `dialog`, `showDialog`, `showFullScreenDialog`, `showBottomSheet`, `showSideSheet` |
-| `M3ENavigation`    | `topAppBar`, `bottomAppBar`, `bar`, `rail`, `drawer`, `tabs`, `toolbar`, `menu`                        |
-| `M3ESelection`     | `checkbox`, `radio`, `switchControl`, `chip`, `slider`, `datePicker`, `timePicker`                     |
-| `M3ETextInputs`    | `textField`, `searchBar`                                                                               |
-
-Each factory returns a standard `Widget`, so it composes anywhere in your tree.
-The underlying widget classes (`M3EButton`, `M3ECard`, …) and their enums/models
-are also exported if you prefer to construct them directly.
+Every component is a widget you construct directly. Each `M3E*` class and its
+enums/models are exported from the single library import.
 
 ### Examples
 
 ```dart
 // A filled button
-M3EActions.button(
-  label: 'Continue',
+M3EButton(
   onPressed: () {},
+  child: const Text('Continue'),
 );
 
 // A tonal icon button that toggles
-M3EActions.iconButton(
+M3EIconButton(
   icon: const Icon(M3EIcons.edit),
   variant: M3EIconButtonVariant.tonal,
   onPressed: () {},
 );
 
 // A switch bound to state
-M3ESelection.switchControl(
+M3ESwitch(
   value: enabled,
   onChanged: (bool value) => setState(() => enabled = value),
 );
 
 // A card
-M3EContainment.card(
+M3ECard(
   variant: M3ECardVariant.elevated,
   child: const Text('Card content'),
 );
@@ -125,7 +111,7 @@ Components that present transient surfaces take a `BuildContext` and require a
 
 ```dart
 // Snackbar
-M3ECommunication.showSnackbar(
+M3ESnackbar.show(
   context,
   message: 'Draft saved',
   actionLabel: 'Undo',
@@ -133,20 +119,20 @@ M3ECommunication.showSnackbar(
 );
 
 // Dialog
-M3EContainment.showDialog<void>(
+M3EDialog.show<void>(
   context,
-  dialog: M3EContainment.dialog(
+  dialog: M3EDialog(
     title: 'Reset settings?',
     content: const Text('This restores default values.'),
     actions: <Widget>[
-      M3EActions.button(
-        label: 'Cancel',
-        variant: M3EButtonVariant.text,
+      M3EButton(
+        style: M3EButtonStyle.text,
         onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
       ),
-      M3EActions.button(
-        label: 'Reset',
+      M3EButton(
         onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Reset'),
       ),
     ],
   ),

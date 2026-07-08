@@ -49,16 +49,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
         DemoRow(
           label: 'Dot and numeric',
           children: <Widget>[
-            M3ECommunication.badge(
-              child: const Icon(M3EIcons.menu, size: 28),
+            const M3EBadge(
+              child: Icon(M3EIcons.menu, size: 28),
             ),
-            M3ECommunication.badge(
+            const M3EBadge(
               label: '8',
-              child: const Icon(M3EIcons.calendar_today, size: 28),
+              child: Icon(M3EIcons.calendar_today, size: 28),
             ),
-            M3ECommunication.badge(
+            const M3EBadge(
               label: '99+',
-              child: const Icon(M3EIcons.edit, size: 28),
+              child: Icon(M3EIcons.edit, size: 28),
             ),
           ],
         ),
@@ -73,10 +73,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
         DemoRow(
           label: 'Indeterminate',
           children: <Widget>[
-            SizedBox(width: 200, child: M3ECommunication.linearProgress()),
-            M3ECommunication.circularProgress(),
-            M3ECommunication.loadingIndicator(),
-            M3ECommunication.loadingIndicator(
+            const SizedBox(width: 200, child: M3ELinearProgress()),
+            const M3ECircularProgress(),
+            const M3ELoadingIndicator(),
+            const M3ELoadingIndicator(
               variant: M3ELoadingIndicatorVariant.contained,
             ),
           ],
@@ -86,15 +86,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
           children: <Widget>[
             SizedBox(
               width: 200,
-              child: M3ECommunication.linearProgress(
+              child: M3ELinearProgress(
                 value: _progress,
                 shape: M3EProgressShape.flat,
               ),
             ),
-            M3ECommunication.circularProgress(value: _progress),
+            M3ECircularProgress(value: _progress),
             SizedBox(
               width: 220,
-              child: M3ESelection.slider(
+              child: M3ESlider(
                 value: _progress,
                 onChanged: (double value) =>
                     setState(() => _progress = value),
@@ -123,7 +123,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
             SizedBox(
               width: 200,
               height: 180,
-              child: M3ECommunication.refreshIndicator(
+              child: M3ERefreshIndicator(
                 onRefresh: _handleRefresh,
                 child: ListView.builder(
                   itemCount: 12,
@@ -137,9 +137,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
             SizedBox(
               width: 200,
               height: 180,
-              child: M3ECommunication.refreshIndicator(
+              child: M3ERefreshIndicator.contained(
                 onRefresh: _handleRefresh,
-                contained: true,
                 child: ListView.builder(
                   itemCount: 12,
                   itemBuilder: (BuildContext context, int index) => Padding(
@@ -162,22 +161,22 @@ class _FeedbackPageState extends State<FeedbackPage> {
         DemoRow(
           label: 'Hover / long-press the icon; tap for a snackbar',
           children: <Widget>[
-            M3ECommunication.tooltip(
+            M3ETooltip(
               message: 'Compose a new message',
-              child: M3EActions.iconButton(
+              child: M3EIconButton(
                 icon: const Icon(M3EIcons.edit),
                 variant: M3EIconButtonVariant.tonal,
                 onPressed: () {},
               ),
             ),
-            M3EActions.button(
-              label: 'Show snackbar',
-              onPressed: () => M3ECommunication.showSnackbar(
+            M3EButton(
+              onPressed: () => M3ESnackbar.show(
                 context,
                 message: 'Draft saved',
                 actionLabel: 'Undo',
                 onAction: () {},
               ),
+              child: const Text('Show snackbar'),
             ),
           ],
         ),
@@ -189,24 +188,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
     return GallerySection(
       title: 'Text fields & search',
       children: <Widget>[
-        M3ETextInputs.textField(
+        M3ETextField(
           controller: _nameController,
           label: 'Full name',
           supportingText: 'As it appears on your ID',
           leading: const Icon(M3EIcons.edit),
         ),
         const SizedBox(height: 16),
-        M3ETextInputs.textField(
+        const M3ETextField(
           label: 'Email',
           variant: M3ETextFieldVariant.outlined,
           errorText: 'Enter a valid email address',
         ),
         const SizedBox(height: 16),
-        M3ETextInputs.searchBar(
+        M3ESearchBar(
           controller: _searchController,
           hintText: 'Search components',
           trailing: <Widget>[
-            M3EActions.iconButton(
+            M3EIconButton(
               icon: const Icon(M3EIcons.close),
               onPressed: _searchController.clear,
             ),

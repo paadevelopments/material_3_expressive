@@ -92,10 +92,10 @@ class _Gallery extends StatelessWidget {
       color: theme.colorScheme.surface,
       child: Column(
         children: <Widget>[
-          M3ENavigation.topAppBar(
-            title: 'Material 3 Expressive',
+          M3ETopAppBar(
+            titleText: 'Material 3 Expressive',
             actions: <Widget>[
-              M3EActions.iconButton(
+              M3EIconButton(
                 icon: Icon(dark ? M3EIcons.close : M3EIcons.check),
                 tooltip: 'Toggle theme',
                 onPressed: onToggleTheme,
@@ -103,7 +103,7 @@ class _Gallery extends StatelessWidget {
             ],
           ),
           Expanded(child: _pages[index]),
-          M3ENavigation.bar(
+          M3ENavigationBar(
             destinations: _destinations,
             selectedIndex: index,
             onDestinationSelected: onIndexChanged,

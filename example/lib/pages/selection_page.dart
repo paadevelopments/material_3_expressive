@@ -37,17 +37,17 @@ class _SelectionPageState extends State<SelectionPage> {
             DemoRow(
               label: 'Binary & tristate',
               children: <Widget>[
-                M3ESelection.checkbox(
+                M3ECheckbox(
                   value: _checked,
                   onChanged: (bool? value) => setState(() => _checked = value),
                 ),
-                M3ESelection.checkbox(
+                M3ECheckbox(
                   value: _tristate,
                   tristate: true,
                   onChanged: (bool? value) =>
                       setState(() => _tristate = value),
                 ),
-                M3ESelection.checkbox(
+                M3ECheckbox(
                   value: true,
                   error: true,
                   onChanged: (bool? value) {},
@@ -64,7 +64,7 @@ class _SelectionPageState extends State<SelectionPage> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: <Widget>[
-                    M3ESelection.radio<String>(
+                    M3ERadio<String>(
                       value: plan,
                       groupValue: _plan,
                       onChanged: (String value) =>
@@ -87,12 +87,12 @@ class _SelectionPageState extends State<SelectionPage> {
             DemoRow(
               label: 'With and without icons',
               children: <Widget>[
-                M3ESelection.switchControl(
+                M3ESwitch(
                   value: _wifi,
                   selectedIcon: const Icon(M3EIcons.check),
                   onChanged: (bool value) => setState(() => _wifi = value),
                 ),
-                M3ESelection.switchControl(
+                M3ESwitch(
                   value: _bluetooth,
                   onChanged: (bool value) => setState(() => _bluetooth = value),
                 ),
@@ -106,29 +106,29 @@ class _SelectionPageState extends State<SelectionPage> {
             DemoRow(
               label: 'Types',
               children: <Widget>[
-                M3ESelection.chip(
+                M3EChip(
                   label: 'Assist',
                   leading: const Icon(M3EIcons.edit),
                   onPressed: () {},
                 ),
-                M3ESelection.chip(
+                M3EChip(
                   label: 'Flutter',
                   type: M3EChipType.filter,
                   selected: _chips.contains('flutter'),
                   onPressed: () => _toggleChip('flutter'),
                 ),
-                M3ESelection.chip(
+                M3EChip(
                   label: 'Dart',
                   type: M3EChipType.filter,
                   selected: _chips.contains('dart'),
                   onPressed: () => _toggleChip('dart'),
                 ),
-                M3ESelection.chip(
+                M3EChip(
                   label: 'Input',
                   type: M3EChipType.input,
                   onDeleted: () {},
                 ),
-                M3ESelection.chip(
+                M3EChip(
                   label: 'Suggestion',
                   type: M3EChipType.suggestion,
                   onPressed: () {},
@@ -145,7 +145,7 @@ class _SelectionPageState extends State<SelectionPage> {
               children: <Widget>[
                 SizedBox(
                   width: 260,
-                  child: M3ESelection.slider(
+                  child: M3ESlider(
                     value: _volume,
                     onChanged: (double value) =>
                         setState(() => _volume = value),
@@ -158,7 +158,7 @@ class _SelectionPageState extends State<SelectionPage> {
               children: <Widget>[
                 SizedBox(
                   width: 260,
-                  child: M3ESelection.slider(
+                  child: M3ESlider(
                     value: _brightness,
                     max: 5,
                     divisions: 5,
@@ -173,13 +173,13 @@ class _SelectionPageState extends State<SelectionPage> {
         GallerySection(
           title: 'Date & time pickers',
           children: <Widget>[
-            M3ESelection.datePicker(
+            M3EDatePicker(
               selectedDate: _date,
               onDateSelected: (DateTime value) =>
                   setState(() => _date = value),
             ),
             const SizedBox(height: 24),
-            M3ESelection.timePicker(
+            M3ETimePicker(
               value: _time,
               onChanged: (M3ETime value) => setState(() => _time = value),
             ),

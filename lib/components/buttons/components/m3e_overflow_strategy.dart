@@ -7,8 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 
 import 'package:flutter/material.dart';
-import '../../toggle_button/toggle_button.dart';
-import '../../toggle_button_group/toggle_button_group.dart';
+import '../../toggle_button/m3e_toggle_button.dart';
+import '../../toggle_button_group/m3e_toggle_button_group.dart';
 import '../enums/m3e_button_enums.dart';
 import '../styles/m3e_button_decoration.dart';
 

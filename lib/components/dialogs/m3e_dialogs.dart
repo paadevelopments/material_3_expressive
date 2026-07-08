@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import '../divider/divider.dart';
+import '../divider/m3e_divider.dart';
 import 'styles/m3e_dialog_tokens.dart';
 
 export 'styles/m3e_dialog_tokens.dart';

@@ -52,18 +52,18 @@ class ContainmentPage extends StatelessWidget {
           children: <Widget>[
             SizedBox(
               width: 220,
-              child: M3EContainment.card(child: body('Elevated')),
+              child: M3ECard(child: body('Elevated')),
             ),
             SizedBox(
               width: 220,
-              child: M3EContainment.card(
+              child: M3ECard(
                 variant: M3ECardVariant.filled,
                 child: body('Filled'),
               ),
             ),
             SizedBox(
               width: 220,
-              child: M3EContainment.card(
+              child: M3ECard(
                 variant: M3ECardVariant.outlined,
                 onPressed: () {},
                 child: body('Outlined (tap)'),
@@ -81,7 +81,7 @@ class ContainmentPage extends StatelessWidget {
       children: <Widget>[
         SizedBox(
           height: 200,
-          child: M3EContainment.carousel(
+          child: M3ECarousel(
             type: M3ECarouselType.hero,
             heroAlignment: M3ECarouselHeroAlignment.center,
             onTap: (int tapIndex) => log(tapIndex.toString()),
@@ -96,7 +96,7 @@ class ContainmentPage extends StatelessWidget {
         const SizedBox(height: 16),
         SizedBox(
           height: 160,
-          child: M3EContainment.carousel(
+          child: M3ECarousel(
             type: M3ECarouselType.uncontained,
             heroAlignment: M3ECarouselHeroAlignment.center,
             onTap: (int tapIndex) => log(tapIndex.toString()),
@@ -117,15 +117,15 @@ class ContainmentPage extends StatelessWidget {
       title: 'Lists',
       children: <Widget>[
         const _ListLabel('Standard list items'),
-        M3EContainment.listItem(
+        M3EListItem(
           headline: 'Wireless charging',
           supportingText: 'On · Fast charge enabled',
           leading: const Icon(M3EIcons.schedule),
           trailing: const Icon(M3EIcons.chevron_right),
           onTap: () {},
         ),
-        M3EContainment.divider(),
-        M3EContainment.listItem(
+        const M3EDivider(),
+        M3EListItem(
           headline: 'Calendar sync',
           supportingText: 'Syncs every 15 minutes',
           leading: const Icon(M3EIcons.calendar_today),
@@ -134,13 +134,13 @@ class ContainmentPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const _ListLabel('Card list items'),
-        M3EContainment.cardList(
+        M3ECardList(
           itemCount: 3,
           onTap: (index) => log('Tapped card $index'),
           itemBuilder: (context, index) {
             final labels = ['Inbox', 'Drafts', 'Sent'];
             final icons = [M3EIcons.schedule, M3EIcons.calendar_today, M3EIcons.check];
-            return M3EContainment.listItem(
+            return M3EListItem(
               headline: labels[index],
               supportingText: 'Dynamic rounding based on position',
               leading: Icon(icons[index]),
@@ -152,11 +152,11 @@ class ContainmentPage extends StatelessWidget {
         const _ListLabel('Card list builder (scrollable)'),
         SizedBox(
           height: 200,
-          child: M3EContainment.cardListBuilder(
+          child: M3ECardList.builder(
             itemCount: 20,
             shrinkWrap: true,
             onTap: (index) => log('Tapped item $index'),
-            itemBuilder: (context, index) => M3EContainment.listItem(
+            itemBuilder: (context, index) => M3EListItem(
               headline: 'Scrollable Item $index',
               supportingText: 'Supports many items with lazy loading',
               leading: const Icon(M3EIcons.schedule),
@@ -165,7 +165,7 @@ class ContainmentPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const _ListLabel('Dismissible list (swipe to dismiss)'),
-        M3EContainment.dismissibleColumn(
+        M3EDismissibleColumn(
           itemCount: 3,
           onDismiss: (index, direction) async {
             log('Dismissed item $index in direction $direction');
@@ -188,7 +188,7 @@ class ContainmentPage extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final labels = ['Swipe right to archive', 'Swipe left to delete', 'Expressive physics'];
-            return M3EContainment.listItem(
+            return M3EListItem(
               headline: labels[index],
               supportingText: 'Physics-based dismissible card',
               leading: const Icon(M3EIcons.schedule),
@@ -197,7 +197,7 @@ class ContainmentPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const _ListLabel('Expandable list (expressive motions)'),
-        M3EContainment.expandableCardColumn(
+        M3EExpandableCardColumn(
           data: [
             M3EExpandableData(
               title: 'Battery level low',
@@ -208,10 +208,10 @@ class ContainmentPage extends StatelessWidget {
                 children: [
                   const Text('Your battery is at 10% and will run out soon.'),
                   const SizedBox(height: 8),
-                  M3EActions.button(
-                    label: 'Enable battery saver',
+                  M3EButton(
                     style: M3EButtonStyle.tonal,
                     onPressed: () {},
+                    child: const Text('Enable battery saver'),
                   ),
                 ],
               ),
@@ -235,7 +235,7 @@ class ContainmentPage extends StatelessWidget {
     return GallerySection(
       title: 'Dividers',
       children: <Widget>[
-        M3EContainment.divider(),
+        const M3EDivider(),
         const SizedBox(height: 12),
         SizedBox(
           height: 40,
@@ -247,7 +247,7 @@ class ContainmentPage extends StatelessWidget {
                     .copyWith(color: theme.colorScheme.onSurface),
               ),
               const SizedBox(width: 12),
-              M3EContainment.divider(axis: M3EDividerAxis.vertical),
+              const M3EDivider(axis: M3EDividerAxis.vertical),
               const SizedBox(width: 12),
               Text(
                 'Right',
@@ -269,25 +269,25 @@ class ContainmentPage extends StatelessWidget {
         DemoRow(
           label: 'Triggers',
           children: <Widget>[
-            M3EActions.button(
-              label: 'Dialog',
+            M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () => _showDialog(context),
+              child: const Text('Dialog'),
             ),
-            M3EActions.button(
-              label: 'Full screen',
+            M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () => _showFullScreen(context),
+              child: const Text('Full screen'),
             ),
-            M3EActions.button(
-              label: 'Bottom sheet',
+            M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () => _showBottomSheet(context),
+              child: const Text('Bottom sheet'),
             ),
-            M3EActions.button(
-              label: 'Side sheet',
+            M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () => _showSideSheet(context),
+              child: const Text('Side sheet'),
             ),
           ],
         ),
@@ -296,23 +296,23 @@ class ContainmentPage extends StatelessWidget {
   }
 
   void _showDialog(BuildContext context) {
-    M3EContainment.showDialog<void>(
+    M3EDialog.show<void>(
       context,
-      dialog: M3EContainment.dialog(
+      dialog: M3EDialog(
         title: 'Reset settings?',
         icon: const Icon(M3EIcons.error),
         content: const Text(
           'This will restore all settings to their default values.',
         ),
         actions: <Widget>[
-          M3EActions.button(
-            label: 'Cancel',
+          M3EButton(
             style: M3EButtonStyle.text,
             onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
           ),
-          M3EActions.button(
-            label: 'Reset',
+          M3EButton(
             onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Reset'),
           ),
         ],
       ),
@@ -320,13 +320,13 @@ class ContainmentPage extends StatelessWidget {
   }
 
   void _showFullScreen(BuildContext context) {
-    M3EContainment.showFullScreenDialog<void>(
+    M3EDialog.showFullScreen<void>(
       context,
       title: 'New event',
-      action: M3EActions.button(
-        label: 'Save',
+      action: M3EButton(
         style: M3EButtonStyle.text,
         onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Save'),
       ),
       body: const Padding(
         padding: EdgeInsets.all(24),
@@ -336,7 +336,7 @@ class ContainmentPage extends StatelessWidget {
   }
 
   void _showBottomSheet(BuildContext context) {
-    M3EContainment.showBottomSheet<void>(
+    M3EBottomSheet.show<void>(
       context,
       builder: (BuildContext context) => const Padding(
         padding: EdgeInsets.all(24),
@@ -346,7 +346,7 @@ class ContainmentPage extends StatelessWidget {
   }
 
   void _showSideSheet(BuildContext context) {
-    M3EContainment.showSideSheet<void>(
+    M3ESideSheet.show<void>(
       context,
       title: 'Filters',
       body: const Padding(

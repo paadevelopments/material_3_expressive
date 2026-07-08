@@ -9,8 +9,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:flutter/physics.dart';
-import '../../toggle_button/toggle_button.dart';
-import '../../toggle_button_group/toggle_button_group.dart';
+import '../../toggle_button/m3e_toggle_button.dart';
+import '../../toggle_button_group/m3e_toggle_button_group.dart';
 import 'package:motor/motor.dart';
 import '../styles/m3e_button_tokens.dart';
 import '../styles/m3e_button_overflow_decoration.dart';

@@ -110,8 +110,8 @@ class _NavigationPageState extends State<NavigationPage> {
       children: <Widget>[
         _framed(
           theme,
-          M3ENavigation.topAppBar(
-            title: 'Small',
+          M3ETopAppBar(
+            titleText: 'Small',
             leading: const Icon(M3EIcons.menu),
             actions: const <Widget>[Icon(M3EIcons.search)],
           ),
@@ -119,8 +119,8 @@ class _NavigationPageState extends State<NavigationPage> {
         const SizedBox(height: 12),
         _framed(
           theme,
-          M3ENavigation.topAppBar(
-            title: 'Centered • compact',
+          M3ETopAppBar(
+            titleText: 'Centered • compact',
             centerTitle: true,
             density: M3EAppBarDensity.compact,
             shapeFamily: M3EAppBarShapeFamily.square,
@@ -130,13 +130,13 @@ class _NavigationPageState extends State<NavigationPage> {
         const SizedBox(height: 12),
         _framed(
           theme,
-          M3ENavigation.bottomAppBar(
+          M3EBottomAppBar(
             actions: const <Widget>[
               Icon(M3EIcons.menu),
               Icon(M3EIcons.search),
               Icon(M3EIcons.edit),
             ],
-            floatingActionButton: M3EActions.fab(
+            floatingActionButton: M3EFab(
               icon: const Icon(M3EIcons.add),
               size: M3EFabSize.small,
               onPressed: () {},
@@ -151,7 +151,7 @@ class _NavigationPageState extends State<NavigationPage> {
     return GallerySection(
       title: 'Tabs',
       children: <Widget>[
-        M3ENavigation.tabs(
+        M3ETabs(
           selectedIndex: _primaryTab,
           onTabSelected: (int i) => setState(() => _primaryTab = i),
           tabs: const <M3ETab>[
@@ -161,7 +161,7 @@ class _NavigationPageState extends State<NavigationPage> {
           ],
         ),
         const SizedBox(height: 16),
-        M3ENavigation.tabs(
+        M3ETabs(
           variant: M3ETabsVariant.secondary,
           selectedIndex: _secondaryTab,
           onTabSelected: (int i) => setState(() => _secondaryTab = i),
@@ -180,7 +180,7 @@ class _NavigationPageState extends State<NavigationPage> {
       children: <Widget>[
         _framed(
           theme,
-          M3ENavigation.bar(
+          M3ENavigationBar(
             destinations: _barDestinations,
             selectedIndex: _barIndex,
             onDestinationSelected: (int i) => setState(() => _barIndex = i),
@@ -202,7 +202,7 @@ class _NavigationPageState extends State<NavigationPage> {
               height: 320,
               child: _framed(
                 theme,
-                M3ENavigation.rail(
+                M3ENavigationRail(
                   sections: _railSections,
                   selectedIndex: _railIndex,
                   onDestinationSelected: (int i) =>
@@ -219,7 +219,7 @@ class _NavigationPageState extends State<NavigationPage> {
               height: 320,
               child: _framed(
                 theme,
-                M3ENavigation.drawer(
+                M3ENavigationDrawer(
                   headline: 'Mail',
                   destinations: _drawerDestinations,
                   selectedIndex: _drawerIndex,
@@ -241,30 +241,30 @@ class _NavigationPageState extends State<NavigationPage> {
         DemoRow(
           label: 'Floating toolbars',
           children: <Widget>[
-            M3ENavigation.toolbar(
+            M3EToolbar(
               children: <Widget>[
-                M3EActions.iconButton(
+                M3EIconButton(
                   icon: const Icon(M3EIcons.arrow_back),
                   onPressed: () {},
                 ),
-                M3EActions.iconButton(
+                M3EIconButton(
                   icon: const Icon(M3EIcons.edit),
                   onPressed: () {},
                 ),
-                M3EActions.iconButton(
+                M3EIconButton(
                   icon: const Icon(M3EIcons.arrow_forward),
                   onPressed: () {},
                 ),
               ],
             ),
-            M3ENavigation.toolbar(
+            M3EToolbar(
               color: M3EToolbarColor.vibrant,
               children: <Widget>[
-                M3EActions.iconButton(
+                M3EIconButton(
                   icon: const Icon(M3EIcons.remove),
                   onPressed: () {},
                 ),
-                M3EActions.iconButton(
+                M3EIconButton(
                   icon: const Icon(M3EIcons.add),
                   onPressed: () {},
                 ),
@@ -275,12 +275,12 @@ class _NavigationPageState extends State<NavigationPage> {
         DemoRow(
           label: 'Anchored menu',
           children: <Widget>[
-            M3ENavigation.menu(
+            M3EMenu(
               anchorBuilder: (BuildContext context, VoidCallback open) {
-                return M3EActions.button(
-                  label: 'Open menu',
+                return M3EButton.icon(
                   style: M3EButtonStyle.outlined,
                   icon: const Icon(M3EIcons.arrow_drop_down),
+                  label: const Text('Open menu'),
                   onPressed: open,
                 );
               },
