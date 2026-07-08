@@ -70,7 +70,12 @@ class M3EChip extends StatelessWidget {
 
     return Container(
       height: M3EChipTokens.height,
-      padding: EdgeInsets.only(left: leading == null ? 16 : 8, right: 12),
+      padding: EdgeInsets.only(
+        left: leading == null
+            ? M3EChipTokens.labelStartPadding
+            : M3EChipTokens.iconStartPadding,
+        right: M3EChipTokens.endPadding,
+      ),
       decoration: BoxDecoration(
         color: container,
         borderRadius: borderRadius,
@@ -102,7 +107,7 @@ class M3EChip extends StatelessWidget {
             data: IconThemeData(color: foreground, size: M3EChipTokens.iconSize),
             child: leading!,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: M3EChipTokens.iconLabelGap),
         ],
         Text(
           label,
@@ -111,7 +116,7 @@ class M3EChip extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (onDeleted != null) ...<Widget>[
-          const SizedBox(width: 8),
+          const SizedBox(width: M3EChipTokens.iconLabelGap),
           GestureDetector(
             onTap: onDeleted,
             child: Icon(M3EIcons.close, size: M3EChipTokens.iconSize, color: foreground),

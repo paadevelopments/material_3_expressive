@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../styles/m3e_time_picker_tokens.dart';
+
 /// Paints the clock dial: hour or minute labels, the selection hand and knob.
 class M3ETimeDialPainter extends CustomPainter {
   const M3ETimeDialPainter({
@@ -26,13 +28,14 @@ class M3ETimeDialPainter extends CustomPainter {
   final Color labelColor;
   final TextDirection textDirection;
 
-  static const double _knobRadius = 20;
+  static const double _knobRadius = M3ETimePickerTokens.dialKnobRadius;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
     final double radius = size.shortestSide / 2;
-    final double ringRadius = radius - _knobRadius - 4;
+    final double ringRadius =
+        radius - _knobRadius - M3ETimePickerTokens.dialRingInset;
 
     canvas.drawCircle(center, radius, Paint()..color = dialColor);
 
@@ -45,9 +48,9 @@ class M3ETimeDialPainter extends CustomPainter {
         knob,
         Paint()
           ..color = accentColor
-          ..strokeWidth = 2,
+          ..strokeWidth = M3ETimePickerTokens.dialHandWidth,
       )
-      ..drawCircle(center, 4, accent)
+      ..drawCircle(center, M3ETimePickerTokens.dialCenterRadius, accent)
       ..drawCircle(knob, _knobRadius, accent);
 
     for (var i = 0; i < labels.length; i++) {
@@ -64,7 +67,7 @@ class M3ETimeDialPainter extends CustomPainter {
         text: labels[i],
         style: TextStyle(
           color: selected ? onAccentColor : labelColor,
-          fontSize: 16,
+          fontSize: M3ETimePickerTokens.dialLabelFontSize,
         ),
       ),
       textDirection: textDirection,

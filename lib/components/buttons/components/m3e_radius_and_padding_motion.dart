@@ -7,19 +7,12 @@
 // LICENSE file in the root directory of this source tree.
 
 import 'dart:ui';
-import 'package:material_3_expressive/foundations/foundations.dart';
-import 'package:flutter/material.dart';
-import 'package:motor/motor.dart';
 
-import '../styles/m3e_button_tokens.dart';
+import 'package:flutter/widgets.dart';
+import 'package:motor/motor.dart';
 
 const double kAnimationDeltaThreshold = 0.005;
 const double kSpringRetargetTolerance = 0.1;
-
-abstract class _ConstProperties {
-  static const double focusRingGap = M3EButtonConstants.kFocusRingGap;
-  static const double focusRingWidth = M3EButtonConstants.kFocusRingWidth;
-}
 
 class _CachedLerpResult {
   double tl = 0;
@@ -112,7 +105,7 @@ class _RadiusAndPaddingMotionKeys {
 
 /// Animates shape and padding changes using a single spring progress value (0→1)
 /// that drives ALL corners and padding edges simultaneously.
-class RadiusAndPaddingMotion extends StatefulWidget {
+class M3ERadiusAndPaddingMotion extends StatefulWidget {
   final SpringMotion motion;
   final double internalLeft;
   final double internalRight;
@@ -127,7 +120,7 @@ class RadiusAndPaddingMotion extends StatefulWidget {
 
   final Widget Function(EdgeInsets padding, BorderRadius radius) builder;
 
-  const RadiusAndPaddingMotion({
+  const M3ERadiusAndPaddingMotion({
     super.key,
     required this.motion,
     required this.internalLeft,
@@ -143,10 +136,11 @@ class RadiusAndPaddingMotion extends StatefulWidget {
   });
 
   @override
-  State<RadiusAndPaddingMotion> createState() => _RadiusAndPaddingMotionState();
+  State<M3ERadiusAndPaddingMotion> createState() =>
+      _M3ERadiusAndPaddingMotionState();
 }
 
-class _RadiusAndPaddingMotionState extends State<RadiusAndPaddingMotion> {
+class _M3ERadiusAndPaddingMotionState extends State<M3ERadiusAndPaddingMotion> {
   late double _srcTopLeft, _srcTopRight, _srcBottomLeft, _srcBottomRight;
   late double _srcLeft, _srcRight, _srcTop, _srcBottom;
 
@@ -185,7 +179,7 @@ class _RadiusAndPaddingMotionState extends State<RadiusAndPaddingMotion> {
   }
 
   @override
-  void didUpdateWidget(covariant RadiusAndPaddingMotion oldWidget) {
+  void didUpdateWidget(covariant M3ERadiusAndPaddingMotion oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (_targetsChanged(oldWidget)) {
@@ -237,7 +231,7 @@ class _RadiusAndPaddingMotionState extends State<RadiusAndPaddingMotion> {
     }
   }
 
-  bool _frozenCornersChanged(RadiusAndPaddingMotion old) {
+  bool _frozenCornersChanged(M3ERadiusAndPaddingMotion old) {
     if (widget.freezeTopLeft &&
         widget.targetRadius.topLeft.x != old.targetRadius.topLeft.x) {
       return true;
@@ -272,7 +266,7 @@ class _RadiusAndPaddingMotionState extends State<RadiusAndPaddingMotion> {
     }
   }
 
-  bool _targetsChanged(RadiusAndPaddingMotion old) {
+  bool _targetsChanged(M3ERadiusAndPaddingMotion old) {
     return widget.targetRadius != old.targetRadius ||
         widget.internalLeft != old.internalLeft ||
         widget.internalRight != old.internalRight ||
@@ -425,66 +419,6 @@ class _RadiusAndPaddingMotionState extends State<RadiusAndPaddingMotion> {
             _lastFrame.cachedRadius!,
           );
         },
-      ),
-    );
-  }
-}
-
-/// A decorator that draws the Material 3 Expressive focus ring around its child.
-class FocusRing extends StatelessWidget {
-  final BorderRadius radius;
-  final Widget child;
-  final bool focused;
-  final Duration animationDuration;
-
-  const FocusRing({
-    super.key,
-    required this.radius,
-    required this.child,
-    this.focused = false,
-    this.animationDuration = Duration.zero,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!focused) return RepaintBoundary(child: child);
-
-    final color = m3eMaterialTheme(context).colorScheme.primary;
-
-    const double gap = _ConstProperties.focusRingGap;
-    const double width = _ConstProperties.focusRingWidth;
-    const double outset = gap + width;
-
-    final adjustedRadius = BorderRadius.only(
-      topLeft: Radius.circular(radius.topLeft.x + outset),
-      topRight: Radius.circular(radius.topRight.x + outset),
-      bottomLeft: Radius.circular(radius.bottomLeft.x + outset),
-      bottomRight: Radius.circular(radius.bottomRight.x + outset),
-    );
-
-    return RepaintBoundary(
-      child: Stack(
-        fit: StackFit.passthrough,
-        clipBehavior: Clip.none,
-        children: [
-          child,
-          Positioned(
-            top: -outset,
-            bottom: -outset,
-            left: -outset,
-            right: -outset,
-            child: IgnorePointer(
-              child: AnimatedContainer(
-                duration: animationDuration,
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  border: Border.all(color: color, width: width),
-                  borderRadius: adjustedRadius,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

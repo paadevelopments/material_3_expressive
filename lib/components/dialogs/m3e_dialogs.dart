@@ -44,7 +44,7 @@ class M3EDialog extends StatelessWidget {
           data: theme,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: M3EDialogTokens.screenMargin,
               child: dialog,
             ),
           ),
@@ -89,7 +89,8 @@ class M3EDialog extends StatelessWidget {
     return FadeTransition(
       opacity: curved,
       child: ScaleTransition(
-        scale: Tween<double>(begin: 0.9, end: 1).animate(curved),
+        scale: Tween<double>(begin: M3EDialogTokens.entranceScale, end: 1)
+            .animate(curved),
         child: child,
       ),
     );
@@ -216,13 +217,13 @@ class _FullScreenDialog extends StatelessWidget {
       height: M3EDialogTokens.fullScreenHeaderHeight,
       child: Row(
         children: <Widget>[
-          const SizedBox(width: 4),
+          const SizedBox(width: M3EDialogTokens.headerEdgeGap),
           M3ETappable(
             onTap: () => Navigator.of(context).pop(),
             semanticLabel: _closeSemanticLabel,
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
-                padding: const EdgeInsets.all(12),
+                padding: M3EDialogTokens.closeButtonPadding,
                 child: Icon(
                   M3EIcons.close,
                   color: scheme.onSurface,
@@ -231,7 +232,7 @@ class _FullScreenDialog extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: M3EDialogTokens.headerEdgeGap),
           Expanded(
             child: Text(
               title,
@@ -243,7 +244,7 @@ class _FullScreenDialog extends StatelessWidget {
           ),
           if (action != null) ...<Widget>[
             action!,
-            const SizedBox(width: 16),
+            const SizedBox(width: M3EDialogTokens.headerActionGap),
           ],
         ],
       ),

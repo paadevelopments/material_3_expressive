@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_icon_button_enums.dart';
+import 'styles/m3e_icon_button_shapes.dart';
 import 'styles/m3e_icon_button_tokens.dart';
 
 /// Material 3 Expressive Icon Button
@@ -91,7 +92,10 @@ class M3EIconButton extends StatelessWidget {
       case M3EIconButtonVariant.outlined:
         bg = Colors.transparent;
         fg = scheme.primary;
-        side = BorderSide(color: scheme.outline, width: 1);
+        side = BorderSide(
+          color: scheme.outline,
+          width: M3EIconButtonTokens.outlineWidth,
+        );
         break;
     }
 

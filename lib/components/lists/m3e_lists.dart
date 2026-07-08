@@ -12,7 +12,7 @@ export 'components/m3e_expandable_card_column.dart';
 export 'components/m3e_expandable_card_list.dart';
 export 'components/m3e_expandable_data.dart';
 export 'components/m3e_expandable_item.dart';
-export 'components/sliver_m3e_expandable_card_list.dart';
+export 'components/m3e_sliver_expandable_card_list.dart';
 export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
 export 'styles/m3e_card_list_tokens.dart';

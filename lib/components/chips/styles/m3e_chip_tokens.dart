@@ -11,6 +11,18 @@ abstract class M3EChipTokens {
   /// The default icon size for leading and trailing icons in a chip.
   static const double iconSize = 18.0;
 
+  /// Leading inset when the chip has no leading icon.
+  static const double labelStartPadding = 16.0;
+
+  /// Leading inset when the chip has a leading icon.
+  static const double iconStartPadding = 8.0;
+
+  /// Trailing inset of the chip content.
+  static const double endPadding = 12.0;
+
+  /// Gap between the icon and the label (and the label and delete icon).
+  static const double iconLabelGap = 8.0;
+
   /// Resolves the container color for a chip based on its state.
   static Color containerColor(
     M3EColorScheme scheme, {

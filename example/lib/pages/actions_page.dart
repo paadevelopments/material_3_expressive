@@ -3,6 +3,8 @@ import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/segmented_buttons/models/m3e_segment.dart';
+import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
+import 'package:material_3_expressive/components/toggle_button_group/models/m3e_button_group_action.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';
@@ -21,6 +23,9 @@ class _ActionsPageState extends State<ActionsPage> {
   Set<String> _filters = <String>{'new'};
   int _groupIndex = 0;
   int _connectedGroupIndex = 0;
+  bool _toggleFilled = false;
+  bool _toggleOutlined = true;
+  bool _toggleText = false;
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +237,31 @@ class _ActionsPageState extends State<ActionsPage> {
                 M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),
                 M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_right)),
               ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Toggle buttons (round <-> square morph)',
+          children: <Widget>[
+            M3EToggleButton.filled(
+              icon: const Icon(M3EIcons.favorite_border),
+              checkedIcon: const Icon(M3EIcons.favorite),
+              checked: _toggleFilled,
+              onCheckedChange: (bool value) =>
+                  setState(() => _toggleFilled = value),
+            ),
+            M3EToggleButton.outlined(
+              icon: const Icon(M3EIcons.star_border),
+              checkedIcon: const Icon(M3EIcons.star),
+              checked: _toggleOutlined,
+              onCheckedChange: (bool value) =>
+                  setState(() => _toggleOutlined = value),
+            ),
+            M3EToggleButton.text(
+              label: const Text('Bold'),
+              checked: _toggleText,
+              onCheckedChange: (bool value) =>
+                  setState(() => _toggleText = value),
             ),
           ],
         ),

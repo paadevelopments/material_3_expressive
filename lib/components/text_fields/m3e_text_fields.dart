@@ -184,7 +184,8 @@ class _M3ETextFieldState extends State<M3ETextField> {
           style: theme.typeScale.bodyLarge.copyWith(color: scheme.onSurface),
           cursorColor: accent,
           backgroundCursorColor: scheme.outlineVariant,
-          selectionColor: scheme.primary.withValues(alpha: 0.4),
+          selectionColor: scheme.primary
+              .withValues(alpha: M3ETextFieldTokens.selectionOpacity),
         ),
       ],
     );

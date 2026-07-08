@@ -92,7 +92,7 @@ class _Gallery extends StatelessWidget {
       color: theme.colorScheme.surface,
       child: Column(
         children: <Widget>[
-          M3ETopAppBar(
+          M3EAppBar.top(
             titleText: 'Material 3 Expressive',
             actions: <Widget>[
               M3EIconButton(

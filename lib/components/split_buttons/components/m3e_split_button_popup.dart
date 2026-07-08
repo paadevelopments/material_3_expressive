@@ -7,8 +7,8 @@ import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:motor/motor.dart';
-import '../m3e_split_buttons.dart';
-import '../styles/m3e_split_button_decoration.dart';
+import '../models/m3e_split_button_item.dart';
+import '../styles/m3e_split_button_popup_decoration.dart';
 import '../../buttons/styles/m3e_button_tokens.dart';
 
 Future<T?> showSplitButtonPopup<T>({

@@ -13,6 +13,21 @@ abstract class M3ETimePickerTokens {
   /// The size of the dial.
   static const double dialSize = 256.0;
 
+  /// The radius of the selection knob on the dial.
+  static const double dialKnobRadius = 20.0;
+
+  /// The radius of the dial's center dot.
+  static const double dialCenterRadius = 4.0;
+
+  /// The inset between the knob and the dial's outer edge.
+  static const double dialRingInset = 4.0;
+
+  /// The stroke width of the selection hand.
+  static const double dialHandWidth = 2.0;
+
+  /// The font size of the dial labels.
+  static const double dialLabelFontSize = 16.0;
+
   /// The size of the time unit field.
   static const Size fieldSize = Size(96, 80);
 

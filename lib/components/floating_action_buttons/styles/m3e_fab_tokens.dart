@@ -37,6 +37,9 @@ class M3EFabTokens {
   final Color background;
   final Color foreground;
 
+  /// Scale applied while the FAB is pressed.
+  static const double pressedScale = 0.95;
+
   static _Dimensions _dimensions(M3EFabSize size) {
     switch (size) {
       case M3EFabSize.small:

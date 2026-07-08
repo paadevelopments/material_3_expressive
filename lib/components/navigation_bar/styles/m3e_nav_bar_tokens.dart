@@ -14,22 +14,7 @@ import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_nav_bar_enums.dart';
-
-@immutable
-class M3ENavMetrics {
-  final double heightSmall;
-  final double heightMedium;
-  final double iconSize;
-  final EdgeInsetsGeometry padding;
-  final double indicatorThickness; // for underline
-  const M3ENavMetrics({
-    required this.heightSmall,
-    required this.heightMedium,
-    required this.iconSize,
-    required this.padding,
-    required this.indicatorThickness,
-  });
-}
+import '../models/m3e_nav_metrics.dart';
 
 M3ENavMetrics _metricsFor(BuildContext context, M3ENavBarDensity density) {
   final m3e = M3ETheme.of(context);

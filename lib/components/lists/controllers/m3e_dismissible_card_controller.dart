@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
 import '../../buttons/styles/m3e_button_tokens.dart';
+import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,43 +28,6 @@ final _kRoundnessSnap = MaterialSpringMotion.expressiveSpatialDefault()
 const _kCardSettleCurve = Cubic(0.34, 1.56, 0.64, 1);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Slot — lightweight per-item bookkeeping
-// ─────────────────────────────────────────────────────────────────────────────
-
-enum _SlotStatus { visible, collapsing }
-
-class DismissibleSlot {
-  _SlotStatus _status;
-  double capturedHeight = 0;
-  double capturedWidth = 0;
-  DismissDirection? dismissedDirection;
-  SingleMotionController? collapseCtrl;
-  SingleMotionController? flyCtrl;
-  final ValueNotifier<double> flyNotifier = ValueNotifier(0.0);
-  bool _flyDisposed = false;
-  Widget? frozenChild;
-  final Object identity = Object();
-
-  DismissibleSlot() : _status = _SlotStatus.visible;
-
-  bool get isVisible => _status == _SlotStatus.visible;
-  bool get isCollapsing => _status == _SlotStatus.collapsing;
-
-  void dispose() {
-    collapseCtrl?.dispose();
-    flyCtrl?.dispose();
-    disposeFlyNotifier();
-  }
-
-  void disposeFlyNotifier() {
-    if (!_flyDisposed) {
-      _flyDisposed = true;
-      flyNotifier.dispose();
-    }
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Mixin — all shared drag / animation / build logic
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -77,8 +40,8 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
       get onDismissCallback;
   void Function(int index)? get onTapCallback;
 
-  final List<DismissibleSlot> _slots = [];
-  DismissibleSlot? _dragSlotRef;
+  final List<M3EDismissibleSlot> _slots = [];
+  M3EDismissibleSlot? _dragSlotRef;
   int _dragSlotIndex = -1;
   double _dragOffset = 0.0;
   bool _pastThreshold = false;
@@ -88,7 +51,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   double _detachPush = 0.0;
   int _collapsingCount = 0;
   final Stopwatch _hapticStopwatch = Stopwatch()..start();
-  final Map<DismissibleSlot, GlobalKey> _measureKeys = {};
+  final Map<M3EDismissibleSlot, GlobalKey> _measureKeys = {};
 
   SingleMotionController? _springCtrl;
   SingleMotionController? _nbrCtrl;
@@ -105,7 +68,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
           if (_slots[i].isVisible) i,
       ];
 
-  List<DismissibleSlot> get slots => List.unmodifiable(_slots);
+  List<M3EDismissibleSlot> get slots => List.unmodifiable(_slots);
   bool get isInteractionLocked => _dragSlotRef != null || _collapsingCount > 0;
 
   void initSlots() => _syncSlots();
@@ -142,7 +105,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     } else if (visibleCount < swipeItemCount) {
       final toAdd = swipeItemCount - visibleCount;
       for (int i = 0; i < toAdd; i++) {
-        _slots.add(DismissibleSlot());
+        _slots.add(M3EDismissibleSlot());
       }
     }
     _reindexDragSlot();
@@ -161,10 +124,10 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     }
   }
 
-  GlobalKey _measureKey(DismissibleSlot slot) =>
+  GlobalKey _measureKey(M3EDismissibleSlot slot) =>
       _measureKeys.putIfAbsent(slot, () => GlobalKey());
 
-  Size _cardSize(DismissibleSlot slot) {
+  Size _cardSize(M3EDismissibleSlot slot) {
     final box =
         _measureKeys[slot]?.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) return const Size(320, 52);
@@ -250,8 +213,8 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     return _neighbourFraction * style.neighbourPull * falloff * _dragOffset.sign;
   }
 
-  void handleDragStart(DismissibleSlot slot) {
-    if (slot._status != _SlotStatus.visible) return;
+  void handleDragStart(M3EDismissibleSlot slot) {
+    if (!slot.isVisible) return;
 
     _springCtrl?.stop(canceled: true);
     _nbrCtrl?.stop(canceled: true);
@@ -514,7 +477,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     _roundnessCtrl = null;
 
     setState(() {
-      slot._status = _SlotStatus.collapsing;
+      slot.markCollapsing();
       _collapsingCount++;
       _dragSlotRef = null;
       _dragSlotIndex = -1;

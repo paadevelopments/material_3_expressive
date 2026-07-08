@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Text, TextAlign, Theme;
+import 'package:flutter/material.dart' show Text, TextAlign;
 import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../styles/m3e_expandable_style.dart';

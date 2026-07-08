@@ -3,245 +3,12 @@
 // ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 
-import '../../buttons/styles/m3e_button_decoration.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
+import '../../buttons/styles/m3e_button_decoration.dart';
 import '../../buttons/styles/m3e_button_motion.dart';
-
-/// Menu presentation style used by [M3ESplitButtonDecoration.menuStyle].
-enum SplitButtonMenuStyle {
-  /// Spring-animated popup menu anchored to the trailing segment.
-  popup,
-
-  /// Modal bottom sheet menu.
-  bottomSheet,
-
-  /// Native Flutter popup menu.
-  native,
-}
-
-/// Selection behavior for bottom-sheet split button menus.
-enum SplitButtonSelectionMode {
-  /// Single item can be selected at a time.
-  single,
-
-  /// Multiple items can be selected together.
-  multiple,
-}
-
-/// Styling options for split-button popup menus.
-@immutable
-class M3ESplitButtonPopupDecoration {
-  const M3ESplitButtonPopupDecoration({
-    this.backgroundColor,
-    this.elevation,
-    this.borderRadius,
-    this.border,
-    this.offset = const Offset(0, 4),
-    this.minWidth = 120,
-    this.maxWidth = 280,
-    this.maxHeight = 400,
-    this.padding,
-    this.motion = M3EButtonMotion.standardPopup,
-    this.selectedColor,
-    this.selectedBorderRadius,
-  });
-
-  final Color? backgroundColor;
-  final double? elevation;
-  final BorderRadius? borderRadius;
-  final Border? border;
-  final Offset offset;
-  final double minWidth;
-  final double maxWidth;
-  final double maxHeight;
-  final EdgeInsetsGeometry? padding;
-  final M3EButtonMotion motion;
-  final Color? selectedColor;
-  final BorderRadius? selectedBorderRadius;
-
-  M3ESplitButtonPopupDecoration copyWith({
-    Color? backgroundColor,
-    double? elevation,
-    BorderRadius? borderRadius,
-    Border? border,
-    Offset? offset,
-    double? minWidth,
-    double? maxWidth,
-    double? maxHeight,
-    EdgeInsetsGeometry? padding,
-    M3EButtonMotion? motion,
-    Color? selectedColor,
-    BorderRadius? selectedBorderRadius,
-  }) {
-    return M3ESplitButtonPopupDecoration(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      elevation: elevation ?? this.elevation,
-      borderRadius: borderRadius ?? this.borderRadius,
-      border: border ?? this.border,
-      offset: offset ?? this.offset,
-      minWidth: minWidth ?? this.minWidth,
-      maxWidth: maxWidth ?? this.maxWidth,
-      maxHeight: maxHeight ?? this.maxHeight,
-      padding: padding ?? this.padding,
-      motion: motion ?? this.motion,
-      selectedColor: selectedColor ?? this.selectedColor,
-      selectedBorderRadius: selectedBorderRadius ?? this.selectedBorderRadius,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is M3ESplitButtonPopupDecoration &&
-          backgroundColor == other.backgroundColor &&
-          elevation == other.elevation &&
-          borderRadius == other.borderRadius &&
-          border == other.border &&
-          offset == other.offset &&
-          minWidth == other.minWidth &&
-          maxWidth == other.maxWidth &&
-          maxHeight == other.maxHeight &&
-          padding == other.padding &&
-          motion == other.motion &&
-          selectedColor == other.selectedColor &&
-          selectedBorderRadius == other.selectedBorderRadius;
-
-  @override
-  int get hashCode => Object.hash(
-    backgroundColor,
-    elevation,
-    borderRadius,
-    border,
-    offset,
-    minWidth,
-    maxWidth,
-    maxHeight,
-    padding,
-    motion,
-    selectedColor,
-    selectedBorderRadius,
-  );
-}
-
-@immutable
-class M3ESplitButtonBottomSheetDecoration {
-  const M3ESplitButtonBottomSheetDecoration({
-    this.title,
-    this.titlePadding,
-    this.showDragHandle = true,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
-    this.motion = M3EButtonMotion.expressiveSpatialDefault,
-    this.selectionMode = SplitButtonSelectionMode.single,
-    this.checkboxStyle,
-  });
-
-  final Widget? title;
-  final EdgeInsetsGeometry? titlePadding;
-  final bool showDragHandle;
-  final Color? backgroundColor;
-  final double? elevation;
-  final ShapeBorder? shape;
-  final M3EButtonMotion motion;
-  final SplitButtonSelectionMode selectionMode;
-  final M3ESplitButtonCheckboxStyle? checkboxStyle;
-
-  M3ESplitButtonBottomSheetDecoration copyWith({
-    Widget? title,
-    EdgeInsetsGeometry? titlePadding,
-    bool? showDragHandle,
-    Color? backgroundColor,
-    double? elevation,
-    ShapeBorder? shape,
-    M3EButtonMotion? motion,
-    SplitButtonSelectionMode? selectionMode,
-    M3ESplitButtonCheckboxStyle? checkboxStyle,
-  }) {
-    return M3ESplitButtonBottomSheetDecoration(
-      title: title ?? this.title,
-      titlePadding: titlePadding ?? this.titlePadding,
-      showDragHandle: showDragHandle ?? this.showDragHandle,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      elevation: elevation ?? this.elevation,
-      shape: shape ?? this.shape,
-      motion: motion ?? this.motion,
-      selectionMode: selectionMode ?? this.selectionMode,
-      checkboxStyle: checkboxStyle ?? this.checkboxStyle,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is M3ESplitButtonBottomSheetDecoration &&
-          title == other.title &&
-          titlePadding == other.titlePadding &&
-          showDragHandle == other.showDragHandle &&
-          backgroundColor == other.backgroundColor &&
-          elevation == other.elevation &&
-          shape == other.shape &&
-          motion == other.motion &&
-          selectionMode == other.selectionMode &&
-          checkboxStyle == other.checkboxStyle;
-
-  @override
-  int get hashCode => Object.hash(
-    title,
-    titlePadding,
-    showDragHandle,
-    backgroundColor,
-    elevation,
-    shape,
-    motion,
-    selectionMode,
-    checkboxStyle,
-  );
-}
-
-@immutable
-class M3ESplitButtonCheckboxStyle {
-  const M3ESplitButtonCheckboxStyle({
-    this.activeColor,
-    this.iconColor,
-    this.nonActiveColor,
-    this.borderColor,
-    this.activeBorderRadius,
-    this.nonActiveBorderRadius,
-    this.icon = const Icon(Icons.check_rounded),
-  });
-
-  final Color? activeColor;
-  final Color? iconColor;
-  final Color? nonActiveColor;
-  final Color? borderColor;
-  final BorderRadius? activeBorderRadius;
-  final BorderRadius? nonActiveBorderRadius;
-  final Widget? icon;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is M3ESplitButtonCheckboxStyle &&
-          activeColor == other.activeColor &&
-          iconColor == other.iconColor &&
-          nonActiveColor == other.nonActiveColor &&
-          borderColor == other.borderColor &&
-          activeBorderRadius == other.activeBorderRadius &&
-          nonActiveBorderRadius == other.nonActiveBorderRadius &&
-          icon == other.icon;
-
-  @override
-  int get hashCode => Object.hash(
-    activeColor,
-    iconColor,
-    nonActiveColor,
-    borderColor,
-    activeBorderRadius,
-    nonActiveBorderRadius,
-    icon,
-  );
-}
+import '../enums/m3e_split_button_menu_style.dart';
+import 'm3e_split_button_bottom_sheet_decoration.dart';
+import 'm3e_split_button_popup_decoration.dart';
 
 @immutable
 class M3ESplitButtonDecoration extends M3EButtonDecoration {
@@ -254,7 +21,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
   final M3EButtonSize? trailingCustomSize;
   final double? trailingSelectedRadius;
   final double? gap;
-  final SplitButtonMenuStyle menuStyle;
+  final M3ESplitButtonMenuStyle menuStyle;
   final M3ESplitButtonPopupDecoration? popupDecoration;
   final M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration;
 
@@ -296,7 +63,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     this.trailingCustomSize,
     this.trailingSelectedRadius,
     this.gap,
-    this.menuStyle = SplitButtonMenuStyle.popup,
+    this.menuStyle = M3ESplitButtonMenuStyle.popup,
     this.popupDecoration,
     this.bottomSheetDecoration,
   });
@@ -342,7 +109,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     M3EButtonSize? trailingCustomSize,
     double? trailingSelectedRadius,
     double? gap,
-    SplitButtonMenuStyle menuStyle = SplitButtonMenuStyle.popup,
+    M3ESplitButtonMenuStyle menuStyle = M3ESplitButtonMenuStyle.popup,
     M3ESplitButtonPopupDecoration? popupDecoration,
     M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
   }) {
@@ -462,7 +229,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     M3EButtonSize? trailingCustomSize,
     double? trailingSelectedRadius,
     double? gap,
-    SplitButtonMenuStyle? menuStyle,
+    M3ESplitButtonMenuStyle? menuStyle,
     M3ESplitButtonPopupDecoration? popupDecoration,
     M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
   }) {

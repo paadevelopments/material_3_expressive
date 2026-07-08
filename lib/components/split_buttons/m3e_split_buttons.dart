@@ -5,22 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_base_button_state.dart';
-import '../buttons/components/m3e_button_motion_widgets.dart';
+import '../buttons/components/m3e_focus_ring.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_tokens.dart';
 import 'components/m3e_split_button_bottom_sheet.dart';
 import 'components/m3e_split_button_popup.dart';
+import 'enums/m3e_split_button_menu_style.dart';
+import 'enums/m3e_split_button_selection_mode.dart';
+import 'enums/m3e_split_button_trailing_alignment.dart';
+import 'models/m3e_split_button_item.dart';
+import 'styles/m3e_split_button_bottom_sheet_decoration.dart';
 import 'styles/m3e_split_button_decoration.dart';
+import 'styles/m3e_split_button_popup_decoration.dart';
 import 'styles/m3e_split_button_tokens.dart';
 
 const bool _kDefaultEnableFeedback = true;
-
-/// Controls how the trailing (dropdown) button aligns with the leading button.
-enum M3ESplitButtonTrailingAlignment {
-  opticalCenter,
-  geometricCenter,
-}
 
 /// Material 3 Expressive Split Button.
 class M3ESplitButton<T> extends StatefulWidget {
@@ -65,6 +65,138 @@ class M3ESplitButton<T> extends StatefulWidget {
             onSelected != null ||
             menuBuilder != null,
         'Provide either onPressed, onSelected, or a custom menuBuilder when the split button is enabled.',
+        );
+
+  /// A filled split button (highest emphasis).
+  const M3ESplitButton.filled({
+    super.key,
+    required this.items,
+    this.onSelected,
+    this.onPressed,
+    this.label,
+    this.leadingIcon,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.trailingAlignment = M3ESplitButtonTrailingAlignment.opticalCenter,
+    this.leadingTooltip,
+    this.trailingTooltip,
+    this.enabled = true,
+    this.menuBuilder,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.selectedValue,
+    this.onMultiSelected,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  })  : style = M3EButtonStyle.filled,
+        assert(
+          items != null || menuBuilder != null,
+          'Provide either `items` or `menuBuilder`.',
+        );
+
+  /// A tonal split button (medium emphasis).
+  const M3ESplitButton.tonal({
+    super.key,
+    required this.items,
+    this.onSelected,
+    this.onPressed,
+    this.label,
+    this.leadingIcon,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.trailingAlignment = M3ESplitButtonTrailingAlignment.opticalCenter,
+    this.leadingTooltip,
+    this.trailingTooltip,
+    this.enabled = true,
+    this.menuBuilder,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.selectedValue,
+    this.onMultiSelected,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  })  : style = M3EButtonStyle.tonal,
+        assert(
+          items != null || menuBuilder != null,
+          'Provide either `items` or `menuBuilder`.',
+        );
+
+  /// An elevated split button (medium emphasis with a shadow).
+  const M3ESplitButton.elevated({
+    super.key,
+    required this.items,
+    this.onSelected,
+    this.onPressed,
+    this.label,
+    this.leadingIcon,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.trailingAlignment = M3ESplitButtonTrailingAlignment.opticalCenter,
+    this.leadingTooltip,
+    this.trailingTooltip,
+    this.enabled = true,
+    this.menuBuilder,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.selectedValue,
+    this.onMultiSelected,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  })  : style = M3EButtonStyle.elevated,
+        assert(
+          items != null || menuBuilder != null,
+          'Provide either `items` or `menuBuilder`.',
+        );
+
+  /// An outlined split button (medium emphasis with a border).
+  const M3ESplitButton.outlined({
+    super.key,
+    required this.items,
+    this.onSelected,
+    this.onPressed,
+    this.label,
+    this.leadingIcon,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.trailingAlignment = M3ESplitButtonTrailingAlignment.opticalCenter,
+    this.leadingTooltip,
+    this.trailingTooltip,
+    this.enabled = true,
+    this.menuBuilder,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.selectedValue,
+    this.onMultiSelected,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  })  : style = M3EButtonStyle.outlined,
+        assert(
+          items != null || menuBuilder != null,
+          'Provide either `items` or `menuBuilder`.',
         );
 
   final List<M3ESplitButtonItem<T>>? items;
@@ -534,7 +666,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     Widget wrapped = ConstrainedBox(
       constraints: BoxConstraints(minWidth: 0, minHeight: minTap),
       child: Center(
-        child: FocusRing(
+        child: M3EFocusRing(
           focused: focused,
           radius: targetRadius,
           child: animatedButton,
@@ -687,7 +819,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       child: ConstrainedBox(
         constraints: BoxConstraints(minWidth: 0, minHeight: minTap),
         child: Center(
-          child: FocusRing(
+          child: M3EFocusRing(
             focused: focused,
             radius: targetRadius,
             child: animatedButton,
@@ -852,14 +984,14 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
     final items = widget.items!;
     final menuStyle =
-        widget.decoration?.menuStyle ?? SplitButtonMenuStyle.popup;
+        widget.decoration?.menuStyle ?? M3ESplitButtonMenuStyle.popup;
 
     switch (menuStyle) {
-      case SplitButtonMenuStyle.popup:
+      case M3ESplitButtonMenuStyle.popup:
         await _showSpringPopup(context, items);
-      case SplitButtonMenuStyle.bottomSheet:
+      case M3ESplitButtonMenuStyle.bottomSheet:
         await _showBottomSheet(context, items);
-      case SplitButtonMenuStyle.native:
+      case M3ESplitButtonMenuStyle.native:
         await _showNativeMenu(context, items: items);
     }
   }
@@ -916,7 +1048,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             const M3ESplitButtonBottomSheetDecoration();
 
     final isMultiSelect =
-        bottomSheetDec.selectionMode == SplitButtonSelectionMode.multiple;
+        bottomSheetDec.selectionMode == M3ESplitButtonSelectionMode.multiple;
 
     if (isMultiSelect) {
       final result = await showSplitButtonBottomSheet<T>(
@@ -1052,18 +1184,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   }
 }
 
-class M3ESplitButtonItem<T> {
-  const M3ESplitButtonItem({
-    required this.value,
-    required this.child,
-    this.enabled = true,
-  });
-
-  final T value;
-  final Object child;
-  final bool enabled;
-}
-
 class _LeadingContent extends StatelessWidget {
   const _LeadingContent({
     required this.size,
@@ -1177,122 +1297,4 @@ class _CornerRadii {
       bottomEnd: Radius.circular(bottomEnd),
     ).resolve(direction);
   }
-}
-
-class M3EFilledSplitButton<T> extends M3ESplitButton<T> {
-  const M3EFilledSplitButton({
-    super.key,
-    required super.items,
-    super.onSelected,
-    super.onPressed,
-    super.label,
-    super.leadingIcon,
-    super.size,
-    super.shape,
-    super.trailingAlignment,
-    super.leadingTooltip,
-    super.trailingTooltip,
-    super.enabled,
-    super.menuBuilder,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.selectedValue,
-    super.onMultiSelected,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.filled);
-
-  const M3EFilledSplitButton.tonal({
-    super.key,
-    required super.items,
-    super.onSelected,
-    super.onPressed,
-    super.label,
-    super.leadingIcon,
-    super.size,
-    super.shape,
-    super.trailingAlignment,
-    super.leadingTooltip,
-    super.trailingTooltip,
-    super.enabled,
-    super.menuBuilder,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.selectedValue,
-    super.onMultiSelected,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.tonal);
-}
-
-class M3EElevatedSplitButton<T> extends M3ESplitButton<T> {
-  const M3EElevatedSplitButton({
-    super.key,
-    required super.items,
-    super.onSelected,
-    super.onPressed,
-    super.label,
-    super.leadingIcon,
-    super.size,
-    super.shape,
-    super.trailingAlignment,
-    super.leadingTooltip,
-    super.trailingTooltip,
-    super.enabled,
-    super.menuBuilder,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.selectedValue,
-    super.onMultiSelected,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.elevated);
-}
-
-class M3EOutlinedSplitButton<T> extends M3ESplitButton<T> {
-  const M3EOutlinedSplitButton({
-    super.key,
-    required super.items,
-    super.onSelected,
-    super.onPressed,
-    super.label,
-    super.leadingIcon,
-    super.size,
-    super.shape,
-    super.trailingAlignment,
-    super.leadingTooltip,
-    super.trailingTooltip,
-    super.enabled,
-    super.menuBuilder,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.selectedValue,
-    super.onMultiSelected,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.outlined);
 }

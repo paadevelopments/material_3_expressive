@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
-import '../../foundations/foundations.dart';
 import 'components/m3e_expressive_loading_indicator.dart';
 import 'enums/m3e_loading_indicator_variant.dart';
 import 'styles/m3e_loading_tokens.dart';

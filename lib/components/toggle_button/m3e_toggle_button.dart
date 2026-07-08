@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 import '../buttons/components/m3e_base_button_state.dart';
-import '../buttons/components/m3e_button_motion_widgets.dart';
+import '../buttons/components/m3e_focus_ring.dart';
+import '../buttons/components/m3e_radius_and_padding_motion.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
@@ -49,6 +50,146 @@ class M3EToggleButton extends StatefulWidget {
     this.enableFeedback = _kDefaultEnableFeedback,
     this.splashFactory,
   });
+
+  /// A filled toggle button (highest emphasis).
+  const M3EToggleButton.filled({
+    super.key,
+    this.onCheckedChange,
+    this.icon,
+    this.checkedIcon,
+    this.label,
+    this.checkedLabel,
+    this.checked,
+    this.size = M3EButtonSize.sm,
+    this.enabled = true,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.filled,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true;
+
+  /// A tonal toggle button (medium emphasis).
+  const M3EToggleButton.tonal({
+    super.key,
+    this.onCheckedChange,
+    this.icon,
+    this.checkedIcon,
+    this.label,
+    this.checkedLabel,
+    this.checked,
+    this.size = M3EButtonSize.sm,
+    this.enabled = true,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.tonal,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true;
+
+  /// An elevated toggle button (medium emphasis with a shadow).
+  const M3EToggleButton.elevated({
+    super.key,
+    this.onCheckedChange,
+    this.icon,
+    this.checkedIcon,
+    this.label,
+    this.checkedLabel,
+    this.checked,
+    this.size = M3EButtonSize.sm,
+    this.enabled = true,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.elevated,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true;
+
+  /// An outlined toggle button (medium emphasis with a border).
+  const M3EToggleButton.outlined({
+    super.key,
+    this.onCheckedChange,
+    this.icon,
+    this.checkedIcon,
+    this.label,
+    this.checkedLabel,
+    this.checked,
+    this.size = M3EButtonSize.sm,
+    this.enabled = true,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.outlined,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true;
+
+  /// A text toggle button (lowest emphasis).
+  const M3EToggleButton.text({
+    super.key,
+    this.onCheckedChange,
+    this.icon,
+    this.checkedIcon,
+    this.label,
+    this.checkedLabel,
+    this.checked,
+    this.size = M3EButtonSize.sm,
+    this.enabled = true,
+    this.decoration,
+    this.mouseCursor,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.text,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true;
 
   /// Icon displayed in the unchecked state.
   final Widget? icon;
@@ -365,7 +506,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
         }
 
         Widget core = RepaintBoundary(
-          child: RadiusAndPaddingMotion(
+          child: M3ERadiusAndPaddingMotion(
             motion: (effectivelyEnabled && pressed)
                 ? _kPressedRadiusMotion
                 : springMotion,
@@ -380,7 +521,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
             freezeBottomRight: widget.isGroupConnected ? freezeRight : false,
             builder: (animatedPadding, animatedRadius) {
               final buttonCore = _buildCore(m, animatedPadding, animatedRadius);
-              return FocusRing(
+              return M3EFocusRing(
                 focused: focused,
                 radius: animatedRadius,
                 child: buttonCore,
@@ -818,157 +959,4 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
   }
 
   double _lerp(double a, double b, double t) => a + (b - a) * t;
-}
-
-class M3EFilledToggleButton extends M3EToggleButton {
-  const M3EFilledToggleButton({
-    super.key,
-    super.onCheckedChange,
-    super.icon,
-    super.checkedIcon,
-    super.label,
-    super.checkedLabel,
-    super.checked,
-    super.size,
-    super.enabled,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.filled,
-    isGroupConnected: false,
-    isFirstInGroup: true,
-    isLastInGroup: true,
-  );
-
-  const M3EFilledToggleButton.tonal({
-    super.key,
-    super.onCheckedChange,
-    super.icon,
-    super.checkedIcon,
-    super.label,
-    super.checkedLabel,
-    super.checked,
-    super.size,
-    super.enabled,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.tonal,
-    isGroupConnected: false,
-    isFirstInGroup: true,
-    isLastInGroup: true,
-  );
-}
-
-class M3EElevatedToggleButton extends M3EToggleButton {
-  const M3EElevatedToggleButton({
-    super.key,
-    super.onCheckedChange,
-    super.icon,
-    super.checkedIcon,
-    super.label,
-    super.checkedLabel,
-    super.checked,
-    super.size,
-    super.enabled,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.elevated,
-    isGroupConnected: false,
-    isFirstInGroup: true,
-    isLastInGroup: true,
-  );
-}
-
-class M3EOutlinedToggleButton extends M3EToggleButton {
-  const M3EOutlinedToggleButton({
-    super.key,
-    super.onCheckedChange,
-    super.icon,
-    super.checkedIcon,
-    super.label,
-    super.checkedLabel,
-    super.checked,
-    super.size,
-    super.enabled,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.outlined,
-    isGroupConnected: false,
-    isFirstInGroup: true,
-    isLastInGroup: true,
-  );
-}
-
-class M3ETextToggleButton extends M3EToggleButton {
-  const M3ETextToggleButton({
-    super.key,
-    super.onCheckedChange,
-    super.icon,
-    super.checkedIcon,
-    super.label,
-    super.checkedLabel,
-    super.checked,
-    super.size,
-    super.enabled,
-    super.decoration,
-    super.mouseCursor,
-    super.statesController,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.text,
-    isGroupConnected: false,
-    isFirstInGroup: true,
-    isLastInGroup: true,
-  );
 }

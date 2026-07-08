@@ -36,4 +36,7 @@ abstract class M3ESegmentedButtonTokens {
 
   /// The gap between the leading icon and the label.
   static const double iconLabelGap = 8.0;
+
+  /// The width of the outer border and inter-segment dividers.
+  static const double borderWidth = 1.0;
 }

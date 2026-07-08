@@ -22,6 +22,7 @@ import 'enums/m3e_navigation_rail_enums.dart';
 import 'models/m3e_navigation_rail_destination.dart';
 import 'models/m3e_navigation_rail_fab_slot.dart';
 import 'models/m3e_navigation_rail_section.dart';
+import 'res/m3e_navigation_rail_layout.dart';
 import 'styles/m3e_nav_rail_theme.dart';
 
 /// Material 3 Expressive Navigation Rail — single widget that animates between states.
@@ -108,7 +109,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
     if (oldWidget.type != widget.type) {
       setState(() => _suppressInk = true);
-      Future.delayed(const Duration(milliseconds: 320), () {
+      Future.delayed(M3ENavigationRailLayout.selectionDelay, () {
         if (mounted) setState(() => _suppressInk = false);
       });
     }
@@ -194,7 +195,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       _expanded = value;
       _suppressInk = true;
     });
-    Future.delayed(const Duration(milliseconds: 320), () {
+    Future.delayed(M3ENavigationRailLayout.selectionDelay, () {
       if (mounted) setState(() => _suppressInk = false);
     });
     widget.onTypeChanged?.call(_notifiedType);
@@ -209,7 +210,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             child: GestureDetector(
               onTap: widget.onDismissModal,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 280),
+                duration: M3ENavigationRailLayout.expandDuration,
                 curve: Curves.easeOutCubic,
                 color: Theme.of(context)
                     .colorScheme
@@ -294,7 +295,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     }
 
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
+      padding: M3ENavigationRailLayout.sectionPadding,
       child: Align(
         alignment: alignment,
         child: button,
@@ -307,7 +308,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     if (fab == null) return null;
     final isExpanded = _isExpanded;
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
+      padding: M3ENavigationRailLayout.sectionPadding,
       child: isExpanded
           ? M3EExtendedFab(
         label: fab.label,
@@ -330,7 +331,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     if (tr == null) return null;
     final isExpanded = _isExpanded;
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
+      padding: M3ENavigationRailLayout.sectionPadding,
       child: Align(
         alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
         child: tr,
@@ -345,7 +346,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final isExpanded = _isExpanded;
 
     final children = <Widget>[];
-    children.add(const SizedBox(height: 36));
+    children.add(const SizedBox(height: M3ENavigationRailLayout.topGap));
     children.add(_buildMenuButton(context,
         alignment: isExpanded ? Alignment.centerLeft : Alignment.center));
     final fabWidget = _buildFab(context);
@@ -393,8 +394,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       for (int i = 0; i < all.length; i++) {
         children.add(Padding(
           padding: EdgeInsetsDirectional.only(
-              start: 16.0,
-              end: 16.0,
+              start: M3ENavigationRailLayout.horizontalInset,
+              end: M3ENavigationRailLayout.horizontalInset,
               top: theme.itemVerticalGap,
               bottom: theme.itemVerticalGap),
           child: M3ERailItem(
@@ -423,7 +424,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final Color containerColor = widget.background ?? theme.containerColor ?? m3e.colorScheme.surface;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 280),
+      duration: M3ENavigationRailLayout.expandDuration,
       curve: Curves.easeOutCubic,
       width: width,
       decoration:

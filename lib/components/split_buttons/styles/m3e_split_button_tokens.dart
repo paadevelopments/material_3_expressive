@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 
 /// Design tokens for Material 3 Expressive Split Buttons.

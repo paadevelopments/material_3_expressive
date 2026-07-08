@@ -35,7 +35,10 @@ class M3ESegmentedButton<T> extends StatelessWidget {
       height: M3ESegmentedButtonTokens.height,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        border: Border.all(color: scheme.outline),
+        border: Border.all(
+          color: scheme.outline,
+          width: M3ESegmentedButtonTokens.borderWidth,
+        ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -52,7 +55,10 @@ class M3ESegmentedButton<T> extends StatelessWidget {
     for (var i = 0; i < segments.length; i++) {
       if (i > 0) {
         children.add(
-          Container(width: 1, color: theme.colorScheme.outline),
+          Container(
+            width: M3ESegmentedButtonTokens.borderWidth,
+            color: theme.colorScheme.outline,
+          ),
         );
       }
       children.add(

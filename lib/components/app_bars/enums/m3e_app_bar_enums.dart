@@ -1,7 +1,7 @@
 /// The top app bar layouts. Mirrors `AppBarM3EVariant`.
 ///
-/// The variant only influences the scrolling `M3ESliverAppBar`; the fixed
-/// `M3ETopAppBar` always renders the collapsed, single-line layout.
+/// The variant only influences the scrolling `M3EAppBar.sliver`; the fixed
+/// `M3EAppBar.top` always renders the collapsed, single-line layout.
 enum M3EAppBarVariant {
   /// A single-line bar with no expanded title.
   small,

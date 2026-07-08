@@ -7,42 +7,14 @@
 // LICENSE file in the root directory of this source tree.
 
 import 'package:flutter/material.dart';
-import '../../toggle_button/m3e_toggle_button.dart';
-import '../../toggle_button_group/m3e_toggle_button_group.dart';
+
+import '../../toggle_button_group/models/m3e_button_group_action.dart';
 import '../enums/m3e_button_enums.dart';
 import '../styles/m3e_button_decoration.dart';
 
-/// Callback type for building overflow menu content.
-typedef OverflowMenuItemBuilder =
-    Widget Function(
-      BuildContext context,
-      M3EButtonGroupAction action,
-      bool isSelected,
-    );
-
-List<Widget> _buildVisibleButtons({
-  required int count,
-  required bool isRtl,
-  required Widget Function(int index, bool isFirst, bool isLast) buildButton,
-}) {
-  final children = <Widget>[];
-  for (int i = 0; i < count; i++) {
-    final isFirst = isRtl ? (i == count - 1) : (i == 0);
-    final isLast = isRtl ? (i == 0) : (i == count - 1);
-    children.add(buildButton(i, isFirst, isLast));
-  }
-  return children;
-}
-
-Widget _axisFlex(List<Widget> children, Axis direction) {
-  return direction == Axis.horizontal
-      ? Row(mainAxisSize: MainAxisSize.min, children: children)
-      : Column(mainAxisSize: MainAxisSize.min, children: children);
-}
-
 /// Abstract base class for custom overflow implementations.
-abstract class OverflowStrategy {
-  const OverflowStrategy();
+abstract class M3EOverflowStrategy {
+  const M3EOverflowStrategy();
 
   String get id;
   double? get triggerExtent => null;
@@ -82,112 +54,28 @@ abstract class OverflowStrategy {
   });
 
   void onItemSelected(int index) {}
-}
 
-class NoOverflowStrategy extends OverflowStrategy {
-  const NoOverflowStrategy();
-
-  @override
-  String get id => 'none';
-
-  @override
-  Widget buildLayout({
-    required BuildContext context,
-    required List<M3EButtonGroupAction> actions,
-    required int visibleCount,
-    required double spacing,
-    required Axis direction,
-    required M3EButtonStyle style,
-    required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
-    required bool connected,
+  /// Builds the ordered list of visible buttons, honouring RTL direction.
+  @protected
+  static List<Widget> buildVisibleButtons({
+    required int count,
     required bool isRtl,
     required Widget Function(int index, bool isFirst, bool isLast) buildButton,
   }) {
-    final children = _buildVisibleButtons(
-      count: actions.length,
-      isRtl: isRtl,
-      buildButton: buildButton,
-    );
-    return _axisFlex(children, direction);
+    final children = <Widget>[];
+    for (int i = 0; i < count; i++) {
+      final isFirst = isRtl ? (i == count - 1) : (i == 0);
+      final isLast = isRtl ? (i == 0) : (i == count - 1);
+      children.add(buildButton(i, isFirst, isLast));
+    }
+    return children;
   }
 
-  @override
-  Widget? buildOverflowTrigger({
-    required BuildContext context,
-    required int hiddenCount,
-    required M3EButtonStyle style,
-    required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
-    required bool connected,
-    required bool isFirst,
-    required bool isLast,
-    required VoidCallback onPressed,
-    required bool checked,
-  }) => null;
-
-  @override
-  Future<int?> showOverflowMenu({
-    required BuildContext context,
-    required List<M3EButtonGroupAction> actions,
-    required int firstHiddenIndex,
-    required int? selectedIndex,
-  }) async => null;
-}
-
-class ScrollOverflowStrategy extends OverflowStrategy {
-  const ScrollOverflowStrategy();
-
-  @override
-  String get id => 'scroll';
-
-  @override
-  Widget buildLayout({
-    required BuildContext context,
-    required List<M3EButtonGroupAction> actions,
-    required int visibleCount,
-    required double spacing,
-    required Axis direction,
-    required M3EButtonStyle style,
-    required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
-    required bool connected,
-    required bool isRtl,
-    required Widget Function(int index, bool isFirst, bool isLast) buildButton,
-  }) {
-    final children = _buildVisibleButtons(
-      count: actions.length,
-      isRtl: isRtl,
-      buildButton: buildButton,
-    );
-
-    return SingleChildScrollView(
-      scrollDirection: direction,
-      primary: false,
-      clipBehavior: Clip.hardEdge,
-      child: _axisFlex(children, direction),
-    );
+  /// Lays out [children] as a row or column for the given [direction].
+  @protected
+  static Widget axisFlex(List<Widget> children, Axis direction) {
+    return direction == Axis.horizontal
+        ? Row(mainAxisSize: MainAxisSize.min, children: children)
+        : Column(mainAxisSize: MainAxisSize.min, children: children);
   }
-
-  @override
-  Widget? buildOverflowTrigger({
-    required BuildContext context,
-    required int hiddenCount,
-    required M3EButtonStyle style,
-    required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
-    required bool connected,
-    required bool isFirst,
-    required bool isLast,
-    required VoidCallback onPressed,
-    required bool checked,
-  }) => null;
-
-  @override
-  Future<int?> showOverflowMenu({
-    required BuildContext context,
-    required List<M3EButtonGroupAction> actions,
-    required int firstHiddenIndex,
-    required int? selectedIndex,
-  }) async => null;
 }

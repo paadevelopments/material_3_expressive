@@ -15,8 +15,14 @@ class M3EDialogTokens {
   /// Padding around the dialog content.
   static const EdgeInsets padding = EdgeInsets.all(24);
 
+  /// Margin between a modal dialog and the screen edges.
+  static const EdgeInsets screenMargin = EdgeInsets.all(24);
+
   /// Container corner radius (M3 extra-large shape).
   static BorderRadius get borderRadius => M3EShapes.radiusExtraLarge;
+
+  /// Initial scale of the dialog entrance transition.
+  static const double entranceScale = 0.9;
 
   /// Icon glyph size in the header.
   static const double iconSize = 24;
@@ -29,6 +35,15 @@ class M3EDialogTokens {
 
   /// Height of the full-screen dialog header.
   static const double fullScreenHeaderHeight = 64;
+
+  /// Gap at the leading edge of the full-screen header and around its close button.
+  static const double headerEdgeGap = 4;
+
+  /// Tap padding around the full-screen header close button.
+  static const EdgeInsets closeButtonPadding = EdgeInsets.all(12);
+
+  /// Gap after the trailing action in the full-screen header.
+  static const double headerActionGap = 16;
 
   /// Scrim opacity behind a modal dialog.
   static const double scrimOpacity = 0.32;

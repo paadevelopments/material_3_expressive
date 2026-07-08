@@ -19,6 +19,15 @@ abstract class M3EDatePickerTokens {
   /// The icon size for navigation arrows.
   static const double arrowIconSize = 24.0;
 
+  /// The tap padding around a navigation arrow.
+  static const EdgeInsets arrowPadding = EdgeInsets.all(8.0);
+
+  /// The top padding of the day grid.
+  static const EdgeInsets gridPadding = EdgeInsets.only(top: 4.0);
+
+  /// The number of days shown per calendar row.
+  static const int daysPerWeek = 7;
+
   /// Resolves the container background color.
   static Color containerColor(M3EColorScheme scheme) {
     return scheme.surfaceContainerHigh;

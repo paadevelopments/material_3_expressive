@@ -3,49 +3,6 @@
 // ignore_for_file: type=lint
 part of '../m3e_toggle_button_group.dart';
 
-/// ParentData for items inside a [M3EButtonGroup].
-class ButtonGroupParentData extends ContainerBoxParentData<RenderBox> {
-  /// The alignment of this child.
-  CrossAxisAlignment? alignment;
-}
-
-/// A widget that controls how a child of a [M3EButtonGroup] aligns itself
-/// along the cross axis.
-class M3EButtonGroupAlign extends ParentDataWidget<ButtonGroupParentData> {
-  /// Creates an alignment widget for a button group item.
-  const M3EButtonGroupAlign({
-    super.key,
-    required this.alignment,
-    required super.child,
-  });
-
-  /// The cross axis alignment to apply to the child.
-  final CrossAxisAlignment alignment;
-
-  @override
-  void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is ButtonGroupParentData);
-    final ButtonGroupParentData parentData =
-        renderObject.parentData! as ButtonGroupParentData;
-    bool needsLayout = false;
-
-    if (parentData.alignment != alignment) {
-      parentData.alignment = alignment;
-      needsLayout = true;
-    }
-
-    if (needsLayout) {
-      final targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
-    }
-  }
-
-  @override
-  Type get debugTypicalAncestorWidgetClass => M3EButtonGroup;
-}
-
 class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   const _ButtonGroupRenderObjectWidget({
     required this.direction,
@@ -63,8 +20,8 @@ class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   final double expandedRatio;
 
   @override
-  RenderButtonGroup createRenderObject(BuildContext context) {
-    return RenderButtonGroup(
+  M3ERenderButtonGroup createRenderObject(BuildContext context) {
+    return M3ERenderButtonGroup(
       direction: direction,
       spacing: spacing,
       pressedIndex: pressedIndex,
@@ -76,7 +33,7 @@ class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(
     BuildContext context,
-    RenderButtonGroup renderObject,
+    M3ERenderButtonGroup renderObject,
   ) {
     renderObject
       ..direction = direction
@@ -87,11 +44,11 @@ class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   }
 }
 
-class RenderButtonGroup extends RenderBox
+class M3ERenderButtonGroup extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, ButtonGroupParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, ButtonGroupParentData> {
-  RenderButtonGroup({
+        ContainerRenderObjectMixin<RenderBox, M3EButtonGroupParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, M3EButtonGroupParentData> {
+  M3ERenderButtonGroup({
     required Axis direction,
     required double spacing,
     required int? pressedIndex,
@@ -145,8 +102,8 @@ class RenderButtonGroup extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! ButtonGroupParentData) {
-      child.parentData = ButtonGroupParentData();
+    if (child.parentData is! M3EButtonGroupParentData) {
+      child.parentData = M3EButtonGroupParentData();
     }
   }
 
@@ -311,8 +268,8 @@ class RenderButtonGroup extends RenderBox
     double currentMainOffset = 0.0;
     for (int i = 0; i < children.length; i++) {
       final c = children[i];
-      final ButtonGroupParentData childParentData =
-          c.parentData as ButtonGroupParentData;
+      final M3EButtonGroupParentData childParentData =
+          c.parentData as M3EButtonGroupParentData;
 
       double crossOffset = 0.0;
       final CrossAxisAlignment alignment =

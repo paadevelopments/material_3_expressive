@@ -89,7 +89,7 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
       onTap: onTap,
       builder: (BuildContext context, M3EInteractionState state) {
         return Padding(
-          padding: const EdgeInsets.all(8),
+          padding: M3EDatePickerTokens.arrowPadding,
           child: Icon(icon, color: scheme.onSurfaceVariant, size: M3EDatePickerTokens.arrowIconSize),
         );
       },
@@ -119,14 +119,16 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
     final int month = _visibleMonth.month;
     final int days = M3ECalendarLabels.daysInMonth(year, month);
     final int offset = M3ECalendarLabels.firstWeekday(year, month);
-    final int cellCount = ((days + offset) / 7).ceil() * 7;
+    final int cellCount =
+        ((days + offset) / M3EDatePickerTokens.daysPerWeek).ceil() *
+        M3EDatePickerTokens.daysPerWeek;
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 4),
+      padding: M3EDatePickerTokens.gridPadding,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
+        crossAxisCount: M3EDatePickerTokens.daysPerWeek,
       ),
       itemCount: cellCount,
       itemBuilder: (BuildContext context, int index) {

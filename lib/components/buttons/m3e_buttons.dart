@@ -13,7 +13,8 @@ import 'package:material_3_expressive/components/buttons/styles/m3e_button_motio
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_tokens.dart';
 
 import 'components/m3e_base_button_state.dart';
-import 'components/m3e_button_motion_widgets.dart';
+import 'components/m3e_focus_ring.dart';
+import 'components/m3e_radius_and_padding_motion.dart';
 import 'enums/m3e_button_enums.dart';
 
 const Alignment _kAlignmentCenter = Alignment.center;
@@ -97,6 +98,116 @@ class M3EButton extends StatefulWidget {
       ),
     );
   }
+
+  /// A filled button (highest emphasis).
+  const M3EButton.filled({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.enabled = true,
+    this.statesController,
+    this.decoration,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.mouseCursor = SystemMouseCursors.click,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.filled;
+
+  /// A tonal button (medium emphasis).
+  const M3EButton.tonal({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.enabled = true,
+    this.statesController,
+    this.decoration,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.mouseCursor = SystemMouseCursors.click,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.tonal;
+
+  /// An elevated button (medium emphasis with a shadow).
+  const M3EButton.elevated({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.enabled = true,
+    this.statesController,
+    this.decoration,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.mouseCursor = SystemMouseCursors.click,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.elevated;
+
+  /// An outlined button (medium emphasis with a border).
+  const M3EButton.outlined({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.enabled = true,
+    this.statesController,
+    this.decoration,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.mouseCursor = SystemMouseCursors.click,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.outlined;
+
+  /// A text button (lowest emphasis).
+  const M3EButton.text({
+    super.key,
+    required this.onPressed,
+    this.child,
+    this.size = M3EButtonSize.sm,
+    this.shape = M3EButtonShape.round,
+    this.enabled = true,
+    this.statesController,
+    this.decoration,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
+    this.semanticLabel,
+    this.tooltip,
+    this.mouseCursor = SystemMouseCursors.click,
+    this.onLongPress,
+    this.onHover,
+    this.enableFeedback = _kDefaultEnableFeedback,
+    this.splashFactory,
+  }) : style = M3EButtonStyle.text;
 
   /// Callback invoked when the button is pressed. Null disables the button.
   final VoidCallback? onPressed;
@@ -471,7 +582,7 @@ class _M3EButtonState extends State<M3EButton>
             : defaultShape;
 
         Widget core = RepaintBoundary(
-          child: RadiusAndPaddingMotion(
+          child: M3ERadiusAndPaddingMotion(
             motion: (effectivelyEnabled && pressed)
                 ? _kPressedRadiusMotion
                 : springMotion,
@@ -491,7 +602,7 @@ class _M3EButtonState extends State<M3EButton>
                 animatedInternal,
                 animatedRadius,
               );
-              return FocusRing(
+              return M3EFocusRing(
                 focused: focused,
                 radius: animatedRadius,
                 child: buttonCore,
@@ -658,500 +769,4 @@ class _M3EButtonState extends State<M3EButton>
 
     return result;
   }
-}
-
-class M3EFilledButton extends M3EButton {
-  const M3EFilledButton({
-    super.key,
-    required super.onPressed,
-    super.child,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.filled);
-
-  const M3EFilledButton.tonal({
-    super.key,
-    required super.onPressed,
-    super.child,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.tonal);
-
-  factory M3EFilledButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    required Widget icon,
-    required Widget label,
-    M3EButtonSize size = M3EButtonSize.sm,
-    M3EButtonShape shape = M3EButtonShape.round,
-    bool enabled = true,
-    WidgetStatesController? statesController,
-    M3EButtonDecoration? decoration,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    String? semanticLabel,
-    String? tooltip,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    bool enableFeedback = _kDefaultEnableFeedback,
-    InteractiveInkFeatureFactory? splashFactory,
-  }) {
-    return _M3EFilledButtonIcon(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      label: label,
-      size: size,
-      shape: shape,
-      enabled: enabled,
-      statesController: statesController,
-      decoration: decoration,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onFocusChange: onFocusChange,
-      semanticLabel: semanticLabel,
-      tooltip: tooltip,
-      mouseCursor: mouseCursor,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      enableFeedback: enableFeedback,
-      splashFactory: splashFactory,
-    );
-  }
-
-  factory M3EFilledButton.tonalIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    required Widget icon,
-    required Widget label,
-    M3EButtonSize size = M3EButtonSize.sm,
-    M3EButtonShape shape = M3EButtonShape.round,
-    bool enabled = true,
-    WidgetStatesController? statesController,
-    M3EButtonDecoration? decoration,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    String? semanticLabel,
-    String? tooltip,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    bool enableFeedback = _kDefaultEnableFeedback,
-    InteractiveInkFeatureFactory? splashFactory,
-  }) {
-    return _M3EFilledButtonTonalIcon(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      label: label,
-      size: size,
-      shape: shape,
-      enabled: enabled,
-      statesController: statesController,
-      decoration: decoration,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onFocusChange: onFocusChange,
-      semanticLabel: semanticLabel,
-      tooltip: tooltip,
-      mouseCursor: mouseCursor,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      enableFeedback: enableFeedback,
-      splashFactory: splashFactory,
-    );
-  }
-}
-
-class _M3EFilledButtonIcon extends M3EButton implements M3EFilledButton {
-  _M3EFilledButtonIcon({
-    super.key,
-    required super.onPressed,
-    required Widget icon,
-    required Widget label,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.filled,
-    child: _M3EButtonIconLayout(
-      icon: icon,
-      label: label,
-      size: size,
-      iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-    ),
-  );
-}
-
-class _M3EFilledButtonTonalIcon extends M3EButton implements M3EFilledButton {
-  _M3EFilledButtonTonalIcon({
-    super.key,
-    required super.onPressed,
-    required Widget icon,
-    required Widget label,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.tonal,
-    child: _M3EButtonIconLayout(
-      icon: icon,
-      label: label,
-      size: size,
-      iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-    ),
-  );
-}
-
-/// An elevated-style M3EButton.
-class M3EElevatedButton extends M3EButton {
-  const M3EElevatedButton({
-    super.key,
-    required super.onPressed,
-    super.child,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.elevated);
-
-  factory M3EElevatedButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    required Widget icon,
-    required Widget label,
-    M3EButtonSize size = M3EButtonSize.sm,
-    M3EButtonShape shape = M3EButtonShape.round,
-    bool enabled = true,
-    WidgetStatesController? statesController,
-    M3EButtonDecoration? decoration,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    String? semanticLabel,
-    String? tooltip,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    bool enableFeedback = _kDefaultEnableFeedback,
-    InteractiveInkFeatureFactory? splashFactory,
-  }) {
-    return _M3EElevatedButtonIcon(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      label: label,
-      size: size,
-      shape: shape,
-      enabled: enabled,
-      statesController: statesController,
-      decoration: decoration,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onFocusChange: onFocusChange,
-      semanticLabel: semanticLabel,
-      tooltip: tooltip,
-      mouseCursor: mouseCursor,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      enableFeedback: enableFeedback,
-      splashFactory: splashFactory,
-    );
-  }
-}
-
-class _M3EElevatedButtonIcon extends M3EButton implements M3EElevatedButton {
-  _M3EElevatedButtonIcon({
-    super.key,
-    required super.onPressed,
-    required Widget icon,
-    required Widget label,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.elevated,
-    child: _M3EButtonIconLayout(
-      icon: icon,
-      label: label,
-      size: size,
-      iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-    ),
-  );
-}
-
-/// An outlined-style M3EButton.
-class M3EOutlinedButton extends M3EButton {
-  const M3EOutlinedButton({
-    super.key,
-    required super.onPressed,
-    super.child,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.outlined);
-
-  factory M3EOutlinedButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    required Widget icon,
-    required Widget label,
-    M3EButtonSize size = M3EButtonSize.sm,
-    M3EButtonShape shape = M3EButtonShape.round,
-    bool enabled = true,
-    WidgetStatesController? statesController,
-    M3EButtonDecoration? decoration,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    String? semanticLabel,
-    String? tooltip,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    bool enableFeedback = _kDefaultEnableFeedback,
-    InteractiveInkFeatureFactory? splashFactory,
-  }) {
-    return _M3EOutlinedButtonIcon(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      label: label,
-      size: size,
-      shape: shape,
-      enabled: enabled,
-      statesController: statesController,
-      decoration: decoration,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onFocusChange: onFocusChange,
-      semanticLabel: semanticLabel,
-      tooltip: tooltip,
-      mouseCursor: mouseCursor,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      enableFeedback: enableFeedback,
-      splashFactory: splashFactory,
-    );
-  }
-}
-
-class _M3EOutlinedButtonIcon extends M3EButton implements M3EOutlinedButton {
-  _M3EOutlinedButtonIcon({
-    super.key,
-    required super.onPressed,
-    required Widget icon,
-    required Widget label,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.outlined,
-    child: _M3EButtonIconLayout(
-      icon: icon,
-      label: label,
-      size: size,
-      iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-    ),
-  );
-}
-
-/// A text-style M3EButton.
-class M3ETextButton extends M3EButton {
-  const M3ETextButton({
-    super.key,
-    required super.onPressed,
-    super.child,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(style: M3EButtonStyle.text);
-
-  factory M3ETextButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    required Widget icon,
-    required Widget label,
-    M3EButtonSize size = M3EButtonSize.sm,
-    M3EButtonShape shape = M3EButtonShape.round,
-    bool enabled = true,
-    WidgetStatesController? statesController,
-    M3EButtonDecoration? decoration,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    String? semanticLabel,
-    String? tooltip,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    bool enableFeedback = _kDefaultEnableFeedback,
-    InteractiveInkFeatureFactory? splashFactory,
-  }) {
-    return _M3ETextButtonIcon(
-      key: key,
-      onPressed: onPressed,
-      icon: icon,
-      label: label,
-      size: size,
-      shape: shape,
-      enabled: enabled,
-      statesController: statesController,
-      decoration: decoration,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      onFocusChange: onFocusChange,
-      semanticLabel: semanticLabel,
-      tooltip: tooltip,
-      mouseCursor: mouseCursor,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      enableFeedback: enableFeedback,
-      splashFactory: splashFactory,
-    );
-  }
-}
-
-class _M3ETextButtonIcon extends M3EButton implements M3ETextButton {
-  _M3ETextButtonIcon({
-    super.key,
-    required super.onPressed,
-    required Widget icon,
-    required Widget label,
-    super.size,
-    super.shape,
-    super.enabled,
-    super.statesController,
-    super.decoration,
-    super.focusNode,
-    super.autofocus,
-    super.onFocusChange,
-    super.semanticLabel,
-    super.tooltip,
-    super.mouseCursor,
-    super.onLongPress,
-    super.onHover,
-    super.enableFeedback,
-    super.splashFactory,
-  }) : super(
-    style: M3EButtonStyle.text,
-    child: _M3EButtonIconLayout(
-      icon: icon,
-      label: label,
-      size: size,
-      iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-    ),
-  );
 }

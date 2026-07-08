@@ -1,16 +1,21 @@
 import 'package:flutter/widgets.dart';
 
-class MeasureSize extends StatefulWidget {
+/// Reports the rendered size of [child] to [onChange] after each layout.
+class M3EMeasureSize extends StatefulWidget {
   final Widget child;
   final void Function(Size) onChange;
 
-  const MeasureSize({super.key, required this.child, required this.onChange});
+  const M3EMeasureSize({
+    super.key,
+    required this.child,
+    required this.onChange,
+  });
 
   @override
-  State<MeasureSize> createState() => _MeasureSizeState();
+  State<M3EMeasureSize> createState() => _M3EMeasureSizeState();
 }
 
-class _MeasureSizeState extends State<MeasureSize> {
+class _M3EMeasureSizeState extends State<M3EMeasureSize> {
   @override
   void initState() {
     super.initState();
@@ -18,7 +23,7 @@ class _MeasureSizeState extends State<MeasureSize> {
   }
 
   @override
-  void didUpdateWidget(covariant MeasureSize oldWidget) {
+  void didUpdateWidget(covariant M3EMeasureSize oldWidget) {
     super.didUpdateWidget(oldWidget);
     WidgetsBinding.instance.addPostFrameCallback((_) => _notifySize());
   }

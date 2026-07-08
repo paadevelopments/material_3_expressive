@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../styles/m3e_slider_tokens.dart';
+
 /// Paints the expressive slider's thick active and inactive track segments
 /// plus the vertical handle, leaving a gap around the handle.
 class M3ESliderTrackPainter extends CustomPainter {
@@ -10,10 +12,10 @@ class M3ESliderTrackPainter extends CustomPainter {
     required this.handleColor,
   });
 
-  static const double _trackHeight = 16;
-  static const double _handleWidth = 4;
-  static const double _handleHeight = 44;
-  static const double _gap = 6;
+  static const double _trackHeight = M3ESliderTokens.trackHeight;
+  static const double _handleWidth = M3ESliderTokens.handleWidth;
+  static const double _handleHeight = M3ESliderTokens.handleHeight;
+  static const double _gap = M3ESliderTokens.handleGap;
 
   final double fraction;
   final Color activeColor;

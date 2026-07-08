@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import '../../buttons/styles/m3e_button_tokens.dart';
 
-import '../m3e_split_buttons.dart';
-import '../styles/m3e_split_button_decoration.dart';
+import '../enums/m3e_split_button_selection_mode.dart';
+import '../models/m3e_split_button_item.dart';
+import '../styles/m3e_split_button_bottom_sheet_decoration.dart';
+import '../styles/m3e_split_button_checkbox_style.dart';
 
 Future<Object?> showSplitButtonBottomSheet<T>({
   required BuildContext context,
@@ -17,7 +19,7 @@ Future<Object?> showSplitButtonBottomSheet<T>({
   FocusNode? callerFocusNode,
   Set<T>? selectedValues,
 }) {
-  if (decoration.selectionMode == SplitButtonSelectionMode.multiple) {
+  if (decoration.selectionMode == M3ESplitButtonSelectionMode.multiple) {
     return _showMultiSelectBottomSheet<T>(
       context: context,
       items: items,

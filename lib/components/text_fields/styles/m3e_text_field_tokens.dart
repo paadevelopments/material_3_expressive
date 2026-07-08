@@ -26,6 +26,9 @@ abstract class M3ETextFieldTokens {
   /// The gap between the label and the text field.
   static const double labelBottomPadding = 2.0;
 
+  /// The opacity of the text selection highlight.
+  static const double selectionOpacity = 0.4;
+
   /// The padding for supporting text.
   static const EdgeInsets supportingTextPadding =
       EdgeInsets.only(left: 16, top: 4, right: 16);

@@ -11,10 +11,13 @@ abstract class M3ESliderTokens {
   static const double trackHeight = 16.0;
 
   /// The gap around the vertical handle.
-  static const double handleGap = 4.0;
+  static const double handleGap = 6.0;
 
   /// The width of the vertical handle.
   static const double handleWidth = 4.0;
+
+  /// The height of the vertical handle.
+  static const double handleHeight = 44.0;
 
   /// Resolves the color based on enabled state.
   static Color color(

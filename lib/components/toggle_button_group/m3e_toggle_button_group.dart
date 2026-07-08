@@ -18,18 +18,25 @@ import 'package:motor/motor.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
-import '../buttons/styles/m3e_button_overflow_decoration.dart';
+import '../buttons/styles/m3e_overflow_bottom_sheet_decoration.dart';
+import '../buttons/styles/m3e_overflow_popup_decoration.dart';
 import '../buttons/styles/m3e_button_tokens.dart';
 import '../buttons/components/m3e_overflow_strategy.dart';
 import '../toggle_button/m3e_toggle_button.dart';
+import 'controllers/m3e_button_group_overflow_controller.dart';
 import 'enums/m3e_toggle_button_group_enums.dart';
+import 'models/m3e_button_group_action.dart';
+import 'models/m3e_button_group_overflow_paging_window.dart';
 import 'styles/m3e_toggle_button_group_tokens.dart';
+import 'components/m3e_toggle_button_group_item_scope.dart';
 import 'components/m3e_toggle_button_group_provider.dart';
 import 'components/m3e_toggle_button_group_scope.dart';
 export 'enums/m3e_toggle_button_group_enums.dart';
 export 'styles/m3e_toggle_button_group_tokens.dart';
 export 'components/m3e_toggle_button_group_scope.dart';
 
+part 'components/m3e_button_group_align.dart';
+part 'components/m3e_button_group_parent_data.dart';
 part 'components/m3e_toggle_button_group_collaborators.dart';
 part 'components/m3e_toggle_button_group_overflow_presenter.dart';
 part 'components/m3e_toggle_button_group_render.dart';
@@ -42,44 +49,6 @@ part 'components/m3e_toggle_button_group_render.dart';
 class _MoveFocusIntent extends Intent {
   final int direction;
   const _MoveFocusIntent(this.direction);
-}
-
-/// Declarative description of a single toggle button inside [M3EButtonGroup].
-class M3EButtonGroupAction {
-  const M3EButtonGroupAction({
-    this.icon,
-    this.checkedIcon,
-    this.label,
-    this.checkedLabel,
-    this.checked,
-    this.enabled = true,
-    this.decoration,
-    this.width,
-    this.focusNode,
-    this.autofocus = false,
-    this.onFocusChange,
-    this.semanticLabel,
-    this.tooltip,
-    this.enableFeedback,
-  }) : assert(
-  icon != null || label != null,
-  'M3EButtonGroupAction must have either an icon or a label.',
-  );
-
-  final Widget? icon;
-  final Widget? checkedIcon;
-  final Widget? label;
-  final Widget? checkedLabel;
-  final bool? checked;
-  final bool enabled;
-  final M3EToggleButtonDecoration? decoration;
-  final double? width;
-  final FocusNode? focusNode;
-  final bool autofocus;
-  final ValueChanged<bool>? onFocusChange;
-  final String? semanticLabel;
-  final String? tooltip;
-  final bool? enableFeedback;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,7 +112,7 @@ class M3EButtonGroup extends StatefulWidget {
   final M3EOverflowPopupDecoration overflowPopupDecoration;
   final M3EOverflowBottomSheetDecoration overflowBottomSheetDecoration;
   final M3EButtonGroupOverflowMenuStyle overflowMenuStyle;
-  final OverflowStrategy? overflowStrategy;
+  final M3EOverflowStrategy? overflowStrategy;
 
   bool get _connected => type == M3EButtonGroupType.connected;
 

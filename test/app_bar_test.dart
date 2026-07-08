@@ -10,19 +10,19 @@ const String _large = 'Large';
 Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
-  testWidgets('M3ETopAppBar renders its title text', (tester) async {
+  testWidgets('M3EAppBar.top renders its title text', (tester) async {
     await tester.pumpWidget(
-      _host(const M3ETopAppBar(titleText: _inbox)),
+      _host(const M3EAppBar.top(titleText: _inbox)),
     );
 
     expect(find.text(_inbox), findsOneWidget);
   });
 
-  testWidgets('M3ETopAppBar honours a custom title widget and actions',
+  testWidgets('M3EAppBar.top honours a custom title widget and actions',
       (tester) async {
     await tester.pumpWidget(
       _host(
-        const M3ETopAppBar(
+        const M3EAppBar.top(
           title: Text(_custom),
           actions: <Widget>[Icon(Icons.search)],
         ),
@@ -36,7 +36,7 @@ void main() {
   testWidgets('compact density reduces the bar height', (tester) async {
     await tester.pumpWidget(
       _host(
-        const M3ETopAppBar(
+        const M3EAppBar.top(
           titleText: _compact,
           density: M3EAppBarDensity.compact,
         ),
@@ -45,20 +45,20 @@ void main() {
 
     final box = tester.getSize(
       find.descendant(
-        of: find.byType(M3ETopAppBar),
+        of: find.byType(M3EAppBar),
         matching: find.byType(SizedBox),
       ).first,
     );
     expect(box.height, 56);
   });
 
-  testWidgets('M3ESliverAppBar renders an expanded large title',
+  testWidgets('M3EAppBar.sliver renders an expanded large title',
       (tester) async {
     await tester.pumpWidget(
       _host(
         CustomScrollView(
           slivers: <Widget>[
-            const M3ESliverAppBar(
+            const M3EAppBar.sliver(
               titleText: _large,
               variant: M3EAppBarVariant.large,
             ),

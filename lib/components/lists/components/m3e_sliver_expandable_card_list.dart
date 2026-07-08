@@ -4,8 +4,9 @@ import 'm3e_expandable_builders.dart';
 import 'm3e_expandable_data.dart';
 import 'm3e_expandable_list_base.dart';
 
-class SliverM3EExpandableCardList extends M3EExpandableListBase {
-  SliverM3EExpandableCardList({
+/// Sliver variant of the expandable card list for use inside a [CustomScrollView].
+class M3ESliverExpandableCardList extends M3EExpandableListBase {
+  M3ESliverExpandableCardList({
     super.key,
     required List<M3EExpandableData> data,
     super.allowMultipleExpanded,
@@ -23,7 +24,7 @@ class SliverM3EExpandableCardList extends M3EExpandableListBase {
           ),
         );
 
-  const SliverM3EExpandableCardList.builder({
+  const M3ESliverExpandableCardList.builder({
     super.key,
     required super.itemCount,
     required super.headerBuilder,
@@ -37,12 +38,13 @@ class SliverM3EExpandableCardList extends M3EExpandableListBase {
   });
 
   @override
-  State<SliverM3EExpandableCardList> createState() =>
-      _SliverM3EExpandableCardListState();
+  State<M3ESliverExpandableCardList> createState() =>
+      _M3ESliverExpandableCardListState();
 }
 
-class _SliverM3EExpandableCardListState extends State<SliverM3EExpandableCardList>
-    with M3EExpandableStateMixin<SliverM3EExpandableCardList> {
+class _M3ESliverExpandableCardListState
+    extends State<M3ESliverExpandableCardList>
+    with M3EExpandableStateMixin<M3ESliverExpandableCardList> {
   @override
   Widget build(BuildContext context) {
     return SliverList.builder(

@@ -5,11 +5,17 @@ import 'package:material_3_expressive/components/app_bars/styles/m3e_app_bar_tok
 import '../../foundations/foundations.dart';
 import 'components/m3e_app_bar_semantics.dart';
 import 'enums/m3e_app_bar_enums.dart';
+import 'styles/m3e_bottom_app_bar_tokens.dart';
 
 export 'enums/m3e_app_bar_enums.dart';
 
-class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const M3ETopAppBar({
+/// Which app bar layout an [M3EAppBar] renders.
+enum _M3EAppBarKind { top, bottom, sliver }
+
+/// A Material 3 Expressive app bar with `top`, `bottom`, and `sliver` variants.
+class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
+  /// A fixed top app bar for use in `Scaffold.appBar`.
+  const M3EAppBar.top({
     super.key,
     this.leading,
     this.title,
@@ -25,14 +31,68 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
-  });
+  })  : _kind = _M3EAppBarKind.top,
+        floatingActionButton = null,
+        pinned = true,
+        floating = false,
+        snap = false,
+        variant = M3EAppBarVariant.medium;
+
+  /// A bottom app bar with actions and an optional floating action button.
+  const M3EAppBar.bottom({
+    super.key,
+    this.actions = const <Widget>[],
+    this.floatingActionButton,
+  })  : _kind = _M3EAppBarKind.bottom,
+        leading = null,
+        title = null,
+        titleText = null,
+        centerTitle = false,
+        backgroundColor = null,
+        foregroundColor = null,
+        elevation = null,
+        shapeFamily = M3EAppBarShapeFamily.square,
+        density = M3EAppBarDensity.regular,
+        toolbarHeight = null,
+        automaticallyImplyLeading = true,
+        clipBehavior = Clip.none,
+        semanticLabel = null,
+        pinned = true,
+        floating = false,
+        snap = false,
+        variant = M3EAppBarVariant.medium;
+
+  /// A scrolling sliver app bar for use in `CustomScrollView.slivers`.
+  const M3EAppBar.sliver({
+    super.key,
+    this.leading,
+    this.title,
+    this.titleText,
+    this.actions,
+    this.centerTitle = false,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.pinned = true,
+    this.floating = false,
+    this.snap = false,
+    this.shapeFamily = M3EAppBarShapeFamily.round,
+    this.density = M3EAppBarDensity.regular,
+    this.variant = M3EAppBarVariant.medium,
+    this.semanticLabel,
+  })  : _kind = _M3EAppBarKind.sliver,
+        elevation = null,
+        toolbarHeight = null,
+        automaticallyImplyLeading = true,
+        clipBehavior = Clip.none,
+        floatingActionButton = null;
+
+  final _M3EAppBarKind _kind;
 
   final Widget? leading;
   final Widget? title;
   final String? titleText;
   final List<Widget>? actions;
   final bool centerTitle;
-
   final Color? backgroundColor;
   final Color? foregroundColor;
   final double? elevation;
@@ -43,14 +103,28 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Clip clipBehavior;
   final String? semanticLabel;
 
+  // Bottom-only.
+  final Widget? floatingActionButton;
+
+  // Sliver-only.
+  final bool pinned;
+  final bool floating;
+  final bool snap;
+  final M3EAppBarVariant variant;
+
   @override
-  Size get preferredSize {
-    // Provide a reasonable non-null size; actual height applied in build.
-    return Size.fromHeight(toolbarHeight ?? 64);
-  }
+  Size get preferredSize => Size.fromHeight(toolbarHeight ?? 64);
 
   @override
   Widget build(BuildContext context) {
+    return switch (_kind) {
+      _M3EAppBarKind.top => _buildTop(context),
+      _M3EAppBarKind.bottom => _buildBottom(context),
+      _M3EAppBarKind.sliver => _buildSliver(context),
+    };
+  }
+
+  Widget _buildTop(BuildContext context) {
     final metrics = appBarMetricsFor(context, density);
     final bg = backgroundColor ?? appBarBackgroundFor(context);
     final fg = foregroundColor ?? M3ETheme.of(context).colorScheme.onSurface;
@@ -58,9 +132,8 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
     final height = toolbarHeight ?? metrics.smallHeight;
     final tStyle = appBarTitleStyleFor(context, collapsed: true);
 
-    final resolvedLeading = leading ?? (automaticallyImplyLeading
-        ? _maybeBackButton(context, fg)
-        : null);
+    final resolvedLeading = leading ??
+        (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
 
     final resolvedTitle = title ??
         (titleText != null
@@ -90,7 +163,9 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
                     if (resolvedTitle != null)
                       Expanded(
                         child: Align(
-                          alignment: centerTitle ? Alignment.center : Alignment.centerLeft,
+                          alignment: centerTitle
+                              ? Alignment.center
+                              : Alignment.centerLeft,
                           child: resolvedTitle,
                         ),
                       )
@@ -117,51 +192,25 @@ class M3ETopAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _withSpacers(List<Widget> items) {
-    final out = <Widget>[];
-    for (var i = 0; i < items.length; i++) {
-      out.add(items[i]);
-      if (i < items.length - 1) out.add(const SizedBox(width: 4));
-    }
-    return out;
-  }
-
-  Widget? _maybeBackButton(BuildContext context, Color fg) {
-    final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
-    if (!canPop) return null;
-    return IconButton(
-      icon: const BackButtonIcon(),
-      color: fg,
-      onPressed: () => Navigator.maybeOf(context)?.maybePop(),
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-    );
-  }
-}
-
-class M3EBottomAppBar extends StatelessWidget {
-  const M3EBottomAppBar({
-    this.actions = const <Widget>[],
-    this.floatingActionButton,
-    super.key,
-  });
-
-  final List<Widget> actions;
-  final Widget? floatingActionButton;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBottom(BuildContext context) {
     final scheme = M3ETheme.of(context).colorScheme;
     return Container(
-      height: 80,
+      height: M3EBottomAppBarTokens.height,
       color: scheme.surfaceContainer,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: M3EBottomAppBarTokens.padding,
       child: SafeArea(
         top: false,
         child: Row(
           children: <Widget>[
             IconTheme.merge(
-              data: IconThemeData(color: scheme.onSurfaceVariant, size: 24),
-              child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+              data: IconThemeData(
+                color: scheme.onSurfaceVariant,
+                size: M3EBottomAppBarTokens.iconSize,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: actions ?? const <Widget>[],
+              ),
             ),
             const Spacer(),
             ?floatingActionButton,
@@ -170,45 +219,8 @@ class M3EBottomAppBar extends StatelessWidget {
       ),
     );
   }
-}
 
-class M3ESliverAppBar extends StatelessWidget {
-  const M3ESliverAppBar({
-    super.key,
-    this.leading,
-    this.title,
-    this.titleText,
-    this.actions,
-    this.centerTitle = false,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.pinned = true,
-    this.floating = false,
-    this.snap = false,
-    this.shapeFamily = M3EAppBarShapeFamily.round,
-    this.density = M3EAppBarDensity.regular,
-    this.variant = M3EAppBarVariant.medium,
-    this.semanticLabel,
-  });
-
-  final Widget? leading;
-  final Widget? title;
-  final String? titleText;
-  final List<Widget>? actions;
-  final bool centerTitle;
-
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final bool pinned;
-  final bool floating;
-  final bool snap;
-  final M3EAppBarShapeFamily shapeFamily;
-  final M3EAppBarDensity density;
-  final M3EAppBarVariant variant;
-  final String? semanticLabel;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSliver(BuildContext context) {
     final metrics = appBarMetricsFor(context, density);
     final bg = backgroundColor ?? appBarBackgroundFor(context);
     final fg = foregroundColor ?? M3ETheme.of(context).colorScheme.onSurface;
@@ -227,7 +239,7 @@ class M3ESliverAppBar extends StatelessWidget {
     final resolvedTitleWidget = title ??
         (titleText != null
             ? Text(titleText!,
-            style: collapsedStyle, overflow: TextOverflow.ellipsis)
+                style: collapsedStyle, overflow: TextOverflow.ellipsis)
             : null);
 
     final bar = SliverAppBar(
@@ -253,6 +265,26 @@ class M3ESliverAppBar extends StatelessWidget {
     );
   }
 
+  List<Widget> _withSpacers(List<Widget> items) {
+    final out = <Widget>[];
+    for (var i = 0; i < items.length; i++) {
+      out.add(items[i]);
+      if (i < items.length - 1) out.add(const SizedBox(width: 4));
+    }
+    return out;
+  }
+
+  Widget? _maybeBackButton(BuildContext context, Color fg) {
+    final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
+    if (!canPop) return null;
+    return IconButton(
+      icon: const BackButtonIcon(),
+      color: fg,
+      onPressed: () => Navigator.maybeOf(context)?.maybePop(),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+    );
+  }
+
   Widget? _buildFlexibleSpace(BuildContext context, TextStyle expandedStyle) {
     switch (variant) {
       case M3EAppBarVariant.small:
@@ -264,7 +296,7 @@ class M3ESliverAppBar extends StatelessWidget {
         if (t == null) return null;
         return FlexibleSpaceBar(
           titlePadding:
-          const EdgeInsetsDirectional.only(start: 16, bottom: 16, end: 16),
+              const EdgeInsetsDirectional.only(start: 16, bottom: 16, end: 16),
           title: DefaultTextStyle(
             style: expandedStyle.copyWith(
               color: M3ETheme.of(context).colorScheme.onSurface,
@@ -272,8 +304,7 @@ class M3ESliverAppBar extends StatelessWidget {
             child: t,
           ),
           collapseMode: CollapseMode.pin,
-          expandedTitleScale:
-          1.0, // Typography already larger; avoid scale morph
+          expandedTitleScale: 1.0,
         );
     }
   }

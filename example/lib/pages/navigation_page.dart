@@ -110,7 +110,7 @@ class _NavigationPageState extends State<NavigationPage> {
       children: <Widget>[
         _framed(
           theme,
-          M3ETopAppBar(
+          M3EAppBar.top(
             titleText: 'Small',
             leading: const Icon(M3EIcons.menu),
             actions: const <Widget>[Icon(M3EIcons.search)],
@@ -119,7 +119,7 @@ class _NavigationPageState extends State<NavigationPage> {
         const SizedBox(height: 12),
         _framed(
           theme,
-          M3ETopAppBar(
+          M3EAppBar.top(
             titleText: 'Centered • compact',
             centerTitle: true,
             density: M3EAppBarDensity.compact,
@@ -130,7 +130,34 @@ class _NavigationPageState extends State<NavigationPage> {
         const SizedBox(height: 12),
         _framed(
           theme,
-          M3EBottomAppBar(
+          SizedBox(
+            height: 180,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                M3EAppBar.sliver(
+                  titleText: 'Sliver • medium',
+                  actions: const <Widget>[Icon(M3EIcons.search)],
+                ),
+                SliverList.list(
+                  children: <Widget>[
+                    for (int i = 0; i < 6; i++)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text('Scrollable item ${i + 1}'),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _framed(
+          theme,
+          M3EAppBar.bottom(
             actions: const <Widget>[
               Icon(M3EIcons.menu),
               Icon(M3EIcons.search),

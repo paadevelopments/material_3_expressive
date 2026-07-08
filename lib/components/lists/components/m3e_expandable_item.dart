@@ -1,14 +1,13 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart' show Icons, InkWell, Material, Tooltip;
+import 'package:flutter/material.dart' show InkWell, Material, Tooltip;
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../styles/m3e_expandable_list_tokens.dart';
 import '../styles/m3e_expandable_style.dart';
-import '../utils/measure_size.dart';
+import '../utils/m3e_measure_size.dart';
 
 typedef M3EExpandableHeaderBuilder = Widget Function(
     BuildContext context, int index, double progress);
@@ -342,13 +341,13 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (_collapsedHeight == null)
-                      MeasureSize(
+                      M3EMeasureSize(
                         onChange: (size) =>
                             setState(() => _collapsedHeight = size.height),
                         child: widget.bodyBuilder(context, widget.index, 0.0),
                       ),
                     if (_expandedHeight == null)
-                      MeasureSize(
+                      M3EMeasureSize(
                         onChange: (size) =>
                             setState(() => _expandedHeight = size.height),
                         child: widget.bodyBuilder(context, widget.index, 1.0),
