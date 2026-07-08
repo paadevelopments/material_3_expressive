@@ -50,14 +50,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
           label: 'Dot and numeric',
           children: <Widget>[
             const M3EBadge(
+              showDot: true,
               child: Icon(M3EIcons.menu, size: 28),
             ),
             const M3EBadge(
-              label: '8',
+              count: 8,
               child: Icon(M3EIcons.calendar_today, size: 28),
             ),
             const M3EBadge(
-              label: '99+',
+              count: 120,
               child: Icon(M3EIcons.edit, size: 28),
             ),
           ],
