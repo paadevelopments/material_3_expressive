@@ -1,56 +1,190 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../foundations/foundations.dart';
-import 'enums/m3e_toolbar_color.dart';
+import 'components/m3e_toolbar_actions_row.dart';
+import 'components/m3e_toolbar_title_block.dart';
+import 'enums/m3e_toolbar_enums.dart';
+import 'models/m3e_toolbar_action.dart';
+import 'styles/m3e_toolbar_theme.dart';
 
-export 'enums/m3e_toolbar_color.dart';
+export 'enums/m3e_toolbar_enums.dart';
+export 'models/m3e_toolbar_action.dart';
 export 'styles/m3e_toolbar_theme.dart';
 
-/// A Material 3 Expressive floating toolbar.
+/// A Material 3 Expressive toolbar.
 ///
-/// A pill-shaped, elevated surface hosting frequently used actions. It can be
-/// laid out horizontally or vertically and floats above content.
-class M3EToolbar extends StatelessWidget {
+/// Hosts a leading affordance, title block, and action icons with overflow
+/// support. Can be used as a [PreferredSizeWidget] in a scaffold app bar slot
+/// or floated above content.
+class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   const M3EToolbar({
-    required this.children,
-    this.axis = Axis.horizontal,
-    this.color = M3EToolbarColor.standard,
+    this.leading,
+    this.title,
+    this.titleText,
+    this.subtitle,
+    this.subtitleText,
+    this.actions = const <M3EToolbarAction>[],
+    this.maxInlineActions = 4,
+    this.overflowIcon = const Icon(M3EIcons.more_vert),
+    this.centerTitle = false,
+    this.variant = M3EToolbarVariant.surface,
+    this.size = M3EToolbarSize.medium,
+    this.density = M3EToolbarDensity.regular,
+    this.shapeFamily = M3EToolbarShapeFamily.round,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.elevation,
+    this.padding,
+    this.safeArea = true,
+    this.clipBehavior = Clip.none,
+    this.semanticLabel,
     super.key,
   });
 
-  final List<Widget> children;
-  final Axis axis;
-  final M3EToolbarColor color;
+  final Widget? leading;
+  final Widget? title;
+  final String? titleText;
+  final Widget? subtitle;
+  final String? subtitleText;
+  final List<M3EToolbarAction> actions;
+  final int maxInlineActions;
+  final Widget overflowIcon;
+  final bool centerTitle;
+  final M3EToolbarVariant variant;
+  final M3EToolbarSize size;
+  final M3EToolbarDensity density;
+  final M3EToolbarShapeFamily shapeFamily;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double? elevation;
+  final EdgeInsetsGeometry? padding;
+  final bool safeArea;
+  final Clip clipBehavior;
+  final String? semanticLabel;
+
+  @override
+  Size get preferredSize {
+    switch (size) {
+      case M3EToolbarSize.small:
+        return const Size.fromHeight(40);
+      case M3EToolbarSize.medium:
+        return const Size.fromHeight(48);
+      case M3EToolbarSize.large:
+        return const Size.fromHeight(56);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final toolbarTheme = theme.toolbarTheme;
-    final scheme = theme.colorScheme;
-    final Color background = toolbarTheme.backgroundColor(scheme, color);
-    final Color foreground = toolbarTheme.foregroundColor(scheme, color);
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EToolbarTheme toolbarTheme = theme.toolbarTheme;
+    final M3EColorScheme scheme = theme.colorScheme;
+    final M3EToolbarMetrics metrics =
+        toolbarTheme.metrics(density, theme.spacing);
 
-    return Container(
-      padding: toolbarTheme.padding,
-      decoration: ShapeDecoration(
-        shape: M3EShapes.stadium,
-        color: background,
-        shadows: M3EElevation.shadows(
-          toolbarTheme.elevation,
-          shadowColor: scheme.shadow,
+    final double height = switch (size) {
+      M3EToolbarSize.small => metrics.heightSmall,
+      M3EToolbarSize.medium => metrics.heightMedium,
+      M3EToolbarSize.large => metrics.heightLarge,
+    };
+
+    final Color background =
+        backgroundColor ?? toolbarTheme.containerColor(scheme, variant);
+    final Color foreground =
+        foregroundColor ?? toolbarTheme.foregroundColor(scheme, variant);
+    final ShapeBorder shape = toolbarTheme.shape(shapeFamily);
+    final EdgeInsetsGeometry resolvedPadding =
+        padding ?? metrics.horizontalPadding;
+
+    final Widget? resolvedTitle = title ??
+        (titleText != null
+            ? Text(
+                titleText!,
+                style: toolbarTheme
+                    .titleStyle(theme.typeScale)
+                    .copyWith(color: foreground),
+                overflow: TextOverflow.ellipsis,
+              )
+            : null);
+
+    final Widget? resolvedSubtitle = subtitle ??
+        (subtitleText != null
+            ? Text(
+                subtitleText!,
+                style: toolbarTheme
+                    .subtitleStyle(theme.typeScale)
+                    .copyWith(color: foreground.withValues(alpha: 0.8)),
+                overflow: TextOverflow.ellipsis,
+              )
+            : null);
+
+    final Widget toolbarRow = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        if (leading != null) leading!,
+        if (leading != null) SizedBox(width: metrics.gap),
+        Expanded(
+          child: M3EToolbarTitleBlock(
+            title: resolvedTitle,
+            subtitle: resolvedSubtitle,
+            center: centerTitle,
+            titleStyle: toolbarTheme
+                .titleStyle(theme.typeScale)
+                .copyWith(color: foreground),
+            subtitleStyle: toolbarTheme
+                .subtitleStyle(theme.typeScale)
+                .copyWith(color: foreground.withValues(alpha: 0.8)),
+          ),
+        ),
+        SizedBox(width: metrics.gap),
+        M3EToolbarActionsRow(
+          actions: actions,
+          maxInline: maxInlineActions,
+          overflowIcon: overflowIcon,
+          iconButtonSize: toolbarTheme.iconButtonSize(size),
+          overflowTextStyle: theme.typeScale.labelLarge
+              .copyWith(color: scheme.onSurface),
+          destructiveColor: scheme.error,
+        ),
+      ],
+    );
+
+    Widget bar = Material(
+      color: background,
+      elevation: elevation ??
+          (variant == M3EToolbarVariant.surface
+              ? metrics.elevationSurface
+              : metrics.elevationProminent),
+      shape: shape,
+      clipBehavior: clipBehavior,
+      child: SizedBox(
+        height: height,
+        child: Padding(
+          padding: resolvedPadding,
+          child: M3ETheme(
+            data: toolbarTheme.scopedTheme(theme, foreground),
+            child: toolbarRow,
+          ),
         ),
       ),
-      child: IconTheme.merge(
-        data: IconThemeData(
-          color: foreground,
-          size: toolbarTheme.iconSize,
-        ),
-        child: Flex(
-          direction: axis,
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        ),
-      ),
+    );
+
+    if (safeArea) {
+      bar = SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: bar,
+      );
+    }
+
+    if (semanticLabel == null) {
+      return bar;
+    }
+    return Semantics(
+      container: true,
+      label: semanticLabel,
+      child: bar,
     );
   }
 }

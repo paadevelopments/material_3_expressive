@@ -266,33 +266,63 @@ class _NavigationPageState extends State<NavigationPage> {
       title: 'Toolbar & menu',
       children: <Widget>[
         DemoRow(
-          label: 'Floating toolbars',
+          label: 'Toolbars',
           children: <Widget>[
             M3EToolbar(
-              children: <Widget>[
-                M3EIconButton(
-                  icon: const Icon(M3EIcons.arrow_back),
+              actions: <M3EToolbarAction>[
+                M3EToolbarAction(
+                  icon: M3EIcons.arrow_back,
                   onPressed: () {},
                 ),
-                M3EIconButton(
-                  icon: const Icon(M3EIcons.edit),
-                  onPressed: () {},
-                ),
-                M3EIconButton(
-                  icon: const Icon(M3EIcons.arrow_forward),
+                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                M3EToolbarAction(
+                  icon: M3EIcons.arrow_forward,
                   onPressed: () {},
                 ),
               ],
             ),
             M3EToolbar(
-              color: M3EToolbarColor.vibrant,
-              children: <Widget>[
-                M3EIconButton(
-                  icon: const Icon(M3EIcons.remove),
+              variant: M3EToolbarVariant.primary,
+              actions: <M3EToolbarAction>[
+                M3EToolbarAction(icon: M3EIcons.remove, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.add, onPressed: () {}),
+              ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Toolbar with title and overflow',
+          children: <Widget>[
+            M3EToolbar(
+              titleText: 'Inbox',
+              subtitleText: '12 unread',
+              maxInlineActions: 3,
+              actions: <M3EToolbarAction>[
+                M3EToolbarAction(
+                  icon: M3EIcons.search,
+                  tooltip: 'Search',
                   onPressed: () {},
                 ),
-                M3EIconButton(
-                  icon: const Icon(M3EIcons.add),
+                M3EToolbarAction(
+                  icon: M3EIcons.filter_list,
+                  tooltip: 'Filter',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.archive,
+                  tooltip: 'Archive',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.delete,
+                  tooltip: 'Delete',
+                  label: 'Delete',
+                  isDestructive: true,
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.settings,
+                  tooltip: 'Settings',
                   onPressed: () {},
                 ),
               ],
