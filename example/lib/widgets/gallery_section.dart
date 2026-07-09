@@ -24,15 +24,19 @@ class GallerySection extends StatelessWidget {
         children: <Widget>[
           Text(
             title,
-            style: theme.typeScale.titleLarge
-                .copyWith(color: theme.colorScheme.onSurface),
+            style: theme.typeScale.titleLarge.copyWith(
+              color: theme.colorScheme.onSurface,
+              decoration: TextDecoration.none,
+            ),
           ),
           if (description != null) ...<Widget>[
             const SizedBox(height: 4),
             Text(
               description!,
-              style: theme.typeScale.bodyMedium
-                  .copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.typeScale.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                decoration: TextDecoration.none,
+              ),
             ),
           ],
           const SizedBox(height: 16),
@@ -60,8 +64,10 @@ class DemoRow extends StatelessWidget {
         children: <Widget>[
           Text(
             label,
-            style: theme.typeScale.labelLarge
-                .copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.typeScale.labelLarge.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              decoration: TextDecoration.none,
+            ),
           ),
           const SizedBox(height: 12),
           Wrap(

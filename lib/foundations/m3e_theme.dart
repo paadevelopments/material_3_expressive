@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart' show InheritedTheme, Theme;
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
+import 'm3e_resolved_theme.dart';
 import 'm3e_theme_controller.dart';
 import 'm3e_theme_data.dart';
 import 'm3e_theme_scope.dart';
 
 export 'components/m3e_component_theme.dart';
+export 'm3e_resolved_theme.dart';
 export 'm3e_theme_controller.dart';
 export 'm3e_theme_data.dart';
 export 'm3e_theme_scope.dart';
@@ -41,8 +43,8 @@ class M3ETheme extends StatefulWidget {
 
   /// Returns the nearest expressive theme, or derives one from Material.
   static M3EThemeData of(BuildContext context) {
-    final _M3EInheritedTheme? inherited =
-        context.dependOnInheritedWidgetOfExactType<_M3EInheritedTheme>();
+    final M3EInheritedTheme? inherited =
+        context.dependOnInheritedWidgetOfExactType<M3EInheritedTheme>();
     if (inherited != null) {
       return inherited.data;
     }
@@ -55,8 +57,8 @@ class M3ETheme extends StatefulWidget {
 
   /// Returns the nearest expressive theme, or null if none is found.
   static M3EThemeData? maybeOf(BuildContext context) {
-    final _M3EInheritedTheme? inherited =
-        context.getInheritedWidgetOfExactType<_M3EInheritedTheme>();
+    final M3EInheritedTheme? inherited =
+        context.getInheritedWidgetOfExactType<M3EInheritedTheme>();
     if (inherited != null) {
       return inherited.data;
     }
@@ -101,57 +103,6 @@ class _M3EThemeState extends State<M3ETheme> {
       );
     }
 
-    return _M3EThemeProvider(data: widget.data, child: widget.child);
+    return M3EResolvedTheme(data: widget.data, child: widget.child);
   }
-}
-
-/// Applies a resolved [M3EThemeData] to a subtree.
-class _M3EThemeProvider extends StatelessWidget {
-  const _M3EThemeProvider({required this.data, required this.child});
-
-  final M3EThemeData data;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle baseStyle = data.typeScale.bodyMedium.copyWith(
-      color: data.colorScheme.onSurface,
-      decoration: TextDecoration.none,
-    );
-    Widget themedChild = _M3EInheritedTheme(
-      data: data,
-      child: IconTheme(
-        data: IconThemeData(color: data.colorScheme.onSurface, size: 24),
-        child: DefaultTextStyle(
-          style: baseStyle,
-          child: child,
-        ),
-      ),
-    );
-    if (data.splashColor != null || data.highlightColor != null) {
-      themedChild = Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: data.splashColor,
-          highlightColor: data.highlightColor,
-        ),
-        child: themedChild,
-      );
-    }
-    return themedChild;
-  }
-}
-
-class _M3EInheritedTheme extends InheritedTheme {
-  const _M3EInheritedTheme({required this.data, required super.child});
-
-  final M3EThemeData data;
-
-  @override
-  Widget wrap(BuildContext context, Widget child) {
-    return _M3EThemeProvider(data: data, child: child);
-  }
-
-  @override
-  bool updateShouldNotify(_M3EInheritedTheme oldWidget) =>
-      data != oldWidget.data;
 }

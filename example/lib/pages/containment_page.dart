@@ -31,14 +31,18 @@ class ContainmentPage extends StatelessWidget {
           children: <Widget>[
             Text(
               title,
-              style: theme.typeScale.titleMedium
-                  .copyWith(color: theme.colorScheme.onSurface),
+              style: theme.typeScale.titleMedium.copyWith(
+                color: theme.colorScheme.onSurface,
+                decoration: TextDecoration.none,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Supporting text for the card body.',
-              style: theme.typeScale.bodyMedium
-                  .copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.typeScale.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                decoration: TextDecoration.none,
+              ),
             ),
           ],
         );

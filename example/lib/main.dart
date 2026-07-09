@@ -36,36 +36,47 @@ class _ExampleAppState extends State<ExampleApp> {
       );
 
   @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _themeController,
-      builder: (BuildContext context, Widget? _) {
-        final ThemeMode themeMode = _themeController.brightnessOverride != null
-            ? _themeController.materialThemeMode
-            : ThemeMode.system;
+  void initState() {
+    super.initState();
+    _themeController.addListener(_onThemeControllerChanged);
+  }
 
-        return MaterialApp(
-          title: 'Material 3 Expressive',
-          debugShowCheckedModeBanner: false,
-          theme: _baseTheme.toThemeData(),
-          darkTheme: _darkTheme.toThemeData(),
-          themeMode: themeMode,
-          builder: (BuildContext context, Widget? child) {
-            return M3ETheme(
-              data: _baseTheme,
-              autoTheming: true,
-              dynamicColoring: true,
-              controller: _themeController,
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
-          home: _Gallery(
-            index: _index,
-            themeController: _themeController,
-            onIndexChanged: (int value) => setState(() => _index = value),
-          ),
+  @override
+  void dispose() {
+    _themeController.removeListener(_onThemeControllerChanged);
+    super.dispose();
+  }
+
+  void _onThemeControllerChanged() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeMode themeMode = _themeController.brightnessOverride != null
+        ? _themeController.materialThemeMode
+        : ThemeMode.system;
+
+    return MaterialApp(
+      title: 'Material 3 Expressive',
+      debugShowCheckedModeBanner: false,
+      theme: _baseTheme.toThemeData(),
+      darkTheme: _darkTheme.toThemeData(),
+      themeMode: themeMode,
+      builder: (BuildContext context, Widget? child) {
+        return M3ETheme(
+          data: _baseTheme,
+          autoTheming: true,
+          dynamicColoring: true,
+          controller: _themeController,
+          child: child ?? const SizedBox.shrink(),
         );
       },
+      home: _Gallery(
+        index: _index,
+        themeController: _themeController,
+        onIndexChanged: (int value) => setState(() => _index = value),
+      ),
     );
   }
 }
@@ -104,33 +115,35 @@ class _Gallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    return ColoredBox(
-      color: theme.colorScheme.surface,
-      child: Column(
-        children: <Widget>[
-          M3EAppBar.top(
-            titleText: 'Material 3 Expressive',
-            actions: <Widget>[
-              M3EIconButton(
-                icon: Icon(
-                  theme.brightness == Brightness.dark
-                      ? M3EIcons.light_mode
-                      : M3EIcons.dark_mode,
+    return Scaffold(
+      body: ColoredBox(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: Column(
+          children: <Widget>[
+            M3EAppBar.top(
+              titleText: 'Material 3 Expressive',
+              actions: <Widget>[
+                M3EIconButton(
+                  icon: Icon(
+                    theme.brightness == Brightness.dark
+                        ? M3EIcons.light_mode
+                        : M3EIcons.dark_mode,
+                  ),
+                  tooltip: 'Toggle theme',
+                  onPressed: () => themeController.toggleBrightness(
+                    fallback: theme.brightness,
+                  ),
                 ),
-                tooltip: 'Toggle theme',
-                onPressed: () => themeController.toggleBrightness(
-                  fallback: theme.brightness,
-                ),
-              ),
-            ],
-          ),
-          Expanded(child: _pages[index]),
-          M3ENavigationBar(
-            destinations: _destinations,
-            selectedIndex: index,
-            onDestinationSelected: onIndexChanged,
-          ),
-        ],
+              ],
+            ),
+            Expanded(child: _pages[index]),
+            M3ENavigationBar(
+              destinations: _destinations,
+              selectedIndex: index,
+              onDestinationSelected: onIndexChanged,
+            ),
+          ],
+        ),
       ),
     );
   }

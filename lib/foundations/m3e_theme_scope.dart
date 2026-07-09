@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Brightness, ColorScheme;
 import 'package:flutter/widgets.dart';
 
 import 'm3e_color_scheme.dart';
+import 'm3e_resolved_theme.dart';
 import 'm3e_theme_controller.dart';
 import 'm3e_theme_data.dart';
 
@@ -135,8 +136,35 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       return template;
     }
 
-    return widget.baseData.withColorScheme(
+    return template.withColorScheme(
       M3EColorScheme.fromColorScheme(dynamicScheme),
+    );
+  }
+
+  Widget _buildInheritedScope(
+    BuildContext context, {
+    ColorScheme? lightDynamic,
+    ColorScheme? darkDynamic,
+  }) {
+    final Brightness? manualBrightness = widget.controller.brightnessOverride;
+    final Brightness? platformBrightness =
+        autoTheming ? MediaQuery.platformBrightnessOf(context) : null;
+    final M3EThemeData resolved = resolve(
+      context,
+      lightDynamic: lightDynamic,
+      darkDynamic: darkDynamic,
+    );
+
+    return _InheritedM3EThemeScope(
+      scopeState: this,
+      manualBrightness: manualBrightness,
+      platformBrightness: platformBrightness,
+      lightDynamic: lightDynamic,
+      darkDynamic: darkDynamic,
+      child: M3EResolvedTheme(
+        data: resolved,
+        child: widget.child,
+      ),
     );
   }
 
@@ -148,11 +176,10 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
           return ListenableBuilder(
             listenable: widget.controller,
             builder: (BuildContext context, Widget? _) {
-              return _InheritedM3EThemeScope(
-                scopeState: this,
+              return _buildInheritedScope(
+                context,
                 lightDynamic: lightDynamic,
                 darkDynamic: darkDynamic,
-                child: widget.child,
               );
             },
           );
@@ -163,12 +190,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (BuildContext context, Widget? _) {
-        return _InheritedM3EThemeScope(
-          scopeState: this,
-          lightDynamic: null,
-          darkDynamic: null,
-          child: widget.child,
-        );
+        return _buildInheritedScope(context);
       },
     );
   }
@@ -177,12 +199,16 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
 class _InheritedM3EThemeScope extends InheritedWidget {
   const _InheritedM3EThemeScope({
     required this.scopeState,
+    required this.manualBrightness,
+    required this.platformBrightness,
     required this.lightDynamic,
     required this.darkDynamic,
     required super.child,
   });
 
   final M3EThemeScopeState scopeState;
+  final Brightness? manualBrightness;
+  final Brightness? platformBrightness;
   final ColorScheme? lightDynamic;
   final ColorScheme? darkDynamic;
 
@@ -197,6 +223,8 @@ class _InheritedM3EThemeScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_InheritedM3EThemeScope oldWidget) {
     return scopeState != oldWidget.scopeState ||
+        manualBrightness != oldWidget.manualBrightness ||
+        platformBrightness != oldWidget.platformBrightness ||
         lightDynamic != oldWidget.lightDynamic ||
         darkDynamic != oldWidget.darkDynamic;
   }
