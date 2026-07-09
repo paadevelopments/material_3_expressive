@@ -27,6 +27,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
+    this.alignment = M3EToolbarAlignment.start,
     this.variant = M3EToolbarVariant.surface,
     this.size = M3EToolbarSize.medium,
     this.density = M3EToolbarDensity.regular,
@@ -50,6 +51,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   final int maxInlineActions;
   final Widget overflowIcon;
   final bool centerTitle;
+  final M3EToolbarAlignment alignment;
   final M3EToolbarVariant variant;
   final M3EToolbarSize size;
   final M3EToolbarDensity density;
@@ -118,34 +120,43 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
               )
             : null);
 
+    final bool hasTitleContent =
+        resolvedTitle != null || resolvedSubtitle != null;
+
+    final M3EToolbarActionsRow actionsRow = M3EToolbarActionsRow(
+      actions: actions,
+      maxInline: maxInlineActions,
+      overflowIcon: overflowIcon,
+      iconButtonSize: toolbarTheme.iconButtonSize(size),
+      overflowTextStyle:
+          theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
+      destructiveColor: scheme.error,
+    );
+
     final Widget toolbarRow = Row(
+      mainAxisSize:
+          hasTitleContent ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (leading != null) leading!,
         if (leading != null) SizedBox(width: metrics.gap),
-        Expanded(
-          child: M3EToolbarTitleBlock(
-            title: resolvedTitle,
-            subtitle: resolvedSubtitle,
-            center: centerTitle,
-            titleStyle: toolbarTheme
-                .titleStyle(theme.typeScale)
-                .copyWith(color: foreground),
-            subtitleStyle: toolbarTheme
-                .subtitleStyle(theme.typeScale)
-                .copyWith(color: foreground.withValues(alpha: 0.8)),
+        if (hasTitleContent) ...<Widget>[
+          Expanded(
+            child: M3EToolbarTitleBlock(
+              title: resolvedTitle,
+              subtitle: resolvedSubtitle,
+              center: centerTitle,
+              titleStyle: toolbarTheme
+                  .titleStyle(theme.typeScale)
+                  .copyWith(color: foreground),
+              subtitleStyle: toolbarTheme
+                  .subtitleStyle(theme.typeScale)
+                  .copyWith(color: foreground.withValues(alpha: 0.8)),
+            ),
           ),
-        ),
-        SizedBox(width: metrics.gap),
-        M3EToolbarActionsRow(
-          actions: actions,
-          maxInline: maxInlineActions,
-          overflowIcon: overflowIcon,
-          iconButtonSize: toolbarTheme.iconButtonSize(size),
-          overflowTextStyle: theme.typeScale.labelLarge
-              .copyWith(color: scheme.onSurface),
-          destructiveColor: scheme.error,
-        ),
+          SizedBox(width: metrics.gap),
+        ],
+        actionsRow,
       ],
     );
 
@@ -159,6 +170,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       clipBehavior: clipBehavior,
       child: SizedBox(
         height: height,
+        width: hasTitleContent ? double.infinity : null,
         child: Padding(
           padding: resolvedPadding,
           child: M3ETheme(
@@ -168,6 +180,13 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
+
+    if (!hasTitleContent) {
+      bar = Align(
+        alignment: _alignmentFor(alignment),
+        child: bar,
+      );
+    }
 
     if (safeArea) {
       bar = SafeArea(
@@ -186,5 +205,16 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       label: semanticLabel,
       child: bar,
     );
+  }
+
+  static AlignmentDirectional _alignmentFor(M3EToolbarAlignment alignment) {
+    switch (alignment) {
+      case M3EToolbarAlignment.start:
+        return AlignmentDirectional.centerStart;
+      case M3EToolbarAlignment.center:
+        return AlignmentDirectional.center;
+      case M3EToolbarAlignment.end:
+        return AlignmentDirectional.centerEnd;
+    }
   }
 }

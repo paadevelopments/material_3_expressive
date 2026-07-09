@@ -291,6 +291,21 @@ class _NavigationPageState extends State<NavigationPage> {
           ],
         ),
         DemoRow(
+          label: 'Toolbar alignment',
+          children: <Widget>[
+            SizedBox(
+              width: double.infinity,
+              child: M3EToolbar(
+                alignment: M3EToolbarAlignment.center,
+                actions: <M3EToolbarAction>[
+                  M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+                  M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+                ],
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
           label: 'Toolbar with title and overflow',
           children: <Widget>[
             M3EToolbar(

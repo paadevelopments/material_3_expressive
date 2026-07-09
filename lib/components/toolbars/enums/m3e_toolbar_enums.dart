@@ -23,3 +23,10 @@ enum M3EToolbarVariant {
   tonal,
   primary,
 }
+
+/// Horizontal alignment of a compact (title-less) toolbar within its parent.
+enum M3EToolbarAlignment {
+  start,
+  center,
+  end,
+}
