@@ -774,7 +774,22 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       animationDuration: _kDurationZero,
       visualDensity: _kVisualDensityStandard,
       splashFactory: widget.splashFactory ?? _kDefaultSplashFactory,
-      overlayColor: widget.decorationOverlayColor,
+      overlayColor: widget.decorationOverlayColor ??
+          WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled)) {
+              return null;
+            }
+            final activeStates = checked
+                ? {...states, WidgetState.selected}
+                : states;
+            Color? foreground;
+            if (widget.decoration?.foregroundColor != null) {
+              foreground =
+                  widget.decoration!.foregroundColor!.resolve(activeStates);
+            }
+            foreground ??= fgColor;
+            return M3EStateLayer.resolveOverlayColor(foreground, states);
+          }),
       surfaceTintColor: widget.decorationSurfaceTintColor,
       enableFeedback: widget.enableFeedback,
     );

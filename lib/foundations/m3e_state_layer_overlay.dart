@@ -53,7 +53,10 @@ class M3EStateLayerOverlay extends StatelessWidget {
           onTapCancel: ink.onTapCancel,
           onHover: ink.onHover,
           customBorder: shape,
-          overlayColor: WidgetStateProperty.resolveWith(_resolveOverlayColor),
+          overlayColor: WidgetStateProperty.resolveWith(
+            (Set<WidgetState> states) =>
+                M3EStateLayer.resolveOverlayColor(color, states),
+          ),
           child: child,
         ),
       );
@@ -75,18 +78,5 @@ class M3EStateLayerOverlay extends StatelessWidget {
         child: child,
       ),
     );
-  }
-
-  Color? _resolveOverlayColor(Set<WidgetState> states) {
-    if (states.contains(WidgetState.pressed)) {
-      return color.withValues(alpha: M3EStateOpacity.pressed);
-    }
-    if (states.contains(WidgetState.hovered)) {
-      return color.withValues(alpha: M3EStateOpacity.hover);
-    }
-    if (states.contains(WidgetState.focused)) {
-      return color.withValues(alpha: M3EStateOpacity.focus);
-    }
-    return null;
   }
 }

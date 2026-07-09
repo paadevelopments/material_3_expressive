@@ -667,6 +667,11 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
                 SystemMouseCursors.click,
             enableFeedback: widget.enableFeedback,
             splashFactory: widget.splashFactory ?? InkRipple.splashFactory,
+            overlayColor: widget.decorationOverlayColor ??
+                WidgetStateProperty.resolveWith(
+                  (Set<WidgetState> states) =>
+                      M3EStateLayer.resolveOverlayColor(onColor, states),
+                ),
             child: _applyDecorationLayers(
               context: context,
               states: segmentStates,
@@ -826,6 +831,11 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             canRequestFocus: false,
             enableFeedback: widget.enableFeedback,
             splashFactory: widget.splashFactory ?? InkRipple.splashFactory,
+            overlayColor: widget.decorationOverlayColor ??
+                WidgetStateProperty.resolveWith(
+                  (Set<WidgetState> states) =>
+                      M3EStateLayer.resolveOverlayColor(onColor, states),
+                ),
             child: _applyDecorationLayers(
               context: context,
               states: segmentStates,

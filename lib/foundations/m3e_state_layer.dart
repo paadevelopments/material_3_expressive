@@ -80,3 +80,27 @@ class M3EInteractionState {
   @override
   int get hashCode => Object.hash(hovered, focused, pressed, dragged);
 }
+
+/// Resolves Material state-layer overlay colors using [M3EStateOpacity] tokens.
+abstract final class M3EStateLayer {
+  const M3EStateLayer._();
+
+  static Color? resolveOverlayColor(Color color, Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) {
+      return color.withValues(alpha: M3EStateOpacity.pressed);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return color.withValues(alpha: M3EStateOpacity.hover);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return color.withValues(alpha: M3EStateOpacity.focus);
+    }
+    return null;
+  }
+
+  static WidgetStateProperty<Color?> overlayColor(Color color) {
+    return WidgetStateProperty.resolveWith(
+      (Set<WidgetState> states) => resolveOverlayColor(color, states),
+    );
+  }
+}

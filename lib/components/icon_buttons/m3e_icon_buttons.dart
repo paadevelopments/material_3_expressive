@@ -177,7 +177,7 @@ class _M3EIconButtonState extends State<M3EIconButton> {
         splashFactory: widget.suppressInk ? NoSplash.splashFactory : null,
         overlayColor: widget.suppressInk
             ? WidgetStateProperty.all(Colors.transparent)
-            : null,
+            : M3EStateLayer.overlayColor(fg),
         animationDuration: _isPointerDown
             ? Duration.zero
             : iconButtonTheme.morphDuration,

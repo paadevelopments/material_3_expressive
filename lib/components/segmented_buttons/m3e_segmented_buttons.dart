@@ -125,6 +125,7 @@ class _M3ESegmentTile<T> extends StatelessWidget {
     return M3ETappable(
       onTap: () => parent._handleTap(segment.value),
       semanticLabel: segment.label,
+      materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
           height: segmentedButtonTheme.height,
@@ -133,23 +134,19 @@ class _M3ESegmentTile<T> extends StatelessWidget {
             scheme,
             selected: isSelected,
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: ColoredBox(
-                    color: foreground.withValues(alpha: state.opacity),
-                  ),
-                ),
-              ),
-              Padding(
+          child: M3EStateLayerOverlay(
+            state: state,
+            color: foreground,
+            shape: const RoundedRectangleBorder(),
+            child: SizedBox(
+              width: double.infinity,
+              child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: segmentedButtonTheme.segmentHorizontalPadding,
                 ),
                 child: _buildLabel(segment, foreground, isSelected),
               ),
-            ],
+            ),
           ),
         );
       },

@@ -537,7 +537,18 @@ class _M3EButtonState extends State<M3EButton>
         }
         return widget.mouseCursor;
       }),
-      overlayColor: dec?.overlayColor,
+      overlayColor: dec?.overlayColor ??
+          WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled)) {
+              return null;
+            }
+            Color? foreground;
+            if (dec?.foregroundColor != null) {
+              foreground = dec!.foregroundColor!.resolve(states);
+            }
+            foreground ??= _buttonTheme.foreground(_scheme, widget.style);
+            return M3EStateLayer.resolveOverlayColor(foreground, states);
+          }),
       surfaceTintColor: dec?.surfaceTintColor,
       enableFeedback:
       (dec?.haptic != null && dec!.haptic != M3EHapticFeedback.none)
