@@ -50,7 +50,7 @@ class M3ETheme extends StatelessWidget {
       color: data.colorScheme.onSurface,
       decoration: TextDecoration.none,
     );
-    return _M3EInheritedTheme(
+    Widget themedChild = _M3EInheritedTheme(
       data: data,
       child: IconTheme(
         data: IconThemeData(color: data.colorScheme.onSurface, size: 24),
@@ -60,6 +60,16 @@ class M3ETheme extends StatelessWidget {
         ),
       ),
     );
+    if (data.splashColor != null || data.highlightColor != null) {
+      themedChild = Theme(
+        data: Theme.of(context).copyWith(
+          splashColor: data.splashColor,
+          highlightColor: data.highlightColor,
+        ),
+        child: themedChild,
+      );
+    }
+    return themedChild;
   }
 }
 

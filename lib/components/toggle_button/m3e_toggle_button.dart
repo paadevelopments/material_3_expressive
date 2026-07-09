@@ -19,8 +19,6 @@ export 'styles/m3e_toggle_button_theme.dart';
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
 const Duration _kDurationZero = Duration.zero;
-const InteractiveInkFeatureFactory _kDefaultSplashFactory =
-    InkRipple.splashFactory;
 const bool _kDefaultEnableFeedback = true;
 final SpringMotion _kPressedRadiusMotion = M3EButtonMotion.expressiveEffectsFast.toMotion();
 
@@ -638,7 +636,10 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
         );
     }
 
-    Widget result = button;
+    Widget result = M3EInkSplashTheme(
+      color: _resolvedForegroundColor(checked),
+      child: button,
+    );
     if (widget.tooltip != null) {
       result = Tooltip(message: widget.tooltip!, child: result);
     }
@@ -650,6 +651,22 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     );
   }
 
+  Color _resolvedForegroundColor(bool checked) {
+    final cs = _scheme;
+    switch (widget.style) {
+      case M3EButtonStyle.filled:
+        return checked ? cs.onPrimary : cs.onSurfaceVariant;
+      case M3EButtonStyle.elevated:
+        return checked ? cs.onPrimary : cs.primary;
+      case M3EButtonStyle.tonal:
+        return checked ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+      case M3EButtonStyle.outlined:
+        return checked ? cs.onSecondaryContainer : cs.onSurface;
+      case M3EButtonStyle.text:
+        return checked ? cs.primary : cs.onSurface;
+    }
+  }
+
   ButtonStyle _buildButtonStyle(
       bool checked,
       WidgetStateProperty<OutlinedBorder> buttonShape,
@@ -658,32 +675,27 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final cs = _scheme;
 
     final Color bgColor;
-    final Color fgColor;
+    final Color fgColor = _resolvedForegroundColor(checked);
 
     switch (widget.style) {
       case M3EButtonStyle.filled:
         bgColor = checked ? cs.primary : cs.surfaceContainerHighest;
-        fgColor = checked ? cs.onPrimary : cs.onSurfaceVariant;
         break;
 
       case M3EButtonStyle.elevated:
         bgColor = checked ? cs.primary : cs.surfaceContainerLow;
-        fgColor = checked ? cs.onPrimary : cs.primary;
         break;
 
       case M3EButtonStyle.tonal:
         bgColor = checked ? cs.secondaryContainer : cs.surfaceContainerHighest;
-        fgColor = checked ? cs.onSecondaryContainer : cs.onSurfaceVariant;
         break;
 
       case M3EButtonStyle.outlined:
         bgColor = checked ? cs.secondaryContainer : Colors.transparent;
-        fgColor = checked ? cs.onSecondaryContainer : cs.onSurface;
         break;
 
       case M3EButtonStyle.text:
         bgColor = Colors.transparent;
-        fgColor = checked ? cs.primary : cs.onSurface;
         break;
     }
 
@@ -773,10 +785,13 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       }),
       animationDuration: _kDurationZero,
       visualDensity: _kVisualDensityStandard,
-      splashFactory: widget.splashFactory ?? _kDefaultSplashFactory,
+      splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
       overlayColor: widget.decorationOverlayColor ??
           WidgetStateProperty.resolveWith((Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
+              return null;
+            }
+            if (states.contains(WidgetState.pressed)) {
               return null;
             }
             final activeStates = checked

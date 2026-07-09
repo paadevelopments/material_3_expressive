@@ -158,30 +158,35 @@ class _M3EIconButtonState extends State<M3EIconButton> {
           : widget.icon,
     );
 
-    final Widget button = IconButton(
-      onPressed: widget.onPressed,
-      isSelected: widget.isSelected,
-      selectedIcon: widget.selectedIcon,
-      icon: innerIcon,
-      tooltip: widget.tooltip,
-      enableFeedback: widget.enableFeedback,
-      statesController: _statesController,
-      style: ButtonStyle(
-        // Visual (painted) size
-        fixedSize: WidgetStateProperty.all(visual),
-        padding: WidgetStateProperty.all(EdgeInsets.zero),
-        shape: WidgetStateProperty.resolveWith(shapeFor),
-        backgroundColor: WidgetStateProperty.all(bg),
-        foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
-        side: WidgetStateProperty.resolveWith((_) => side),
-        splashFactory: widget.suppressInk ? NoSplash.splashFactory : null,
-        overlayColor: widget.suppressInk
-            ? WidgetStateProperty.all(Colors.transparent)
-            : M3EStateLayer.overlayColor(fg),
-        animationDuration: _isPointerDown
-            ? Duration.zero
-            : iconButtonTheme.morphDuration,
-        visualDensity: VisualDensity.standard,
+    final Widget button = M3EInkSplashTheme(
+      color: fg,
+      child: IconButton(
+        onPressed: widget.onPressed,
+        isSelected: widget.isSelected,
+        selectedIcon: widget.selectedIcon,
+        icon: innerIcon,
+        tooltip: widget.tooltip,
+        enableFeedback: widget.enableFeedback,
+        statesController: _statesController,
+        style: ButtonStyle(
+          // Visual (painted) size
+          fixedSize: WidgetStateProperty.all(visual),
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
+          shape: WidgetStateProperty.resolveWith(shapeFor),
+          backgroundColor: WidgetStateProperty.all(bg),
+          foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
+          side: WidgetStateProperty.resolveWith((_) => side),
+          splashFactory: widget.suppressInk
+              ? NoSplash.splashFactory
+              : InkSparkle.splashFactory,
+          overlayColor: widget.suppressInk
+              ? WidgetStateProperty.all(Colors.transparent)
+              : M3EStateLayer.overlayColorHoverFocus(fg),
+          animationDuration: _isPointerDown
+              ? Duration.zero
+              : iconButtonTheme.morphDuration,
+          visualDensity: VisualDensity.standard,
+        ),
       ),
     );
 

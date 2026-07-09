@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart' show Brightness, TargetPlatform, ThemeData, VisualDensity;
+import 'package:flutter/material.dart'
+    show Brightness, Color, TargetPlatform, ThemeData, VisualDensity;
 import 'package:flutter/widgets.dart';
 
 import '../components/app_bars/styles/m3e_app_bar_theme.dart';
@@ -52,6 +53,8 @@ class M3EThemeData {
     this.visualDensity = 0,
     this.platform,
     this.useMaterial3 = true,
+    this.splashColor,
+    this.highlightColor,
     this.appBarTheme = M3EAppBarTheme.defaults,
     this.badgeTheme = M3EBadgeTheme.defaults,
     this.bottomSheetTheme = M3EBottomSheetTheme.defaults,
@@ -120,6 +123,8 @@ class M3EThemeData {
       visualDensity: theme.visualDensity.vertical,
       platform: theme.platform,
       useMaterial3: theme.useMaterial3,
+      splashColor: theme.splashColor,
+      highlightColor: theme.highlightColor,
     );
     _materialCache[theme] = data;
     return data;
@@ -131,6 +136,8 @@ class M3EThemeData {
   final double visualDensity;
   final TargetPlatform? platform;
   final bool useMaterial3;
+  final Color? splashColor;
+  final Color? highlightColor;
   final Brightness brightness;
 
   final M3EAppBarTheme appBarTheme;
@@ -178,6 +185,8 @@ class M3EThemeData {
     double? visualDensity,
     TargetPlatform? platform,
     bool? useMaterial3,
+    Color? splashColor,
+    Color? highlightColor,
     M3EAppBarTheme? appBarTheme,
     M3EBadgeTheme? badgeTheme,
     M3EBottomSheetTheme? bottomSheetTheme,
@@ -223,6 +232,8 @@ class M3EThemeData {
       visualDensity: visualDensity ?? this.visualDensity,
       platform: platform ?? this.platform,
       useMaterial3: useMaterial3 ?? this.useMaterial3,
+      splashColor: splashColor ?? this.splashColor,
+      highlightColor: highlightColor ?? this.highlightColor,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
@@ -273,6 +284,8 @@ class M3EThemeData {
         vertical: visualDensity,
       ),
       platform: platform,
+      splashColor: splashColor,
+      highlightColor: highlightColor,
     );
   }
 }

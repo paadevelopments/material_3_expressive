@@ -98,9 +98,22 @@ abstract final class M3EStateLayer {
     return null;
   }
 
+  /// Pressed ripple color. Use with splash on ink widgets or
+  /// [M3EInkSplashTheme] for Material buttons.
+  static Color splashColor(Color color) =>
+      color.withValues(alpha: M3EStateOpacity.pressed);
+
+  /// Hover/focus overlays only. Pressed feedback is splash-only.
+  static WidgetStateProperty<Color?> overlayColorHoverFocus(Color color) {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
+        return null;
+      }
+      return resolveOverlayColor(color, states);
+    });
+  }
+
   static WidgetStateProperty<Color?> overlayColor(Color color) {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) => resolveOverlayColor(color, states),
-    );
+    return overlayColorHoverFocus(color);
   }
 }

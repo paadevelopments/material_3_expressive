@@ -27,8 +27,6 @@ export 'styles/m3e_button_theme.dart';
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
 const Duration _kDurationZero = Duration.zero;
-const InteractiveInkFeatureFactory _kDefaultSplashFactory =
-    InkRipple.splashFactory;
 const bool _kDefaultEnableFeedback = true;
 final _kPressedRadiusMotion = M3EButtonMotion.expressiveEffectsFast.toMotion();
 
@@ -469,7 +467,7 @@ class _M3EButtonState extends State<M3EButton>
       tapTargetSize: dec?.tapTargetSize,
       animationDuration: dec?.animationDuration ?? _kDurationZero,
       splashFactory:
-      dec?.splashFactory ?? widget.splashFactory ?? _kDefaultSplashFactory,
+      dec?.splashFactory ?? widget.splashFactory ?? InkSparkle.splashFactory,
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (dec?.foregroundColor != null) {
           final color = dec!.foregroundColor!.resolve(states);
@@ -540,6 +538,9 @@ class _M3EButtonState extends State<M3EButton>
       overlayColor: dec?.overlayColor ??
           WidgetStateProperty.resolveWith((Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
+              return null;
+            }
+            if (states.contains(WidgetState.pressed)) {
               return null;
             }
             Color? foreground;
@@ -781,7 +782,17 @@ class _M3EButtonState extends State<M3EButton>
         );
     }
 
-    Widget result = button;
+    final dec = widget.decoration;
+    Color inkSplashColor = _buttonTheme.foreground(_scheme, widget.style);
+    if (dec?.foregroundColor != null) {
+      inkSplashColor =
+          dec!.foregroundColor!.resolve(const <WidgetState>{}) ?? inkSplashColor;
+    }
+
+    Widget result = M3EInkSplashTheme(
+      color: inkSplashColor,
+      child: button,
+    );
     if (widget.tooltip != null) {
       result = Tooltip(message: widget.tooltip!, child: result);
     }

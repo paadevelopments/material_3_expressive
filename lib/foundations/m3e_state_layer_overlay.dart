@@ -53,10 +53,10 @@ class M3EStateLayerOverlay extends StatelessWidget {
           onTapCancel: ink.onTapCancel,
           onHover: ink.onHover,
           customBorder: shape,
-          overlayColor: WidgetStateProperty.resolveWith(
-            (Set<WidgetState> states) =>
-                M3EStateLayer.resolveOverlayColor(color, states),
-          ),
+          splashFactory: InkSparkle.splashFactory,
+          splashColor: M3EStateLayer.splashColor(color),
+          highlightColor: Colors.transparent,
+          overlayColor: M3EStateLayer.overlayColorHoverFocus(color),
           child: child,
         ),
       );
