@@ -128,8 +128,8 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(
+          width: double.infinity,
           height: segmentedButtonTheme.height,
-          alignment: Alignment.center,
           color: segmentedButtonTheme.backgroundColor(
             scheme,
             selected: isSelected,
@@ -138,13 +138,17 @@ class _M3ESegmentTile<T> extends StatelessWidget {
             state: state,
             color: foreground,
             shape: const RoundedRectangleBorder(),
+            alignment: Alignment.center,
             child: SizedBox(
               width: double.infinity,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: segmentedButtonTheme.segmentHorizontalPadding,
+              height: segmentedButtonTheme.height,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: segmentedButtonTheme.segmentHorizontalPadding,
+                  ),
+                  child: _buildLabel(segment, foreground, isSelected),
                 ),
-                child: _buildLabel(segment, foreground, isSelected),
               ),
             ),
           ),
