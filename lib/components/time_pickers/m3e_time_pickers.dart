@@ -45,13 +45,17 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
         color: timeTheme.containerColor(scheme),
         borderRadius: timeTheme.borderRadius,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _buildHeader(theme),
-          SizedBox(height: timeTheme.headerDialGap),
-          _buildDial(theme),
-        ],
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.topCenter,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildHeader(theme),
+            SizedBox(height: timeTheme.headerDialGap),
+            _buildDial(theme),
+          ],
+        ),
       ),
     );
   }
