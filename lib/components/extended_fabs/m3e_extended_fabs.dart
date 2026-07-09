@@ -46,46 +46,48 @@ class M3EExtendedFab extends StatelessWidget {
     final borderRadius = M3EShapes.resolve(extendedTheme.cornerRadius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
-    return M3ETappable(
-      onTap: onPressed,
-      enabled: _enabled,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      semanticLabel: label,
-      pressedScale: extendedTheme.pressedScale,
-      materialInk: true,
-      builder: (BuildContext context, M3EInteractionState state) {
-        final double elevation = extendedTheme.elevation(
-          hovered: state.hovered,
-        );
-        return AnimatedContainer(
-          duration: M3EMotion.medium2,
-          curve: M3EMotion.emphasized,
-          height: extendedTheme.height,
-          decoration: BoxDecoration(
-            color: metrics.background,
-            borderRadius: borderRadius,
-            boxShadow: M3EElevation.shadows(
-              elevation,
-              shadowColor: theme.colorScheme.shadow,
-            ),
-          ),
-          child: M3EStateLayerOverlay(
-            state: state,
-            color: metrics.foreground,
-            shape: border,
-            alignment: Alignment.center,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: extended
-                    ? extendedTheme.extendedHorizontalPadding
-                    : extendedTheme.collapsedHorizontalPadding,
+    return M3EComponentTheme(
+      child: M3ETappable(
+        onTap: onPressed,
+        enabled: _enabled,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        semanticLabel: label,
+        pressedScale: extendedTheme.pressedScale,
+        materialInk: true,
+        builder: (BuildContext context, M3EInteractionState state) {
+          final double elevation = extendedTheme.elevation(
+            hovered: state.hovered,
+          );
+          return AnimatedContainer(
+            duration: M3EMotion.medium2,
+            curve: M3EMotion.emphasized,
+            height: extendedTheme.height,
+            decoration: BoxDecoration(
+              color: metrics.background,
+              borderRadius: borderRadius,
+              boxShadow: M3EElevation.shadows(
+                elevation,
+                shadowColor: theme.colorScheme.shadow,
               ),
-              child: _buildContent(theme, metrics, extendedTheme),
             ),
-          ),
-        );
-      },
+            child: M3EStateLayerOverlay(
+              state: state,
+              color: metrics.foreground,
+              shape: border,
+              alignment: Alignment.center,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: extended
+                      ? extendedTheme.extendedHorizontalPadding
+                      : extendedTheme.collapsedHorizontalPadding,
+                ),
+                child: _buildContent(theme, metrics, extendedTheme),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

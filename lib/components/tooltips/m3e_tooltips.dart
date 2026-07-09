@@ -69,20 +69,22 @@ class _M3ETooltipState extends State<M3ETooltip> {
   @override
   Widget build(BuildContext context) {
     final tooltipTheme = M3ETheme.of(context).tooltipTheme;
-    return OverlayPortal(
-      controller: _portal,
-      overlayChildBuilder: _buildOverlay,
-      child: CompositedTransformTarget(
-        link: _link,
-        child: MouseRegion(
-          onEnter: (_) => _show(),
-          onExit: (_) => _hide(),
-          child: GestureDetector(
-            onLongPress: () {
-              _show();
-              _scheduleHide(tooltipTheme);
-            },
-            child: widget.child,
+    return M3EComponentTheme(
+      child: OverlayPortal(
+        controller: _portal,
+        overlayChildBuilder: _buildOverlay,
+        child: CompositedTransformTarget(
+          link: _link,
+          child: MouseRegion(
+            onEnter: (_) => _show(),
+            onExit: (_) => _hide(),
+            child: GestureDetector(
+              onLongPress: () {
+                _show();
+                _scheduleHide(tooltipTheme);
+              },
+              child: widget.child,
+            ),
           ),
         ),
       ),

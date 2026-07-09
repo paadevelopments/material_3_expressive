@@ -78,15 +78,17 @@ class _M3EFabMenuState extends State<M3EFabMenu>
 
   @override
   Widget build(BuildContext context) {
-    return OverlayPortal(
-      controller: _portal,
-      overlayChildBuilder: _buildOverlay,
-      child: CompositedTransformTarget(
-        link: _link,
-        child: M3EFab(
-          icon: _open ? widget.closeIcon : widget.icon,
-          color: widget.color,
-          onPressed: _toggle,
+    return M3EComponentTheme(
+      child: OverlayPortal(
+        controller: _portal,
+        overlayChildBuilder: _buildOverlay,
+        child: CompositedTransformTarget(
+          link: _link,
+          child: M3EFab(
+            icon: _open ? widget.closeIcon : widget.icon,
+            color: widget.color,
+            onPressed: _toggle,
+          ),
         ),
       ),
     );

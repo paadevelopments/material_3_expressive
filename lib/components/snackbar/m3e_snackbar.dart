@@ -38,8 +38,7 @@ class M3ESnackbar extends StatelessWidget {
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (BuildContext context) {
-        return M3ETheme(
-          data: theme,
+        return M3EComponentTheme(
           child: M3ESnackbarHost(
             duration: resolvedDuration,
             entry: entry,
@@ -57,6 +56,12 @@ class M3ESnackbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildBar(context),
+    );
+  }
+
+  Widget _buildBar(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final snackTheme = theme.snackBarTheme;

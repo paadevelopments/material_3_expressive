@@ -1,3 +1,4 @@
+export 'components/m3e_component_theme.dart';
 export 'm3e_color_scheme.dart';
 export 'm3e_color_utils.dart';
 export 'm3e_elevation.dart';
@@ -12,6 +13,8 @@ export 'm3e_state_layer_overlay.dart';
 export 'm3e_tappable.dart';
 export 'm3e_tappable_ink_scope.dart';
 export 'm3e_theme.dart';
+export 'm3e_theme_controller.dart';
 export 'm3e_theme_data.dart';
 export 'm3e_theme_extension.dart';
+export 'm3e_theme_scope.dart';
 export 'm3e_typography.dart';

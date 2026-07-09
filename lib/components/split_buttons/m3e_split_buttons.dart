@@ -343,10 +343,12 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
   @override
   Widget build(BuildContext context) {
-    return buildAnimatedContent(
+    return M3EComponentTheme(
+      child: buildAnimatedContent(
       builder: (context, pressed, hovered, focused) {
         return _buildContent(context, pressed, hovered, focused);
       },
+    ),
     );
   }
 

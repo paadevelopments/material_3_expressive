@@ -50,6 +50,12 @@ class M3EListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildItem(context),
+    );
+  }
+
+  Widget _buildItem(BuildContext context) {
     final body = _buildBody(context);
     if (M3EListItemScope.isEmbedded(context)) {
       return body;
@@ -302,6 +308,12 @@ class M3ECardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildList(context),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
     final EdgeInsetsGeometry? localMargin = margin;
     final Widget? localEmptyBuilder = emptyBuilder;
 
@@ -429,6 +441,12 @@ class _M3EDismissibleListState extends State<M3EDismissibleList>
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildList(context),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
     final visible = computeVisibleIndices();
     return ListView.builder(
       controller: widget.scrollController,
@@ -521,6 +539,12 @@ class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildColumn(context),
+    );
+  }
+
+  Widget _buildColumn(BuildContext context) {
     final visible = computeVisibleIndices();
     return Column(
       mainAxisSize: MainAxisSize.min,

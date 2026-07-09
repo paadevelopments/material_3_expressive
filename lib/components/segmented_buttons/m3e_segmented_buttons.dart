@@ -35,20 +35,22 @@ class M3ESegmentedButton<T> extends StatelessWidget {
     final scheme = theme.colorScheme;
     final borderRadius = segmentedButtonTheme.borderRadius;
 
-    return Container(
-      height: segmentedButtonTheme.height,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: Border.all(
-          color: scheme.outline,
-          width: segmentedButtonTheme.borderWidth,
+    return M3EComponentTheme(
+      child: Container(
+        height: segmentedButtonTheme.height,
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: scheme.outline,
+            width: segmentedButtonTheme.borderWidth,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: _buildSegments(theme, segmentedButtonTheme),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: _buildSegments(theme, segmentedButtonTheme),
+          ),
         ),
       ),
     );

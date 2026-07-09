@@ -560,6 +560,12 @@ class _M3EButtonState extends State<M3EButton>
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final m = _measurements;
 
     final EdgeInsets baseInternalPadding = EdgeInsets.symmetric(

@@ -38,14 +38,15 @@ class M3ESwitch extends StatelessWidget {
     final switchTheme = theme.switchTheme;
     final scheme = theme.colorScheme;
 
-    return M3ETappable(
-      onTap: _enabled ? () => onChanged!(!value) : null,
-      enabled: _enabled,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      semanticLabel: semanticLabel,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return AnimatedContainer(
+    return M3EComponentTheme(
+      child: M3ETappable(
+        onTap: _enabled ? () => onChanged!(!value) : null,
+        enabled: _enabled,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        semanticLabel: semanticLabel,
+        builder: (BuildContext context, M3EInteractionState state) {
+          return AnimatedContainer(
           duration: M3EMotion.short4,
           curve: M3EMotion.emphasized,
           width: switchTheme.trackWidth,
@@ -70,7 +71,8 @@ class M3ESwitch extends StatelessWidget {
           ),
           child: _buildThumb(switchTheme, scheme, state),
         );
-      },
+        },
+      ),
     );
   }
 

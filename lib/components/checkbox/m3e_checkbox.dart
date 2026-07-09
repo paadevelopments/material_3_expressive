@@ -58,25 +58,27 @@ class M3ECheckbox extends StatelessWidget {
     final bool checked = value ?? false;
     final bool active = value == null || checked;
 
-    return M3ETappable(
-      onTap: _enabled ? _handleTap : null,
-      enabled: _enabled,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      semanticLabel: semanticLabel,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return SizedBox(
-          width: checkboxTheme.hitSize,
-          height: checkboxTheme.hitSize,
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              _buildStateLayer(checkboxTheme, scheme, state, active),
-              _buildBox(checkboxTheme, scheme, active),
-            ],
-          ),
-        );
-      },
+    return M3EComponentTheme(
+      child: M3ETappable(
+        onTap: _enabled ? _handleTap : null,
+        enabled: _enabled,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        semanticLabel: semanticLabel,
+        builder: (BuildContext context, M3EInteractionState state) {
+          return SizedBox(
+            width: checkboxTheme.hitSize,
+            height: checkboxTheme.hitSize,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                _buildStateLayer(checkboxTheme, scheme, state, active),
+                _buildBox(checkboxTheme, scheme, active),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

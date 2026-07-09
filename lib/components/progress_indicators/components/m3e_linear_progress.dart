@@ -110,18 +110,20 @@ class _M3ELinearProgressState extends State<M3ELinearProgress>
         ? widget.phase
         : (_shouldAnimate ? _controller.value * 2 * math.pi : 0.0);
 
-    return RepaintBoundary(
-      child: SizedBox(
-        height: totalHeight,
-        width: double.infinity,
-        child: CustomPaint(
-          painter: _LinearPainter(
-            value: widget.value,
-            spec: spec,
-            active: widget.activeColor ?? active,
-            track: widget.trackColor ?? track,
-            phase: phaseValue,
-            inset: widget.inset,
+    return M3EComponentTheme(
+      child: RepaintBoundary(
+        child: SizedBox(
+          height: totalHeight,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: _LinearPainter(
+              value: widget.value,
+              spec: spec,
+              active: widget.activeColor ?? active,
+              track: widget.trackColor ?? track,
+              phase: phaseValue,
+              inset: widget.inset,
+            ),
           ),
         ),
       ),

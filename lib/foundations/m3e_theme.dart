@@ -1,16 +1,43 @@
 import 'package:flutter/material.dart' show InheritedTheme, Theme;
 import 'package:flutter/widgets.dart';
 
+import 'm3e_theme_controller.dart';
 import 'm3e_theme_data.dart';
+import 'm3e_theme_scope.dart';
 
+export 'components/m3e_component_theme.dart';
+export 'm3e_theme_controller.dart';
 export 'm3e_theme_data.dart';
+export 'm3e_theme_scope.dart';
 
 /// Provides an [M3EThemeData] to the widget subtree.
-class M3ETheme extends StatelessWidget {
-  const M3ETheme({required this.data, required this.child, super.key});
+///
+/// At the app entry point, pass [initialTheme], [autoTheming], [dynamicColoring],
+/// and an optional [controller] to enable adaptive theming. Nested instances
+/// that only pass [data] continue to provide a static local override.
+class M3ETheme extends StatefulWidget {
+  const M3ETheme({
+    required this.data,
+    required this.child,
+    this.initialTheme,
+    this.autoTheming,
+    this.dynamicColoring,
+    this.controller,
+    super.key,
+  });
 
   final M3EThemeData data;
   final Widget child;
+  final Brightness? initialTheme;
+  final bool? autoTheming;
+  final bool? dynamicColoring;
+  final M3EThemeController? controller;
+
+  bool get usesAdaptiveScope =>
+      initialTheme != null ||
+      autoTheming == true ||
+      dynamicColoring == true ||
+      controller != null;
 
   /// Returns the nearest expressive theme, or derives one from Material.
   static M3EThemeData of(BuildContext context) {
@@ -19,6 +46,10 @@ class M3ETheme extends StatelessWidget {
     if (inherited != null) {
       return inherited.data;
     }
+    final M3EThemeData? scoped = M3EThemeScope.resolveForComponent(context);
+    if (scoped != null) {
+      return scoped;
+    }
     return M3EThemeData.fromMaterial(Theme.of(context));
   }
 
@@ -26,7 +57,10 @@ class M3ETheme extends StatelessWidget {
   static M3EThemeData? maybeOf(BuildContext context) {
     final _M3EInheritedTheme? inherited =
         context.getInheritedWidgetOfExactType<_M3EInheritedTheme>();
-    return inherited?.data;
+    if (inherited != null) {
+      return inherited.data;
+    }
+    return M3EThemeScope.resolveOf(context);
   }
 
   /// Brightness from the nearest [M3ETheme], else platform brightness.
@@ -43,6 +77,40 @@ class M3ETheme extends StatelessWidget {
     }
     return Theme.of(context).platform;
   }
+
+  @override
+  State<M3ETheme> createState() => _M3EThemeState();
+}
+
+class _M3EThemeState extends State<M3ETheme> {
+  M3EThemeController? _internalController;
+
+  M3EThemeController get _effectiveController =>
+      widget.controller ?? (_internalController ??= M3EThemeController());
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.usesAdaptiveScope) {
+      return M3EThemeScope(
+        baseData: widget.data,
+        initialTheme: widget.initialTheme,
+        autoTheming: widget.autoTheming,
+        dynamicColoring: widget.dynamicColoring,
+        controller: _effectiveController,
+        child: widget.child,
+      );
+    }
+
+    return _M3EThemeProvider(data: widget.data, child: widget.child);
+  }
+}
+
+/// Applies a resolved [M3EThemeData] to a subtree.
+class _M3EThemeProvider extends StatelessWidget {
+  const _M3EThemeProvider({required this.data, required this.child});
+
+  final M3EThemeData data;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +148,7 @@ class _M3EInheritedTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return M3ETheme(data: data, child: child);
+    return _M3EThemeProvider(data: data, child: child);
   }
 
   @override

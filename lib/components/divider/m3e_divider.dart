@@ -28,6 +28,12 @@ class M3EDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildDivider(context),
+    );
+  }
+
+  Widget _buildDivider(BuildContext context) {
     final dividerTheme = M3ETheme.of(context).dividerTheme;
     final Color line =
         color ?? dividerTheme.color(M3ETheme.of(context).colorScheme);

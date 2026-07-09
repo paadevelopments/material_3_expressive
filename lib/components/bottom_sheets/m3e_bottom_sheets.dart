@@ -26,7 +26,8 @@ class M3EBottomSheet extends StatelessWidget {
     required WidgetBuilder builder,
     bool showDragHandle = true,
   }) {
-    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
     final sheetTheme = theme.bottomSheetTheme;
     return showGeneralDialog<T>(
       context: context,
@@ -35,8 +36,7 @@ class M3EBottomSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3ETheme(
-          data: theme,
+        return M3EComponentTheme(
           child: Align(
             alignment: Alignment.bottomCenter,
             child: M3EBottomSheet(
@@ -60,6 +60,12 @@ class M3EBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildSheet(context),
+    );
+  }
+
+  Widget _buildSheet(BuildContext context) {
     final theme = M3ETheme.of(context);
     final sheetTheme = theme.bottomSheetTheme;
     final scheme = theme.colorScheme;

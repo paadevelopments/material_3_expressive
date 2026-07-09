@@ -60,14 +60,16 @@ class M3ELoadingIndicator extends StatelessWidget {
       constraints: cons,
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: containerBg,
-        borderRadius: loadingTheme.containerRadius,
-      ),
-      child: Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: indicator,
+    return M3EComponentTheme(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: containerBg,
+          borderRadius: loadingTheme.containerRadius,
+        ),
+        child: Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: indicator,
+        ),
       ),
     );
   }

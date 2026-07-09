@@ -34,8 +34,9 @@ class M3ESlider extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final sliderTheme = theme.sliderTheme;
     final scheme = theme.colorScheme;
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+    return M3EComponentTheme(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
         final double width = constraints.maxWidth;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -74,7 +75,8 @@ class M3ESlider extends StatelessWidget {
             ),
           ),
         );
-      },
+        },
+      ),
     );
   }
 

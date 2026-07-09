@@ -96,6 +96,12 @@ class _M3EIconButtonState extends State<M3EIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;

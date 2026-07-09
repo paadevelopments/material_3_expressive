@@ -197,14 +197,14 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    if (semanticLabel == null) {
-      return bar;
+    if (semanticLabel != null) {
+      bar = Semantics(
+        container: true,
+        label: semanticLabel,
+        child: bar,
+      );
     }
-    return Semantics(
-      container: true,
-      label: semanticLabel,
-      child: bar,
-    );
+    return M3EComponentTheme(child: bar);
   }
 
   static AlignmentDirectional _alignmentFor(M3EToolbarAlignment alignment) {

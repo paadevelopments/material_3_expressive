@@ -745,7 +745,9 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       );
     }
 
-    return result;
+    return M3EComponentTheme(
+      child: result,
+    );
   }
 
   Widget _buildContent(BuildContext context, double spacing) {

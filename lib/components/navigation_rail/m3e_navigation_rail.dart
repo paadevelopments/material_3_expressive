@@ -462,7 +462,9 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final Widget child =
     _needsOverlay ? const SizedBox.shrink() : _buildRailCore(context);
 
-    return CompositedTransformTarget(link: _anchor, child: child);
+    return M3EComponentTheme(
+      child: CompositedTransformTarget(link: _anchor, child: child),
+    );
   }
 
   static int _destinationIndex(List<M3ENavigationRailSection> sections,

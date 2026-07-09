@@ -39,22 +39,24 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    return Container(
-      padding: timeTheme.padding,
-      decoration: BoxDecoration(
-        color: timeTheme.containerColor(scheme),
-        borderRadius: timeTheme.borderRadius,
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.topCenter,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _buildHeader(theme),
-            SizedBox(height: timeTheme.headerDialGap),
-            _buildDial(theme),
-          ],
+    return M3EComponentTheme(
+      child: Container(
+        padding: timeTheme.padding,
+        decoration: BoxDecoration(
+          color: timeTheme.containerColor(scheme),
+          borderRadius: timeTheme.borderRadius,
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _buildHeader(theme),
+              SizedBox(height: timeTheme.headerDialGap),
+              _buildDial(theme),
+            ],
+          ),
         ),
       ),
     );

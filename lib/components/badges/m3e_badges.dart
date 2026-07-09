@@ -55,20 +55,22 @@ class M3EBadge extends StatelessWidget {
             _format(count!, maxCount),
           );
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        child,
-        Positioned(
-          right: effectiveOffset.dx,
-          top: effectiveOffset.dy,
-          child: Semantics(
-            label: semanticLabel ??
-                (count != null ? 'Notifications: $count' : 'Notifications'),
-            child: badge,
+    return M3EComponentTheme(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          child,
+          Positioned(
+            right: effectiveOffset.dx,
+            top: effectiveOffset.dy,
+            child: Semantics(
+              label: semanticLabel ??
+                  (count != null ? 'Notifications: $count' : 'Notifications'),
+              child: badge,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

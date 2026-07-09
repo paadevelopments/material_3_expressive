@@ -38,25 +38,27 @@ class M3ERadio<T> extends StatelessWidget {
     final radioTheme = theme.radioTheme;
     final scheme = theme.colorScheme;
 
-    return M3ETappable(
-      onTap: _enabled ? () => onChanged!(value) : null,
-      enabled: _enabled,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      semanticLabel: semanticLabel,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return SizedBox(
-          width: radioTheme.hitSize,
-          height: radioTheme.hitSize,
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              _buildStateLayer(radioTheme, scheme, state),
-              _buildRing(radioTheme, scheme),
-            ],
-          ),
-        );
-      },
+    return M3EComponentTheme(
+      child: M3ETappable(
+        onTap: _enabled ? () => onChanged!(value) : null,
+        enabled: _enabled,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        semanticLabel: semanticLabel,
+        builder: (BuildContext context, M3EInteractionState state) {
+          return SizedBox(
+            width: radioTheme.hitSize,
+            height: radioTheme.hitSize,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                _buildStateLayer(radioTheme, scheme, state),
+                _buildRing(radioTheme, scheme),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

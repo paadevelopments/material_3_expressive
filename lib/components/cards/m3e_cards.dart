@@ -60,6 +60,12 @@ class M3ECard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     final theme = M3ETheme.of(context);
     final cardTheme = theme.cardTheme;
     final resolvedBorderRadius = borderRadius ?? cardTheme.borderRadius;

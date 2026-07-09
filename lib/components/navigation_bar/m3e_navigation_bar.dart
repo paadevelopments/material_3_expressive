@@ -135,16 +135,24 @@ class M3ENavigationBar extends StatelessWidget {
       ),
     );
 
-    if (!safeArea && semanticLabel == null) return content;
-    final wrapped = SafeArea(
+    Widget result = content;
+    if (safeArea || semanticLabel != null) {
+      result = SafeArea(
         top: false,
         left: false,
         right: false,
         bottom: safeArea,
-        child: content);
-
-    if (semanticLabel == null) return wrapped;
-    return Semantics(container: true, label: semanticLabel!, child: wrapped);
+        child: content,
+      );
+    }
+    if (semanticLabel != null) {
+      result = Semantics(
+        container: true,
+        label: semanticLabel!,
+        child: result,
+      );
+    }
+    return M3EComponentTheme(child: result);
   }
 
   Widget _icon(BuildContext context, bool selected,

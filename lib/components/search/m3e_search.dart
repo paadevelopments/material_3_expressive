@@ -68,42 +68,44 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final searchTheme = theme.searchBarTheme;
-    return GestureDetector(
-      onTap: widget.onTap ?? _focusNode.requestFocus,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: searchTheme.height,
-        padding: EdgeInsets.symmetric(horizontal: searchTheme.horizontalPadding),
-        decoration: BoxDecoration(
-          color: searchTheme.containerColor(scheme),
-          borderRadius: M3EShapes.resolve(searchTheme.cornerRadius),
-          boxShadow: widget.elevated
-              ? M3EElevation.shadows(
-                  searchTheme.elevation,
-                  shadowColor: scheme.shadow,
-                )
-              : null,
-        ),
-        child: Row(
-          children: <Widget>[
-            IconTheme.merge(
-              data: IconThemeData(
-                color: searchTheme.iconColor(scheme),
-                size: searchTheme.iconSize,
-              ),
-              child: widget.leading ?? const Icon(M3EIcons.search),
-            ),
-            SizedBox(width: searchTheme.leadingGap),
-            Expanded(child: _buildInput(theme, scheme, searchTheme)),
-            for (final Widget action in widget.trailing)
+    return M3EComponentTheme(
+      child: GestureDetector(
+        onTap: widget.onTap ?? _focusNode.requestFocus,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: searchTheme.height,
+          padding: EdgeInsets.symmetric(horizontal: searchTheme.horizontalPadding),
+          decoration: BoxDecoration(
+            color: searchTheme.containerColor(scheme),
+            borderRadius: M3EShapes.resolve(searchTheme.cornerRadius),
+            boxShadow: widget.elevated
+                ? M3EElevation.shadows(
+                    searchTheme.elevation,
+                    shadowColor: scheme.shadow,
+                  )
+                : null,
+          ),
+          child: Row(
+            children: <Widget>[
               IconTheme.merge(
                 data: IconThemeData(
                   color: searchTheme.iconColor(scheme),
                   size: searchTheme.iconSize,
                 ),
-                child: action,
+                child: widget.leading ?? const Icon(M3EIcons.search),
               ),
-          ],
+              SizedBox(width: searchTheme.leadingGap),
+              Expanded(child: _buildInput(theme, scheme, searchTheme)),
+              for (final Widget action in widget.trailing)
+                IconTheme.merge(
+                  data: IconThemeData(
+                    color: searchTheme.iconColor(scheme),
+                    size: searchTheme.iconSize,
+                  ),
+                  child: action,
+                ),
+            ],
+          ),
         ),
       ),
     );

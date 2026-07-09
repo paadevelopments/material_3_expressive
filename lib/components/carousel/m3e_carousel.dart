@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
@@ -238,37 +239,39 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (ctx, dimens) {
-        frameWidth = widget.width ?? dimens.maxWidth;
-        frameHeight = widget.height ?? dimens.maxHeight;
-        return setGestureLayer(
-          SizedBox(
-            width: frameWidth,
-            height: frameHeight,
-            child: M3ECarouselWrapper(
-              key: UniqueKey(),
-              controller: controller,
-              freeScroll: widget.freeScroll,
-              itemSnapping: widget.freeScroll,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  widget.childElementBorderRadius,
+    return M3EComponentTheme(
+      child: LayoutBuilder(
+        builder: (ctx, dimens) {
+          frameWidth = widget.width ?? dimens.maxWidth;
+          frameHeight = widget.height ?? dimens.maxHeight;
+          return setGestureLayer(
+            SizedBox(
+              width: frameWidth,
+              height: frameHeight,
+              child: M3ECarouselWrapper(
+                key: UniqueKey(),
+                controller: controller,
+                freeScroll: widget.freeScroll,
+                itemSnapping: widget.freeScroll,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    widget.childElementBorderRadius,
+                  ),
                 ),
+                onTap: widget.onTap,
+                flexWeights: widget.type == M3ECarouselType.uncontained
+                    ? null
+                    : layoutWeight,
+                itemExtent: widget.type == M3ECarouselType.uncontained
+                    ? widget.uncontainedItemExtent
+                    : null,
+                fixedPulseDelta: widget.fixedPulseDelta,
+                children: widget.children,
               ),
-              onTap: widget.onTap,
-              flexWeights: widget.type == M3ECarouselType.uncontained
-                  ? null
-                  : layoutWeight,
-              itemExtent: widget.type == M3ECarouselType.uncontained
-                  ? widget.uncontainedItemExtent
-                  : null,
-              fixedPulseDelta: widget.fixedPulseDelta,
-              children: widget.children,
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

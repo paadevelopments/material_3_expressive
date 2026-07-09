@@ -178,6 +178,11 @@ class M3EThemeData {
   final M3EToolbarTheme toolbarTheme;
   final M3ETooltipTheme tooltipTheme;
 
+  /// Returns a copy with [colorScheme] swapped and all component themes kept.
+  M3EThemeData withColorScheme(M3EColorScheme colorScheme) {
+    return copyWith(colorScheme: colorScheme);
+  }
+
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,

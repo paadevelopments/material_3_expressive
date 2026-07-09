@@ -32,7 +32,8 @@ class M3ESideSheet extends StatelessWidget {
     required Widget body,
     List<Widget> actions = const <Widget>[],
   }) {
-    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
     final sheetTheme = theme.sideSheetTheme;
     return showGeneralDialog<T>(
       context: context,
@@ -41,8 +42,7 @@ class M3ESideSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3ETheme(
-          data: theme,
+        return M3EComponentTheme(
           child: Align(
             alignment: Alignment.centerRight,
             child: M3ESideSheet(title: title, body: body, actions: actions),
@@ -63,6 +63,12 @@ class M3ESideSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildSheet(context),
+    );
+  }
+
+  Widget _buildSheet(BuildContext context) {
     final theme = M3ETheme.of(context);
     final sheetTheme = theme.sideSheetTheme;
     final scheme = theme.colorScheme;

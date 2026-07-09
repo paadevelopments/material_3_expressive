@@ -90,13 +90,15 @@ class _M3ETextFieldState extends State<M3ETextField> {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        _buildContainer(theme),
-        _buildSupporting(theme),
-      ],
+    return M3EComponentTheme(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _buildContainer(theme),
+          _buildSupporting(theme),
+        ],
+      ),
     );
   }
 

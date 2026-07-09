@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+
+import '../../../foundations/foundations.dart';
 import '../styles/m3e_expandable_style.dart';
 import 'm3e_expandable_builders.dart';
 import 'm3e_expandable_data.dart';
@@ -57,13 +59,15 @@ class _M3EExpandableCardListState extends State<M3EExpandableCardList>
     with M3EExpandableStateMixin<M3EExpandableCardList> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      controller: widget.controller,
-      physics: widget.physics,
-      shrinkWrap: widget.shrinkWrap,
-      padding: widget.padding,
-      itemCount: widget.itemCount,
-      itemBuilder: (context, index) => buildItem(context, index),
+    return M3EComponentTheme(
+      child: ListView.builder(
+        controller: widget.controller,
+        physics: widget.physics,
+        shrinkWrap: widget.shrinkWrap,
+        padding: widget.padding,
+        itemCount: widget.itemCount,
+        itemBuilder: (context, index) => buildItem(context, index),
+      ),
     );
   }
 }

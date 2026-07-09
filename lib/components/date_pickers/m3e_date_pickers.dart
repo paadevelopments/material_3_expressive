@@ -46,20 +46,22 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final dateTheme = theme.datePickerTheme;
-    return Container(
-      width: dateTheme.width,
-      padding: dateTheme.padding,
-      decoration: BoxDecoration(
-        color: dateTheme.containerColor(scheme),
-        borderRadius: dateTheme.borderRadius,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _buildHeader(theme),
-          _buildWeekdays(theme),
-          _buildGrid(theme),
-        ],
+    return M3EComponentTheme(
+      child: Container(
+        width: dateTheme.width,
+        padding: dateTheme.padding,
+        decoration: BoxDecoration(
+          color: dateTheme.containerColor(scheme),
+          borderRadius: dateTheme.borderRadius,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildHeader(theme),
+            _buildWeekdays(theme),
+            _buildGrid(theme),
+          ],
+        ),
       ),
     );
   }

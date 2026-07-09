@@ -416,33 +416,35 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     final bool showIndeterminateIndicator =
         _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
 
-    return Stack(
-      children: <Widget>[
-        child,
-        if (_status != null)
-          Positioned(
-            top: _isIndicatorAtTop! ? widget.edgeOffset : null,
-            bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
-            left: 0.0,
-            right: 0.0,
-            child: SizeTransition(
-              axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
-              sizeFactor: _positionFactor,
-              child: Padding(
-                padding: _isIndicatorAtTop!
-                    ? EdgeInsets.only(top: widget.displacement)
-                    : EdgeInsets.only(bottom: widget.displacement),
-                child: Align(
-                  alignment: _isIndicatorAtTop! ? Alignment.topCenter : Alignment.bottomCenter,
-                  child: ScaleTransition(
-                    scale: _scaleFactor,
-                    child: _buildIndicator(context, showIndeterminateIndicator),
+    return M3EComponentTheme(
+      child: Stack(
+        children: <Widget>[
+          child,
+          if (_status != null)
+            Positioned(
+              top: _isIndicatorAtTop! ? widget.edgeOffset : null,
+              bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
+              left: 0.0,
+              right: 0.0,
+              child: SizeTransition(
+                axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
+                sizeFactor: _positionFactor,
+                child: Padding(
+                  padding: _isIndicatorAtTop!
+                      ? EdgeInsets.only(top: widget.displacement)
+                      : EdgeInsets.only(bottom: widget.displacement),
+                  child: Align(
+                    alignment: _isIndicatorAtTop! ? Alignment.topCenter : Alignment.bottomCenter,
+                    child: ScaleTransition(
+                      scale: _scaleFactor,
+                      child: _buildIndicator(context, showIndeterminateIndicator),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

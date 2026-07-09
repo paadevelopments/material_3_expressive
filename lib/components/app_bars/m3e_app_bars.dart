@@ -115,11 +115,13 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (_kind) {
-      _M3EAppBarKind.top => _buildTop(context),
-      _M3EAppBarKind.bottom => _buildBottom(context),
-      _M3EAppBarKind.sliver => _buildSliver(context),
-    };
+    return M3EComponentTheme(
+      child: switch (_kind) {
+        _M3EAppBarKind.top => _buildTop(context),
+        _M3EAppBarKind.bottom => _buildBottom(context),
+        _M3EAppBarKind.sliver => _buildSliver(context),
+      },
+    );
   }
 
   Widget _buildTop(BuildContext context) {

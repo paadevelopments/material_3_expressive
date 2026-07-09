@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   collection: ^1.19.1
+  dynamic_color: ^1.8.1
   flutter:
     sdk: flutter
   material_new_shapes: ^1.0.0

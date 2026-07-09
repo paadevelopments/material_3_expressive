@@ -27,28 +27,30 @@ class M3ENavigationDrawer extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final drawerTheme = theme.navigationDrawerTheme;
     final scheme = theme.colorScheme;
-    return Container(
-      width: drawerTheme.width,
-      color: drawerTheme.containerColor(scheme),
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (headline != null)
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: drawerTheme.headlineHorizontalPadding,
-                  vertical: drawerTheme.headlineVerticalPadding,
+    return M3EComponentTheme(
+      child: Container(
+        width: drawerTheme.width,
+        color: drawerTheme.containerColor(scheme),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (headline != null)
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: drawerTheme.headlineHorizontalPadding,
+                    vertical: drawerTheme.headlineVerticalPadding,
+                  ),
+                  child: Text(
+                    headline!,
+                    style: theme.typeScale.titleSmall
+                        .copyWith(color: scheme.onSurfaceVariant),
+                  ),
                 ),
-                child: Text(
-                  headline!,
-                  style: theme.typeScale.titleSmall
-                      .copyWith(color: scheme.onSurfaceVariant),
-                ),
-              ),
-            for (int i = 0; i < destinations.length; i++)
-              _buildDestination(context, i),
-          ],
+              for (int i = 0; i < destinations.length; i++)
+                _buildDestination(context, i),
+            ],
+          ),
         ),
       ),
     );

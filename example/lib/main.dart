@@ -24,30 +24,48 @@ class ExampleApp extends StatefulWidget {
 class _ExampleAppState extends State<ExampleApp> {
   static const Color _seed = Color(0xFF6750A4);
 
-  bool _dark = false;
+  final M3EThemeController _themeController = M3EThemeController();
   int _index = 0;
+
+  M3EThemeData get _baseTheme => M3EThemeData.light(seedColor: _seed);
+
+  M3EThemeData get _darkTheme =>
+      M3EThemeData.dark(seedColor: _seed).copyWith(
+        typeScale: _baseTheme.typeScale,
+        spacing: _baseTheme.spacing,
+      );
 
   @override
   Widget build(BuildContext context) {
-    final theme = _dark
-        ? M3EThemeData.dark(seedColor: _seed)
-        : M3EThemeData.light(seedColor: _seed);
-    // The expressive foundation is the single source of truth: it both drives
-    // the Material theme (so Material widgets, localizations and overlays are
-    // consistent) and is provided to the tree for the `M3E*` components.
-    return MaterialApp(
-      title: 'Material 3 Expressive',
-      debugShowCheckedModeBanner: false,
-      theme: theme.toThemeData(),
-      home: M3ETheme(
-        data: theme,
-        child: _Gallery(
-          index: _index,
-          dark: _dark,
-          onIndexChanged: (int value) => setState(() => _index = value),
-          onToggleTheme: () => setState(() => _dark = !_dark),
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: _themeController,
+      builder: (BuildContext context, Widget? _) {
+        final ThemeMode themeMode = _themeController.brightnessOverride != null
+            ? _themeController.materialThemeMode
+            : ThemeMode.system;
+
+        return MaterialApp(
+          title: 'Material 3 Expressive',
+          debugShowCheckedModeBanner: false,
+          theme: _baseTheme.toThemeData(),
+          darkTheme: _darkTheme.toThemeData(),
+          themeMode: themeMode,
+          builder: (BuildContext context, Widget? child) {
+            return M3ETheme(
+              data: _baseTheme,
+              autoTheming: true,
+              dynamicColoring: true,
+              controller: _themeController,
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          home: _Gallery(
+            index: _index,
+            themeController: _themeController,
+            onIndexChanged: (int value) => setState(() => _index = value),
+          ),
+        );
+      },
     );
   }
 }
@@ -55,15 +73,13 @@ class _ExampleAppState extends State<ExampleApp> {
 class _Gallery extends StatelessWidget {
   const _Gallery({
     required this.index,
-    required this.dark,
+    required this.themeController,
     required this.onIndexChanged,
-    required this.onToggleTheme,
   });
 
   final int index;
-  final bool dark;
+  final M3EThemeController themeController;
   final ValueChanged<int> onIndexChanged;
-  final VoidCallback onToggleTheme;
 
   static const List<Widget> _pages = <Widget>[
     ActionsPage(),
@@ -96,9 +112,15 @@ class _Gallery extends StatelessWidget {
             titleText: 'Material 3 Expressive',
             actions: <Widget>[
               M3EIconButton(
-                icon: Icon(dark ? M3EIcons.close : M3EIcons.check),
+                icon: Icon(
+                  theme.brightness == Brightness.dark
+                      ? M3EIcons.light_mode
+                      : M3EIcons.dark_mode,
+                ),
                 tooltip: 'Toggle theme',
-                onPressed: onToggleTheme,
+                onPressed: () => themeController.toggleBrightness(
+                  fallback: theme.brightness,
+                ),
               ),
             ],
           ),

@@ -32,7 +32,8 @@ class M3EDialog extends StatelessWidget {
     required Widget dialog,
     bool barrierDismissible = true,
   }) {
-    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
     final dialogTheme = theme.dialogTheme;
     return showGeneralDialog<T>(
       context: context,
@@ -41,8 +42,7 @@ class M3EDialog extends StatelessWidget {
       barrierColor: dialogTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3ETheme(
-          data: theme,
+        return M3EComponentTheme(
           child: Center(
             child: Padding(
               padding: dialogTheme.screenMargin,
@@ -63,14 +63,14 @@ class M3EDialog extends StatelessWidget {
     required Widget body,
     Widget? action,
   }) {
-    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
     return showGeneralDialog<T>(
       context: context,
       barrierLabel: 'Full screen dialog',
       transitionDuration: M3EMotion.long2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3ETheme(
-          data: theme,
+        return M3EComponentTheme(
           child: _FullScreenDialog(title: title, body: body, action: action),
         );
       },
@@ -118,6 +118,12 @@ class M3EDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildDialog(context),
+    );
+  }
+
+  Widget _buildDialog(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
@@ -199,6 +205,12 @@ class _FullScreenDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      child: _buildFullScreen(context),
+    );
+  }
+
+  Widget _buildFullScreen(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
