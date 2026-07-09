@@ -4,6 +4,7 @@ import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../../cards/m3e_cards.dart';
 import '../enums/m3e_list_enums.dart';
+import 'm3e_list_item_scope.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
 M3ECardPosition calculateCardPosition(int index, int total) => total == 1
@@ -103,7 +104,7 @@ class M3ECardListItem extends StatelessWidget {
         semanticLabel: semanticLabel,
         haptic: haptic,
         width: double.infinity,
-        child: child,
+        child: M3EListItemScope(child: child),
       ),
     );
   }

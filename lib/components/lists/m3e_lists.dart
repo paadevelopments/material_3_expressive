@@ -4,6 +4,7 @@ import '../../foundations/foundations.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../cards/m3e_cards.dart';
 import 'components/m3e_card_list_item.dart';
+import 'components/m3e_list_item_scope.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_list_theme.dart';
@@ -24,6 +25,9 @@ export 'styles/m3e_list_theme.dart';
 /// A single row of a list with optional leading and trailing widgets, a
 /// headline and up to three lines of supporting text. Becomes interactive with
 /// state layers when [onTap] is supplied.
+///
+/// Inside card-backed lists, the parent list owns the outer card surface
+/// automatically.
 class M3EListItem extends StatelessWidget {
   const M3EListItem({
     required this.headline,
@@ -46,6 +50,11 @@ class M3EListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final body = _buildBody(context);
+    if (M3EListItemScope.isEmbedded(context)) {
+      return body;
+    }
+
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final listTheme = theme.listTheme.item;
@@ -63,13 +72,21 @@ class M3EListItem extends StatelessWidget {
             : listTheme.verticalPadding,
       ),
       width: double.infinity,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: listTheme.minHeight),
-        child: Row(
-          crossAxisAlignment:
-              threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-          children: _buildChildren(theme),
-        ),
+      child: body,
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    final theme = M3ETheme.of(context);
+    final listTheme = theme.listTheme.item;
+    final bool threeLine = _isThreeLine;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: listTheme.minHeight),
+      child: Row(
+        crossAxisAlignment:
+            threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: _buildChildren(theme),
       ),
     );
   }

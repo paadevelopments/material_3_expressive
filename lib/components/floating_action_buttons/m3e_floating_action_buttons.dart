@@ -70,12 +70,18 @@ class M3EFab extends StatelessWidget {
             color: metrics.foreground,
             shape: border,
             alignment: Alignment.center,
-            child: IconTheme.merge(
-              data: IconThemeData(
-                color: metrics.foreground,
-                size: metrics.iconSize,
+            child: SizedBox(
+              width: metrics.container,
+              height: metrics.container,
+              child: Align(
+                child: IconTheme.merge(
+                  data: IconThemeData(
+                    color: metrics.foreground,
+                    size: metrics.iconSize,
+                  ),
+                  child: icon,
+                ),
               ),
-              child: icon,
             ),
           ),
         );

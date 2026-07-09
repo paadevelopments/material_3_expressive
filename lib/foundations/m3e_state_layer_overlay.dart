@@ -5,8 +5,11 @@ import 'm3e_state_layer.dart';
 
 /// Paints an animated Material state layer clipped to [shape] behind [child].
 ///
-/// Owns the internal [Stack] and sizing rules so callers do not need an outer
-/// stack. When [state.opacity] is zero, [child] is returned directly.
+/// Owns the internal stack layout and sizing rules so callers do not need an
+/// outer stack. When opacity is zero, [child] is returned directly.
+///
+/// Size [child] to the desired overlay bounds at the call site — the stack
+/// sizes to its non-positioned child and the fill overlay paints within that.
 class M3EStateLayerOverlay extends StatelessWidget {
   const M3EStateLayerOverlay({
     required this.state,
@@ -49,39 +52,5 @@ class M3EStateLayerOverlay extends StatelessWidget {
         child: child,
       ),
     );
-
-    // return LayoutBuilder(
-    //   builder: (BuildContext context, BoxConstraints constraints) {
-    //     final laidOutChild = _layoutChild(constraints);
-    //     return Stack(
-    //       alignment: alignment,
-    //       children: <Widget>[
-    //         Positioned.fill(
-    //           child: ,
-    //         ),
-    //         laidOutChild,
-    //       ],
-    //     );
-    //   },
-    // );
-  }
-
-  Widget _layoutChild(BoxConstraints constraints) {
-    final bool tight =
-        constraints.hasBoundedWidth && constraints.hasBoundedHeight;
-    final bool wide =
-        constraints.hasBoundedWidth && !constraints.hasBoundedHeight;
-
-    if (tight) {
-      return SizedBox(
-        width: constraints.maxWidth,
-        height: constraints.maxHeight,
-        child: Align(alignment: alignment, child: child),
-      );
-    }
-    if (wide) {
-      return SizedBox(width: constraints.maxWidth, child: child);
-    }
-    return child;
   }
 }

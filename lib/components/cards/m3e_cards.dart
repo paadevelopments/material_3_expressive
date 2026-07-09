@@ -118,6 +118,11 @@ class M3ECard extends StatelessWidget {
             ? Border.all(color: cardTheme.outlineColor(scheme))
             : null);
 
+    Widget decoratedChild = Padding(
+      padding: padding,
+      child: child,
+    );
+
     Widget surface = AnimatedContainer(
       key: surfaceKey,
       width: width,
@@ -133,17 +138,17 @@ class M3ECard extends StatelessWidget {
           shadowColor: scheme.shadow,
         ),
       ),
-      child: Stack(
-        children: <Widget>[
-          if (_isInteractive)
-            M3EStateLayerOverlay(
+      child: _isInteractive
+          ? M3EStateLayerOverlay(
               state: state,
               color: scheme.onSurface,
               shape: shape,
-            ),
-          Padding(padding: padding, child: child),
-        ],
-      ),
+              child: SizedBox(
+                width: width ?? double.infinity,
+                child: decoratedChild,
+              ),
+            )
+          : decoratedChild,
     );
 
     return surface;

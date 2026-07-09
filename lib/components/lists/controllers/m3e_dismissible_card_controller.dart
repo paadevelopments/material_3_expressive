@@ -6,6 +6,7 @@ import 'package:motor/motor.dart';
 import '../../../foundations/foundations.dart';
 import '../../buttons/res/m3e_button_constants.dart';
 import '../../cards/m3e_cards.dart';
+import '../components/m3e_list_item_scope.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 
@@ -631,7 +632,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                             child: child,
                           ),
                           child: Padding(
-                            padding: s.margin ?? EdgeInsets.zero,
+                            padding: EdgeInsets.zero,
                             child: M3ECard(
                               variant: M3ECardVariant.filled,
                               borderRadius: BorderRadius.circular(cardRadius),
@@ -639,11 +640,12 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                                   M3ETheme.of(context)
                                       .colorScheme
                                       .surfaceContainerHighest,
-                              elevation: s.elevation + 6,
                               border: s.border,
                               padding: s.padding ?? const EdgeInsets.all(16),
                               width: double.infinity,
-                              child: slot.frozenChild!,
+                              child: M3EListItemScope(
+                                child: slot.frozenChild!,
+                              ),
                             ),
                           ),
                         ),
@@ -717,19 +719,23 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                     borderRadius: br,
                     color: s.color ??
                         M3ETheme.of(context).colorScheme.surfaceContainerHighest,
-                    elevation: isDragged ? s.elevation + 6 : s.elevation,
                     border: s.border,
                     animationDuration: _dragSlotRef != null
                         ? Duration.zero
                         : const Duration(milliseconds: 520),
                     animationCurve: _kCardSettleCurve,
                     width: double.infinity,
-                    padding: s.padding ?? const EdgeInsets.all(16),
+                    padding: EdgeInsets.zero,
                     onPressed: isInteractionLocked || onTapCallback == null
                         ? null
                         : () => onTapCallback!(slotPos),
                     haptic: s.hapticOnTap,
-                    child: swipeItemBuilder(context, slotPos),
+                    child: Padding(
+                      padding: s.padding ?? const EdgeInsets.all(16),
+                      child: M3EListItemScope(
+                        child: swipeItemBuilder(context, slotPos),
+                      ),
+                    ),
                   ),
                 ),
               ),
