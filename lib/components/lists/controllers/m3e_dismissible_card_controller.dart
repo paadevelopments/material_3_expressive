@@ -826,14 +826,6 @@ class _AnimatedCardState extends State<_AnimatedCard> {
   BoxDecoration _buildDecoration() => BoxDecoration(
         color: widget.color,
         borderRadius: widget.borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06 + widget.elevation * 0.015),
-            blurRadius: 4 + widget.elevation * 2,
-            spreadRadius: widget.isDragged ? 1 : 0,
-            offset: Offset(0, widget.isDragged ? 4 : 2),
-          ),
-        ],
         border: widget.border != null
             ? Border.all(color: widget.border!.color, width: widget.border!.width)
             : null,
@@ -879,14 +871,6 @@ class _FlyingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06 + elevation * 0.015),
-            blurRadius: 4 + elevation * 2,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
         border: border != null
             ? Border.all(color: border!.color, width: border!.width)
             : null,

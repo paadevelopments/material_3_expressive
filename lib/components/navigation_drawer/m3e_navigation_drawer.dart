@@ -87,43 +87,51 @@ class M3ENavigationDrawer extends StatelessWidget {
                 selected: selected,
               ),
             ),
-            child: Stack(
-              children: <Widget>[
-                M3EStateLayerOverlay(
-                  state: state,
-                  color: scheme.onSurface,
-                  shape: border,
-                ),
-                Row(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stack(
                   children: <Widget>[
-                    IconTheme.merge(
-                      data: IconThemeData(
-                        color: foreground,
-                        size: drawerTheme.iconSize,
-                      ),
-                      child: selected
-                          ? (dest.selectedIcon ?? dest.icon)
-                          : dest.icon,
+                    M3EStateLayerOverlay(
+                      state: state,
+                      color: scheme.onSurface,
+                      shape: border,
                     ),
-                    SizedBox(width: drawerTheme.iconLabelGap),
-                    Expanded(
-                      child: Text(
-                        dest.label,
-                        style: theme.typeScale.labelLarge
-                            .copyWith(color: foreground),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    SizedBox(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      child: Row(
+                        children: <Widget>[
+                          IconTheme.merge(
+                            data: IconThemeData(
+                              color: foreground,
+                              size: drawerTheme.iconSize,
+                            ),
+                            child: selected
+                                ? (dest.selectedIcon ?? dest.icon)
+                                : dest.icon,
+                          ),
+                          SizedBox(width: drawerTheme.iconLabelGap),
+                          Expanded(
+                            child: Text(
+                              dest.label,
+                              style: theme.typeScale.labelLarge
+                                  .copyWith(color: foreground),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (dest.badgeLabel != null)
+                            Text(
+                              dest.badgeLabel!,
+                              style: theme.typeScale.labelLarge
+                                  .copyWith(color: foreground),
+                            ),
+                        ],
                       ),
                     ),
-                    if (dest.badgeLabel != null)
-                      Text(
-                        dest.badgeLabel!,
-                        style: theme.typeScale.labelLarge
-                            .copyWith(color: foreground),
-                      ),
                   ],
-                ),
-              ],
+                );
+              }
             ),
           );
         },
