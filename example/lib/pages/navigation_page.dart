@@ -243,7 +243,7 @@ class _NavigationPageState extends State<NavigationPage> {
               ),
             ),
             SizedBox(
-              height: 320,
+              height: 328,
               child: _framed(
                 theme,
                 M3ENavigationDrawer(

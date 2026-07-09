@@ -75,14 +75,14 @@ class _Gallery extends StatelessWidget {
 
   static const List<M3ENavigationBarDestination> _destinations =
       <M3ENavigationBarDestination>[
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.add), label: 'Actions'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.check), label: 'Selection'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.add), label: 'Do'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.check), label: 'Pick'),
     M3ENavigationBarDestination(
       icon: Icon(M3EIcons.calendar_today),
-      label: 'Containment',
+      label: 'View',
     ),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Navigation'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Feedback'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Nav'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Find'),
   ];
 
   @override
