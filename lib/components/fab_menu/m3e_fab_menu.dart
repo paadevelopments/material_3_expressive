@@ -177,9 +177,6 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     final border = M3EShapes.stadium;
     return Container(
       height: fabMenuTheme.itemHeight,
-      padding: EdgeInsets.symmetric(
-        horizontal: fabMenuTheme.itemHorizontalPadding,
-      ),
       decoration: ShapeDecoration(
         shape: border,
         color: fabMenuTheme.itemContainerColor(scheme),
@@ -188,15 +185,16 @@ class _M3EFabMenuState extends State<M3EFabMenu>
           shadowColor: scheme.shadow,
         ),
       ),
-      child: Stack(
+      child: M3EStateLayerOverlay(
+        state: state,
+        color: fabMenuTheme.itemForegroundColor(scheme),
+        shape: border,
         alignment: Alignment.center,
-        children: <Widget>[
-          M3EStateLayerOverlay(
-            state: state,
-            color: fabMenuTheme.itemForegroundColor(scheme),
-            shape: border,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: fabMenuTheme.itemHorizontalPadding,
           ),
-          Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               IconTheme.merge(
@@ -213,7 +211,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

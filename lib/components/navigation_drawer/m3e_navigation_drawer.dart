@@ -77,9 +77,6 @@ class M3ENavigationDrawer extends StatelessWidget {
         builder: (BuildContext context, M3EInteractionState state) {
           return Container(
             height: drawerTheme.destinationHeight,
-            padding: EdgeInsets.symmetric(
-              horizontal: drawerTheme.destinationInnerHorizontalPadding,
-            ),
             decoration: ShapeDecoration(
               shape: border,
               color: drawerTheme.destinationBackgroundColor(
@@ -87,51 +84,44 @@ class M3ENavigationDrawer extends StatelessWidget {
                 selected: selected,
               ),
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Stack(
+            child: M3EStateLayerOverlay(
+              state: state,
+              color: scheme.onSurface,
+              shape: border,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: drawerTheme.destinationInnerHorizontalPadding,
+                ),
+                child: Row(
                   children: <Widget>[
-                    M3EStateLayerOverlay(
-                      state: state,
-                      color: scheme.onSurface,
-                      shape: border,
+                    IconTheme.merge(
+                      data: IconThemeData(
+                        color: foreground,
+                        size: drawerTheme.iconSize,
+                      ),
+                      child: selected
+                          ? (dest.selectedIcon ?? dest.icon)
+                          : dest.icon,
                     ),
-                    SizedBox(
-                      width: constraints.maxWidth,
-                      height: constraints.maxHeight,
-                      child: Row(
-                        children: <Widget>[
-                          IconTheme.merge(
-                            data: IconThemeData(
-                              color: foreground,
-                              size: drawerTheme.iconSize,
-                            ),
-                            child: selected
-                                ? (dest.selectedIcon ?? dest.icon)
-                                : dest.icon,
-                          ),
-                          SizedBox(width: drawerTheme.iconLabelGap),
-                          Expanded(
-                            child: Text(
-                              dest.label,
-                              style: theme.typeScale.labelLarge
-                                  .copyWith(color: foreground),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (dest.badgeLabel != null)
-                            Text(
-                              dest.badgeLabel!,
-                              style: theme.typeScale.labelLarge
-                                  .copyWith(color: foreground),
-                            ),
-                        ],
+                    SizedBox(width: drawerTheme.iconLabelGap),
+                    Expanded(
+                      child: Text(
+                        dest.label,
+                        style: theme.typeScale.labelLarge
+                            .copyWith(color: foreground),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    if (dest.badgeLabel != null)
+                      Text(
+                        dest.badgeLabel!,
+                        style: theme.typeScale.labelLarge
+                            .copyWith(color: foreground),
+                      ),
                   ],
-                );
-              }
+                ),
+              ),
             ),
           );
         },

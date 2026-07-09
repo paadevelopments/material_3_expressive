@@ -75,12 +75,6 @@ class M3EChip extends StatelessWidget {
 
     return Container(
       height: chipTheme.height,
-      padding: EdgeInsets.only(
-        left: leading == null
-            ? chipTheme.labelStartPadding
-            : chipTheme.iconStartPadding,
-        right: chipTheme.endPadding,
-      ),
       decoration: BoxDecoration(
         color: container,
         borderRadius: borderRadius,
@@ -89,16 +83,20 @@ class M3EChip extends StatelessWidget {
             ? M3EElevation.shadows(M3EElevation.level1, shadowColor: scheme.shadow)
             : null,
       ),
-      child: Stack(
+      child: M3EStateLayerOverlay(
+        state: state,
+        color: foreground,
+        shape: border,
         alignment: Alignment.center,
-        children: <Widget>[
-          M3EStateLayerOverlay(
-            state: state,
-            color: foreground,
-            shape: border,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: leading == null
+                ? chipTheme.labelStartPadding
+                : chipTheme.iconStartPadding,
+            right: chipTheme.endPadding,
           ),
-          _buildContent(theme, chipTheme, foreground),
-        ],
+          child: _buildContent(theme, chipTheme, foreground),
+        ),
       ),
     );
   }

@@ -61,11 +61,6 @@ class M3EExtendedFab extends StatelessWidget {
           duration: M3EMotion.medium2,
           curve: M3EMotion.emphasized,
           height: extendedTheme.height,
-          padding: EdgeInsets.symmetric(
-            horizontal: extended
-                ? extendedTheme.extendedHorizontalPadding
-                : extendedTheme.collapsedHorizontalPadding,
-          ),
           decoration: BoxDecoration(
             color: metrics.background,
             borderRadius: borderRadius,
@@ -74,16 +69,19 @@ class M3EExtendedFab extends StatelessWidget {
               shadowColor: theme.colorScheme.shadow,
             ),
           ),
-          child: Stack(
+          child: M3EStateLayerOverlay(
+            state: state,
+            color: metrics.foreground,
+            shape: border,
             alignment: Alignment.center,
-            children: <Widget>[
-              M3EStateLayerOverlay(
-                state: state,
-                color: metrics.foreground,
-                shape: border,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: extended
+                    ? extendedTheme.extendedHorizontalPadding
+                    : extendedTheme.collapsedHorizontalPadding,
               ),
-              _buildContent(theme, metrics, extendedTheme),
-            ],
+              child: _buildContent(theme, metrics, extendedTheme),
+            ),
           ),
         );
       },
