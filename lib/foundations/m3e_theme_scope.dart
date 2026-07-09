@@ -136,9 +136,11 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       return template;
     }
 
-    return template.withColorScheme(
-      M3EColorScheme.fromColorScheme(dynamicScheme),
-    );
+    final ColorScheme harmonizedDynamic = dynamicScheme.harmonized();
+    final M3EColorScheme m3eScheme =
+        M3EColorScheme.fromColorScheme(harmonizedDynamic).harmonized();
+
+    return template.withColorScheme(m3eScheme);
   }
 
   Widget _buildInheritedScope(

@@ -238,4 +238,65 @@ void main() {
     expect(resolved.brightness, Brightness.dark);
     expect(resolved.colorScheme.primary, const Color(0xFF90D889));
   });
+
+  testWidgets('dynamicColoring harmonizes built-in and expressive semantic colors',
+      (WidgetTester tester) async {
+    DynamicColorTestingUtils.setMockDynamicColors(
+      corePalette: SampleCorePalettes.green,
+    );
+
+    final ColorScheme rawDynamic = SampleColorSchemes.green(Brightness.light);
+    final M3EColorScheme expectedScheme = M3EColorScheme.fromColorScheme(
+      rawDynamic.harmonized(),
+    ).harmonized();
+    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final M3EColorScheme scheme =
+        M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme;
+
+    expect(scheme.primary, expectedScheme.primary);
+    expect(scheme.error, expectedScheme.error);
+    expect(scheme.success, expectedScheme.success);
+    expect(scheme.warning, expectedScheme.warning);
+    expect(scheme.danger, scheme.error);
+
+    final M3EColorScheme baseM3e =
+        M3EColorScheme.fromColorScheme(rawDynamic.harmonized());
+    expect(scheme.success, baseM3e.success.harmonizeWith(scheme.primary));
+    expect(scheme.warning, baseM3e.warning.harmonizeWith(scheme.primary));
+  });
+
+  test('M3EColorScheme.harmonized shifts custom roles toward primary', () {
+    const Color primary = Colors.blue;
+    final M3EColorScheme scheme = M3EColorScheme.fromColorScheme(
+      const ColorScheme.light(primary: primary),
+    );
+
+    final M3EColorScheme harmonized = scheme.harmonized();
+
+    expect(
+      harmonized.success,
+      const Color(0xFF2E7D32).harmonizeWith(primary),
+    );
+    expect(
+      harmonized.warning,
+      const Color(0xFFEF6C00).harmonizeWith(primary),
+    );
+    expect(harmonized.success, isNot(scheme.success));
+  });
 }

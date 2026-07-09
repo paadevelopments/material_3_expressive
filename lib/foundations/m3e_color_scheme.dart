@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart' show ColorScheme;
 import 'package:flutter/widgets.dart';
 
@@ -119,6 +120,17 @@ class M3EColorScheme {
       shadow: scheme.shadow,
       scrim: scheme.scrim,
       surfaceTint: scheme.surfaceTint,
+    );
+  }
+
+  /// Harmonizes expressive custom roles with [primary].
+  ///
+  /// Call after [fromColorScheme] when adapting a dynamic device palette so
+  /// [success] and [warning] feel cohesive with the user's colors.
+  M3EColorScheme harmonized() {
+    return copyWith(
+      success: success.harmonizeWith(primary),
+      warning: warning.harmonizeWith(primary),
     );
   }
 
