@@ -113,11 +113,14 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
         borderRadius: M3EShapes.radiusSmall,
         border: Border.all(color: scheme.outline),
       ),
-      child: Column(
-        children: <Widget>[
-          _buildPeriodOption(theme, _amLabel, !widget.value.isPm),
-          _buildPeriodOption(theme, _pmLabel, widget.value.isPm),
-        ],
+      child: ClipRRect(
+        borderRadius: M3EShapes.radiusSmall,
+        child: Column(
+          children: <Widget>[
+            _buildPeriodOption(theme, _amLabel, !widget.value.isPm),
+            _buildPeriodOption(theme, _pmLabel, widget.value.isPm),
+          ],
+        ),
       ),
     );
   }
