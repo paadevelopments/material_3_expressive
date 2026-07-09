@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../buttons/enums/m3e_button_enums.dart';
+import '../cards/m3e_cards.dart';
 import 'components/m3e_card_list_item.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
 import 'styles/m3e_dismissible_list_style.dart';
@@ -46,53 +47,30 @@ class M3EListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    if (onTap == null) {
-      return _buildRow(theme, const M3EInteractionState());
-    }
-    return M3ETappable(
-      onTap: onTap,
-      semanticButton: false,
-      semanticLabel: headline,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return _buildRow(theme, state);
-      },
-    );
-  }
-
-  Widget _buildRow(M3EThemeData theme, M3EInteractionState state) {
     final scheme = theme.colorScheme;
     final listTheme = theme.listTheme.item;
     final bool threeLine = _isThreeLine;
-    final CrossAxisAlignment alignment =
-        threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center;
 
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: IgnorePointer(
-            child: ColoredBox(
-              color: selected
-                  ? listTheme.selectedColor(scheme)
-                  : scheme.onSurface.withValues(alpha: state.opacity),
-            ),
-          ),
+    return M3ECard(
+      variant: M3ECardVariant.filled,
+      color: selected ? listTheme.selectedColor(scheme) : null,
+      onPressed: onTap,
+      semanticLabel: headline,
+      padding: EdgeInsets.symmetric(
+        horizontal: listTheme.horizontalPadding,
+        vertical: threeLine
+            ? listTheme.threeLineVerticalPadding
+            : listTheme.verticalPadding,
+      ),
+      width: double.infinity,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: listTheme.minHeight),
+        child: Row(
+          crossAxisAlignment:
+              threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          children: _buildChildren(theme),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: listTheme.horizontalPadding,
-            vertical: threeLine
-                ? listTheme.threeLineVerticalPadding
-                : listTheme.verticalPadding,
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: listTheme.minHeight),
-            child: Row(
-              crossAxisAlignment: alignment,
-              children: _buildChildren(theme),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

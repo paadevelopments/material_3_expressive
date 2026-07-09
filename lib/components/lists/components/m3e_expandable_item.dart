@@ -1,9 +1,10 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart' show InkWell, Material, Tooltip;
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../cards/m3e_cards.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../styles/m3e_expandable_style.dart';
 import '../utils/m3e_measure_size.dart';
@@ -76,9 +77,6 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   }
 
   void _handleHoverChanged(bool hovering) => setState(() => _isHovered = hovering);
-  void _handleTapDown() => setState(() => _isPressed = true);
-  void _handleTapUp() => setState(() => _isPressed = false);
-  void _handleTapCancel() => setState(() => _isPressed = false);
 
   @override
   void dispose() {
@@ -160,7 +158,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     VoidCallback? headerTap,
     String? outerTooltip,
   ) {
-    Widget content = AnimatedBuilder(
+    final content = AnimatedBuilder(
       animation: _expandCtrl,
       builder: (context, child) {
         final progress = _expandCtrl.value;
@@ -184,14 +182,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       },
     );
 
-    content = _buildInteractionWrapper(
-      d,
-      onTap: outerTap,
-      tooltip: outerTooltip,
-      child: content,
-    );
-
-    return TweenAnimationBuilder(
+    return TweenAnimationBuilder<BorderRadius?>(
       duration: _isPressed
           ? Duration.zero
           : const Duration(milliseconds: 40),
@@ -201,16 +192,34 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         end: _buildEffectiveRadius(),
       ),
       builder: (context, animatedRadius, child) {
-        return Material(
-          elevation: d.elevation,
+        Widget card = M3ECard(
+          variant: M3ECardVariant.filled,
+          borderRadius: animatedRadius ?? _buildEffectiveRadius(),
           color: d.color ?? cs.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            borderRadius: animatedRadius ?? _buildEffectiveRadius(),
-            side: d.border ?? BorderSide.none,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: child,
+          elevation: d.elevation,
+          border: d.border,
+          padding: EdgeInsets.zero,
+          animationDuration: _isPressed
+              ? Duration.zero
+              : const Duration(milliseconds: 40),
+          width: double.infinity,
+          onPressed: outerTap,
+          onStateChanged: outerTap != null
+              ? (M3EInteractionState state) {
+                  if (state.hovered != _isHovered) {
+                    _handleHoverChanged(state.hovered);
+                  }
+                  if (state.pressed != _isPressed) {
+                    setState(() => _isPressed = state.pressed);
+                  }
+                }
+              : null,
+          child: child!,
         );
+        if (outerTooltip != null) {
+          card = Tooltip(message: outerTooltip, child: card);
+        }
+        return card;
       },
       child: content,
     );
@@ -291,7 +300,6 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         d,
         onTap: onToggle,
         isHeader: true,
-        isIcon: true,
         semanticLabel: isExpanded ? 'Collapse button' : 'Expand button',
         isExpanded: isExpanded,
         tooltip: tooltip,
@@ -409,7 +417,6 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     required Widget child,
     required VoidCallback? onTap,
     bool isHeader = false,
-    bool isIcon = false,
     String? semanticLabel,
     String? semanticHint,
     bool? isExpanded,
@@ -426,42 +433,27 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         child: result,
       );
     }
-    if (!d.useInkWell) {
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: onTap,
-        onTapDown: (_) => _handleTapDown(),
-        onTapUp: (_) => _handleTapUp(),
-        onTapCancel: _handleTapCancel,
-        child: Semantics(
+    return M3ETappable(
+      onTap: onTap,
+      semanticLabel: semanticLabel,
+      onStateChanged: (M3EInteractionState state) {
+        if (isHeader && state.hovered != _isHovered) {
+          _handleHoverChanged(state.hovered);
+        }
+        if (state.pressed != _isPressed) {
+          setState(() => _isPressed = state.pressed);
+        }
+      },
+      builder: (BuildContext context, M3EInteractionState state) {
+        return Semantics(
           label: semanticLabel,
           hint: semanticHint,
           expanded: isExpanded,
           button: true,
           onTap: onTap,
           child: result,
-        ),
-      );
-    }
-    return InkWell(
-      customBorder: isIcon ? const CircleBorder() : null,
-      splashColor: d.splashColor,
-      highlightColor: d.highlightColor,
-      splashFactory: d.splashFactory,
-      enableFeedback: d.enableFeedback,
-      onTap: onTap,
-      onHover: isHeader ? (h) => _handleHoverChanged(h) : null,
-      onTapDown: (_) => _handleTapDown(),
-      onTapUp: (_) => _handleTapUp(),
-      onTapCancel: _handleTapCancel,
-      child: Semantics(
-        label: semanticLabel,
-        hint: semanticHint,
-        expanded: isExpanded,
-        button: true,
-        onTap: onTap,
-        child: result,
-      ),
+        );
+      },
     );
   }
 }

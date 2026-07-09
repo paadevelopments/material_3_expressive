@@ -5,6 +5,7 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/res/m3e_button_constants.dart';
+import '../../cards/m3e_cards.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 
@@ -631,12 +632,17 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                           ),
                           child: Padding(
                             padding: s.margin ?? EdgeInsets.zero,
-                            child: _FlyingCard(
+                            child: M3ECard(
+                              variant: M3ECardVariant.filled,
                               borderRadius: BorderRadius.circular(cardRadius),
-                              color: s.color ?? M3ETheme.of(context).colorScheme.surfaceContainerHighest,
+                              color: s.color ??
+                                  M3ETheme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
                               elevation: s.elevation + 6,
                               border: s.border,
                               padding: s.padding ?? const EdgeInsets.all(16),
+                              width: double.infinity,
                               child: slot.frozenChild!,
                             ),
                           ),
@@ -705,28 +711,25 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                   onHorizontalDragStart: (_) => handleDragStart(slot),
                   onHorizontalDragUpdate: handleDragUpdate,
                   onHorizontalDragEnd: handleDragEnd,
-                  child: _AnimatedCard(
-                    cardKey: _measureKey(slot),
+                  child: M3ECard(
+                    variant: M3ECardVariant.filled,
+                    surfaceKey: _measureKey(slot),
                     borderRadius: br,
-                    color: s.color ?? M3ETheme.of(context).colorScheme.surfaceContainerHighest,
+                    color: s.color ??
+                        M3ETheme.of(context).colorScheme.surfaceContainerHighest,
                     elevation: isDragged ? s.elevation + 6 : s.elevation,
                     border: s.border,
-                    isDragged: isDragged,
-                    hasActiveDrag: _dragSlotRef != null,
-                    child: InkWell(
-                      splashColor: s.splashColor,
-                      highlightColor: s.highlightColor,
-                      splashFactory: s.splashFactory,
-                      enableFeedback: s.enableFeedback,
-                      onTap: isInteractionLocked || onTapCallback == null ? null : () {
-                        onTapCallback!(slotPos);
-                        M3EButtonConstants.triggerHapticFeedback(s.hapticOnTap);
-                      },
-                      child: Padding(
-                        padding: s.padding ?? const EdgeInsets.all(16.0),
-                        child: swipeItemBuilder(context, slotPos),
-                      ),
-                    ),
+                    animationDuration: _dragSlotRef != null
+                        ? Duration.zero
+                        : const Duration(milliseconds: 520),
+                    animationCurve: _kCardSettleCurve,
+                    width: double.infinity,
+                    padding: s.padding ?? const EdgeInsets.all(16),
+                    onPressed: isInteractionLocked || onTapCallback == null
+                        ? null
+                        : () => onTapCallback!(slotPos),
+                    haptic: s.hapticOnTap,
+                    child: swipeItemBuilder(context, slotPos),
                   ),
                 ),
               ),
@@ -774,114 +777,5 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
       );
     }
     return wrapChild(bg);
-  }
-}
-
-class _AnimatedCard extends StatefulWidget {
-  final GlobalKey cardKey;
-  final BorderRadius borderRadius;
-  final Color color;
-  final double elevation;
-  final BorderSide? border;
-  final bool isDragged;
-  final bool hasActiveDrag;
-  final Widget child;
-
-  const _AnimatedCard({
-    required this.cardKey,
-    required this.borderRadius,
-    required this.color,
-    required this.elevation,
-    required this.isDragged,
-    required this.hasActiveDrag,
-    this.border,
-    required this.child,
-  });
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard> {
-  late BoxDecoration _decoration;
-
-  @override
-  void initState() {
-    super.initState();
-    _decoration = _buildDecoration();
-  }
-
-  @override
-  void didUpdateWidget(_AnimatedCard old) {
-    super.didUpdateWidget(old);
-    if (old.color != widget.color ||
-        old.borderRadius != widget.borderRadius ||
-        old.elevation != widget.elevation ||
-        old.isDragged != widget.isDragged ||
-        old.border != widget.border) {
-      _decoration = _buildDecoration();
-    }
-  }
-
-  BoxDecoration _buildDecoration() => BoxDecoration(
-        color: widget.color,
-        borderRadius: widget.borderRadius,
-        border: widget.border != null
-            ? Border.all(color: widget.border!.color, width: widget.border!.width)
-            : null,
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      width: double.infinity,
-      duration: widget.hasActiveDrag ? Duration.zero : const Duration(milliseconds: 520),
-      curve: _kCardSettleCurve,
-      decoration: _decoration,
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        key: widget.cardKey,
-        color: Colors.transparent,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-class _FlyingCard extends StatelessWidget {
-  final BorderRadius borderRadius;
-  final Color color;
-  final double elevation;
-  final BorderSide? border;
-  final EdgeInsetsGeometry padding;
-  final Widget child;
-
-  const _FlyingCard({
-    required this.borderRadius,
-    required this.color,
-    required this.elevation,
-    this.border,
-    required this.padding,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: borderRadius,
-        border: border != null
-            ? Border.all(color: border!.color, width: border!.width)
-            : null,
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(padding: padding, child: child),
-        ),
-      ),
-    );
   }
 }

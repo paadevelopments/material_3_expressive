@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
-import '../../buttons/res/m3e_button_constants.dart';
+import '../../cards/m3e_cards.dart';
 import '../enums/m3e_list_enums.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
@@ -86,45 +86,24 @@ class M3ECardListItem extends StatelessWidget {
     final bool isLast =
         position == M3ECardPosition.last || position == M3ECardPosition.single;
 
-    final VoidCallback? wrappedOnTap = onTap != null
-        ? () {
-            onTap!(index);
-            M3EButtonConstants.triggerHapticFeedback(haptic);
-          }
-        : null;
-
+    final VoidCallback? wrappedOnTap = onTap != null ? () => onTap!(index) : null;
     final VoidCallback? wrappedOnLongPress =
         onLongPress != null ? () => onLongPress!(index) : null;
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
-      child: M3ETappable(
-        onTap: wrappedOnTap,
+      child: M3ECard(
+        variant: M3ECardVariant.filled,
+        borderRadius: borderRadius,
+        color: color ?? cardListTheme.backgroundColor(scheme),
+        padding: padding ?? cardListTheme.itemPadding,
+        onPressed: wrappedOnTap,
         onLongPress: wrappedOnLongPress,
         mouseCursor: mouseCursor,
         semanticLabel: semanticLabel,
-        builder: (context, state) {
-          return Container(
-            decoration: BoxDecoration(
-              color: color ?? cardListTheme.backgroundColor(scheme),
-              borderRadius: borderRadius,
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                M3EStateLayerOverlay(
-                  state: state,
-                  color: scheme.onSurface,
-                  shape: RoundedRectangleBorder(borderRadius: borderRadius),
-                ),
-                Padding(
-                  padding: padding ?? cardListTheme.itemPadding,
-                  child: child,
-                ),
-              ],
-            ),
-          );
-        },
+        haptic: haptic,
+        width: double.infinity,
+        child: child,
       ),
     );
   }

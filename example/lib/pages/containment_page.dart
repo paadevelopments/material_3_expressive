@@ -124,7 +124,7 @@ class ContainmentPage extends StatelessWidget {
           trailing: const Icon(M3EIcons.chevron_right),
           onTap: () {},
         ),
-        const M3EDivider(),
+        const SizedBox(height: 8),
         M3EListItem(
           headline: 'Calendar sync',
           supportingText: 'Syncs every 15 minutes',
