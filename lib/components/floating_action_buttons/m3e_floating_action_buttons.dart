@@ -49,6 +49,7 @@ class M3EFab extends StatelessWidget {
       autofocus: autofocus,
       semanticLabel: tooltip,
       pressedScale: fabTheme.pressedScale,
+      materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         final double elevation =
             state.hovered ? M3EElevation.level4 : M3EElevation.level3;

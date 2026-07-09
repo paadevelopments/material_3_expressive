@@ -74,6 +74,7 @@ class M3ENavigationDrawer extends StatelessWidget {
       child: M3ETappable(
         onTap: () => onDestinationSelected(index),
         semanticLabel: dest.label,
+        materialInk: true,
         builder: (BuildContext context, M3EInteractionState state) {
           return Container(
             height: drawerTheme.destinationHeight,

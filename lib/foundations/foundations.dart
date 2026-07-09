@@ -9,6 +9,7 @@ export 'm3e_spacing.dart';
 export 'm3e_state_layer.dart';
 export 'm3e_state_layer_overlay.dart';
 export 'm3e_tappable.dart';
+export 'm3e_tappable_ink_scope.dart';
 export 'm3e_theme.dart';
 export 'm3e_theme_data.dart';
 export 'm3e_theme_extension.dart';

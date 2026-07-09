@@ -1,15 +1,14 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'm3e_motion.dart';
 import 'm3e_state_layer.dart';
+import 'm3e_tappable_ink_scope.dart';
 
-/// Paints an animated Material state layer clipped to [shape] behind [child].
+/// Paints a Material ink splash clipped to [shape] behind [child].
 ///
-/// Owns the internal stack layout and sizing rules so callers do not need an
-/// outer stack. When opacity is zero, [child] is returned directly.
-///
-/// Size [child] to the desired overlay bounds at the call site — the stack
-/// sizes to its non-positioned child and the fill overlay paints within that.
+/// When wrapped in [M3ETappableInkScope], uses [InkWell] for the Material
+/// ripple and state overlays. Size [child] to the desired bounds at the call
+/// site so ink covers the surface.
 class M3EStateLayerOverlay extends StatelessWidget {
   const M3EStateLayerOverlay({
     required this.state,
@@ -20,7 +19,8 @@ class M3EStateLayerOverlay extends StatelessWidget {
     super.key,
   });
 
-  /// The active interaction state driving the overlay opacity.
+  /// The active interaction state driving fallback overlays when no ink scope
+  /// is present.
   final M3EInteractionState state;
 
   /// The role color painted as the overlay.
@@ -37,6 +37,28 @@ class M3EStateLayerOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final M3ETappableInkScope? ink = M3ETappableInkScope.maybeOf(context);
+    if (ink != null && ink.isInteractive) {
+      return Material(
+        type: MaterialType.transparency,
+        color: Colors.transparent,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: ink.onTap,
+          onLongPress: ink.onLongPress,
+          mouseCursor: ink.mouseCursor ?? MouseCursor.defer,
+          onTapDown: ink.onTapDown,
+          onTapUp: ink.onTapUp,
+          onTapCancel: ink.onTapCancel,
+          onHover: ink.onHover,
+          customBorder: shape,
+          overlayColor: WidgetStateProperty.resolveWith(_resolveOverlayColor),
+          child: child,
+        ),
+      );
+    }
+
     if (state.opacity == 0) {
       return child;
     }
@@ -45,6 +67,7 @@ class M3EStateLayerOverlay extends StatelessWidget {
       child: AnimatedContainer(
         duration: M3EMotion.short3,
         curve: M3EMotion.standard,
+        alignment: alignment,
         decoration: ShapeDecoration(
           shape: shape,
           color: color.withValues(alpha: state.opacity),
@@ -52,5 +75,18 @@ class M3EStateLayerOverlay extends StatelessWidget {
         child: child,
       ),
     );
+  }
+
+  Color? _resolveOverlayColor(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) {
+      return color.withValues(alpha: M3EStateOpacity.pressed);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return color.withValues(alpha: M3EStateOpacity.hover);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return color.withValues(alpha: M3EStateOpacity.focus);
+    }
+    return null;
   }
 }

@@ -159,6 +159,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
             _close();
           },
           semanticLabel: item.label,
+          materialInk: true,
           builder: (BuildContext context, M3EInteractionState state) {
             return _itemSurface(theme, item, scheme, state);
           },

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import 'm3e_motion.dart';
 import 'm3e_state_layer.dart';
+import 'm3e_tappable_ink_scope.dart';
 
 /// Builds the visual for a tappable surface given its interaction [state].
 typedef M3EStateWidgetBuilder = Widget Function(
@@ -30,6 +31,7 @@ class M3ETappable extends StatefulWidget {
     this.pressedScale = 1,
     this.spring = M3EMotion.expressiveSpatialFast,
     this.onStateChanged,
+    this.materialInk = false,
     super.key,
   });
 
@@ -52,6 +54,9 @@ class M3ETappable extends StatefulWidget {
 
   /// Notified whenever the resolved interaction state changes.
   final ValueChanged<M3EInteractionState>? onStateChanged;
+
+  /// When true, gestures are handled by the overlay ink well.
+  final bool materialInk;
 
   bool get _isInteractive =>
       enabled && (onTap != null || onLongPress != null);
@@ -120,7 +125,27 @@ class _M3ETappableState extends State<M3ETappable>
   @override
   Widget build(BuildContext context) {
     final bool interactive = widget._isInteractive;
-    final Widget content = _wrapScale(widget.builder(context, _state));
+    Widget content = widget.builder(context, _state);
+    if (widget.materialInk) {
+      content = M3ETappableInkScope(
+        onTap: interactive ? widget.onTap : null,
+        onLongPress: interactive ? widget.onLongPress : null,
+        mouseCursor: _resolveCursor(interactive),
+        onTapDown: interactive && widget.pressedScale != 1
+            ? (_) => _handlePointerDown()
+            : null,
+        onTapUp: interactive && widget.pressedScale != 1
+            ? (_) => _handlePointerUp()
+            : null,
+        onTapCancel:
+            interactive && widget.pressedScale != 1 ? _handlePointerUp : null,
+        onHover: interactive
+            ? (bool hovered) => _update(_state.copyWith(hovered: hovered))
+            : null,
+        child: content,
+      );
+    }
+    content = _wrapScale(content);
     final Widget pointer = _wrapPointer(content, interactive);
     return _wrapSemantics(_wrapFocus(pointer, interactive));
   }
@@ -139,6 +164,10 @@ class _M3ETappableState extends State<M3ETappable>
   }
 
   Widget _wrapPointer(Widget child, bool interactive) {
+    if (widget.materialInk) {
+      return child;
+    }
+
     Widget wrapped = MouseRegion(
       cursor: _resolveCursor(interactive),
       onEnter: (_) => _update(_state.copyWith(hovered: true)),

@@ -45,6 +45,7 @@ class M3EChip extends StatelessWidget {
       onTap: onPressed,
       enabled: onPressed != null,
       semanticLabel: label,
+      materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         return _buildSurface(theme, chipTheme, borderRadius, border, state);
       },

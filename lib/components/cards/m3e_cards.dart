@@ -90,6 +90,7 @@ class M3ECard extends StatelessWidget {
       mouseCursor: mouseCursor,
       semanticLabel: semanticLabel,
       onStateChanged: onStateChanged,
+      materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         return _buildSurface(
           theme,
