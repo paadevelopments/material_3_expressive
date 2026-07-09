@@ -299,4 +299,52 @@ void main() {
     );
     expect(harmonized.success, isNot(scheme.success));
   });
+
+  testWidgets('dynamicColoring refreshes when app resumes after OS color change',
+      (WidgetTester tester) async {
+    DynamicColorTestingUtils.setMockDynamicColors(
+      corePalette: SampleCorePalettes.green,
+    );
+
+    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    const Color greenPrimary = Color(0xFF286C2A);
+    final Color orangePrimary =
+        SampleColorSchemes.orange(Brightness.light).primary;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme.primary,
+      greenPrimary,
+    );
+
+    DynamicColorTestingUtils.setMockDynamicColors(
+      corePalette: SampleCorePalettes.orange,
+    );
+
+    final TestWidgetsFlutterBinding binding =
+        tester.binding as TestWidgetsFlutterBinding;
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(
+      M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme.primary,
+      orangePrimary,
+    );
+    expect(orangePrimary, isNot(greenPrimary));
+  });
 }

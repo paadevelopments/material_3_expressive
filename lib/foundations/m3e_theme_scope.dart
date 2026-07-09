@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Brightness, ColorScheme;
 import 'package:flutter/widgets.dart';
 
 import 'm3e_color_scheme.dart';
+import 'm3e_dynamic_color_host.dart';
 import 'm3e_resolved_theme.dart';
 import 'm3e_theme_controller.dart';
 import 'm3e_theme_data.dart';
@@ -173,7 +174,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
   @override
   Widget build(BuildContext context) {
     if (dynamicColoring) {
-      return DynamicColorBuilder(
+      return M3EDynamicColorHost(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
           return ListenableBuilder(
             listenable: widget.controller,
