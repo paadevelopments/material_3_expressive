@@ -1373,7 +1373,6 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                         index: index,
                         total: filtered.length,
                         style: widget.itemStyle,
-                        splashFactory: widget.splashFactory,
                         onTap: () => _onItemTap(item),
                       );
                     },

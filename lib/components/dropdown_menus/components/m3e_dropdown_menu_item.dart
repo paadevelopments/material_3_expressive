@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../cards/m3e_cards.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_item_style.dart';
 
@@ -14,7 +15,6 @@ class M3EDropdownMenuItemWidget<T> extends StatefulWidget {
   final int index;
   final int total;
   final M3EDropdownItemStyle style;
-  final InteractiveInkFeatureFactory? splashFactory;
   final VoidCallback onTap;
 
   const M3EDropdownMenuItemWidget({
@@ -23,7 +23,6 @@ class M3EDropdownMenuItemWidget<T> extends StatefulWidget {
     required this.index,
     required this.total,
     required this.style,
-    required this.splashFactory,
     required this.onTap,
   });
 
@@ -126,25 +125,22 @@ class _M3EDropdownMenuItemWidgetState<T>
       textColor = id.textColor ?? menuTheme.itemForegroundColor(scheme);
     }
 
-    final content = Padding(
-      padding: id.itemPadding,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              item.label,
-              style:
-                  (item.selected ? id.selectedTextStyle : id.textStyle) ??
-                  menuTheme.itemTextStyle(m3eTheme.typeScale, scheme).copyWith(
-                    color: textColor,
-                  ),
-            ),
+    final content = Row(
+      children: [
+        Expanded(
+          child: Text(
+            item.label,
+            style:
+                (item.selected ? id.selectedTextStyle : id.textStyle) ??
+                menuTheme.itemTextStyle(m3eTheme.typeScale, scheme).copyWith(
+                  color: textColor,
+                ),
           ),
-          if (item.selected)
-            id.selectedIcon ??
-                Icon(Icons.check_rounded, color: textColor, size: 20),
-        ],
-      ),
+        ),
+        if (item.selected)
+          id.selectedIcon ??
+              Icon(Icons.check_rounded, color: textColor, size: 20),
+      ],
     );
 
     final selectionChanged = _lastSelected != widget.item.selected;
@@ -162,32 +158,24 @@ class _M3EDropdownMenuItemWidgetState<T>
         end: _buildEffectiveRadius(),
       ),
       builder: (context, animatedRadius, child) {
-        final radius = animatedRadius ?? _buildEffectiveRadius();
-        return Material(
+        return M3ECard(
+          variant: M3ECardVariant.filled,
+          borderRadius: animatedRadius ?? _buildEffectiveRadius(),
           color: bgColor,
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: radius),
-          child: InkWell(
-            splashFactory: id.splashFactory ?? widget.splashFactory,
-            splashColor: id.splashColor,
-            highlightColor: id.highlightColor,
-            overlayColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.pressed)) {
-                return textColor.withValues(alpha: 0.10);
-              }
-              if (states.contains(WidgetState.hovered)) {
-                return textColor.withValues(alpha: 0.05);
-              }
-              return Colors.transparent;
-            }),
-            mouseCursor: id.mouseCursor,
-            onTap: item.disabled ? null : widget.onTap,
-            onHover: (hover) => setState(() => _isHovered = hover),
-            onTapDown: (_) => setState(() => _isPressed = true),
-            onTapUp: (_) => setState(() => _isPressed = false),
-            onTapCancel: () => setState(() => _isPressed = false),
-            child: child,
-          ),
+          elevation: 0,
+          padding: id.itemPadding,
+          width: double.infinity,
+          onPressed: item.disabled ? null : widget.onTap,
+          mouseCursor: id.mouseCursor,
+          onStateChanged: (state) {
+            if (_isHovered != state.hovered || _isPressed != state.pressed) {
+              setState(() {
+                _isHovered = state.hovered;
+                _isPressed = state.pressed;
+              });
+            }
+          },
+          child: child!,
         );
       },
       child: content,
