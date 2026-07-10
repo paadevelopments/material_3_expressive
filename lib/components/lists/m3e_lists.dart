@@ -188,7 +188,7 @@ class M3ECardList extends StatelessWidget {
 
   /// The background color for each card.
   ///
-  /// Defaults to [M3EListCardListTheme.defaults.backgroundColor] if null.
+  /// Defaults to `M3EListCardListTheme.defaults.backgroundColor` if null.
   final Color? color;
 
   /// The inner padding applied to the [itemBuilder] child of each item.

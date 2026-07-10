@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EBottomSheet].
+/// Theme values for `M3EBottomSheet`.
 @immutable
 class M3EBottomSheetTheme extends M3EThemeExtension<M3EBottomSheetTheme> {
   const M3EBottomSheetTheme({

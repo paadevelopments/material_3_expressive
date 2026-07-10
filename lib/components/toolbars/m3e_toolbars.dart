@@ -127,7 +127,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     final bool hasTitleContent =
         resolvedTitle != null || resolvedSubtitle != null;
 
-    final M3EToolbarActionsRow actionsRow = M3EToolbarActionsRow(
+    final actionsRow = M3EToolbarActionsRow(
       actions: actions,
       maxInline: maxInlineActions,
       overflowIcon: overflowIcon,
@@ -140,9 +140,8 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     final Widget toolbarRow = Row(
       mainAxisSize:
           hasTitleContent ? MainAxisSize.max : MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (leading != null) leading!,
+        ?leading,
         if (leading != null) SizedBox(width: metrics.gap),
         if (hasTitleContent) ...<Widget>[
           Expanded(

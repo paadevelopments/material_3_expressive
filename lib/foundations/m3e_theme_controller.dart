@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart' show Brightness, ChangeNotifier, ThemeMode;
+import 'package:material_3_expressive/foundations/foundations.dart' show M3ETheme;
+import 'package:material_3_expressive/foundations/m3e_theme.dart' show M3ETheme;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3ETheme;
 
-/// Manual brightness control for an adaptive [M3ETheme] root.
+/// Manual brightness control for an adaptive `M3ETheme` root.
 ///
-/// When [autoTheming] is enabled, [toggleBrightness] inverts relative to the
+/// When `autoTheming` is enabled, `toggleBrightness` inverts relative to the
 /// platform brightness instead of locking an absolute override. When
-/// [autoTheming] is off, [brightnessOverride] takes precedence until
-/// [followSystem] is called.
+/// `autoTheming` is off, `brightnessOverride` takes precedence until
+/// `followSystem` is called.
 class M3EThemeController extends ChangeNotifier {
   Brightness? _brightnessOverride;
   bool _invertPlatformBrightness = false;
@@ -13,13 +16,13 @@ class M3EThemeController extends ChangeNotifier {
   /// Active manual brightness, or null when following system/initial rules.
   Brightness? get brightnessOverride => _brightnessOverride;
 
-  /// Whether platform brightness is inverted when [autoTheming] is enabled.
+  /// Whether platform brightness is inverted when `autoTheming` is enabled.
   bool get invertPlatformBrightness => _invertPlatformBrightness;
 
   /// Material [ThemeMode] derived from the manual override, if any.
   ///
-  /// When [autoTheming] is enabled, derive [ThemeMode] from the effective
-  /// brightness returned by [resolveBrightness] instead.
+  /// When `autoTheming` is enabled, derive `ThemeMode` from the effective
+  /// brightness returned by `resolveBrightness` instead.
   ThemeMode get materialThemeMode {
     if (_brightnessOverride == null) {
       return ThemeMode.system;
@@ -29,7 +32,7 @@ class M3EThemeController extends ChangeNotifier {
         : ThemeMode.light;
   }
 
-  /// Resolves effective brightness for an adaptive [M3ETheme] root.
+  /// Resolves effective brightness for an adaptive `M3ETheme` root.
   Brightness resolveBrightness(
     Brightness platformBrightness, {
     required bool autoTheming,
@@ -81,7 +84,7 @@ class M3EThemeController extends ChangeNotifier {
 
   /// Toggles between light and dark.
   ///
-  /// When [autoTheming] is true, inverts relative to [platformBrightness]
+  /// When `autoTheming` is true, inverts relative to `platformBrightness`
   /// without stopping automatic platform detection.
   void toggleBrightness({
     Brightness fallback = Brightness.light,
@@ -99,7 +102,7 @@ class M3EThemeController extends ChangeNotifier {
     );
   }
 
-  /// Clears manual overrides so [autoTheming] / [initialTheme] apply again.
+  /// Clears manual overrides so `autoTheming` / `initialTheme` apply again.
   void followSystem() {
     if (_brightnessOverride == null && !_invertPlatformBrightness) {
       return;

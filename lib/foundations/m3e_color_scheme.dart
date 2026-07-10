@@ -125,7 +125,7 @@ class M3EColorScheme {
 
   /// Harmonizes expressive custom roles with [primary].
   ///
-  /// Call after [fromColorScheme] when adapting a dynamic device palette so
+  /// Call after `fromColorScheme` when adapting a dynamic device palette so
   /// [success] and [warning] feel cohesive with the user's colors.
   M3EColorScheme harmonized() {
     return copyWith(

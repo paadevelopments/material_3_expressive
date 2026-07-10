@@ -20,7 +20,7 @@ class M3EButtonGroupMetrics {
   final double dividerThickness;
 }
 
-/// Theme values for [M3EButtonGroup].
+/// Theme values for `M3EButtonGroup`.
 @immutable
 class M3EToggleButtonGroupTheme
     extends M3EThemeExtension<M3EToggleButtonGroupTheme> {
@@ -111,10 +111,10 @@ class M3EToggleButtonGroupTheme
         ? connectedPressedInnerRadius
         : connectedInnerRadius;
 
-    final double tl = isFirst ? outerRad : innerRad;
-    final double tr = isLast ? outerRad : innerRad;
-    final double bl = isFirst ? outerRad : innerRad;
-    final double br = isLast ? outerRad : innerRad;
+    final tl = isFirst ? outerRad : innerRad;
+    final tr = isLast ? outerRad : innerRad;
+    final bl = isFirst ? outerRad : innerRad;
+    final br = isLast ? outerRad : innerRad;
 
     final result = BorderRadius.only(
       topLeft: Radius.circular(tl),
@@ -164,8 +164,10 @@ class M3EToggleButtonGroupTheme
   }) {
     final ratio = expandedRatio ?? this.expandedRatio;
     final n = naturalWidths.length;
-    final deltas = List<double>.filled(n, 0.0);
-    if (pressedIndex == null || n < 2) return deltas;
+    final deltas = List<double>.filled(n, 0);
+    if (pressedIndex == null || n < 2) {
+      return deltas;
+    }
 
     final i = pressedIndex;
     final growth = ratio * naturalWidths[i];
@@ -187,7 +189,7 @@ class M3EToggleButtonGroupTheme
   }
 
   double overflowTriggerExtent(M3EButtonSize size) =>
-      clampDouble(containerHeightFor(size), 40.0, 56.0);
+      clampDouble(containerHeightFor(size), 40, 56);
 
   double containerHeightFor(M3EButtonSize size) => switch (size.name) {
     'xs' => 32.0,

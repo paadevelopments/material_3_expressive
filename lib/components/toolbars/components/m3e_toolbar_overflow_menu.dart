@@ -51,7 +51,6 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
         icon: icon,
         size: iconButtonSize,
         tooltip: 'More options',
-        variant: M3EIconButtonVariant.standard,
       ),
     );
   }

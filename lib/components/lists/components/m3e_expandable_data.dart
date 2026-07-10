@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart' show CircleAvatar;
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/lists/components/m3e_expandable_card_list.dart' show M3EExpandableCardList;
+import 'package:material_3_expressive/components/lists/m3e_lists.dart' show M3EExpandableCardList;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EExpandableCardList;
 
 /// A data container used to configure items for [M3EExpandableCardList].
 class M3EExpandableData {

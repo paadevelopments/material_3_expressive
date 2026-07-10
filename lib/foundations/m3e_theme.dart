@@ -37,8 +37,8 @@ class M3ETheme extends StatefulWidget {
 
   bool get usesAdaptiveScope =>
       initialTheme != null ||
-      autoTheming == true ||
-      dynamicColoring == true ||
+      (autoTheming ?? false) ||
+      (dynamicColoring ?? false) ||
       controller != null;
 
   /// Returns the nearest expressive theme, or derives one from Material.

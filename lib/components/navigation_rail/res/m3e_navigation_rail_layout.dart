@@ -13,8 +13,8 @@ abstract final class M3ENavigationRailLayout {
       EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12);
 
   /// Horizontal inset for rail content.
-  static const double horizontalInset = 16.0;
+  static const double horizontalInset = 16;
 
   /// Vertical gap inserted above the first section.
-  static const double topGap = 36.0;
+  static const double topGap = 36;
 }

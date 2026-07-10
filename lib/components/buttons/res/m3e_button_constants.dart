@@ -2,10 +2,11 @@ import 'package:flutter/services.dart';
 
 import '../enums/m3e_button_enums.dart';
 
-/// Shared numeric constants used throughout the button package.
-abstract final class M3EButtonConstants {
+enum M3EButtonConstants {
+  _;
+
   /// Minimum distance between any popup / dropdown and the screen edge (dp).
-  static const double kScreenEdgePadding = 12.0;
+  static const double kScreenEdgePadding = 12;
 
   /// Spring progress threshold at which a pending press-release is committed.
   static const double kPressReleaseThreshold = 0.75;
@@ -14,16 +15,16 @@ abstract final class M3EButtonConstants {
   static const Duration kReleaseTimeout = Duration(seconds: 1);
 
   /// Default natural-width fallback for icon-only buttons.
-  static const double kIconOnlyNaturalSizeFallback = 40.0;
+  static const double kIconOnlyNaturalSizeFallback = 40;
 
   /// Sentinel `index` for the overflow trigger button.
   static const int kOverflowTriggerScopeIndex = 999;
 
   /// Gap between the component edge and the focus ring outline (dp).
-  static const double kFocusRingGap = 2.0;
+  static const double kFocusRingGap = 2;
 
   /// Stroke width of the focus ring outline (dp).
-  static const double kFocusRingWidth = 2.0;
+  static const double kFocusRingWidth = 2;
 
   /// Alpha value for disabled foreground color (text/icons).
   static const double kDisabledForegroundAlpha = 0.38;
@@ -38,10 +39,10 @@ abstract final class M3EButtonConstants {
   static const double kPressedRadiusRatio = 0.6;
 
   /// Minimum pressed corner radius in dp.
-  static const double kMinPressedRadius = 6.0;
+  static const double kMinPressedRadius = 6;
 
   /// Maximum pressed corner radius in dp.
-  static const double kMaxPressedRadius = 18.0;
+  static const double kMaxPressedRadius = 18;
 
   /// Minimum delta threshold for triggering animation progress update.
   static const double kAnimationDeltaThreshold = 0.5;

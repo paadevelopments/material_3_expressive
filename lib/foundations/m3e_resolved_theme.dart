@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart' show InheritedTheme, Theme;
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/foundations/foundations.dart' show M3ETheme;
+import 'package:material_3_expressive/foundations/m3e_theme.dart' show M3ETheme;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3ETheme;
 
 import 'm3e_theme_data.dart';
 
@@ -41,7 +44,7 @@ class M3EResolvedTheme extends StatelessWidget {
 
 /// Inherited theme handle used by [M3ETheme.of].
 class M3EInheritedTheme extends InheritedTheme {
-  const M3EInheritedTheme({required this.data, required super.child});
+  const M3EInheritedTheme({super.key, required this.data, required super.child});
 
   final M3EThemeData data;
 

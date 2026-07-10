@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_button_enums.dart';
 import '../models/m3e_button_measurements.dart';
 import '../res/m3e_button_constants.dart';
 
-/// Theme values for [M3EButton].
+/// Theme values for `M3EButton`.
 @immutable
 class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   const M3EButtonTheme({
@@ -128,7 +126,9 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     final hovered = states.contains(WidgetState.hovered);
     final pressed = states.contains(WidgetState.pressed);
     final disabled = states.contains(WidgetState.disabled);
-    if (disabled) return 0;
+    if (disabled) {
+      return 0;
+    }
     switch (style) {
       case M3EButtonStyle.elevated:
         return pressed ? 0 : hovered ? 3 : 1;
@@ -167,7 +167,9 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
 
   M3EButtonMeasurements _tokenMeasurements(M3EButtonSize size) {
     for (final variant in _measurementsTable.keys) {
-      if (variant.name == size.name) return _measurementsTable[variant]!;
+      if (variant.name == size.name) {
+        return _measurementsTable[variant]!;
+      }
     }
     return _measurementsTable[M3EButtonSize.md]!;
   }

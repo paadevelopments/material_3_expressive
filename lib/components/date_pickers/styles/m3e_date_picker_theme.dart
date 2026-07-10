@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EDatePicker].
+/// Theme values for `M3EDatePicker`.
 @immutable
 class M3EDatePickerTheme extends M3EThemeExtension<M3EDatePickerTheme> {
   const M3EDatePickerTheme({

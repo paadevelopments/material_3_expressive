@@ -94,8 +94,9 @@ class _M3ETappableState extends State<M3ETappable>
     if (widget.pressedScale == 1) {
       return;
     }
-    _scaleController.stop();
-    _scaleController.value = target;
+    _scaleController
+      ..stop()
+      ..value = target;
   }
 
   void _animateScale(double target) {

@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart' show WidgetState, WidgetStateProperty;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ECarousel].
+/// Theme values for `M3ECarousel`.
 @immutable
 class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
   static const double defaultUncontainedItemExtent = 270;

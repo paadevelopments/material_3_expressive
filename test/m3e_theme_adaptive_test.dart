@@ -13,7 +13,7 @@ M3EColorScheme resolvedM3eSchemeFromAccent(
   Color accent, {
   Brightness brightness = Brightness.light,
 }) {
-  final ColorScheme fromSeed = ColorScheme.fromSeed(
+  final fromSeed = ColorScheme.fromSeed(
     seedColor: accent,
     brightness: brightness,
   );
@@ -25,7 +25,7 @@ void main() {
 
   testWidgets('static M3ETheme defaults to light when adaptive fields are null',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -49,7 +49,7 @@ void main() {
 
   testWidgets('autoTheming resolves platform brightness without app setState',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -77,7 +77,7 @@ void main() {
   testWidgets(
       'autoTheming updates when platform brightness changes without setState',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithBrightness(Brightness brightness) {
       return tester.pumpWidget(
@@ -118,7 +118,7 @@ void main() {
   testWidgets(
       'autoTheming updates card painted color when platform brightness changes without setState',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithBrightness(Brightness brightness) {
       return tester.pumpWidget(
@@ -174,7 +174,7 @@ void main() {
   testWidgets(
       'autoTheming updates icon button painted color when platform brightness changes without setState',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithBrightness(Brightness brightness) {
       return tester.pumpWidget(
@@ -221,7 +221,7 @@ void main() {
   testWidgets(
       'autoTheming updates navigation bar painted color when platform brightness changes without setState',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     const destinations = <M3ENavigationBarDestination>[
       M3ENavigationBarDestination(icon: Icon(Icons.home), label: 'Home'),
       M3ENavigationBarDestination(icon: Icon(Icons.search), label: 'Search'),
@@ -273,8 +273,8 @@ void main() {
 
   testWidgets('M3EThemeController toggles wrapped component brightness',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -307,8 +307,8 @@ void main() {
 
   testWidgets('M3EThemeController updates card background color after toggle',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -353,7 +353,7 @@ void main() {
       (WidgetTester tester) async {
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
 
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final M3EColorScheme expected = resolvedM3eSchemeFromAccent(_accentGreen);
 
     await tester.pumpWidget(
@@ -380,7 +380,7 @@ void main() {
       (WidgetTester tester) async {
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
 
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final M3EColorScheme expected = resolvedM3eSchemeFromAccent(
       _accentGreen,
       brightness: Brightness.dark,
@@ -415,9 +415,9 @@ void main() {
       (WidgetTester tester) async {
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
 
-    final ColorScheme rawDynamic = ColorScheme.fromSeed(seedColor: _accentGreen);
+    final rawDynamic = ColorScheme.fromSeed(seedColor: _accentGreen);
     final M3EColorScheme expectedScheme = resolvedM3eSchemeFromAccent(_accentGreen);
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -443,7 +443,7 @@ void main() {
     expect(scheme.warning, expectedScheme.warning);
     expect(scheme.danger, scheme.error);
 
-    final M3EColorScheme baseM3e =
+    final baseM3e =
         M3EColorScheme.fromColorScheme(rawDynamic.harmonized());
     expect(scheme.success, baseM3e.success.harmonizeWith(scheme.primary));
     expect(scheme.warning, baseM3e.warning.harmonizeWith(scheme.primary));
@@ -451,7 +451,7 @@ void main() {
 
   test('M3EColorScheme.harmonized shifts custom roles toward primary', () {
     const Color primary = Colors.blue;
-    final M3EColorScheme scheme = M3EColorScheme.fromColorScheme(
+    final scheme = M3EColorScheme.fromColorScheme(
       const ColorScheme.light(primary: primary),
     );
 
@@ -472,7 +472,7 @@ void main() {
       (WidgetTester tester) async {
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
 
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final Color greenPrimary =
         resolvedM3eSchemeFromAccent(_accentGreen).primary;
     final Color orangePrimary =
@@ -500,10 +500,9 @@ void main() {
 
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentOrange);
 
-    final TestWidgetsFlutterBinding binding =
-        tester.binding as TestWidgetsFlutterBinding;
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    tester.binding
+      ..handleAppLifecycleStateChanged(AppLifecycleState.paused)
+      ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
     expect(
@@ -515,15 +514,15 @@ void main() {
 
   testWidgets('autoTheming toggle inverts platform brightness',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithController() {
       return tester.pumpWidget(
         MaterialApp(
           theme: base.toThemeData(),
           home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.light),
+            data: const MediaQueryData(),
             child: M3ETheme(
               data: base,
               autoTheming: true,
@@ -569,8 +568,8 @@ void main() {
   testWidgets(
       'autoTheming toggle keeps tracking platform brightness when OS changes',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithBrightness(Brightness brightness) {
       return tester.pumpWidget(
@@ -614,8 +613,8 @@ void main() {
 
   testWidgets('toggle without autoTheming locks absolute brightness',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -635,7 +634,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    controller.toggleBrightness(fallback: Brightness.light);
+    controller.toggleBrightness();
     await tester.pumpAndSettle();
 
     expect(
@@ -648,7 +647,7 @@ void main() {
       MaterialApp(
         theme: base.toThemeData(),
         home: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
+          data: const MediaQueryData(),
           child: M3ETheme(
             data: base,
             controller: controller,

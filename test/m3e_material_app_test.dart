@@ -6,7 +6,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('deriveDarkTemplate preserves non-color tokens', () {
-    final M3EThemeData light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final M3EThemeData dark = light.deriveDarkTemplate();
 
     expect(dark.brightness, Brightness.dark);
@@ -19,7 +19,7 @@ void main() {
 
   testWidgets('M3EMaterialApp aligns themeMode with autoTheming platform brightness',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     Future<void> pumpWithBrightness(Brightness brightness) {
       return tester.pumpWidget(
@@ -60,7 +60,7 @@ void main() {
 
   testWidgets('M3EMaterialApp toggle via controllerOf updates brightness',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       M3EMaterialApp(
@@ -102,8 +102,8 @@ void main() {
 
   testWidgets('M3ETheme.controllerOf returns controller from M3EMaterialApp',
       (WidgetTester tester) async {
-    final M3EThemeController controller = M3EThemeController();
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final controller = M3EThemeController();
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
 
     await tester.pumpWidget(
       M3EMaterialApp(
@@ -126,15 +126,14 @@ void main() {
 
   testWidgets('M3EMaterialApp forwards MaterialApp constructor fields',
       (WidgetTester tester) async {
-    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
-    const Locale locale = Locale('en', 'US');
-    const List<Locale> supportedLocales = <Locale>[Locale('en', 'US')];
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    const locale = Locale('en', 'US');
+    const supportedLocales = <Locale>[Locale('en', 'US')];
 
     await tester.pumpWidget(
       M3EMaterialApp(
         data: base,
         locale: locale,
-        supportedLocales: supportedLocales,
         showPerformanceOverlay: true,
         home: const M3EButton(
           onPressed: null,

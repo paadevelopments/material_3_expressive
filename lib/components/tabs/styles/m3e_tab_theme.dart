@@ -1,10 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_tabs_variant.dart';
 
-/// Theme values for [M3ETabs].
+/// Theme values for `M3ETabs`.
 @immutable
 class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
   const M3ETabTheme({

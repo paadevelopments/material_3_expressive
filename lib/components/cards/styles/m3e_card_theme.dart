@@ -1,10 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_card_variant.dart';
 
-/// Theme values for [M3ECard].
+/// Theme values for `M3ECard`.
 @immutable
 class M3ECardTheme extends M3EThemeExtension<M3ECardTheme> {
   const M3ECardTheme({

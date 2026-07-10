@@ -1,10 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_loading_indicator_variant.dart';
 
-/// Theme values for [M3ELoadingIndicator].
+/// Theme values for `M3ELoadingIndicator`.
 @immutable
 class M3ELoadingIndicatorTheme
     extends M3EThemeExtension<M3ELoadingIndicatorTheme> {

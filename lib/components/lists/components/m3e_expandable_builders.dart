@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' show Text, TextAlign;
 import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../styles/m3e_expandable_style.dart';
@@ -100,7 +99,7 @@ Widget buildM3ESimpleBody(
               ClipRect(
                 child: Align(
                   alignment: alignment,
-                  heightFactor: 1.0,
+                  heightFactor: 1,
                   child: Text(
                     data.subtitle!,
                     style: expandedSubtitleStyle,
@@ -129,8 +128,12 @@ Widget buildM3ESimpleBody(
     );
   }
 
-  if (children.isEmpty) return const SizedBox.shrink();
-  if (children.length == 1) return children.first;
+  if (children.isEmpty) {
+    return const SizedBox.shrink();
+  }
+  if (children.length == 1) {
+    return children.first;
+  }
 
   return Column(
     mainAxisSize: MainAxisSize.min,

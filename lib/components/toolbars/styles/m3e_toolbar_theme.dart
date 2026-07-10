@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' show RoundedRectangleBorder, ShapeBorder;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
@@ -29,7 +28,7 @@ class M3EToolbarMetrics {
   final double elevationProminent;
 }
 
-/// Theme values for [M3EToolbar].
+/// Theme values for `M3EToolbar`.
 @immutable
 class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
   const M3EToolbarTheme({

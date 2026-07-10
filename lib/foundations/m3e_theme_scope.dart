@@ -59,8 +59,8 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
   M3EThemeData get baseData => widget.baseData;
   M3EThemeController get controller => widget.controller;
   Brightness? get initialTheme => widget.initialTheme;
-  bool get autoTheming => widget.autoTheming == true;
-  bool get dynamicColoring => widget.dynamicColoring == true;
+  bool get autoTheming => widget.autoTheming ?? false;
+  bool get dynamicColoring => widget.dynamicColoring ?? false;
 
   M3EThemeData get lightTemplate => widget.baseData;
   M3EThemeData get darkTemplate => widget.baseData.deriveDarkTemplate();
@@ -86,7 +86,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       return template;
     }
 
-    final ColorScheme? dynamicScheme =
+    final dynamicScheme =
         brightness == Brightness.dark ? darkDynamic : lightDynamic;
     if (dynamicScheme == null) {
       return template;

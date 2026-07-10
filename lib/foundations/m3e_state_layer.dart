@@ -1,4 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/foundations/foundations.dart' show M3EInkSplashTheme;
+import 'package:material_3_expressive/foundations/m3e_ink_splash_theme.dart' show M3EInkSplashTheme;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EInkSplashTheme;
 
 /// Material 3 state layer opacity tokens.
 ///

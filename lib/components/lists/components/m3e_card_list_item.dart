@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/lists/m3e_lists.dart' show M3ECardList;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3ECardList;
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';

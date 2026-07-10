@@ -1,11 +1,14 @@
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
+import 'package:material_3_expressive/foundations/foundations.dart';
+
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
 import 'styles/m3e_carousel_theme.dart';
+
 export 'enums/m3e_carousel_type.dart';
 export 'styles/m3e_carousel_theme.dart';
 
@@ -130,18 +133,18 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   void scrollFrame(int direction) {
     double prevScrollPosition = controller.position.pixels,
-        nextScrollPosition = 0.0;
+        nextScrollPosition = 0;
     if (widget.type == M3ECarouselType.hero) {
       double shouldAddOrSubtract =
-          (((layoutWeight.reduce(
+          ((layoutWeight.reduce(
                     widget.heroAlignment == M3ECarouselHeroAlignment.left
                         ? max
                         : min,
                   ) *
                   10) /
               100) *
-          frameWidth);
-      int limit = 0;
+          frameWidth;
+      var limit = 0;
       switch (widget.heroAlignment) {
         case M3ECarouselHeroAlignment.center:
           limit = direction == 0 ? 0 : 3;
@@ -151,19 +154,25 @@ class _M3ECarouselState extends State<M3ECarousel> {
           limit = direction == 0 ? 0 : 2;
       }
       if (direction == 0) {
-        if (itemScrolled <= limit) return;
+        if (itemScrolled <= limit) {
+          return;
+        }
         nextScrollPosition = prevScrollPosition - shouldAddOrSubtract;
         itemScrolled -= 1;
       } else {
-        if (itemScrolled >= (widget.children.length - limit)) return;
+        if (itemScrolled >= (widget.children.length - limit)) {
+          return;
+        }
         nextScrollPosition = prevScrollPosition + shouldAddOrSubtract;
         itemScrolled += 1;
       }
     } else if (widget.type == M3ECarouselType.contained) {
       double shouldAddOrSubtract =
-          (((layoutWeight.reduce(max) * 10) / 100) * frameWidth);
+          ((layoutWeight.reduce(max) * 10) / 100) * frameWidth;
       if (direction == 0) {
-        if (itemScrolled <= 0) return;
+        if (itemScrolled <= 0) {
+          return;
+        }
         nextScrollPosition = prevScrollPosition - shouldAddOrSubtract;
         itemScrolled -= 1;
       } else {
@@ -176,11 +185,15 @@ class _M3ECarouselState extends State<M3ECarousel> {
       }
     } else {
       if (direction == 0) {
-        if (itemScrolled <= 0) return;
+        if (itemScrolled <= 0) {
+          return;
+        }
         nextScrollPosition = prevScrollPosition - widget.uncontainedItemExtent;
         itemScrolled -= 1;
       } else {
-        if (itemScrolled >= (widget.children.length - 1)) return;
+        if (itemScrolled >= (widget.children.length - 1)) {
+          return;
+        }
         nextScrollPosition = prevScrollPosition + widget.uncontainedItemExtent;
         itemScrolled += 1;
       }

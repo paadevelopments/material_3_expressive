@@ -21,7 +21,7 @@ class M3EBadge extends StatelessWidget {
     this.backgroundColor,
     this.foregroundColor,
     this.semanticLabel,
-  }) : assert(count == null || count >= 0);
+  }) : assert(count == null || count >= 0, 'count must be non-negative');
 
   final Widget child;
   final int? count;

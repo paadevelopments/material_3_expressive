@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ESnackbar].
+/// Theme values for `M3ESnackbar`.
 @immutable
 class M3ESnackbarTheme extends M3EThemeExtension<M3ESnackbarTheme> {
   const M3ESnackbarTheme({

@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ERadio].
+/// Theme values for `M3ERadio`.
 @immutable
 class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
   const M3ERadioTheme({

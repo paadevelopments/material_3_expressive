@@ -11,7 +11,7 @@ class M3EDismissibleSlot {
   DismissDirection? dismissedDirection;
   SingleMotionController? collapseCtrl;
   SingleMotionController? flyCtrl;
-  final ValueNotifier<double> flyNotifier = ValueNotifier(0.0);
+  final ValueNotifier<double> flyNotifier = ValueNotifier(0);
   bool _flyDisposed = false;
   Widget? frozenChild;
   final Object identity = Object();

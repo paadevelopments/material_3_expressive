@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_progress_enums.dart';
 
 /// Measured layout values for a linear progress indicator lane.
@@ -29,7 +27,7 @@ class M3ELinearProgressLayout {
   final double wavePeriod;
 }
 
-/// Theme values for [M3ELinearProgress].
+/// Theme values for `M3ELinearProgress`.
 @immutable
 class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
   const M3ELinearProgressTheme();
@@ -88,7 +86,7 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
   M3ELinearProgressTheme lerp(M3ELinearProgressTheme? other, double t) => this;
 }
 
-/// Theme values for [M3ECircularProgress].
+/// Theme values for `M3ECircularProgress`.
 @immutable
 class M3ECircularProgressTheme
     extends M3EThemeExtension<M3ECircularProgressTheme> {

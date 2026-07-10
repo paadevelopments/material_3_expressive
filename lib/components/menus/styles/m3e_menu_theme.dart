@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EMenu].
+/// Theme values for `M3EMenu`.
 @immutable
 class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   const M3EMenuTheme({

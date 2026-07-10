@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
+
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_motion.dart';
-import '../styles/m3e_expandable_style.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../../buttons/res/m3e_button_constants.dart';
+import '../styles/m3e_expandable_style.dart';
 import 'm3e_expandable_item.dart';
 
 abstract class M3EExpandableListBase extends StatefulWidget {
@@ -15,7 +15,7 @@ abstract class M3EExpandableListBase extends StatefulWidget {
   final M3EExpandableStyle? style;
   final M3ESpring? expandMotion;
   final M3ESpring? collapseMotion;
-  final void Function(int index, bool isExpanded)? onExpansionChanged;
+  final void Function(int index, {required bool isExpanded})? onExpansionChanged;
 
   const M3EExpandableListBase({
     super.key,
@@ -45,19 +45,21 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
     int index, {
     required bool allowMultipleExpanded,
     required M3EHapticFeedback haptic,
-    void Function(int index, bool isExpanding)? onExpansionChanged,
+    void Function(int index, {required bool isExpanded})? onExpansionChanged,
   }) {
     M3EButtonConstants.triggerHapticFeedback(haptic);
     final isExpanding = !_expandedIndices.contains(index);
     setState(() {
       if (isExpanding) {
-        if (!allowMultipleExpanded) _expandedIndices.clear();
+        if (!allowMultipleExpanded) {
+          _expandedIndices.clear();
+        }
         _expandedIndices.add(index);
       } else {
         _expandedIndices.remove(index);
       }
     });
-    onExpansionChanged?.call(index, isExpanding);
+    onExpansionChanged?.call(index, isExpanded: isExpanding);
   }
 
   bool isExpanded(int index) => _expandedIndices.contains(index);

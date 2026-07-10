@@ -55,7 +55,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     super.initState();
     final spring = widget.isExpanded ? widget.expandMotion : widget.collapseMotion;
     _expandCtrl = SingleMotionController(
-      motion: MaterialSpringMotion.expressiveEffectsFast().copyWith(
+      motion: const MaterialSpringMotion.expressiveEffectsFast().copyWith(
         stiffness: spring.stiffness,
         damping: spring.damping,
       ),
@@ -68,7 +68,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isExpanded != widget.isExpanded) {
       final spring = widget.isExpanded ? widget.expandMotion : widget.collapseMotion;
-      _expandCtrl.motion = MaterialSpringMotion.expressiveEffectsFast().copyWith(
+      _expandCtrl.motion = const MaterialSpringMotion.expressiveEffectsFast().copyWith(
         stiffness: spring.stiffness,
         damping: spring.damping,
       );
@@ -93,7 +93,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     if (widget.isExpanded && d.expandedRadius != null) {
       return BorderRadius.circular(d.expandedRadius!);
     }
-    if (isSingle) return BorderRadius.circular(d.outerRadius);
+    if (isSingle) {
+      return BorderRadius.circular(d.outerRadius);
+    }
 
     final effectiveInnerRadius = _isPressed
         ? d.pressedRadius
@@ -283,7 +285,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     }
     final bool isExpanded = progress >= 0.5;
     final Widget? icon = isExpanded ? d.collapseIcon : d.expandIcon;
-    if (icon == null) return const SizedBox.shrink();
+    if (icon == null) {
+      return const SizedBox.shrink();
+    }
 
     final double angle = d.iconRotationAngle * progress;
     final String? tooltip = d.tapIconToToggle
@@ -319,7 +323,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     final effectivePadding = d.bodyPadding ??
         M3ETheme.of(context).listTheme.expandable.bodyPadding;
     final resolvedPadding = effectivePadding.resolve(Directionality.of(context));
-    final contentShift = math.min(12.0, resolvedPadding.bottom * 0.6 + 4.0);
+    final contentShift = math.min(12, resolvedPadding.bottom * 0.6 + 4.0);
     final needsMeasurement = _collapsedHeight == null || _expandedHeight == null;
 
     final clampedProgress = progress.clamp(0.0, 1.0);
@@ -344,7 +348,6 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
             right: 0,
             top: 0,
             child: Offstage(
-              offstage: true,
               child: Padding(
                 padding: effectivePadding,
                 child: Column(
@@ -355,13 +358,13 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
                       M3EMeasureSize(
                         onChange: (size) =>
                             setState(() => _collapsedHeight = size.height),
-                        child: widget.bodyBuilder(context, widget.index, 0.0),
+                        child: widget.bodyBuilder(context, widget.index, 0),
                       ),
                     if (_expandedHeight == null)
                       M3EMeasureSize(
                         onChange: (size) =>
                             setState(() => _expandedHeight = size.height),
-                        child: widget.bodyBuilder(context, widget.index, 1.0),
+                        child: widget.bodyBuilder(context, widget.index, 1),
                       ),
                   ],
                 ),
@@ -422,7 +425,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     bool? isExpanded,
     String? tooltip,
   }) {
-    Widget result = child;
+    var result = child;
     if (tooltip != null) {
       result = Tooltip(message: tooltip, child: result);
     }

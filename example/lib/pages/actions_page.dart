@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
-import 'package:material_3_expressive/components/segmented_buttons/models/m3e_segment.dart';
 import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
 import 'package:material_3_expressive/components/toggle_button_group/models/m3e_button_group_action.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';

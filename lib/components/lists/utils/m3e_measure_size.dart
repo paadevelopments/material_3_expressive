@@ -30,7 +30,7 @@ class _M3EMeasureSizeState extends State<M3EMeasureSize> {
 
   void _notifySize() {
     if (mounted) {
-      final RenderBox? box = context.findRenderObject() as RenderBox?;
+      final box = context.findRenderObject() as RenderBox?;
       if (box != null && box.hasSize) {
         widget.onChange(box.size);
       }

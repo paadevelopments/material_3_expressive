@@ -5,7 +5,7 @@ import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_expandable_enums.dart';
 import 'm3e_list_theme.dart';
 
-/// Visual style configuration for [M3EExpandableList].
+/// Visual style configuration for `M3EExpandableList`.
 @immutable
 class M3EExpandableStyle {
   // ── Shape ──

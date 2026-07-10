@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ESlider].
+/// Theme values for `M3ESlider`.
 @immutable
 class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
   const M3ESliderTheme({

@@ -34,7 +34,6 @@ void main() {
         Align(
           alignment: Alignment.bottomCenter,
           child: M3ENavigationBar(
-            selectedIndex: 0,
             onDestinationSelected: (i) => selected = i,
             destinations: const <M3ENavigationBarDestination>[
               M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
@@ -84,7 +83,7 @@ void main() {
   });
 
   testWidgets('M3ESlider reports value changes', (tester) async {
-    double value = 0.5;
+    var value = 0.5;
     await tester.pumpWidget(
       _host(
         StatefulBuilder(
@@ -125,7 +124,6 @@ void main() {
         home: const Align(
           alignment: Alignment.bottomCenter,
           child: M3ENavigationBar(
-            selectedIndex: 0,
             destinations: <M3ENavigationBarDestination>[
               M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
               M3ENavigationBarDestination(

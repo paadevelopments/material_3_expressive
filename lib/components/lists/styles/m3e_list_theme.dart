@@ -3,9 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EListItem].
+/// Theme values for `M3EListItem`.
 @immutable
 class M3EListItemTheme {
   const M3EListItemTheme({
@@ -59,7 +58,7 @@ class M3EListItemTheme {
   }
 }
 
-/// Theme values for [M3ECardList].
+/// Theme values for `M3ECardList`.
 @immutable
 class M3EListCardListTheme {
   static const double defaultOuterRadius = 24;

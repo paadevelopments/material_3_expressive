@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/floating_action_buttons/m3e_floating_action_buttons.dart' show M3EFab;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EFab;
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_fab.dart';
 
 /// Resolved size and color metrics for a floating action button.
@@ -50,7 +51,7 @@ class M3EExtendedFabTheme {
       type.labelLarge.copyWith(color: foreground);
 }
 
-/// Theme values for [M3EFab] and [M3EExtendedFab].
+/// Theme values for `M3EFab` and `M3EExtendedFab`.
 @immutable
 class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
   const M3EFabTheme({

@@ -7,8 +7,8 @@ import 'm3e_theme.dart';
 /// Owns platform-brightness observation, [M3EThemeController] lifecycle, and
 /// keeps Material [ThemeMode] aligned with the resolved M3E brightness.
 ///
-/// [themeMode] and the core [MaterialApp.builder] are managed internally.
-/// Use [appBuilder] to wrap the themed subtree when extra integration layers
+/// `themeMode` and the core `MaterialApp.builder` are managed internally.
+/// Use `appBuilder` to wrap the themed subtree when extra integration layers
 /// are needed.
 class M3EMaterialApp extends StatefulWidget {
   const M3EMaterialApp({
@@ -74,18 +74,18 @@ class M3EMaterialApp extends StatefulWidget {
       onNavigationNotification;
   final List<NavigatorObserver> navigatorObservers;
 
-  /// Optional wrapper applied after [M3ETheme] in the internal [MaterialApp.builder].
+  /// Optional wrapper applied after `M3ETheme` in the internal `MaterialApp.builder`.
   final TransitionBuilder? appBuilder;
 
   final String title;
   final GenerateAppTitle? onGenerateTitle;
   final Color? color;
 
-  /// Optional Material light theme override. Defaults to [data.toThemeData].
+  /// Optional Material light theme override. Defaults to `data.toThemeData`.
   final ThemeData? theme;
 
   /// Optional Material dark theme override. Defaults to
-  /// [data.deriveDarkTemplate().toThemeData].
+  /// `data.deriveDarkTemplate().toThemeData`.
   final ThemeData? darkTheme;
 
   final ThemeData? highContrastTheme;
@@ -110,8 +110,8 @@ class M3EMaterialApp extends StatefulWidget {
   final AnimationStyle? themeAnimationStyle;
 
   bool get _usesAdaptiveLifecycle =>
-      autoTheming == true ||
-      dynamicColoring == true ||
+      (autoTheming ?? false) ||
+      (dynamicColoring ?? false) ||
       controller != null;
 
   @override
@@ -173,7 +173,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
             WidgetsBinding.instance.platformDispatcher.platformBrightness;
     final ThemeMode themeMode = _effectiveController.effectiveThemeMode(
       platformBrightness: platformBrightness,
-      autoTheming: widget.autoTheming == true,
+      autoTheming: widget.autoTheming ?? false,
       initialTheme: widget.initialTheme,
     );
 

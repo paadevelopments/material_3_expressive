@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ESideSheet].
+/// Theme values for `M3ESideSheet`.
 @immutable
 class M3ESideSheetTheme extends M3EThemeExtension<M3ESideSheetTheme> {
   const M3ESideSheetTheme({

@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_icon_button_enums.dart';
 
-/// Theme values for [M3EIconButton].
+/// Theme values for `M3EIconButton`.
 @immutable
 class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
   const M3EIconButtonTheme({

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_app_bar_semantics.dart';
@@ -131,7 +130,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final fg = foregroundColor ?? theme.colorScheme.onSurface;
     final shape = appBarTheme.shape(shapeFamily);
     final height = toolbarHeight ?? metrics.smallHeight;
-    final tStyle = appBarTheme.titleStyle(theme.typeScale, collapsed: true);
+    final tStyle = appBarTheme.titleStyle(theme.typeScale);
 
     final resolvedLeading = leading ??
         (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
@@ -157,9 +156,8 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: DefaultTextStyle(
                 style: tStyle.copyWith(color: fg),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (resolvedLeading != null) resolvedLeading,
+                    ?resolvedLeading,
                     if (resolvedLeading != null) const SizedBox(width: 8),
                     if (resolvedTitle != null)
                       Expanded(
@@ -185,7 +183,9 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    if (semanticLabel == null) return bar;
+    if (semanticLabel == null) {
+      return bar;
+    }
     return Semantics(
       container: true,
       label: semanticLabel,
@@ -232,7 +232,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final shape = appBarTheme.shape(shapeFamily);
 
     final collapsedStyle =
-        appBarTheme.titleStyle(theme.typeScale, collapsed: true);
+        appBarTheme.titleStyle(theme.typeScale);
     final expandedStyle =
         appBarTheme.titleStyle(theme.typeScale, collapsed: false);
 
@@ -265,7 +265,9 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: _buildFlexibleSpace(context, expandedStyle),
     );
 
-    if (semanticLabel == null) return bar;
+    if (semanticLabel == null) {
+      return bar;
+    }
     return M3ESliverSemantic(
       label: semanticLabel!,
       child: bar,
@@ -276,14 +278,18 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final out = <Widget>[];
     for (var i = 0; i < items.length; i++) {
       out.add(items[i]);
-      if (i < items.length - 1) out.add(const SizedBox(width: 4));
+      if (i < items.length - 1) {
+        out.add(const SizedBox(width: 4));
+      }
     }
     return out;
   }
 
   Widget? _maybeBackButton(BuildContext context, Color fg) {
     final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
-    if (!canPop) return null;
+    if (!canPop) {
+      return null;
+    }
     return IconButton(
       icon: const BackButtonIcon(),
       color: fg,
@@ -300,7 +306,9 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       case M3EAppBarVariant.large:
         final t = title ??
             (titleText != null ? Text(titleText!, style: expandedStyle) : null);
-        if (t == null) return null;
+        if (t == null) {
+          return null;
+        }
         return FlexibleSpaceBar(
           titlePadding:
               const EdgeInsetsDirectional.only(start: 16, bottom: 16, end: 16),
@@ -311,7 +319,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: t,
           ),
           collapseMode: CollapseMode.pin,
-          expandedTitleScale: 1.0,
+          expandedTitleScale: 1,
         );
     }
   }

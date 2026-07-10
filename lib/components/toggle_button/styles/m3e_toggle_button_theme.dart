@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EToggleButton].
+/// Theme values for `M3EToggleButton`.
 @immutable
 class M3EToggleButtonTheme extends M3EThemeExtension<M3EToggleButtonTheme> {
   const M3EToggleButtonTheme({

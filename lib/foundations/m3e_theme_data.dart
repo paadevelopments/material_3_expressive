@@ -186,7 +186,7 @@ class M3EThemeData {
   /// Builds a dark template from this light-oriented [M3EThemeData].
   ///
   /// Preserves non-color tokens (type scale, spacing, component themes) while
-  /// swapping in a dark [M3EColorScheme] seeded from [colorScheme.primary].
+  /// swapping in a dark `M3EColorScheme` seeded from `colorScheme.primary`.
   M3EThemeData deriveDarkTemplate() {
     return M3EThemeData.dark(
       seedColor: colorScheme.primary,

@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ESegmentedButton].
+/// Theme values for `M3ESegmentedButton`.
 @immutable
 class M3ESegmentedButtonTheme extends M3EThemeExtension<M3ESegmentedButtonTheme> {
   const M3ESegmentedButtonTheme({

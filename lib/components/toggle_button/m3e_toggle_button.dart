@@ -1,3 +1,4 @@
+// File exceeds length guideline due to combined toggle button states and motion.
 // ignore: file_length
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
@@ -322,9 +323,10 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     if (_cachedIconChecked == checked && _cachedIcon != null) {
       return _cachedIcon;
     }
-    _cachedIconChecked = checked;
-    _cachedIcon = checked ? (widget.checkedIcon ?? widget.icon) : widget.icon;
-    return _cachedIcon;
+    return _cachedIcon = () {
+      _cachedIconChecked = checked;
+      return checked ? (widget.checkedIcon ?? widget.icon) : widget.icon;
+    }();
   }
 
   Widget? get _effectiveLabel {
@@ -332,11 +334,12 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     if (_cachedLabelChecked == checked && _cachedLabel != null) {
       return _cachedLabel;
     }
-    _cachedLabelChecked = checked;
-    _cachedLabel = checked
-        ? (widget.checkedLabel ?? widget.label)
-        : widget.label;
-    return _cachedLabel;
+    return _cachedLabel = () {
+      _cachedLabelChecked = checked;
+      return checked
+          ? (widget.checkedLabel ?? widget.label)
+          : widget.label;
+    }();
   }
 
   @override
@@ -406,12 +409,16 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
   }
 
   void _handleTap() {
-    if (!widget.enabled) return;
+    if (!widget.enabled) {
+      return;
+    }
     if (widget.decorationHaptic != M3EHapticFeedback.none) {
       M3EButtonConstants.triggerHapticFeedback(widget.decorationHaptic);
     }
     final newChecked = !_isChecked;
-    if (widget.checked == null) setState(() => _localChecked = newChecked);
+    if (widget.checked == null) {
+      setState(() => _localChecked = newChecked);
+    }
     widget.onCheckedChange?.call(newChecked);
   }
 
@@ -430,8 +437,8 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final double? explicitBorderRadius = widget.decorationBorderRadius;
     final double squareRad = _buttonTheme.squareRadius(widget.size);
     final double pressRad = _buttonTheme.pressedRadius(widget.size);
-    final BorderRadius fullyRound = BorderRadius.circular(halfHeight);
-    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    final fullyRound = BorderRadius.circular(halfHeight);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     final double outerRad = explicitBorderRadius ?? halfHeight;
     final double innerRad =
@@ -445,21 +452,21 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
     final bool freezeStart = widget.isFirstInGroup;
     final bool freezeEnd = widget.isLastInGroup;
-    final bool freezeLeft = isRtl ? freezeEnd : freezeStart;
-    final bool freezeRight = isRtl ? freezeStart : freezeEnd;
+    final freezeLeft = isRtl ? freezeEnd : freezeStart;
+    final freezeRight = isRtl ? freezeStart : freezeEnd;
 
-    final BorderRadius restingShape = widget.decorationUncheckedRadius != null
+    final restingShape = widget.decorationUncheckedRadius != null
         ? BorderRadius.circular(widget.decorationUncheckedRadius!)
         : explicitBorderRadius != null
         ? BorderRadius.circular(explicitBorderRadius)
         : fullyRound;
-    final BorderRadius squareShape = BorderRadius.circular(
+    final squareShape = BorderRadius.circular(
       widget.decorationCheckedRadius ?? explicitBorderRadius ?? squareRad,
     );
-    final BorderRadius pressSquish = BorderRadius.circular(
+    final pressSquish = BorderRadius.circular(
       widget.decorationPressedRadius ?? explicitBorderRadius ?? pressRad,
     );
-    final BorderRadius checkedConnectedShape = explicitBorderRadius != null
+    final checkedConnectedShape = explicitBorderRadius != null
         ? BorderRadius.circular(explicitBorderRadius)
         : fullyRound;
 
@@ -507,7 +514,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
               ? checkedConnectedShape
               : restingRadius;
         } else {
-          final BorderRadius hoverShape =
+          final hoverShape =
           widget.decoration?.hoveredRadius != null
               ? BorderRadius.circular(widget.decoration!.hoveredRadius!)
               : explicitBorderRadius != null
@@ -534,10 +541,10 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
             internalTop: 0,
             internalBottom: 0,
             targetRadius: targetRadius,
-            freezeTopLeft: widget.isGroupConnected ? freezeLeft : false,
-            freezeBottomLeft: widget.isGroupConnected ? freezeLeft : false,
-            freezeTopRight: widget.isGroupConnected ? freezeRight : false,
-            freezeBottomRight: widget.isGroupConnected ? freezeRight : false,
+            freezeTopLeft: widget.isGroupConnected && freezeLeft,
+            freezeBottomLeft: widget.isGroupConnected && freezeLeft,
+            freezeTopRight: widget.isGroupConnected && freezeRight,
+            freezeBottomRight: widget.isGroupConnected && freezeRight,
             builder: (animatedPadding, animatedRadius) {
               final buttonCore = _buildCore(m, animatedPadding, animatedRadius);
               return M3EFocusRing(
@@ -550,7 +557,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
         );
 
         final fixedWidth = widget.size.width;
-        if (fixedWidth != null) core = SizedBox(width: fixedWidth, child: core);
+        if (fixedWidth != null) {
+          core = SizedBox(width: fixedWidth, child: core);
+        }
 
         return core;
       },
@@ -647,7 +656,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       child: button,
     );
     if (widget.tooltip != null) {
-      result = Tooltip(message: widget.tooltip!, child: result);
+      result = Tooltip(message: widget.tooltip, child: result);
     }
 
     return Semantics(
@@ -686,23 +695,18 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     switch (widget.style) {
       case M3EButtonStyle.filled:
         bgColor = checked ? cs.primary : cs.surfaceContainerHighest;
-        break;
 
       case M3EButtonStyle.elevated:
         bgColor = checked ? cs.primary : cs.surfaceContainerLow;
-        break;
 
       case M3EButtonStyle.tonal:
         bgColor = checked ? cs.secondaryContainer : cs.surfaceContainerHighest;
-        break;
 
       case M3EButtonStyle.outlined:
         bgColor = checked ? cs.secondaryContainer : Colors.transparent;
-        break;
 
       case M3EButtonStyle.text:
         bgColor = Colors.transparent;
-        break;
     }
 
     final bool transparent =
@@ -723,7 +727,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
           final color = widget.decoration!.foregroundColor!.resolve(
             activeStates,
           );
-          if (color != null) return color;
+          if (color != null) {
+            return color;
+          }
         }
 
         if (states.contains(WidgetState.disabled)) {
@@ -742,7 +748,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
           final color = widget.decoration!.backgroundColor!.resolve(
             activeStates,
           );
-          if (color != null) return color;
+          if (color != null) {
+            return color;
+          }
         }
 
         if (states.contains(WidgetState.disabled)) {
@@ -764,25 +772,30 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
             : states;
         if (widget.decoration?.side != null) {
           final s = widget.decoration!.side!.resolve(activeStates);
-          if (s != null) return s;
+          if (s != null) {
+            return s;
+          }
         }
         final isOutlined = widget.style == M3EButtonStyle.outlined;
-        if (!isOutlined) return BorderSide.none;
+        if (!isOutlined) {
+          return BorderSide.none;
+        }
 
         if (states.contains(WidgetState.disabled)) {
           return BorderSide(
             color: cs.onSurface.withValues(
               alpha: M3EButtonConstants.kDisabledOutlineAlpha,
             ),
-            width: 1,
           );
         }
-        return BorderSide(color: _buttonTheme.outline(_scheme), width: 1);
+        return BorderSide(color: _buttonTheme.outline(_scheme));
       }),
       mouseCursor: WidgetStateProperty.resolveWith((states) {
         if (widget.decoration?.mouseCursor != null) {
           final cursor = widget.decoration!.mouseCursor!.resolve(states);
-          if (cursor != null) return cursor;
+          if (cursor != null) {
+            return cursor;
+          }
         }
         if (states.contains(WidgetState.disabled)) {
           return SystemMouseCursors.basic;
@@ -855,8 +868,8 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       );
     }
 
-    final bool hasUncheckedLabel = uncheckedLabel != null;
-    final bool hasCheckedLabel = checkedLabel != null;
+    final hasUncheckedLabel = uncheckedLabel != null;
+    final hasCheckedLabel = checkedLabel != null;
     final bool hasDistinctLabelStates =
         animateIconToCheckedLabel || animateLabelToCheckedIcon;
 
@@ -882,7 +895,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       }
 
       final Widget? gapWidget = (iconWidget != null && labelWidget != null)
-          ? SizedBox(width: m.iconGap.toDouble() * activeLabelProgress)
+          ? SizedBox(width: m.iconGap * activeLabelProgress)
           : null;
 
       if (iconWidget != null && labelWidget != null) {
@@ -913,7 +926,6 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
           height: m.height,
           child: FittedBox(
             fit: BoxFit.none,
-            alignment: _kAlignmentCenter,
             clipBehavior: Clip.hardEdge,
             child: naturalRow,
           ),
@@ -1006,7 +1018,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
   double _lingerOpacity(double t) {
     final p = _boundedProgress(t);
-    if (p >= 0.45) return 1.0;
+    if (p >= 0.45) {
+      return 1;
+    }
     return p / 0.45;
   }
 

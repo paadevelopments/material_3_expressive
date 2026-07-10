@@ -17,7 +17,9 @@ class M3EButtonMeasurements {
   final double iconGap;
 
   M3EButtonMeasurements applyCustomSize(M3EButtonSize? custom) {
-    if (custom == null) return this;
+    if (custom == null) {
+      return this;
+    }
     return M3EButtonMeasurements(
       height: custom.height ?? height,
       hPadding: custom.hPadding ?? hPadding,

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../../buttons/styles/m3e_button_motion.dart';
 
-/// Theme values for [M3ESplitButton].
+/// Theme values for `M3ESplitButton`.
 @immutable
 class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
   const M3ESplitButtonTheme({
@@ -183,7 +182,9 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
 
   double splitTrailingWidth(M3EButtonSize size) {
     for (final variant in _splitTrailingWidth.keys) {
-      if (variant.name == size.name) return _splitTrailingWidth[variant]!;
+      if (variant.name == size.name) {
+        return _splitTrailingWidth[variant]!;
+      }
     }
     return 26;
   }
@@ -243,7 +244,9 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
 
   double splitSidePaddingSelected(M3EButtonSize size) {
     for (final variant in _splitSidePaddingSelected.keys) {
-      if (variant.name == size.name) return _splitSidePaddingSelected[variant]!;
+      if (variant.name == size.name) {
+        return _splitSidePaddingSelected[variant]!;
+      }
     }
     return 15;
   }

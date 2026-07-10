@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ENavigationRail].
+/// Theme values for `M3ENavigationRail`.
 @immutable
 class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
   const M3ENavigationRailTheme({

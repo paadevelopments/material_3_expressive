@@ -291,7 +291,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
           return Container(
             key: _itemKeys[index],
             child: Transform(
-              transform: Matrix4.identity()..scale(scaleX, 1, 1),
+              transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
               alignment: individualAlignment,
               child: Padding(
                 padding: dynamicPadding,

@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3ESwitch].
+/// Theme values for `M3ESwitch`.
 @immutable
 class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   const M3ESwitchTheme({

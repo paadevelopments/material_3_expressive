@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_nav_metrics.dart';
 
-/// Theme values for [M3ENavigationBar].
+/// Theme values for `M3ENavigationBar`.
 @immutable
 class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
   const M3ENavigationBarTheme({

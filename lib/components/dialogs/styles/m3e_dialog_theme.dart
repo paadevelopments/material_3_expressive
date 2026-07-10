@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EDialog].
+/// Theme values for `M3EDialog`.
 @immutable
 class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   const M3EDialogTheme({

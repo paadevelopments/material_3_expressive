@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../../foundations/m3e_theme_extension.dart';
 
-/// Theme values for [M3EFabMenu].
+/// Theme values for `M3EFabMenu`.
 @immutable
 class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
   const M3EFabMenuTheme({
