@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Brightness, ColorScheme;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_color_utilities/material_color_utilities.dart';
 
 /// Builds a subtree from device light and dark dynamic [ColorScheme]s.
 typedef M3EDynamicColorBuilder = Widget Function(
@@ -51,7 +50,7 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
 
   Future<void> _fetchDynamicColors() async {
     try {
-      final CorePalette? corePalette = await DynamicColorPlugin.getCorePalette();
+      final Color? corePalette = await DynamicColorPlugin.getAccentColor();
 
       if (!mounted) {
         return;
@@ -62,8 +61,8 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
           debugPrint('dynamic_color: Core palette detected.');
         }
         setState(() {
-          _light = corePalette.toColorScheme();
-          _dark = corePalette.toColorScheme(brightness: Brightness.dark);
+          _light =  ColorScheme.fromSeed(seedColor: corePalette);
+          _dark = ColorScheme.fromSeed(seedColor: corePalette, brightness: Brightness.dark);
         });
         return;
       }

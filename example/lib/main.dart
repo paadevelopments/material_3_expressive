@@ -117,7 +117,7 @@ class _Gallery extends StatelessWidget {
     final theme = M3ETheme.of(context);
     return Scaffold(
       body: ColoredBox(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.surface,
         child: Column(
           children: <Widget>[
             M3EAppBar.top(
