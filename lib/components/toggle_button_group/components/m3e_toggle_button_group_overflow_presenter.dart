@@ -392,11 +392,12 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
       elevation: dec.elevation,
       shape: dec.shape,
       builder: (sheetContext) {
-        return _SpringMenuWrapper(
-          motion: dec.motion,
-          alignment: Alignment.bottomCenter,
-          isBottomSheet: true,
-          child: SafeArea(
+        return M3EScrimSystemUi.wrapBottomSheet(
+          _SpringMenuWrapper(
+            motion: dec.motion,
+            alignment: Alignment.bottomCenter,
+            isBottomSheet: true,
+            child: SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -432,6 +433,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               ),
             ),
           ),
+        ),
         );
       },
     );

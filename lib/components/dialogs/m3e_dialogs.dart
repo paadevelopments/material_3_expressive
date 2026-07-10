@@ -42,12 +42,13 @@ class M3EDialog extends StatelessWidget {
       barrierColor: dialogTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(builder: (context) => Center(
+        return M3EScrimSystemUi.wrap(
+          M3EComponentTheme(builder: (context) => Center(
             child: Padding(
               padding: dialogTheme.screenMargin,
               child: dialog,
             ),
-          ),
+          )),
         );
       },
       transitionBuilder: (context, animation, secondary, child) =>

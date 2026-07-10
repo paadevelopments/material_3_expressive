@@ -43,10 +43,9 @@ class M3ESideSheet extends StatelessWidget {
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
         return M3EComponentTheme(builder: (context) => Align(
-            alignment: Alignment.centerRight,
-            child: M3ESideSheet(title: title, body: body, actions: actions),
-          ),
-        );
+          alignment: Alignment.centerRight,
+          child: M3ESideSheet(title: title, body: body, actions: actions),
+        ));
       },
       transitionBuilder: (BuildContext context, Animation<double> a, _, Widget c) {
         return SlideTransition(

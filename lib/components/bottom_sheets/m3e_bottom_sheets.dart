@@ -36,13 +36,14 @@ class M3EBottomSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(builder: (context) => Align(
+        return M3EScrimSystemUi.wrapBottomSheet(
+          M3EComponentTheme(builder: (context) => Align(
             alignment: Alignment.bottomCenter,
             child: M3EBottomSheet(
               showDragHandle: showDragHandle,
               child: Builder(builder: builder),
             ),
-          ),
+          )),
         );
       },
       transitionBuilder: (BuildContext context, Animation<double> a, _, Widget c) {

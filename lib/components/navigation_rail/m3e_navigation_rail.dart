@@ -207,32 +207,34 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   Widget _buildModalOverlay(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: IgnorePointer(
-            ignoring: !_isExpanded,
-            child: GestureDetector(
-              onTap: widget.onDismissModal,
-              child: AnimatedContainer(
-                duration: M3ENavigationRailLayout.expandDuration,
-                curve: Curves.easeOutCubic,
-                color: M3ETheme.of(context)
-                    .colorScheme
-                    .scrim
-                    .withValues(alpha: _isExpanded ? 0.32 : 0.0),
+    return M3EScrimSystemUi.wrap(
+      Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !_isExpanded,
+              child: GestureDetector(
+                onTap: widget.onDismissModal,
+                child: AnimatedContainer(
+                  duration: M3ENavigationRailLayout.expandDuration,
+                  curve: Curves.easeOutCubic,
+                  color: M3ETheme.of(context)
+                      .colorScheme
+                      .scrim
+                      .withValues(alpha: _isExpanded ? 0.32 : 0.0),
+                ),
               ),
             ),
           ),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Material(
-            type: MaterialType.transparency,
-            child: _buildRailCore(context),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Material(
+              type: MaterialType.transparency,
+              child: _buildRailCore(context),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

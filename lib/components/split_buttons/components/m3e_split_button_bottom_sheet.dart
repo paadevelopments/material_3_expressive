@@ -60,8 +60,9 @@ Future<T?> _showSingleSelectBottomSheet<T>({
     builder: (sheetContext) {
       final m3eTheme = M3ETheme.of(sheetContext);
 
-      return SafeArea(
-        child: SingleChildScrollView(
+      return M3EScrimSystemUi.wrapBottomSheet(
+        SafeArea(
+          child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,6 +92,7 @@ Future<T?> _showSingleSelectBottomSheet<T>({
             ],
           ),
         ),
+      ),
       );
     },
   );
@@ -115,14 +117,16 @@ Future<List<T>?> _showMultiSelectBottomSheet<T>({
     shape: decoration.shape,
     isScrollControlled: true,
     builder: (sheetContext) {
-      return _MultiSelectBottomSheet<T>(
-        context: sheetContext,
-        items: items,
-        decoration: decoration,
-        foregroundColor: foregroundColor,
-        iconSize: iconSize,
-        initialSelectedValues: initialSelectedValues,
-        keyboardActivated: keyboardActivated,
+      return M3EScrimSystemUi.wrapBottomSheet(
+        _MultiSelectBottomSheet<T>(
+          context: sheetContext,
+          items: items,
+          decoration: decoration,
+          foregroundColor: foregroundColor,
+          iconSize: iconSize,
+          initialSelectedValues: initialSelectedValues,
+          keyboardActivated: keyboardActivated,
+        ),
       );
     },
   );

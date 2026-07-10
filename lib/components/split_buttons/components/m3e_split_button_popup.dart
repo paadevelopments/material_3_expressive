@@ -176,9 +176,10 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
 
     final motion = widget.decoration.motion.toMotion();
 
-    return FocusScope(
-      node: _focusScopeNode,
-      child: Focus(
+    return M3EScrimSystemUi.wrap(
+      FocusScope(
+        node: _focusScopeNode,
+        child: Focus(
         focusNode: FocusNode(skipTraversal: true),
         onKeyEvent: (node, event) {
           if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -269,6 +270,7 @@ class _PopupOverlayState<T> extends State<_PopupOverlay<T>> {
           ),
         ),
       ),
+    ),
     );
   }
 

@@ -94,17 +94,19 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   }
 
   Widget _buildOverlay(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        _buildScrim(context),
-        CompositedTransformFollower(
-          link: _link,
-          targetAnchor: Alignment.topRight,
-          followerAnchor: Alignment.bottomRight,
-          offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
-          child: _buildMenu(context),
-        ),
-      ],
+    return M3EScrimSystemUi.wrap(
+      Stack(
+        children: <Widget>[
+          _buildScrim(context),
+          CompositedTransformFollower(
+            link: _link,
+            targetAnchor: Alignment.topRight,
+            followerAnchor: Alignment.bottomRight,
+            offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
+            child: _buildMenu(context),
+          ),
+        ],
+      ),
     );
   }
 
