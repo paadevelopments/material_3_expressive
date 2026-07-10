@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'm3e_theme.dart';
-import 'm3e_theme_controller.dart';
-import 'm3e_theme_data.dart';
 
 /// A [MaterialApp] wired to adaptive [M3ETheme] with minimal integration code.
 ///
 /// Owns platform-brightness observation, [M3EThemeController] lifecycle, and
 /// keeps Material [ThemeMode] aligned with the resolved M3E brightness.
+///
+/// [themeMode] and the core [MaterialApp.builder] are managed internally.
+/// Use [appBuilder] to wrap the themed subtree when extra integration layers
+/// are needed.
 class M3EMaterialApp extends StatefulWidget {
   const M3EMaterialApp({
     required this.data,
@@ -16,14 +18,41 @@ class M3EMaterialApp extends StatefulWidget {
     this.dynamicColoring,
     this.initialTheme,
     this.controller,
-    this.title,
-    this.debugShowCheckedModeBanner,
-    this.routes,
-    this.onGenerateRoute,
-    this.onUnknownRoute,
     this.navigatorKey,
+    this.scaffoldMessengerKey,
+    this.routes = const <String, WidgetBuilder>{},
+    this.initialRoute,
+    this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
+    this.onUnknownRoute,
+    this.onNavigationNotification,
+    this.navigatorObservers = const <NavigatorObserver>[],
+    this.appBuilder,
+    this.title = '',
+    this.onGenerateTitle,
+    this.color,
     this.theme,
     this.darkTheme,
+    this.highContrastTheme,
+    this.highContrastDarkTheme,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
+    this.locale,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.debugShowMaterialGrid = false,
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowCheckedModeBanner = true,
+    this.shortcuts,
+    this.actions,
+    this.restorationScopeId,
+    this.scrollBehavior,
+    this.themeAnimationStyle,
     super.key,
   });
 
@@ -33,12 +62,24 @@ class M3EMaterialApp extends StatefulWidget {
   final bool? dynamicColoring;
   final Brightness? initialTheme;
   final M3EThemeController? controller;
-  final String? title;
-  final bool? debugShowCheckedModeBanner;
-  final Map<String, WidgetBuilder>? routes;
-  final RouteFactory? onGenerateRoute;
-  final RouteFactory? onUnknownRoute;
+
   final GlobalKey<NavigatorState>? navigatorKey;
+  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
+  final Map<String, WidgetBuilder> routes;
+  final String? initialRoute;
+  final RouteFactory? onGenerateRoute;
+  final InitialRouteListFactory? onGenerateInitialRoutes;
+  final RouteFactory? onUnknownRoute;
+  final NotificationListenerCallback<NavigationNotification>?
+      onNavigationNotification;
+  final List<NavigatorObserver> navigatorObservers;
+
+  /// Optional wrapper applied after [M3ETheme] in the internal [MaterialApp.builder].
+  final TransitionBuilder? appBuilder;
+
+  final String title;
+  final GenerateAppTitle? onGenerateTitle;
+  final Color? color;
 
   /// Optional Material light theme override. Defaults to [data.toThemeData].
   final ThemeData? theme;
@@ -46,6 +87,27 @@ class M3EMaterialApp extends StatefulWidget {
   /// Optional Material dark theme override. Defaults to
   /// [data.deriveDarkTemplate().toThemeData].
   final ThemeData? darkTheme;
+
+  final ThemeData? highContrastTheme;
+  final ThemeData? highContrastDarkTheme;
+  final Duration themeAnimationDuration;
+  final Curve themeAnimationCurve;
+  final Locale? locale;
+  final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+  final LocaleResolutionCallback? localeResolutionCallback;
+  final Iterable<Locale> supportedLocales;
+  final bool debugShowMaterialGrid;
+  final bool showPerformanceOverlay;
+  final bool checkerboardRasterCacheImages;
+  final bool checkerboardOffscreenLayers;
+  final bool showSemanticsDebugger;
+  final bool debugShowCheckedModeBanner;
+  final Map<ShortcutActivator, Intent>? shortcuts;
+  final Map<Type, Action<Intent>>? actions;
+  final String? restorationScopeId;
+  final ScrollBehavior? scrollBehavior;
+  final AnimationStyle? themeAnimationStyle;
 
   bool get _usesAdaptiveLifecycle =>
       autoTheming == true ||
@@ -116,18 +178,45 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     );
 
     return MaterialApp(
-      title: widget.title ?? '',
-      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner ?? true,
-      theme: widget.theme ?? widget.data.toThemeData(),
-      darkTheme: widget.darkTheme ?? widget.data.deriveDarkTemplate().toThemeData(),
-      themeMode: themeMode,
       navigatorKey: widget.navigatorKey,
-      routes: widget.routes ?? const <String, WidgetBuilder>{},
-      onGenerateRoute: widget.onGenerateRoute,
-      onUnknownRoute: widget.onUnknownRoute,
+      scaffoldMessengerKey: widget.scaffoldMessengerKey,
       home: widget.home,
+      routes: widget.routes,
+      initialRoute: widget.initialRoute,
+      onGenerateRoute: widget.onGenerateRoute,
+      onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+      onUnknownRoute: widget.onUnknownRoute,
+      onNavigationNotification: widget.onNavigationNotification,
+      navigatorObservers: widget.navigatorObservers,
+      title: widget.title,
+      onGenerateTitle: widget.onGenerateTitle,
+      color: widget.color,
+      theme: widget.theme ?? widget.data.toThemeData(),
+      darkTheme:
+          widget.darkTheme ?? widget.data.deriveDarkTemplate().toThemeData(),
+      highContrastTheme: widget.highContrastTheme,
+      highContrastDarkTheme: widget.highContrastDarkTheme,
+      themeMode: themeMode,
+      themeAnimationDuration: widget.themeAnimationDuration,
+      themeAnimationCurve: widget.themeAnimationCurve,
+      locale: widget.locale,
+      localizationsDelegates: widget.localizationsDelegates,
+      localeListResolutionCallback: widget.localeListResolutionCallback,
+      localeResolutionCallback: widget.localeResolutionCallback,
+      supportedLocales: widget.supportedLocales,
+      debugShowMaterialGrid: widget.debugShowMaterialGrid,
+      showPerformanceOverlay: widget.showPerformanceOverlay,
+      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      showSemanticsDebugger: widget.showSemanticsDebugger,
+      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+      shortcuts: widget.shortcuts,
+      actions: widget.actions,
+      restorationScopeId: widget.restorationScopeId,
+      scrollBehavior: widget.scrollBehavior,
+      themeAnimationStyle: widget.themeAnimationStyle,
       builder: (BuildContext context, Widget? child) {
-        return M3ETheme(
+        final Widget themed = M3ETheme(
           data: widget.data,
           autoTheming: widget.autoTheming,
           dynamicColoring: widget.dynamicColoring,
@@ -135,6 +224,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
           controller: _effectiveController,
           child: child ?? const SizedBox.shrink(),
         );
+        return widget.appBuilder?.call(context, themed) ?? themed;
       },
     );
   }

@@ -123,4 +123,30 @@ void main() {
       controller,
     );
   });
+
+  testWidgets('M3EMaterialApp forwards MaterialApp constructor fields',
+      (WidgetTester tester) async {
+    final M3EThemeData base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    const Locale locale = Locale('en', 'US');
+    const List<Locale> supportedLocales = <Locale>[Locale('en', 'US')];
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: base,
+        locale: locale,
+        supportedLocales: supportedLocales,
+        showPerformanceOverlay: true,
+        home: const M3EButton(
+          onPressed: null,
+          child: Text('Probe'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final MaterialApp app = tester.widget(find.byType(MaterialApp));
+    expect(app.locale, locale);
+    expect(app.supportedLocales, supportedLocales);
+    expect(app.showPerformanceOverlay, isTrue);
+  });
 }
