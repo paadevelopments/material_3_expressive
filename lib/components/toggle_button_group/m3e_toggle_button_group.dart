@@ -687,6 +687,10 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(builder: _buildGroup);
+  }
+
+  Widget _buildGroup(BuildContext context) {
     final groupTheme = M3ETheme.of(context).toggleButtonGroupTheme;
     final metrics = groupTheme.metricsFor(
       widget.size,
@@ -745,9 +749,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       );
     }
 
-    return M3EComponentTheme(
-      child: result,
-    );
+    return result;
   }
 
   Widget _buildContent(BuildContext context, double spacing) {

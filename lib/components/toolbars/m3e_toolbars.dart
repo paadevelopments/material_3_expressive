@@ -78,6 +78,10 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    return M3EComponentTheme(builder: _buildToolbar);
+  }
+
+  Widget _buildToolbar(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EToolbarTheme toolbarTheme = theme.toolbarTheme;
     final M3EColorScheme scheme = theme.colorScheme;
@@ -204,7 +208,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
         child: bar,
       );
     }
-    return M3EComponentTheme(child: bar);
+    return bar;
   }
 
   static AlignmentDirectional _alignmentFor(M3EToolbarAlignment alignment) {

@@ -55,8 +55,7 @@ class M3EBadge extends StatelessWidget {
             _format(count!, maxCount),
           );
 
-    return M3EComponentTheme(
-      child: Stack(
+    return M3EComponentTheme(builder: (context) => Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
           child,

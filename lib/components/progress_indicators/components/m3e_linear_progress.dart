@@ -110,8 +110,7 @@ class _M3ELinearProgressState extends State<M3ELinearProgress>
         ? widget.phase
         : (_shouldAnimate ? _controller.value * 2 * math.pi : 0.0);
 
-    return M3EComponentTheme(
-      child: RepaintBoundary(
+    return M3EComponentTheme(builder: (context) => RepaintBoundary(
         child: SizedBox(
           height: totalHeight,
           width: double.infinity,

@@ -561,7 +561,7 @@ class _M3EButtonState extends State<M3EButton>
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildContent(context),
+      builder: _buildContent,
     );
   }
 

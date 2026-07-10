@@ -68,8 +68,7 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final searchTheme = theme.searchBarTheme;
-    return M3EComponentTheme(
-      child: GestureDetector(
+    return M3EComponentTheme(builder: (context) => GestureDetector(
         onTap: widget.onTap ?? _focusNode.requestFocus,
         behavior: HitTestBehavior.opaque,
         child: Container(

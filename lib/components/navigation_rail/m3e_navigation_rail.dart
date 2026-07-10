@@ -103,6 +103,12 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverlay());
+  }
+
+  @override
   void didUpdateWidget(covariant M3ENavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -459,11 +465,12 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverlay());
 
-    final Widget child =
-    _needsOverlay ? const SizedBox.shrink() : _buildRailCore(context);
-
     return M3EComponentTheme(
-      child: CompositedTransformTarget(link: _anchor, child: child),
+      builder: (BuildContext context) {
+        final Widget child =
+            _needsOverlay ? const SizedBox.shrink() : _buildRailCore(context);
+        return CompositedTransformTarget(link: _anchor, child: child);
+      },
     );
   }
 

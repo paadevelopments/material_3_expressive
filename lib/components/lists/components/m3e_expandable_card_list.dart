@@ -59,8 +59,7 @@ class _M3EExpandableCardListState extends State<M3EExpandableCardList>
     with M3EExpandableStateMixin<M3EExpandableCardList> {
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      child: ListView.builder(
+    return M3EComponentTheme(builder: (context) => ListView.builder(
         controller: widget.controller,
         physics: widget.physics,
         shrinkWrap: widget.shrinkWrap,

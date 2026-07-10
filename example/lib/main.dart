@@ -21,7 +21,7 @@ class ExampleApp extends StatefulWidget {
   State<ExampleApp> createState() => _ExampleAppState();
 }
 
-class _ExampleAppState extends State<ExampleApp> {
+class _ExampleAppState extends State<ExampleApp> with WidgetsBindingObserver {
   static const Color _seed = Color(0xFF6750A4);
 
   final M3EThemeController _themeController = M3EThemeController();
@@ -38,13 +38,20 @@ class _ExampleAppState extends State<ExampleApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _themeController.addListener(_onThemeControllerChanged);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _themeController.removeListener(_onThemeControllerChanged);
     super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {});
   }
 
   void _onThemeControllerChanged() {
@@ -53,9 +60,14 @@ class _ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeMode themeMode = _themeController.brightnessOverride != null
-        ? _themeController.materialThemeMode
-        : ThemeMode.system;
+    final Brightness platformBrightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final Brightness effectiveBrightness = _themeController.resolveBrightness(
+      platformBrightness,
+      autoTheming: true,
+    );
+    final ThemeMode themeMode =
+        M3EThemeController.themeModeFor(effectiveBrightness);
 
     return MaterialApp(
       title: 'Material 3 Expressive',
@@ -132,6 +144,7 @@ class _Gallery extends StatelessWidget {
                   tooltip: 'Toggle theme',
                   onPressed: () => themeController.toggleBrightness(
                     fallback: theme.brightness,
+                    autoTheming: true,
                   ),
                 ),
               ],

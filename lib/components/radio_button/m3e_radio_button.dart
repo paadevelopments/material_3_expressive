@@ -38,8 +38,7 @@ class M3ERadio<T> extends StatelessWidget {
     final radioTheme = theme.radioTheme;
     final scheme = theme.colorScheme;
 
-    return M3EComponentTheme(
-      child: M3ETappable(
+    return M3EComponentTheme(builder: (context) => M3ETappable(
         onTap: _enabled ? () => onChanged!(value) : null,
         enabled: _enabled,
         focusNode: focusNode,

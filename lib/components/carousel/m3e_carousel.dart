@@ -239,8 +239,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      child: LayoutBuilder(
+    return M3EComponentTheme(builder: (context) => LayoutBuilder(
         builder: (ctx, dimens) {
           frameWidth = widget.width ?? dimens.maxWidth;
           frameHeight = widget.height ?? dimens.maxHeight;

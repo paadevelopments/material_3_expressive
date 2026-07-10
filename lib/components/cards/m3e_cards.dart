@@ -61,19 +61,18 @@ class M3ECard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildCard(context),
+      builder: _buildCard,
     );
   }
 
   Widget _buildCard(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final cardTheme = theme.cardTheme;
+    final cardTheme = M3ETheme.of(context).cardTheme;
     final resolvedBorderRadius = borderRadius ?? cardTheme.borderRadius;
     final shape = RoundedRectangleBorder(borderRadius: resolvedBorderRadius);
 
     if (!_isInteractive) {
       return _buildSurface(
-        theme,
+        context,
         cardTheme,
         resolvedBorderRadius,
         shape,
@@ -99,7 +98,7 @@ class M3ECard extends StatelessWidget {
       materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         return _buildSurface(
-          theme,
+          context,
           cardTheme,
           resolvedBorderRadius,
           shape,
@@ -110,13 +109,13 @@ class M3ECard extends StatelessWidget {
   }
 
   Widget _buildSurface(
-    M3EThemeData theme,
+    BuildContext context,
     M3ECardTheme cardTheme,
     BorderRadius resolvedBorderRadius,
     RoundedRectangleBorder shape,
     M3EInteractionState state,
   ) {
-    final scheme = theme.colorScheme;
+    final scheme = M3ETheme.of(context).colorScheme;
     final double resolvedElevation = elevation ??
         cardTheme.elevation(variant, hovered: state.hovered);
     final BoxBorder? resolvedBorder = border != null

@@ -59,7 +59,10 @@ class M3ENavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(destinations.isNotEmpty, 'Provide at least one destination');
+    return M3EComponentTheme(builder: _buildNavigationBar);
+  }
 
+  Widget _buildNavigationBar(BuildContext context) {
     final m3e = M3ETheme.of(context);
     final navTheme = m3e.navigationBarTheme;
     final metrics = navTheme.metrics(density, m3e.spacing);
@@ -152,7 +155,7 @@ class M3ENavigationBar extends StatelessWidget {
         child: result,
       );
     }
-    return M3EComponentTheme(child: result);
+    return result;
   }
 
   Widget _icon(BuildContext context, bool selected,

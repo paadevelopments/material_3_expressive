@@ -1,6 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Brightness, ColorScheme;
+import 'package:flutter/material.dart' show Brightness, Color, ColorScheme;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,10 +10,11 @@ typedef M3EDynamicColorBuilder = Widget Function(
   ColorScheme? darkDynamic,
 );
 
-/// Fetches device dynamic colors and refreshes them when the app resumes.
+/// Fetches device accent colors and refreshes them when the app resumes.
 ///
-/// Mirrors [DynamicColorBuilder] but re-fetches on [AppLifecycleState.resumed]
-/// so OS accent or wallpaper changes apply without restarting the app.
+/// Builds light and dark [ColorScheme]s from [DynamicColorPlugin.getAccentColor].
+/// Re-fetches on [AppLifecycleState.resumed] so OS accent changes apply without
+/// restarting the app.
 class M3EDynamicColorHost extends StatefulWidget {
   const M3EDynamicColorHost({required this.builder, super.key});
 
@@ -49,29 +50,6 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
   }
 
   Future<void> _fetchDynamicColors() async {
-    try {
-      final Color? corePalette = await DynamicColorPlugin.getAccentColor();
-
-      if (!mounted) {
-        return;
-      }
-
-      if (corePalette != null) {
-        if (kDebugMode) {
-          debugPrint('dynamic_color: Core palette detected.');
-        }
-        setState(() {
-          _light =  ColorScheme.fromSeed(seedColor: corePalette);
-          _dark = ColorScheme.fromSeed(seedColor: corePalette, brightness: Brightness.dark);
-        });
-        return;
-      }
-    } on PlatformException {
-      if (kDebugMode) {
-        debugPrint('dynamic_color: Failed to obtain core palette.');
-      }
-    }
-
     try {
       final Color? accentColor = await DynamicColorPlugin.getAccentColor();
 

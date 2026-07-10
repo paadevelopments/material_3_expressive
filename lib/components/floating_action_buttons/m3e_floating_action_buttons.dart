@@ -42,8 +42,7 @@ class M3EFab extends StatelessWidget {
     final borderRadius = M3EShapes.resolve(metrics.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
-    return M3EComponentTheme(
-      child: M3ETappable(
+    return M3EComponentTheme(builder: (context) => M3ETappable(
         onTap: onPressed,
         enabled: _enabled,
         focusNode: focusNode,

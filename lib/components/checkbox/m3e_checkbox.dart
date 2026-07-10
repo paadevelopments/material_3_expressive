@@ -58,8 +58,7 @@ class M3ECheckbox extends StatelessWidget {
     final bool checked = value ?? false;
     final bool active = value == null || checked;
 
-    return M3EComponentTheme(
-      child: M3ETappable(
+    return M3EComponentTheme(builder: (context) => M3ETappable(
         onTap: _enabled ? _handleTap : null,
         enabled: _enabled,
         focusNode: focusNode,

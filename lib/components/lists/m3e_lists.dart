@@ -51,7 +51,7 @@ class M3EListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildItem(context),
+      builder: _buildItem,
     );
   }
 
@@ -309,7 +309,7 @@ class M3ECardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildList(context),
+      builder: _buildList,
     );
   }
 
@@ -442,7 +442,7 @@ class _M3EDismissibleListState extends State<M3EDismissibleList>
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildList(context),
+      builder: _buildList,
     );
   }
 
@@ -540,7 +540,7 @@ class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildColumn(context),
+      builder: _buildColumn,
     );
   }
 

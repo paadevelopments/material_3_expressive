@@ -66,8 +66,7 @@ class _M3EMenuState extends State<M3EMenu>
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      child: OverlayPortal(
+    return M3EComponentTheme(builder: (context) => OverlayPortal(
         controller: _portal,
         overlayChildBuilder: _buildOverlay,
         child: CompositedTransformTarget(

@@ -418,7 +418,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildWidget(context),
+      builder: _buildWidget,
     );
   }
 

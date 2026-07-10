@@ -46,8 +46,7 @@ class _M3EDatePickerState extends State<M3EDatePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final dateTheme = theme.datePickerTheme;
-    return M3EComponentTheme(
-      child: Container(
+    return M3EComponentTheme(builder: (context) => Container(
         width: dateTheme.width,
         padding: dateTheme.padding,
         decoration: BoxDecoration(

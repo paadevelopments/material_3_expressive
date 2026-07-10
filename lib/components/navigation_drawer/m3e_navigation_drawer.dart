@@ -27,8 +27,7 @@ class M3ENavigationDrawer extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final drawerTheme = theme.navigationDrawerTheme;
     final scheme = theme.colorScheme;
-    return M3EComponentTheme(
-      child: Container(
+    return M3EComponentTheme(builder: (context) => Container(
         width: drawerTheme.width,
         color: drawerTheme.containerColor(scheme),
         child: SafeArea(

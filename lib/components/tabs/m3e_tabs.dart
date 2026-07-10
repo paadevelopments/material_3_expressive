@@ -35,8 +35,7 @@ class M3ETabs extends StatelessWidget {
     final double align =
         tabs.length == 1 ? 0 : -1 + 2 * selectedIndex / (tabs.length - 1);
 
-    return M3EComponentTheme(
-      child: DecoratedBox(
+    return M3EComponentTheme(builder: (context) => DecoratedBox(
         decoration: BoxDecoration(
           color: tabTheme.backgroundColor(scheme),
           border: Border(

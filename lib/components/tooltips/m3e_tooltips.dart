@@ -69,8 +69,7 @@ class _M3ETooltipState extends State<M3ETooltip> {
   @override
   Widget build(BuildContext context) {
     final tooltipTheme = M3ETheme.of(context).tooltipTheme;
-    return M3EComponentTheme(
-      child: OverlayPortal(
+    return M3EComponentTheme(builder: (context) => OverlayPortal(
         controller: _portal,
         overlayChildBuilder: _buildOverlay,
         child: CompositedTransformTarget(

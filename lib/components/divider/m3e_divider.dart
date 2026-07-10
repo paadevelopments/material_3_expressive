@@ -29,7 +29,7 @@ class M3EDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildDivider(context),
+      builder: _buildDivider,
     );
   }
 

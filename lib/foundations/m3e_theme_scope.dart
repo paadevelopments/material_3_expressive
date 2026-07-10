@@ -108,14 +108,11 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       );
 
   Brightness resolveBrightness(BuildContext context) {
-    final Brightness? manual = widget.controller.brightnessOverride;
-    if (manual != null) {
-      return manual;
-    }
-    if (autoTheming) {
-      return MediaQuery.platformBrightnessOf(context);
-    }
-    return initialTheme ?? Brightness.light;
+    return widget.controller.resolveBrightness(
+      MediaQuery.platformBrightnessOf(context),
+      autoTheming: autoTheming,
+      initialTheme: initialTheme,
+    );
   }
 
   M3EThemeData resolve(
@@ -162,6 +159,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       scopeState: this,
       manualBrightness: manualBrightness,
       platformBrightness: platformBrightness,
+      invertPlatformBrightness: widget.controller.invertPlatformBrightness,
       lightDynamic: lightDynamic,
       darkDynamic: darkDynamic,
       child: M3EResolvedTheme(
@@ -204,6 +202,7 @@ class _InheritedM3EThemeScope extends InheritedWidget {
     required this.scopeState,
     required this.manualBrightness,
     required this.platformBrightness,
+    required this.invertPlatformBrightness,
     required this.lightDynamic,
     required this.darkDynamic,
     required super.child,
@@ -212,6 +211,7 @@ class _InheritedM3EThemeScope extends InheritedWidget {
   final M3EThemeScopeState scopeState;
   final Brightness? manualBrightness;
   final Brightness? platformBrightness;
+  final bool invertPlatformBrightness;
   final ColorScheme? lightDynamic;
   final ColorScheme? darkDynamic;
 
@@ -228,6 +228,7 @@ class _InheritedM3EThemeScope extends InheritedWidget {
     return scopeState != oldWidget.scopeState ||
         manualBrightness != oldWidget.manualBrightness ||
         platformBrightness != oldWidget.platformBrightness ||
+        invertPlatformBrightness != oldWidget.invertPlatformBrightness ||
         lightDynamic != oldWidget.lightDynamic ||
         darkDynamic != oldWidget.darkDynamic;
   }

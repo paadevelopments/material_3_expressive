@@ -39,8 +39,7 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    return M3EComponentTheme(
-      child: Container(
+    return M3EComponentTheme(builder: (context) => Container(
         padding: timeTheme.padding,
         decoration: BoxDecoration(
           color: timeTheme.containerColor(scheme),

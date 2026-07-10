@@ -49,8 +49,7 @@ class _M3ESliverExpandableCardListState
     with M3EExpandableStateMixin<M3ESliverExpandableCardList> {
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      child: SliverList.builder(
+    return M3EComponentTheme(builder: (context) => SliverList.builder(
         itemCount: widget.itemCount,
         itemBuilder: (context, index) => buildItem(context, index),
       ),

@@ -65,8 +65,7 @@ class _M3ECircularProgressState extends State<M3ECircularProgress>
     final double resolvedSize = widget.size ?? circularTheme.defaultSize;
     final double resolvedStrokeWidth =
         widget.strokeWidth ?? circularTheme.defaultStrokeWidth;
-    return M3EComponentTheme(
-      child: SizedBox(
+    return M3EComponentTheme(builder: (context) => SizedBox(
         width: resolvedSize,
         height: resolvedSize,
         child: AnimatedBuilder(

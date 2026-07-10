@@ -416,8 +416,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     final bool showIndeterminateIndicator =
         _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
 
-    return M3EComponentTheme(
-      child: Stack(
+    return M3EComponentTheme(builder: (context) => Stack(
         children: <Widget>[
           child,
           if (_status != null)

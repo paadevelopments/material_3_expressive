@@ -60,8 +60,7 @@ class M3ELoadingIndicator extends StatelessWidget {
       constraints: cons,
     );
 
-    return M3EComponentTheme(
-      child: DecoratedBox(
+    return M3EComponentTheme(builder: (context) => DecoratedBox(
         decoration: BoxDecoration(
           color: containerBg,
           borderRadius: loadingTheme.containerRadius,

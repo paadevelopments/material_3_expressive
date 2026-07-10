@@ -47,8 +47,7 @@ class _M3EExpandableCardColumnState extends State<M3EExpandableCardColumn>
     with M3EExpandableStateMixin<M3EExpandableCardColumn> {
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      child: Column(
+    return M3EComponentTheme(builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(
           widget.itemCount,

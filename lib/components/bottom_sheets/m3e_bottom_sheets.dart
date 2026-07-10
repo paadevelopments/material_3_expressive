@@ -36,8 +36,7 @@ class M3EBottomSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(
-          child: Align(
+        return M3EComponentTheme(builder: (context) => Align(
             alignment: Alignment.bottomCenter,
             child: M3EBottomSheet(
               showDragHandle: showDragHandle,
@@ -61,7 +60,7 @@ class M3EBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildSheet(context),
+      builder: _buildSheet,
     );
   }
 

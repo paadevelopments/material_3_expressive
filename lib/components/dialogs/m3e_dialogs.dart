@@ -42,8 +42,7 @@ class M3EDialog extends StatelessWidget {
       barrierColor: dialogTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(
-          child: Center(
+        return M3EComponentTheme(builder: (context) => Center(
             child: Padding(
               padding: dialogTheme.screenMargin,
               child: dialog,
@@ -70,8 +69,7 @@ class M3EDialog extends StatelessWidget {
       barrierLabel: 'Full screen dialog',
       transitionDuration: M3EMotion.long2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(
-          child: _FullScreenDialog(title: title, body: body, action: action),
+        return M3EComponentTheme(builder: (context) => _FullScreenDialog(title: title, body: body, action: action),
         );
       },
       transitionBuilder: _slide,
@@ -119,7 +117,7 @@ class M3EDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildDialog(context),
+      builder: _buildDialog,
     );
   }
 
@@ -206,7 +204,7 @@ class _FullScreenDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildFullScreen(context),
+      builder: _buildFullScreen,
     );
   }
 

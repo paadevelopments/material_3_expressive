@@ -41,8 +41,7 @@ class M3EChip extends StatelessWidget {
     final borderRadius = chipTheme.borderRadius;
     final border = chipTheme.shape as RoundedRectangleBorder;
 
-    return M3EComponentTheme(
-      child: M3ETappable(
+    return M3EComponentTheme(builder: (context) => M3ETappable(
         onTap: onPressed,
         enabled: onPressed != null,
         semanticLabel: label,

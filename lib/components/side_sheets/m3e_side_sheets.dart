@@ -42,8 +42,7 @@ class M3ESideSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(
-          child: Align(
+        return M3EComponentTheme(builder: (context) => Align(
             alignment: Alignment.centerRight,
             child: M3ESideSheet(title: title, body: body, actions: actions),
           ),
@@ -64,7 +63,7 @@ class M3ESideSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      child: _buildSheet(context),
+      builder: _buildSheet,
     );
   }
 
