@@ -13,6 +13,7 @@ export 'components/chips/m3e_chips.dart';
 export 'components/date_pickers/m3e_date_pickers.dart';
 export 'components/dialogs/m3e_dialogs.dart';
 export 'components/divider/m3e_divider.dart';
+export 'components/dropdown_menus/m3e_dropdown_menus.dart';
 export 'components/extended_fabs/m3e_extended_fabs.dart';
 export 'components/fab_menu/m3e_fab_menu.dart';
 export 'components/floating_action_buttons/m3e_floating_action_buttons.dart';

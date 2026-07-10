@@ -13,6 +13,7 @@ import '../components/chips/styles/m3e_chip_theme.dart';
 import '../components/date_pickers/styles/m3e_date_picker_theme.dart';
 import '../components/dialogs/styles/m3e_dialog_theme.dart';
 import '../components/divider/styles/m3e_divider_theme.dart';
+import '../components/dropdown_menus/styles/m3e_dropdown_menu_theme.dart';
 import '../components/fab_menu/styles/m3e_fab_menu_theme.dart';
 import '../components/floating_action_buttons/styles/m3e_fab_theme.dart';
 import '../components/icon_buttons/styles/m3e_icon_button_theme.dart';
@@ -66,6 +67,7 @@ class M3EThemeData {
     this.datePickerTheme = M3EDatePickerTheme.defaults,
     this.dialogTheme = M3EDialogTheme.defaults,
     this.dividerTheme = M3EDividerTheme.defaults,
+    this.dropdownMenuTheme = M3EDropdownMenuTheme.defaults,
     this.fabTheme = M3EFabTheme.defaults,
     this.fabMenuTheme = M3EFabMenuTheme.defaults,
     this.iconButtonTheme = M3EIconButtonTheme.defaults,
@@ -151,6 +153,7 @@ class M3EThemeData {
   final M3EDatePickerTheme datePickerTheme;
   final M3EDialogTheme dialogTheme;
   final M3EDividerTheme dividerTheme;
+  final M3EDropdownMenuTheme dropdownMenuTheme;
   final M3EFabTheme fabTheme;
   final M3EFabMenuTheme fabMenuTheme;
   final M3EIconButtonTheme iconButtonTheme;
@@ -209,6 +212,7 @@ class M3EThemeData {
       datePickerTheme: datePickerTheme,
       dialogTheme: dialogTheme,
       dividerTheme: dividerTheme,
+      dropdownMenuTheme: dropdownMenuTheme,
       fabTheme: fabTheme,
       fabMenuTheme: fabMenuTheme,
       iconButtonTheme: iconButtonTheme,
@@ -258,6 +262,7 @@ class M3EThemeData {
     M3EDatePickerTheme? datePickerTheme,
     M3EDialogTheme? dialogTheme,
     M3EDividerTheme? dividerTheme,
+    M3EDropdownMenuTheme? dropdownMenuTheme,
     M3EFabTheme? fabTheme,
     M3EFabMenuTheme? fabMenuTheme,
     M3EIconButtonTheme? iconButtonTheme,
@@ -305,6 +310,7 @@ class M3EThemeData {
       datePickerTheme: datePickerTheme ?? this.datePickerTheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
+      dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
       fabTheme: fabTheme ?? this.fabTheme,
       fabMenuTheme: fabMenuTheme ?? this.fabMenuTheme,
       iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,

@@ -23,6 +23,9 @@ class _SelectionPageState extends State<SelectionPage> {
   double _brightness = 3;
   DateTime? _date;
   M3ETime _time = const M3ETime(hour: 9, minute: 30);
+  String? _framework;
+  final List<String> _skills = <String>[];
+  String? _asyncCountry;
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +140,105 @@ class _SelectionPageState extends State<SelectionPage> {
           ],
         ),
         GallerySection(
+          title: 'Dropdown menu',
+          children: <Widget>[
+            DemoRow(
+              label: 'Single select',
+              children: <Widget>[
+                SizedBox(
+                  width: 280,
+                  child: M3EDropdownMenu<String>(
+                    singleSelect: true,
+                    items: const <M3EDropdownItem<String>>[
+                      M3EDropdownItem(label: 'Flutter', value: 'flutter'),
+                      M3EDropdownItem(label: 'Dart', value: 'dart'),
+                      M3EDropdownItem(label: 'Material 3', value: 'm3'),
+                    ],
+                    fieldStyle: const M3EDropdownFieldStyle(
+                      hintText: 'Choose a framework',
+                    ),
+                    onSelectionChanged: (List<M3EDropdownItem<String>> items) {
+                      setState(() {
+                        _framework = items.isEmpty ? null : items.first.value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            if (_framework != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Selected: $_framework',
+                  style: theme.typeScale.bodyMedium
+                      .copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            const SizedBox(height: 16),
+            DemoRow(
+              label: 'Multi select with search',
+              children: <Widget>[
+                SizedBox(
+                  width: 320,
+                  child: M3EDropdownMenu<String>(
+                    searchEnabled: true,
+                    items: const <M3EDropdownItem<String>>[
+                      M3EDropdownItem(label: 'Layout', value: 'layout'),
+                      M3EDropdownItem(label: 'Animation', value: 'animation'),
+                      M3EDropdownItem(label: 'Theming', value: 'theming'),
+                      M3EDropdownItem(label: 'Accessibility', value: 'a11y'),
+                      M3EDropdownItem(label: 'Navigation', value: 'navigation'),
+                    ],
+                    fieldStyle: const M3EDropdownFieldStyle(
+                      hintText: 'Select skills',
+                      showClearIcon: true,
+                    ),
+                    onSelectionChanged: (List<M3EDropdownItem<String>> items) {
+                      setState(() {
+                        _skills
+                          ..clear()
+                          ..addAll(items.map((M3EDropdownItem<String> i) => i.value));
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            DemoRow(
+              label: 'Async load',
+              children: <Widget>[
+                SizedBox(
+                  width: 280,
+                  child: M3EDropdownMenu<String>.future(
+                    singleSelect: true,
+                    future: _loadCountries,
+                    fieldStyle: const M3EDropdownFieldStyle(
+                      hintText: 'Load countries',
+                    ),
+                    onSelectionChanged: (List<M3EDropdownItem<String>> items) {
+                      setState(() {
+                        _asyncCountry =
+                            items.isEmpty ? null : items.first.value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            if (_asyncCountry != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Country: $_asyncCountry',
+                  style: theme.typeScale.bodyMedium
+                      .copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+          ],
+        ),
+        GallerySection(
           title: 'Sliders',
           children: <Widget>[
             DemoRow(
@@ -194,5 +296,14 @@ class _SelectionPageState extends State<SelectionPage> {
         _chips.remove(value);
       }
     });
+  }
+
+  Future<List<M3EDropdownItem<String>>> _loadCountries() async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    return const <M3EDropdownItem<String>>[
+      M3EDropdownItem(label: 'Ghana', value: 'gh'),
+      M3EDropdownItem(label: 'Kenya', value: 'ke'),
+      M3EDropdownItem(label: 'Nigeria', value: 'ng'),
+    ];
   }
 }
