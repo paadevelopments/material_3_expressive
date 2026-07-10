@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'm3e_theme.dart';
 
@@ -6,6 +7,9 @@ import 'm3e_theme.dart';
 ///
 /// Owns platform-brightness observation, [M3EThemeController] lifecycle, and
 /// keeps Material [ThemeMode] aligned with the resolved M3E brightness.
+///
+/// System status and navigation bars are transparent. Icon brightness follows
+/// the active M3E theme and updates when the theme switches.
 ///
 /// `themeMode` and the core `MaterialApp.builder` are managed internally.
 /// Use `appBuilder` to wrap the themed subtree when extra integration layers
@@ -18,6 +22,7 @@ class M3EMaterialApp extends StatefulWidget {
     this.dynamicColoring,
     this.initialTheme,
     this.controller,
+    this.drawUnderSystemBars = false,
     this.navigatorKey,
     this.scaffoldMessengerKey,
     this.routes = const <String, WidgetBuilder>{},
@@ -62,6 +67,11 @@ class M3EMaterialApp extends StatefulWidget {
   final bool? dynamicColoring;
   final Brightness? initialTheme;
   final M3EThemeController? controller;
+
+  /// When true, enables edge-to-edge layout so app content draws under
+  /// transparent system bars. When false, system bars remain transparent but
+  /// default layout insets apply.
+  final bool drawUnderSystemBars;
 
   final GlobalKey<NavigatorState>? navigatorKey;
   final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
@@ -128,6 +138,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   @override
   void initState() {
     super.initState();
+    _applySystemUiMode(widget.drawUnderSystemBars);
     if (widget._usesAdaptiveLifecycle) {
       WidgetsBinding.instance.addObserver(this);
       _effectiveController.addListener(_onThemeControllerChanged);
@@ -137,6 +148,9 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   @override
   void didUpdateWidget(covariant M3EMaterialApp oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.drawUnderSystemBars != widget.drawUnderSystemBars) {
+      _applySystemUiMode(widget.drawUnderSystemBars);
+    }
     if (oldWidget.controller != widget.controller) {
       if (oldWidget._usesAdaptiveLifecycle) {
         (oldWidget.controller ?? _internalController)
@@ -150,6 +164,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
 
   @override
   void dispose() {
+    _applySystemUiMode(false);
     if (widget._usesAdaptiveLifecycle) {
       WidgetsBinding.instance.removeObserver(this);
       _effectiveController.removeListener(_onThemeControllerChanged);
@@ -166,6 +181,61 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     setState(() {});
   }
 
+  void _applySystemUiMode(bool drawUnderSystemBars) {
+    if (WidgetsBinding.instance.platformDispatcher.views.isEmpty) {
+      return;
+    }
+    if (drawUnderSystemBars) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      return;
+    }
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: const [SystemUiOverlay.top, SystemUiOverlay.bottom],
+    );
+  }
+
+  Brightness _effectiveBrightness(BuildContext context) {
+    final Brightness platformBrightness =
+        MediaQuery.maybePlatformBrightnessOf(context) ??
+            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+
+    return _effectiveController.resolveBrightness(
+      platformBrightness,
+      autoTheming: widget.autoTheming ?? false,
+      initialTheme: widget.initialTheme ?? widget.data.brightness,
+    );
+  }
+
+  SystemUiOverlayStyle _overlayStyleFor(Brightness brightness) {
+    final Brightness iconBrightness =
+        brightness == Brightness.dark ? Brightness.light : Brightness.dark;
+
+    return const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+    ).copyWith(
+      statusBarIconBrightness: iconBrightness,
+      systemNavigationBarIconBrightness: iconBrightness,
+      statusBarBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
+  Widget _wrapThemedChild(BuildContext context, Widget themed) {
+    if (!widget.drawUnderSystemBars) {
+      return themed;
+    }
+    final MediaQueryData media = MediaQuery.of(context);
+    return MediaQuery(
+      data: media.copyWith(
+        padding: media.padding.copyWith(bottom: 0),
+      ),
+      child: themed,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Brightness platformBrightness =
@@ -176,56 +246,63 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
       autoTheming: widget.autoTheming ?? false,
       initialTheme: widget.initialTheme,
     );
+    final SystemUiOverlayStyle overlayStyle =
+        _overlayStyleFor(_effectiveBrightness(context));
+    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
 
-    return MaterialApp(
-      navigatorKey: widget.navigatorKey,
-      scaffoldMessengerKey: widget.scaffoldMessengerKey,
-      home: widget.home,
-      routes: widget.routes,
-      initialRoute: widget.initialRoute,
-      onGenerateRoute: widget.onGenerateRoute,
-      onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
-      onUnknownRoute: widget.onUnknownRoute,
-      onNavigationNotification: widget.onNavigationNotification,
-      navigatorObservers: widget.navigatorObservers,
-      title: widget.title,
-      onGenerateTitle: widget.onGenerateTitle,
-      color: widget.color,
-      theme: widget.theme ?? widget.data.toThemeData(),
-      darkTheme:
-          widget.darkTheme ?? widget.data.deriveDarkTemplate().toThemeData(),
-      highContrastTheme: widget.highContrastTheme,
-      highContrastDarkTheme: widget.highContrastDarkTheme,
-      themeMode: themeMode,
-      themeAnimationDuration: widget.themeAnimationDuration,
-      themeAnimationCurve: widget.themeAnimationCurve,
-      locale: widget.locale,
-      localizationsDelegates: widget.localizationsDelegates,
-      localeListResolutionCallback: widget.localeListResolutionCallback,
-      localeResolutionCallback: widget.localeResolutionCallback,
-      supportedLocales: widget.supportedLocales,
-      debugShowMaterialGrid: widget.debugShowMaterialGrid,
-      showPerformanceOverlay: widget.showPerformanceOverlay,
-      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      showSemanticsDebugger: widget.showSemanticsDebugger,
-      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      shortcuts: widget.shortcuts,
-      actions: widget.actions,
-      restorationScopeId: widget.restorationScopeId,
-      scrollBehavior: widget.scrollBehavior,
-      themeAnimationStyle: widget.themeAnimationStyle,
-      builder: (BuildContext context, Widget? child) {
-        final Widget themed = M3ETheme(
-          data: widget.data,
-          autoTheming: widget.autoTheming,
-          dynamicColoring: widget.dynamicColoring,
-          initialTheme: widget.initialTheme,
-          controller: _effectiveController,
-          child: child ?? const SizedBox.shrink(),
-        );
-        return widget.appBuilder?.call(context, themed) ?? themed;
-      },
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: MaterialApp(
+        navigatorKey: widget.navigatorKey,
+        scaffoldMessengerKey: widget.scaffoldMessengerKey,
+        home: widget.home,
+        routes: widget.routes,
+        initialRoute: widget.initialRoute,
+        onGenerateRoute: widget.onGenerateRoute,
+        onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+        onUnknownRoute: widget.onUnknownRoute,
+        onNavigationNotification: widget.onNavigationNotification,
+        navigatorObservers: widget.navigatorObservers,
+        title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
+        color: widget.color,
+        theme: widget.theme ?? widget.data.toThemeData(),
+        darkTheme:
+            widget.darkTheme ?? widget.data.deriveDarkTemplate().toThemeData(),
+        highContrastTheme: widget.highContrastTheme,
+        highContrastDarkTheme: widget.highContrastDarkTheme,
+        themeMode: themeMode,
+        themeAnimationDuration: widget.themeAnimationDuration,
+        themeAnimationCurve: widget.themeAnimationCurve,
+        locale: widget.locale,
+        localizationsDelegates: widget.localizationsDelegates,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        supportedLocales: widget.supportedLocales,
+        debugShowMaterialGrid: widget.debugShowMaterialGrid,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+        shortcuts: widget.shortcuts,
+        actions: widget.actions,
+        restorationScopeId: widget.restorationScopeId,
+        scrollBehavior: widget.scrollBehavior,
+        themeAnimationStyle: widget.themeAnimationStyle,
+        builder: (BuildContext context, Widget? child) {
+          Widget themed = M3ETheme(
+            data: widget.data,
+            autoTheming: widget.autoTheming,
+            dynamicColoring: widget.dynamicColoring,
+            initialTheme: widget.initialTheme,
+            controller: _effectiveController,
+            child: child ?? const SizedBox.shrink(),
+          );
+          themed = _wrapThemedChild(context, themed);
+          return widget.appBuilder?.call(context, themed) ?? themed;
+        },
+      ),
     );
   }
 }

@@ -97,11 +97,15 @@ class MyApp extends StatelessWidget {
       data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
       autoTheming: true,
       dynamicColoring: true,
+      drawUnderSystemBars: true, // transparent system bars, edge-to-edge layout
       home: const HomePage(),
     );
   }
 }
 ```
+
+Surfaces draw behind the OS navigation bar; components such as `M3ENavigationBar`
+keep interactive content above the gesture area via `viewPadding`.
 
 ### Alternative: `M3ETheme` subtree
 

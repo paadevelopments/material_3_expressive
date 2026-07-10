@@ -73,51 +73,55 @@ class M3ENavigationBar extends StatelessWidget {
     final bg = backgroundColor ?? navTheme.containerColor(m3e.colorScheme);
     final shape = navTheme.containerShape(shapeFamily);
 
+    final bottomInset =
+        safeArea ? MediaQuery.viewPaddingOf(context).bottom : 0.0;
+
     final nav = Material(
       color: bg,
       elevation: elevation ?? 0,
       shape: shape,
-      child: SizedBox(
-        height: height,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          removeBottom: safeArea,
-          child: NavigationBar(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SizedBox(
           height: height,
-          elevation: elevation ?? 0,
-          indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
-              ? Colors.transparent
-              : (indicatorColor ?? navTheme.indicatorColor(m3e.colorScheme)),
-          indicatorShape: switch (indicatorStyle) {
-            M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
-            M3ENavBarIndicatorStyle.underline =>
-            const StadiumBorder(), // we'll fake underline via decoration below
-            M3ENavBarIndicatorStyle.none => const StadiumBorder(),
-          },
-          backgroundColor:
-          Colors.transparent, // outer Material supplies bg + shape
-          labelBehavior: switch (labelBehavior) {
-            M3ENavBarLabelBehavior.alwaysShow =>
-            NavigationDestinationLabelBehavior.alwaysShow,
-            M3ENavBarLabelBehavior.onlySelected =>
-            NavigationDestinationLabelBehavior.onlyShowSelected,
-            M3ENavBarLabelBehavior.alwaysHide =>
-            NavigationDestinationLabelBehavior.alwaysHide,
-          },
-          selectedIndex: selectedIndex,
-          destinations: List.generate(destinations.length, (i) {
-            final d = destinations[i];
-            return NavigationDestination(
-              icon: _icon(context, false, d, metrics.iconSize),
-              selectedIcon: _selectedIcon(
-                  context, true, d, metrics.iconSize, navTheme, indicatorStyle),
-              label: d.label,
-              tooltip: d.semanticLabel,
-            );
-          }),
-          onDestinationSelected: onDestinationSelected,
-        ),
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            removeBottom: safeArea,
+            child: NavigationBar(
+              height: height,
+              elevation: elevation ?? 0,
+              indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
+                  ? Colors.transparent
+                  : (indicatorColor ?? navTheme.indicatorColor(m3e.colorScheme)),
+              indicatorShape: switch (indicatorStyle) {
+                M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
+                M3ENavBarIndicatorStyle.underline => const StadiumBorder(),
+                M3ENavBarIndicatorStyle.none => const StadiumBorder(),
+              },
+              backgroundColor: Colors.transparent,
+              labelBehavior: switch (labelBehavior) {
+                M3ENavBarLabelBehavior.alwaysShow =>
+                NavigationDestinationLabelBehavior.alwaysShow,
+                M3ENavBarLabelBehavior.onlySelected =>
+                NavigationDestinationLabelBehavior.onlyShowSelected,
+                M3ENavBarLabelBehavior.alwaysHide =>
+                NavigationDestinationLabelBehavior.alwaysHide,
+              },
+              selectedIndex: selectedIndex,
+              destinations: List.generate(destinations.length, (i) {
+                final d = destinations[i];
+                return NavigationDestination(
+                  icon: _icon(context, false, d, metrics.iconSize),
+                  selectedIcon: _selectedIcon(
+                      context, true, d, metrics.iconSize, navTheme, indicatorStyle),
+                  label: d.label,
+                  tooltip: d.semanticLabel,
+                );
+              }),
+              onDestinationSelected: onDestinationSelected,
+            ),
+          ),
         ),
       ),
     );
@@ -139,15 +143,6 @@ class M3ENavigationBar extends StatelessWidget {
     );
 
     Widget result = content;
-    if (safeArea || semanticLabel != null) {
-      result = SafeArea(
-        top: false,
-        left: false,
-        right: false,
-        bottom: safeArea,
-        child: content,
-      );
-    }
     if (semanticLabel != null) {
       result = Semantics(
         container: true,

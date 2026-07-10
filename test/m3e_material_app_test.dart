@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -147,5 +148,157 @@ void main() {
     expect(app.locale, locale);
     expect(app.supportedLocales, supportedLocales);
     expect(app.showPerformanceOverlay, isTrue);
+  });
+
+  testWidgets('M3EMaterialApp applies light overlay style for light brightness',
+      (WidgetTester tester) async {
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: M3EMaterialApp(
+          data: base,
+          autoTheming: true,
+          home: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region = tester.widget(
+      find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+    );
+    final SystemUiOverlayStyle style = region.value;
+
+    expect(style.statusBarColor, Colors.transparent);
+    expect(style.systemNavigationBarColor, Colors.transparent);
+    expect(style.statusBarIconBrightness, Brightness.dark);
+    expect(style.systemNavigationBarIconBrightness, Brightness.dark);
+    expect(style.statusBarBrightness, Brightness.dark);
+    expect(style.systemStatusBarContrastEnforced, isFalse);
+    expect(style.systemNavigationBarContrastEnforced, isFalse);
+  });
+
+  testWidgets('M3EMaterialApp updates overlay style after brightness toggle',
+      (WidgetTester tester) async {
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: base,
+        autoTheming: true,
+        home: Builder(
+          builder: (BuildContext context) {
+            return M3EButton(
+              onPressed: () {
+                M3ETheme.controllerOf(context)?.toggleBrightness(
+                  autoTheming: true,
+                );
+              },
+              child: const Text('Toggle'),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    SystemUiOverlayStyle overlayStyle() => tester
+        .widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+          find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+        )
+        .value;
+
+    expect(overlayStyle().statusBarIconBrightness, Brightness.dark);
+
+    await tester.tap(find.text('Toggle'));
+    await tester.pumpAndSettle();
+
+    expect(overlayStyle().statusBarIconBrightness, Brightness.light);
+    expect(overlayStyle().systemNavigationBarIconBrightness, Brightness.light);
+    expect(overlayStyle().statusBarBrightness, Brightness.light);
+  });
+
+  testWidgets('M3EMaterialApp accepts drawUnderSystemBars without error',
+      (WidgetTester tester) async {
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: base,
+        drawUnderSystemBars: true,
+        home: const M3EButton(
+          onPressed: null,
+          child: Text('Probe'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(M3EMaterialApp), findsOneWidget);
+    expect(find.byType(AnnotatedRegion<SystemUiOverlayStyle>), findsOneWidget);
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: base,
+        home: const M3EButton(
+          onPressed: null,
+          child: Text('Probe'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(M3EMaterialApp), findsOneWidget);
+  });
+
+  test('M3EMaterialApp defaults drawUnderSystemBars to false', () {
+    final app = M3EMaterialApp(
+      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+      home: const SizedBox.shrink(),
+    );
+
+    expect(app.drawUnderSystemBars, isFalse);
+  });
+
+  testWidgets(
+      'M3EMaterialApp clears bottom padding when drawUnderSystemBars is true',
+      (WidgetTester tester) async {
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    const media = MediaQueryData(
+      padding: EdgeInsets.only(bottom: 48),
+      viewPadding: EdgeInsets.only(bottom: 48),
+    );
+    double capturedBottom = -1;
+
+    Future<void> pump({required bool drawUnderSystemBars}) {
+      return tester.pumpWidget(
+        MediaQuery(
+          data: media,
+          child: M3EMaterialApp(
+            data: base,
+            drawUnderSystemBars: drawUnderSystemBars,
+            home: Builder(
+              builder: (BuildContext context) {
+                capturedBottom = MediaQuery.paddingOf(context).bottom;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pump(drawUnderSystemBars: true);
+    await tester.pumpAndSettle();
+    expect(capturedBottom, 0);
+
+    await pump(drawUnderSystemBars: false);
+    await tester.pumpAndSettle();
+    expect(capturedBottom, 48);
   });
 }

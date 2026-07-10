@@ -210,6 +210,7 @@ class _NavigationPageState extends State<NavigationPage> {
           M3ENavigationBar(
             destinations: _barDestinations,
             selectedIndex: _barIndex,
+            safeArea: false,
             onDestinationSelected: (int i) => setState(() => _barIndex = i),
           ),
         ),

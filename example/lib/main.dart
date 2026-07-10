@@ -30,6 +30,7 @@ class _ExampleAppState extends State<ExampleApp> {
     return M3EMaterialApp(
       title: 'Material 3 Expressive',
       debugShowCheckedModeBanner: false,
+      drawUnderSystemBars: true,
       data: M3EThemeData.light(seedColor: _seed),
       autoTheming: true,
       dynamicColoring: true,
