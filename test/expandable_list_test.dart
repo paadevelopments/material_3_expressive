@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('M3EExpandableList single-expand collapses prior item',
       (tester) async {
-    final List<int> expandedEvents = <int>[];
+    final expandedEvents = <int>[];
 
     await tester.pumpWidget(
       _host(

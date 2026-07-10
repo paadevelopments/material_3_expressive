@@ -162,7 +162,9 @@ class M3EDropdownItemStyle with Diagnosticable {
     M3EDropdownItemStyle? b,
     double t,
   ) {
-    if (a == null && b == null) return const M3EDropdownItemStyle();
+    if (a == null && b == null) {
+      return const M3EDropdownItemStyle();
+    }
     return M3EDropdownItemStyle(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       selectedBackgroundColor: Color.lerp(
@@ -265,14 +267,15 @@ class M3EDropdownItemStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(
-      ColorProperty('selectedBackgroundColor', selectedBackgroundColor),
-    );
-    properties.add(DoubleProperty('outerRadius', outerRadius));
-    properties.add(DoubleProperty('innerRadius', innerRadius));
-    properties.add(
-      DiagnosticsProperty<EdgeInsetsGeometry>('itemPadding', itemPadding),
-    );
+    properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(
+        ColorProperty('selectedBackgroundColor', selectedBackgroundColor),
+      )
+      ..add(DoubleProperty('outerRadius', outerRadius))
+      ..add(DoubleProperty('innerRadius', innerRadius))
+      ..add(
+        DiagnosticsProperty<EdgeInsetsGeometry>('itemPadding', itemPadding),
+      );
   }
 }

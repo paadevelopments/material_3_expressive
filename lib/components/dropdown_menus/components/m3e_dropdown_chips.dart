@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 
+import '../../../foundations/m3e_motion.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_chip_style.dart';
 import '../utils/m3e_dropdown_spring_motion.dart';
-import '../../../foundations/m3e_motion.dart';
 
 /// Internal widget for a bouncy spring chip.
 class M3ESpringChip<T> extends StatefulWidget {
@@ -75,7 +75,7 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
 
   void triggerSquish(double intensity) {
     // We animate from 1.0 -> intensity -> 1.0 (handled by the spring)
-    _squishCtrl.animateTo(1.0, from: intensity);
+    _squishCtrl.animateTo(1, from: intensity);
   }
 
   @override
@@ -112,7 +112,7 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
         // result: horizontal = entrance_scale * squish_factor
         //         vertical   = entrance_scale
         final double finalXScale = scale * squish;
-        final double finalYScale = scale;
+        final finalYScale = scale;
 
         return Transform.translate(
           offset: Offset(slide, 0),
@@ -121,7 +121,7 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
             child: Transform(
               alignment: Alignment.centerLeft,
               // diagonal3Values is the modern, clean way to set x, y, z scale
-              transform: Matrix4.diagonal3Values(finalXScale, finalYScale, 1.0),
+              transform: Matrix4.diagonal3Values(finalXScale, finalYScale, 1),
               child: child,
             ),
           ),
@@ -194,7 +194,7 @@ class M3EChipFlowDelegate extends FlowDelegate {
   @override
   void paintChildren(FlowPaintingContext context) {
     double x = 0;
-    for (int i = 0; i < context.childCount; i++) {
+    for (var i = 0; i < context.childCount; i++) {
       final childSize = context.getChildSize(i)!;
       final slideOffset = slideAnimations[i].value;
       context.paintChild(
@@ -264,7 +264,7 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
   }
 
   void triggerSquish(double intensity) {
-    _squishCtrl.animateTo(1.0, from: intensity);
+    _squishCtrl.animateTo(1, from: intensity);
   }
 
   void animateOut(VoidCallback onDone) {
@@ -290,7 +290,7 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.count != widget.count) {
       // Pop effect when the number increments/decrements
-      _popCtrl.animateTo(1.0, from: 1.25);
+      _popCtrl.animateTo(1, from: 1.25);
     }
   }
 
@@ -317,7 +317,7 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
             transform: Matrix4.diagonal3Values(
               scale * pop * squish,
               scale * pop,
-              1.0,
+              1,
             ),
             child: child,
           ),

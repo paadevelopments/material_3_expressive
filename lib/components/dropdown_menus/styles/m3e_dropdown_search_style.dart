@@ -112,7 +112,9 @@ class M3EDropdownSearchStyle with Diagnosticable {
 
   /// Linearly interpolate between two search styles.
   static M3EDropdownSearchStyle lerp(M3EDropdownSearchStyle? a, M3EDropdownSearchStyle? b, double t) {
-    if (a == null && b == null) return const M3EDropdownSearchStyle();
+    if (a == null && b == null) {
+      return const M3EDropdownSearchStyle();
+    }
     return M3EDropdownSearchStyle(
       hintText: t < 0.5
           ? (a?.hintText ?? 'Search…')
@@ -182,10 +184,11 @@ class M3EDropdownSearchStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('hintText', hintText));
-    properties.add(ColorProperty('fillColor', fillColor));
-    properties.add(
-      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-    );
+    properties
+      ..add(StringProperty('hintText', hintText))
+      ..add(ColorProperty('fillColor', fillColor))
+      ..add(
+        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
+      );
   }
 }

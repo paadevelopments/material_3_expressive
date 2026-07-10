@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
 
 import '../../../foundations/foundations.dart';
 

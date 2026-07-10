@@ -3,7 +3,9 @@
 
 import 'dart:convert';
 
-/// A single item in an [M3EDropdownMenu].
+import 'package:flutter/foundation.dart';
+
+/// A single item in an `M3EDropdownMenu`.
 ///
 /// Each item has a display [label] and an associated [value]. Items can be
 /// individually [disabled] or [selected] at construction time.
@@ -11,6 +13,7 @@ import 'dart:convert';
 /// Items are **immutable** — use [copyWith] to derive new instances when
 /// toggling selection or disabled state. This prevents accidental state
 /// mutations and ensures the controller can properly detect changes.
+@immutable
 class M3EDropdownItem<T> {
   /// The text shown in the dropdown list.
   final String label;

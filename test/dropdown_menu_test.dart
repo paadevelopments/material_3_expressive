@@ -24,9 +24,9 @@ void main() {
   testWidgets('M3EDropdownMenu renders field with hint text', (tester) async {
     await tester.pumpWidget(
       _host(
-        M3EDropdownMenu<String>(
+        const M3EDropdownMenu<String>(
           items: _items,
-          fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
+          fieldStyle: M3EDropdownFieldStyle(hintText: 'Choose framework'),
         ),
       ),
     );

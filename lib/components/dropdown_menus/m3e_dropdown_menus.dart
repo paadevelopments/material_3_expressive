@@ -37,8 +37,11 @@ typedef M3EDropdownFutureRequest<T> =
     Future<List<M3EDropdownItem<T>>> Function();
 
 /// Signature for a custom item builder inside the dropdown list.
-typedef M3EDropdownItemBuilder<T> =
-    Widget Function(M3EDropdownItem<T> item, bool selected, VoidCallback onTap);
+typedef M3EDropdownItemBuilder<T> = Widget Function(
+  M3EDropdownItem<T> item, {
+  required bool selected,
+  required VoidCallback onTap,
+});
 
 /// A Material 3 Expressive dropdown menu.
 ///
@@ -353,8 +356,8 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller
-        ..setOnSelectionChange(widget.onSelectionChanged)
-        ..setOnSearchChange(widget.onSearchChanged);
+        ..onSelectionChange = widget.onSelectionChanged
+        ..onSearchChange = widget.onSearchChanged;
       _listenBackButton();
     });
 
@@ -372,7 +375,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   }
 
   void _listenBackButton() {
-    if (!widget.closeOnBackButton) return;
+    if (!widget.closeOnBackButton) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         _registerBackButtonDispatcherCallback();
@@ -387,7 +392,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     if (rootBackDispatcher != null) {
       rootBackDispatcher.createChildBackButtonDispatcher()
         ..addCallback(() {
-          if (_controller.isOpen) _close();
+          if (_controller.isOpen) {
+            _close();
+          }
           return Future.value(true);
         })
         ..takePriority();
@@ -406,7 +413,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     // Controller changed
     if (oldWidget.controller != widget.controller) {
       _controller.removeListener(_onControllerChanged);
-      if (_ownController) _controller.dispose();
+      if (_ownController) {
+        _controller.dispose();
+      }
 
       if (widget.controller != null) {
         _controller = widget.controller!;
@@ -423,13 +432,15 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       }
       _controller.addListener(_onControllerChanged);
       _controller
-        ..setOnSelectionChange(widget.onSelectionChanged)
-        ..setOnSearchChange(widget.onSearchChanged);
+        ..onSelectionChange = widget.onSelectionChanged
+        ..onSearchChange = widget.onSearchChanged;
     }
 
     // FocusNode changed
     if (oldWidget.focusNode != widget.focusNode) {
-      if (oldWidget.focusNode == null) _focusNode.dispose();
+      if (oldWidget.focusNode == null) {
+        _focusNode.dispose();
+      }
       _focusNode = widget.focusNode ?? FocusNode();
     }
 
@@ -443,15 +454,20 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   @override
   void dispose() {
-    _expandCtrl.removeListener(_onExpandAnimationTick);
-    _expandCtrl.dispose();
+    _expandCtrl
+      ..removeListener(_onExpandAnimationTick)
+      ..dispose();
     _arrowCtrl.dispose();
     _searchDebounce?.cancel();
     _searchTextController.dispose();
     _loadingNotifier.dispose();
     _controller.removeListener(_onControllerChanged);
-    if (_ownController) _controller.dispose();
-    if (widget.focusNode == null) _focusNode.dispose();
+    if (_ownController) {
+      _controller.dispose();
+    }
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -504,11 +520,15 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   // ── Open / close logic ──
 
   void _open() {
-    if (_controller.isOpen && _portalController.isShowing) return;
-    if (!widget.enabled || _isLoading) return;
+    if (_controller.isOpen && _portalController.isShowing) {
+      return;
+    }
+    if (!widget.enabled || _isLoading) {
+      return;
+    }
 
     if (!_controller.isOpen) {
-      _controller.setOpen(true);
+      _controller.setOpen(open: true);
     }
 
     // Determine direction before opening
@@ -524,15 +544,12 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       switch (widget.dropdownStyle.expandDirection) {
         case M3EDropdownExpandDirection.down:
           _openingShowOnTop = false;
-          break;
         case M3EDropdownExpandDirection.up:
           _openingShowOnTop = true;
-          break;
         case M3EDropdownExpandDirection.auto:
           _openingShowOnTop =
               spaceBelow < widget.dropdownStyle.maxHeight &&
               spaceAbove > spaceBelow;
-          break;
       }
     }
 
@@ -544,10 +561,12 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   }
 
   void _close() {
-    if (!_controller.isOpen && !_portalController.isShowing) return;
+    if (!_controller.isOpen && !_portalController.isShowing) {
+      return;
+    }
 
     if (_controller.isOpen) {
-      _controller.setOpen(false);
+      _controller.setOpen(open: false);
     }
     _expandCtrl.motion = widget.closeMotion.toMotion();
     _arrowCtrl.motion = widget.closeMotion.toMotion();
@@ -560,7 +579,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   }
 
   void _toggle() {
-    if (!widget.enabled || _isLoading) return;
+    if (!widget.enabled || _isLoading) {
+      return;
+    }
     _applyHaptic();
     if (_controller.isOpen) {
       _close();
@@ -597,7 +618,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   // ── Item selection ──
 
   void _onItemTap(M3EDropdownItem<T> item) {
-    if (item.disabled) return;
+    if (item.disabled) {
+      return;
+    }
     _applyHaptic();
 
     if (widget.singleSelect) {
@@ -724,15 +747,12 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       switch (widget.dropdownStyle.expandDirection) {
         case M3EDropdownExpandDirection.down:
           showOnTop = false;
-          break;
         case M3EDropdownExpandDirection.up:
           showOnTop = true;
-          break;
         case M3EDropdownExpandDirection.auto:
           showOnTop =
               spaceBelow < widget.dropdownStyle.maxHeight &&
               spaceAbove > spaceBelow;
-          break;
       }
     }
 
@@ -771,7 +791,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   /// Detects taps outside the field and dropdown, and closes the dropdown.
   void _handleOutsideTap(PointerDownEvent event) {
-    if (!_controller.isOpen) return;
+    if (!_controller.isOpen) {
+      return;
+    }
 
     // If the tap landed on the field itself, let the field handle it.
     final renderBox = context.findRenderObject() as RenderBox?;
@@ -860,7 +882,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     Widget content;
     final selected = _controller.selectedItems;
 
-    final bool isOpenChanged = _lastIsOpen != _controller.isOpen;
+    final isOpenChanged = _lastIsOpen != _controller.isOpen;
     _lastIsOpen = _controller.isOpen;
 
     if (widget.selectedItemBuilder != null && selected.isNotEmpty) {
@@ -1020,9 +1042,13 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
         !_isMoreChipsRemoving) {
       _isMoreChipsRemoving = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         _moreKey.currentState?.animateOut(() {
-          if (!mounted) return;
+          if (!mounted) {
+            return;
+          }
           setState(() {
             _isMoreChipsRemoving = false;
             _moreChipsLastCount = 0;
@@ -1036,7 +1062,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       if (_isMoreChipsRemoving) {
         _isMoreChipsRemoving = false;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
+          if (!mounted) {
+            return;
+          }
           _moreKey.currentState?.animateIn();
         });
       }
@@ -1072,7 +1100,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     final List<Widget> chipWidgets = [];
     final List<Animation<double>> slideAnims = [];
 
-    for (int i = 0; i < displayOptions.length; i++) {
+    for (var i = 0; i < displayOptions.length; i++) {
       final option = displayOptions[i];
       final optionKey = option.value as Object;
 
@@ -1092,7 +1120,6 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           labelStyle: labelStyle,
           cs: cs,
           enabled: widget.enabled,
-          slideOffset: 0, // Flow handles positioning, not the chip itself
           onRemove: () =>
               _handleChipRemove(option, optionKey, chipKey, displayOptions, i),
           customChild: widget.selectedItemBuilder?.call(option),
@@ -1109,12 +1136,14 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       int earliestInsertIdx = newOrder.length;
       for (final nk in newKeys) {
         final idx = newOrder.indexOf(nk);
-        if (idx < earliestInsertIdx) earliestInsertIdx = idx;
+        if (idx < earliestInsertIdx) {
+          earliestInsertIdx = idx;
+        }
       }
 
       // All old chips at or after the insertion point were pushed right
       final chipsToPush = <Object>[];
-      for (int i = earliestInsertIdx; i < newOrder.length; i++) {
+      for (var i = earliestInsertIdx; i < newOrder.length; i++) {
         final k = newOrder[i];
         if (!newKeys.contains(k)) {
           chipsToPush.add(k);
@@ -1123,8 +1152,10 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
       if (chipsToPush.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          for (int i = 0; i < chipsToPush.length; i++) {
+          if (!mounted) {
+            return;
+          }
+          for (var i = 0; i < chipsToPush.length; i++) {
             final stateKey = _chipKeys[chipsToPush[i]];
             Future.delayed(Duration(milliseconds: i * 25), () {
               if (stateKey?.currentState != null) {
@@ -1150,7 +1181,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       );
 
       // Ensure the Flow delegate has an animation to track for this child
-      slideAnims.add(AlwaysStoppedAnimation(0));
+      slideAnims.add(const AlwaysStoppedAnimation(0));
     }
 
     if (cd.wrap) {
@@ -1192,7 +1223,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     // 3. Start the Scale-Out animation for the deleted chip
     _removingChips.add(optionKey);
     chipKey.currentState?.animateOut(() {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       // 4. Update State: The list physically shifts now
       _controller.unselectWhere((e) => e.value == option.value);
@@ -1205,7 +1238,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       final remainingCount = selectedItems.length - maxDisplay;
 
       // 5. Loop through the chips we captured in Step 2
-      for (int i = 0; i < chipsToAnimate.length; i++) {
+      for (var i = 0; i < chipsToAnimate.length; i++) {
         final item = chipsToAnimate[i];
         final key = item.value as Object;
         final stateKey = _chipKeys[key];
@@ -1214,8 +1247,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
         if (slideCtrl != null) {
           // --- A. THE SLIDE ---
           // Always slide from the old position to the new 0 position
-          slideCtrl.motion = M3EMotion.effectsFast.toMotion();
-          slideCtrl.animateTo(0, from: removedWidth);
+          slideCtrl
+            ..motion = M3EMotion.effectsFast.toMotion()
+            ..animateTo(0, from: removedWidth);
 
           // --- B. THE SQUISH ---
           // We calculate the stagger based on its position in the "moving group"
@@ -1259,7 +1293,11 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
         final progress = _expandCtrl.value.clamp(0.0, 1.5);
         final clampedScale = progress.clamp(0.0, 1.2);
 
-        if (progress <= 0.01) return const SizedBox.shrink();
+        if (progress <= 0.01) {
+
+          return const SizedBox.shrink();
+
+        }
 
         return Opacity(
           opacity: progress.clamp(0.0, 1.0),
@@ -1326,8 +1364,8 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                       if (widget.itemBuilder != null) {
                         return widget.itemBuilder!(
                           item,
-                          item.selected,
-                          () => _onItemTap(item),
+                          selected: item.selected,
+                          onTap: () => _onItemTap(item),
                         );
                       }
 

@@ -2,6 +2,8 @@
 // Adapted for material_3_expressive: import paths, foundations wiring, M3E naming.
 
 import 'package:flutter/foundation.dart';
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
 
 import '../models/m3e_dropdown_item.dart';
 
@@ -45,8 +47,8 @@ class M3EDropdownController<T> extends ChangeNotifier {
   bool _isDisposed = false;
 
   // Callbacks wired by the widget
-  ValueChanged<List<M3EDropdownItem<T>>>? _onSelectionChange;
-  ValueChanged<String>? _onSearchChange;
+  ValueChanged<List<M3EDropdownItem<T>>>? onSelectionChange;
+  ValueChanged<String>? onSearchChange;
 
   // ── Public getters ──
 
@@ -95,16 +97,6 @@ class M3EDropdownController<T> extends ChangeNotifier {
     super.notifyListeners();
   }
 
-  /// Wires up the selection-change callback. Called by the widget.
-  void setOnSelectionChange(ValueChanged<List<M3EDropdownItem<T>>>? callback) {
-    _onSelectionChange = callback;
-  }
-
-  /// Wires up the search-change callback. Called by the widget.
-  void setOnSearchChange(ValueChanged<String>? callback) {
-    _onSearchChange = callback;
-  }
-
   // ── Search ──
 
   /// Re-applies the current search filter after items are modified.
@@ -123,7 +115,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
   void setSearchQuery(String query) {
     _searchQuery = query;
     _reapplySearchFilter();
-    _onSearchChange?.call(query);
+    onSearchChange?.call(query);
     notifyListeners();
   }
 
@@ -131,7 +123,9 @@ class M3EDropdownController<T> extends ChangeNotifier {
   void clearSearchQuery({bool notify = false}) {
     _searchQuery = '';
     _filteredItems = List.from(_items);
-    if (notify) notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   /// Clears the current search query and shows all items.
@@ -151,7 +145,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     _searchQuery = '';
     _filteredItems = List.from(_items);
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Adds a single item. If [index] is provided, inserts at that position.
@@ -163,7 +157,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Adds multiple items at the end of the list.
@@ -171,7 +165,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     _items.addAll(items);
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   // ── Selection ──
@@ -185,7 +179,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// De-selects every item.
@@ -197,7 +191,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Selects the item at the given [index].
@@ -205,13 +199,17 @@ class M3EDropdownController<T> extends ChangeNotifier {
   /// Does nothing if [index] is out of range, or the item is already
   /// selected or disabled.
   void selectAtIndex(int index) {
-    if (index < 0 || index >= _items.length) return;
+    if (index < 0 || index >= _items.length) {
+      return;
+    }
     final item = _items[index];
-    if (item.disabled || item.selected) return;
+    if (item.disabled || item.selected) {
+      return;
+    }
     _items[index] = item.copyWith(selected: true);
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Selects items matching [predicate].
@@ -223,7 +221,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// De-selects items matching [predicate].
@@ -235,7 +233,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Toggles items matching [predicate].
@@ -247,7 +245,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Selects only [item], deselecting all others (single-select helper).
@@ -261,7 +259,7 @@ class M3EDropdownController<T> extends ChangeNotifier {
     }
     _reapplySearchFilter();
     notifyListeners();
-    _onSelectionChange?.call(selectedItems);
+    onSelectionChange?.call(selectedItems);
   }
 
   /// Disables items matching [predicate].
@@ -313,10 +311,12 @@ class M3EDropdownController<T> extends ChangeNotifier {
   }
 
   /// Sets the open state directly (used by the widget internally).
-  void setOpen(bool open) {
+  void setOpen({required bool open}) {
     if (_isOpen != open) {
       _isOpen = open;
-      if (!open) clearSearchQuery();
+      if (!open) {
+        clearSearchQuery();
+      }
       notifyListeners();
     }
   }
@@ -325,7 +325,9 @@ class M3EDropdownController<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (_isDisposed) return;
+    if (_isDisposed) {
+      return;
+    }
     _isDisposed = true;
     super.dispose();
   }

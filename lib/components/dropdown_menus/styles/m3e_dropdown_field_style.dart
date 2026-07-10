@@ -5,6 +5,9 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownItemStyle;
+import 'package:material_3_expressive/components/dropdown_menus/styles/m3e_dropdown_item_style.dart' show M3EDropdownItemStyle;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownItemStyle;
 
 @immutable
 class M3EDropdownFieldStyle with Diagnosticable {
@@ -201,7 +204,9 @@ class M3EDropdownFieldStyle with Diagnosticable {
     M3EDropdownFieldStyle? b,
     double t,
   ) {
-    if (a == null && b == null) return const M3EDropdownFieldStyle();
+    if (a == null && b == null) {
+      return const M3EDropdownFieldStyle();
+    }
     return M3EDropdownFieldStyle(
       hintText: t < 0.5 ? a?.hintText : b?.hintText,
       hintStyle: TextStyle.lerp(a?.hintStyle, b?.hintStyle, t),
@@ -320,19 +325,20 @@ class M3EDropdownFieldStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('hintText', hintText));
-    properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle));
-    properties.add(
-      DiagnosticsProperty<TextStyle>('selectedTextStyle', selectedTextStyle),
-    );
-    properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle));
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(ColorProperty('foregroundColor', foregroundColor));
-    properties.add(
-      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-    );
-    properties.add(
-      DoubleProperty('selectedBorderRadius', selectedBorderRadius),
-    );
+    properties
+      ..add(StringProperty('hintText', hintText))
+      ..add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle))
+      ..add(
+        DiagnosticsProperty<TextStyle>('selectedTextStyle', selectedTextStyle),
+      )
+      ..add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle))
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(ColorProperty('foregroundColor', foregroundColor))
+      ..add(
+        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
+      )
+      ..add(
+        DoubleProperty('selectedBorderRadius', selectedBorderRadius),
+      );
   }
 }

@@ -105,7 +105,9 @@ class M3EDropdownChipStyle with Diagnosticable {
 
   /// Linearly interpolate between two chip styles.
   static M3EDropdownChipStyle lerp(M3EDropdownChipStyle? a, M3EDropdownChipStyle? b, double t) {
-    if (a == null && b == null) return const M3EDropdownChipStyle();
+    if (a == null && b == null) {
+      return const M3EDropdownChipStyle();
+    }
     return M3EDropdownChipStyle(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
@@ -173,13 +175,14 @@ class M3EDropdownChipStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
-    properties.add(
-      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-    );
-    properties.add(DoubleProperty('spacing', spacing));
-    properties.add(IntProperty('maxDisplayCount', maxDisplayCount));
+    properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle))
+      ..add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding))
+      ..add(
+        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
+      )
+      ..add(DoubleProperty('spacing', spacing))
+      ..add(IntProperty('maxDisplayCount', maxDisplayCount));
   }
 }

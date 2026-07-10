@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
 
 import '../enums/m3e_dropdown_expand_direction.dart';
 
@@ -22,7 +24,7 @@ class M3EDropdownPanelStyle with Diagnosticable {
   /// Gap between the field and the dropdown panel.
   final double marginTop;
 
-  /// Text shown when search yields no matches. Ignored when [emptyBuilder] is not null
+  /// Text shown when search yields no matches. Ignored when `emptyBuilder` is not null.
   final String noItemsFoundText;
 
   /// An optional header widget shown above the items.
@@ -94,7 +96,9 @@ class M3EDropdownPanelStyle with Diagnosticable {
     M3EDropdownPanelStyle? b,
     double t,
   ) {
-    if (a == null && b == null) return const M3EDropdownPanelStyle();
+    if (a == null && b == null) {
+      return const M3EDropdownPanelStyle();
+    }
     return M3EDropdownPanelStyle(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t) ?? 3,
@@ -147,16 +151,20 @@ class M3EDropdownPanelStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DoubleProperty('maxHeight', maxHeight));
-    properties.add(DoubleProperty('marginTop', marginTop));
-    properties.add(
-      DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding),
-    );
-    properties.add(
-      EnumProperty<M3EDropdownExpandDirection>('expandDirection', expandDirection),
-    );
-    properties.add(DoubleProperty('containerRadius', containerRadius));
+    properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
+      ..add(DoubleProperty('elevation', elevation))
+      ..add(DoubleProperty('maxHeight', maxHeight))
+      ..add(DoubleProperty('marginTop', marginTop))
+      ..add(
+        DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding),
+      )
+      ..add(
+        EnumProperty<M3EDropdownExpandDirection>(
+          'expandDirection',
+          expandDirection,
+        ),
+      )
+      ..add(DoubleProperty('containerRadius', containerRadius));
   }
 }

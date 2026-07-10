@@ -135,7 +135,7 @@ class _M3EDropdownMenuItemWidgetState<T>
       ),
     );
 
-    final bool selectionChanged = _lastSelected != widget.item.selected;
+    final selectionChanged = _lastSelected != widget.item.selected;
     _lastSelected = widget.item.selected;
 
     final duration = selectionChanged
