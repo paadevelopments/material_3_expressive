@@ -21,72 +21,20 @@ class ExampleApp extends StatefulWidget {
   State<ExampleApp> createState() => _ExampleAppState();
 }
 
-class _ExampleAppState extends State<ExampleApp> with WidgetsBindingObserver {
+class _ExampleAppState extends State<ExampleApp> {
   static const Color _seed = Color(0xFF6750A4);
-
-  final M3EThemeController _themeController = M3EThemeController();
   int _index = 0;
-
-  M3EThemeData get _baseTheme => M3EThemeData.light(seedColor: _seed);
-
-  M3EThemeData get _darkTheme =>
-      M3EThemeData.dark(seedColor: _seed).copyWith(
-        typeScale: _baseTheme.typeScale,
-        spacing: _baseTheme.spacing,
-      );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _themeController.addListener(_onThemeControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _themeController.removeListener(_onThemeControllerChanged);
-    super.dispose();
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {});
-  }
-
-  void _onThemeControllerChanged() {
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
-    final Brightness platformBrightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    final Brightness effectiveBrightness = _themeController.resolveBrightness(
-      platformBrightness,
-      autoTheming: true,
-    );
-    final ThemeMode themeMode =
-        M3EThemeController.themeModeFor(effectiveBrightness);
-
-    return MaterialApp(
+    return M3EMaterialApp(
       title: 'Material 3 Expressive',
       debugShowCheckedModeBanner: false,
-      theme: _baseTheme.toThemeData(),
-      darkTheme: _darkTheme.toThemeData(),
-      themeMode: themeMode,
-      builder: (BuildContext context, Widget? child) {
-        return M3ETheme(
-          data: _baseTheme,
-          autoTheming: true,
-          dynamicColoring: true,
-          controller: _themeController,
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
+      data: M3EThemeData.light(seedColor: _seed),
+      autoTheming: true,
+      dynamicColoring: true,
       home: _Gallery(
         index: _index,
-        themeController: _themeController,
         onIndexChanged: (int value) => setState(() => _index = value),
       ),
     );
@@ -96,12 +44,10 @@ class _ExampleAppState extends State<ExampleApp> with WidgetsBindingObserver {
 class _Gallery extends StatelessWidget {
   const _Gallery({
     required this.index,
-    required this.themeController,
     required this.onIndexChanged,
   });
 
   final int index;
-  final M3EThemeController themeController;
   final ValueChanged<int> onIndexChanged;
 
   static const List<Widget> _pages = <Widget>[
@@ -142,7 +88,7 @@ class _Gallery extends StatelessWidget {
                         : M3EIcons.dark_mode,
                   ),
                   tooltip: 'Toggle theme',
-                  onPressed: () => themeController.toggleBrightness(
+                  onPressed: () => M3ETheme.controllerOf(context)?.toggleBrightness(
                     fallback: theme.brightness,
                     autoTheming: true,
                   ),

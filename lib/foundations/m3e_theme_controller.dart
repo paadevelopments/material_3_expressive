@@ -54,6 +54,21 @@ class M3EThemeController extends ChangeNotifier {
     return brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
   }
 
+  /// Resolves [ThemeMode] from platform brightness and adaptive rules.
+  ThemeMode effectiveThemeMode({
+    required Brightness platformBrightness,
+    required bool autoTheming,
+    Brightness? initialTheme,
+  }) {
+    return themeModeFor(
+      resolveBrightness(
+        platformBrightness,
+        autoTheming: autoTheming,
+        initialTheme: initialTheme,
+      ),
+    );
+  }
+
   /// Locks the theme to [brightness] until [followSystem] is called.
   void setBrightness(Brightness brightness) {
     if (_brightnessOverride == brightness && !_invertPlatformBrightness) {

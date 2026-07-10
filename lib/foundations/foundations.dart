@@ -5,6 +5,7 @@ export 'm3e_elevation.dart';
 export 'm3e_icons.dart';
 export 'm3e_ink_splash_theme.dart';
 export 'm3e_material_new_shapes_bridge.dart';
+export 'm3e_material_app.dart';
 export 'm3e_motion.dart';
 export 'm3e_shapes.dart';
 export 'm3e_spacing.dart';

@@ -66,6 +66,11 @@ class M3ETheme extends StatefulWidget {
     return M3EThemeScope.resolveOf(context);
   }
 
+  /// Returns the nearest adaptive [M3EThemeController], if any.
+  static M3EThemeController? controllerOf(BuildContext context) {
+    return M3EThemeScope.controllerOf(context);
+  }
+
   /// Brightness from the nearest [M3ETheme], else platform brightness.
   static Brightness brightnessOf(BuildContext context) {
     return maybeOf(context)?.brightness ??

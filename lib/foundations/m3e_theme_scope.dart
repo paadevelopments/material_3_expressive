@@ -39,6 +39,11 @@ class M3EThemeScope extends StatefulWidget {
     return maybeOf(context)?.resolve(context);
   }
 
+  /// Returns the nearest adaptive [M3EThemeController], if any.
+  static M3EThemeController? controllerOf(BuildContext context) {
+    return maybeOf(context)?.controller;
+  }
+
   /// Resolves theme for a component, registering an inherited dependency.
   static M3EThemeData? resolveForComponent(BuildContext context) {
     final _InheritedM3EThemeScope? inherited = context
@@ -58,54 +63,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
   bool get dynamicColoring => widget.dynamicColoring == true;
 
   M3EThemeData get lightTemplate => widget.baseData;
-  M3EThemeData get darkTemplate => M3EThemeData.dark(
-        seedColor: widget.baseData.colorScheme.primary,
-      ).copyWith(
-        typeScale: widget.baseData.typeScale,
-        spacing: widget.baseData.spacing,
-        visualDensity: widget.baseData.visualDensity,
-        platform: widget.baseData.platform,
-        useMaterial3: widget.baseData.useMaterial3,
-        splashColor: widget.baseData.splashColor,
-        highlightColor: widget.baseData.highlightColor,
-        appBarTheme: widget.baseData.appBarTheme,
-        badgeTheme: widget.baseData.badgeTheme,
-        bottomSheetTheme: widget.baseData.bottomSheetTheme,
-        buttonTheme: widget.baseData.buttonTheme,
-        cardTheme: widget.baseData.cardTheme,
-        carouselTheme: widget.baseData.carouselTheme,
-        checkboxTheme: widget.baseData.checkboxTheme,
-        chipTheme: widget.baseData.chipTheme,
-        datePickerTheme: widget.baseData.datePickerTheme,
-        dialogTheme: widget.baseData.dialogTheme,
-        dividerTheme: widget.baseData.dividerTheme,
-        fabTheme: widget.baseData.fabTheme,
-        fabMenuTheme: widget.baseData.fabMenuTheme,
-        iconButtonTheme: widget.baseData.iconButtonTheme,
-        listTheme: widget.baseData.listTheme,
-        loadingIndicatorTheme: widget.baseData.loadingIndicatorTheme,
-        menuTheme: widget.baseData.menuTheme,
-        navigationBarTheme: widget.baseData.navigationBarTheme,
-        navigationDrawerTheme: widget.baseData.navigationDrawerTheme,
-        navigationRailTheme: widget.baseData.navigationRailTheme,
-        progressIndicatorTheme: widget.baseData.progressIndicatorTheme,
-        radioTheme: widget.baseData.radioTheme,
-        refreshIndicatorTheme: widget.baseData.refreshIndicatorTheme,
-        searchBarTheme: widget.baseData.searchBarTheme,
-        segmentedButtonTheme: widget.baseData.segmentedButtonTheme,
-        sideSheetTheme: widget.baseData.sideSheetTheme,
-        sliderTheme: widget.baseData.sliderTheme,
-        snackBarTheme: widget.baseData.snackBarTheme,
-        splitButtonTheme: widget.baseData.splitButtonTheme,
-        switchTheme: widget.baseData.switchTheme,
-        tabTheme: widget.baseData.tabTheme,
-        textFieldTheme: widget.baseData.textFieldTheme,
-        timePickerTheme: widget.baseData.timePickerTheme,
-        toggleButtonTheme: widget.baseData.toggleButtonTheme,
-        toggleButtonGroupTheme: widget.baseData.toggleButtonGroupTheme,
-        toolbarTheme: widget.baseData.toolbarTheme,
-        tooltipTheme: widget.baseData.tooltipTheme,
-      );
+  M3EThemeData get darkTemplate => widget.baseData.deriveDarkTemplate();
 
   Brightness resolveBrightness(BuildContext context) {
     return widget.controller.resolveBrightness(

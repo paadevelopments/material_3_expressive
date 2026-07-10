@@ -183,6 +183,61 @@ class M3EThemeData {
     return copyWith(colorScheme: colorScheme);
   }
 
+  /// Builds a dark template from this light-oriented [M3EThemeData].
+  ///
+  /// Preserves non-color tokens (type scale, spacing, component themes) while
+  /// swapping in a dark [M3EColorScheme] seeded from [colorScheme.primary].
+  M3EThemeData deriveDarkTemplate() {
+    return M3EThemeData.dark(
+      seedColor: colorScheme.primary,
+    ).copyWith(
+      typeScale: typeScale,
+      spacing: spacing,
+      visualDensity: visualDensity,
+      platform: platform,
+      useMaterial3: useMaterial3,
+      splashColor: splashColor,
+      highlightColor: highlightColor,
+      appBarTheme: appBarTheme,
+      badgeTheme: badgeTheme,
+      bottomSheetTheme: bottomSheetTheme,
+      buttonTheme: buttonTheme,
+      cardTheme: cardTheme,
+      carouselTheme: carouselTheme,
+      checkboxTheme: checkboxTheme,
+      chipTheme: chipTheme,
+      datePickerTheme: datePickerTheme,
+      dialogTheme: dialogTheme,
+      dividerTheme: dividerTheme,
+      fabTheme: fabTheme,
+      fabMenuTheme: fabMenuTheme,
+      iconButtonTheme: iconButtonTheme,
+      listTheme: listTheme,
+      loadingIndicatorTheme: loadingIndicatorTheme,
+      menuTheme: menuTheme,
+      navigationBarTheme: navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme,
+      navigationRailTheme: navigationRailTheme,
+      progressIndicatorTheme: progressIndicatorTheme,
+      radioTheme: radioTheme,
+      refreshIndicatorTheme: refreshIndicatorTheme,
+      searchBarTheme: searchBarTheme,
+      segmentedButtonTheme: segmentedButtonTheme,
+      sideSheetTheme: sideSheetTheme,
+      sliderTheme: sliderTheme,
+      snackBarTheme: snackBarTheme,
+      splitButtonTheme: splitButtonTheme,
+      switchTheme: switchTheme,
+      tabTheme: tabTheme,
+      textFieldTheme: textFieldTheme,
+      timePickerTheme: timePickerTheme,
+      toggleButtonTheme: toggleButtonTheme,
+      toggleButtonGroupTheme: toggleButtonGroupTheme,
+      toolbarTheme: toolbarTheme,
+      tooltipTheme: tooltipTheme,
+    );
+  }
+
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
