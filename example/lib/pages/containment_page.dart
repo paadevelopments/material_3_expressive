@@ -201,7 +201,7 @@ class ContainmentPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const _ListLabel('Expandable list (expressive motions)'),
-        M3EExpandableCardColumn(
+        M3EExpandableList(
           data: [
             M3EExpandableData(
               title: 'Battery level low',

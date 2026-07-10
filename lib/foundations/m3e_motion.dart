@@ -41,6 +41,12 @@ abstract final class M3EMotion {
       M3ESpring(stiffness: 700, damping: 0.9);
   static const M3ESpring spatialSlow = M3ESpring(stiffness: 300, damping: 0.9);
 
+  /// AOSP spatial spring (stiffness: 380, damping: 1.0).
+  ///
+  /// Matches AOSP notification-list expansion — no overshoot.
+  static const M3ESpring aospSpatial =
+      M3ESpring(stiffness: 380, damping: 1.0);
+
   // Expressive spatial springs add a small overshoot for a lively feel.
   static const M3ESpring expressiveSpatialFast =
       M3ESpring(stiffness: 800, damping: 0.6);

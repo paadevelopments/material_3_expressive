@@ -1,5 +1,9 @@
+// Ported from https://github.com/Mudit200408/m3e_expandable
+// Adapted for material_3_expressive: M3ECard, M3ETheme, M3ESpring.
+
 import 'dart:math' as math;
-import 'package:flutter/material.dart' show Tooltip;
+
+import 'package:flutter/material.dart' show InkWell, Tooltip;
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
@@ -7,6 +11,7 @@ import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../styles/m3e_expandable_style.dart';
+import '../utils/m3e_expandable_spring_motion.dart';
 import '../utils/m3e_measure_size.dart';
 
 typedef M3EExpandableHeaderBuilder = Widget Function(
@@ -15,16 +20,6 @@ typedef M3EExpandableBodyBuilder = Widget Function(
     BuildContext context, int index, double progress);
 
 class M3EExpandableItem extends StatefulWidget {
-  final int index;
-  final int totalCount;
-  final bool isExpanded;
-  final M3EExpandableHeaderBuilder headerBuilder;
-  final M3EExpandableBodyBuilder bodyBuilder;
-  final M3EExpandableStyle decoration;
-  final M3ESpring expandMotion;
-  final M3ESpring collapseMotion;
-  final VoidCallback onToggle;
-
   const M3EExpandableItem({
     super.key,
     required this.index,
@@ -38,6 +33,16 @@ class M3EExpandableItem extends StatefulWidget {
     required this.onToggle,
   });
 
+  final int index;
+  final int totalCount;
+  final bool isExpanded;
+  final M3EExpandableHeaderBuilder headerBuilder;
+  final M3EExpandableBodyBuilder bodyBuilder;
+  final M3EExpandableStyle decoration;
+  final M3ESpring expandMotion;
+  final M3ESpring collapseMotion;
+  final VoidCallback onToggle;
+
   @override
   State<M3EExpandableItem> createState() => _M3EExpandableItemState();
 }
@@ -45,38 +50,43 @@ class M3EExpandableItem extends StatefulWidget {
 class _M3EExpandableItemState extends State<M3EExpandableItem>
     with TickerProviderStateMixin {
   late final SingleMotionController _expandCtrl;
+
   bool _isHovered = false;
   bool _isPressed = false;
+
   double? _collapsedHeight;
   double? _expandedHeight;
 
   @override
   void initState() {
     super.initState();
-    final spring = widget.isExpanded ? widget.expandMotion : widget.collapseMotion;
-    _expandCtrl = SingleMotionController(
-      motion: const MaterialSpringMotion.expressiveEffectsFast().copyWith(
-        stiffness: spring.stiffness,
-        damping: spring.damping,
-      ),
-      vsync: this,
-    )..value = widget.isExpanded ? 1.0 : 0.0;
+    final motion = widget.isExpanded
+        ? widget.expandMotion.toMotion()
+        : widget.collapseMotion.toMotion();
+
+    _expandCtrl = SingleMotionController(motion: motion, vsync: this)
+      ..value = widget.isExpanded ? 1.0 : 0.0;
   }
 
   @override
   void didUpdateWidget(covariant M3EExpandableItem oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.isExpanded != widget.isExpanded) {
-      final spring = widget.isExpanded ? widget.expandMotion : widget.collapseMotion;
-      _expandCtrl.motion = const MaterialSpringMotion.expressiveEffectsFast().copyWith(
-        stiffness: spring.stiffness,
-        damping: spring.damping,
-      );
+      final motion = widget.isExpanded
+          ? widget.expandMotion.toMotion()
+          : widget.collapseMotion.toMotion();
+
+      _expandCtrl.motion = motion;
       _expandCtrl.animateTo(widget.isExpanded ? 1.0 : 0.0);
     }
   }
 
-  void _handleHoverChanged(bool hovering) => setState(() => _isHovered = hovering);
+  void _handleHoverChanged(bool hovering) =>
+      setState(() => _isHovered = hovering);
+  void _handleTapDown() => setState(() => _isPressed = true);
+  void _handleTapUp() => setState(() => _isPressed = false);
+  void _handleTapCancel() => setState(() => _isPressed = false);
 
   @override
   void dispose() {
@@ -93,6 +103,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     if (widget.isExpanded && d.expandedRadius != null) {
       return BorderRadius.circular(d.expandedRadius!);
     }
+
     if (isSingle) {
       return BorderRadius.circular(d.outerRadius);
     }
@@ -119,7 +130,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final cs = theme.colorScheme;
+    final scheme = theme.colorScheme;
     final d = widget.decoration;
     final isLast = widget.index == widget.totalCount - 1;
 
@@ -129,9 +140,11 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     final entireCardTappable = !d.tapIconToToggle && canTapHeader && canTapBody;
 
     final outerTap = entireCardTappable ? widget.onToggle : null;
-    final headerTap = (!entireCardTappable && canTapHeader && !d.tapIconToToggle)
-        ? widget.onToggle
-        : null;
+    final headerTap =
+        (!entireCardTappable && canTapHeader && !d.tapIconToToggle)
+            ? widget.onToggle
+            : null;
+
     final String? outerTooltip = entireCardTappable
         ? (widget.isExpanded ? d.collapseTooltip : d.expandTooltip)
         : null;
@@ -142,7 +155,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         child: Padding(
           padding: EdgeInsets.only(bottom: isLast ? 0 : d.gap),
           child: _buildAnimatedContainer(
-            cs,
+            scheme,
             d,
             outerTap,
             headerTap,
@@ -154,13 +167,13 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   }
 
   Widget _buildAnimatedContainer(
-    M3EColorScheme cs,
+    M3EColorScheme scheme,
     M3EExpandableStyle d,
     VoidCallback? outerTap,
     VoidCallback? headerTap,
     String? outerTooltip,
   ) {
-    final content = AnimatedBuilder(
+    Widget content = AnimatedBuilder(
       animation: _expandCtrl,
       builder: (context, child) {
         final progress = _expandCtrl.value;
@@ -184,44 +197,31 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       },
     );
 
+    content = _buildInteractionWrapper(
+      d,
+      onTap: outerTap,
+      tooltip: outerTooltip,
+      child: content,
+    );
+
     return TweenAnimationBuilder<BorderRadius?>(
-      duration: _isPressed
-          ? Duration.zero
-          : const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
       curve: Curves.easeOut,
       tween: BorderRadiusTween(
         begin: _buildEffectiveRadius(),
         end: _buildEffectiveRadius(),
       ),
       builder: (context, animatedRadius, child) {
-        Widget card = M3ECard(
+        return M3ECard(
           variant: M3ECardVariant.filled,
           borderRadius: animatedRadius ?? _buildEffectiveRadius(),
-          color: d.color ?? cs.surfaceContainerHighest,
+          color: d.color ?? scheme.surfaceContainerHighest,
           elevation: d.elevation,
           border: d.border,
           padding: EdgeInsets.zero,
-          animationDuration: _isPressed
-              ? Duration.zero
-              : const Duration(milliseconds: 40),
           width: double.infinity,
-          onPressed: outerTap,
-          onStateChanged: outerTap != null
-              ? (M3EInteractionState state) {
-                  if (state.hovered != _isHovered) {
-                    _handleHoverChanged(state.hovered);
-                  }
-                  if (state.pressed != _isPressed) {
-                    setState(() => _isPressed = state.pressed);
-                  }
-                }
-              : null,
           child: child!,
         );
-        if (outerTooltip != null) {
-          card = Tooltip(message: outerTooltip, child: card);
-        }
-        return card;
       },
       child: content,
     );
@@ -233,9 +233,9 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     VoidCallback? onTap, {
     required bool isEntirelyTappable,
   }) {
+    final expandableTheme = M3ETheme.of(context).listTheme.expandable;
     final headerContent = Padding(
-      padding: d.headerPadding ??
-          M3ETheme.of(context).listTheme.expandable.headerPadding,
+      padding: d.headerPadding ?? expandableTheme.headerPadding,
       child: Row(
         crossAxisAlignment: d.headerAlignment == CrossAxisAlignment.stretch
             ? CrossAxisAlignment.center
@@ -283,13 +283,16 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     if (d.expandIcon == null && d.collapseIcon == null) {
       return const SizedBox.shrink();
     }
+
     final bool isExpanded = progress >= 0.5;
     final Widget? icon = isExpanded ? d.collapseIcon : d.expandIcon;
+
     if (icon == null) {
       return const SizedBox.shrink();
     }
 
     final double angle = d.iconRotationAngle * progress;
+
     final String? tooltip = d.tapIconToToggle
         ? (isExpanded ? d.collapseTooltip : d.expandTooltip)
         : null;
@@ -304,6 +307,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         d,
         onTap: onToggle,
         isHeader: true,
+        isIcon: true,
         semanticLabel: isExpanded ? 'Collapse button' : 'Expand button',
         isExpanded: isExpanded,
         tooltip: tooltip,
@@ -312,6 +316,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     } else {
       iconWidget = ExcludeSemantics(child: iconWidget);
     }
+
     return iconWidget;
   }
 
@@ -320,24 +325,26 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     double progress, {
     required bool isEntirelyTappable,
   }) {
-    final effectivePadding = d.bodyPadding ??
-        M3ETheme.of(context).listTheme.expandable.bodyPadding;
+    final expandableTheme = M3ETheme.of(context).listTheme.expandable;
+    final effectivePadding = d.bodyPadding ?? expandableTheme.bodyPadding;
     final resolvedPadding = effectivePadding.resolve(Directionality.of(context));
-    final contentShift = math.min(12, resolvedPadding.bottom * 0.6 + 4.0);
-    final needsMeasurement = _collapsedHeight == null || _expandedHeight == null;
+    final contentShift = math.min<double>(12, resolvedPadding.bottom * 0.6 + 4.0);
 
+    final needsMeasurement = _collapsedHeight == null || _expandedHeight == null;
     final clampedProgress = progress.clamp(0.0, 1.0);
     final contentCollapsed = _collapsedHeight ?? 0.0;
     final contentExpanded = _expandedHeight ?? 200.0;
-    final paddingVertical = effectivePadding.vertical;
 
+    final paddingVertical = effectivePadding.vertical;
     final totalCollapsed =
         contentCollapsed > 0 ? contentCollapsed + paddingVertical : 0.0;
     final totalExpanded =
         contentExpanded > 0 ? contentExpanded + paddingVertical : 0.0;
 
-    final bodyHeight =
-        math.max<double>(0, totalCollapsed + (totalExpanded - totalCollapsed) * progress);
+    final bodyHeight = math.max<double>(
+      0,
+      totalCollapsed + (totalExpanded - totalCollapsed) * progress,
+    );
     final translationY = -(1.0 - clampedProgress) * contentShift;
 
     return Stack(
@@ -385,9 +392,12 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
                     final canTapBody = (isExpanded && d.tapBodyToCollapse) ||
                         (!isExpanded && d.tapBodyToExpand);
                     final tapCallback =
-                        (!isEntirelyTappable && canTapBody && !d.tapIconToToggle)
+                        (!isEntirelyTappable &&
+                                canTapBody &&
+                                !d.tapIconToToggle)
                             ? widget.onToggle
                             : null;
+
                     final String? bodyTooltip = (tapCallback != null)
                         ? (isExpanded ? d.collapseTooltip : d.expandTooltip)
                         : null;
@@ -400,7 +410,11 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
                         alignment: d.bodyAlignment,
                         child: Transform.translate(
                           offset: Offset(0, translationY),
-                          child: widget.bodyBuilder(context, widget.index, progress),
+                          child: widget.bodyBuilder(
+                            context,
+                            widget.index,
+                            progress,
+                          ),
                         ),
                       ),
                     );
@@ -420,15 +434,18 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     required Widget child,
     required VoidCallback? onTap,
     bool isHeader = false,
+    bool isIcon = false,
     String? semanticLabel,
     String? semanticHint,
     bool? isExpanded,
     String? tooltip,
   }) {
     var result = child;
+
     if (tooltip != null) {
       result = Tooltip(message: tooltip, child: result);
     }
+
     if (onTap == null) {
       return Semantics(
         label: semanticLabel,
@@ -436,27 +453,44 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         child: result,
       );
     }
-    return M3ETappable(
-      onTap: onTap,
-      semanticLabel: semanticLabel,
-      onStateChanged: (M3EInteractionState state) {
-        if (isHeader && state.hovered != _isHovered) {
-          _handleHoverChanged(state.hovered);
-        }
-        if (state.pressed != _isPressed) {
-          setState(() => _isPressed = state.pressed);
-        }
-      },
-      builder: (BuildContext context, M3EInteractionState state) {
-        return Semantics(
+
+    if (!d.useInkWell) {
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: onTap,
+        onTapDown: isHeader ? (_) => _handleTapDown() : null,
+        onTapUp: isHeader ? (_) => _handleTapUp() : null,
+        onTapCancel: isHeader ? () => _handleTapCancel() : null,
+        child: Semantics(
           label: semanticLabel,
           hint: semanticHint,
           expanded: isExpanded,
           button: true,
           onTap: onTap,
           child: result,
-        );
-      },
+        ),
+      );
+    }
+
+    return InkWell(
+      customBorder: isIcon ? const CircleBorder() : null,
+      splashColor: d.splashColor,
+      highlightColor: d.highlightColor,
+      splashFactory: d.splashFactory,
+      enableFeedback: d.enableFeedback,
+      onTap: onTap,
+      onHover: isHeader ? _handleHoverChanged : null,
+      onTapDown: isHeader ? (_) => _handleTapDown() : null,
+      onTapUp: isHeader ? (_) => _handleTapUp() : null,
+      onTapCancel: isHeader ? () => _handleTapCancel() : null,
+      child: Semantics(
+        label: semanticLabel,
+        hint: semanticHint,
+        expanded: isExpanded,
+        button: true,
+        onTap: onTap,
+        child: result,
+      ),
     );
   }
 }

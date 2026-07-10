@@ -4,21 +4,24 @@ import '../../foundations/foundations.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../cards/m3e_cards.dart';
 import 'components/m3e_card_list_item.dart';
+import 'components/m3e_expandable_builders.dart';
+import 'components/m3e_expandable_data.dart';
+import 'components/m3e_expandable_list_base.dart';
 import 'components/m3e_list_item_scope.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
 import 'styles/m3e_dismissible_list_style.dart';
+import 'styles/m3e_expandable_style.dart';
 import 'styles/m3e_list_theme.dart';
 
-export 'components/m3e_expandable_card_column.dart';
-export 'components/m3e_expandable_card_list.dart';
 export 'components/m3e_expandable_data.dart';
 export 'components/m3e_expandable_item.dart';
-export 'components/m3e_sliver_expandable_card_list.dart';
 export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
 export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_expandable_style.dart';
 export 'styles/m3e_list_theme.dart';
+
+enum _M3EExpandableListLayout { column, scrollable, sliver }
 
 /// A Material 3 Expressive list item.
 ///
@@ -364,6 +367,180 @@ class M3ECardList extends StatelessWidget {
       mouseCursor: mouseCursor,
       haptic: haptic,
       child: itemBuilder(context, index),
+    );
+  }
+}
+
+/// A spring-animated expandable card list.
+///
+/// Supports three layouts via named constructors:
+/// - default / [M3EExpandableList.builder]: non-scrollable [Column]
+/// - [M3EExpandableList.scrollable] / [M3EExpandableList.scrollableBuilder]:
+///   [ListView.builder]
+/// - [M3EExpandableList.sliver] / [M3EExpandableList.sliverBuilder]:
+///   [SliverList.builder] for [CustomScrollView]
+class M3EExpandableList extends M3EExpandableListBase {
+  M3EExpandableList({
+    super.key,
+    required List<M3EExpandableData> data,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+  })  : _layout = _M3EExpandableListLayout.column,
+        controller = null,
+        physics = null,
+        shrinkWrap = false,
+        padding = null,
+        super(
+          itemCount: data.length,
+          headerBuilder: m3eSimpleHeaderBuilder(data),
+          bodyBuilder: m3eSimpleBodyBuilder(
+            data,
+            style ?? const M3EExpandableStyle(),
+          ),
+        );
+
+  const M3EExpandableList.builder({
+    super.key,
+    required super.itemCount,
+    required super.headerBuilder,
+    required super.bodyBuilder,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+  })  : _layout = _M3EExpandableListLayout.column,
+        controller = null,
+        physics = null,
+        shrinkWrap = false,
+        padding = null;
+
+  M3EExpandableList.scrollable({
+    super.key,
+    required List<M3EExpandableData> data,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+    this.controller,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
+  })  : _layout = _M3EExpandableListLayout.scrollable,
+        super(
+          itemCount: data.length,
+          headerBuilder: m3eSimpleHeaderBuilder(data),
+          bodyBuilder: m3eSimpleBodyBuilder(
+            data,
+            style ?? const M3EExpandableStyle(),
+          ),
+        );
+
+  const M3EExpandableList.scrollableBuilder({
+    super.key,
+    required super.itemCount,
+    required super.headerBuilder,
+    required super.bodyBuilder,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+    this.controller,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
+  }) : _layout = _M3EExpandableListLayout.scrollable;
+
+  M3EExpandableList.sliver({
+    super.key,
+    required List<M3EExpandableData> data,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+  })  : _layout = _M3EExpandableListLayout.sliver,
+        controller = null,
+        physics = null,
+        shrinkWrap = false,
+        padding = null,
+        super(
+          itemCount: data.length,
+          headerBuilder: m3eSimpleHeaderBuilder(data),
+          bodyBuilder: m3eSimpleBodyBuilder(
+            data,
+            style ?? const M3EExpandableStyle(),
+          ),
+        );
+
+  const M3EExpandableList.sliverBuilder({
+    super.key,
+    required super.itemCount,
+    required super.headerBuilder,
+    required super.bodyBuilder,
+    super.allowMultipleExpanded,
+    super.initiallyExpanded,
+    super.style,
+    super.expandMotion,
+    super.collapseMotion,
+    super.onExpansionChanged,
+  })  : _layout = _M3EExpandableListLayout.sliver,
+        controller = null,
+        physics = null,
+        shrinkWrap = false,
+        padding = null;
+
+  final _M3EExpandableListLayout _layout;
+  final ScrollController? controller;
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  State<M3EExpandableList> createState() => _M3EExpandableListState();
+}
+
+class _M3EExpandableListState extends State<M3EExpandableList>
+    with M3EExpandableStateMixin<M3EExpandableList> {
+  @override
+  Widget build(BuildContext context) {
+    return M3EComponentTheme(
+      builder: (context) {
+        switch (widget._layout) {
+          case _M3EExpandableListLayout.column:
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                widget.itemCount,
+                (index) => buildItem(context, index),
+              ),
+            );
+          case _M3EExpandableListLayout.scrollable:
+            return ListView.builder(
+              controller: widget.controller,
+              physics: widget.physics,
+              shrinkWrap: widget.shrinkWrap,
+              padding: widget.padding,
+              itemCount: widget.itemCount,
+              itemBuilder: (context, index) => buildItem(context, index),
+            );
+          case _M3EExpandableListLayout.sliver:
+            return SliverList.builder(
+              itemCount: widget.itemCount,
+              itemBuilder: (context, index) => buildItem(context, index),
+            );
+        }
+      },
     );
   }
 }
