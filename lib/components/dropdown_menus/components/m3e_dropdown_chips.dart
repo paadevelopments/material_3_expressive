@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 
-import '../../../foundations/m3e_motion.dart';
+import '../../../foundations/foundations.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_chip_style.dart';
 import '../utils/m3e_dropdown_spring_motion.dart';
@@ -15,7 +15,7 @@ class M3ESpringChip<T> extends StatefulWidget {
   final M3EDropdownChipStyle cd;
   final Color chipColor;
   final TextStyle? labelStyle;
-  final ColorScheme cs;
+  final M3EColorScheme scheme;
   final bool enabled;
   final VoidCallback onRemove;
   final double
@@ -30,7 +30,7 @@ class M3ESpringChip<T> extends StatefulWidget {
     required this.cd,
     required this.chipColor,
     required this.labelStyle,
-    required this.cs,
+    required this.scheme,
     required this.enabled,
     required this.onRemove,
     this.slideOffset = 0,
@@ -170,7 +170,7 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
                         Icon(
                           Icons.close,
                           size: 16,
-                          color: widget.cs.onSecondaryContainer,
+                          color: widget.scheme.onSecondaryContainer,
                         ),
                   ),
                 ),

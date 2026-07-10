@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../foundations/foundations.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_item_style.dart';
 
@@ -92,28 +93,37 @@ class _M3EDropdownMenuItemWidgetState<T>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final m3eTheme = M3ETheme.of(context);
+    final scheme = m3eTheme.colorScheme;
+    final menuTheme = m3eTheme.dropdownMenuTheme;
     final id = widget.style;
     final item = widget.item;
 
     Color bgColor;
     if (item.disabled) {
       bgColor =
-          id.disabledBackgroundColor ?? cs.onSurface.withValues(alpha: 0.04);
+          id.disabledBackgroundColor ??
+          scheme.onSurface.withValues(alpha: 0.04);
     } else if (item.selected) {
-      bgColor = id.selectedBackgroundColor ?? cs.secondaryContainer;
+      bgColor =
+          id.selectedBackgroundColor ??
+          menuTheme.itemSelectedBackgroundColor(scheme);
     } else {
-      bgColor = id.backgroundColor ?? cs.surfaceContainerHigh;
+      bgColor =
+          id.backgroundColor ?? menuTheme.itemBackgroundColor(scheme);
     }
 
     Color textColor;
     if (item.disabled) {
-      textColor = id.disabledTextColor ?? cs.onSurface.withValues(alpha: 0.38);
+      textColor =
+          id.disabledTextColor ??
+          scheme.onSurface.withValues(alpha: 0.38);
     } else if (item.selected) {
-      textColor = id.selectedTextColor ?? cs.onSecondaryContainer;
+      textColor =
+          id.selectedTextColor ??
+          menuTheme.itemSelectedForegroundColor(scheme);
     } else {
-      textColor = id.textColor ?? cs.onSurface;
+      textColor = id.textColor ?? menuTheme.itemForegroundColor(scheme);
     }
 
     final content = Padding(
@@ -125,7 +135,9 @@ class _M3EDropdownMenuItemWidgetState<T>
               item.label,
               style:
                   (item.selected ? id.selectedTextStyle : id.textStyle) ??
-                  theme.textTheme.bodyLarge?.copyWith(color: textColor),
+                  menuTheme.itemTextStyle(m3eTheme.typeScale, scheme).copyWith(
+                    color: textColor,
+                  ),
             ),
           ),
           if (item.selected)

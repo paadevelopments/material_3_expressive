@@ -705,16 +705,21 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                 const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    formState.errorText!,
-                    style:
-                        (widget.fieldStyle.errorStyle ??
-                                Theme.of(context).textTheme.bodySmall)
-                            ?.copyWith(
-                              color:
-                                  widget.fieldStyle.errorStyle?.color ??
-                                  Theme.of(context).colorScheme.error,
-                            ),
+                  child: Builder(
+                    builder: (context) {
+                      final m3eTheme = M3ETheme.of(context);
+                      return Text(
+                        formState.errorText!,
+                        style:
+                            (widget.fieldStyle.errorStyle ??
+                                    m3eTheme.typeScale.bodySmall)
+                                .copyWith(
+                                  color:
+                                      widget.fieldStyle.errorStyle?.color ??
+                                      m3eTheme.colorScheme.error,
+                                ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -813,10 +818,10 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     BuildContext context,
     FormFieldState<List<M3EDropdownItem<T>>?> formState,
   ) {
-    final theme = Theme.of(context);
     final m3eTheme = M3ETheme.of(context);
     final menuTheme = m3eTheme.dropdownMenuTheme;
     final scheme = m3eTheme.colorScheme;
+    final type = m3eTheme.typeScale;
     final fd = widget.fieldStyle;
 
     final bgColor =
@@ -922,17 +927,13 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
         selected.first.label,
         style:
             fd.selectedTextStyle ??
-            theme.textTheme.bodyLarge?.copyWith(color: fgColor),
+            menuTheme.selectedTextStyle(type, scheme),
         overflow: TextOverflow.ellipsis,
       );
     } else {
       content = Text(
         fd.hintText ?? 'Select',
-        style:
-            fd.hintStyle ??
-            theme.textTheme.bodyLarge?.copyWith(
-              color: fgColor.withValues(alpha: 0.5),
-            ),
+        style: fd.hintStyle ?? menuTheme.hintTextStyle(type, scheme),
       );
     }
 
@@ -1018,11 +1019,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     Color fgColor,
   ) {
     final cd = widget.chipStyle;
-    final theme = Theme.of(context);
     final m3eTheme = M3ETheme.of(context);
     final menuTheme = m3eTheme.dropdownMenuTheme;
     final scheme = m3eTheme.colorScheme;
-    final cs = theme.colorScheme;
 
     final labelStyle =
         cd.labelStyle ??
@@ -1118,7 +1117,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           cd: cd,
           chipColor: chipColor,
           labelStyle: labelStyle,
-          cs: cs,
+          scheme: scheme,
           enabled: widget.enabled,
           onRemove: () =>
               _handleChipRemove(option, optionKey, chipKey, displayOptions, i),
@@ -1279,11 +1278,10 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   // ── Dropdown panel ──
 
   Widget _buildDropdownPanel(bool showOnTop) {
-    final theme = Theme.of(context);
     final m3eTheme = M3ETheme.of(context);
     final menuTheme = m3eTheme.dropdownMenuTheme;
     final scheme = m3eTheme.colorScheme;
-    final cs = theme.colorScheme;
+    final type = m3eTheme.typeScale;
     final dd = widget.dropdownStyle;
     final filtered = _controller.items;
 
@@ -1334,8 +1332,8 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     _errorMessage!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: cs.error,
+                    style: type.bodyMedium.copyWith(
+                      color: scheme.error,
                     ),
                   ),
                 )
@@ -1345,8 +1343,8 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                       padding: const EdgeInsets.all(16),
                       child: Text(
                         dd.noItemsFoundText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.5),
+                        style: type.bodyMedium.copyWith(
+                          color: scheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     )
@@ -1393,8 +1391,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   Widget _buildSearch(BuildContext context) {
     final sd = widget.searchStyle;
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final m3eTheme = M3ETheme.of(context);
+    final scheme = m3eTheme.colorScheme;
+    final type = m3eTheme.typeScale;
 
     final searchRadius =
         sd.borderRadius ??
@@ -1405,7 +1404,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       child: TextField(
         controller: _searchTextController,
         autofocus: sd.autofocus,
-        style: sd.textStyle ?? theme.textTheme.bodyMedium,
+        style: sd.textStyle ?? type.bodyMedium,
         mouseCursor: sd.mouseCursor,
         decoration: InputDecoration(
           hintText: sd.hintText,
@@ -1414,7 +1413,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           fillColor: sd.fillColor,
           prefixIcon: Icon(
             Icons.search,
-            color: cs.onSurface.withValues(alpha: 0.5),
+            color: scheme.onSurface.withValues(alpha: 0.5),
           ),
           suffixIcon: sd.showClearIcon && _searchTextController.text.isNotEmpty
               ? IconButton(
@@ -1437,7 +1436,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: searchRadius,
-            borderSide: BorderSide(color: cs.primary, width: 1.5),
+            borderSide: BorderSide(color: scheme.primary, width: 1.5),
           ),
         ),
         onChanged: _handleSearchChanged,
