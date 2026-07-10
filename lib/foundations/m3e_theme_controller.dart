@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart' show Brightness, ChangeNotifier, ThemeMode;
-import 'package:material_3_expressive/foundations/foundations.dart' show M3ETheme;
-import 'package:material_3_expressive/foundations/m3e_theme.dart' show M3ETheme;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3ETheme;
 
 /// Manual brightness control for an adaptive `M3ETheme` root.
 ///

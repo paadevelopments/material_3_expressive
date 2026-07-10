@@ -337,7 +337,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
         contentExpanded > 0 ? contentExpanded + paddingVertical : 0.0;
 
     final bodyHeight =
-        math.max(0.0, totalCollapsed + (totalExpanded - totalCollapsed) * progress);
+        math.max<double>(0, totalCollapsed + (totalExpanded - totalCollapsed) * progress);
     final translationY = -(1.0 - clampedProgress) * contentShift;
 
     return Stack(

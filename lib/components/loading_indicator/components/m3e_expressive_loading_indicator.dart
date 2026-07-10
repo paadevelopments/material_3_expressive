@@ -63,13 +63,6 @@ class _M3EExpressiveLoadingIndicatorState
     M3EMaterialNewShapes.oval,
   ];
 
-  static final BoxConstraints _defaultConstraints = BoxConstraints(
-    minWidth: 48.0,
-    minHeight: 48.0,
-    maxWidth: 48.0,
-    maxHeight: 48.0,
-  ); // default from kotlin source
-
   late final List<RoundedPolygon> _polygons;
 
   static const int _globalRotationDurationMs = 4666;

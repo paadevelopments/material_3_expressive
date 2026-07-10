@@ -62,8 +62,6 @@ class M3EDialog extends StatelessWidget {
     required Widget body,
     Widget? action,
   }) {
-    final M3EThemeData theme =
-        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
     return showGeneralDialog<T>(
       context: context,
       barrierLabel: 'Full screen dialog',

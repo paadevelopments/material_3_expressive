@@ -2,8 +2,9 @@ import 'package:flutter/services.dart';
 
 import '../enums/m3e_button_enums.dart';
 
-enum M3EButtonConstants {
-  _;
+/// Shared numeric constants used throughout the button package.
+class M3EButtonConstants {
+  const M3EButtonConstants._();
 
   /// Minimum distance between any popup / dropdown and the screen edge (dp).
   static const double kScreenEdgePadding = 12;

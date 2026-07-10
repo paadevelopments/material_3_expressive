@@ -12,6 +12,8 @@ include: package:flutter_lints/flutter.yaml
 custom_lint:
 
 analyzer:
+  exclude:
+    - "analysis_options.yaml"
 
   plugins:
     - custom_lint

@@ -1,6 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/floating_action_buttons/m3e_floating_action_buttons.dart' show M3EFab;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EFab;
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_fab.dart';
