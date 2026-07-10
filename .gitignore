@@ -34,4 +34,6 @@ migrate_working_dir/
 
 # FVM Version Cache
 .fvm/
+
+# Cursor IDE (local rules, plans, agent state)
 .cursor/
