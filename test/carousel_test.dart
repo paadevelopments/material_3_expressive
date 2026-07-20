@@ -35,6 +35,11 @@ void main() {
   testWidgets('tap pulse with neighbors completes', _tapPulseWithNeighbors);
   testWidgets('re-tap after scroll completes pulse', _retapAfterScroll);
   testWidgets('edge item tap pulse completes', _edgeItemTapPulse);
+  testWidgets('hero tap pulse uses fixed per-edge pixels', _heroTapPulse);
+  testWidgets(
+    'hero tap pulse preserves per-edge pixel budget on mixed widths',
+    _heroTapPulsePixelBudget,
+  );
 }
 
 Future<void> _hero(WidgetTester tester) async {
@@ -194,6 +199,48 @@ Future<void> _edgeItemTapPulse(WidgetTester tester) async {
   await tester.pumpAndSettle();
 
   await tester.tap(find.text('item0'), warnIfMissed: false);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 90));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _heroTapPulse(WidgetTester tester) async {
+  await tester.pumpWidget(_host(M3ECarousel(children: _items(6))));
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text('item1'), warnIfMissed: false);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 90));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _heroTapPulsePixelBudget(WidgetTester tester) async {
+  final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: base.copyWith(
+        carouselTheme: const M3ECarouselTheme(
+          itemPadding: EdgeInsets.all(8),
+        ),
+      ),
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 400,
+            height: 200,
+            child: M3ECarousel(children: _items(6)),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text('item1'), warnIfMissed: false);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 90));
   await tester.pumpAndSettle();

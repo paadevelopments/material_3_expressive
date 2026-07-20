@@ -105,9 +105,10 @@ class M3ECarousel extends StatefulWidget {
   /// .
   final int singleSwipeGestureSensitivityRange;
 
-  /// A precise stepping constant utilized to offset position indexes inside elastic layout computations.
+  /// Fixed logical pixels added or removed per animating edge at peak pulse.
   ///
-  /// .
+  /// A value of `4` expands or squishes each active edge by up to 4px.
+  /// When both sides animate, each edge uses the full delta independently.
   final double fixedPulseDelta;
 
   /// Click event notification pipe exposing the zero-based list tracking index of the interacted element.

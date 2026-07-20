@@ -26,6 +26,10 @@ class M3ECarouselWrapper extends StatefulWidget {
     this.flexWeights,
     required this.children,
     this.onIndexChanged,
+    /// Fixed logical pixels added or removed per animating edge at peak pulse.
+    ///
+    /// A value of `4` expands or squishes each active edge by up to 4px.
+    /// When both sides animate, each edge uses the full delta independently.
     this.fixedPulseDelta = 4,
   }) : assert(
          (flexWeights != null && itemExtent == null) ||
@@ -52,6 +56,8 @@ class M3ECarouselWrapper extends StatefulWidget {
   final List<int>? flexWeights;
   final List<Widget> children;
   final void Function(int)? onIndexChanged;
+
+  /// Fixed logical pixels added or removed per animating edge at peak pulse.
   final double fixedPulseDelta;
 
   @override
@@ -115,6 +121,33 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     super.dispose();
   }
 
+  double _fallbackExtent() => widget.itemExtent ?? 100.0;
+
+  double _contentWidthFor(int index) {
+    final context = _itemKeys[index].currentContext;
+    final box = context?.findRenderObject() as RenderBox?;
+    final width = box?.size.width;
+    if (width == null || width <= 0) {
+      return _fallbackExtent();
+    }
+    return width;
+  }
+
+  (bool expandLeft, bool expandRight) _expandSidesForActiveIndex(int index) {
+    final leftVisible = _leftVisibleNeighborIndex != null;
+    final rightVisible = _rightVisibleNeighborIndex != null;
+    final noVisibleNeighbors = !leftVisible && !rightVisible;
+    final lastIndex = widget.children.length - 1;
+
+    final expandLeft = leftVisible ||
+        (noVisibleNeighbors && index == lastIndex) ||
+        (noVisibleNeighbors && index > 0 && index < lastIndex);
+    final expandRight = rightVisible ||
+        (noVisibleNeighbors && index == 0) ||
+        (noVisibleNeighbors && index > 0 && index < lastIndex);
+    return (expandLeft, expandRight);
+  }
+
   bool _isNeighborViewportVisible(int index, RenderBox carouselBox) {
     if (index < 0 || index >= widget.children.length) {
       return false;
@@ -136,17 +169,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   }
 
   Alignment _expandAlignmentForActiveIndex(int index) {
-    final leftVisible = _leftVisibleNeighborIndex != null;
-    final rightVisible = _rightVisibleNeighborIndex != null;
-    final noVisibleNeighbors = !leftVisible && !rightVisible;
-    final lastIndex = widget.children.length - 1;
-
-    final expandLeft = leftVisible ||
-        (noVisibleNeighbors && index == lastIndex) ||
-        (noVisibleNeighbors && index > 0 && index < lastIndex);
-    final expandRight = rightVisible ||
-        (noVisibleNeighbors && index == 0) ||
-        (noVisibleNeighbors && index > 0 && index < lastIndex);
+    final (expandLeft, expandRight) = _expandSidesForActiveIndex(index);
 
     if (expandLeft && expandRight) {
       return Alignment.center;
@@ -192,15 +215,10 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
     final parentContext = _carouselKey.currentContext;
     final parentBox = parentContext?.findRenderObject() as RenderBox?;
-    final context = _itemKeys[index].currentContext;
-    final renderBox = context?.findRenderObject() as RenderBox?;
-
-    final double fallbackBasis = widget.itemExtent ?? 100.0;
-    final double accurateWidth = renderBox?.size.width ?? fallbackBasis;
 
     setState(() {
       _activeIndex = index;
-      _currentGrowBaseWidth = accurateWidth;
+      _currentGrowBaseWidth = _contentWidthFor(index);
       _snapshotVisibleNeighbors(index, parentBox);
     });
 
@@ -223,6 +241,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       builder: (context, _) {
         final int squishCount = (_leftVisibleNeighborIndex != null ? 1 : 0) +
             (_rightVisibleNeighborIndex != null ? 1 : 0);
+        final double edgeDelta = widget.fixedPulseDelta * _bump.value;
 
         final carouselChildren = List<Widget>.generate(widget.children.length, (
           int index,
@@ -232,7 +251,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
           final isRightNeighbor = _rightVisibleNeighborIndex == index;
 
           var scaleX = 1.0;
-          EdgeInsets dynamicPadding = EdgeInsets.zero;
 
           Alignment individualAlignment = Alignment.center;
           if (isActive) {
@@ -242,34 +260,24 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
           }
 
           if (_activeIndex != null) {
-            final double currentGrowDelta =
-                widget.fixedPulseDelta * _bump.value;
-
             if (isActive) {
-              scaleX =
-                  (_currentGrowBaseWidth + currentGrowDelta) /
-                  _currentGrowBaseWidth;
+              final double width = _currentGrowBaseWidth > 0
+                  ? _currentGrowBaseWidth
+                  : _fallbackExtent();
+              final (expandLeft, expandRight) =
+                  _expandSidesForActiveIndex(index);
+              final growTotal = (expandLeft ? edgeDelta : 0) +
+                  (expandRight ? edgeDelta : 0);
+              scaleX = (width + growTotal) / width;
             } else if ((isLeftNeighbor || isRightNeighbor) &&
                 squishCount > 0) {
-              final double shrinkEach = currentGrowDelta / squishCount;
-
-              final neighborContext = _itemKeys[index].currentContext;
-              final neighborBox =
-                  neighborContext?.findRenderObject() as RenderBox?;
-              final double neighborWidth =
-                  neighborBox?.size.width ?? widget.itemExtent ?? 100.0;
-
-              final targetWidth = math.max(
-                neighborWidth - shrinkEach,
+              final double neighborWidth = _contentWidthFor(index);
+              final shrinkPixels = edgeDelta;
+              final double targetWidth = math.max(
+                neighborWidth - shrinkPixels,
                 1,
               );
               scaleX = targetWidth / neighborWidth;
-
-              if (isLeftNeighbor) {
-                dynamicPadding = EdgeInsets.only(right: shrinkEach);
-              } else if (isRightNeighbor) {
-                dynamicPadding = EdgeInsets.only(left: shrinkEach);
-              }
             }
           }
 
@@ -284,27 +292,24 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
             child: Transform(
               transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
               alignment: individualAlignment,
-              child: Padding(
-                padding: dynamicPadding,
-                child: ClipRRect(
-                  borderRadius: finalRadius,
-                  clipBehavior: widget.itemClipBehavior != Clip.none
-                      ? widget.itemClipBehavior
-                      : Clip.antiAlias,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      IgnorePointer(child: widget.children[index]),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          enableFeedback: widget.enableSplash,
-                          onTap: () => _handleTap(index),
-                          overlayColor: widget.overlayColor,
-                        ),
+              child: ClipRRect(
+                borderRadius: finalRadius,
+                clipBehavior: widget.itemClipBehavior != Clip.none
+                    ? widget.itemClipBehavior
+                    : Clip.antiAlias,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    IgnorePointer(child: widget.children[index]),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        enableFeedback: widget.enableSplash,
+                        onTap: () => _handleTap(index),
+                        overlayColor: widget.overlayColor,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
