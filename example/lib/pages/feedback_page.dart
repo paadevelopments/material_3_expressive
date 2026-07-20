@@ -235,6 +235,7 @@ class _FeedbackPageState extends State<FeedbackPage>
         const SizedBox(height: 16),
         M3ESearchBar(
           controller: _searchController,
+          expandOnFocus: true,
           hintText: 'Search components',
           trailing: <Widget>[
             M3EIconButton(

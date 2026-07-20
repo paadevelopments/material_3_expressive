@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Material, WidgetStatePropertyAll;
+import 'package:flutter/material.dart' show Colors, Material, WidgetStatePropertyAll;
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -234,7 +234,7 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
       effectiveShape = effectiveShape.copyWith(side: effectiveSide);
     }
     final Color effectiveDividerColor =
-        widget.dividerColor ?? viewTheme.dividerColor(scheme);
+        widget.dividerColor ?? Colors.transparent;
     final double? effectiveHeaderHeight = widget.viewHeaderHeight ??
         (widget.showFullScreenView ? viewTheme.headerHeight : null);
     final BoxConstraints? headerConstraints = effectiveHeaderHeight == null

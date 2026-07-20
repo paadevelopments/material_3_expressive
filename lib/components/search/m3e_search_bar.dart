@@ -14,8 +14,77 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../icon_buttons/enums/m3e_icon_button_enums.dart';
+import '../icon_buttons/m3e_icon_buttons.dart';
 import 'res/m3e_search_constants.dart';
 import 'styles/m3e_search_bar_theme.dart';
+
+double _resolveActionIconSize({
+  required M3EIconButtonTheme iconButtonTheme,
+  required Iterable<Widget>? trailing,
+  required Widget? leading,
+}) {
+  final Widget? referenceAction = _resolveReferenceAction(
+    trailing: trailing,
+    leading: leading,
+  );
+  if (referenceAction is M3EIconButton) {
+    final M3EIconButton button = referenceAction;
+    return iconButtonTheme.iconSize(button.size);
+  }
+  if (referenceAction is Icon) {
+    final Icon icon = referenceAction;
+    if (icon.size != null) {
+      return icon.size!;
+    }
+  }
+  return iconButtonTheme.iconSize(M3EIconButtonSize.sm);
+}
+
+Widget? _resolveReferenceAction({
+  required Iterable<Widget>? trailing,
+  required Widget? leading,
+}) {
+  if (trailing != null && trailing.isNotEmpty) {
+    return trailing.last;
+  }
+  return leading;
+}
+
+double _resolveActionSlotWidth({
+  required M3EIconButtonTheme iconButtonTheme,
+  required Iterable<Widget>? trailing,
+  required Widget? leading,
+}) {
+  final Widget? referenceAction = _resolveReferenceAction(
+    trailing: trailing,
+    leading: leading,
+  );
+  if (referenceAction is M3EIconButton) {
+    final M3EIconButton button = referenceAction;
+    return iconButtonTheme.target(button.size, button.width).width;
+  }
+  if (referenceAction is Icon) {
+    final Icon icon = referenceAction;
+    return icon.size ??
+        iconButtonTheme
+            .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
+            .width;
+  }
+  return iconButtonTheme
+      .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
+      .width;
+}
+
+Widget _wrapActionSlot({
+  required double width,
+  required Widget child,
+}) {
+  return SizedBox(
+    width: width,
+    child: Center(child: child),
+  );
+}
 
 Widget m3eDefaultSearchContextMenuBuilder(
   BuildContext context,
@@ -50,6 +119,7 @@ class M3ESearchBarInput extends StatefulWidget {
     this.contextMenuBuilder = m3eDefaultSearchContextMenuBuilder,
     this.smartDashesType,
     this.smartQuotesType,
+    this.contentPadding = EdgeInsets.zero,
     super.key,
   });
 
@@ -74,6 +144,7 @@ class M3ESearchBarInput extends StatefulWidget {
   final EditableTextContextMenuBuilder contextMenuBuilder;
   final SmartDashesType? smartDashesType;
   final SmartQuotesType? smartQuotesType;
+  final EdgeInsetsGeometry contentPadding;
 
   @override
   State<M3ESearchBarInput> createState() => _M3ESearchBarInputState();
@@ -108,44 +179,47 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
     return Semantics(
       label: widget.hintText,
       textField: true,
-      child: Stack(
-        alignment: AlignmentDirectional.centerStart,
-        children: <Widget>[
-          if (widget.controller.text.isEmpty && widget.hintText != null)
-            IgnorePointer(
-              child: Text(
-                widget.hintText!,
-                style: widget.hintStyle,
+      child: Padding(
+        padding: widget.contentPadding,
+        child: Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: <Widget>[
+            if (widget.controller.text.isEmpty && widget.hintText != null)
+              IgnorePointer(
+                child: Text(
+                  widget.hintText!,
+                  style: widget.hintStyle,
+                  maxLines: 1,
+                ),
+              ),
+            Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) => widget.onTap?.call(),
+              child: EditableText(
+                controller: widget.controller,
+                focusNode: widget.focusNode,
+                readOnly: widget.readOnly || !widget.enabled,
+                autofocus: widget.autoFocus,
+                onTapOutside: widget.onTapOutside,
+                onChanged: widget.onChanged,
+                onSubmitted: widget.onSubmitted,
+                style: widget.textStyle,
+                cursorColor: widget.cursorColor,
+                backgroundCursorColor:
+                    widget.cursorColor.withValues(alpha: 0.4),
+                selectionColor: widget.selectionColor,
+                textCapitalization: widget.textCapitalization,
+                textInputAction: widget.textInputAction,
+                keyboardType: widget.keyboardType,
+                scrollPadding: widget.scrollPadding,
+                contextMenuBuilder: widget.contextMenuBuilder,
+                smartDashesType: widget.smartDashesType,
+                smartQuotesType: widget.smartQuotesType,
                 maxLines: 1,
               ),
             ),
-          Listener(
-            behavior: HitTestBehavior.translucent,
-            onPointerDown: (_) => widget.onTap?.call(),
-            child: EditableText(
-              controller: widget.controller,
-              focusNode: widget.focusNode,
-              readOnly: widget.readOnly || !widget.enabled,
-              autofocus: widget.autoFocus,
-              onTapOutside: widget.onTapOutside,
-              onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
-              style: widget.textStyle,
-              cursorColor: widget.cursorColor,
-              backgroundCursorColor:
-                  widget.cursorColor.withValues(alpha: 0.4),
-              selectionColor: widget.selectionColor,
-              textCapitalization: widget.textCapitalization,
-              textInputAction: widget.textInputAction,
-              keyboardType: widget.keyboardType,
-              scrollPadding: widget.scrollPadding,
-              contextMenuBuilder: widget.contextMenuBuilder,
-              smartDashesType: widget.smartDashesType,
-              smartQuotesType: widget.smartQuotesType,
-              maxLines: 1,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -233,6 +307,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   late final AnimationController _widthController;
   FocusNode? _internalFocusNode;
   double? _parentMaxWidth;
+  bool _widthSyncScheduled = false;
 
   FocusNode get _focusNode =>
       widget.focusNode ?? (_internalFocusNode ??= FocusNode());
@@ -241,10 +316,23 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   void initState() {
     super.initState();
     _widthController = AnimationController.unbounded(vsync: this);
-    _widthController.addListener(() => setState(() {}));
     _statesController.addListener(() => setState(() {}));
     _focusNode.addListener(_handleFocusChange);
     _syncFocusedState();
+  }
+
+  void _scheduleWidthSync(M3ESearchBarTheme barTheme, {bool animate = false}) {
+    if (_widthSyncScheduled) {
+      return;
+    }
+    _widthSyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _widthSyncScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      _syncWidthController(barTheme, animate: animate);
+    });
   }
 
   @override
@@ -256,7 +344,6 @@ class _M3ESearchBarState extends State<M3ESearchBar>
       );
       _focusNode.addListener(_handleFocusChange);
       _syncFocusedState();
-      _animateToTargetWidth();
     }
   }
 
@@ -272,57 +359,77 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     super.dispose();
   }
 
-  void _handleFocusChange() {
-    _syncFocusedState();
-    _animateToTargetWidth();
-  }
-
   void _syncFocusedState() {
     _statesController.update(WidgetState.focused, _focusNode.hasFocus);
   }
 
-  bool _shouldExpandWidth(M3ESearchBarTheme barTheme) {
-    return widget.expandOnFocus &&
-        barTheme.expandOnFocus &&
-        widget.enabled &&
-        !widget.readOnly &&
-        _parentMaxWidth != null &&
-        _parentMaxWidth! > barTheme.collapsedMaxWidth;
-  }
-
-  double _targetWidth(M3ESearchBarTheme barTheme) {
-    final double parentMax = _parentMaxWidth ?? barTheme.focusedMaxWidth;
-    if (!_shouldExpandWidth(barTheme)) {
-      return parentMax;
-    }
-    final double cap = barTheme.focusedMaxWidth;
-    if (_focusNode.hasFocus) {
-      return math.min(parentMax, cap);
-    }
+  double _collapsedWidth(M3ESearchBarTheme barTheme) {
+    final double parentMax = _parentMaxWidth ?? barTheme.collapsedMaxWidth;
     return math.min(parentMax, barTheme.collapsedMaxWidth);
   }
 
-  void _animateToTargetWidth() {
-    final barTheme = M3ETheme.of(context).searchBarTheme;
+  double _focusedWidth(M3ESearchBarTheme barTheme) {
+    final double parentMax = _parentMaxWidth ?? barTheme.focusedMaxWidth;
+    return math.min(parentMax, barTheme.focusedMaxWidth);
+  }
+
+  bool _shouldExpandWidth(M3ESearchBarTheme barTheme) {
+    if (!widget.expandOnFocus ||
+        !barTheme.expandOnFocus ||
+        !widget.enabled ||
+        widget.readOnly ||
+        _parentMaxWidth == null) {
+      return false;
+    }
+    return _focusedWidth(barTheme) > _collapsedWidth(barTheme) + 0.5;
+  }
+
+  double _targetWidth(M3ESearchBarTheme barTheme) {
+    if (!_shouldExpandWidth(barTheme)) {
+      return _parentMaxWidth ?? barTheme.focusedMaxWidth;
+    }
+    return _focusNode.hasFocus
+        ? _focusedWidth(barTheme)
+        : _collapsedWidth(barTheme);
+  }
+
+  void _syncWidthController(M3ESearchBarTheme barTheme, {bool animate = false}) {
     final double target = _targetWidth(barTheme);
-    if (!_widthController.isAnimating && _widthController.value == target) {
+    if (!_shouldExpandWidth(barTheme)) {
+      _widthController.value = target;
       return;
     }
-    _widthController.stop();
-    _widthController.animateWith(
-      SpringSimulation(
-        barTheme.focusExpandSpring.toDescription(),
-        _widthController.value,
-        target,
-        _widthController.velocity,
-      ),
-    );
+    if (animate &&
+        (_widthController.isAnimating ||
+            (target - _widthController.value).abs() > 0.5)) {
+      _widthController
+        ..stop()
+        ..animateWith(
+          SpringSimulation(
+            barTheme.focusExpandSpring.toDescription(),
+            _widthController.value,
+            target,
+            _widthController.velocity,
+          ),
+        );
+      return;
+    }
+    if (!_widthController.isAnimating) {
+      _widthController.value = target;
+    }
+  }
+
+  void _handleFocusChange() {
+    _syncFocusedState();
+    _syncWidthController(M3ETheme.of(context).searchBarTheme, animate: true);
   }
 
   void _handleTap() {
     widget.onTap?.call();
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
+    } else {
+      _syncWidthController(M3ETheme.of(context).searchBarTheme, animate: true);
     }
   }
 
@@ -375,26 +482,52 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     );
     final effectiveTextCapitalization =
         widget.textCapitalization ?? TextCapitalization.none;
+    final M3EIconButtonTheme iconButtonTheme = theme.iconButtonTheme;
+    final double actionIconSize = _resolveActionIconSize(
+      iconButtonTheme: iconButtonTheme,
+      trailing: widget.trailing,
+      leading: widget.leading,
+    );
+    final double actionSlotWidth = _resolveActionSlotWidth(
+      iconButtonTheme: iconButtonTheme,
+      trailing: widget.trailing,
+      leading: widget.leading,
+    );
+    final EdgeInsetsDirectional inputPadding = widget.leading == null
+        ? EdgeInsetsDirectional.only(
+            start: barTheme.noLeadingHintExtraPadding,
+          )
+        : EdgeInsetsDirectional.zero;
 
     final Widget? leading = widget.leading == null
         ? null
-        : IconTheme.merge(
-            data: IconThemeData(
-              color: barTheme.leadingIconColor(scheme),
-              size: barTheme.iconSize,
-            ),
-            child: widget.leading!,
+        : _wrapActionSlot(
+            width: actionSlotWidth,
+            child: widget.leading is M3EIconButton
+                ? widget.leading!
+                : IconTheme.merge(
+                    data: IconThemeData(
+                      color: barTheme.leadingIconColor(scheme),
+                      size: actionIconSize,
+                    ),
+                    child: widget.leading!,
+                  ),
           );
 
     final List<Widget>? trailing = widget.trailing
         ?.map(
-          (Widget action) => IconTheme.merge(
-            data: IconThemeData(
-              color: barTheme.trailingIconColor(scheme),
-              size: barTheme.iconSize,
-            ),
-            child: action,
-          ),
+          (Widget action) => action is M3EIconButton
+              ? _wrapActionSlot(width: actionSlotWidth, child: action)
+              : _wrapActionSlot(
+                  width: actionSlotWidth,
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      color: barTheme.trailingIconColor(scheme),
+                      size: actionIconSize,
+                    ),
+                    child: action,
+                  ),
+                ),
         )
         .toList();
 
@@ -447,6 +580,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
                         contextMenuBuilder: widget.contextMenuBuilder,
                         smartDashesType: widget.smartDashesType,
                         smartQuotesType: widget.smartQuotesType,
+                        contentPadding: inputPadding,
                       ),
                     ),
                     ...?trailing,
@@ -475,14 +609,13 @@ class _M3ESearchBarState extends State<M3ESearchBar>
             final double parentMax = constraints.maxWidth.isFinite
                 ? constraints.maxWidth
                 : barTheme.focusedMaxWidth;
-            if (_parentMaxWidth != parentMax) {
+            final bool parentChanged = _parentMaxWidth != parentMax;
+            if (parentChanged) {
               _parentMaxWidth = parentMax;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  final double target = _targetWidth(barTheme);
-                  _widthController.value = target;
-                }
-              });
+            }
+            if (parentChanged ||
+                (_widthController.value == 0 && !_widthController.isAnimating)) {
+              _scheduleWidthSync(barTheme);
             }
 
             final Widget bar = _buildBarContent(
@@ -500,21 +633,27 @@ class _M3ESearchBarState extends State<M3ESearchBar>
               );
             }
 
-            final double width = _widthController.value.clamp(
-              barTheme.minWidth,
-              parentMax,
-            );
+            return AnimatedBuilder(
+              animation: _widthController,
+              builder: (BuildContext context, Widget? child) {
+                final double width = _widthController.value.clamp(
+                  _collapsedWidth(barTheme),
+                  parentMax,
+                );
 
-            return Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: SizedBox(
-                width: width,
-                child: ConstrainedBox(
-                  constraints: barTheme.constraints(override: widget.constraints)
-                      .copyWith(maxWidth: width),
-                  child: bar,
-                ),
-              ),
+                return Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: SizedBox(
+                    width: width,
+                    child: ConstrainedBox(
+                      constraints: barTheme
+                          .constraints(override: widget.constraints)
+                          .copyWith(maxWidth: width),
+                      child: bar,
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

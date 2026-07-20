@@ -33,6 +33,45 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('M3ESearchBar applies hint inset only without leading',
+      (WidgetTester tester) async {
+    const double extraInset = 12;
+
+    await tester.pumpWidget(
+      _host(
+        const SizedBox(
+          width: 400,
+          child: M3ESearchBar(hintText: 'Search'),
+        ),
+      ),
+    );
+
+    final M3ESearchBarInput withoutLeading = tester.widget<M3ESearchBarInput>(
+      find.byType(M3ESearchBarInput),
+    );
+    expect(
+      withoutLeading.contentPadding,
+      EdgeInsetsDirectional.only(start: extraInset),
+    );
+
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: 400,
+          child: M3ESearchBar(
+            hintText: 'Search',
+            leading: const Icon(M3EIcons.search),
+          ),
+        ),
+      ),
+    );
+
+    final M3ESearchBarInput withLeading = tester.widget<M3ESearchBarInput>(
+      find.byType(M3ESearchBarInput),
+    );
+    expect(withLeading.contentPadding, EdgeInsetsDirectional.zero);
+  });
+
   testWidgets('disabled M3ESearchBar applies reduced opacity',
       (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -242,7 +281,7 @@ void main() {
     expect(
       materials.any(
         (Material material) =>
-            material.elevation == 6 &&
+            material.elevation == 0 &&
             material.color == theme.colorScheme.surfaceContainerHigh,
       ),
       isTrue,

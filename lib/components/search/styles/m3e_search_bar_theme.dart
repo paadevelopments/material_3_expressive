@@ -18,6 +18,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     this.focusedMaxWidth = 800,
     this.expandOnFocus = true,
     this.focusExpandSpring = M3EMotion.expressiveSpatialFast,
+    this.noLeadingHintExtraPadding = 12,
     this.pressedOverlayOpacity = 0.1,
     this.hoveredOverlayOpacity = 0.08,
   });
@@ -36,6 +37,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   final double focusedMaxWidth;
   final bool expandOnFocus;
   final M3ESpring focusExpandSpring;
+  final double noLeadingHintExtraPadding;
   final double pressedOverlayOpacity;
   final double hoveredOverlayOpacity;
 
@@ -176,6 +178,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     double? focusedMaxWidth,
     bool? expandOnFocus,
     M3ESpring? focusExpandSpring,
+    double? noLeadingHintExtraPadding,
     double? pressedOverlayOpacity,
     double? hoveredOverlayOpacity,
   }) {
@@ -192,6 +195,8 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       focusedMaxWidth: focusedMaxWidth ?? this.focusedMaxWidth,
       expandOnFocus: expandOnFocus ?? this.expandOnFocus,
       focusExpandSpring: focusExpandSpring ?? this.focusExpandSpring,
+      noLeadingHintExtraPadding:
+          noLeadingHintExtraPadding ?? this.noLeadingHintExtraPadding,
       pressedOverlayOpacity:
           pressedOverlayOpacity ?? this.pressedOverlayOpacity,
       hoveredOverlayOpacity:
@@ -223,6 +228,11 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       expandOnFocus: t < 0.5 ? expandOnFocus : other.expandOnFocus,
       focusExpandSpring:
           t < 0.5 ? focusExpandSpring : other.focusExpandSpring,
+      noLeadingHintExtraPadding: _lerpDouble(
+        noLeadingHintExtraPadding,
+        other.noLeadingHintExtraPadding,
+        t,
+      )!,
       pressedOverlayOpacity:
           _lerpDouble(pressedOverlayOpacity, other.pressedOverlayOpacity, t)!,
       hoveredOverlayOpacity:
