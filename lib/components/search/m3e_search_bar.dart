@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart'
     show
         AdaptiveTextSelectionToolbar,
@@ -257,6 +255,7 @@ class M3ESearchBar extends StatefulWidget {
     this.contextMenuBuilder = m3eDefaultSearchContextMenuBuilder,
     this.readOnly = false,
     this.expandOnFocus = true,
+    this.expandRestPadding,
     this.smartDashesType,
     this.smartQuotesType,
     super.key,
@@ -291,6 +290,7 @@ class M3ESearchBar extends StatefulWidget {
   final EditableTextContextMenuBuilder contextMenuBuilder;
   final bool readOnly;
   final bool expandOnFocus;
+  final double? expandRestPadding;
   final SmartDashesType? smartDashesType;
   final SmartQuotesType? smartQuotesType;
 
@@ -304,10 +304,9 @@ class _M3ESearchBarState extends State<M3ESearchBar>
       widget.controller ?? TextEditingController();
   late final WidgetStatesController _statesController =
       WidgetStatesController();
-  late final AnimationController _widthController;
+  late final AnimationController _expandPaddingController;
   FocusNode? _internalFocusNode;
-  double? _parentMaxWidth;
-  bool _widthSyncScheduled = false;
+  bool _expandPaddingSyncScheduled = false;
 
   FocusNode get _focusNode =>
       widget.focusNode ?? (_internalFocusNode ??= FocusNode());
@@ -315,23 +314,34 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   @override
   void initState() {
     super.initState();
-    _widthController = AnimationController.unbounded(vsync: this);
+    _expandPaddingController = AnimationController.unbounded(vsync: this);
     _statesController.addListener(() => setState(() {}));
     _focusNode.addListener(_handleFocusChange);
     _syncFocusedState();
-  }
-
-  void _scheduleWidthSync(M3ESearchBarTheme barTheme, {bool animate = false}) {
-    if (_widthSyncScheduled) {
-      return;
-    }
-    _widthSyncScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _widthSyncScheduled = false;
       if (!mounted) {
         return;
       }
-      _syncWidthController(barTheme, animate: animate);
+      _syncExpandPaddingController(
+        M3ETheme.of(context).searchBarTheme,
+      );
+    });
+  }
+
+  void _scheduleExpandPaddingSync(
+    M3ESearchBarTheme barTheme, {
+    bool animate = false,
+  }) {
+    if (_expandPaddingSyncScheduled) {
+      return;
+    }
+    _expandPaddingSyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _expandPaddingSyncScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      _syncExpandPaddingController(barTheme, animate: animate);
     });
   }
 
@@ -350,7 +360,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   @override
   void dispose() {
     _focusNode.removeListener(_handleFocusChange);
-    _widthController.dispose();
+    _expandPaddingController.dispose();
     _statesController.dispose();
     if (widget.controller == null) {
       _controller.dispose();
@@ -363,65 +373,68 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     _statesController.update(WidgetState.focused, _focusNode.hasFocus);
   }
 
-  double _collapsedWidth(M3ESearchBarTheme barTheme) {
-    final double parentMax = _parentMaxWidth ?? barTheme.collapsedMaxWidth;
-    return math.min(parentMax, barTheme.collapsedMaxWidth);
+  double _restingExpandPadding(M3ESearchBarTheme barTheme) {
+    return widget.expandRestPadding ?? barTheme.restingExpandPadding;
   }
 
-  double _focusedWidth(M3ESearchBarTheme barTheme) {
-    final double parentMax = _parentMaxWidth ?? barTheme.focusedMaxWidth;
-    return math.min(parentMax, barTheme.focusedMaxWidth);
+  double _focusedExpandPadding(M3ESearchBarTheme barTheme) {
+    return _restingExpandPadding(barTheme) / 2;
   }
 
-  bool _shouldExpandWidth(M3ESearchBarTheme barTheme) {
+  bool _shouldAnimateExpandPadding(M3ESearchBarTheme barTheme) {
     if (!widget.expandOnFocus ||
         !barTheme.expandOnFocus ||
         !widget.enabled ||
-        widget.readOnly ||
-        _parentMaxWidth == null) {
+        widget.readOnly) {
       return false;
     }
-    return _focusedWidth(barTheme) > _collapsedWidth(barTheme) + 0.5;
+    return _restingExpandPadding(barTheme) > 0.5;
   }
 
-  double _targetWidth(M3ESearchBarTheme barTheme) {
-    if (!_shouldExpandWidth(barTheme)) {
-      return _parentMaxWidth ?? barTheme.focusedMaxWidth;
+  double _targetExpandPadding(M3ESearchBarTheme barTheme) {
+    if (!_shouldAnimateExpandPadding(barTheme)) {
+      return 0;
     }
     return _focusNode.hasFocus
-        ? _focusedWidth(barTheme)
-        : _collapsedWidth(barTheme);
+        ? _focusedExpandPadding(barTheme)
+        : _restingExpandPadding(barTheme);
   }
 
-  void _syncWidthController(M3ESearchBarTheme barTheme, {bool animate = false}) {
-    final double target = _targetWidth(barTheme);
-    if (!_shouldExpandWidth(barTheme)) {
-      _widthController.value = target;
+  void _syncExpandPaddingController(
+    M3ESearchBarTheme barTheme, {
+    bool animate = false,
+  }) {
+    final double target = _targetExpandPadding(barTheme);
+    if (!_shouldAnimateExpandPadding(barTheme)) {
+      _expandPaddingController.value = target;
       return;
     }
     if (animate &&
-        (_widthController.isAnimating ||
-            (target - _widthController.value).abs() > 0.5)) {
-      _widthController
+        (_expandPaddingController.isAnimating ||
+            (target - _expandPaddingController.value).abs() > 0.5)) {
+      _expandPaddingController
         ..stop()
         ..animateWith(
           SpringSimulation(
             barTheme.focusExpandSpring.toDescription(),
-            _widthController.value,
+            _expandPaddingController.value,
             target,
-            _widthController.velocity,
+            _expandPaddingController.velocity,
           ),
         );
       return;
     }
-    if (!_widthController.isAnimating) {
-      _widthController.value = target;
+    if (!_expandPaddingController.isAnimating) {
+      _expandPaddingController.value = target;
     }
   }
 
   void _handleFocusChange() {
     _syncFocusedState();
-    _syncWidthController(M3ETheme.of(context).searchBarTheme, animate: true);
+    _syncExpandPaddingController(
+      M3ETheme.of(context).searchBarTheme,
+      animate: true,
+    );
   }
 
   void _handleTap() {
@@ -429,7 +442,10 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     } else {
-      _syncWidthController(M3ETheme.of(context).searchBarTheme, animate: true);
+      _syncExpandPaddingController(
+        M3ETheme.of(context).searchBarTheme,
+        animate: true,
+      );
     }
   }
 
@@ -604,56 +620,41 @@ class _M3ESearchBarState extends State<M3ESearchBar>
         final states = _statesController.value;
         final textDirection = Directionality.of(context);
 
-        return LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final double parentMax = constraints.maxWidth.isFinite
-                ? constraints.maxWidth
-                : barTheme.focusedMaxWidth;
-            final bool parentChanged = _parentMaxWidth != parentMax;
-            if (parentChanged) {
-              _parentMaxWidth = parentMax;
-            }
-            if (parentChanged ||
-                (_widthController.value == 0 && !_widthController.isAnimating)) {
-              _scheduleWidthSync(barTheme);
-            }
+        if (_expandPaddingController.value == 0 &&
+            !_expandPaddingController.isAnimating &&
+            _shouldAnimateExpandPadding(barTheme)) {
+          _scheduleExpandPaddingSync(barTheme);
+        }
 
-            final Widget bar = _buildBarContent(
-              theme: theme,
-              barTheme: barTheme,
-              scheme: scheme,
-              states: states,
-              textDirection: textDirection,
-            );
+        final Widget bar = _buildBarContent(
+          theme: theme,
+          barTheme: barTheme,
+          scheme: scheme,
+          states: states,
+          textDirection: textDirection,
+        );
 
-            if (!_shouldExpandWidth(barTheme)) {
-              return ConstrainedBox(
-                constraints: barTheme.constraints(override: widget.constraints),
+        final BoxConstraints barConstraints =
+            barTheme.constraints(override: widget.constraints);
+
+        if (!_shouldAnimateExpandPadding(barTheme)) {
+          return ConstrainedBox(
+            constraints: barConstraints,
+            child: bar,
+          );
+        }
+
+        return AnimatedBuilder(
+          animation: _expandPaddingController,
+          builder: (BuildContext context, Widget? child) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: _expandPaddingController.value,
+              ),
+              child: ConstrainedBox(
+                constraints: barConstraints,
                 child: bar,
-              );
-            }
-
-            return AnimatedBuilder(
-              animation: _widthController,
-              builder: (BuildContext context, Widget? child) {
-                final double width = _widthController.value.clamp(
-                  _collapsedWidth(barTheme),
-                  parentMax,
-                );
-
-                return Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: SizedBox(
-                    width: width,
-                    child: ConstrainedBox(
-                      constraints: barTheme
-                          .constraints(override: widget.constraints)
-                          .copyWith(maxWidth: width),
-                      child: bar,
-                    ),
-                  ),
-                );
-              },
+              ),
             );
           },
         );

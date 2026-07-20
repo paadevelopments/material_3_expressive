@@ -315,12 +315,50 @@ void main() {
 
     final double widthFocused = tester.getSize(barMaterial).width;
     expect(widthFocused, greaterThan(widthBefore));
+    expect(widthFocused - widthBefore, closeTo(8, 0.1));
 
     focusNode.unfocus();
     await tester.pumpAndSettle();
 
     final double widthAfter = tester.getSize(barMaterial).width;
     expect(widthAfter, lessThan(widthFocused));
+    expect(widthAfter, closeTo(widthBefore, 0.1));
+  });
+
+  testWidgets('M3ESearchBar expands on focus in narrow gallery layout',
+      (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+        home: Scaffold(
+          body: ListView(
+            padding: const EdgeInsets.all(24),
+            children: const <Widget>[
+              M3ESearchBar(
+                hintText: 'Search components',
+                expandOnFocus: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder barMaterial = find.descendant(
+      of: find.byType(M3ESearchBar),
+      matching: find.byType(Material),
+    ).first;
+    final double widthBefore = tester.getSize(barMaterial).width;
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pumpAndSettle();
+
+    final double widthFocused = tester.getSize(barMaterial).width;
+    expect(widthFocused, greaterThan(widthBefore));
   });
 
   testWidgets('M3ESearchBarTheme overrides container color',

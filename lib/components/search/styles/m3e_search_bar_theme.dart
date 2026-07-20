@@ -14,8 +14,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     this.minWidth = 360,
     this.maxWidth = 800,
     this.minHeight = 56,
-    this.collapsedMaxWidth = 360,
-    this.focusedMaxWidth = 800,
+    this.restingExpandPadding = 8,
     this.expandOnFocus = true,
     this.focusExpandSpring = M3EMotion.expressiveSpatialFast,
     this.noLeadingHintExtraPadding = 12,
@@ -33,8 +32,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   final double minWidth;
   final double maxWidth;
   final double minHeight;
-  final double collapsedMaxWidth;
-  final double focusedMaxWidth;
+  final double restingExpandPadding;
   final bool expandOnFocus;
   final M3ESpring focusExpandSpring;
   final double noLeadingHintExtraPadding;
@@ -174,8 +172,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     double? minWidth,
     double? maxWidth,
     double? minHeight,
-    double? collapsedMaxWidth,
-    double? focusedMaxWidth,
+    double? restingExpandPadding,
     bool? expandOnFocus,
     M3ESpring? focusExpandSpring,
     double? noLeadingHintExtraPadding,
@@ -191,8 +188,8 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
-      collapsedMaxWidth: collapsedMaxWidth ?? this.collapsedMaxWidth,
-      focusedMaxWidth: focusedMaxWidth ?? this.focusedMaxWidth,
+      restingExpandPadding:
+          restingExpandPadding ?? this.restingExpandPadding,
       expandOnFocus: expandOnFocus ?? this.expandOnFocus,
       focusExpandSpring: focusExpandSpring ?? this.focusExpandSpring,
       noLeadingHintExtraPadding:
@@ -221,10 +218,8 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
       maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,
       minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
-      collapsedMaxWidth:
-          _lerpDouble(collapsedMaxWidth, other.collapsedMaxWidth, t)!,
-      focusedMaxWidth:
-          _lerpDouble(focusedMaxWidth, other.focusedMaxWidth, t)!,
+      restingExpandPadding:
+          _lerpDouble(restingExpandPadding, other.restingExpandPadding, t)!,
       expandOnFocus: t < 0.5 ? expandOnFocus : other.expandOnFocus,
       focusExpandSpring:
           t < 0.5 ? focusExpandSpring : other.focusExpandSpring,
