@@ -241,7 +241,7 @@ class _FeedbackPageState extends State<FeedbackPage>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 24, 16),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
           child: Column(
             children: [
               const SizedBox(height: 16),
