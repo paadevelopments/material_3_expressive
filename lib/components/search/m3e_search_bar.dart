@@ -198,7 +198,8 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
                 focusNode: widget.focusNode,
                 readOnly: widget.readOnly || !widget.enabled,
                 autofocus: widget.autoFocus,
-                onTapOutside: widget.onTapOutside,
+                onTapOutside: widget.onTapOutside ??
+                    M3EFocus.tapOutsideHandler(widget.focusNode),
                 onChanged: widget.onChanged,
                 onSubmitted: widget.onSubmitted,
                 style: widget.textStyle,
@@ -582,7 +583,8 @@ class _M3ESearchBarState extends State<M3ESearchBar>
                         readOnly: widget.readOnly,
                         autoFocus: widget.autoFocus,
                         onTap: _handleTap,
-                        onTapOutside: widget.onTapOutside,
+                        onTapOutside: widget.onTapOutside ??
+                            M3EFocus.tapOutsideHandler(_focusNode),
                         onChanged: widget.onChanged,
                         onSubmitted: widget.onSubmitted,
                         textStyle: effectiveTextStyle,

@@ -7,26 +7,33 @@ class GallerySection extends StatelessWidget {
     required this.title,
     required this.children,
     this.description,
+    this.padding = const EdgeInsets.fromLTRB(24, 0, 24, 32),
     super.key,
   });
 
   final String title;
   final String? description;
   final List<Widget> children;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 32),
+      padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            title,
-            style: theme.typeScale.titleLarge.copyWith(
-              color: theme.colorScheme.onSurface,
-              decoration: TextDecoration.none,
+          Padding(
+            padding: padding == EdgeInsets.zero
+                ? EdgeInsets.symmetric(horizontal: 24)
+                : EdgeInsets.zero,
+            child: Text(
+              title,
+              style: theme.typeScale.titleLarge.copyWith(
+                color: theme.colorScheme.onSurface,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           if (description != null) ...<Widget>[
@@ -59,11 +66,13 @@ class GalleryPageScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.all(24),
       addRepaintBoundaries: false,
       itemCount: sections.length,
       itemBuilder: (BuildContext context, int index) {
-        return RepaintBoundary(child: sections[index]);
+        return Padding(
+          padding: EdgeInsets.zero,
+          child: RepaintBoundary(child: sections[index]),
+        );
       },
     );
   }

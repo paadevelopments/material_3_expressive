@@ -2,6 +2,7 @@ export 'components/m3e_component_theme.dart';
 export 'm3e_color_scheme.dart';
 export 'm3e_color_utils.dart';
 export 'm3e_elevation.dart';
+export 'm3e_focus.dart';
 export 'm3e_icons.dart';
 export 'm3e_ink_splash_theme.dart';
 export 'm3e_material_app.dart';

@@ -219,52 +219,67 @@ class _FeedbackPageState extends State<FeedbackPage>
   Widget _inputs() {
     return GallerySection(
       title: 'Text fields & search',
+      padding: EdgeInsets.zero,
       children: <Widget>[
-        M3ETextField(
-          controller: _nameController,
-          label: 'Full name',
-          supportingText: 'As it appears on your ID',
-          leading: const Icon(M3EIcons.edit),
-        ),
-        const SizedBox(height: 16),
-        const M3ETextField(
-          label: 'Email',
-          variant: M3ETextFieldVariant.outlined,
-          errorText: 'Enter a valid email address',
-        ),
-        const SizedBox(height: 16),
-        M3ESearchBar(
-          controller: _searchController,
-          expandOnFocus: true,
-          hintText: 'Search components',
-          trailing: <Widget>[
-            M3EIconButton(
-              icon: const Icon(M3EIcons.close),
-              onPressed: _searchController.clear,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        M3ESearchAnchor.bar(
-          searchController: _anchorSearchController,
-          barHintText: 'Search gallery components',
-          shrinkWrap: true,
-          suggestionsBuilder:
-              (BuildContext context, M3ESearchController controller) {
-            final String query = controller.text.trim().toLowerCase();
-            final Iterable<String> matches = query.isEmpty
-                ? _galleryComponentNames
-                : _galleryComponentNames.where(
-                    (String name) => name.toLowerCase().contains(query),
-                  );
-            return matches.map(
-              (String name) => ListTile(
-                title: Text(name),
-                onTap: () => controller.closeView(name),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+          child: Column(
+            children: [
+              M3ETextField(
+                controller: _nameController,
+                label: 'Full name',
+                supportingText: 'As it appears on your ID',
+                leading: const Icon(M3EIcons.edit),
               ),
-            );
-          },
+              const SizedBox(height: 16),
+              const M3ETextField(
+                label: 'Email',
+                variant: M3ETextFieldVariant.outlined,
+                errorText: 'Enter a valid email address',
+              ),
+            ],
+          ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 24, 16),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              M3ESearchBar(
+                controller: _searchController,
+                expandOnFocus: true,
+                hintText: 'Search components',
+                trailing: <Widget>[
+                  M3EIconButton(
+                    icon: const Icon(M3EIcons.close),
+                    onPressed: _searchController.clear,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              M3ESearchAnchor.bar(
+                searchController: _anchorSearchController,
+                barHintText: 'Search gallery components',
+                shrinkWrap: true,
+                suggestionsBuilder:
+                    (BuildContext context, M3ESearchController controller) {
+                  final String query = controller.text.trim().toLowerCase();
+                  final Iterable<String> matches = query.isEmpty
+                      ? _galleryComponentNames
+                      : _galleryComponentNames.where(
+                        (String name) => name.toLowerCase().contains(query),
+                  );
+                  return matches.map(
+                        (String name) => ListTile(
+                      title: Text(name),
+                      onTap: () => controller.closeView(name),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        )
       ],
     );
   }

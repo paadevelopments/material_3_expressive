@@ -1403,6 +1403,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       child: TextField(
         controller: _searchTextController,
         autofocus: sd.autofocus,
+        onTapOutside: (PointerDownEvent event) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
         style: sd.textStyle ?? type.bodyMedium,
         mouseCursor: sd.mouseCursor,
         decoration: InputDecoration(
