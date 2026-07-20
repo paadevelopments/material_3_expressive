@@ -289,27 +289,29 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
           return Container(
             key: _itemKeys[index],
-            child: Transform(
-              transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
-              alignment: individualAlignment,
-              child: ClipRRect(
-                borderRadius: finalRadius,
-                clipBehavior: widget.itemClipBehavior != Clip.none
-                    ? widget.itemClipBehavior
-                    : Clip.antiAlias,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    IgnorePointer(child: widget.children[index]),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        enableFeedback: widget.enableSplash,
-                        onTap: () => _handleTap(index),
-                        overlayColor: widget.overlayColor,
+            child: RepaintBoundary(
+              child: Transform(
+                transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
+                alignment: individualAlignment,
+                child: ClipRRect(
+                  borderRadius: finalRadius,
+                  clipBehavior: widget.itemClipBehavior != Clip.none
+                      ? widget.itemClipBehavior
+                      : Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      IgnorePointer(child: widget.children[index]),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          enableFeedback: widget.enableSplash,
+                          onTap: () => _handleTap(index),
+                          overlayColor: widget.overlayColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

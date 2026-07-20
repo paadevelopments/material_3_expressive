@@ -16,7 +16,11 @@ class ActionsPage extends StatefulWidget {
   State<ActionsPage> createState() => _ActionsPageState();
 }
 
-class _ActionsPageState extends State<ActionsPage> {
+class _ActionsPageState extends State<ActionsPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   bool _favorite = false;
   Set<String> _singleView = <String>{'grid'};
   Set<String> _filters = <String>{'new'};
@@ -28,6 +32,7 @@ class _ActionsPageState extends State<ActionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: <Widget>[

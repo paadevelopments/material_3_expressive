@@ -12,15 +12,17 @@ class SelectionPage extends StatefulWidget {
   State<SelectionPage> createState() => _SelectionPageState();
 }
 
-class _SelectionPageState extends State<SelectionPage> {
+class _SelectionPageState extends State<SelectionPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   bool? _checked = true;
   bool? _tristate;
   String _plan = 'standard';
   bool _wifi = true;
   bool _bluetooth = false;
   final Set<String> _chips = <String>{'flutter'};
-  double _volume = 0.5;
-  double _brightness = 3;
   DateTime? _date;
   M3ETime _time = const M3ETime(hour: 9, minute: 30);
   String? _framework;
@@ -29,6 +31,7 @@ class _SelectionPageState extends State<SelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = M3ETheme.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -240,51 +243,24 @@ class _SelectionPageState extends State<SelectionPage> {
         ),
         GallerySection(
           title: 'Sliders',
-          children: <Widget>[
-            DemoRow(
-              label: 'Continuous',
-              children: <Widget>[
-                SizedBox(
-                  width: 260,
-                  child: M3ESlider(
-                    value: _volume,
-                    onChanged: (double value) =>
-                        setState(() => _volume = value),
-                  ),
-                ),
-              ],
-            ),
-            DemoRow(
-              label: 'Discrete (0-5)',
-              children: <Widget>[
-                SizedBox(
-                  width: 260,
-                  child: M3ESlider(
-                    value: _brightness,
-                    max: 5,
-                    divisions: 5,
-                    onChanged: (double value) =>
-                        setState(() => _brightness = value),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          children: const <Widget>[_SelectionSlidersSection()],
         ),
-        GallerySection(
-          title: 'Date & time pickers',
-          children: <Widget>[
-            M3EDatePicker(
-              selectedDate: _date,
-              onDateSelected: (DateTime value) =>
-                  setState(() => _date = value),
-            ),
-            const SizedBox(height: 24),
-            M3ETimePicker(
-              value: _time,
-              onChanged: (M3ETime value) => setState(() => _time = value),
-            ),
-          ],
+        RepaintBoundary(
+          child: GallerySection(
+            title: 'Date & time pickers',
+            children: <Widget>[
+              M3EDatePicker(
+                selectedDate: _date,
+                onDateSelected: (DateTime value) =>
+                    setState(() => _date = value),
+              ),
+              const SizedBox(height: 24),
+              M3ETimePicker(
+                value: _time,
+                onChanged: (M3ETime value) => setState(() => _time = value),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -305,5 +281,54 @@ class _SelectionPageState extends State<SelectionPage> {
       M3EDropdownItem(label: 'Kenya', value: 'ke'),
       M3EDropdownItem(label: 'Nigeria', value: 'ng'),
     ];
+  }
+}
+
+class _SelectionSlidersSection extends StatefulWidget {
+  const _SelectionSlidersSection();
+
+  @override
+  State<_SelectionSlidersSection> createState() =>
+      _SelectionSlidersSectionState();
+}
+
+class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
+  double _volume = 0.5;
+  double _brightness = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        DemoRow(
+          label: 'Continuous',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider(
+                value: _volume,
+                onChanged: (double value) => setState(() => _volume = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Discrete (0-5)',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider(
+                value: _brightness,
+                max: 5,
+                divisions: 5,
+                onChanged: (double value) =>
+                    setState(() => _brightness = value),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

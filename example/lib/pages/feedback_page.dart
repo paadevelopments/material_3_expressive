@@ -13,7 +13,11 @@ class FeedbackPage extends StatefulWidget {
   State<FeedbackPage> createState() => _FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> {
+class _FeedbackPageState extends State<FeedbackPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   double _progress = 0.6;
@@ -28,6 +32,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = M3ETheme.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -67,42 +72,44 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   Widget _progressSection() {
-    return GallerySection(
-      title: 'Progress & loading',
-      children: <Widget>[
-        DemoRow(
-          label: 'Indeterminate',
-          children: <Widget>[
-            const SizedBox(width: 200, child: M3ELinearProgress()),
-            const M3ECircularProgress(),
-            const M3ELoadingIndicator(),
-            const M3ELoadingIndicator(
-              variant: M3ELoadingIndicatorVariant.contained,
-            ),
-          ],
-        ),
-        DemoRow(
-          label: 'Determinate',
-          children: <Widget>[
-            SizedBox(
-              width: 200,
-              child: M3ELinearProgress(
-                value: _progress,
-                shape: M3EProgressShape.flat,
+    return RepaintBoundary(
+      child: GallerySection(
+        title: 'Progress & loading',
+        children: <Widget>[
+          DemoRow(
+            label: 'Indeterminate',
+            children: <Widget>[
+              const SizedBox(width: 200, child: M3ELinearProgress()),
+              const M3ECircularProgress(),
+              const M3ELoadingIndicator(),
+              const M3ELoadingIndicator(
+                variant: M3ELoadingIndicatorVariant.contained,
               ),
-            ),
-            M3ECircularProgress(value: _progress),
-            SizedBox(
-              width: 220,
-              child: M3ESlider(
-                value: _progress,
-                onChanged: (double value) =>
-                    setState(() => _progress = value),
+            ],
+          ),
+          DemoRow(
+            label: 'Determinate',
+            children: <Widget>[
+              SizedBox(
+                width: 200,
+                child: M3ELinearProgress(
+                  value: _progress,
+                  shape: M3EProgressShape.flat,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              M3ECircularProgress(value: _progress),
+              SizedBox(
+                width: 220,
+                child: M3ESlider(
+                  value: _progress,
+                  onChanged: (double value) =>
+                      setState(() => _progress = value),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -114,43 +121,45 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   Widget _pullToRefresh() {
-    return GallerySection(
-      title: 'Pull to refresh',
-      children: <Widget>[
-        DemoRow(
-          label: 'Drag the lists down to refresh (count: $_refreshCount)',
-          children: <Widget>[
-            SizedBox(
-              width: 200,
-              height: 180,
-              child: M3ERefreshIndicator(
-                onRefresh: _handleRefresh,
-                child: ListView.builder(
-                  itemCount: 12,
-                  itemBuilder: (BuildContext context, int index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text('Expressive item ${index + 1}'),
+    return RepaintBoundary(
+      child: GallerySection(
+        title: 'Pull to refresh',
+        children: <Widget>[
+          DemoRow(
+            label: 'Drag the lists down to refresh (count: $_refreshCount)',
+            children: <Widget>[
+              SizedBox(
+                width: 200,
+                height: 180,
+                child: M3ERefreshIndicator(
+                  onRefresh: _handleRefresh,
+                  child: ListView.builder(
+                    itemCount: 12,
+                    itemBuilder: (BuildContext context, int index) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text('Expressive item ${index + 1}'),
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(
-              width: 200,
-              height: 180,
-              child: M3ERefreshIndicator.contained(
-                onRefresh: _handleRefresh,
-                child: ListView.builder(
-                  itemCount: 12,
-                  itemBuilder: (BuildContext context, int index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text('Contained item ${index + 1}'),
+              SizedBox(
+                width: 200,
+                height: 180,
+                child: M3ERefreshIndicator.contained(
+                  onRefresh: _handleRefresh,
+                  child: ListView.builder(
+                    itemCount: 12,
+                    itemBuilder: (BuildContext context, int index) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text('Contained item ${index + 1}'),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 

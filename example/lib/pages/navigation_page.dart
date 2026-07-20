@@ -18,7 +18,11 @@ class NavigationPage extends StatefulWidget {
   State<NavigationPage> createState() => _NavigationPageState();
 }
 
-class _NavigationPageState extends State<NavigationPage> {
+class _NavigationPageState extends State<NavigationPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   int _barIndex = 0;
   int _railIndex = 0;
   int _drawerIndex = 0;
@@ -78,6 +82,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = M3ETheme.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -130,27 +135,30 @@ class _NavigationPageState extends State<NavigationPage> {
         const SizedBox(height: 12),
         _framed(
           theme,
-          SizedBox(
-            height: 180,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                M3EAppBar.sliver(
-                  titleText: 'Sliver • medium',
-                  actions: const <Widget>[Icon(M3EIcons.search)],
-                ),
-                SliverList.list(
-                  children: <Widget>[
-                    for (int i = 0; i < 6; i++)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+          RepaintBoundary(
+            child: SizedBox(
+              height: 180,
+              child: CustomScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                slivers: <Widget>[
+                  M3EAppBar.sliver(
+                    titleText: 'Sliver • medium',
+                    actions: const <Widget>[Icon(M3EIcons.search)],
+                  ),
+                  SliverList.list(
+                    children: <Widget>[
+                      for (int i = 0; i < 6; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Text('Scrollable item ${i + 1}'),
                         ),
-                        child: Text('Scrollable item ${i + 1}'),
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -154,23 +154,25 @@ class _M3ETimePickerState extends State<M3ETimePicker> {
   Widget _buildDial(M3EThemeData theme) {
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    return SizedBox(
-      width: timeTheme.dialSize,
-      height: timeTheme.dialSize,
-      child: GestureDetector(
-        onTapDown: (TapDownDetails d) => _handleDial(d.localPosition, timeTheme),
-        onPanUpdate: (DragUpdateDetails d) =>
-            _handleDial(d.localPosition, timeTheme),
-        child: CustomPaint(
-          painter: M3ETimeDialPainter(
-            labels: _dialLabels(),
-            selectedIndex: _selectedIndex(),
-            dialColor: scheme.surfaceContainerHighest,
-            accentColor: scheme.primary,
-            onAccentColor: scheme.onPrimary,
-            labelColor: scheme.onSurface,
-            textDirection: Directionality.of(context),
-            timeTheme: timeTheme,
+    return RepaintBoundary(
+      child: SizedBox(
+        width: timeTheme.dialSize,
+        height: timeTheme.dialSize,
+        child: GestureDetector(
+          onTapDown: (TapDownDetails d) => _handleDial(d.localPosition, timeTheme),
+          onPanUpdate: (DragUpdateDetails d) =>
+              _handleDial(d.localPosition, timeTheme),
+          child: CustomPaint(
+            painter: M3ETimeDialPainter(
+              labels: _dialLabels(),
+              selectedIndex: _selectedIndex(),
+              dialColor: scheme.surfaceContainerHighest,
+              accentColor: scheme.primary,
+              onAccentColor: scheme.onPrimary,
+              labelColor: scheme.onSurface,
+              textDirection: Directionality.of(context),
+              timeTheme: timeTheme,
+            ),
           ),
         ),
       ),

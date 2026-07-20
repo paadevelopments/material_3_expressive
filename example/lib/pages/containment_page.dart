@@ -7,11 +7,34 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import '../widgets/gallery_section.dart';
 
 /// Demonstrates every component in the Material 3 *Containment* group.
-class ContainmentPage extends StatelessWidget {
+class ContainmentPage extends StatefulWidget {
   const ContainmentPage({super.key});
 
   @override
+  State<ContainmentPage> createState() => _ContainmentPageState();
+}
+
+class _ContainmentPageState extends State<ContainmentPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  late final List<Widget> _heroCarouselItems = _buildCarouselItems();
+  late final List<Widget> _uncontainedCarouselItems = _buildCarouselItems();
+
+  static List<Widget> _buildCarouselItems() {
+    return List<Widget>.generate(10, (int index) {
+      return ColoredBox(
+        color: Colors.primaries[index % Colors.primaries.length]
+            .withValues(alpha: 0.8),
+        child: const SizedBox.expand(),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = M3ETheme.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -83,33 +106,27 @@ class ContainmentPage extends StatelessWidget {
     return GallerySection(
       title: 'Carousel',
       children: <Widget>[
-        SizedBox(
-          height: 200,
-          child: M3ECarousel(
-            type: M3ECarouselType.hero,
-            heroAlignment: M3ECarouselHeroAlignment.center,
-            onTap: (int tapIndex) => log(tapIndex.toString()),
-            children: List<Widget>.generate(10, (int index) {
-              return ColoredBox(
-                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.8),
-                child: const SizedBox.expand(),
-              );
-            }),
+        RepaintBoundary(
+          child: SizedBox(
+            height: 200,
+            child: M3ECarousel(
+              type: M3ECarouselType.hero,
+              heroAlignment: M3ECarouselHeroAlignment.center,
+              onTap: (int tapIndex) => log(tapIndex.toString()),
+              children: _heroCarouselItems,
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          height: 160,
-          child: M3ECarousel(
-            type: M3ECarouselType.uncontained,
-            heroAlignment: M3ECarouselHeroAlignment.center,
-            onTap: (int tapIndex) => log(tapIndex.toString()),
-            children: List<Widget>.generate(10, (int index) {
-              return ColoredBox(
-                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.8),
-                child: const SizedBox.expand(),
-              );
-            }),
+        RepaintBoundary(
+          child: SizedBox(
+            height: 160,
+            child: M3ECarousel(
+              type: M3ECarouselType.uncontained,
+              heroAlignment: M3ECarouselHeroAlignment.center,
+              onTap: (int tapIndex) => log(tapIndex.toString()),
+              children: _uncontainedCarouselItems,
+            ),
           ),
         ),
       ],

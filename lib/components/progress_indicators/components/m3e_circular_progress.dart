@@ -65,23 +65,26 @@ class _M3ECircularProgressState extends State<M3ECircularProgress>
     final double resolvedSize = widget.size ?? circularTheme.defaultSize;
     final double resolvedStrokeWidth =
         widget.strokeWidth ?? circularTheme.defaultStrokeWidth;
-    return M3EComponentTheme(builder: (context) => SizedBox(
-        width: resolvedSize,
-        height: resolvedSize,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (BuildContext context, Widget? child) {
-            final _Arc arc = _resolveArc();
-            return CustomPaint(
-              painter: M3ECircularProgressPainter(
-                trackColor: circularTheme.trackColor(scheme),
-                activeColor: circularTheme.activeColor(scheme),
-                strokeWidth: resolvedStrokeWidth,
-                startAngle: arc.start,
-                sweepAngle: arc.sweep,
-              ),
-            );
-          },
+    return M3EComponentTheme(
+      builder: (context) => RepaintBoundary(
+        child: SizedBox(
+          width: resolvedSize,
+          height: resolvedSize,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (BuildContext context, Widget? child) {
+              final _Arc arc = _resolveArc();
+              return CustomPaint(
+                painter: M3ECircularProgressPainter(
+                  trackColor: circularTheme.trackColor(scheme),
+                  activeColor: circularTheme.activeColor(scheme),
+                  strokeWidth: resolvedStrokeWidth,
+                  startAngle: arc.start,
+                  sweepAngle: arc.sweep,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

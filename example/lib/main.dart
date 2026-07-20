@@ -14,16 +14,10 @@ void main() {
 
 /// A full gallery demonstrating every Material 3 Expressive component,
 /// grouped the same way as the official Material 3 documentation.
-class ExampleApp extends StatefulWidget {
+class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
-  @override
-  State<ExampleApp> createState() => _ExampleAppState();
-}
-
-class _ExampleAppState extends State<ExampleApp> {
   static const Color _seed = Color(0xFF6750A4);
-  int _index = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,22 +28,20 @@ class _ExampleAppState extends State<ExampleApp> {
       data: M3EThemeData.light(seedColor: _seed),
       autoTheming: true,
       dynamicColoring: true,
-      home: _Gallery(
-        index: _index,
-        onIndexChanged: (int value) => setState(() => _index = value),
-      ),
+      home: const _GalleryShell(),
     );
   }
 }
 
-class _Gallery extends StatelessWidget {
-  const _Gallery({
-    required this.index,
-    required this.onIndexChanged,
-  });
+class _GalleryShell extends StatefulWidget {
+  const _GalleryShell();
 
-  final int index;
-  final ValueChanged<int> onIndexChanged;
+  @override
+  State<_GalleryShell> createState() => _GalleryShellState();
+}
+
+class _GalleryShellState extends State<_GalleryShell> {
+  int _index = 0;
 
   static const List<Widget> _pages = <Widget>[
     ActionsPage(),
@@ -96,11 +88,23 @@ class _Gallery extends StatelessWidget {
                 ),
               ],
             ),
-            Expanded(child: _pages[index]),
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: <Widget>[
+                  for (int i = 0; i < _pages.length; i++)
+                    TickerMode(
+                      enabled: _index == i,
+                      child: _pages[i],
+                    ),
+                ],
+              ),
+            ),
             M3ENavigationBar(
               destinations: _destinations,
-              selectedIndex: index,
-              onDestinationSelected: onIndexChanged,
+              selectedIndex: _index,
+              onDestinationSelected: (int value) =>
+                  setState(() => _index = value),
             ),
           ],
         ),
