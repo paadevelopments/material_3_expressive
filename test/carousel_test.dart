@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -32,6 +32,9 @@ void main() {
   testWidgets('uncontained layout renders and swipes', _uncontained);
   testWidgets('tap reports the item index', _tap);
   testWidgets('free scroll snaps on drag', _freeScroll);
+  testWidgets('tap pulse with neighbors completes', _tapPulseWithNeighbors);
+  testWidgets('re-tap after scroll completes pulse', _retapAfterScroll);
+  testWidgets('edge item tap pulse completes', _edgeItemTapPulse);
 }
 
 Future<void> _hero(WidgetTester tester) async {
@@ -131,5 +134,69 @@ Future<void> _freeScroll(WidgetTester tester) async {
 
   await tester.fling(find.byType(M3ECarousel), const Offset(-400, 0), 800);
   await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _tapPulseWithNeighbors(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        type: M3ECarouselType.uncontained,
+        uncontainedItemExtent: 150,
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text('item2'), warnIfMissed: false);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 90));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _retapAfterScroll(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        freeScroll: true,
+        type: M3ECarouselType.uncontained,
+        uncontainedItemExtent: 150,
+        children: _items(8),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.fling(find.byType(M3ECarousel), const Offset(-300, 0), 600);
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.byType(InkWell).first, warnIfMissed: false);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 90));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _edgeItemTapPulse(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        type: M3ECarouselType.uncontained,
+        uncontainedItemExtent: 150,
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text('item0'), warnIfMissed: false);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 90));
+  await tester.pumpAndSettle();
+
   expect(tester.takeException(), isNull);
 }

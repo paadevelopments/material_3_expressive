@@ -1,6 +1,8 @@
-import "package:flutter/material.dart";
+import 'dart:math' as math;
 
-import "m3e_carousel_view.dart";
+import 'package:flutter/material.dart';
+
+import 'm3e_carousel_view.dart';
 
 class M3ECarouselWrapper extends StatefulWidget {
   const M3ECarouselWrapper({
@@ -28,7 +30,7 @@ class M3ECarouselWrapper extends StatefulWidget {
   }) : assert(
          (flexWeights != null && itemExtent == null) ||
              (flexWeights == null && itemExtent != null),
-         "Provide either itemExtent for standard layouts OR flexWeights for weighted layouts.",
+         'Provide either itemExtent for standard layouts OR flexWeights for weighted layouts.',
        );
 
   final bool freeScroll;
@@ -59,12 +61,12 @@ class M3ECarouselWrapper extends StatefulWidget {
 class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     with SingleTickerProviderStateMixin {
   int? _activeIndex;
+  int? _leftVisibleNeighborIndex;
+  int? _rightVisibleNeighborIndex;
   late M3ECarouselController _internalController;
   late List<GlobalKey> _itemKeys;
   final GlobalKey _carouselKey = GlobalKey();
 
-  bool _hasLeftNeighborDataset = false;
-  bool _hasRightNeighborDataset = false;
   double _currentGrowBaseWidth = 0;
 
   late final AnimationController _pulseController = AnimationController(
@@ -133,68 +135,63 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     return itemRight > (carouselLeft + 1.0) && itemLeft < (carouselRight - 1.0);
   }
 
-  Alignment _getAlignmentForIndex(int index) {
-    if (!_internalController.hasClients || widget.infinite) {
+  Alignment _expandAlignmentForActiveIndex(int index) {
+    final leftVisible = _leftVisibleNeighborIndex != null;
+    final rightVisible = _rightVisibleNeighborIndex != null;
+    final noVisibleNeighbors = !leftVisible && !rightVisible;
+    final lastIndex = widget.children.length - 1;
+
+    final expandLeft = leftVisible ||
+        (noVisibleNeighbors && index == lastIndex) ||
+        (noVisibleNeighbors && index > 0 && index < lastIndex);
+    final expandRight = rightVisible ||
+        (noVisibleNeighbors && index == 0) ||
+        (noVisibleNeighbors && index > 0 && index < lastIndex);
+
+    if (expandLeft && expandRight) {
       return Alignment.center;
     }
-
-    if (widget.itemExtent != null) {
-      final int totalItems = widget.children.length;
-      final bool leftPresent = index > 0;
-      final bool rightPresent = index < totalItems - 1;
-
-      final double scrollOffset = _internalController.offset;
-      final double viewportWidth =
-          _internalController.position.viewportDimension;
-
-      final double itemStart = index * widget.itemExtent!;
-      final double itemEnd = itemStart + widget.itemExtent!;
-
-      final bool leftVisible = leftPresent && (itemStart > scrollOffset + 1.0);
-      final bool rightVisible =
-          rightPresent && (itemEnd < (scrollOffset + viewportWidth - 1.0));
-
-      if (leftVisible && !rightVisible) {
-        return Alignment.centerRight;
-      }
-      if (rightVisible && !leftVisible) {
-        return Alignment.centerLeft;
-      }
-      return Alignment.center;
+    if (expandLeft) {
+      return Alignment.centerRight;
     }
-
-    if (_activeIndex != null) {
-      if (index == _activeIndex) {
-        if (_hasLeftNeighborDataset && !_hasRightNeighborDataset) {
-          return Alignment.centerRight;
-        }
-        if (_hasRightNeighborDataset && !_hasLeftNeighborDataset) {
-          return Alignment.centerLeft;
-        }
-        return Alignment.center;
-      }
-      if (index == _activeIndex! - 1) {
-        return Alignment.centerLeft;
-      }
-      if (index == _activeIndex! + 1) {
-        return Alignment.centerRight;
-      }
+    if (expandRight) {
+      return Alignment.centerLeft;
     }
-
     return Alignment.center;
   }
 
-  Future<void> _handleTap(int index) async {
-    if (widget.onTap != null) {
-      widget.onTap?.call(index);
+  Alignment _squishAlignmentForNeighborIndex(int index) {
+    if (index == _leftVisibleNeighborIndex) {
+      return Alignment.centerLeft;
     }
+    if (index == _rightVisibleNeighborIndex) {
+      return Alignment.centerRight;
+    }
+    return Alignment.center;
+  }
+
+  void _snapshotVisibleNeighbors(int index, RenderBox? parentBox) {
+    if (parentBox != null) {
+      _leftVisibleNeighborIndex =
+          _isNeighborViewportVisible(index - 1, parentBox) ? index - 1 : null;
+      _rightVisibleNeighborIndex =
+          _isNeighborViewportVisible(index + 1, parentBox) ? index + 1 : null;
+      return;
+    }
+
+    _leftVisibleNeighborIndex = index > 0 ? index - 1 : null;
+    _rightVisibleNeighborIndex =
+        index < widget.children.length - 1 ? index + 1 : null;
+  }
+
+  Future<void> _handleTap(int index) async {
+    widget.onTap?.call(index);
     if (_pulseController.isAnimating) {
       return;
     }
 
     final parentContext = _carouselKey.currentContext;
-    final parentBox =
-        parentContext?.findRenderObject() as RenderBox?;
+    final parentBox = parentContext?.findRenderObject() as RenderBox?;
     final context = _itemKeys[index].currentContext;
     final renderBox = context?.findRenderObject() as RenderBox?;
 
@@ -204,30 +201,18 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     setState(() {
       _activeIndex = index;
       _currentGrowBaseWidth = accurateWidth;
-
-      if (widget.infinite) {
-        _hasLeftNeighborDataset = true;
-        _hasRightNeighborDataset = true;
-      } else if (parentBox != null) {
-        _hasLeftNeighborDataset = _isNeighborViewportVisible(
-          index - 1,
-          parentBox,
-        );
-        _hasRightNeighborDataset = _isNeighborViewportVisible(
-          index + 1,
-          parentBox,
-        );
-      } else {
-        _hasLeftNeighborDataset = index > 0;
-        _hasRightNeighborDataset = index < widget.children.length - 1;
-      }
+      _snapshotVisibleNeighbors(index, parentBox);
     });
 
     await _pulseController.forward();
     await _pulseController.reverse();
 
     if (mounted) {
-      setState(() => _activeIndex = null);
+      setState(() {
+        _activeIndex = null;
+        _leftVisibleNeighborIndex = null;
+        _rightVisibleNeighborIndex = null;
+      });
     }
   }
 
@@ -236,17 +221,25 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     return AnimatedBuilder(
       animation: _bump,
       builder: (context, _) {
+        final int squishCount = (_leftVisibleNeighborIndex != null ? 1 : 0) +
+            (_rightVisibleNeighborIndex != null ? 1 : 0);
+
         final carouselChildren = List<Widget>.generate(widget.children.length, (
           int index,
         ) {
           final isActive = _activeIndex == index;
-          final bool isNeighbor =
-              _activeIndex != null && (_activeIndex! - index).abs() == 1;
+          final isLeftNeighbor = _leftVisibleNeighborIndex == index;
+          final isRightNeighbor = _rightVisibleNeighborIndex == index;
 
           var scaleX = 1.0;
           EdgeInsets dynamicPadding = EdgeInsets.zero;
 
-          final Alignment individualAlignment = _getAlignmentForIndex(index);
+          Alignment individualAlignment = Alignment.center;
+          if (isActive) {
+            individualAlignment = _expandAlignmentForActiveIndex(index);
+          } else if (isLeftNeighbor || isRightNeighbor) {
+            individualAlignment = _squishAlignmentForNeighborIndex(index);
+          }
 
           if (_activeIndex != null) {
             final double currentGrowDelta =
@@ -256,11 +249,9 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
               scaleX =
                   (_currentGrowBaseWidth + currentGrowDelta) /
                   _currentGrowBaseWidth;
-            } else if (isNeighbor) {
-              final double shrinkEach =
-                  currentGrowDelta /
-                  ((_hasLeftNeighborDataset ? 1 : 0) +
-                      (_hasRightNeighborDataset ? 1 : 0));
+            } else if ((isLeftNeighbor || isRightNeighbor) &&
+                squishCount > 0) {
+              final double shrinkEach = currentGrowDelta / squishCount;
 
               final neighborContext = _itemKeys[index].currentContext;
               final neighborBox =
@@ -268,16 +259,16 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
               final double neighborWidth =
                   neighborBox?.size.width ?? widget.itemExtent ?? 100.0;
 
-              scaleX = (neighborWidth - shrinkEach) / neighborWidth;
+              final targetWidth = math.max(
+                neighborWidth - shrinkEach,
+                1,
+              );
+              scaleX = targetWidth / neighborWidth;
 
-              if (individualAlignment == Alignment.centerLeft) {
+              if (isLeftNeighbor) {
                 dynamicPadding = EdgeInsets.only(right: shrinkEach);
-              } else if (individualAlignment == Alignment.centerRight) {
+              } else if (isRightNeighbor) {
                 dynamicPadding = EdgeInsets.only(left: shrinkEach);
-              } else {
-                dynamicPadding = EdgeInsets.symmetric(
-                  horizontal: shrinkEach / 2.0,
-                );
               }
             }
           }

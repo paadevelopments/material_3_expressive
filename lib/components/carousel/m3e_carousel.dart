@@ -261,7 +261,6 @@ class _M3ECarouselState extends State<M3ECarousel> {
               width: frameWidth,
               height: frameHeight,
               child: M3ECarouselWrapper(
-                key: UniqueKey(),
                 controller: controller,
                 freeScroll: widget.freeScroll,
                 itemSnapping: widget.freeScroll,
