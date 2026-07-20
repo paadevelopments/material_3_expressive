@@ -63,16 +63,16 @@ class M3ESnackbarHostState extends State<M3ESnackbarHost>
   @override
   Widget build(BuildContext context) {
     final snackTheme = M3ETheme.of(context).snackBarTheme;
+    final MediaQueryData media = MediaQuery.of(context);
     return Positioned(
-      left: snackTheme.overlayHorizontalInset,
-      right: snackTheme.overlayHorizontalInset,
+      left: snackTheme.overlayHorizontalInset + media.viewPadding.left,
+      right: snackTheme.overlayHorizontalInset + media.viewPadding.right,
       bottom: snackTheme.overlayBottomInset +
-          MediaQuery.viewInsetsOf(context).bottom,
-      child: SafeArea(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: SlideTransition(position: _offset, child: widget.child),
-        ),
+          media.viewPadding.bottom +
+          media.viewInsets.bottom,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SlideTransition(position: _offset, child: widget.child),
       ),
     );
   }
