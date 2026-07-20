@@ -27,6 +27,7 @@ import '../components/progress_indicators/styles/m3e_progress_indicator_theme.da
 import '../components/radio_button/styles/m3e_radio_theme.dart';
 import '../components/refresh_indicator/styles/m3e_refresh_indicator_theme.dart';
 import '../components/search/styles/m3e_search_bar_theme.dart';
+import '../components/search/styles/m3e_search_view_theme.dart';
 import '../components/segmented_buttons/styles/m3e_segmented_button_theme.dart';
 import '../components/side_sheets/styles/m3e_side_sheet_theme.dart';
 import '../components/sliders/styles/m3e_slider_theme.dart';
@@ -81,6 +82,7 @@ class M3EThemeData {
     this.radioTheme = M3ERadioTheme.defaults,
     this.refreshIndicatorTheme = M3ERefreshIndicatorTheme.defaults,
     this.searchBarTheme = M3ESearchBarTheme.defaults,
+    this.searchViewTheme = M3ESearchViewTheme.defaults,
     this.segmentedButtonTheme = M3ESegmentedButtonTheme.defaults,
     this.sideSheetTheme = M3ESideSheetTheme.defaults,
     this.sliderTheme = M3ESliderTheme.defaults,
@@ -167,6 +169,7 @@ class M3EThemeData {
   final M3ERadioTheme radioTheme;
   final M3ERefreshIndicatorTheme refreshIndicatorTheme;
   final M3ESearchBarTheme searchBarTheme;
+  final M3ESearchViewTheme searchViewTheme;
   final M3ESegmentedButtonTheme segmentedButtonTheme;
   final M3ESideSheetTheme sideSheetTheme;
   final M3ESliderTheme sliderTheme;
@@ -226,6 +229,7 @@ class M3EThemeData {
       radioTheme: radioTheme,
       refreshIndicatorTheme: refreshIndicatorTheme,
       searchBarTheme: searchBarTheme,
+      searchViewTheme: searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme,
       sideSheetTheme: sideSheetTheme,
       sliderTheme: sliderTheme,
@@ -276,6 +280,7 @@ class M3EThemeData {
     M3ERadioTheme? radioTheme,
     M3ERefreshIndicatorTheme? refreshIndicatorTheme,
     M3ESearchBarTheme? searchBarTheme,
+    M3ESearchViewTheme? searchViewTheme,
     M3ESegmentedButtonTheme? segmentedButtonTheme,
     M3ESideSheetTheme? sideSheetTheme,
     M3ESliderTheme? sliderTheme,
@@ -324,6 +329,7 @@ class M3EThemeData {
       radioTheme: radioTheme ?? this.radioTheme,
       refreshIndicatorTheme: refreshIndicatorTheme ?? this.refreshIndicatorTheme,
       searchBarTheme: searchBarTheme ?? this.searchBarTheme,
+      searchViewTheme: searchViewTheme ?? this.searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
       sideSheetTheme: sideSheetTheme ?? this.sideSheetTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,

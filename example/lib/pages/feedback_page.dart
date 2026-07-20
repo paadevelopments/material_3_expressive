@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ListTile;
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/text_fields/enums/m3e_text_field_variant.dart';
@@ -20,8 +21,31 @@ class _FeedbackPageState extends State<FeedbackPage>
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
+  final M3ESearchController _anchorSearchController = M3ESearchController();
   double _progress = 0.6;
   int _refreshCount = 0;
+
+  static const List<String> _galleryComponentNames = <String>[
+    'Buttons',
+    'Cards',
+    'Carousel',
+    'Checkbox',
+    'Chips',
+    'Date picker',
+    'Dialog',
+    'Dropdown',
+    'FAB',
+    'Navigation bar',
+    'Progress',
+    'Search bar',
+    'Slider',
+    'Snackbar',
+    'Switch',
+    'Tabs',
+    'Text field',
+    'Time picker',
+    'Tooltip',
+  ];
 
   @override
   void dispose() {
@@ -218,6 +242,27 @@ class _FeedbackPageState extends State<FeedbackPage>
               onPressed: _searchController.clear,
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        M3ESearchAnchor.bar(
+          searchController: _anchorSearchController,
+          barHintText: 'Search gallery components',
+          shrinkWrap: true,
+          suggestionsBuilder:
+              (BuildContext context, M3ESearchController controller) {
+            final String query = controller.text.trim().toLowerCase();
+            final Iterable<String> matches = query.isEmpty
+                ? _galleryComponentNames
+                : _galleryComponentNames.where(
+                    (String name) => name.toLowerCase().contains(query),
+                  );
+            return matches.map(
+              (String name) => ListTile(
+                title: Text(name),
+                onTap: () => controller.closeView(name),
+              ),
+            );
+          },
         ),
       ],
     );

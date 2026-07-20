@@ -1035,11 +1035,12 @@ const M3ETextField(
 );
 ```
 
-#### M3ESearchBar
+#### M3ESearchBar / M3ESearchAnchor
 
-Search field with leading icon and trailing actions.
+Inline search field, or a bar that opens a full search view with suggestions.
 
 ```dart
+// Inline bar
 M3ESearchBar(
   controller: searchController,
   hintText: 'Search components',
@@ -1049,6 +1050,21 @@ M3ESearchBar(
       onPressed: searchController.clear,
     ),
   ],
+);
+
+// Anchor + search view
+final controller = M3ESearchController();
+M3ESearchAnchor.bar(
+  searchController: controller,
+  barHintText: 'Search',
+  suggestionsBuilder: (context, controller) sync* {
+    for (final name in names.where((n) => n.contains(controller.text))) {
+      yield ListTile(
+        title: Text(name),
+        onTap: () => controller.closeView(name),
+      );
+    }
+  },
 );
 ```
 
