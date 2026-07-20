@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../m3e_theme.dart';
-import '../m3e_theme_scope.dart';
 
 /// Registers an adaptive theme dependency for a single M3E component subtree.
 ///
@@ -14,7 +13,11 @@ class M3EComponentTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    M3EThemeScope.resolveForComponent(context);
+    final M3EInheritedTheme? inherited =
+        context.dependOnInheritedWidgetOfExactType<M3EInheritedTheme>();
+    if (inherited == null) {
+      M3EThemeScope.resolveForComponent(context);
+    }
     return builder(context);
   }
 }

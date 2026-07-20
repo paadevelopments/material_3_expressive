@@ -56,6 +56,8 @@ class M3EThemeScope extends StatefulWidget {
 }
 
 class M3EThemeScopeState extends State<M3EThemeScope> {
+  late M3EThemeData _cachedDarkTemplate;
+
   M3EThemeData get baseData => widget.baseData;
   M3EThemeController get controller => widget.controller;
   Brightness? get initialTheme => widget.initialTheme;
@@ -63,7 +65,21 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
   bool get dynamicColoring => widget.dynamicColoring ?? false;
 
   M3EThemeData get lightTemplate => widget.baseData;
-  M3EThemeData get darkTemplate => widget.baseData.deriveDarkTemplate();
+  M3EThemeData get darkTemplate => _cachedDarkTemplate;
+
+  @override
+  void initState() {
+    super.initState();
+    _cachedDarkTemplate = widget.baseData.deriveDarkTemplate();
+  }
+
+  @override
+  void didUpdateWidget(M3EThemeScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.baseData != widget.baseData) {
+      _cachedDarkTemplate = widget.baseData.deriveDarkTemplate();
+    }
+  }
 
   Brightness resolveBrightness(BuildContext context) {
     return widget.controller.resolveBrightness(

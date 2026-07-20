@@ -18,6 +18,30 @@ void main() {
     expect(dark.colorScheme.primary, isNot(equals(light.colorScheme.primary)));
   });
 
+  testWidgets('M3EThemeScope caches dark template across resolve calls',
+      (WidgetTester tester) async {
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.dark),
+        child: M3ETheme(
+          data: base,
+          autoTheming: true,
+          child: Builder(
+            builder: (BuildContext context) {
+              final M3EThemeScopeState? scope = M3EThemeScope.maybeOf(context);
+              final M3EThemeData first = scope!.resolve(context);
+              final M3EThemeData second = scope.resolve(context);
+              expect(identical(first, second), isTrue);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+  });
+
   testWidgets('M3EMaterialApp aligns themeMode with autoTheming platform brightness',
       (WidgetTester tester) async {
     final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));

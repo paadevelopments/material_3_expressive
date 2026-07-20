@@ -43,12 +43,12 @@ class M3ETheme extends StatefulWidget {
 
   /// Returns the nearest expressive theme, or derives one from Material.
   static M3EThemeData of(BuildContext context) {
-    M3EThemeScope.resolveForComponent(context);
     final M3EInheritedTheme? inherited =
         context.dependOnInheritedWidgetOfExactType<M3EInheritedTheme>();
     if (inherited != null) {
       return inherited.data;
     }
+    M3EThemeScope.resolveForComponent(context);
     final M3EThemeData? scoped = M3EThemeScope.resolveOf(context);
     if (scoped != null) {
       return scoped;
