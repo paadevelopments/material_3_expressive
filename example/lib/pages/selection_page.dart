@@ -33,9 +33,8 @@ class _SelectionPageState extends State<SelectionPage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = M3ETheme.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: <Widget>[
+    return GalleryPageScrollView(
+      sections: <Widget>[
         GallerySection(
           title: 'Checkbox',
           children: <Widget>[
@@ -245,22 +244,20 @@ class _SelectionPageState extends State<SelectionPage>
           title: 'Sliders',
           children: const <Widget>[_SelectionSlidersSection()],
         ),
-        RepaintBoundary(
-          child: GallerySection(
-            title: 'Date & time pickers',
-            children: <Widget>[
-              M3EDatePicker(
-                selectedDate: _date,
-                onDateSelected: (DateTime value) =>
-                    setState(() => _date = value),
-              ),
-              const SizedBox(height: 24),
-              M3ETimePicker(
-                value: _time,
-                onChanged: (M3ETime value) => setState(() => _time = value),
-              ),
-            ],
-          ),
+        GallerySection(
+          title: 'Date & time pickers',
+          children: <Widget>[
+            M3EDatePicker(
+              selectedDate: _date,
+              onDateSelected: (DateTime value) =>
+                  setState(() => _date = value),
+            ),
+            const SizedBox(height: 24),
+            M3ETimePicker(
+              value: _time,
+              onChanged: (M3ETime value) => setState(() => _time = value),
+            ),
+          ],
         ),
       ],
     );

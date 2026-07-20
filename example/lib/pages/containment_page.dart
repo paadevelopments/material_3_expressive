@@ -36,9 +36,8 @@ class _ContainmentPageState extends State<ContainmentPage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = M3ETheme.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: <Widget>[
+    return GalleryPageScrollView(
+      sections: <Widget>[
         _cards(theme),
         _carousel(theme),
         _lists(theme),
@@ -175,7 +174,6 @@ class _ContainmentPageState extends State<ContainmentPage>
           height: 200,
           child: M3ECardList.builder(
             itemCount: 20,
-            shrinkWrap: true,
             onTap: (index) => log('Tapped item $index'),
             itemBuilder: (context, index) => M3EListItem(
               headline: 'Scrollable Item $index',

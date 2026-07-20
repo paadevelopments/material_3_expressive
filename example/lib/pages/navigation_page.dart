@@ -84,9 +84,8 @@ class _NavigationPageState extends State<NavigationPage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = M3ETheme.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: <Widget>[
+    return GalleryPageScrollView(
+      sections: <Widget>[
         _appBars(theme),
         _tabs(),
         _bar(theme),

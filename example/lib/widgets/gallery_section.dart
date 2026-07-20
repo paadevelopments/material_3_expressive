@@ -47,6 +47,28 @@ class GallerySection extends StatelessWidget {
   }
 }
 
+/// Lazy scroll surface for gallery demo pages.
+///
+/// Builds one section at a time so rapid scrolling does not layout every demo
+/// block on every frame.
+class GalleryPageScrollView extends StatelessWidget {
+  const GalleryPageScrollView({required this.sections, super.key});
+
+  final List<Widget> sections;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      addRepaintBoundaries: false,
+      itemCount: sections.length,
+      itemBuilder: (BuildContext context, int index) {
+        return RepaintBoundary(child: sections[index]);
+      },
+    );
+  }
+}
+
 /// A labelled sub-group inside a [GallerySection], with a wrapping layout.
 class DemoRow extends StatelessWidget {
   const DemoRow({required this.label, required this.children, super.key});

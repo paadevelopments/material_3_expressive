@@ -34,9 +34,8 @@ class _FeedbackPageState extends State<FeedbackPage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = M3ETheme.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: <Widget>[
+    return GalleryPageScrollView(
+      sections: <Widget>[
         _badges(theme),
         _progressSection(),
         _pullToRefresh(),

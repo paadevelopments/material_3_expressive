@@ -33,9 +33,8 @@ class _ActionsPageState extends State<ActionsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: <Widget>[
+    return GalleryPageScrollView(
+      sections: <Widget>[
         _buttons(),
         _iconButtons(),
         _fabs(),

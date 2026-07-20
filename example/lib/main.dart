@@ -43,13 +43,16 @@ class _GalleryShell extends StatefulWidget {
 class _GalleryShellState extends State<_GalleryShell> {
   int _index = 0;
 
-  static const List<Widget> _pages = <Widget>[
-    ActionsPage(),
-    SelectionPage(),
-    ContainmentPage(),
-    NavigationPage(),
-    FeedbackPage(),
-  ];
+  late final List<GlobalKey> _pageKeys =
+      List<GlobalKey>.generate(5, (_) => GlobalKey());
+
+  List<Widget> get _pages => <Widget>[
+        ActionsPage(key: _pageKeys[0]),
+        SelectionPage(key: _pageKeys[1]),
+        ContainmentPage(key: _pageKeys[2]),
+        NavigationPage(key: _pageKeys[3]),
+        FeedbackPage(key: _pageKeys[4]),
+      ];
 
   static const List<M3ENavigationBarDestination> _destinations =
       <M3ENavigationBarDestination>[
@@ -89,15 +92,9 @@ class _GalleryShellState extends State<_GalleryShell> {
               ],
             ),
             Expanded(
-              child: IndexedStack(
-                index: _index,
-                children: <Widget>[
-                  for (int i = 0; i < _pages.length; i++)
-                    TickerMode(
-                      enabled: _index == i,
-                      child: _pages[i],
-                    ),
-                ],
+              child: TickerMode(
+                enabled: true,
+                child: _pages[_index],
               ),
             ),
             M3ENavigationBar(
