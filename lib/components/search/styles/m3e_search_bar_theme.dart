@@ -14,6 +14,10 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     this.minWidth = 360,
     this.maxWidth = 800,
     this.minHeight = 56,
+    this.collapsedMaxWidth = 360,
+    this.focusedMaxWidth = 800,
+    this.expandOnFocus = true,
+    this.focusExpandSpring = M3EMotion.expressiveSpatialFast,
     this.pressedOverlayOpacity = 0.1,
     this.hoveredOverlayOpacity = 0.08,
   });
@@ -28,6 +32,10 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   final double minWidth;
   final double maxWidth;
   final double minHeight;
+  final double collapsedMaxWidth;
+  final double focusedMaxWidth;
+  final bool expandOnFocus;
+  final M3ESpring focusExpandSpring;
   final double pressedOverlayOpacity;
   final double hoveredOverlayOpacity;
 
@@ -44,7 +52,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
 
   Color shadowColor(M3EColorScheme scheme) => scheme.shadow;
 
-  Color surfaceTintColor(M3EColorScheme scheme) => scheme.surfaceTint;
+  Color surfaceTintColor(M3EColorScheme scheme) => const Color(0x00000000);
 
   Color leadingIconColor(M3EColorScheme scheme) => scheme.onSurface;
 
@@ -164,6 +172,10 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     double? minWidth,
     double? maxWidth,
     double? minHeight,
+    double? collapsedMaxWidth,
+    double? focusedMaxWidth,
+    bool? expandOnFocus,
+    M3ESpring? focusExpandSpring,
     double? pressedOverlayOpacity,
     double? hoveredOverlayOpacity,
   }) {
@@ -176,6 +188,10 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
+      collapsedMaxWidth: collapsedMaxWidth ?? this.collapsedMaxWidth,
+      focusedMaxWidth: focusedMaxWidth ?? this.focusedMaxWidth,
+      expandOnFocus: expandOnFocus ?? this.expandOnFocus,
+      focusExpandSpring: focusExpandSpring ?? this.focusExpandSpring,
       pressedOverlayOpacity:
           pressedOverlayOpacity ?? this.pressedOverlayOpacity,
       hoveredOverlayOpacity:
@@ -200,6 +216,13 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
       maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,
       minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
+      collapsedMaxWidth:
+          _lerpDouble(collapsedMaxWidth, other.collapsedMaxWidth, t)!,
+      focusedMaxWidth:
+          _lerpDouble(focusedMaxWidth, other.focusedMaxWidth, t)!,
+      expandOnFocus: t < 0.5 ? expandOnFocus : other.expandOnFocus,
+      focusExpandSpring:
+          t < 0.5 ? focusExpandSpring : other.focusExpandSpring,
       pressedOverlayOpacity:
           _lerpDouble(pressedOverlayOpacity, other.pressedOverlayOpacity, t)!,
       hoveredOverlayOpacity:

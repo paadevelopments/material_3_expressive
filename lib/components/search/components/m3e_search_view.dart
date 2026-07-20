@@ -215,12 +215,16 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
         ),
     ];
 
-    final Color effectiveBackground =
-        widget.viewBackgroundColor ?? viewTheme.backgroundColor(scheme);
-    final Color effectiveSurfaceTint =
-        widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme);
-    final double effectiveElevation =
-        widget.viewElevation ?? viewTheme.elevation;
+    final Color effectiveBackground = widget.showFullScreenView
+        ? (widget.viewBackgroundColor ??
+            viewTheme.fullScreenBackgroundColor(scheme))
+        : (widget.viewBackgroundColor ?? viewTheme.backgroundColor(scheme));
+    final Color effectiveSurfaceTint = widget.showFullScreenView
+        ? (widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme))
+        : (widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme));
+    final double effectiveElevation = widget.showFullScreenView
+        ? (widget.viewElevation ?? 0)
+        : (widget.viewElevation ?? viewTheme.elevation);
     final BorderSide? effectiveSide = widget.viewSide;
     OutlinedBorder effectiveShape = widget.viewShape ??
         (widget.showFullScreenView
@@ -244,6 +248,8 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
     final EdgeInsetsGeometry effectivePadding = widget.viewPadding ?? EdgeInsets.zero;
     final EdgeInsetsGeometry effectiveBarPadding =
         widget.viewBarPadding ?? viewTheme.barPadding();
+    final EdgeInsetsGeometry fullScreenHeaderPadding =
+        viewTheme.fullScreenHeaderPadding();
     final BoxConstraints effectiveConstraints =
         widget.viewConstraints ?? viewTheme.constraints();
     final double minWidth =
@@ -257,6 +263,61 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
             ? M3ESearchConstants.fullScreenBarHeight
             : theme.searchBarTheme.minHeight);
     final bool showBody = _viewRect.height > headerBlockHeight + 1;
+
+    final Widget headerBar = widget.showFullScreenView
+        ? M3ESearchBar(
+            autoFocus: true,
+            expandOnFocus: false,
+            leading: widget.viewLeading ?? defaultLeading,
+            trailing: widget.viewTrailing ?? defaultTrailing,
+            hintText: widget.viewHintText,
+            controller: widget.searchController,
+            onChanged: (String value) {
+              widget.viewOnChanged?.call(value);
+              _updateSuggestions();
+            },
+            onSubmitted: widget.viewOnSubmitted,
+            textCapitalization: widget.textCapitalization,
+            textInputAction: widget.textInputAction,
+            keyboardType: widget.keyboardType,
+            smartDashesType: widget.smartDashesType,
+            smartQuotesType: widget.smartQuotesType,
+          )
+        : M3ESearchBar(
+            autoFocus: true,
+            expandOnFocus: false,
+            constraints: headerConstraints,
+            padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
+              effectiveBarPadding,
+            ),
+            leading: widget.viewLeading ?? defaultLeading,
+            trailing: widget.viewTrailing ?? defaultTrailing,
+            hintText: widget.viewHintText,
+            backgroundColor: const WidgetStatePropertyAll<Color>(
+              Color(0x00000000),
+            ),
+            overlayColor: const WidgetStatePropertyAll<Color>(
+              Color(0x00000000),
+            ),
+            elevation: const WidgetStatePropertyAll<double>(0),
+            textStyle: WidgetStatePropertyAll<TextStyle>(
+              effectiveTextStyle,
+            ),
+            hintStyle: WidgetStatePropertyAll<TextStyle>(
+              effectiveHintStyle,
+            ),
+            controller: widget.searchController,
+            onChanged: (String value) {
+              widget.viewOnChanged?.call(value);
+              _updateSuggestions();
+            },
+            onSubmitted: widget.viewOnSubmitted,
+            textCapitalization: widget.textCapitalization,
+            textInputAction: widget.textInputAction,
+            keyboardType: widget.keyboardType,
+            smartDashesType: widget.smartDashesType,
+            smartQuotesType: widget.smartQuotesType,
+          );
 
     return Align(
       alignment: Alignment.topLeft,
@@ -295,48 +356,12 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
                         child: SafeArea(
                           top: false,
                           bottom: false,
-                          child: M3ESearchBar(
-                            autoFocus: true,
-                            constraints: headerConstraints ??
-                                (widget.showFullScreenView
-                                    ? BoxConstraints(
-                                        minHeight: M3ESearchConstants
-                                            .fullScreenBarHeight,
-                                      )
-                                    : null),
-                            padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
-                              effectiveBarPadding,
-                            ),
-                            leading: widget.viewLeading ?? defaultLeading,
-                            trailing:
-                                widget.viewTrailing ?? defaultTrailing,
-                            hintText: widget.viewHintText,
-                            backgroundColor:
-                                const WidgetStatePropertyAll<Color>(
-                              Color(0x00000000),
-                            ),
-                            overlayColor: const WidgetStatePropertyAll<Color>(
-                              Color(0x00000000),
-                            ),
-                            elevation: const WidgetStatePropertyAll<double>(0),
-                            textStyle: WidgetStatePropertyAll<TextStyle>(
-                              effectiveTextStyle,
-                            ),
-                            hintStyle: WidgetStatePropertyAll<TextStyle>(
-                              effectiveHintStyle,
-                            ),
-                            controller: widget.searchController,
-                            onChanged: (String value) {
-                              widget.viewOnChanged?.call(value);
-                              _updateSuggestions();
-                            },
-                            onSubmitted: widget.viewOnSubmitted,
-                            textCapitalization: widget.textCapitalization,
-                            textInputAction: widget.textInputAction,
-                            keyboardType: widget.keyboardType,
-                            smartDashesType: widget.smartDashesType,
-                            smartQuotesType: widget.smartQuotesType,
-                          ),
+                          child: widget.showFullScreenView
+                              ? Padding(
+                                  padding: fullScreenHeaderPadding,
+                                  child: headerBar,
+                                )
+                              : headerBar,
                         ),
                       ),
                       if (showBody &&

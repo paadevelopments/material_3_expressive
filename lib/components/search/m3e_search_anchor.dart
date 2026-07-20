@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart'
-    show
-        EditableTextContextMenuBuilder,
-        WidgetStateProperty,
-        WidgetStatePropertyAll;
+    show EditableTextContextMenuBuilder, WidgetStateProperty;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -130,32 +127,23 @@ class M3ESearchAnchor extends StatefulWidget {
       smartQuotesType: smartQuotesType,
       suggestionsBuilder: suggestionsBuilder,
       builder: (BuildContext context, M3ESearchController controller) {
-        return M3ESearchBar(
-          constraints: constraints,
+        return _M3ESearchAnchorBar(
           controller: controller,
-          onTap: () {
-            controller.openView();
-            onTap?.call();
-          },
-          onChanged: (String value) {
-            controller.openView();
-            onChanged?.call(value);
-          },
+          constraints: constraints,
+          barLeading: barLeading,
+          barTrailing: barTrailing,
+          barHintText: barHintText,
+          onTap: onTap,
+          onChanged: onChanged,
           onSubmitted: onSubmitted,
-          hintText: barHintText,
-          hintStyle: barHintStyle,
-          textStyle: barTextStyle,
-          elevation: barElevation,
-          backgroundColor: barBackgroundColor,
-          overlayColor: barOverlayColor,
-          side: barSide,
-          shape: barShape,
-          padding: barPadding ??
-              const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16),
-              ),
-          leading: barLeading ?? const Icon(M3EIcons.search),
-          trailing: barTrailing,
+          barElevation: barElevation,
+          barBackgroundColor: barBackgroundColor,
+          barOverlayColor: barOverlayColor,
+          barSide: barSide,
+          barShape: barShape,
+          barPadding: barPadding,
+          barTextStyle: barTextStyle,
+          barHintStyle: barHintStyle,
           textCapitalization: textCapitalization,
           textInputAction: textInputAction,
           keyboardType: keyboardType,
@@ -204,10 +192,130 @@ class M3ESearchAnchor extends StatefulWidget {
   State<M3ESearchAnchor> createState() => _M3ESearchAnchorState();
 }
 
+class _M3ESearchAnchorBar extends StatefulWidget {
+  const _M3ESearchAnchorBar({
+    required this.controller,
+    this.constraints,
+    this.barLeading,
+    this.barTrailing,
+    this.barHintText,
+    this.onTap,
+    this.onChanged,
+    this.onSubmitted,
+    this.barElevation,
+    this.barBackgroundColor,
+    this.barOverlayColor,
+    this.barSide,
+    this.barShape,
+    this.barPadding,
+    this.barTextStyle,
+    this.barHintStyle,
+    this.textCapitalization = TextCapitalization.none,
+    this.textInputAction,
+    this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20),
+    this.contextMenuBuilder = m3eDefaultSearchContextMenuBuilder,
+    this.smartDashesType,
+    this.smartQuotesType,
+  });
+
+  final M3ESearchController controller;
+  final BoxConstraints? constraints;
+  final Widget? barLeading;
+  final Iterable<Widget>? barTrailing;
+  final String? barHintText;
+  final GestureTapCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final WidgetStateProperty<double?>? barElevation;
+  final WidgetStateProperty<Color?>? barBackgroundColor;
+  final WidgetStateProperty<Color?>? barOverlayColor;
+  final WidgetStateProperty<BorderSide?>? barSide;
+  final WidgetStateProperty<OutlinedBorder?>? barShape;
+  final WidgetStateProperty<EdgeInsetsGeometry?>? barPadding;
+  final WidgetStateProperty<TextStyle?>? barTextStyle;
+  final WidgetStateProperty<TextStyle?>? barHintStyle;
+  final TextCapitalization textCapitalization;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
+  final EdgeInsets scrollPadding;
+  final EditableTextContextMenuBuilder contextMenuBuilder;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
+
+  @override
+  State<_M3ESearchAnchorBar> createState() => _M3ESearchAnchorBarState();
+}
+
+class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
+  late final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (_focusNode.hasFocus &&
+        !widget.controller.isOpen &&
+        !widget.controller.suppressFocusOpen) {
+      widget.controller.openView();
+    }
+  }
+
+  void _openView() {
+    if (!widget.controller.isOpen) {
+      widget.controller.openView();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return M3ESearchBar(
+      focusNode: _focusNode,
+      constraints: widget.constraints,
+      controller: widget.controller,
+      onTap: () {
+        _openView();
+        widget.onTap?.call();
+      },
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
+      hintText: widget.barHintText,
+      hintStyle: widget.barHintStyle,
+      textStyle: widget.barTextStyle,
+      elevation: widget.barElevation,
+      backgroundColor: widget.barBackgroundColor,
+      overlayColor: widget.barOverlayColor,
+      side: widget.barSide,
+      shape: widget.barShape,
+      padding: widget.barPadding,
+      leading: widget.barLeading ?? const Icon(M3EIcons.search),
+      trailing: widget.barTrailing,
+      textCapitalization: widget.textCapitalization,
+      textInputAction: widget.textInputAction,
+      keyboardType: widget.keyboardType,
+      scrollPadding: widget.scrollPadding,
+      contextMenuBuilder: widget.contextMenuBuilder,
+      smartDashesType: widget.smartDashesType,
+      smartQuotesType: widget.smartQuotesType,
+    );
+  }
+}
+
 class _M3ESearchAnchorState extends State<M3ESearchAnchor>
     implements M3ESearchAnchorHandle {
   Size? _screenSize;
   bool _anchorIsVisible = true;
+  bool _suppressFocusOpen = false;
   final GlobalKey _anchorKey = GlobalKey();
   M3ESearchController? _internalSearchController;
   M3ESearchViewRoute? _route;
@@ -217,6 +325,9 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
 
   @override
   bool get viewIsOpen => !_anchorIsVisible;
+
+  @override
+  bool get suppressFocusOpen => _suppressFocusOpen;
 
   @override
   void initState() {
@@ -333,7 +444,21 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
   }
 
   bool _toggleVisibility() {
+    final bool viewClosing = !_anchorIsVisible;
     setState(() => _anchorIsVisible = !_anchorIsVisible);
+    if (viewClosing) {
+      _suppressFocusOpen = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_anchorKey.currentContext != null) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _suppressFocusOpen = false;
+          }
+        });
+      });
+    }
     return _anchorIsVisible;
   }
 
@@ -352,7 +477,11 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
       duration: M3ESearchConstants.anchorFadeDuration,
       child: IgnorePointer(
         ignoring: !widget.enabled,
-        child: widget.builder(context, _searchController),
+        child: GestureDetector(
+          onTap: openView,
+          behavior: HitTestBehavior.translucent,
+          child: widget.builder(context, _searchController),
+        ),
       ),
     );
   }

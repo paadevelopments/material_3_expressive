@@ -27,7 +27,12 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
 
   Color backgroundColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
 
-  Color surfaceTintColor(M3EColorScheme scheme) => scheme.surfaceTint;
+  Color fullScreenBackgroundColor(M3EColorScheme scheme) => scheme.surface;
+
+  Color surfaceTintColor(M3EColorScheme scheme) => const Color(0x00000000);
+
+  EdgeInsetsGeometry fullScreenHeaderPadding() =>
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
   Color dividerColor(M3EColorScheme scheme) => scheme.outline;
 

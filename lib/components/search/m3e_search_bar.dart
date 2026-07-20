@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart'
     show
         AdaptiveTextSelectionToolbar,
@@ -7,11 +9,13 @@ import 'package:flutter/material.dart'
         WidgetStateProperty,
         WidgetStatePropertyAll,
         WidgetStatesController;
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'res/m3e_search_constants.dart';
+import 'styles/m3e_search_bar_theme.dart';
 
 Widget m3eDefaultSearchContextMenuBuilder(
   BuildContext context,
@@ -115,27 +119,31 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
                 maxLines: 1,
               ),
             ),
-          EditableText(
-            controller: widget.controller,
-            focusNode: widget.focusNode,
-            readOnly: widget.readOnly || !widget.enabled,
-            autofocus: widget.autoFocus,
-            onTapOutside: widget.onTapOutside,
-            onChanged: widget.onChanged,
-            onSubmitted: widget.onSubmitted,
-            style: widget.textStyle,
-            cursorColor: widget.cursorColor,
-            backgroundCursorColor:
-                widget.cursorColor.withValues(alpha: 0.4),
-            selectionColor: widget.selectionColor,
-            textCapitalization: widget.textCapitalization,
-            textInputAction: widget.textInputAction,
-            keyboardType: widget.keyboardType,
-            scrollPadding: widget.scrollPadding,
-            contextMenuBuilder: widget.contextMenuBuilder,
-            smartDashesType: widget.smartDashesType,
-            smartQuotesType: widget.smartQuotesType,
-            maxLines: 1,
+          Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (_) => widget.onTap?.call(),
+            child: EditableText(
+              controller: widget.controller,
+              focusNode: widget.focusNode,
+              readOnly: widget.readOnly || !widget.enabled,
+              autofocus: widget.autoFocus,
+              onTapOutside: widget.onTapOutside,
+              onChanged: widget.onChanged,
+              onSubmitted: widget.onSubmitted,
+              style: widget.textStyle,
+              cursorColor: widget.cursorColor,
+              backgroundCursorColor:
+                  widget.cursorColor.withValues(alpha: 0.4),
+              selectionColor: widget.selectionColor,
+              textCapitalization: widget.textCapitalization,
+              textInputAction: widget.textInputAction,
+              keyboardType: widget.keyboardType,
+              scrollPadding: widget.scrollPadding,
+              contextMenuBuilder: widget.contextMenuBuilder,
+              smartDashesType: widget.smartDashesType,
+              smartQuotesType: widget.smartQuotesType,
+              maxLines: 1,
+            ),
           ),
         ],
       ),
@@ -174,6 +182,7 @@ class M3ESearchBar extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20),
     this.contextMenuBuilder = m3eDefaultSearchContextMenuBuilder,
     this.readOnly = false,
+    this.expandOnFocus = true,
     this.smartDashesType,
     this.smartQuotesType,
     super.key,
@@ -207,6 +216,7 @@ class M3ESearchBar extends StatefulWidget {
   final EdgeInsets scrollPadding;
   final EditableTextContextMenuBuilder contextMenuBuilder;
   final bool readOnly;
+  final bool expandOnFocus;
   final SmartDashesType? smartDashesType;
   final SmartQuotesType? smartQuotesType;
 
@@ -214,29 +224,240 @@ class M3ESearchBar extends StatefulWidget {
   State<M3ESearchBar> createState() => _M3ESearchBarState();
 }
 
-class _M3ESearchBarState extends State<M3ESearchBar> {
+class _M3ESearchBarState extends State<M3ESearchBar>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _controller =
       widget.controller ?? TextEditingController();
   late final WidgetStatesController _statesController =
       WidgetStatesController();
+  late final AnimationController _widthController;
   FocusNode? _internalFocusNode;
+  double? _parentMaxWidth;
 
-  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+  FocusNode get _focusNode =>
+      widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
     super.initState();
+    _widthController = AnimationController.unbounded(vsync: this);
+    _widthController.addListener(() => setState(() {}));
     _statesController.addListener(() => setState(() {}));
+    _focusNode.addListener(_handleFocusChange);
+    _syncFocusedState();
+  }
+
+  @override
+  void didUpdateWidget(covariant M3ESearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      (oldWidget.focusNode ?? _internalFocusNode)?.removeListener(
+        _handleFocusChange,
+      );
+      _focusNode.addListener(_handleFocusChange);
+      _syncFocusedState();
+      _animateToTargetWidth();
+    }
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _widthController.dispose();
     _statesController.dispose();
     if (widget.controller == null) {
       _controller.dispose();
     }
     _internalFocusNode?.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChange() {
+    _syncFocusedState();
+    _animateToTargetWidth();
+  }
+
+  void _syncFocusedState() {
+    _statesController.update(WidgetState.focused, _focusNode.hasFocus);
+  }
+
+  bool _shouldExpandWidth(M3ESearchBarTheme barTheme) {
+    return widget.expandOnFocus &&
+        barTheme.expandOnFocus &&
+        widget.enabled &&
+        !widget.readOnly &&
+        _parentMaxWidth != null &&
+        _parentMaxWidth! > barTheme.collapsedMaxWidth;
+  }
+
+  double _targetWidth(M3ESearchBarTheme barTheme) {
+    final double parentMax = _parentMaxWidth ?? barTheme.focusedMaxWidth;
+    if (!_shouldExpandWidth(barTheme)) {
+      return parentMax;
+    }
+    final double cap = barTheme.focusedMaxWidth;
+    if (_focusNode.hasFocus) {
+      return math.min(parentMax, cap);
+    }
+    return math.min(parentMax, barTheme.collapsedMaxWidth);
+  }
+
+  void _animateToTargetWidth() {
+    final barTheme = M3ETheme.of(context).searchBarTheme;
+    final double target = _targetWidth(barTheme);
+    if (!_widthController.isAnimating && _widthController.value == target) {
+      return;
+    }
+    _widthController.stop();
+    _widthController.animateWith(
+      SpringSimulation(
+        barTheme.focusExpandSpring.toDescription(),
+        _widthController.value,
+        target,
+        _widthController.velocity,
+      ),
+    );
+  }
+
+  void _handleTap() {
+    widget.onTap?.call();
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  Widget _buildBarContent({
+    required M3EThemeData theme,
+    required M3ESearchBarTheme barTheme,
+    required M3EColorScheme scheme,
+    required Set<WidgetState> states,
+    required TextDirection textDirection,
+  }) {
+    final effectiveElevation = barTheme.resolveElevation(
+      states: states,
+      widgetValue: widget.elevation,
+    );
+    final effectiveBackground = barTheme.resolveBackground(
+      scheme: scheme,
+      states: states,
+      widgetValue: widget.backgroundColor,
+    );
+    final effectiveShadow = barTheme.resolveShadowColor(
+      scheme: scheme,
+      states: states,
+      widgetValue: widget.shadowColor,
+    );
+    final effectiveSurfaceTint = barTheme.resolveSurfaceTint(
+      scheme: scheme,
+      states: states,
+      widgetValue: widget.surfaceTintColor,
+    );
+    final effectiveOverlay = barTheme.resolveOverlay(
+      scheme: scheme,
+      states: states,
+      widgetValue: widget.overlayColor,
+    );
+    final effectivePadding =
+        widget.padding?.resolve(states) ?? barTheme.padding();
+    final effectiveShape =
+        widget.shape?.resolve(states) ?? barTheme.shape() as OutlinedBorder;
+    final effectiveSide = widget.side?.resolve(states);
+    final effectiveTextStyle = barTheme.resolveTextStyle(
+      theme: theme,
+      states: states,
+      widgetValue: widget.textStyle,
+    );
+    final effectiveHintStyle = barTheme.resolveHintStyle(
+      theme: theme,
+      states: states,
+      widgetValue: widget.hintStyle,
+      textStyleOverride: widget.textStyle,
+    );
+    final effectiveTextCapitalization =
+        widget.textCapitalization ?? TextCapitalization.none;
+
+    final Widget? leading = widget.leading == null
+        ? null
+        : IconTheme.merge(
+            data: IconThemeData(
+              color: barTheme.leadingIconColor(scheme),
+              size: barTheme.iconSize,
+            ),
+            child: widget.leading!,
+          );
+
+    final List<Widget>? trailing = widget.trailing
+        ?.map(
+          (Widget action) => IconTheme.merge(
+            data: IconThemeData(
+              color: barTheme.trailingIconColor(scheme),
+              size: barTheme.iconSize,
+            ),
+            child: action,
+          ),
+        )
+        .toList();
+
+    return Opacity(
+      opacity: widget.enabled ? 1 : M3ESearchConstants.disabledOpacity,
+      child: Material(
+        elevation: effectiveElevation,
+        shadowColor: effectiveShadow,
+        color: effectiveBackground,
+        surfaceTintColor: effectiveSurfaceTint,
+        shape: effectiveShape.copyWith(side: effectiveSide),
+        clipBehavior: Clip.antiAlias,
+        child: IgnorePointer(
+          ignoring: !widget.enabled,
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: _handleTap,
+              overlayColor: effectiveOverlay == null
+                  ? null
+                  : WidgetStatePropertyAll<Color?>(effectiveOverlay),
+              customBorder: effectiveShape.copyWith(side: effectiveSide),
+              statesController: _statesController,
+              child: Padding(
+                padding: effectivePadding,
+                child: Row(
+                  textDirection: textDirection,
+                  children: <Widget>[
+                    if (leading != null) leading,
+                    Expanded(
+                      child: M3ESearchBarInput(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        hintText: widget.hintText,
+                        enabled: widget.enabled,
+                        readOnly: widget.readOnly,
+                        autoFocus: widget.autoFocus,
+                        onTap: _handleTap,
+                        onTapOutside: widget.onTapOutside,
+                        onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
+                        textStyle: effectiveTextStyle,
+                        hintStyle: effectiveHintStyle,
+                        cursorColor: barTheme.cursorColor(scheme),
+                        selectionColor: barTheme.selectionColor(scheme),
+                        textCapitalization: effectiveTextCapitalization,
+                        textInputAction: widget.textInputAction,
+                        keyboardType: widget.keyboardType,
+                        scrollPadding: widget.scrollPadding,
+                        contextMenuBuilder: widget.contextMenuBuilder,
+                        smartDashesType: widget.smartDashesType,
+                        smartQuotesType: widget.smartQuotesType,
+                      ),
+                    ),
+                    ...?trailing,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -249,142 +470,53 @@ class _M3ESearchBarState extends State<M3ESearchBar> {
         final states = _statesController.value;
         final textDirection = Directionality.of(context);
 
-        final effectiveElevation = barTheme.resolveElevation(
-          states: states,
-          widgetValue: widget.elevation,
-        );
-        final effectiveBackground = barTheme.resolveBackground(
-          scheme: scheme,
-          states: states,
-          widgetValue: widget.backgroundColor,
-        );
-        final effectiveShadow = barTheme.resolveShadowColor(
-          scheme: scheme,
-          states: states,
-          widgetValue: widget.shadowColor,
-        );
-        final effectiveSurfaceTint = barTheme.resolveSurfaceTint(
-          scheme: scheme,
-          states: states,
-          widgetValue: widget.surfaceTintColor,
-        );
-        final effectiveOverlay = barTheme.resolveOverlay(
-          scheme: scheme,
-          states: states,
-          widgetValue: widget.overlayColor,
-        );
-        final effectivePadding = widget.padding?.resolve(states) ??
-            barTheme.padding();
-        final effectiveShape = widget.shape?.resolve(states) ??
-            barTheme.shape() as OutlinedBorder;
-        final effectiveSide = widget.side?.resolve(states);
-        final effectiveTextStyle = barTheme.resolveTextStyle(
-          theme: theme,
-          states: states,
-          widgetValue: widget.textStyle,
-        );
-        final effectiveHintStyle = barTheme.resolveHintStyle(
-          theme: theme,
-          states: states,
-          widgetValue: widget.hintStyle,
-          textStyleOverride: widget.textStyle,
-        );
-        final effectiveTextCapitalization =
-            widget.textCapitalization ?? TextCapitalization.none;
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double parentMax = constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : barTheme.focusedMaxWidth;
+            if (_parentMaxWidth != parentMax) {
+              _parentMaxWidth = parentMax;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  final double target = _targetWidth(barTheme);
+                  _widthController.value = target;
+                }
+              });
+            }
 
-        final Widget? leading = widget.leading == null
-            ? null
-            : IconTheme.merge(
-                data: IconThemeData(
-                  color: barTheme.leadingIconColor(scheme),
-                  size: barTheme.iconSize,
-                ),
-                child: widget.leading!,
+            final Widget bar = _buildBarContent(
+              theme: theme,
+              barTheme: barTheme,
+              scheme: scheme,
+              states: states,
+              textDirection: textDirection,
+            );
+
+            if (!_shouldExpandWidth(barTheme)) {
+              return ConstrainedBox(
+                constraints: barTheme.constraints(override: widget.constraints),
+                child: bar,
               );
+            }
 
-        final List<Widget>? trailing = widget.trailing
-            ?.map(
-              (Widget action) => IconTheme.merge(
-                data: IconThemeData(
-                  color: barTheme.trailingIconColor(scheme),
-                  size: barTheme.iconSize,
-                ),
-                child: action,
-              ),
-            )
-            .toList();
+            final double width = _widthController.value.clamp(
+              barTheme.minWidth,
+              parentMax,
+            );
 
-        return ConstrainedBox(
-          constraints: barTheme.constraints(override: widget.constraints),
-          child: Opacity(
-            opacity: widget.enabled ? 1 : M3ESearchConstants.disabledOpacity,
-            child: Material(
-              elevation: effectiveElevation,
-              shadowColor: effectiveShadow,
-              color: effectiveBackground,
-              surfaceTintColor: effectiveSurfaceTint,
-              shape: effectiveShape.copyWith(side: effectiveSide),
-              clipBehavior: Clip.antiAlias,
-              child: IgnorePointer(
-                ignoring: !widget.enabled,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    onTap: () {
-                      widget.onTap?.call();
-                      if (!_focusNode.hasFocus) {
-                        _focusNode.requestFocus();
-                      }
-                    },
-                    overlayColor: effectiveOverlay == null
-                        ? null
-                        : WidgetStatePropertyAll<Color?>(effectiveOverlay),
-                    customBorder: effectiveShape.copyWith(side: effectiveSide),
-                    statesController: _statesController,
-                    child: Padding(
-                      padding: effectivePadding,
-                      child: Row(
-                        textDirection: textDirection,
-                        children: <Widget>[
-                          if (leading != null) leading,
-                          Expanded(
-                            child: Padding(
-                              padding: effectivePadding,
-                              child: M3ESearchBarInput(
-                                controller: _controller,
-                                focusNode: _focusNode,
-                                hintText: widget.hintText,
-                                enabled: widget.enabled,
-                                readOnly: widget.readOnly,
-                                autoFocus: widget.autoFocus,
-                                onTap: widget.onTap,
-                                onTapOutside: widget.onTapOutside,
-                                onChanged: widget.onChanged,
-                                onSubmitted: widget.onSubmitted,
-                                textStyle: effectiveTextStyle,
-                                hintStyle: effectiveHintStyle,
-                                cursorColor: barTheme.cursorColor(scheme),
-                                selectionColor:
-                                    barTheme.selectionColor(scheme),
-                                textCapitalization: effectiveTextCapitalization,
-                                textInputAction: widget.textInputAction,
-                                keyboardType: widget.keyboardType,
-                                scrollPadding: widget.scrollPadding,
-                                contextMenuBuilder: widget.contextMenuBuilder,
-                                smartDashesType: widget.smartDashesType,
-                                smartQuotesType: widget.smartQuotesType,
-                              ),
-                            ),
-                          ),
-                          ...?trailing,
-                        ],
-                      ),
-                    ),
-                  ),
+            return Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: SizedBox(
+                width: width,
+                child: ConstrainedBox(
+                  constraints: barTheme.constraints(override: widget.constraints)
+                      .copyWith(maxWidth: width),
+                  child: bar,
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

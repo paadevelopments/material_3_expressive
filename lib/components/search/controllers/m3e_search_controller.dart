@@ -6,6 +6,9 @@ import 'package:flutter/widgets.dart';
 abstract class M3ESearchAnchorHandle {
   bool get viewIsOpen;
 
+  /// Whether focus on the anchor bar should avoid reopening the view.
+  bool get suppressFocusOpen;
+
   void openView();
 
   void closeView(String? selectedText);
@@ -22,6 +25,12 @@ class M3ESearchController extends TextEditingController {
   bool get isOpen {
     assert(isAttached);
     return _anchor!.viewIsOpen;
+  }
+
+  /// Whether the anchor should ignore focus-driven [openView] calls.
+  bool get suppressFocusOpen {
+    assert(isAttached);
+    return _anchor!.suppressFocusOpen;
   }
 
   /// Opens the search view associated with this controller.
