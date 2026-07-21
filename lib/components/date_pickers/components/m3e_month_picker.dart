@@ -116,30 +116,16 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
   Widget build(BuildContext context) {
     return Focus(
       onKeyEvent: _handleKey,
-      child: widget.expandToFit
-          ? PageView.builder(
-              controller: _pageController,
-              itemCount: _monthCount,
-              onPageChanged: (int index) {
-                final DateTime month = _monthForPage(index);
-                setState(() => _currentMonth = month);
-                widget.onMonthChanged(month);
-              },
-              itemBuilder: _buildMonthPage,
-            )
-          : SizedBox(
-              height: M3EDatePickerConstants.maxDayPickerHeight,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _monthCount,
-                onPageChanged: (int index) {
-                  final DateTime month = _monthForPage(index);
-                  setState(() => _currentMonth = month);
-                  widget.onMonthChanged(month);
-                },
-                itemBuilder: _buildMonthPage,
-              ),
-            ),
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: _monthCount,
+        onPageChanged: (int index) {
+          final DateTime month = _monthForPage(index);
+          setState(() => _currentMonth = month);
+          widget.onMonthChanged(month);
+        },
+        itemBuilder: _buildMonthPage,
+      ),
     );
   }
 
@@ -152,7 +138,7 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
     final bool canGoNext = page < _monthCount - 1;
 
     return Column(
-      mainAxisSize: widget.expandToFit ? MainAxisSize.min : MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         _MonthNavRow(
           month: month,
@@ -163,33 +149,17 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
           mode: widget.mode,
           onModeChanged: widget.onModeChanged,
         ),
-        if (widget.expandToFit)
-          M3EDayPicker(
-            displayedMonth: month,
-            selectedDate: widget.selectedDate,
-            currentDate: widget.currentDate,
-            firstDate: widget.firstDate,
-            lastDate: widget.lastDate,
-            onChanged: widget.onChanged,
-            selectableDayPredicate: widget.selectableDayPredicate,
-            rangeStart: widget.rangeStart,
-            rangeEnd: widget.rangeEnd,
-          )
-        else
-          Expanded(
-            child: M3EDayPicker(
-              displayedMonth: month,
-              selectedDate: widget.selectedDate,
-              currentDate: widget.currentDate,
-              firstDate: widget.firstDate,
-              lastDate: widget.lastDate,
-              onChanged: widget.onChanged,
-              selectableDayPredicate: widget.selectableDayPredicate,
-              rangeStart: widget.rangeStart,
-              rangeEnd: widget.rangeEnd,
-              fitHeight: widget.expandToFit,
-            ),
-          ),
+        M3EDayPicker(
+          displayedMonth: month,
+          selectedDate: widget.selectedDate,
+          currentDate: widget.currentDate,
+          firstDate: widget.firstDate,
+          lastDate: widget.lastDate,
+          onChanged: widget.onChanged,
+          selectableDayPredicate: widget.selectableDayPredicate,
+          rangeStart: widget.rangeStart,
+          rangeEnd: widget.rangeEnd,
+        ),
       ],
     );
   }
