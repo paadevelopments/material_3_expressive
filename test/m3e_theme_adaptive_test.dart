@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 const Color _accentGreen = Color(0xFF286C2A);
 const Color _accentOrange = Color(0xFFE65100);
@@ -355,6 +356,35 @@ void main() {
 
     final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final M3EColorScheme expected = resolvedM3eSchemeFromAccent(_accentGreen);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final M3EThemeData resolved =
+        M3ETheme.of(tester.element(find.byType(M3EButton)));
+    expect(resolved.colorScheme.primary, expected.primary);
+  });
+
+  testWidgets('dynamicColoring applies mocked core palette via fromSeed',
+      (WidgetTester tester) async {
+    final CorePalette corePalette = CorePalette.of(_accentGreen.toARGB32());
+    final seed = Color(corePalette.primary.get(40));
+    DynamicColorTestingUtils.setMockDynamicColors(corePalette: corePalette);
+
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final M3EColorScheme expected = resolvedM3eSchemeFromAccent(seed);
 
     await tester.pumpWidget(
       MaterialApp(

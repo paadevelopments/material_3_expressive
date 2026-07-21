@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Brightness, Color, ColorScheme;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 /// Builds a subtree from device light and dark dynamic [ColorScheme]s.
 typedef M3EDynamicColorBuilder = Widget Function(
@@ -10,10 +11,14 @@ typedef M3EDynamicColorBuilder = Widget Function(
   ColorScheme? darkDynamic,
 );
 
-/// Fetches device accent colors and refreshes them when the app resumes.
+/// Fetches OS seed colors and refreshes them when the app resumes.
 ///
-/// Builds light and dark [ColorScheme]s from [DynamicColorPlugin.getAccentColor].
-/// Re-fetches on [AppLifecycleState.resumed] so OS accent changes apply without
+/// On Android, reads the Material You primary tone from
+/// [DynamicColorPlugin.getCorePalette]. On desktop, uses
+/// [DynamicColorPlugin.getAccentColor]. Both paths build light and dark
+/// [ColorScheme]s via [ColorScheme.fromSeed].
+///
+/// Re-fetches on [AppLifecycleState.resumed] so OS color changes apply without
 /// restarting the app.
 class M3EDynamicColorHost extends StatefulWidget {
   const M3EDynamicColorHost({required this.builder, super.key});
@@ -51,6 +56,26 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
 
   Future<void> _fetchDynamicColors() async {
     try {
+      final CorePalette? corePalette = await DynamicColorPlugin.getCorePalette();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (corePalette != null) {
+        if (kDebugMode) {
+          debugPrint('dynamic_color: Core palette detected.');
+        }
+        _applySeedColor(Color(corePalette.primary.get(40)));
+        return;
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        debugPrint('dynamic_color: Failed to obtain core palette.');
+      }
+    }
+
+    try {
       final Color? accentColor = await DynamicColorPlugin.getAccentColor();
 
       if (!mounted) {
@@ -61,13 +86,7 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
         if (kDebugMode) {
           debugPrint('dynamic_color: Accent color detected.');
         }
-        setState(() {
-          _light = ColorScheme.fromSeed(seedColor: accentColor);
-          _dark = ColorScheme.fromSeed(
-            seedColor: accentColor,
-            brightness: Brightness.dark,
-          );
-        });
+        _applySeedColor(accentColor);
         return;
       }
     } on PlatformException {
@@ -79,6 +98,16 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
     if (kDebugMode) {
       debugPrint('dynamic_color: Dynamic color not detected on this device.');
     }
+  }
+
+  void _applySeedColor(Color seed) {
+    setState(() {
+      _light = ColorScheme.fromSeed(seedColor: seed);
+      _dark = ColorScheme.fromSeed(
+        seedColor: seed,
+        brightness: Brightness.dark,
+      );
+    });
   }
 
   @override
