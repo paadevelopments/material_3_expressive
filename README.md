@@ -486,13 +486,30 @@ M3ESlider(
 
 #### M3EDatePicker
 
-Inline calendar date picker.
+Dialog and inline calendar date pickers.
 
 ```dart
-// in State
-M3EDatePicker(
-  selectedDate: date,
-  onDateSelected: (v) => setState(() => date = v),
+// Inline calendar
+M3ECalendarDatePicker(
+  initialDate: date,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+  onDateChanged: (v) => setState(() => date = v),
+);
+
+// Dialog
+final picked = await M3EDatePicker.show(
+  context,
+  initialDate: date,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+);
+
+// Range dialog
+final range = await M3EDatePicker.showRange(
+  context,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
 );
 ```
 

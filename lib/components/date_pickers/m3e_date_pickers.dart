@@ -1,206 +1,198 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
-import '../../../foundations/foundations.dart';
-import 'models/m3e_calendar_labels.dart';
+import '../../foundations/foundations.dart';
+import '../dialogs/styles/m3e_dialog_theme.dart';
+import 'enums/m3e_date_picker_enums.dart';
+import 'm3e_date_picker_dialog.dart';
+import 'm3e_date_range_picker_dialog.dart';
+import 'models/m3e_date_picker_models.dart';
+import 'res/m3e_date_picker_constants.dart';
+import 'utils/m3e_date_picker_utils.dart';
 
-/// A Material 3 Expressive date picker.
-///
-/// A month calendar for selecting a single date. Navigate months with the
-/// arrows; the selected day is filled and today is outlined.
-class M3EDatePicker extends StatefulWidget {
-  const M3EDatePicker({
-    required this.onDateSelected,
-    this.selectedDate,
-    this.firstDate,
-    this.lastDate,
-    super.key,
-  });
+export 'enums/m3e_date_picker_enums.dart';
+export 'm3e_calendar_date_picker.dart';
+export 'm3e_date_picker_dialog.dart';
+export 'm3e_date_range_picker_dialog.dart';
+export 'models/m3e_date_picker_models.dart';
+export 'styles/m3e_date_picker_theme.dart';
 
-  final ValueChanged<DateTime> onDateSelected;
-  final DateTime? selectedDate;
-  final DateTime? firstDate;
-  final DateTime? lastDate;
+/// Entry points for presenting M3E date picker dialogs.
+abstract final class M3EDatePicker {
+  const M3EDatePicker._();
 
-  @override
-  State<M3EDatePicker> createState() => _M3EDatePickerState();
-}
+  /// Shows a dialog to pick a single date.
+  static Future<DateTime?> show(
+    BuildContext context, {
+    DateTime? initialDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    DateTime? currentDate,
+    M3EDatePickerEntryMode initialEntryMode = M3EDatePickerEntryMode.calendar,
+    M3ESelectableDayPredicate? selectableDayPredicate,
+    String? helpText,
+    String? cancelText,
+    String? confirmText,
+    M3EDatePickerMode initialCalendarMode = M3EDatePickerMode.day,
+    String? errorFormatText,
+    String? errorInvalidText,
+    String? fieldHintText,
+    String? fieldLabelText,
+    TextInputType? keyboardType,
+    bool barrierDismissible = true,
+    String? restorationId,
+    ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
+    EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+  }) {
+    initialDate =
+        initialDate == null ? null : M3EDatePickerUtils.dateOnly(initialDate);
+    firstDate = M3EDatePickerUtils.dateOnly(firstDate);
+    lastDate = M3EDatePickerUtils.dateOnly(lastDate);
 
-class _M3EDatePickerState extends State<M3EDatePicker> {
-  late DateTime _visibleMonth;
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
+    final M3EDialogTheme dialogTheme = theme.dialogTheme;
 
-  @override
-  void initState() {
-    super.initState();
-    final DateTime base = widget.selectedDate ?? DateTime.now();
-    _visibleMonth = DateTime(base.year, base.month);
-  }
-
-  void _shiftMonth(int delta) {
-    setState(() {
-      _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + delta);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final scheme = theme.colorScheme;
-    final dateTheme = theme.datePickerTheme;
-    return M3EComponentTheme(builder: (context) => Container(
-        width: dateTheme.width,
-        padding: dateTheme.padding,
-        decoration: BoxDecoration(
-          color: dateTheme.containerColor(scheme),
-          borderRadius: dateTheme.borderRadius,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _buildHeader(theme),
-            _buildWeekdays(theme),
-            _buildGrid(theme),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(M3EThemeData theme) {
-    final scheme = theme.colorScheme;
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Text(
-            M3ECalendarLabels.monthYear(
-              _visibleMonth.year,
-              _visibleMonth.month,
-            ),
-            style:
-            theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
-          ),
-        ),
-        _buildArrow(scheme, M3EIcons.chevron_left, () => _shiftMonth(-1)),
-        _buildArrow(scheme, M3EIcons.chevron_right, () => _shiftMonth(1)),
-      ],
-    );
-  }
-
-  Widget _buildArrow(M3EColorScheme scheme, IconData icon, VoidCallback onTap) {
-    final dateTheme = M3ETheme.of(context).datePickerTheme;
-    return M3ETappable(
-      onTap: onTap,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return Padding(
-          padding: dateTheme.arrowPadding,
-          child: Icon(
-            icon,
-            color: scheme.onSurfaceVariant,
-            size: dateTheme.arrowIconSize,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWeekdays(M3EThemeData theme) {
-    final scheme = theme.colorScheme;
-    return Row(
-      children: <Widget>[
-        for (final String label in M3ECalendarLabels.weekdayInitials)
-          Expanded(
-            child: Center(
-              child: Text(
-                label,
-                style: theme.typeScale.bodySmall
-                    .copyWith(color: scheme.onSurfaceVariant),
+    return showGeneralDialog<DateTime>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: dialogTheme.scrimColor(theme.colorScheme),
+      transitionDuration: M3EMotion.medium2,
+      pageBuilder: (BuildContext context, _, _) {
+        return M3EScrimSystemUi.wrap(
+          M3EComponentTheme(
+            builder: (BuildContext context) => Center(
+              child: M3EDatePickerDialog(
+                initialDate: initialDate,
+                firstDate: firstDate,
+                lastDate: lastDate,
+                currentDate: currentDate,
+                initialEntryMode: initialEntryMode,
+                initialCalendarMode: initialCalendarMode,
+                selectableDayPredicate: selectableDayPredicate,
+                helpText: helpText,
+                cancelText: cancelText,
+                confirmText: confirmText,
+                errorFormatText: errorFormatText,
+                errorInvalidText: errorInvalidText,
+                fieldHintText: fieldHintText,
+                fieldLabelText: fieldLabelText,
+                keyboardType: keyboardType,
+                restorationId: restorationId,
+                onDatePickerModeChange: onDatePickerModeChange,
+                insetPadding: insetPadding,
               ),
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildGrid(M3EThemeData theme) {
-    final dateTheme = theme.datePickerTheme;
-    final int year = _visibleMonth.year;
-    final int month = _visibleMonth.month;
-    final int days = M3ECalendarLabels.daysInMonth(year, month);
-    final int offset = M3ECalendarLabels.firstWeekday(year, month);
-    final int cellCount =
-        ((days + offset) / dateTheme.daysPerWeek).ceil() *
-        dateTheme.daysPerWeek;
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: dateTheme.gridPadding,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: dateTheme.daysPerWeek,
-      ),
-      itemCount: cellCount,
-      itemBuilder: (BuildContext context, int index) {
-        final int day = index - offset + 1;
-        if (day < 1 || day > days) {
-          return const SizedBox.shrink();
-        }
-        return _buildDay(theme, DateTime(year, month, day));
+        );
       },
-    );
-  }
-
-  Widget _buildDay(M3EThemeData theme, DateTime date) {
-    final scheme = theme.colorScheme;
-    final dateTheme = theme.datePickerTheme;
-    final bool selected = _isSameDay(date, widget.selectedDate);
-    final bool today = _isSameDay(date, DateTime.now());
-    final bool enabled = _isEnabled(date);
-    final Color foreground = dateTheme.dayForegroundColor(
-      scheme,
-      selected: selected,
-      enabled: enabled,
-    );
-
-    return M3ETappable(
-      enabled: enabled,
-      onTap: () => widget.onDateSelected(date),
-      builder: (BuildContext context, M3EInteractionState state) {
-        return Center(
-          child: Container(
-            width: dateTheme.daySize,
-            height: dateTheme.daySize,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected ? scheme.primary : null,
-              border: today && !selected
-                  ? Border.all(color: scheme.primary)
-                  : null,
-            ),
-            child: Text(
-              '${date.day}',
-              style:
-              theme.typeScale.bodyMedium.copyWith(color: foreground),
-            ),
+      transitionBuilder: (context, animation, secondary, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: M3EMotion.emphasizedDecelerate,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: dialogTheme.entranceScale,
+              end: 1,
+            ).animate(curved),
+            child: child,
           ),
         );
       },
     );
   }
 
-  bool _isEnabled(DateTime date) {
-    if (widget.firstDate != null && date.isBefore(widget.firstDate!)) {
-      return false;
-    }
-    if (widget.lastDate != null && date.isAfter(widget.lastDate!)) {
-      return false;
-    }
-    return true;
-  }
+  /// Shows a dialog to pick a date range.
+  static Future<M3EDateRange?> showRange(
+    BuildContext context, {
+    DateTime? initialStartDate,
+    DateTime? initialEndDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    DateTime? currentDate,
+    M3EDatePickerEntryMode initialEntryMode = M3EDatePickerEntryMode.calendar,
+    M3ESelectableDayForRangePredicate? selectableDayPredicate,
+    String? helpText,
+    String? cancelText,
+    String? confirmText,
+    String? errorFormatText,
+    String? errorInvalidText,
+    String? fieldStartHintText,
+    String? fieldEndHintText,
+    String? fieldStartLabelText,
+    String? fieldEndLabelText,
+    bool barrierDismissible = true,
+    String? restorationId,
+    ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
+    EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+  }) {
+    initialStartDate = initialStartDate == null
+        ? null
+        : M3EDatePickerUtils.dateOnly(initialStartDate);
+    initialEndDate = initialEndDate == null
+        ? null
+        : M3EDatePickerUtils.dateOnly(initialEndDate);
+    firstDate = M3EDatePickerUtils.dateOnly(firstDate);
+    lastDate = M3EDatePickerUtils.dateOnly(lastDate);
 
-  bool _isSameDay(DateTime a, DateTime? b) {
-    return b != null &&
-        a.year == b.year &&
-        a.month == b.month &&
-        a.day == b.day;
+    final M3EThemeData theme =
+        M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
+    final M3EDialogTheme dialogTheme = theme.dialogTheme;
+
+    return showGeneralDialog<M3EDateRange>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: dialogTheme.scrimColor(theme.colorScheme),
+      transitionDuration: M3EMotion.medium2,
+      pageBuilder: (BuildContext context, _, _) {
+        return M3EScrimSystemUi.wrap(
+          M3EComponentTheme(
+            builder: (BuildContext context) => Center(
+              child: M3EDateRangePickerDialog(
+                initialStartDate: initialStartDate,
+                initialEndDate: initialEndDate,
+                firstDate: firstDate,
+                lastDate: lastDate,
+                currentDate: currentDate,
+                initialEntryMode: initialEntryMode,
+                selectableDayPredicate: selectableDayPredicate,
+                helpText: helpText,
+                cancelText: cancelText,
+                confirmText: confirmText,
+                errorFormatText: errorFormatText,
+                errorInvalidText: errorInvalidText,
+                fieldStartHintText: fieldStartHintText,
+                fieldEndHintText: fieldEndHintText,
+                fieldStartLabelText: fieldStartLabelText,
+                fieldEndLabelText: fieldEndLabelText,
+                restorationId: restorationId,
+                onDatePickerModeChange: onDatePickerModeChange,
+                insetPadding: insetPadding,
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondary, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: M3EMotion.emphasizedDecelerate,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: dialogTheme.entranceScale,
+              end: 1,
+            ).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 }

@@ -24,6 +24,7 @@ class _SelectionPageState extends State<SelectionPage>
   bool _bluetooth = false;
   final Set<String> _chips = <String>{'flutter'};
   DateTime? _date;
+  M3EDateRange? _dateRange;
   M3ETime _time = const M3ETime(hour: 9, minute: 30);
   String? _framework;
   final List<String> _skills = <String>[];
@@ -247,11 +248,60 @@ class _SelectionPageState extends State<SelectionPage>
         GallerySection(
           title: 'Date & time pickers',
           children: <Widget>[
-            M3EDatePicker(
-              selectedDate: _date,
-              onDateSelected: (DateTime value) =>
+            M3ECalendarDatePicker(
+              initialDate: _date,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              onDateChanged: (DateTime value) =>
                   setState(() => _date = value),
             ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                M3EButton(
+                  onPressed: () async {
+                    final DateTime? picked = await M3EDatePicker.show(
+                      context,
+                      initialDate: _date,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      setState(() => _date = picked);
+                    }
+                  },
+                  child: const Text('Pick date'),
+                ),
+                M3EButton(
+                  onPressed: () async {
+                    final M3EDateRange? picked = await M3EDatePicker.showRange(
+                      context,
+                      initialStartDate: _dateRange?.start ?? _date,
+                      initialEndDate: _dateRange?.end,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      setState(() => _dateRange = picked);
+                    }
+                  },
+                  child: const Text('Pick range'),
+                ),
+              ],
+            ),
+            if (_dateRange != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Range: ${_dateRange!.start.toIso8601String().split('T').first}'
+                  '${_dateRange!.end != null ? ' – ${_dateRange!.end!.toIso8601String().split('T').first}' : ''}',
+                  style: theme.typeScale.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             const SizedBox(height: 24),
             M3ETimePicker(
               value: _time,
