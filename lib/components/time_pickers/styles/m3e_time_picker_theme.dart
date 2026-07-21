@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 
-/// Theme values for `M3ETimePicker`.
+/// Theme values for M3E time pickers.
 @immutable
 class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
   const M3ETimePickerTheme({
@@ -18,6 +18,8 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     this.periodOptionSize = const Size(48, 40),
     this.fieldPeriodGap = 12,
     this.headerDialGap = 24,
+    this.elevation = 6,
+    this.headerLandscapeWidth = 152,
   });
 
   static const M3ETimePickerTheme defaults = M3ETimePickerTheme();
@@ -34,10 +36,23 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
   final Size periodOptionSize;
   final double fieldPeriodGap;
   final double headerDialGap;
+  final double elevation;
+  final double headerLandscapeWidth;
 
   BorderRadius get borderRadius => M3EShapes.radiusExtraLarge;
+  BorderRadius get dialogShape => M3EShapes.radiusExtraLarge;
+
+  Color backgroundColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
 
   Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
+
+  Color headerBackgroundColor(M3EColorScheme scheme) =>
+      scheme.surfaceContainerHigh;
+
+  Color headerForegroundColor(M3EColorScheme scheme) => scheme.onSurfaceVariant;
+
+  Color dividerColor(M3EColorScheme scheme) =>
+      M3EColorUtils.withOpacity(scheme.onSurface, 0.12);
 
   Color periodOptionBackgroundColor(
     M3EColorScheme scheme, {
@@ -67,6 +82,21 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     return active ? scheme.onPrimaryContainer : scheme.onSurface;
   }
 
+  TextStyle headerHelpStyle(M3ETypeScale typeScale, M3EColorScheme scheme) {
+    return typeScale.labelLarge.copyWith(color: headerForegroundColor(scheme));
+  }
+
+  TextStyle headerHeadlineStyle(M3ETypeScale typeScale, M3EColorScheme scheme) {
+    return typeScale.headlineLarge.copyWith(color: scheme.onSurface);
+  }
+
+  TextStyle headerHeadlineShortStyle(
+    M3ETypeScale typeScale,
+    M3EColorScheme scheme,
+  ) {
+    return typeScale.headlineSmall.copyWith(color: scheme.onSurface);
+  }
+
   @override
   M3ETimePickerTheme copyWith({
     EdgeInsets? padding,
@@ -81,6 +111,8 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     Size? periodOptionSize,
     double? fieldPeriodGap,
     double? headerDialGap,
+    double? elevation,
+    double? headerLandscapeWidth,
   }) {
     return M3ETimePickerTheme(
       padding: padding ?? this.padding,
@@ -95,6 +127,9 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
       periodOptionSize: periodOptionSize ?? this.periodOptionSize,
       fieldPeriodGap: fieldPeriodGap ?? this.fieldPeriodGap,
       headerDialGap: headerDialGap ?? this.headerDialGap,
+      elevation: elevation ?? this.elevation,
+      headerLandscapeWidth:
+          headerLandscapeWidth ?? this.headerLandscapeWidth,
     );
   }
 
@@ -118,6 +153,9 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
       periodOptionSize: Size.lerp(periodOptionSize, other.periodOptionSize, t)!,
       fieldPeriodGap: _lerpDouble(fieldPeriodGap, other.fieldPeriodGap, t)!,
       headerDialGap: _lerpDouble(headerDialGap, other.headerDialGap, t)!,
+      elevation: _lerpDouble(elevation, other.elevation, t)!,
+      headerLandscapeWidth:
+          _lerpDouble(headerLandscapeWidth, other.headerLandscapeWidth, t)!,
     );
   }
 

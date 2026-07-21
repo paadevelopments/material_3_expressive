@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/time_pickers/models/m3e_time.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';
@@ -303,9 +302,22 @@ class _SelectionPageState extends State<SelectionPage>
                 ),
               ),
             const SizedBox(height: 24),
-            M3ETimePicker(
+            M3EDialTimePicker(
               value: _time,
               onChanged: (M3ETime value) => setState(() => _time = value),
+            ),
+            const SizedBox(height: 16),
+            M3EButton(
+              onPressed: () async {
+                final M3ETime? picked = await M3ETimePicker.show(
+                  context,
+                  initialTime: _time,
+                );
+                if (picked != null) {
+                  setState(() => _time = picked);
+                }
+              },
+              child: const Text('Pick time'),
             ),
           ],
         ),

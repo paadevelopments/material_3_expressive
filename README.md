@@ -515,11 +515,17 @@ final range = await M3EDatePicker.showRange(
 
 #### M3ETimePicker
 
-Dial-style time picker.
+Dialog and dial-style time picker.
 
 ```dart
-// in State
-M3ETimePicker(
+// Dialog
+final M3ETime? picked = await M3ETimePicker.show(
+  context,
+  initialTime: time,
+);
+
+// Inline dial
+M3EDialTimePicker(
   value: time,
   onChanged: (v) => setState(() => time = v),
 );

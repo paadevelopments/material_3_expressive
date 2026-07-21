@@ -20,6 +20,14 @@ class M3ETime {
     return M3ETime(hour: hour ?? this.hour, minute: minute ?? this.minute);
   }
 
+  @override
+  bool operator ==(Object other) {
+    return other is M3ETime && other.hour == hour && other.minute == minute;
+  }
+
+  @override
+  int get hashCode => Object.hash(hour, minute);
+
   /// A zero-padded "HH:MM" style label using the 12-hour hour.
   String get minuteLabel => minute.toString().padLeft(2, '0');
 }
