@@ -258,8 +258,10 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     final bool isInputMode =
         _entryMode.value == M3ETimePickerEntryMode.input ||
         _entryMode.value == M3ETimePickerEntryMode.inputOnly;
-    final double? dialBodyHeight =
-        isInputMode ? null : M3ETimePickerConstants.dialDialogBodyHeight;
+    final EdgeInsets dialogPadding = theme.dialogTheme.padding;
+    final double? dialBodyHeight = isInputMode
+        ? null
+        : M3ETimePickerConstants.dialDialogBodyHeight + dialogPadding.vertical;
 
     final Widget pickerBody = _buildPickerBody(
       picker: picker,

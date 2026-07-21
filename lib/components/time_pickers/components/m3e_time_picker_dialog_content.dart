@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 
-/// Wraps time picker dialog body content with padding in input mode only.
+/// Wraps time picker dialog body content with mode-specific padding.
 class M3ETimePickerDialogContent extends StatelessWidget {
   const M3ETimePickerDialogContent({
     required this.isInputMode,
@@ -15,11 +15,15 @@ class M3ETimePickerDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isInputMode) {
-      return child;
+    final EdgeInsets padding = M3ETheme.of(context).dialogTheme.padding;
+    if (isInputMode) {
+      return Padding(
+        padding: padding,
+        child: child,
+      );
     }
     return Padding(
-      padding: M3ETheme.of(context).dialogTheme.padding,
+      padding: EdgeInsets.fromLTRB(0, padding.top, 0, padding.bottom),
       child: child,
     );
   }
