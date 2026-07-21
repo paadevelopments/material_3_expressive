@@ -57,7 +57,8 @@ class GallerySection extends StatelessWidget {
 /// Lazy scroll surface for gallery demo pages.
 ///
 /// Builds one section at a time so rapid scrolling does not layout every demo
-/// block on every frame.
+/// block on every frame. Sections stay alive once built so interactive demos
+/// (dropdowns, sliders, pickers) keep their state when scrolled off screen.
 class GalleryPageScrollView extends StatelessWidget {
   const GalleryPageScrollView({required this.sections, super.key});
 
@@ -69,12 +70,33 @@ class GalleryPageScrollView extends StatelessWidget {
       addRepaintBoundaries: false,
       itemCount: sections.length,
       itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: EdgeInsets.zero,
+        return _KeepAliveGallerySection(
           child: RepaintBoundary(child: sections[index]),
         );
       },
     );
+  }
+}
+
+class _KeepAliveGallerySection extends StatefulWidget {
+  const _KeepAliveGallerySection({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeepAliveGallerySection> createState() =>
+      _KeepAliveGallerySectionState();
+}
+
+class _KeepAliveGallerySectionState extends State<_KeepAliveGallerySection>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 
