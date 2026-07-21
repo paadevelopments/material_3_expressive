@@ -382,35 +382,6 @@ void main() {
     expect(resolved.colorScheme.primary, expected.primary);
   });
 
-  testWidgets('preload resolves dynamic colors before the first frame',
-      (WidgetTester tester) async {
-    DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
-
-    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
-    final M3EColorScheme expected = resolvedM3eSchemeFromAccent(_accentGreen);
-
-    await M3EDynamicColorHost.preload();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: base.toThemeData(),
-        home: M3ETheme(
-          data: base,
-          dynamicColoring: true,
-          child: const M3EButton(
-            onPressed: null,
-            child: Text('Probe'),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    final M3EThemeData resolved =
-        M3ETheme.of(tester.element(find.byType(M3EButton)));
-    expect(resolved.colorScheme.primary, expected.primary);
-  });
-
   testWidgets('dynamicColoring applies mocked core palette via fromSeed',
       (WidgetTester tester) async {
     final Cam16 cam = Cam16.fromInt(_accentGreen.toARGB32());

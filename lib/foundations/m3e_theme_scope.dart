@@ -71,6 +71,9 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
   void initState() {
     super.initState();
     _cachedDarkTemplate = widget.baseData.deriveDarkTemplate();
+    if (widget.dynamicColoring ?? false) {
+      M3EDynamicColorHost.ensureLoaded();
+    }
   }
 
   @override
