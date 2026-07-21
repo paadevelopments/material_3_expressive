@@ -8,7 +8,9 @@ import 'pages/feedback_page.dart';
 import 'pages/navigation_page.dart';
 import 'pages/selection_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await M3EDynamicColorHost.preload();
   runApp(const ExampleApp());
 }
 
