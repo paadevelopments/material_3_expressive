@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'm3e_dynamic_color_host.dart';
 import 'm3e_theme.dart';
 
 /// A [MaterialApp] wired to adaptive [M3ETheme] with minimal integration code.
@@ -140,9 +139,6 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   void initState() {
     super.initState();
     _applySystemUiMode(widget.drawUnderSystemBars);
-    if (widget.dynamicColoring ?? false) {
-      M3EDynamicColorHost.ensureLoaded();
-    }
     if (widget._usesAdaptiveLifecycle) {
       WidgetsBinding.instance.addObserver(this);
       _effectiveController.addListener(_onThemeControllerChanged);

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:dynamic_color/test_utils.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:material_color_utilities/hct/cam16.dart';
-import 'package:material_color_utilities/palettes/tonal_palette.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 const Color _accentGreen = Color(0xFF286C2A);
 const Color _accentOrange = Color(0xFFE65100);
@@ -26,8 +23,6 @@ M3EColorScheme resolvedM3eSchemeFromAccent(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  setUp(M3EDynamicColorHost.clearCacheForTesting);
 
   testWidgets('static M3ETheme defaults to light when adaptive fields are null',
       (WidgetTester tester) async {
@@ -384,17 +379,9 @@ void main() {
 
   testWidgets('dynamicColoring applies mocked core palette via fromSeed',
       (WidgetTester tester) async {
-    final Cam16 cam = Cam16.fromInt(_accentGreen.toARGB32());
-    final TonalPalette primary =
-        TonalPalette.of(cam.hue, math.max(48, cam.chroma));
-    final seed = Color(primary.get(40));
-    DynamicColorTestingUtils.setMockDynamicColors(
-      corePalette: generateCorePalette(
-        (int index) => index < TonalPalette.commonSize
-            ? primary.asList[index]
-            : 0,
-      ),
-    );
+    final CorePalette corePalette = CorePalette.of(_accentGreen.toARGB32());
+    final seed = Color(corePalette.primary.get(40));
+    DynamicColorTestingUtils.setMockDynamicColors(corePalette: corePalette);
 
     final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
     final M3EColorScheme expected = resolvedM3eSchemeFromAccent(seed);
