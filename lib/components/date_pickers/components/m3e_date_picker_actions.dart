@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../buttons/enums/m3e_button_enums.dart';
 import '../../buttons/m3e_buttons.dart';
 import '../res/m3e_date_picker_constants.dart';
 
@@ -21,30 +22,31 @@ class M3EDatePickerActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final dateTheme = theme.datePickerTheme;
+    final dialogTheme = M3ETheme.of(context).dialogTheme;
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: M3EDatePickerConstants.actionsMinHeight,
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: dateTheme.actionHorizontalPadding,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: dialogTheme.padding.left),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: M3EDatePickerConstants.actionsMinHeight,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            M3EButton.text(
-              onPressed: onCancel,
-              child: Text(cancelText),
-            ),
-            SizedBox(width: dateTheme.actionSpacing),
-            M3EButton.text(
-              onPressed: onConfirm,
-              child: Text(confirmText),
-            ),
-          ],
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              M3EButton(
+                style: M3EButtonStyle.text,
+                onPressed: onCancel,
+                child: Text(cancelText),
+              ),
+              SizedBox(width: dialogTheme.actionGap),
+              M3EButton(
+                onPressed: onConfirm,
+                child: Text(confirmText),
+              ),
+            ],
+          ),
         ),
       ),
     );

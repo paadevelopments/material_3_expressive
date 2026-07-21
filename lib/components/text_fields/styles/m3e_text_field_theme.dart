@@ -7,6 +7,8 @@ import '../../../foundations/foundations.dart';
 class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   const M3ETextFieldTheme({
     this.minHeight = 56,
+    this.contentHeight = 48,
+    this.labelRestingOffset = 12,
     this.horizontalPadding = const EdgeInsets.symmetric(horizontal: 16),
     this.iconSize = 24,
     this.iconGap = 12,
@@ -21,6 +23,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   static const M3ETextFieldTheme defaults = M3ETextFieldTheme();
 
   final double minHeight;
+  final double contentHeight;
+  final double labelRestingOffset;
   final EdgeInsets horizontalPadding;
   final double iconSize;
   final double iconGap;
@@ -72,6 +76,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   @override
   M3ETextFieldTheme copyWith({
     double? minHeight,
+    double? contentHeight,
+    double? labelRestingOffset,
     EdgeInsets? horizontalPadding,
     double? iconSize,
     double? iconGap,
@@ -83,6 +89,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   }) {
     return M3ETextFieldTheme(
       minHeight: minHeight ?? this.minHeight,
+      contentHeight: contentHeight ?? this.contentHeight,
+      labelRestingOffset: labelRestingOffset ?? this.labelRestingOffset,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       iconSize: iconSize ?? this.iconSize,
       iconGap: iconGap ?? this.iconGap,
@@ -104,6 +112,9 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     }
     return M3ETextFieldTheme(
       minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
+      contentHeight: _lerpDouble(contentHeight, other.contentHeight, t)!,
+      labelRestingOffset:
+          _lerpDouble(labelRestingOffset, other.labelRestingOffset, t)!,
       horizontalPadding:
           EdgeInsets.lerp(horizontalPadding, other.horizontalPadding, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,

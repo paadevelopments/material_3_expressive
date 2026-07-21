@@ -72,19 +72,21 @@ class M3EDatePickerHeader extends StatelessWidget {
     }
 
     return Container(
-      height: dateTheme.headerPortraitHeight,
+      constraints: BoxConstraints(minHeight: dateTheme.headerPortraitHeight),
       color: dateTheme.headerBackgroundColor(scheme),
       padding: const EdgeInsetsDirectional.fromSTEB(24, 16, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(child: help),
-              if (entryModeButton != null) entryModeButton!,
+              ?entryModeButton,
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 12),
           title,
         ],
       ),

@@ -44,6 +44,9 @@ abstract final class M3EDatePickerConstants {
   static const double headerPaddingLandscape = 16;
   static const double actionsMinHeight = 52;
 
+  /// Calendar body height inside portrait dialogs at minimum header height.
+  static const double dialogPickerBodyHeight = 395;
+
   static const EdgeInsets defaultInsetPadding =
       EdgeInsets.symmetric(horizontal: 16, vertical: 24);
 

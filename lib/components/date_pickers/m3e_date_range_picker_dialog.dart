@@ -239,6 +239,15 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
 
+    final double pickerHeight = switch (_entryMode.value) {
+      M3EDatePickerEntryMode.input ||
+      M3EDatePickerEntryMode.inputOnly =>
+        M3EDatePickerConstants.inputFormPortraitHeight,
+      M3EDatePickerEntryMode.calendar ||
+      M3EDatePickerEntryMode.calendarOnly =>
+        M3EDatePickerConstants.dialogPickerBodyHeight,
+    };
+
     return Padding(
       padding: widget.insetPadding,
       child: Material(
@@ -248,8 +257,8 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: dialogSize.width,
-          height: dialogSize.height,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               M3EDatePickerHeader(
@@ -263,7 +272,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 thickness: 1,
                 color: dateTheme.dividerColor(theme.colorScheme),
               ),
-              Expanded(child: picker),
+              SizedBox(height: pickerHeight, child: picker),
               M3EDatePickerActions(
                 cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
                 confirmText: widget.confirmText ?? localizations.okButtonLabel,

@@ -261,6 +261,13 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
         M3EDatePickerConstants.fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
 
+    final bool isInputMode =
+        _entryMode.value == M3EDatePickerEntryMode.input ||
+        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
+    final double portraitPickerHeight = isInputMode
+        ? M3EDatePickerConstants.inputFormPortraitHeight
+        : M3EDatePickerConstants.dialogPickerBodyHeight;
+
     return Padding(
       padding: widget.insetPadding,
       child: Material(
@@ -270,11 +277,11 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: AnimatedContainer(
           width: dialogSize.width,
-          height: dialogSize.height,
           duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
           curve: Curves.easeIn,
           child: switch (orientation) {
             Orientation.portrait => Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   header,
@@ -282,29 +289,40 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
                     thickness: 1,
                     color: dateTheme.dividerColor(theme.colorScheme),
                   ),
-                  Expanded(child: picker),
+                  AnimatedSize(
+                    duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
+                    curve: Curves.easeIn,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      height: portraitPickerHeight,
+                      child: picker,
+                    ),
+                  ),
                   actions,
                 ],
               ),
-            Orientation.landscape => Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  header,
-                  M3EDivider(
-                    axis: M3EDividerAxis.vertical,
-                    thickness: 1,
-                    color: dateTheme.dividerColor(theme.colorScheme),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Expanded(child: picker),
-                        actions,
-                      ],
+            Orientation.landscape => SizedBox(
+                height: dialogSize.height,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    M3EDivider(
+                      axis: M3EDividerAxis.vertical,
+                      thickness: 1,
+                      color: dateTheme.dividerColor(theme.colorScheme),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Expanded(child: picker),
+                          actions,
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
           },
         ),
