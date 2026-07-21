@@ -46,6 +46,14 @@ class M3EDatePickerHeader extends StatelessWidget {
 
     final Widget help = Text(helpText, style: helpStyle);
 
+    final Widget helpRow = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(child: help),
+        ?entryModeButton,
+      ],
+    );
+
     if (orientation == Orientation.landscape) {
       return SizedBox(
         width: dateTheme.headerLandscapeWidth,
@@ -57,12 +65,7 @@ class M3EDatePickerHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                help,
-                if (entryModeButton != null)
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: entryModeButton,
-                  ),
+                helpRow,
                 Visibility(visible: showTitle, child: title),
               ],
             ),
@@ -79,13 +82,7 @@ class M3EDatePickerHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(child: help),
-                ?entryModeButton,
-              ],
-            ),
+            helpRow,
             Visibility(visible: showTitle, child: title),
           ],
         ),
