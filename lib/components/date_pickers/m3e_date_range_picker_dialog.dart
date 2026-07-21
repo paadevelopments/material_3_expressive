@@ -5,6 +5,7 @@ import '../../foundations/foundations.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_calendar_date_range_picker.dart';
 import 'components/m3e_date_picker_actions.dart';
+import 'components/m3e_date_picker_dialog_content.dart';
 import 'components/m3e_date_picker_header.dart';
 import 'components/m3e_input_date_range_picker_form_field.dart';
 import 'enums/m3e_date_picker_enums.dart';
@@ -198,11 +199,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
         picker = Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode.value,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: dateTheme.inputHorizontalPadding,
-            ),
-            child: M3EInputDateRangePickerFormField(
+          child: M3EInputDateRangePickerFormField(
               firstDate: firstDate,
               lastDate: lastDate,
               initialStartDate: _startDate.value,
@@ -221,7 +218,6 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
               fieldStartLabelText: widget.fieldStartLabelText,
               fieldEndLabelText: widget.fieldEndLabelText,
             ),
-          ),
         );
         if (_entryMode.value == M3EDatePickerEntryMode.input) {
           entryModeButton = M3EDatePickerEntryModeButton(
@@ -239,14 +235,24 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
 
-    final double pickerHeight = switch (_entryMode.value) {
-      M3EDatePickerEntryMode.input ||
-      M3EDatePickerEntryMode.inputOnly =>
-        M3EDatePickerConstants.inputFormPortraitHeight,
-      M3EDatePickerEntryMode.calendar ||
-      M3EDatePickerEntryMode.calendarOnly =>
-        M3EDatePickerConstants.dialogPickerBodyHeight,
-    };
+    final bool isInputMode =
+        _entryMode.value == M3EDatePickerEntryMode.input ||
+        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
+
+    final Widget pickerBody = AnimatedSize(
+      duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
+      curve: Curves.easeIn,
+      alignment: Alignment.topCenter,
+      child: isInputMode
+          ? M3EDatePickerDialogContent(
+              isInputMode: true,
+              child: picker,
+            )
+          : SizedBox(
+              height: M3EDatePickerConstants.dialogPickerBodyHeight,
+              child: picker,
+            ),
+    );
 
     return Padding(
       padding: widget.insetPadding,
@@ -265,6 +271,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 helpText:
                     widget.helpText ?? localizations.dateRangePickerHelpText,
                 titleText: _headerTitle(localizations),
+                showTitle: _startDate.value != null,
                 orientation: orientation,
                 entryModeButton: entryModeButton,
               ),
@@ -272,7 +279,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 thickness: 1,
                 color: dateTheme.dividerColor(theme.colorScheme),
               ),
-              SizedBox(height: pickerHeight, child: picker),
+              pickerBody,
               M3EDatePickerActions(
                 cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
                 confirmText: widget.confirmText ?? localizations.okButtonLabel,

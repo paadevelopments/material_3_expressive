@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
-import '../res/m3e_date_picker_constants.dart';
 
 /// Header for single- and range-date picker dialogs.
 class M3EDatePickerHeader extends StatelessWidget {
   const M3EDatePickerHeader({
     required this.helpText,
     required this.titleText,
+    required this.showTitle,
     required this.orientation,
     this.titleSemanticsLabel,
     this.isShort = false,
@@ -18,6 +18,7 @@ class M3EDatePickerHeader extends StatelessWidget {
 
   final String helpText;
   final String titleText;
+  final bool showTitle;
   final String? titleSemanticsLabel;
   final Orientation orientation;
   final bool isShort;
@@ -27,6 +28,7 @@ class M3EDatePickerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dateTheme = theme.datePickerTheme;
+    final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
     final TextStyle helpStyle =
         dateTheme.headerHelpStyle(theme.typeScale, scheme);
@@ -50,12 +52,10 @@ class M3EDatePickerHeader extends StatelessWidget {
         child: ColoredBox(
           color: dateTheme.headerBackgroundColor(scheme),
           child: Padding(
-            padding: const EdgeInsets.all(
-              M3EDatePickerConstants.headerPaddingLandscape,
-            ),
+            padding: dialogTheme.padding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 help,
                 if (entryModeButton != null)
@@ -63,7 +63,7 @@ class M3EDatePickerHeader extends StatelessWidget {
                     alignment: AlignmentDirectional.centerEnd,
                     child: entryModeButton,
                   ),
-                title,
+                Visibility(visible: showTitle, child: title),
               ],
             ),
           ),
@@ -71,24 +71,24 @@ class M3EDatePickerHeader extends StatelessWidget {
       );
     }
 
-    return Container(
-      constraints: BoxConstraints(minHeight: dateTheme.headerPortraitHeight),
+    return ColoredBox(
       color: dateTheme.headerBackgroundColor(scheme),
-      padding: const EdgeInsetsDirectional.fromSTEB(24, 16, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(child: help),
-              ?entryModeButton,
-            ],
-          ),
-          const SizedBox(height: 12),
-          title,
-        ],
+      child: Padding(
+        padding: dialogTheme.padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: help),
+                ?entryModeButton,
+              ],
+            ),
+            Visibility(visible: showTitle, child: title),
+          ],
+        ),
       ),
     );
   }

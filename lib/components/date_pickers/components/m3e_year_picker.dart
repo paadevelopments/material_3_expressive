@@ -65,8 +65,12 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
     final int selectedYear = widget.selectedDate?.year ?? firstYear;
     final DateTime monthDate =
         widget.displayedMonth ?? widget.selectedDate ?? widget.firstDate;
+    final double gridHeight = M3EDatePickerUtils.yearPickerGridHeight(yearCount);
+    final bool scrollable =
+        M3EDatePickerUtils.yearPickerGridNaturalHeight(yearCount) > gridHeight;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (widget.mode != null && widget.onModeChanged != null)
           SizedBox(
@@ -100,9 +104,13 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
               ),
             ),
           ),
-        Expanded(
+        SizedBox(
+          height: gridHeight,
           child: GridView.builder(
             controller: _controller,
+            physics: scrollable
+                ? null
+                : const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(
               M3EDatePickerConstants.yearPickerPadding,
             ),

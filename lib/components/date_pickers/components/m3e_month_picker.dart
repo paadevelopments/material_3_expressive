@@ -152,6 +152,7 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
     final bool canGoNext = page < _monthCount - 1;
 
     return Column(
+      mainAxisSize: widget.expandToFit ? MainAxisSize.min : MainAxisSize.max,
       children: <Widget>[
         _MonthNavRow(
           month: month,
@@ -162,8 +163,8 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
           mode: widget.mode,
           onModeChanged: widget.onModeChanged,
         ),
-        Expanded(
-          child: M3EDayPicker(
+        if (widget.expandToFit)
+          M3EDayPicker(
             displayedMonth: month,
             selectedDate: widget.selectedDate,
             currentDate: widget.currentDate,
@@ -173,9 +174,22 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
             selectableDayPredicate: widget.selectableDayPredicate,
             rangeStart: widget.rangeStart,
             rangeEnd: widget.rangeEnd,
-            fitHeight: widget.expandToFit,
+          )
+        else
+          Expanded(
+            child: M3EDayPicker(
+              displayedMonth: month,
+              selectedDate: widget.selectedDate,
+              currentDate: widget.currentDate,
+              firstDate: widget.firstDate,
+              lastDate: widget.lastDate,
+              onChanged: widget.onChanged,
+              selectableDayPredicate: widget.selectableDayPredicate,
+              rangeStart: widget.rangeStart,
+              rangeEnd: widget.rangeEnd,
+              fitHeight: widget.expandToFit,
+            ),
           ),
-        ),
       ],
     );
   }

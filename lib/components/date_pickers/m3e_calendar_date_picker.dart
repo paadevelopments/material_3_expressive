@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../foundations/foundations.dart';
+import 'components/m3e_date_picker_mode_toggle.dart';
+import 'components/m3e_month_picker.dart';
+import 'components/m3e_year_picker.dart';
 import 'enums/m3e_date_picker_enums.dart';
 import 'models/m3e_date_picker_models.dart';
 import 'res/m3e_date_picker_constants.dart';
 import 'utils/m3e_date_picker_utils.dart';
-import 'components/m3e_date_picker_mode_toggle.dart';
-import 'components/m3e_month_picker.dart';
-import 'components/m3e_year_picker.dart';
 
 /// Embeddable calendar for selecting a single date.
 class M3ECalendarDatePicker extends StatefulWidget {
@@ -20,6 +20,7 @@ class M3ECalendarDatePicker extends StatefulWidget {
     this.currentDate,
     this.initialCalendarMode = M3EDatePickerMode.day,
     this.onDisplayedMonthChanged,
+    this.onCalendarModeChanged,
     this.selectableDayPredicate,
     this.expandToFit = false,
     super.key,
@@ -31,6 +32,7 @@ class M3ECalendarDatePicker extends StatefulWidget {
   final DateTime? currentDate;
   final ValueChanged<DateTime> onDateChanged;
   final ValueChanged<DateTime>? onDisplayedMonthChanged;
+  final ValueChanged<M3EDatePickerMode>? onCalendarModeChanged;
   final M3EDatePickerMode initialCalendarMode;
   final M3ESelectableDayPredicate? selectableDayPredicate;
   final bool expandToFit;
@@ -66,6 +68,7 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   void _handleModeChanged(M3EDatePickerMode mode) {
     HapticFeedback.selectionClick();
     setState(() => _mode = mode);
+    widget.onCalendarModeChanged?.call(mode);
   }
 
   void _handleMonthChanged(DateTime month) {
@@ -94,6 +97,8 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
         widget.onDateChanged(clamped);
       }
     });
+    widget.onDisplayedMonthChanged?.call(_displayedMonth);
+    widget.onCalendarModeChanged?.call(M3EDatePickerMode.day);
   }
 
   void _handleDayChanged(DateTime value) {
@@ -149,7 +154,16 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
                 onChanged: _handleModeChanged,
               ),
               SizedBox(
-                height: M3EDatePickerConstants.maxDayPickerHeight,
+                height: switch (_mode) {
+                  M3EDatePickerMode.day =>
+                    M3EDatePickerConstants.maxDayPickerHeight,
+                  M3EDatePickerMode.year =>
+                    M3EDatePickerUtils.calendarYearViewHeight(
+                      _firstDate,
+                      _lastDate,
+                      includeSubHeader: false,
+                    ),
+                },
                 child: switch (_mode) {
                   M3EDatePickerMode.day => M3EMonthPicker(
                       initialMonth: _displayedMonth,

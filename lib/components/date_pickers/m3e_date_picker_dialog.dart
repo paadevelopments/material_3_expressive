@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../foundations/foundations.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_date_picker_actions.dart';
+import 'components/m3e_date_picker_dialog_content.dart';
 import 'components/m3e_date_picker_header.dart';
 import 'components/m3e_input_date_picker_form_field.dart';
 import 'enums/m3e_date_picker_enums.dart';
@@ -68,6 +69,21 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
   final _RestorableAutovalidateMode _autovalidateMode =
       _RestorableAutovalidateMode(AutovalidateMode.disabled);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late DateTime _displayedMonth;
+  M3EDatePickerMode _calendarMode = M3EDatePickerMode.day;
+
+  @override
+  void initState() {
+    super.initState();
+    final DateTime currentDate = M3EDatePickerUtils.dateOnly(
+      widget.currentDate ?? DateTime.now(),
+    );
+    final DateTime base = widget.initialDate != null
+        ? M3EDatePickerUtils.dateOnly(widget.initialDate!)
+        : currentDate;
+    _displayedMonth = M3EDatePickerUtils.getMonth(base.year, base.month);
+    _calendarMode = widget.initialCalendarMode;
+  }
 
   @override
   String? get restorationId => widget.restorationId;
@@ -125,6 +141,48 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     setState(() => _selectedDate.value = M3EDatePickerUtils.dateOnly(date));
   }
 
+  void _handleDisplayedMonthChanged(DateTime month) {
+    setState(() => _displayedMonth = month);
+  }
+
+  void _handleCalendarModeChanged(M3EDatePickerMode mode) {
+    setState(() => _calendarMode = mode);
+  }
+
+  double _calendarBodyHeight(BuildContext context) {
+    final int firstDayOfWeekIndex =
+        MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    if (_calendarMode == M3EDatePickerMode.year) {
+      return M3EDatePickerUtils.calendarYearViewHeight(
+        widget.firstDate,
+        widget.lastDate,
+      );
+    }
+    return M3EDatePickerUtils.calendarDayViewHeight(
+      _displayedMonth,
+      firstDayOfWeekIndex,
+    );
+  }
+
+  Widget _buildPickerBody({
+    required Widget picker,
+    required bool isInputMode,
+    required double? calendarHeight,
+  }) {
+    final Widget content = M3EDatePickerDialogContent(
+      isInputMode: isInputMode,
+      child: picker,
+    );
+    return AnimatedSize(
+      duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
+      curve: Curves.easeIn,
+      alignment: Alignment.topCenter,
+      child: isInputMode
+          ? content
+          : SizedBox(height: calendarHeight, child: content),
+    );
+  }
+
   Size _dialogSize(BuildContext context) {
     final bool isCalendar = switch (_entryMode.value) {
       M3EDatePickerEntryMode.calendar ||
@@ -174,6 +232,8 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           initialCalendarMode: widget.initialCalendarMode,
           selectableDayPredicate: widget.selectableDayPredicate,
           onDateChanged: _handleDateChanged,
+          onDisplayedMonthChanged: _handleDisplayedMonthChanged,
+          onCalendarModeChanged: _handleCalendarModeChanged,
           expandToFit: true,
         );
         entryModeButton = M3EDatePickerEntryModeButton(
@@ -191,6 +251,8 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           initialCalendarMode: widget.initialCalendarMode,
           selectableDayPredicate: widget.selectableDayPredicate,
           onDateChanged: _handleDateChanged,
+          onDisplayedMonthChanged: _handleDisplayedMonthChanged,
+          onCalendarModeChanged: _handleCalendarModeChanged,
           expandToFit: true,
         );
       case M3EDatePickerEntryMode.input:
@@ -198,33 +260,23 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
         picker = Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode.value,
-          child: SizedBox(
-            height: orientation == Orientation.portrait
-                ? M3EDatePickerConstants.inputFormPortraitHeight
-                : M3EDatePickerConstants.inputFormLandscapeHeight,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: dateTheme.inputHorizontalPadding,
-              ),
-              child: Shortcuts(
-                shortcuts: const <ShortcutActivator, Intent>{
-                  SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
-                },
-                child: M3EInputDatePickerFormField(
-                  initialDate: _selectedDate.value,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                  onDateSubmitted: _handleDateChanged,
-                  onDateSaved: _handleDateChanged,
-                  selectableDayPredicate: widget.selectableDayPredicate,
-                  errorFormatText: widget.errorFormatText,
-                  errorInvalidText: widget.errorInvalidText,
-                  fieldHintText: widget.fieldHintText,
-                  fieldLabelText: widget.fieldLabelText,
-                  keyboardType: widget.keyboardType,
-                  autofocus: true,
-                ),
-              ),
+          child: Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
+            },
+            child: M3EInputDatePickerFormField(
+              initialDate: _selectedDate.value,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              onDateSubmitted: _handleDateChanged,
+              onDateSaved: _handleDateChanged,
+              selectableDayPredicate: widget.selectableDayPredicate,
+              errorFormatText: widget.errorFormatText,
+              errorInvalidText: widget.errorInvalidText,
+              fieldHintText: widget.fieldHintText,
+              fieldLabelText: widget.fieldLabelText,
+              keyboardType: widget.keyboardType,
+              autofocus: true,
             ),
           ),
         );
@@ -240,6 +292,7 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     final Widget header = M3EDatePickerHeader(
       helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: titleText,
+      showTitle: _selectedDate.value != null,
       orientation: orientation,
       isShort: orientation == Orientation.landscape &&
           (_entryMode.value == M3EDatePickerEntryMode.input ||
@@ -264,9 +317,14 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     final bool isInputMode =
         _entryMode.value == M3EDatePickerEntryMode.input ||
         _entryMode.value == M3EDatePickerEntryMode.inputOnly;
-    final double portraitPickerHeight = isInputMode
-        ? M3EDatePickerConstants.inputFormPortraitHeight
-        : M3EDatePickerConstants.dialogPickerBodyHeight;
+    final double? calendarBodyHeight =
+        isInputMode ? null : _calendarBodyHeight(context);
+
+    final Widget pickerBody = _buildPickerBody(
+      picker: picker,
+      isInputMode: isInputMode,
+      calendarHeight: calendarBodyHeight,
+    );
 
     return Padding(
       padding: widget.insetPadding,
@@ -289,40 +347,31 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
                     thickness: 1,
                     color: dateTheme.dividerColor(theme.colorScheme),
                   ),
-                  AnimatedSize(
-                    duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
-                    curve: Curves.easeIn,
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      height: portraitPickerHeight,
-                      child: picker,
-                    ),
-                  ),
+                  pickerBody,
                   actions,
                 ],
               ),
-            Orientation.landscape => SizedBox(
-                height: dialogSize.height,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    header,
-                    M3EDivider(
-                      axis: M3EDividerAxis.vertical,
-                      thickness: 1,
-                      color: dateTheme.dividerColor(theme.colorScheme),
+            Orientation.landscape => Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  header,
+                  M3EDivider(
+                    axis: M3EDividerAxis.vertical,
+                    thickness: 1,
+                    color: dateTheme.dividerColor(theme.colorScheme),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        pickerBody,
+                        actions,
+                      ],
                     ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Expanded(child: picker),
-                          actions,
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
           },
         ),

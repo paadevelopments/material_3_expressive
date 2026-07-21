@@ -81,6 +81,9 @@ Future<void> _predicate(WidgetTester tester) async {
 }
 
 Future<void> _dialogCancel(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(800, 900));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
   DateTime? result;
   await tester.pumpWidget(
     MaterialApp(
@@ -113,6 +116,9 @@ Future<void> _dialogCancel(WidgetTester tester) async {
 }
 
 Future<void> _dialogConfirm(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(800, 900));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
   DateTime? result;
   await tester.pumpWidget(
     MaterialApp(

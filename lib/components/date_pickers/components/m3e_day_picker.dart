@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../foundations/foundations.dart';
 import '../res/m3e_date_picker_constants.dart';
 import '../utils/m3e_date_picker_utils.dart';
-import '../utils/m3e_date_picker_utils.dart';
 import 'm3e_day_cell.dart';
 
 /// Weekday headers and day grid for one month.
@@ -47,15 +46,17 @@ class M3EDayPicker extends StatelessWidget {
     final int cellCount =
         ((daysInMonth + firstDayOffset) / dateTheme.daysPerWeek).ceil() *
         dateTheme.daysPerWeek;
-    const int _maxDayPickerRowCount = 6;
+    const int maxDayPickerRowCount = 6;
+    final int rowCount =
+        ((daysInMonth + firstDayOffset) / dateTheme.daysPerWeek).ceil();
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double rowHeight = fitHeight && constraints.hasBoundedHeight
             ? ((constraints.maxHeight -
                         dateTheme.gridPadding.vertical -
-                        24) /
-                    _maxDayPickerRowCount)
+                        M3EDatePickerConstants.weekdayRowHeight) /
+                    rowCount)
                 .clamp(40.0, M3EDatePickerConstants.dayPickerRowHeight)
             : M3EDatePickerConstants.dayPickerRowHeight;
 
