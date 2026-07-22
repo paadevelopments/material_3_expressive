@@ -25,7 +25,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.shapeFamily = M3EAppBarShapeFamily.square,
     this.density = M3EAppBarDensity.regular,
     this.toolbarHeight,
-    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyLeading = false,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
   })  : _kind = _M3EAppBarKind.top,
