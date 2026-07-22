@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 const Color _accentGreen = Color(0xFF286C2A);
 const Color _accentOrange = Color(0xFFE65100);
@@ -499,6 +500,101 @@ void main() {
     );
 
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentOrange);
+
+    tester.binding
+      ..handleAppLifecycleStateChanged(AppLifecycleState.paused)
+      ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(
+      M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme.primary,
+      orangePrimary,
+    );
+    expect(orangePrimary, isNot(greenPrimary));
+  });
+
+  testWidgets(
+      'dynamicColoring prefers core palette primary as seed over accent',
+      (WidgetTester tester) async {
+    // DynamicColorPlugin still returns CorePalette on Android.
+    // ignore: deprecated_member_use
+    final CorePalette palette = CorePalette.of(_accentGreen.toARGB32());
+    DynamicColorTestingUtils.setMockDynamicColors(
+      corePalette: palette,
+      accentColor: _accentOrange,
+    );
+
+    final Color seed = palette.toColorScheme().primary;
+    final Color expectedPrimary = resolvedM3eSchemeFromAccent(seed).primary;
+    final Color accentPrimary =
+        resolvedM3eSchemeFromAccent(_accentOrange).primary;
+
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme.primary,
+      expectedPrimary,
+    );
+    expect(expectedPrimary, isNot(accentPrimary));
+  });
+
+  testWidgets(
+      'dynamicColoring refreshes from core palette primary on resume',
+      (WidgetTester tester) async {
+    // DynamicColorPlugin still returns CorePalette on Android.
+    // ignore: deprecated_member_use
+    final CorePalette greenPalette = CorePalette.of(_accentGreen.toARGB32());
+    // DynamicColorPlugin still returns CorePalette on Android.
+    // ignore: deprecated_member_use
+    final CorePalette orangePalette = CorePalette.of(_accentOrange.toARGB32());
+
+    DynamicColorTestingUtils.setMockDynamicColors(corePalette: greenPalette);
+
+    final Color greenPrimary = resolvedM3eSchemeFromAccent(
+      greenPalette.toColorScheme().primary,
+    ).primary;
+    final Color orangePrimary = resolvedM3eSchemeFromAccent(
+      orangePalette.toColorScheme().primary,
+    ).primary;
+
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      M3ETheme.of(tester.element(find.byType(M3EButton))).colorScheme.primary,
+      greenPrimary,
+    );
+
+    DynamicColorTestingUtils.setMockDynamicColors(corePalette: orangePalette);
 
     tester.binding
       ..handleAppLifecycleStateChanged(AppLifecycleState.paused)

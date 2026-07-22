@@ -10,10 +10,14 @@ typedef M3EDynamicColorBuilder = Widget Function(
   ColorScheme? darkDynamic,
 );
 
-/// Fetches device accent colors and refreshes them when the app resumes.
+/// Fetches device dynamic colors and refreshes them when the app resumes.
 ///
-/// Builds light and dark [ColorScheme]s from [DynamicColorPlugin.getAccentColor].
-/// Re-fetches on [AppLifecycleState.resumed] so OS accent changes apply without
+/// Prefers Android's core palette: extracts its primary color and builds light
+/// and dark [ColorScheme]s via [ColorScheme.fromSeed]. Falls back to
+/// [DynamicColorPlugin.getAccentColor] on platforms that expose an accent
+/// color (desktop) or when the core palette is unavailable.
+///
+/// Re-fetches on [AppLifecycleState.resumed] so OS color changes apply without
 /// restarting the app.
 class M3EDynamicColorHost extends StatefulWidget {
   const M3EDynamicColorHost({required this.builder, super.key});
@@ -49,7 +53,39 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
     }
   }
 
+  void _applySeed(Color seed) {
+    setState(() {
+      _light = ColorScheme.fromSeed(seedColor: seed);
+      _dark = ColorScheme.fromSeed(
+        seedColor: seed,
+        brightness: Brightness.dark,
+      );
+    });
+  }
+
   Future<void> _fetchDynamicColors() async {
+    try {
+      final corePalette = await DynamicColorPlugin.getCorePalette();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (corePalette != null) {
+        // Primary role from the OS palette, used as fromSeed input.
+        final Color seed = corePalette.toColorScheme().primary;
+        if (kDebugMode) {
+          debugPrint('dynamic_color: Core palette primary seed detected.');
+        }
+        _applySeed(seed);
+        return;
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        debugPrint('dynamic_color: Failed to obtain core palette.');
+      }
+    }
+
     try {
       final Color? accentColor = await DynamicColorPlugin.getAccentColor();
 
@@ -61,13 +97,7 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
         if (kDebugMode) {
           debugPrint('dynamic_color: Accent color detected.');
         }
-        setState(() {
-          _light = ColorScheme.fromSeed(seedColor: accentColor);
-          _dark = ColorScheme.fromSeed(
-            seedColor: accentColor,
-            brightness: Brightness.dark,
-          );
-        });
+        _applySeed(accentColor);
         return;
       }
     } on PlatformException {
