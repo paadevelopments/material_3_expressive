@@ -195,8 +195,8 @@ class M3EListExpandableTheme {
     this.iconRotationAngle = defaultIconRotationAngle,
     this.expandTooltip = defaultExpandTooltip,
     this.collapseTooltip = defaultCollapseTooltip,
-    this.expandMotion = M3EMotion.aospSpatial,
-    this.collapseMotion = M3EMotion.aospSpatial,
+    this.expandMotion = M3EMotion.expressiveSpatialDefault,
+    this.collapseMotion = M3EMotion.expressiveSpatialDefault,
     this.allowMultipleExpanded = false,
   });
 
