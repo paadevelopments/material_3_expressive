@@ -17,6 +17,9 @@ class M3EDismissibleListStyle {
   /// Vertical gap between cards.
   final double gap;
 
+  /// Horizontal gap between a swiped card and its revealed action.
+  final double actionGap;
+
   /// Card background colour.
   final Color? color;
 
@@ -77,6 +80,7 @@ class M3EDismissibleListStyle {
     this.selectedBorderRadius,
     this.innerRadius = M3EListDismissibleTheme.defaultInnerRadius,
     this.gap = M3EListDismissibleTheme.defaultGap,
+    this.actionGap = M3EListDismissibleTheme.defaultActionGap,
     this.color,
     this.padding = M3EListDismissibleTheme.defaultItemPadding,
     this.margin,

@@ -644,14 +644,19 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                       valueListenable: slot.flyNotifier,
                       builder: (_, flyOff, child) {
                         final progress = flyOff.abs();
+                        final actionWidth =
+                            (progress - s.actionGap).clamp(0.0, progress);
                         final swipingRight =
                             slot.dismissedDirection == DismissDirection.startToEnd;
+                        if (actionWidth <= 0) {
+                          return const SizedBox.shrink();
+                        }
                         return Positioned.fill(
                           bottom: s.gap,
                           child: Align(
                             alignment: swipingRight ? Alignment.centerLeft : Alignment.centerRight,
                             child: SizedBox(
-                              width: progress,
+                              width: actionWidth,
                               height: double.infinity,
                               child: Padding(
                                 padding: s.margin ?? EdgeInsets.zero,
@@ -733,6 +738,8 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     final bool swipingRight = _dragOffset > 0;
     final Widget? activeBg = swipingRight ? s.background : (s.secondaryBackground ?? s.background);
     final bgRadius = swipingRight ? s.backgroundBorderRadius : (s.secondaryBackgroundBorderRadius ?? s.backgroundBorderRadius);
+    final double revealed = _dragOffset.abs();
+    final double actionWidth = (revealed - s.actionGap).clamp(0.0, revealed);
 
     return RepaintBoundary(
       child: Padding(
@@ -740,7 +747,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            if (isDragged && _dragOffset != 0 && activeBg != null)
+            if (isDragged && actionWidth > 0 && activeBg != null)
               Positioned.fill(
                 bottom: isLast ? 0 : s.gap,
                 child: RepaintBoundary(
@@ -749,7 +756,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(bgRadius),
                       child: SizedBox(
-                        width: _dragOffset.abs(),
+                        width: actionWidth,
                         height: double.infinity,
                         child: Opacity(
                           opacity: (_dragProgress * 3.0).clamp(0.0, 1.0),

@@ -104,6 +104,7 @@ class M3EListDismissibleTheme {
   static const double defaultOuterRadius = 18;
   static const double defaultInnerRadius = 4;
   static const double defaultGap = 3;
+  static const double defaultActionGap = 8;
   static const double defaultDismissThreshold = 0.2;
   static const double defaultNeighbourPull = 8;
   static const int defaultNeighbourReach = 3;
@@ -115,6 +116,7 @@ class M3EListDismissibleTheme {
     this.outerRadius = defaultOuterRadius,
     this.innerRadius = defaultInnerRadius,
     this.gap = defaultGap,
+    this.actionGap = defaultActionGap,
     this.dismissThreshold = defaultDismissThreshold,
     this.neighbourPull = defaultNeighbourPull,
     this.neighbourReach = defaultNeighbourReach,
@@ -128,6 +130,9 @@ class M3EListDismissibleTheme {
   final double outerRadius;
   final double innerRadius;
   final double gap;
+
+  /// Horizontal gap between a swiped card and its revealed action background.
+  final double actionGap;
   final double dismissThreshold;
   final double neighbourPull;
   final int neighbourReach;
@@ -142,6 +147,7 @@ class M3EListDismissibleTheme {
     double? outerRadius,
     double? innerRadius,
     double? gap,
+    double? actionGap,
     double? dismissThreshold,
     double? neighbourPull,
     int? neighbourReach,
@@ -153,6 +159,7 @@ class M3EListDismissibleTheme {
       outerRadius: outerRadius ?? this.outerRadius,
       innerRadius: innerRadius ?? this.innerRadius,
       gap: gap ?? this.gap,
+      actionGap: actionGap ?? this.actionGap,
       dismissThreshold: dismissThreshold ?? this.dismissThreshold,
       neighbourPull: neighbourPull ?? this.neighbourPull,
       neighbourReach: neighbourReach ?? this.neighbourReach,
