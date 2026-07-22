@@ -46,18 +46,29 @@ class M3ECircularProgressPainter extends CustomPainter {
       ..color = activeColor;
 
     final double? p = progress;
+    const double tau = 2 * math.pi;
+    final double adjustedGap =
+        gapSize + (strokeWidth + trackStrokeWidth) / 2;
+    final double gapAngle = adjustedGap / radius;
+
     if (p == null) {
-      // Indeterminate: full track + spinning active arc.
-      canvas.drawCircle(center, radius, trackPaint);
-      if (sweepAngle != 0) {
-        canvas.drawArc(rect, startAngle, sweepAngle, false, activePaint);
+      // Indeterminate: spinning active arc with the same front/back gaps.
+      final double activeSweep = sweepAngle.clamp(0.0, tau);
+      final double appliedGap = math.min(activeSweep, gapAngle);
+      final double trackStart = startAngle + activeSweep + appliedGap;
+      final double trackSweep = tau - activeSweep - appliedGap * 2;
+
+      if (trackSweep > 0) {
+        canvas.drawArc(rect, trackStart, trackSweep, false, trackPaint);
+      }
+      if (activeSweep > 0) {
+        canvas.drawArc(rect, startAngle, activeSweep, false, activePaint);
       }
       return;
     }
 
-    // Compose determinate: active = progress * full circle.
+    // Determinate: active = progress * full circle.
     // Track uses two gaps (front + back). At 100% active is a complete ring.
-    const double tau = 2 * math.pi;
     final double coerced = p.clamp(0.0, 1.0);
     final double activeSweep = coerced * tau;
 
@@ -66,9 +77,6 @@ class M3ECircularProgressPainter extends CustomPainter {
       return;
     }
 
-    final double adjustedGap =
-        gapSize + (strokeWidth + trackStrokeWidth) / 2;
-    final double gapAngle = adjustedGap / radius;
     final double appliedGap = math.min(activeSweep, gapAngle);
     final double trackStart = startAngle + activeSweep + appliedGap;
     final double trackSweep = tau - activeSweep - appliedGap * 2;
