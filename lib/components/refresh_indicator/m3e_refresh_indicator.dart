@@ -204,11 +204,14 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         M3ETheme.of(context).refreshIndicatorTheme;
 
     if (widget._indicatorType == _IndicatorType.contained) {
-      _effectiveValueColor = widget.color ?? refreshTheme.activeColor(scheme);
-      _effectiveContainerColor = widget.backgroundColor ?? refreshTheme.containerColorDefault();
+      _effectiveValueColor =
+          widget.color ?? refreshTheme.containedActiveColor(scheme);
+      _effectiveContainerColor = widget.backgroundColor ??
+          refreshTheme.containedContainerColor(scheme);
     } else {
-      _effectiveValueColor = widget.color ?? refreshTheme.containedActiveColor(scheme);
-      _effectiveContainerColor = widget.backgroundColor ?? refreshTheme.containedContainerColor(scheme);
+      _effectiveValueColor = widget.color ?? refreshTheme.activeColor(scheme);
+      _effectiveContainerColor =
+          widget.backgroundColor ?? refreshTheme.containerColorDefault();
     }
 
     final Color color = _effectiveValueColor;
@@ -352,7 +355,14 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
       );
     }
-    _positionController.value = clampDouble(newValue, 0.0, 1.0);
+    final double clamped = clampDouble(newValue, 0.0, 1.0);
+    // Rebuild even when the controller is saturated so the indicator can still
+    // settle at its snap cap while the finger keeps moving.
+    if (clamped == _positionController.value) {
+      setState(() {});
+    } else {
+      _positionController.value = clamped;
+    }
     if (_status == M3ERefreshStatus.drag &&
         _valueColor.value!.a == _effectiveValueColor.a) {
       _status = M3ERefreshStatus.armed;
@@ -365,6 +375,17 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     assert(
       newMode == M3ERefreshStatus.canceled || newMode == M3ERefreshStatus.done,
     );
+
+    if (newMode == M3ERefreshStatus.canceled && _dragOffset != null) {
+      // Continuity: start the retract animation from the current visual pull.
+      final double height = _indicatorHeight(context);
+      final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+      final double currentPull = _visualPull(context);
+      _positionController.value =
+          (currentPull / (limit * (widget.displacement + height)))
+              .clamp(0.0, 1.0);
+    }
+
     setState(() {
       _status = newMode;
       widget.onStatusChange?.call(_status);
@@ -402,11 +423,21 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     assert(_status != M3ERefreshStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
+
+    // Keep the indicator where it visually is, then animate to the resting
+    // refresh offset (displacement below the edge).
+    final double height = _indicatorHeight(context);
+    final double currentPull = _visualPull(context);
+    final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+    _positionController.value =
+        (currentPull / (limit * (widget.displacement + height))).clamp(0.0, 1.0);
+
     _status = M3ERefreshStatus.snap;
     widget.onStatusChange?.call(_status);
+
     _positionController
         .animateTo(
-          1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
+          1.0 / limit,
           duration: M3ERefreshIndicatorTheme.defaults.indicatorSnapDuration,
         )
         .then<void>((void value) {
@@ -467,35 +498,71 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     );
   }
 
-  /// Pull distance from the list edge. Starts at 0 (top edge) and grows with
-  /// drag — no padded SizeTransition reveal, so the indicator does not jump in.
-  double get _edgePullOffset =>
-      _positionFactor.value * widget.displacement;
+  double _indicatorHeight(BuildContext context) {
+    final double? maxHeight = widget.indicatorConstraints?.maxHeight;
+    if (maxHeight != null && maxHeight.isFinite) {
+      return maxHeight;
+    }
+    return M3ETheme.of(context).loadingIndicatorTheme.containerHeight;
+  }
+
+  /// Max visual travel during drag: resting refresh position
+  /// (`top == displacement`).
+  double _maxVisualPull(BuildContext context) =>
+      widget.displacement + _indicatorHeight(context);
+
+  /// Finger pull clamped to the snap cap.
+  double _visualPull(BuildContext context) {
+    return math.min(
+      math.max(0.0, _dragOffset ?? 0.0),
+      _maxVisualPull(context),
+    );
+  }
+
+  /// Pull distance in pixels used for positioning.
+  ///
+  /// Drag/armed follow the finger via [_dragOffset] until the snap cap.
+  /// Animated phases derive pull from [_positionFactor] so the resting refresh
+  /// position is [M3ERefreshIndicator.displacement] below the edge.
+  double _pullDistance(BuildContext context) {
+    final double height = _indicatorHeight(context);
+    switch (_status) {
+      case M3ERefreshStatus.drag:
+      case M3ERefreshStatus.armed:
+        return _visualPull(context);
+      case M3ERefreshStatus.snap:
+      case M3ERefreshStatus.refresh:
+      case M3ERefreshStatus.done:
+      case M3ERefreshStatus.canceled:
+        // positionFactor 1.0 → pull = displacement + height → top = displacement.
+        return _positionFactor.value * (widget.displacement + height);
+      case null:
+        return 0.0;
+    }
+  }
 
   Widget _buildPositionedIndicator(BuildContext context) {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate = _status == M3ERefreshStatus.refresh ||
         _status == M3ERefreshStatus.done;
-    final double pull = _edgePullOffset;
-    // Fade in over the first ~15% of drag so touch-down at the edge doesn't
-    // flash a full indicator before the pull begins.
-    final double reveal =
-        (_positionController.value / 0.15).clamp(0.0, 1.0);
+    final double height = _indicatorHeight(context);
+    final double pull = _pullDistance(context);
+    // pull 0 → fully above the clip; as the user drags, the indicator slides
+    // out of the top edge and continues downward with the finger.
+    final double inset = pull - height;
 
     return Positioned(
-      top: atTop ? widget.edgeOffset + pull : null,
-      bottom: atTop ? null : widget.edgeOffset + pull,
+      top: atTop ? widget.edgeOffset + inset : null,
+      bottom: atTop ? null : widget.edgeOffset + inset,
       left: 0.0,
       right: 0.0,
       child: IgnorePointer(
-        child: Opacity(
-          opacity: reveal,
-          child: Align(
+        child: Align(
+          alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
+          child: ScaleTransition(
+            scale: _scaleFactor,
             alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-            child: ScaleTransition(
-              scale: _scaleFactor,
-              child: _buildIndicator(context, showIndeterminate),
-            ),
+            child: _buildIndicator(context, showIndeterminate),
           ),
         ),
       ),
@@ -506,12 +573,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     switch (widget._indicatorType) {
       case _IndicatorType.expressive:
         return _buildLoadingIndicator(
-          showIndeterminate: showIndeterminate,
           variant: M3ELoadingIndicatorVariant.defaultStyle,
         );
       case _IndicatorType.contained:
         return _buildLoadingIndicator(
-          showIndeterminate: showIndeterminate,
           variant: M3ELoadingIndicatorVariant.contained,
         );
       case _IndicatorType.material:
@@ -524,31 +589,16 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   Widget _buildLoadingIndicator({
-    required bool showIndeterminate,
     required M3ELoadingIndicatorVariant variant,
   }) {
-    final Color color = showIndeterminate
-        ? _effectiveValueColor
-        : (_valueColor.value ?? _effectiveValueColor);
-    final Widget indicator = M3ELoadingIndicator(
+    return M3ELoadingIndicator(
       variant: variant,
-      color: color,
+      color: _valueColor.value ?? _effectiveValueColor,
       containerColor: _effectiveContainerColor,
       polygons: widget.polygons,
       constraints: widget.indicatorConstraints,
       semanticLabel: widget.semanticsLabel,
       semanticValue: widget.semanticsValue,
-    );
-
-    if (showIndeterminate) {
-      return indicator;
-    }
-
-    // During drag, grow the loading indicator with pull progress.
-    final double t = (_value.value / 0.75).clamp(0.0, 1.0);
-    return Transform.scale(
-      scale: 0.55 + 0.45 * Curves.easeOut.transform(t),
-      child: indicator,
     );
   }
 
