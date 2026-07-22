@@ -38,6 +38,11 @@ class M3ELinearProgressPainter extends CustomPainter {
   final double inset;
   final M3ELinearProgressLayout? flatLayout;
 
+  /// Inflates [gap] so round stroke caps leave a visible empty space.
+  double _visualGap(double activeStroke, double trackStroke) {
+    return gap + (activeStroke + trackStroke) / 2;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     if (isWavy) {
@@ -49,50 +54,65 @@ class M3ELinearProgressPainter extends CustomPainter {
 
   void _paintFlat(Canvas canvas, Size size) {
     final M3ELinearProgressLayout spec = flatLayout!;
+    final double activeStroke = strokeWidth;
+    final double trackStroke = trackStrokeWidth;
+    final double visualGap = _visualGap(activeStroke, trackStroke);
     final double left = inset;
-    final double right = size.width - spec.trailingMargin;
+    final double stopCenterX =
+        size.width - math.max(spec.dotOffset, stopSize / 2);
+    final double trackEndX = stopCenterX - stopSize / 2 - gap;
+    final double right = math.max(left, trackEndX);
     final double width = math.max(0.0, right - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
 
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = spec.trackHeight
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true;
 
-    final double activeEndX = value == null ? right : (left + width * p);
-    final double trackStartX =
-        value == null ? left : math.min(right, activeEndX + spec.gap);
+    final bool indeterminate = value == null;
+    final double activeEndX = indeterminate ? right : (left + width * p);
+    final double trackStartX = indeterminate
+        ? left
+        : math.min(right, activeEndX + visualGap);
 
-    canvas.drawLine(
-      Offset(trackStartX, cy),
-      Offset(right, cy),
-      paint..color = track,
-    );
+    if (!indeterminate && trackStartX < right) {
+      canvas.drawLine(
+        Offset(trackStartX, cy),
+        Offset(right, cy),
+        paint
+          ..color = track
+          ..strokeWidth = trackStroke,
+      );
+    }
 
-    final double start = left;
-    final double end = value == null ? right : (left + width * p);
-    canvas.drawLine(
-      Offset(start, cy),
-      Offset(end, cy),
-      paint
-        ..color = active
-        ..strokeWidth = spec.trackHeight,
-    );
+    final double end = indeterminate ? right : activeEndX;
+    if (end > left) {
+      canvas.drawLine(
+        Offset(left, cy),
+        Offset(end, cy),
+        paint
+          ..color = active
+          ..strokeWidth = activeStroke,
+      );
+    }
 
-    final double dotCenterX = math.max(left, right - spec.dotOffset);
-    canvas.drawCircle(
-      Offset(dotCenterX, cy),
-      spec.dotDiameter / 2,
-      Paint()..color = active,
-    );
+    if (!indeterminate) {
+      canvas.drawCircle(
+        Offset(stopCenterX, cy),
+        stopSize / 2,
+        Paint()..color = active,
+      );
+    }
   }
 
   void _paintWavy(Canvas canvas, Size size) {
+    final double visualGap = _visualGap(strokeWidth, trackStrokeWidth);
     final double left = inset;
-    final double trailing = stopSize > 0 ? stopSize + gap : gap;
-    final double right = size.width - trailing;
+    final double stopCenterX = size.width - stopSize / 2 - 2;
+    final double trackEndX = stopCenterX - stopSize / 2 - gap;
+    final double right = math.max(left, trackEndX);
     final double width = math.max(0.0, right - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -107,9 +127,9 @@ class M3ELinearProgressPainter extends CustomPainter {
     final bool waveOnly = value == null || p >= 1.0;
     final double activeEndX = value == null ? right : (left + width * p);
     final double trackStartX =
-        value == null ? left : math.min(right, activeEndX + gap);
+        value == null ? left : math.min(right, activeEndX + visualGap);
 
-    if (!waveOnly) {
+    if (!waveOnly && trackStartX < right) {
       canvas.drawLine(
         Offset(trackStartX, cy),
         Offset(right, cy),
@@ -120,7 +140,7 @@ class M3ELinearProgressPainter extends CustomPainter {
     }
 
     final double start = left;
-    final double end = value == null ? right : (left + width * p);
+    final double end = value == null ? right : activeEndX;
     final Path path = Path();
     const double step = 1.5;
     final double k = 2 * math.pi / wavelength;
@@ -143,9 +163,8 @@ class M3ELinearProgressPainter extends CustomPainter {
     );
 
     if (!waveOnly && stopSize > 0) {
-      final double dotCenterX = math.max(left, size.width - stopSize / 2 - 2);
       canvas.drawCircle(
-        Offset(dotCenterX, cy),
+        Offset(stopCenterX, cy),
         stopSize / 2,
         Paint()..color = active,
       );

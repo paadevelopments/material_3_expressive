@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-/// Paints a Compose-style circular wavy progress ring.
+/// Paints a Compose-style circular wavy progress ring with front and back gaps.
 class M3ECircularWavyProgressPainter extends CustomPainter {
   const M3ECircularWavyProgressPainter({
     required this.progress,
@@ -15,6 +15,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     required this.maxAmplitude,
     required this.wavelength,
     required this.phase,
+    this.stopSize,
   });
 
   /// Null means indeterminate (full ring wave).
@@ -28,6 +29,9 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
   final double maxAmplitude;
   final double wavelength;
   final double phase;
+
+  /// Optional stop indicator at 12 o'clock (determinate).
+  final double? stopSize;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -47,11 +51,13 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
         math.max(1, (circumference / wavelength).round());
     final double waveK = waveCount * tau / circumference;
 
-    final double gapAngle = gapSize / radius;
+    // Match Compose: inflate gap for round stroke caps.
+    final double adjustedGap =
+        gapSize + (strokeWidth + trackStrokeWidth) / 2;
+    final double gapAngle = adjustedGap / radius;
     final bool indeterminate = progress == null;
     final double p = (progress ?? 1).clamp(0.0, 1.0);
-    final double activeSweep =
-        indeterminate ? tau - gapAngle : p * tau;
+    // Start at 12 o'clock.
     const double startAngle = -math.pi / 2;
 
     final Paint trackPaint = Paint()
@@ -68,28 +74,8 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
       ..color = activeColor
       ..isAntiAlias = true;
 
-    final bool waveOnly = indeterminate || p >= 1.0;
-
-    if (!waveOnly) {
-      final double trackStart = startAngle + activeSweep + gapAngle;
-      final double trackSweep = tau - activeSweep - gapAngle;
-      if (trackSweep > 0) {
-        canvas.drawPath(
-          _wavyArc(
-            center: center,
-            radius: radius,
-            startAngle: trackStart,
-            sweepAngle: trackSweep,
-            amplitude: 0,
-            waveK: waveK,
-            phase: phase,
-          ),
-          trackPaint,
-        );
-      }
-    }
-
-    if (activeSweep > 0) {
+    if (indeterminate) {
+      final double activeSweep = tau - gapAngle;
       canvas.drawPath(
         _wavyArc(
           center: center,
@@ -101,6 +87,57 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
           phase: phase,
         ),
         activePaint,
+      );
+      return;
+    }
+
+    // Determinate: stop at 12 o'clock, back gap, active, front gap, track.
+    final double available = math.max(0.0, tau - 2 * gapAngle);
+    final double activeSweep = p * available;
+    final double activeStart = startAngle + gapAngle;
+    final double trackStart = activeStart + activeSweep + gapAngle;
+    final double trackSweep = available - activeSweep;
+
+    if (trackSweep > 0) {
+      canvas.drawPath(
+        _wavyArc(
+          center: center,
+          radius: radius,
+          startAngle: trackStart,
+          sweepAngle: trackSweep,
+          amplitude: 0,
+          waveK: waveK,
+          phase: phase,
+        ),
+        trackPaint,
+      );
+    }
+
+    if (activeSweep > 0) {
+      canvas.drawPath(
+        _wavyArc(
+          center: center,
+          radius: radius,
+          startAngle: activeStart,
+          sweepAngle: activeSweep,
+          amplitude: amplitude,
+          waveK: waveK,
+          phase: phase,
+        ),
+        activePaint,
+      );
+    }
+
+    final double? stop = stopSize;
+    if (stop != null && stop > 0 && p < 1.0) {
+      final Offset stopCenter = Offset(
+        center.dx + radius * math.cos(startAngle),
+        center.dy + radius * math.sin(startAngle),
+      );
+      canvas.drawCircle(
+        stopCenter,
+        stop / 2,
+        Paint()..color = activeColor,
       );
     }
   }
@@ -146,6 +183,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
         oldDelegate.amplitudeFactor != amplitudeFactor ||
         oldDelegate.maxAmplitude != maxAmplitude ||
         oldDelegate.wavelength != wavelength ||
-        oldDelegate.phase != phase;
+        oldDelegate.phase != phase ||
+        oldDelegate.stopSize != stopSize;
   }
 }

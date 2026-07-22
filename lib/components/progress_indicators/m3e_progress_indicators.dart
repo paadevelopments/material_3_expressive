@@ -237,6 +237,9 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final double resolvedSize = widget.size ?? circular.defaultSize;
     final double resolvedStroke =
         widget.strokeWidth ?? circular.defaultStrokeWidth;
+    final double trackStroke =
+        widget.trackStrokeWidth ?? circular.trackStrokeWidth;
+    final double gap = widget.gapSize ?? circular.gapSize;
     final Color active = widget.color ?? circular.activeColor(scheme);
     final Color track = widget.trackColor ?? circular.trackColor(scheme);
 
@@ -253,8 +256,12 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 trackColor: track,
                 activeColor: active,
                 strokeWidth: resolvedStroke,
+                trackStrokeWidth: trackStroke,
                 startAngle: arc.start,
                 sweepAngle: arc.sweep,
+                gapSize: gap,
+                progress: widget.value,
+                stopSize: resolvedStroke,
               ),
             );
           },
@@ -302,6 +309,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 phase: _needsAnimation
                     ? _phase(wavelength, waveSpeed)
                     : 0,
+                stopSize: stroke,
               ),
             );
           },
@@ -329,7 +337,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
               active: active,
               track: track,
               strokeWidth: layout.trackHeight,
-              trackStrokeWidth: layout.trackHeight,
+              trackStrokeWidth: math.max(2, layout.trackHeight / 2),
               gap: layout.gap,
               stopSize: layout.dotDiameter,
               isWavy: false,
