@@ -278,6 +278,11 @@ class _CarouselViewState extends State<M3ECarouselView> {
       widget.controller ?? _internalController!;
   late int _lastReportedLeadingItem;
 
+  /// Cached from [didChangeDependencies] so item builds do not each register
+  /// an [M3ETheme] dependency during sliver child updates.
+  late M3ECarouselTheme _carouselTheme;
+  late M3EColorScheme _scheme;
+
   @override
   void initState() {
     super.initState();
@@ -288,6 +293,14 @@ class _CarouselViewState extends State<M3ECarouselView> {
     _lastReportedLeadingItem = _getInitialLeadingItem();
     _controller._attach(this);
     _controller.addListener(_handleScroll);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final M3EThemeData theme = M3ETheme.of(context);
+    _carouselTheme = theme.carouselTheme;
+    _scheme = theme.colorScheme;
   }
 
   @override
@@ -359,9 +372,11 @@ class _CarouselViewState extends State<M3ECarouselView> {
     if (widget.infinite && widget.children.isNotEmpty) {
       index = index % widget.children.length;
     }
-    final M3EThemeData m3eTheme = M3ETheme.of(context);
-    final M3ECarouselTheme carouselTheme = m3eTheme.carouselTheme;
-    final M3EColorScheme scheme = m3eTheme.colorScheme;
+    // Resolve tokens once per State lifetime rebuild via [build], not here —
+    // calling M3ETheme.of inside the item builder during a theme swap can
+    // rebuild the weighted sliver mid-layout and drop the leading child.
+    final M3ECarouselTheme carouselTheme = _carouselTheme;
+    final M3EColorScheme scheme = _scheme;
     final EdgeInsets effectivePadding =
         widget.padding ?? carouselTheme.itemPadding as EdgeInsets;
     final Color effectiveBackgroundColor = widget.backgroundColor ??
@@ -408,7 +423,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
     );
   }
 
-  Widget _buildSliverCarousel() {
+  Widget _buildSliverCarousel(BuildContext context) {
     // Determine the child count and builder based on whether we're using lazy loading
     final int? childCount = widget.infinite
         ? null
@@ -433,13 +448,17 @@ class _CarouselViewState extends State<M3ECarouselView> {
           (BuildContext context, int index) => _buildCarouselItem(index);
     }
 
+    final SliverChildDelegate delegate = SliverChildBuilderDelegate(
+      effectiveBuilder,
+      childCount: childCount,
+    );
+
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
         infinite: widget.infinite,
-        delegate: SliverChildBuilderDelegate(effectiveBuilder,
-            childCount: childCount),
+        delegate: delegate,
       );
     }
 
@@ -452,8 +471,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
       infinite: widget.infinite,
-      delegate:
-          SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
+      delegate: delegate,
     );
   }
 
@@ -480,7 +498,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
           physics: widget.physics ?? physics,
           clipBehavior: Clip.antiAlias,
           scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-          slivers: <Widget>[_buildSliverCarousel()],
+          slivers: <Widget>[_buildSliverCarousel(context)],
         );
       },
     );

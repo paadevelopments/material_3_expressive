@@ -222,19 +222,20 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   @override
   void initState() {
+    // Weighted layouts use consumeMaxWeight: false and initialItem: 0 so
+    // flexWeights map onto items 0..n at scroll offset 0. Using
+    // consumeMaxWeight with a non-zero initialItem inserts a phantom leading
+    // extent that theme rebuilds can leave offstage.
     controller = M3ECarouselController();
     switch (widget.type) {
       case M3ECarouselType.hero:
         switch (widget.heroAlignment) {
           case M3ECarouselHeroAlignment.left:
             layoutWeight = [8, 2];
-            controller = M3ECarouselController();
           case M3ECarouselHeroAlignment.center:
             layoutWeight = [2, 6, 2];
-            controller = M3ECarouselController(initialItem: 1);
           case M3ECarouselHeroAlignment.right:
             layoutWeight = [2, 8];
-            controller = M3ECarouselController(initialItem: 1);
         }
       case M3ECarouselType.contained:
         layoutWeight = widget.isExtended ? [4, 3, 2, 1] : [5, 4, 1];
@@ -265,6 +266,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
                 controller: controller,
                 freeScroll: widget.freeScroll,
                 itemSnapping: widget.freeScroll,
+                consumeMaxWeight: false,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     widget.childElementBorderRadius,

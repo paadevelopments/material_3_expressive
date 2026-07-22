@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'm3e_carousel_view.dart';
 
@@ -15,6 +16,7 @@ class M3ECarouselWrapper extends StatefulWidget {
     this.itemClipBehavior = Clip.none,
     this.overlayColor,
     this.itemSnapping = false,
+    this.consumeMaxWeight = true,
     this.shrinkExtent = 0.0,
     this.controller,
     this.scrollDirection = Axis.horizontal,
@@ -26,6 +28,7 @@ class M3ECarouselWrapper extends StatefulWidget {
     this.flexWeights,
     required this.children,
     this.onIndexChanged,
+
     /// Fixed logical pixels added or removed per animating edge at peak pulse.
     ///
     /// A value of `4` expands or squishes each active edge by up to 4px.
@@ -45,6 +48,7 @@ class M3ECarouselWrapper extends StatefulWidget {
   final Clip itemClipBehavior;
   final WidgetStateProperty<Color?>? overlayColor;
   final bool itemSnapping;
+  final bool consumeMaxWeight;
   final double shrinkExtent;
   final M3ECarouselController? controller;
   final Axis scrollDirection;
@@ -70,8 +74,13 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   int? _leftVisibleNeighborIndex;
   int? _rightVisibleNeighborIndex;
   late M3ECarouselController _internalController;
-  late List<GlobalKey> _itemKeys;
-  final GlobalKey _carouselKey = GlobalKey();
+
+  /// Per-index item boxes for pulse measuring.
+  final Map<int, RenderBox> _itemBoxes = <int, RenderBox>{};
+
+  /// Viewport box for neighbor visibility checks (no [GlobalKey] — those can
+  /// reparent under [Theme] rebuilds and corrupt the weighted sliver).
+  RenderBox? _viewportBox;
 
   double _currentGrowBaseWidth = 0;
 
@@ -91,14 +100,15 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   void initState() {
     super.initState();
     _internalController = widget.controller ?? M3ECarouselController();
-    _generateKeys();
   }
 
   @override
   void didUpdateWidget(M3ECarouselWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.children.length != oldWidget.children.length) {
-      _generateKeys();
+      _itemBoxes.removeWhere(
+        (int index, _) => index >= widget.children.length,
+      );
     }
     if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
@@ -106,10 +116,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       }
       _internalController = widget.controller ?? M3ECarouselController();
     }
-  }
-
-  void _generateKeys() {
-    _itemKeys = List.generate(widget.children.length, (_) => GlobalKey());
   }
 
   @override
@@ -121,12 +127,31 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     super.dispose();
   }
 
+  void _registerItemBox(int index, RenderBox box) {
+    _itemBoxes[index] = box;
+  }
+
+  void _unregisterItemBox(int index, RenderBox box) {
+    if (_itemBoxes[index] == box) {
+      _itemBoxes.remove(index);
+    }
+  }
+
+  void _registerViewportBox(RenderBox box) {
+    _viewportBox = box;
+  }
+
+  void _unregisterViewportBox(RenderBox box) {
+    if (_viewportBox == box) {
+      _viewportBox = null;
+    }
+  }
+
   double _fallbackExtent() => widget.itemExtent ?? 100.0;
 
   double _contentWidthFor(int index) {
-    final context = _itemKeys[index].currentContext;
-    final box = context?.findRenderObject() as RenderBox?;
-    final width = box?.size.width;
+    final box = _itemBoxes[index];
+    final width = (box != null && box.hasSize) ? box.size.width : null;
     if (width == null || width <= 0) {
       return _fallbackExtent();
     }
@@ -139,10 +164,12 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     final noVisibleNeighbors = !leftVisible && !rightVisible;
     final lastIndex = widget.children.length - 1;
 
-    final expandLeft = leftVisible ||
+    final expandLeft =
+        leftVisible ||
         (noVisibleNeighbors && index == lastIndex) ||
         (noVisibleNeighbors && index > 0 && index < lastIndex);
-    final expandRight = rightVisible ||
+    final expandRight =
+        rightVisible ||
         (noVisibleNeighbors && index == 0) ||
         (noVisibleNeighbors && index > 0 && index < lastIndex);
     return (expandLeft, expandRight);
@@ -153,9 +180,8 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       return false;
     }
 
-    final context = _itemKeys[index].currentContext;
-    final box = context?.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize || box.size.width <= 1.0) {
+    final box = _itemBoxes[index];
+    if (box == null || !box.hasSize || !box.attached || box.size.width <= 1.0) {
       return false;
     }
 
@@ -213,13 +239,10 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       return;
     }
 
-    final parentContext = _carouselKey.currentContext;
-    final parentBox = parentContext?.findRenderObject() as RenderBox?;
-
     setState(() {
       _activeIndex = index;
       _currentGrowBaseWidth = _contentWidthFor(index);
-      _snapshotVisibleNeighbors(index, parentBox);
+      _snapshotVisibleNeighbors(index, _viewportBox);
     });
 
     await _pulseController.forward();
@@ -239,7 +262,8 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     return AnimatedBuilder(
       animation: _bump,
       builder: (context, _) {
-        final int squishCount = (_leftVisibleNeighborIndex != null ? 1 : 0) +
+        final int squishCount =
+            (_leftVisibleNeighborIndex != null ? 1 : 0) +
             (_rightVisibleNeighborIndex != null ? 1 : 0);
         final double edgeDelta = widget.fixedPulseDelta * _bump.value;
 
@@ -264,13 +288,13 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
               final double width = _currentGrowBaseWidth > 0
                   ? _currentGrowBaseWidth
                   : _fallbackExtent();
-              final (expandLeft, expandRight) =
-                  _expandSidesForActiveIndex(index);
-              final growTotal = (expandLeft ? edgeDelta : 0) +
-                  (expandRight ? edgeDelta : 0);
+              final (expandLeft, expandRight) = _expandSidesForActiveIndex(
+                index,
+              );
+              final growTotal =
+                  (expandLeft ? edgeDelta : 0) + (expandRight ? edgeDelta : 0);
               scaleX = (width + growTotal) / width;
-            } else if ((isLeftNeighbor || isRightNeighbor) &&
-                squishCount > 0) {
+            } else if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
               final double neighborWidth = _contentWidthFor(index);
               final shrinkPixels = edgeDelta;
               final double targetWidth = math.max(
@@ -287,8 +311,10 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
                     as BorderRadius)
               : BorderRadius.zero;
 
-          return Container(
-            key: _itemKeys[index],
+          return _CarouselItemAnchor(
+            index: index,
+            onRegister: _registerItemBox,
+            onUnregister: _unregisterItemBox,
             child: RepaintBoundary(
               child: Transform(
                 transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
@@ -318,56 +344,205 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
           );
         });
 
-        if (widget.flexWeights != null) {
-          return M3ECarouselView.weighted(
-            key: _carouselKey,
-            physics: widget.freeScroll
-                ? null
-                : const NeverScrollableScrollPhysics()
-                .applyTo(const M3ECarouselScrollPhysics()),
-            padding: widget.padding,
-            backgroundColor: widget.backgroundColor,
-            elevation: widget.elevation,
-            shape: widget.shape,
-            itemClipBehavior: Clip.none,
-            overlayColor: widget.overlayColor,
-            itemSnapping: widget.itemSnapping,
-            shrinkExtent: widget.shrinkExtent,
-            controller: _internalController,
-            scrollDirection: widget.scrollDirection,
-            reverse: widget.reverse,
-            enableSplash: false,
-            infinite: widget.infinite,
-            flexWeights: widget.flexWeights!,
-            onIndexChanged: widget.onIndexChanged,
-            children: carouselChildren,
-          );
-        } else {
-          return M3ECarouselView(
-            key: _carouselKey,
-            physics: widget.freeScroll
-                ? null
-                : const NeverScrollableScrollPhysics()
-                .applyTo(const M3ECarouselScrollPhysics()),
-            padding: widget.padding,
-            backgroundColor: widget.backgroundColor,
-            elevation: widget.elevation,
-            shape: widget.shape,
-            itemClipBehavior: Clip.none,
-            overlayColor: widget.overlayColor,
-            itemSnapping: widget.itemSnapping,
-            shrinkExtent: widget.shrinkExtent,
-            controller: _internalController,
-            scrollDirection: widget.scrollDirection,
-            reverse: widget.reverse,
-            enableSplash: false,
-            infinite: widget.infinite,
-            itemExtent: widget.itemExtent!,
-            onIndexChanged: widget.onIndexChanged,
-            children: carouselChildren,
-          );
-        }
+        final Widget view = widget.flexWeights != null
+            ? M3ECarouselView.weighted(
+                physics: widget.freeScroll
+                    ? null
+                    : const NeverScrollableScrollPhysics().applyTo(
+                        const M3ECarouselScrollPhysics(),
+                      ),
+                padding: widget.padding,
+                backgroundColor: widget.backgroundColor,
+                elevation: widget.elevation,
+                shape: widget.shape,
+                itemClipBehavior: Clip.none,
+                overlayColor: widget.overlayColor,
+                itemSnapping: widget.itemSnapping,
+                consumeMaxWeight: widget.consumeMaxWeight,
+                shrinkExtent: widget.shrinkExtent,
+                controller: _internalController,
+                scrollDirection: widget.scrollDirection,
+                reverse: widget.reverse,
+                enableSplash: false,
+                infinite: widget.infinite,
+                flexWeights: widget.flexWeights!,
+                onIndexChanged: widget.onIndexChanged,
+                children: carouselChildren,
+              )
+            : M3ECarouselView(
+                physics: widget.freeScroll
+                    ? null
+                    : const NeverScrollableScrollPhysics().applyTo(
+                        const M3ECarouselScrollPhysics(),
+                      ),
+                padding: widget.padding,
+                backgroundColor: widget.backgroundColor,
+                elevation: widget.elevation,
+                shape: widget.shape,
+                itemClipBehavior: Clip.none,
+                overlayColor: widget.overlayColor,
+                itemSnapping: widget.itemSnapping,
+                shrinkExtent: widget.shrinkExtent,
+                controller: _internalController,
+                scrollDirection: widget.scrollDirection,
+                reverse: widget.reverse,
+                enableSplash: false,
+                infinite: widget.infinite,
+                itemExtent: widget.itemExtent!,
+                onIndexChanged: widget.onIndexChanged,
+                children: carouselChildren,
+              );
+
+        return _CarouselViewportAnchor(
+          onRegister: _registerViewportBox,
+          onUnregister: _unregisterViewportBox,
+          child: view,
+        );
       },
     );
+  }
+}
+
+/// Registers the carousel viewport [RenderBox] without a [GlobalKey].
+class _CarouselViewportAnchor extends SingleChildRenderObjectWidget {
+  const _CarouselViewportAnchor({
+    required this.onRegister,
+    required this.onUnregister,
+    required Widget child,
+  }) : super(child: child);
+
+  final void Function(RenderBox box) onRegister;
+  final void Function(RenderBox box) onUnregister;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCarouselViewportAnchor(
+      onRegister: onRegister,
+      onUnregister: onUnregister,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderCarouselViewportAnchor renderObject,
+  ) {
+    renderObject
+      ..onRegister = onRegister
+      ..onUnregister = onUnregister;
+  }
+}
+
+class _RenderCarouselViewportAnchor extends RenderProxyBox {
+  _RenderCarouselViewportAnchor({
+    required this.onRegister,
+    required this.onUnregister,
+  });
+
+  void Function(RenderBox box) onRegister;
+  void Function(RenderBox box) onUnregister;
+
+  void _registerIfReady() {
+    if (hasSize && attached) {
+      onRegister(this);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _registerIfReady();
+  }
+
+  @override
+  void detach() {
+    onUnregister(this);
+    super.detach();
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _registerIfReady();
+  }
+}
+
+/// Registers its [RenderBox] for pulse measuring without a [GlobalKey].
+class _CarouselItemAnchor extends SingleChildRenderObjectWidget {
+  const _CarouselItemAnchor({
+    required this.index,
+    required this.onRegister,
+    required this.onUnregister,
+    required Widget child,
+  }) : super(child: child);
+
+  final int index;
+  final void Function(int index, RenderBox box) onRegister;
+  final void Function(int index, RenderBox box) onUnregister;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCarouselItemAnchor(
+      index: index,
+      onRegister: onRegister,
+      onUnregister: onUnregister,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderCarouselItemAnchor renderObject,
+  ) {
+    renderObject
+      ..index = index
+      ..onRegister = onRegister
+      ..onUnregister = onUnregister;
+  }
+}
+
+class _RenderCarouselItemAnchor extends RenderProxyBox {
+  _RenderCarouselItemAnchor({
+    required this._index,
+    required this.onRegister,
+    required this.onUnregister,
+  });
+
+  int _index;
+  void Function(int index, RenderBox box) onRegister;
+  void Function(int index, RenderBox box) onUnregister;
+
+  int get index => _index;
+  set index(int value) {
+    if (_index == value) {
+      return;
+    }
+    onUnregister(_index, this);
+    _index = value;
+    _registerIfReady();
+  }
+
+  void _registerIfReady() {
+    if (hasSize && attached) {
+      onRegister(_index, this);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _registerIfReady();
+  }
+
+  @override
+  void detach() {
+    onUnregister(_index, this);
+    super.detach();
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _registerIfReady();
   }
 }
