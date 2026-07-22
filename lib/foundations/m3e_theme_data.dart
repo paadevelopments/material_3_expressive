@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart'
-    show Brightness, Color, TargetPlatform, ThemeData, VisualDensity;
+    show
+        Brightness,
+        Color,
+        TargetPlatform,
+        TextTheme,
+        ThemeData,
+        VisualDensity;
 import 'package:flutter/widgets.dart';
 
 import '../components/app_bars/styles/m3e_app_bar_theme.dart';
@@ -51,6 +57,7 @@ class M3EThemeData {
   M3EThemeData({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    this.iconTheme = const IconThemeData(size: 24),
     this.spacing = const M3ESpacing.regular(),
     this.visualDensity = 0,
     this.platform,
@@ -124,6 +131,7 @@ class M3EThemeData {
     final data = M3EThemeData(
       colorScheme: M3EColorScheme.fromColorScheme(theme.colorScheme),
       typeScale: M3ETypeScale.fromTextTheme(theme.textTheme),
+      iconTheme: theme.iconTheme,
       visualDensity: theme.visualDensity.vertical,
       platform: theme.platform,
       useMaterial3: theme.useMaterial3,
@@ -136,6 +144,11 @@ class M3EThemeData {
 
   final M3EColorScheme colorScheme;
   final M3ETypeScale typeScale;
+
+  /// Default icon size/opacity/etc. When color is null, icons use
+  /// [M3EColorScheme.onSurface] (including after dynamic color updates).
+  final IconThemeData iconTheme;
+
   final M3ESpacing spacing;
   final double visualDensity;
   final TargetPlatform? platform;
@@ -143,6 +156,16 @@ class M3EThemeData {
   final Color? splashColor;
   final Color? highlightColor;
   final Brightness brightness;
+
+  /// [typeScale] as a Material [TextTheme], colored with
+  /// [M3EColorScheme.onSurface] so it tracks the active scheme.
+  TextTheme get textTheme =>
+      typeScale.withColor(colorScheme.onSurface).toTextTheme();
+
+  /// [iconTheme] with [M3EColorScheme.onSurface] when no explicit color is set.
+  IconThemeData get resolvedIconTheme => iconTheme.copyWith(
+        color: iconTheme.color ?? colorScheme.onSurface,
+      );
 
   final M3EAppBarTheme appBarTheme;
   final M3EBadgeTheme badgeTheme;
@@ -198,6 +221,7 @@ class M3EThemeData {
       seedColor: colorScheme.primary,
     ).copyWith(
       typeScale: typeScale,
+      iconTheme: iconTheme,
       spacing: spacing,
       visualDensity: visualDensity,
       platform: platform,
@@ -249,6 +273,7 @@ class M3EThemeData {
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    IconThemeData? iconTheme,
     M3ESpacing? spacing,
     double? visualDensity,
     TargetPlatform? platform,
@@ -298,6 +323,7 @@ class M3EThemeData {
     return M3EThemeData(
       colorScheme: colorScheme ?? this.colorScheme,
       typeScale: typeScale ?? this.typeScale,
+      iconTheme: iconTheme ?? this.iconTheme,
       spacing: spacing ?? this.spacing,
       visualDensity: visualDensity ?? this.visualDensity,
       platform: platform ?? this.platform,
@@ -347,10 +373,13 @@ class M3EThemeData {
   }
 
   ThemeData toThemeData() {
+    final IconThemeData icons = resolvedIconTheme;
     return ThemeData(
       useMaterial3: useMaterial3,
       colorScheme: colorScheme.toColorScheme(),
-      textTheme: typeScale.toTextTheme(),
+      textTheme: textTheme,
+      iconTheme: icons,
+      primaryIconTheme: icons.copyWith(color: colorScheme.onPrimary),
       visualDensity: VisualDensity(
         horizontal: visualDensity,
         vertical: visualDensity,

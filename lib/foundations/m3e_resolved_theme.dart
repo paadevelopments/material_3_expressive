@@ -1,10 +1,6 @@
-import 'package:flutter/material.dart' show InheritedTheme, Theme;
-import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/foundations/foundations.dart' show M3ETheme;
-import 'package:material_3_expressive/foundations/m3e_theme.dart' show M3ETheme;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3ETheme;
+import 'package:flutter/material.dart';
 
-import 'm3e_theme_data.dart';
+import 'm3e_theme.dart';
 
 /// Applies a resolved [M3EThemeData] to a subtree.
 class M3EResolvedTheme extends StatelessWidget {
@@ -15,14 +11,13 @@ class M3EResolvedTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle baseStyle = data.typeScale.bodyMedium.copyWith(
-      color: data.colorScheme.onSurface,
-      decoration: TextDecoration.none,
-    );
+    final IconThemeData icons = data.resolvedIconTheme;
+    final TextStyle baseStyle = (data.textTheme.bodyMedium ?? const TextStyle())
+        .copyWith(decoration: TextDecoration.none);
     Widget themedChild = M3EInheritedTheme(
       data: data,
       child: IconTheme(
-        data: IconThemeData(color: data.colorScheme.onSurface, size: 24),
+        data: icons,
         child: DefaultTextStyle(
           style: baseStyle,
           child: child,

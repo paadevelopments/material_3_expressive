@@ -57,6 +57,37 @@ void main() {
       material.textTheme.labelLarge?.fontSize,
       tokens.typeScale.labelLarge.fontSize,
     );
+    expect(material.textTheme.bodyMedium?.color, tokens.colorScheme.onSurface);
+    expect(material.iconTheme.color, tokens.colorScheme.onSurface);
+    expect(material.iconTheme.size, 24);
+  });
+
+  test('textTheme and iconTheme track colorScheme via withColorScheme', () {
+    final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final darkScheme = M3EColorScheme.fromSeed(
+      const Color(0xFF6750A4),
+      brightness: Brightness.dark,
+    );
+    final updated = light.withColorScheme(darkScheme);
+
+    expect(updated.textTheme.bodyMedium?.color, darkScheme.onSurface);
+    expect(updated.resolvedIconTheme.color, darkScheme.onSurface);
+    expect(updated.resolvedIconTheme.size, light.iconTheme.size);
+  });
+
+  test('explicit iconTheme color is preserved across scheme changes', () {
+    const override = Color(0xFF123456);
+    final tokens = M3EThemeData.light().copyWith(
+      iconTheme: const IconThemeData(size: 20, color: override),
+    );
+    final updated = tokens.withColorScheme(
+      M3EColorScheme.fromSeed(
+        const Color(0xFF00695C),
+        brightness: Brightness.dark,
+      ),
+    );
+    expect(updated.resolvedIconTheme.color, override);
+    expect(updated.resolvedIconTheme.size, 20);
   });
 
   testWidgets('M3ETheme.of is stable across rebuilds under a Material theme',
