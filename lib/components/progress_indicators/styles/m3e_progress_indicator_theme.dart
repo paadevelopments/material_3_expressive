@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_progress_enums.dart';
 
-/// Measured layout values for a linear progress indicator lane.
+/// Measured layout values for a flat linear progress indicator.
 @immutable
 class M3ELinearProgressLayout {
   const M3ELinearProgressLayout({
@@ -12,9 +12,6 @@ class M3ELinearProgressLayout {
     required this.dotDiameter,
     required this.dotOffset,
     required this.trailingMargin,
-    required this.isWavy,
-    this.waveAmplitude = 0,
-    this.wavePeriod = 40,
   });
 
   final double trackHeight;
@@ -22,96 +19,161 @@ class M3ELinearProgressLayout {
   final double dotDiameter;
   final double dotOffset;
   final double trailingMargin;
-  final bool isWavy;
-  final double waveAmplitude;
-  final double wavePeriod;
 }
 
-/// Theme values for `M3ELinearProgress`.
+/// Theme values for linear progress indicators.
 @immutable
 class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
-  const M3ELinearProgressTheme();
+  const M3ELinearProgressTheme({
+    this.strokeWidth = 4,
+    this.trackStrokeWidth = 4,
+    this.gapSize = 8,
+    this.stopSize = 4,
+    this.waveAmplitude = 3,
+    this.determinateWavelength = 40,
+    this.indeterminateWavelength = 20,
+    this.wavyContainerHeight = 10,
+  });
 
   static const M3ELinearProgressTheme defaults = M3ELinearProgressTheme();
 
-  M3ELinearProgressLayout resolve({
-    required M3ELinearProgressSize size,
-    required M3EProgressShape shape,
-  }) =>
-      switch ((shape, size)) {
-        (M3EProgressShape.flat, M3ELinearProgressSize.s) =>
-          const M3ELinearProgressLayout(
+  final double strokeWidth;
+  final double trackStrokeWidth;
+  final double gapSize;
+  final double stopSize;
+  final double waveAmplitude;
+  final double determinateWavelength;
+  final double indeterminateWavelength;
+  final double wavyContainerHeight;
+
+  M3ELinearProgressLayout resolveFlat(M3EProgressIndicatorSize size) =>
+      switch (size) {
+        M3EProgressIndicatorSize.s => const M3ELinearProgressLayout(
             trackHeight: 4,
             gap: 4,
             dotDiameter: 4,
             dotOffset: 4,
             trailingMargin: 4,
-            isWavy: false,
           ),
-        (M3EProgressShape.flat, M3ELinearProgressSize.m) =>
-          const M3ELinearProgressLayout(
+        M3EProgressIndicatorSize.m => const M3ELinearProgressLayout(
             trackHeight: 8,
             gap: 4,
             dotDiameter: 4,
             dotOffset: 2,
             trailingMargin: 8,
-            isWavy: false,
-          ),
-        (M3EProgressShape.wavy, M3ELinearProgressSize.s) =>
-          const M3ELinearProgressLayout(
-            trackHeight: 4,
-            gap: 4,
-            dotDiameter: 4,
-            dotOffset: 2,
-            trailingMargin: 10,
-            isWavy: true,
-            waveAmplitude: 3,
-          ),
-        (M3EProgressShape.wavy, M3ELinearProgressSize.m) =>
-          const M3ELinearProgressLayout(
-            trackHeight: 8,
-            gap: 4,
-            dotDiameter: 4,
-            dotOffset: 2,
-            trailingMargin: 14,
-            isWavy: true,
-            waveAmplitude: 3,
           ),
       };
 
-  @override
-  M3ELinearProgressTheme copyWith() => this;
+  /// Compose wavy determinate amplitude: full mid-progress, zero near ends.
+  double amplitudeForProgress(double progress) {
+    if (progress <= 0.1 || progress >= 0.95) {
+      return 0;
+    }
+    return 1;
+  }
 
   @override
-  M3ELinearProgressTheme lerp(M3ELinearProgressTheme? other, double t) => this;
+  M3ELinearProgressTheme copyWith({
+    double? strokeWidth,
+    double? trackStrokeWidth,
+    double? gapSize,
+    double? stopSize,
+    double? waveAmplitude,
+    double? determinateWavelength,
+    double? indeterminateWavelength,
+    double? wavyContainerHeight,
+  }) {
+    return M3ELinearProgressTheme(
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+      trackStrokeWidth: trackStrokeWidth ?? this.trackStrokeWidth,
+      gapSize: gapSize ?? this.gapSize,
+      stopSize: stopSize ?? this.stopSize,
+      waveAmplitude: waveAmplitude ?? this.waveAmplitude,
+      determinateWavelength:
+          determinateWavelength ?? this.determinateWavelength,
+      indeterminateWavelength:
+          indeterminateWavelength ?? this.indeterminateWavelength,
+      wavyContainerHeight: wavyContainerHeight ?? this.wavyContainerHeight,
+    );
+  }
+
+  @override
+  M3ELinearProgressTheme lerp(M3ELinearProgressTheme? other, double t) {
+    if (other is! M3ELinearProgressTheme) {
+      return this;
+    }
+    return M3ELinearProgressTheme(
+      strokeWidth: _lerp(strokeWidth, other.strokeWidth, t),
+      trackStrokeWidth: _lerp(trackStrokeWidth, other.trackStrokeWidth, t),
+      gapSize: _lerp(gapSize, other.gapSize, t),
+      stopSize: _lerp(stopSize, other.stopSize, t),
+      waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
+      determinateWavelength:
+          _lerp(determinateWavelength, other.determinateWavelength, t),
+      indeterminateWavelength:
+          _lerp(indeterminateWavelength, other.indeterminateWavelength, t),
+      wavyContainerHeight:
+          _lerp(wavyContainerHeight, other.wavyContainerHeight, t),
+    );
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
 }
 
-/// Theme values for `M3ECircularProgress`.
+/// Theme values for circular progress indicators.
 @immutable
 class M3ECircularProgressTheme
     extends M3EThemeExtension<M3ECircularProgressTheme> {
   const M3ECircularProgressTheme({
     this.defaultSize = 40,
+    this.wavySize = 48,
     this.defaultStrokeWidth = 4,
+    this.trackStrokeWidth = 4,
+    this.gapSize = 8,
+    this.waveAmplitude = 1.6,
+    this.wavelength = 15,
   });
 
   static const M3ECircularProgressTheme defaults = M3ECircularProgressTheme();
 
   final double defaultSize;
+  final double wavySize;
   final double defaultStrokeWidth;
+  final double trackStrokeWidth;
+  final double gapSize;
+  final double waveAmplitude;
+  final double wavelength;
 
   Color trackColor(M3EColorScheme scheme) => scheme.secondaryContainer;
 
   Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
+  /// Compose wavy determinate amplitude: full mid-progress, zero near ends.
+  double amplitudeForProgress(double progress) {
+    if (progress <= 0.1 || progress >= 0.95) {
+      return 0;
+    }
+    return 1;
+  }
+
   @override
   M3ECircularProgressTheme copyWith({
     double? defaultSize,
+    double? wavySize,
     double? defaultStrokeWidth,
+    double? trackStrokeWidth,
+    double? gapSize,
+    double? waveAmplitude,
+    double? wavelength,
   }) {
     return M3ECircularProgressTheme(
       defaultSize: defaultSize ?? this.defaultSize,
+      wavySize: wavySize ?? this.wavySize,
       defaultStrokeWidth: defaultStrokeWidth ?? this.defaultStrokeWidth,
+      trackStrokeWidth: trackStrokeWidth ?? this.trackStrokeWidth,
+      gapSize: gapSize ?? this.gapSize,
+      waveAmplitude: waveAmplitude ?? this.waveAmplitude,
+      wavelength: wavelength ?? this.wavelength,
     );
   }
 
@@ -121,13 +183,17 @@ class M3ECircularProgressTheme
       return this;
     }
     return M3ECircularProgressTheme(
-      defaultSize: _lerpDouble(defaultSize, other.defaultSize, t)!,
-      defaultStrokeWidth:
-          _lerpDouble(defaultStrokeWidth, other.defaultStrokeWidth, t)!,
+      defaultSize: _lerp(defaultSize, other.defaultSize, t),
+      wavySize: _lerp(wavySize, other.wavySize, t),
+      defaultStrokeWidth: _lerp(defaultStrokeWidth, other.defaultStrokeWidth, t),
+      trackStrokeWidth: _lerp(trackStrokeWidth, other.trackStrokeWidth, t),
+      gapSize: _lerp(gapSize, other.gapSize, t),
+      waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
+      wavelength: _lerp(wavelength, other.wavelength, t),
     );
   }
 
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
 }
 
 /// Theme values for progress indicator widgets.

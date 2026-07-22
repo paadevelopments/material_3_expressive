@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-/// Paints the track and active arc of a circular progress indicator.
+/// Paints the track and active arc of a classic circular progress indicator.
 class M3ECircularProgressPainter extends CustomPainter {
   const M3ECircularProgressPainter({
     required this.trackColor,
@@ -22,9 +22,9 @@ class M3ECircularProgressPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
     final double radius = (size.shortestSide - strokeWidth) / 2;
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    final Rect rect = Rect.fromCircle(center: center, radius: radius);
 
-    final track = Paint()
+    final Paint track = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
@@ -34,7 +34,7 @@ class M3ECircularProgressPainter extends CustomPainter {
     if (sweepAngle == 0) {
       return;
     }
-    final active = Paint()
+    final Paint active = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
@@ -47,9 +47,10 @@ class M3ECircularProgressPainter extends CustomPainter {
     return oldDelegate.startAngle != startAngle ||
         oldDelegate.sweepAngle != sweepAngle ||
         oldDelegate.activeColor != activeColor ||
-        oldDelegate.trackColor != trackColor;
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 
-  /// A full turn in radians, exposed for callers computing sweeps.
+  /// A full turn in radians.
   static const double tau = 2 * math.pi;
 }

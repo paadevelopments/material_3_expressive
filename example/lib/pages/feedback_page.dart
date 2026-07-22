@@ -102,8 +102,12 @@ class _FeedbackPageState extends State<FeedbackPage>
           DemoRow(
             label: 'Indeterminate',
             children: <Widget>[
-              const SizedBox(width: 200, child: M3ELinearProgress()),
-              const M3ECircularProgress(),
+              const SizedBox(
+                width: 200,
+                child: M3EProgressIndicator.linearWavy(),
+              ),
+              const M3EProgressIndicator.circularWavy(),
+              const M3EProgressIndicator.circular(),
               const M3ELoadingIndicator(),
               const M3ELoadingIndicator(
                 variant: M3ELoadingIndicatorVariant.contained,
@@ -115,12 +119,18 @@ class _FeedbackPageState extends State<FeedbackPage>
             children: <Widget>[
               SizedBox(
                 width: 200,
-                child: M3ELinearProgress(
+                child: M3EProgressIndicator.linear(
                   value: _progress,
-                  shape: M3EProgressShape.flat,
                 ),
               ),
-              M3ECircularProgress(value: _progress),
+              SizedBox(
+                width: 200,
+                child: M3EProgressIndicator.linearWavy(
+                  value: _progress,
+                ),
+              ),
+              M3EProgressIndicator.circular(value: _progress),
+              M3EProgressIndicator.circularWavy(value: _progress),
               SizedBox(
                 width: 220,
                 child: M3ESlider(

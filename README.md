@@ -954,30 +954,30 @@ const M3EBadge(
 );
 ```
 
-#### M3ELinearProgress
+#### M3EProgressIndicator
 
-Horizontal progress indicator.
+Material 3 Expressive progress indicators with circular and linear variants,
+including Compose-style wavy forms.
 
 ```dart
-const M3ELinearProgress();
+// Classic
+const M3EProgressIndicator.circular();
+M3EProgressIndicator.circular(value: 0.6);
+
+const M3EProgressIndicator.linear();
+SizedBox(
+  width: 200,
+  child: M3EProgressIndicator.linear(value: 0.6),
+);
+
+// Expressive wavy (Compose CircularWavy / LinearWavy)
+const M3EProgressIndicator.circularWavy();
+M3EProgressIndicator.circularWavy(value: 0.6);
 
 SizedBox(
   width: 200,
-  child: M3ELinearProgress(
-    value: 0.6,
-    shape: M3EProgressShape.flat,
-  ),
+  child: M3EProgressIndicator.linearWavy(value: 0.6),
 );
-```
-
-#### M3ECircularProgress
-
-Circular progress indicator.
-
-```dart
-const M3ECircularProgress();
-
-M3ECircularProgress(value: 0.6);
 ```
 
 #### M3ELoadingIndicator

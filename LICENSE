@@ -44,7 +44,7 @@ Copyright (c) 2025 Emily Moonstone
     lib/components/icon_buttons/
     lib/components/navigation_bar/
     lib/components/navigation_rail/
-    lib/components/progress_indicators/components/m3e_linear_progress.dart
+    lib/components/progress_indicators/
     lib/components/loading_indicator/components/m3e_expressive_loading_indicator.dart
     (wrapper only; see Apache 2.0 notice below for Android-derived portions)
 
