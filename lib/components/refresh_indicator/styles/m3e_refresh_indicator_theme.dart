@@ -32,10 +32,15 @@ class M3ERefreshIndicatorTheme
   final Duration indicatorSnapDuration;
   final Duration indicatorScaleDuration;
 
-  Color color(M3EColorScheme scheme) => scheme.primary;
+  Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
-  Color containedBackgroundColor(M3EColorScheme scheme) =>
-      scheme.secondaryContainer;
+  Color containerColorDefault() => const Color(0x00000000);
+
+  Color containedContainerColor(M3EColorScheme scheme) =>
+      scheme.primaryContainer;
+
+  Color containedActiveColor(M3EColorScheme scheme) =>
+      scheme.onPrimaryContainer;
 
   @override
   M3ERefreshIndicatorTheme copyWith({
