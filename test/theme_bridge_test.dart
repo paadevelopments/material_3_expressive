@@ -90,6 +90,75 @@ void main() {
     expect(updated.resolvedIconTheme.size, 20);
   });
 
+  testWidgets('M3EResolvedTheme projects text/icon/color onto Material Theme',
+      (tester) async {
+    final tokens = M3EThemeData.light(seedColor: const Color(0xFFB3261E))
+        .copyWith(iconTheme: const IconThemeData(size: 28));
+    final stale = ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: stale,
+        home: M3ETheme(
+          data: tokens,
+          child: Builder(
+            builder: (context) {
+              final material = Theme.of(context);
+              expect(material.colorScheme.primary, tokens.colorScheme.primary);
+              expect(
+                material.textTheme.bodyMedium?.color,
+                tokens.colorScheme.onSurface,
+              );
+              expect(material.iconTheme.color, tokens.colorScheme.onSurface);
+              expect(material.iconTheme.size, 28);
+              expect(
+                DefaultTextStyle.of(context).style.color,
+                tokens.colorScheme.onSurface,
+              );
+              expect(IconTheme.of(context).size, 28);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Material Theme tracks withColorScheme under M3ETheme',
+      (tester) async {
+    final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final dark = light.withColorScheme(
+      M3EColorScheme.fromSeed(
+        const Color(0xFF6750A4),
+        brightness: Brightness.dark,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: light.toThemeData(),
+        home: M3ETheme(
+          data: dark,
+          child: Builder(
+            builder: (context) {
+              final material = Theme.of(context);
+              expect(material.brightness, Brightness.dark);
+              expect(
+                material.textTheme.bodyMedium?.color,
+                dark.colorScheme.onSurface,
+              );
+              expect(material.iconTheme.color, dark.colorScheme.onSurface);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+  });
+
   testWidgets('M3ETheme.of is stable across rebuilds under a Material theme',
       (tester) async {
     final first = await _resolve(tester, _capture(ThemeData()));

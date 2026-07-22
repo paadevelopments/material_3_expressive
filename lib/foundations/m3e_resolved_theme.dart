@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'm3e_theme.dart';
 
 /// Applies a resolved [M3EThemeData] to a subtree.
+///
+/// Projects [data] onto Material [Theme] so host widgets that read
+/// [Theme.of] (text/icon/color scheme) track the active M3E tokens,
+/// including after dynamic color updates.
 class M3EResolvedTheme extends StatelessWidget {
   const M3EResolvedTheme({required this.data, required this.child, super.key});
 
@@ -14,26 +18,27 @@ class M3EResolvedTheme extends StatelessWidget {
     final IconThemeData icons = data.resolvedIconTheme;
     final TextStyle baseStyle = (data.textTheme.bodyMedium ?? const TextStyle())
         .copyWith(decoration: TextDecoration.none);
-    Widget themedChild = M3EInheritedTheme(
-      data: data,
-      child: IconTheme(
-        data: icons,
-        child: DefaultTextStyle(
-          style: baseStyle,
-          child: child,
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: data.colorScheme.toColorScheme(),
+        textTheme: data.textTheme,
+        iconTheme: icons,
+        primaryIconTheme: icons.copyWith(color: data.colorScheme.onPrimary),
+        splashColor: data.splashColor,
+        highlightColor: data.highlightColor,
+      ),
+      child: M3EInheritedTheme(
+        data: data,
+        child: IconTheme(
+          data: icons,
+          child: DefaultTextStyle(
+            style: baseStyle,
+            child: child,
+          ),
         ),
       ),
     );
-    if (data.splashColor != null || data.highlightColor != null) {
-      themedChild = Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: data.splashColor,
-          highlightColor: data.highlightColor,
-        ),
-        child: themedChild,
-      );
-    }
-    return themedChild;
   }
 }
 
