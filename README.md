@@ -157,7 +157,9 @@ Key properties on `M3EThemeData`:
 - `spacing`, `visualDensity`, per-component `*Theme` extensions
 
 `M3EMaterialApp` additionally supports `autoTheming` (platform brightness) and
-`dynamicColoring` (OS accent color on supported platforms).
+`dynamicColoring` (OS seed color on supported platforms — Material You primary
+on Android 12+, accent color on desktop — with schemes generated via
+`ColorScheme.fromSeed`).
 
 ## Components
 

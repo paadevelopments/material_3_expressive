@@ -377,6 +377,35 @@ void main() {
     expect(resolved.colorScheme.primary, expected.primary);
   });
 
+  testWidgets('dynamicColoring applies mocked core palette via fromSeed',
+      (WidgetTester tester) async {
+    final CorePalette corePalette = CorePalette.of(_accentGreen.toARGB32());
+    final seed = Color(corePalette.primary.get(40));
+    DynamicColorTestingUtils.setMockDynamicColors(corePalette: corePalette);
+
+    final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+    final M3EColorScheme expected = resolvedM3eSchemeFromAccent(seed);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: base.toThemeData(),
+        home: M3ETheme(
+          data: base,
+          dynamicColoring: true,
+          child: const M3EButton(
+            onPressed: null,
+            child: Text('Probe'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final M3EThemeData resolved =
+        M3ETheme.of(tester.element(find.byType(M3EButton)));
+    expect(resolved.colorScheme.primary, expected.primary);
+  });
+
   testWidgets('dynamicColoring applies mocked dynamic schemes in dark mode',
       (WidgetTester tester) async {
     DynamicColorTestingUtils.setMockDynamicColors(accentColor: _accentGreen);
