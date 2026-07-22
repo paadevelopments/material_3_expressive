@@ -166,7 +166,12 @@ class _FeedbackPageState extends State<FeedbackPage>
                 height: 180,
                 child: M3ERefreshIndicator(
                   onRefresh: _handleRefresh,
+                  triggerMode: M3ERefreshTriggerMode.onEdge,
                   child: ListView.builder(
+                    primary: false,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: NeverScrollableScrollPhysics(),
+                    ),
                     itemCount: 12,
                     itemBuilder: (BuildContext context, int index) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -180,7 +185,12 @@ class _FeedbackPageState extends State<FeedbackPage>
                 height: 180,
                 child: M3ERefreshIndicator.contained(
                   onRefresh: _handleRefresh,
+                  triggerMode: M3ERefreshTriggerMode.onEdge,
                   child: ListView.builder(
+                    primary: false,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: NeverScrollableScrollPhysics(),
+                    ),
                     itemCount: 12,
                     itemBuilder: (BuildContext context, int index) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),

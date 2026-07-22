@@ -219,7 +219,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       _valueColor = AlwaysStoppedAnimation<Color>(color);
     } else {
       _valueColor = _positionController.drive(
-        ColorTween(begin: color, end: color).chain(
+        ColorTween(
+          begin: color.withValues(alpha: 0.0),
+          end: color.withValues(alpha: color.a),
+        ).chain(
           CurveTween(
             curve: const Interval(
               0.0,
@@ -231,18 +234,69 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     }
   }
 
+  bool _isAtLeadingEdge(ScrollMetrics metrics) {
+    return switch (metrics.axisDirection) {
+      AxisDirection.down => metrics.extentBefore == 0.0,
+      AxisDirection.up => metrics.extentAfter == 0.0,
+      AxisDirection.left || AxisDirection.right => false,
+    };
+  }
+
+  bool _isPullingPastLeadingEdge(OverscrollNotification notification) {
+    return switch (notification.metrics.axisDirection) {
+      // Dragging down past the top (or up past the bottom).
+      AxisDirection.down => notification.overscroll < 0.0,
+      AxisDirection.up => notification.overscroll > 0.0,
+      AxisDirection.left || AxisDirection.right => false,
+    };
+  }
+
   bool _shouldStart(ScrollNotification notification) {
-    return ((notification is ScrollStartNotification &&
-                notification.dragDetails != null) ||
-            (notification is ScrollUpdateNotification &&
-                notification.dragDetails != null &&
-                widget.triggerMode == M3ERefreshTriggerMode.anywhere)) &&
-        ((notification.metrics.axisDirection == AxisDirection.up &&
-                notification.metrics.extentAfter == 0.0) ||
-            (notification.metrics.axisDirection == AxisDirection.down &&
-                notification.metrics.extentBefore == 0.0)) &&
-        _status == null &&
-        _start(notification.metrics.axisDirection);
+    if (_status != null) {
+      return false;
+    }
+    if (!_isAtLeadingEdge(notification.metrics)) {
+      return false;
+    }
+
+    final bool startedFromEdgeDrag =
+        notification is ScrollStartNotification &&
+            notification.dragDetails != null &&
+            widget.triggerMode == M3ERefreshTriggerMode.onEdge;
+    final bool startedFromAnywhereDrag =
+        notification is ScrollUpdateNotification &&
+            notification.dragDetails != null &&
+            widget.triggerMode == M3ERefreshTriggerMode.anywhere;
+    // Also start on a real leading-edge overscroll so a drag-down at the top
+    // still works when ScrollStart was consumed by a parent scrollable.
+    final bool startedFromOverscroll = notification is OverscrollNotification &&
+        notification.dragDetails != null &&
+        _isPullingPastLeadingEdge(notification);
+
+    if (!startedFromEdgeDrag &&
+        !startedFromAnywhereDrag &&
+        !startedFromOverscroll) {
+      return false;
+    }
+    return _start(notification.metrics.axisDirection);
+  }
+
+  void _applyDragDelta(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification &&
+        notification.scrollDelta != null) {
+      if (notification.metrics.axisDirection == AxisDirection.down) {
+        _dragOffset = _dragOffset! - notification.scrollDelta!;
+      } else if (notification.metrics.axisDirection == AxisDirection.up) {
+        _dragOffset = _dragOffset! + notification.scrollDelta!;
+      }
+    } else if (notification is OverscrollNotification) {
+      if (notification.metrics.axisDirection == AxisDirection.down) {
+        _dragOffset = _dragOffset! - notification.overscroll;
+      } else if (notification.metrics.axisDirection == AxisDirection.up) {
+        _dragOffset = _dragOffset! + notification.overscroll;
+      }
+    }
+    _checkDragOffset(notification.metrics.viewportDimension);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -254,26 +308,36 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         _status = M3ERefreshStatus.drag;
         widget.onStatusChange?.call(_status);
       });
+      // Apply this notification's delta so the first overscroll is not lost.
+      _applyDragDelta(notification);
       return false;
     }
+
     final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
       AxisDirection.down || AxisDirection.up => true,
       AxisDirection.left || AxisDirection.right => null,
     };
+
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_status == M3ERefreshStatus.drag ||
           _status == M3ERefreshStatus.armed) {
         _dismiss(M3ERefreshStatus.canceled);
       }
-    } else if (notification is ScrollUpdateNotification) {
+      return false;
+    }
+
+    // Scrolled away from the top into content — abandon the pull.
+    if ((_status == M3ERefreshStatus.drag ||
+            _status == M3ERefreshStatus.armed) &&
+        !_isAtLeadingEdge(notification.metrics)) {
+      _dismiss(M3ERefreshStatus.canceled);
+      return false;
+    }
+
+    if (notification is ScrollUpdateNotification) {
       if (_status == M3ERefreshStatus.drag ||
           _status == M3ERefreshStatus.armed) {
-        if (notification.metrics.axisDirection == AxisDirection.down) {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
-        } else if (notification.metrics.axisDirection == AxisDirection.up) {
-          _dragOffset = _dragOffset! + notification.scrollDelta!;
-        }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _applyDragDelta(notification);
       }
       if (_status == M3ERefreshStatus.armed &&
           notification.dragDetails == null) {
@@ -282,12 +346,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     } else if (notification is OverscrollNotification) {
       if (_status == M3ERefreshStatus.drag ||
           _status == M3ERefreshStatus.armed) {
-        if (notification.metrics.axisDirection == AxisDirection.down) {
-          _dragOffset = _dragOffset! - notification.overscroll;
-        } else if (notification.metrics.axisDirection == AxisDirection.up) {
-          _dragOffset = _dragOffset! + notification.overscroll;
-        }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _applyDragDelta(notification);
       }
     } else if (notification is ScrollEndNotification) {
       switch (_status) {
@@ -363,8 +422,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     } else {
       _positionController.value = clamped;
     }
+    // Arm once the drag passes Material's armed threshold (same point where
+    // the value-color fade completes).
     if (_status == M3ERefreshStatus.drag &&
-        _valueColor.value!.a == _effectiveValueColor.a) {
+        _positionController.value >=
+            1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit) {
       _status = M3ERefreshStatus.armed;
       widget.onStatusChange?.call(_status);
     }
@@ -591,9 +653,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   Widget _buildLoadingIndicator({
     required M3ELoadingIndicatorVariant variant,
   }) {
+    // Keep loading indicators fully opaque; reveal is the edge slide-in.
     return M3ELoadingIndicator(
       variant: variant,
-      color: _valueColor.value ?? _effectiveValueColor,
+      color: _effectiveValueColor,
       containerColor: _effectiveContainerColor,
       polygons: widget.polygons,
       constraints: widget.indicatorConstraints,
