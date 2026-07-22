@@ -261,7 +261,6 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 sweepAngle: arc.sweep,
                 gapSize: gap,
                 progress: widget.value,
-                stopSize: resolvedStroke,
               ),
             );
           },
@@ -309,7 +308,6 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 phase: _needsAnimation
                     ? _phase(wavelength, waveSpeed)
                     : 0,
-                stopSize: stroke,
               ),
             );
           },

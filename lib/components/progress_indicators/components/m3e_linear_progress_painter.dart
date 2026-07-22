@@ -58,11 +58,10 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double trackStroke = trackStrokeWidth;
     final double visualGap = _visualGap(activeStroke, trackStroke);
     final double left = inset;
-    final double stopCenterX =
-        size.width - math.max(spec.dotOffset, stopSize / 2);
-    final double trackEndX = stopCenterX - stopSize / 2 - gap;
-    final double right = math.max(left, trackEndX);
-    final double width = math.max(0.0, right - left);
+    // Track ends with a small trailing margin; stop sits inside the track end.
+    final double trackRight = size.width - spec.trailingMargin;
+    final double stopCenterX = trackRight - stopSize / 2;
+    final double width = math.max(0.0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
 
@@ -72,48 +71,66 @@ class M3ELinearProgressPainter extends CustomPainter {
       ..isAntiAlias = true;
 
     final bool indeterminate = value == null;
-    final double activeEndX = indeterminate ? right : (left + width * p);
-    final double trackStartX = indeterminate
-        ? left
-        : math.min(right, activeEndX + visualGap);
+    final bool complete = !indeterminate && p >= 1.0;
 
-    if (!indeterminate && trackStartX < right) {
-      canvas.drawLine(
-        Offset(trackStartX, cy),
-        Offset(right, cy),
-        paint
-          ..color = track
-          ..strokeWidth = trackStroke,
-      );
-    }
-
-    final double end = indeterminate ? right : activeEndX;
-    if (end > left) {
+    if (indeterminate) {
       canvas.drawLine(
         Offset(left, cy),
-        Offset(end, cy),
+        Offset(trackRight, cy),
         paint
           ..color = active
           ..strokeWidth = activeStroke,
       );
+      return;
     }
 
-    if (!indeterminate) {
-      canvas.drawCircle(
-        Offset(stopCenterX, cy),
-        stopSize / 2,
-        Paint()..color = active,
+    if (complete) {
+      canvas.drawLine(
+        Offset(left, cy),
+        Offset(trackRight, cy),
+        paint
+          ..color = active
+          ..strokeWidth = activeStroke,
       );
+    } else {
+      final double activeEndX = left + width * p;
+      final double trackStartX = math.min(trackRight, activeEndX + visualGap);
+
+      if (trackStartX < trackRight) {
+        canvas.drawLine(
+          Offset(trackStartX, cy),
+          Offset(trackRight, cy),
+          paint
+            ..color = track
+            ..strokeWidth = trackStroke,
+        );
+      }
+
+      if (activeEndX > left) {
+        canvas.drawLine(
+          Offset(left, cy),
+          Offset(activeEndX, cy),
+          paint
+            ..color = active
+            ..strokeWidth = activeStroke,
+        );
+      }
     }
+
+    canvas.drawCircle(
+      Offset(stopCenterX, cy),
+      stopSize / 2,
+      Paint()..color = active,
+    );
   }
 
   void _paintWavy(Canvas canvas, Size size) {
     final double visualGap = _visualGap(strokeWidth, trackStrokeWidth);
     final double left = inset;
-    final double stopCenterX = size.width - stopSize / 2 - 2;
-    final double trackEndX = stopCenterX - stopSize / 2 - gap;
-    final double right = math.max(left, trackEndX);
-    final double width = math.max(0.0, right - left);
+    final double trailing = math.max(gap, 4);
+    final double trackRight = size.width - trailing;
+    final double stopCenterX = trackRight - stopSize / 2;
+    final double width = math.max(0.0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
     final double amplitude =
@@ -124,45 +141,62 @@ class M3ELinearProgressPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true;
 
-    final bool waveOnly = value == null || p >= 1.0;
-    final double activeEndX = value == null ? right : (left + width * p);
-    final double trackStartX =
-        value == null ? left : math.min(right, activeEndX + visualGap);
+    final bool indeterminate = value == null;
+    final bool complete = !indeterminate && p >= 1.0;
+    final bool waveOnly = indeterminate || complete;
 
-    if (!waveOnly && trackStartX < right) {
+    void drawWave(double start, double end, double amp) {
+      if (end <= start) {
+        return;
+      }
+      final Path path = Path();
+      const double step = 1.5;
+      final double k = 2 * math.pi / wavelength;
+      double x = start;
+      double y = cy + amp * math.sin(phase + (x - start) * k);
+      path.moveTo(x, y);
+      for (x = start + step; x <= end; x += step) {
+        y = cy + amp * math.sin(phase + (x - start) * k);
+        path.lineTo(x, y);
+      }
+      y = cy + amp * math.sin(phase + (end - start) * k);
+      path.lineTo(end, y);
+      canvas.drawPath(
+        path,
+        paint
+          ..color = active
+          ..strokeWidth = strokeWidth,
+      );
+    }
+
+    if (waveOnly) {
+      drawWave(left, trackRight, amplitude);
+      if (complete && stopSize > 0) {
+        canvas.drawCircle(
+          Offset(stopCenterX, cy),
+          stopSize / 2,
+          Paint()..color = active,
+        );
+      }
+      return;
+    }
+
+    final double activeEndX = left + width * p;
+    final double trackStartX = math.min(trackRight, activeEndX + visualGap);
+
+    if (trackStartX < trackRight) {
       canvas.drawLine(
         Offset(trackStartX, cy),
-        Offset(right, cy),
+        Offset(trackRight, cy),
         paint
           ..color = track
           ..strokeWidth = trackStrokeWidth,
       );
     }
 
-    final double start = left;
-    final double end = value == null ? right : activeEndX;
-    final Path path = Path();
-    const double step = 1.5;
-    final double k = 2 * math.pi / wavelength;
+    drawWave(left, activeEndX, amplitude);
 
-    double x = start;
-    double y = cy + amplitude * math.sin(phase + (x - start) * k);
-    path.moveTo(x, y);
-    for (x = start + step; x <= end; x += step) {
-      y = cy + amplitude * math.sin(phase + (x - start) * k);
-      path.lineTo(x, y);
-    }
-    y = cy + amplitude * math.sin(phase + (end - start) * k);
-    path.lineTo(end, y);
-
-    canvas.drawPath(
-      path,
-      paint
-        ..color = active
-        ..strokeWidth = strokeWidth,
-    );
-
-    if (!waveOnly && stopSize > 0) {
+    if (stopSize > 0) {
       canvas.drawCircle(
         Offset(stopCenterX, cy),
         stopSize / 2,

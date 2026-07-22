@@ -13,7 +13,6 @@ class M3ECircularProgressPainter extends CustomPainter {
     required this.sweepAngle,
     required this.gapSize,
     this.progress,
-    this.stopSize,
   });
 
   final Color trackColor;
@@ -26,7 +25,6 @@ class M3ECircularProgressPainter extends CustomPainter {
 
   /// When non-null, paints determinate dual-gap track. Null = indeterminate.
   final double? progress;
-  final double? stopSize;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -57,35 +55,29 @@ class M3ECircularProgressPainter extends CustomPainter {
       return;
     }
 
-    // Determinate: stop at 12 o'clock, back gap, active, front gap, track.
+    // Compose determinate: active = progress * full circle.
+    // Track uses two gaps (front + back). At 100% active is a complete ring.
     const double tau = 2 * math.pi;
+    final double coerced = p.clamp(0.0, 1.0);
+    final double activeSweep = coerced * tau;
+
+    if (coerced >= 1.0) {
+      canvas.drawArc(rect, startAngle, tau, false, activePaint);
+      return;
+    }
+
     final double adjustedGap =
         gapSize + (strokeWidth + trackStrokeWidth) / 2;
     final double gapAngle = adjustedGap / radius;
-    final double available = math.max(0.0, tau - 2 * gapAngle);
-    final double activeSweep = p.clamp(0.0, 1.0) * available;
-    final double activeStart = startAngle + gapAngle;
-    final double trackStart = activeStart + activeSweep + gapAngle;
-    final double trackSweep = available - activeSweep;
+    final double appliedGap = math.min(activeSweep, gapAngle);
+    final double trackStart = startAngle + activeSweep + appliedGap;
+    final double trackSweep = tau - activeSweep - appliedGap * 2;
 
     if (trackSweep > 0) {
       canvas.drawArc(rect, trackStart, trackSweep, false, trackPaint);
     }
     if (activeSweep > 0) {
-      canvas.drawArc(rect, activeStart, activeSweep, false, activePaint);
-    }
-
-    final double? stop = stopSize;
-    if (stop != null && stop > 0 && p < 1.0) {
-      final Offset stopCenter = Offset(
-        center.dx + radius * math.cos(startAngle),
-        center.dy + radius * math.sin(startAngle),
-      );
-      canvas.drawCircle(
-        stopCenter,
-        stop / 2,
-        Paint()..color = activeColor,
-      );
+      canvas.drawArc(rect, startAngle, activeSweep, false, activePaint);
     }
   }
 
@@ -98,8 +90,7 @@ class M3ECircularProgressPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.trackStrokeWidth != trackStrokeWidth ||
         oldDelegate.gapSize != gapSize ||
-        oldDelegate.progress != progress ||
-        oldDelegate.stopSize != stopSize;
+        oldDelegate.progress != progress;
   }
 
   /// A full turn in radians.
