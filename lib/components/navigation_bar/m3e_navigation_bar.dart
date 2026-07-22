@@ -65,16 +65,47 @@ class M3ENavigationBar extends StatelessWidget {
   Widget _buildNavigationBar(BuildContext context) {
     final m3e = M3ETheme.of(context);
     final navTheme = m3e.navigationBarTheme;
+    final scheme = m3e.colorScheme;
     final metrics = navTheme.metrics(density, m3e.spacing);
 
     final height = size == M3ENavBarSize.small
         ? metrics.heightSmall
         : metrics.heightMedium;
-    final bg = backgroundColor ?? navTheme.containerColor(m3e.colorScheme);
+    final bg = backgroundColor ?? navTheme.containerColor(scheme);
     final shape = navTheme.containerShape(shapeFamily);
 
     final bottomInset =
         safeArea ? MediaQuery.viewPaddingOf(context).bottom : 0.0;
+
+    final Color selected = navTheme.selectedColor(scheme);
+    final Color unselected = navTheme.unselectedColor(scheme);
+    final TextStyle labelBase = navTheme.labelStyle(m3e.typeScale);
+
+    final WidgetStateProperty<IconThemeData?> iconTheme =
+        WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      final Color color;
+      if (states.contains(WidgetState.disabled)) {
+        color = unselected.withValues(alpha: 0.38);
+      } else if (states.contains(WidgetState.selected)) {
+        color = selected;
+      } else {
+        color = unselected;
+      }
+      return IconThemeData(size: metrics.iconSize, color: color);
+    });
+
+    final WidgetStateProperty<TextStyle?> labelTextStyle =
+        WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      final Color color;
+      if (states.contains(WidgetState.disabled)) {
+        color = unselected.withValues(alpha: 0.38);
+      } else if (states.contains(WidgetState.selected)) {
+        color = selected;
+      } else {
+        color = unselected;
+      }
+      return labelBase.copyWith(color: color);
+    });
 
     final nav = Material(
       color: bg,
@@ -88,38 +119,51 @@ class M3ENavigationBar extends StatelessWidget {
             context: context,
             removeTop: true,
             removeBottom: safeArea,
-            child: NavigationBar(
-              height: height,
-              elevation: elevation ?? 0,
-              indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
-                  ? Colors.transparent
-                  : (indicatorColor ?? navTheme.indicatorColor(m3e.colorScheme)),
-              indicatorShape: switch (indicatorStyle) {
-                M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
-                M3ENavBarIndicatorStyle.underline => const StadiumBorder(),
-                M3ENavBarIndicatorStyle.none => const StadiumBorder(),
-              },
-              backgroundColor: Colors.transparent,
-              labelBehavior: switch (labelBehavior) {
-                M3ENavBarLabelBehavior.alwaysShow =>
-                NavigationDestinationLabelBehavior.alwaysShow,
-                M3ENavBarLabelBehavior.onlySelected =>
-                NavigationDestinationLabelBehavior.onlyShowSelected,
-                M3ENavBarLabelBehavior.alwaysHide =>
-                NavigationDestinationLabelBehavior.alwaysHide,
-              },
-              selectedIndex: selectedIndex,
-              destinations: List.generate(destinations.length, (i) {
-                final d = destinations[i];
-                return NavigationDestination(
-                  icon: _icon(context, false, d, metrics.iconSize),
-                  selectedIcon: _selectedIcon(
-                      context, true, d, metrics.iconSize, navTheme, indicatorStyle),
-                  label: d.label,
-                  tooltip: d.semanticLabel,
-                );
-              }),
-              onDestinationSelected: onDestinationSelected,
+            child: NavigationBarTheme(
+              data: NavigationBarThemeData(
+                iconTheme: iconTheme,
+                labelTextStyle: labelTextStyle,
+              ),
+              child: NavigationBar(
+                height: height,
+                elevation: elevation ?? 0,
+                indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
+                    ? Colors.transparent
+                    : (indicatorColor ?? navTheme.indicatorColor(scheme)),
+                indicatorShape: switch (indicatorStyle) {
+                  M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
+                  M3ENavBarIndicatorStyle.underline => const StadiumBorder(),
+                  M3ENavBarIndicatorStyle.none => const StadiumBorder(),
+                },
+                backgroundColor: Colors.transparent,
+                labelBehavior: switch (labelBehavior) {
+                  M3ENavBarLabelBehavior.alwaysShow =>
+                    NavigationDestinationLabelBehavior.alwaysShow,
+                  M3ENavBarLabelBehavior.onlySelected =>
+                    NavigationDestinationLabelBehavior.onlyShowSelected,
+                  M3ENavBarLabelBehavior.alwaysHide =>
+                    NavigationDestinationLabelBehavior.alwaysHide,
+                },
+                labelTextStyle: labelTextStyle,
+                selectedIndex: selectedIndex,
+                destinations: List.generate(destinations.length, (i) {
+                  final d = destinations[i];
+                  return NavigationDestination(
+                    icon: _icon(context, false, d, metrics.iconSize),
+                    selectedIcon: _selectedIcon(
+                      context,
+                      true,
+                      d,
+                      metrics.iconSize,
+                      navTheme,
+                      indicatorStyle,
+                    ),
+                    label: d.label,
+                    tooltip: d.semanticLabel,
+                  );
+                }),
+                onDestinationSelected: onDestinationSelected,
+              ),
             ),
           ),
         ),
@@ -131,18 +175,7 @@ class M3ENavigationBar extends StatelessWidget {
       child: nav,
     );
 
-    final content = DefaultTextStyle.merge(
-      style: navTheme.labelStyle(m3e.typeScale).copyWith(
-        color: m3e.colorScheme.onSurfaceVariant,
-      ),
-      child: IconTheme.merge(
-        data: IconThemeData(
-            size: metrics.iconSize, color: m3e.colorScheme.onSurfaceVariant),
-        child: padded,
-      ),
-    );
-
-    Widget result = content;
+    Widget result = padded;
     if (semanticLabel != null) {
       result = Semantics(
         container: true,
