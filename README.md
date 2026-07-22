@@ -1144,6 +1144,26 @@ Optional custom lint rules (if `klin_dart` is enabled in your environment):
 dart run custom_lint
 ```
 
+## Credits
+
+Several components were ported or vendored from earlier Material 3 Expressive
+implementations. Thanks to the original authors:
+
+| Author | Components | Source |
+| ------ | ---------- | ------ |
+| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, toggle button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
+| [Mudit Purohit](https://github.com/Mudit200408) | Dropdown menus | [m3e_dropdown_menu](https://github.com/Mudit200408/m3e_dropdown_menu) |
+| [Mudit Purohit](https://github.com/Mudit200408) | Expandable lists | [m3e_expandable](https://github.com/Mudit200408/m3e_expandable) |
+| [Emily](https://github.com/EmilyMoonstone) | Icon buttons | [icon_button_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e) |
+| [Emily](https://github.com/EmilyMoonstone) | Navigation bar | [navigation_bar_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e) |
+| [Emily](https://github.com/EmilyMoonstone) | Navigation rail | [navigation_rail_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e) |
+| [Emily](https://github.com/EmilyMoonstone) | Loading indicator (Flutter package) | [loading_indicator_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e) |
+| [The Android Open Source Project](https://source.android.com/) | Loading indicator (Compose reference) | [`LoadingIndicator.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt) |
+| [The Flutter Authors](https://github.com/flutter/flutter) | Carousel view layout (`CarouselView`) | Flutter SDK / [m3_carousel](https://pub.dev/packages/m3_carousel) |
+
+Copyright notices and licenses from those sources are retained in the
+corresponding source files where applicable.
+
 ## License
 
 Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
