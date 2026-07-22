@@ -85,17 +85,21 @@ class M3ERailItemButton extends StatelessWidget {
     final double height = heightOverride ?? defaultHeight;
 
     final bool selected = isSelected;
-    
-    // Colors and shape per state, with defaults from M3ETheme if not in extension.
-    final Color activeIconLabel = theme.activeIconAndLabel ?? scheme.secondary;
-    final Color inactiveIconLabel = theme.inactiveIconAndLabel ?? scheme.onSurfaceVariant;
-    final Color activeIndicator = theme.activeIndicatorColor ?? scheme.secondaryContainer;
-    final ShapeBorder indicatorShape = theme.indicatorShapeFull ?? 
+
+    // Prefer theme overrides; otherwise match M3 rail tokens (same as nav bar).
+    final Color activeIconLabel =
+        theme.activeIconAndLabelColor(scheme);
+    final Color inactiveIconLabel =
+        theme.inactiveIconAndLabelColor(scheme);
+    final Color activeIndicator =
+        theme.activeIndicatorColorResolved(scheme);
+    final ShapeBorder indicatorShape = theme.indicatorShapeFull ??
         RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs);
 
     final Color fg = selected ? activeIconLabel : inactiveIconLabel;
     final Color bg = expanded && selected ? activeIndicator : Colors.transparent;
-    final ShapeBorder shape = expanded ? indicatorShape : const RoundedRectangleBorder();
+    final ShapeBorder shape =
+        expanded ? indicatorShape : const RoundedRectangleBorder();
 
     // Content
     final Widget effectiveIcon =
@@ -104,12 +108,12 @@ class M3ERailItemButton extends StatelessWidget {
     Widget content;
     if (expanded) {
       final textExpanded = Flexible(
-        child: DefaultTextStyle.merge(
-          // Use a readable style in expanded mode.
-          style: m3e.typeScale.labelLarge,
+        child: Text(
+          label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          child: Text(label, semanticsLabel: semanticLabel ?? label),
+          semanticsLabel: semanticLabel ?? label,
+          style: m3e.typeScale.labelLarge.copyWith(color: fg),
         ),
       );
 
@@ -136,11 +140,12 @@ class M3ERailItemButton extends StatelessWidget {
       );
     } else {
       final textCollapsed = Flexible(
-        child: DefaultTextStyle.merge(
-          style: m3e.typeScale.labelMedium,
+        child: Text(
+          label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          child: Text(label, semanticsLabel: semanticLabel ?? label),
+          semanticsLabel: semanticLabel ?? label,
+          style: m3e.typeScale.labelMedium.copyWith(color: fg),
         ),
       );
 

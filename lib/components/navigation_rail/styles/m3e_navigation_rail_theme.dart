@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../foundations/m3e_theme_extension.dart';
+import '../../../foundations/foundations.dart';
 
 /// Theme values for `M3ENavigationRail`.
 @immutable
@@ -53,6 +53,18 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
   final Color? badgeBackground;
   final Color? badgeLargeLabel;
   final ShapeBorder? indicatorShapeFull;
+
+  Color activeIconAndLabelColor(M3EColorScheme scheme) =>
+      activeIconAndLabel ?? scheme.onSecondaryContainer;
+
+  Color inactiveIconAndLabelColor(M3EColorScheme scheme) =>
+      inactiveIconAndLabel ?? scheme.onSurfaceVariant;
+
+  Color activeIndicatorColorResolved(M3EColorScheme scheme) =>
+      activeIndicatorColor ?? scheme.secondaryContainer;
+
+  Color containerColorResolved(M3EColorScheme scheme) =>
+      containerColor ?? scheme.surface;
 
   @override
   M3ENavigationRailTheme copyWith({

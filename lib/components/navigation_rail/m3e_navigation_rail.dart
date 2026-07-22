@@ -404,7 +404,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
     final width = _targetWidth(context);
-    final Color containerColor = widget.background ?? theme.containerColor ?? m3e.colorScheme.surface;
+    final Color containerColor =
+        widget.background ?? theme.containerColorResolved(m3e.colorScheme);
 
     return AnimatedContainer(
       duration: M3ENavigationRailLayout.expandDuration,
