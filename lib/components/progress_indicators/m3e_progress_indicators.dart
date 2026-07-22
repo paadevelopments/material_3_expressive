@@ -335,7 +335,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
               active: active,
               track: track,
               strokeWidth: layout.trackHeight,
-              trackStrokeWidth: math.max(2, layout.trackHeight / 2),
+              trackStrokeWidth: layout.trackHeight,
               gap: layout.gap,
               stopSize: layout.dotDiameter,
               isWavy: false,
@@ -355,7 +355,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
         widget.trackStrokeWidth ?? linear.trackStrokeWidth;
     final double gap = widget.gapSize ?? linear.gapSize;
     final double stop = widget.stopSize ?? linear.stopSize;
-    final bool indeterminate = widget.value == null;
+    final indeterminate = widget.value == null;
     final double wavelength = widget.wavelength ??
         (indeterminate
             ? linear.indeterminateWavelength

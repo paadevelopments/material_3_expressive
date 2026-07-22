@@ -39,8 +39,22 @@ class M3ELinearProgressPainter extends CustomPainter {
   final M3ELinearProgressLayout? flatLayout;
 
   /// Inflates [gap] so round stroke caps leave a visible empty space.
-  double _visualGap(double activeStroke, double trackStroke) {
-    return gap + (activeStroke + trackStroke) / 2;
+  double _visualGap(double stroke) => gap + stroke;
+
+  /// Stop diameter and center so the dot sits inside the track end with equal
+  /// padding on all sides.
+  ({double diameter, double centerX}) _stopPlacement({
+    required double trackRight,
+    required double trackStroke,
+  }) {
+    final double pad = math.max(1.0, trackStroke / 4);
+    final double maxDiameter = math.max(1.0, trackStroke - 2 * pad);
+    final double diameter = math.min(stopSize, maxDiameter);
+    final double actualPad = (trackStroke - diameter) / 2;
+    // Nestle in the round end-cap: equal pad from the visual tip.
+    final double centerX =
+        trackRight + trackStroke / 2 - actualPad - diameter / 2;
+    return (diameter: diameter, centerX: centerX);
   }
 
   @override
@@ -54,13 +68,13 @@ class M3ELinearProgressPainter extends CustomPainter {
 
   void _paintFlat(Canvas canvas, Size size) {
     final M3ELinearProgressLayout spec = flatLayout!;
-    final double activeStroke = strokeWidth;
-    final double trackStroke = trackStrokeWidth;
-    final double visualGap = _visualGap(activeStroke, trackStroke);
+    // Active and track share the same thickness.
+    final double stroke = strokeWidth;
+    final double visualGap = _visualGap(stroke);
     final double left = inset;
-    // Track ends with a small trailing margin; stop sits inside the track end.
     final double trackRight = size.width - spec.trailingMargin;
-    final double stopCenterX = trackRight - stopSize / 2;
+    final ({double diameter, double centerX}) stop =
+        _stopPlacement(trackRight: trackRight, trackStroke: stroke);
     final double width = math.max(0.0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -68,6 +82,7 @@ class M3ELinearProgressPainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
+      ..strokeWidth = stroke
       ..isAntiAlias = true;
 
     final bool indeterminate = value == null;
@@ -77,9 +92,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(
         Offset(left, cy),
         Offset(trackRight, cy),
-        paint
-          ..color = active
-          ..strokeWidth = activeStroke,
+        paint..color = active,
       );
       return;
     }
@@ -88,9 +101,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(
         Offset(left, cy),
         Offset(trackRight, cy),
-        paint
-          ..color = active
-          ..strokeWidth = activeStroke,
+        paint..color = active,
       );
     } else {
       final double activeEndX = left + width * p;
@@ -100,9 +111,7 @@ class M3ELinearProgressPainter extends CustomPainter {
         canvas.drawLine(
           Offset(trackStartX, cy),
           Offset(trackRight, cy),
-          paint
-            ..color = track
-            ..strokeWidth = trackStroke,
+          paint..color = track,
         );
       }
 
@@ -110,26 +119,27 @@ class M3ELinearProgressPainter extends CustomPainter {
         canvas.drawLine(
           Offset(left, cy),
           Offset(activeEndX, cy),
-          paint
-            ..color = active
-            ..strokeWidth = activeStroke,
+          paint..color = active,
         );
       }
     }
 
     canvas.drawCircle(
-      Offset(stopCenterX, cy),
-      stopSize / 2,
+      Offset(stop.centerX, cy),
+      stop.diameter / 2,
       Paint()..color = active,
     );
   }
 
   void _paintWavy(Canvas canvas, Size size) {
-    final double visualGap = _visualGap(strokeWidth, trackStrokeWidth);
+    // Active and track share the same thickness.
+    final double stroke = strokeWidth;
+    final double visualGap = _visualGap(stroke);
     final double left = inset;
     final double trailing = math.max(gap, 4);
     final double trackRight = size.width - trailing;
-    final double stopCenterX = trackRight - stopSize / 2;
+    final ({double diameter, double centerX}) stop =
+        _stopPlacement(trackRight: trackRight, trackStroke: stroke);
     final double width = math.max(0.0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -139,6 +149,7 @@ class M3ELinearProgressPainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
+      ..strokeWidth = stroke
       ..isAntiAlias = true;
 
     final bool indeterminate = value == null;
@@ -161,20 +172,15 @@ class M3ELinearProgressPainter extends CustomPainter {
       }
       y = cy + amp * math.sin(phase + (end - start) * k);
       path.lineTo(end, y);
-      canvas.drawPath(
-        path,
-        paint
-          ..color = active
-          ..strokeWidth = strokeWidth,
-      );
+      canvas.drawPath(path, paint..color = active);
     }
 
     if (waveOnly) {
       drawWave(left, trackRight, amplitude);
-      if (complete && stopSize > 0) {
+      if (complete) {
         canvas.drawCircle(
-          Offset(stopCenterX, cy),
-          stopSize / 2,
+          Offset(stop.centerX, cy),
+          stop.diameter / 2,
           Paint()..color = active,
         );
       }
@@ -188,21 +194,17 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(
         Offset(trackStartX, cy),
         Offset(trackRight, cy),
-        paint
-          ..color = track
-          ..strokeWidth = trackStrokeWidth,
+        paint..color = track,
       );
     }
 
     drawWave(left, activeEndX, amplitude);
 
-    if (stopSize > 0) {
-      canvas.drawCircle(
-        Offset(stopCenterX, cy),
-        stopSize / 2,
-        Paint()..color = active,
-      );
-    }
+    canvas.drawCircle(
+      Offset(stop.centerX, cy),
+      stop.diameter / 2,
+      Paint()..color = active,
+    );
   }
 
   @override
