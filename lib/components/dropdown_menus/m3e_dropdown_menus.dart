@@ -857,7 +857,12 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
               _controller.clearAll();
               _formFieldKey.currentState?.didChange(_controller.selectedItems);
             },
-            child: fd.clearIcon ?? Icon(Icons.clear, color: fgColor, size: 20),
+            child: fd.clearIcon ??
+                Icon(
+                  Icons.clear,
+                  color: fgColor,
+                  size: m3eTheme.resolvedIconTheme.size,
+                ),
           ),
         ),
       );
@@ -1416,10 +1421,15 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           prefixIcon: Icon(
             Icons.search,
             color: scheme.onSurface.withValues(alpha: 0.5),
+            size: m3eTheme.resolvedIconTheme.size,
           ),
           suffixIcon: sd.showClearIcon && _searchTextController.text.isNotEmpty
               ? IconButton(
-                  icon: sd.clearIcon ?? const Icon(Icons.clear, size: 18),
+                  icon: sd.clearIcon ??
+                      Icon(
+                        Icons.clear,
+                        size: m3eTheme.resolvedIconTheme.size,
+                      ),
                   onPressed: () {
                     _searchTextController.clear();
                     _searchDebounce?.cancel();

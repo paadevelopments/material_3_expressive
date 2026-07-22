@@ -139,7 +139,11 @@ class _M3EDropdownMenuItemWidgetState<T>
         ),
         if (item.selected)
           id.selectedIcon ??
-              Icon(Icons.check_rounded, color: textColor, size: 20),
+              Icon(
+                Icons.check_rounded,
+                color: textColor,
+                size: m3eTheme.resolvedIconTheme.size,
+              ),
       ],
     );
 

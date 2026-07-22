@@ -1169,7 +1169,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             size: _splitTheme.splitIcon(widget.size),
           ),
           child: DefaultTextStyle.merge(
-            style: TextStyle(color: effective),
+            style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
+              color: effective,
+            ),
             child: baseChild,
           ),
         );
@@ -1258,15 +1260,19 @@ class _LeadingContent extends StatelessWidget {
     final iconBlock = iconSize;
     final gap = customSize?.iconGap ?? splitTheme.splitGapIconToLabel(size);
 
-    final bfs = _getButtonFontSize(size);
-    final double? labelFontSize = switch (size.name) {
-      'xs' => bfs,
-      'sm' => bfs,
-      'md' => bfs,
-      'lg' => bfs,
-      'xl' => bfs,
-      _ => bfs,
+    final type = M3ETheme.of(context).typeScale;
+    final base = switch (size.name) {
+      'xs' => type.labelSmall,
+      'sm' => type.labelMedium,
+      'md' => type.labelLarge,
+      'lg' => type.titleMedium,
+      'xl' => type.titleLarge,
+      _ => type.labelLarge,
     };
+    final labelStyle = base.copyWith(
+      color: color,
+      overflow: TextOverflow.ellipsis,
+    );
 
     Widget content;
     if (icon != null && (label?.isNotEmpty ?? false)) {
@@ -1284,7 +1290,7 @@ class _LeadingContent extends StatelessWidget {
             child: Text(
               label!,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: color, fontSize: labelFontSize),
+              style: labelStyle,
             ),
           ),
         ],
@@ -1300,7 +1306,7 @@ class _LeadingContent extends StatelessWidget {
       content = Text(
         label ?? '',
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: color, fontSize: labelFontSize),
+        style: labelStyle,
       );
     }
 
@@ -1308,23 +1314,6 @@ class _LeadingContent extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: lp, end: rp),
       child: content,
     );
-  }
-
-  double? _getButtonFontSize(M3EButtonSize size) {
-    switch (size.name) {
-      case 'xs':
-        return 11;
-      case 'sm':
-        return 12;
-      case 'md':
-        return 14;
-      case 'lg':
-        return 16;
-      case 'xl':
-        return 22;
-      default:
-        return 14;
-    }
   }
 }
 

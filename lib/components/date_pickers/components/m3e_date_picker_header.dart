@@ -106,9 +106,8 @@ class M3EDatePickerEntryModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = M3ETheme.of(context).colorScheme;
     return M3EIconButton(
-      icon: Icon(icon, color: scheme.onSurfaceVariant),
+      icon: Icon(icon),
       tooltip: tooltip,
       onPressed: onPressed,
     );

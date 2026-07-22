@@ -114,10 +114,9 @@ class M3ESideSheet extends StatelessWidget {
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
                 padding: sheetTheme.closeButtonPadding,
-                child: Icon(
-                  M3EIcons.close,
-                  color: scheme.onSurface,
-                  size: sheetTheme.iconSize,
+                child: IconTheme.merge(
+                  data: IconThemeData(size: sheetTheme.iconSize),
+                  child: const Icon(M3EIcons.close),
                 ),
               );
             },

@@ -242,10 +242,9 @@ class _FullScreenDialog extends StatelessWidget {
             builder: (BuildContext context, M3EInteractionState state) {
               return Padding(
                 padding: dialogTheme.closeButtonPadding,
-                child: Icon(
-                  M3EIcons.close,
-                  color: scheme.onSurface,
-                  size: dialogTheme.iconSize,
+                child: IconTheme.merge(
+                  data: IconThemeData(size: dialogTheme.iconSize),
+                  child: const Icon(M3EIcons.close),
                 ),
               );
             },

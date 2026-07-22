@@ -257,7 +257,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
             children: [
               IconTheme.merge(
                 data: IconThemeData(
-                  size: 18,
+                  size: M3ETheme.of(context).resolvedIconTheme.size,
                   color: selected ? cs.onSecondaryContainer : cs.onSurface,
                 ),
                 child: _overflowMenuLeading(actionIndex),
@@ -276,7 +276,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                     Icon(
                       M3EIcons.check_rounded,
                       color: cs.onSecondaryContainer,
-                      size: 20,
+                      size: M3ETheme.of(context).resolvedIconTheme.size,
                     ),
             ],
           ),
@@ -343,7 +343,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               children: [
                 IconTheme.merge(
                   data: IconThemeData(
-                    size: 18,
+                    size: M3ETheme.of(context).resolvedIconTheme.size,
                     color: action.enabled
                         ? fgColor
                         : fgColor.withValues(
@@ -367,7 +367,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 ),
                 if (selected)
                   dec.trailing ??
-                      Icon(M3EIcons.check_rounded, color: fgColor, size: 20),
+                      Icon(M3EIcons.check_rounded, color: fgColor, size: M3ETheme.of(context).resolvedIconTheme.size),
               ],
             ),
           ),
@@ -406,7 +406,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                     Padding(
                       padding: dec.titlePadding,
                       child: DefaultTextStyle.merge(
-                        style: M3ETheme.of(sheetContext).typeScale.titleMedium,
+                        style: M3ETheme.of(sheetContext).textTheme.titleMedium!,
                         child: dec.title!,
                       ),
                     ),
@@ -528,7 +528,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
             children: [
               IconTheme.merge(
                 data: IconThemeData(
-                  size: 18,
+                  size: M3ETheme.of(context).resolvedIconTheme.size,
                   color: selected ? cs.onSecondaryContainer : cs.onSurface,
                 ),
                 child: _overflowMenuLeading(actionIndex),
@@ -547,7 +547,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                     Icon(
                       M3EIcons.check_rounded,
                       color: cs.onSecondaryContainer,
-                      size: 20,
+                      size: M3ETheme.of(context).resolvedIconTheme.size,
                     ),
             ],
           ),
@@ -614,7 +614,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
               children: [
                 IconTheme.merge(
                   data: IconThemeData(
-                    size: 18,
+                    size: M3ETheme.of(context).resolvedIconTheme.size,
                     color: action.enabled
                         ? fgColor
                         : fgColor.withValues(
@@ -638,7 +638,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 ),
                 if (selected)
                   dec.trailing ??
-                      Icon(M3EIcons.check_rounded, color: fgColor, size: 20),
+                      Icon(M3EIcons.check_rounded, color: fgColor, size: M3ETheme.of(context).resolvedIconTheme.size),
               ],
             ),
           ),

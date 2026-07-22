@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../models/m3e_toolbar_action.dart';
@@ -23,6 +24,15 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = M3ETheme.of(context);
+    final baseStyle = textStyle ??
+        theme.typeScale.labelLarge.copyWith(
+          color: theme.colorScheme.onSurface,
+        );
+    final destructiveStyle = baseStyle.copyWith(
+      color: destructiveColor ?? theme.colorScheme.error,
+    );
+
     return PopupMenuButton<int>(
       tooltip: 'More options',
       itemBuilder: (BuildContext context) {
@@ -32,10 +42,7 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
               value: i,
               enabled: actions[i].enabled,
               child: DefaultTextStyle.merge(
-                style: actions[i].isDestructive
-                    ? (textStyle?.copyWith(color: destructiveColor) ??
-                        TextStyle(color: destructiveColor))
-                    : textStyle,
+                style: actions[i].isDestructive ? destructiveStyle : baseStyle,
                 child: Text(
                   actions[i].label ??
                       actions[i].tooltip ??

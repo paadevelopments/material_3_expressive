@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 
-import '../../buttons/res/m3e_button_constants.dart';
+import '../../buttons/m3e_buttons.dart';
 import '../enums/m3e_split_button_selection_mode.dart';
 import '../models/m3e_split_button_item.dart';
 import '../styles/m3e_split_button_bottom_sheet_decoration.dart';
@@ -73,7 +73,7 @@ Future<T?> _showSingleSelectBottomSheet<T>({
                       decoration.titlePadding ??
                       const EdgeInsets.fromLTRB(24, 16, 24, 8),
                   child: DefaultTextStyle.merge(
-                    style: m3eTheme.typeScale.titleMedium,
+                    style: m3eTheme.textTheme.titleMedium!,
                     child: decoration.title!,
                   ),
                 ),
@@ -198,7 +198,7 @@ class _MultiSelectBottomSheetState<T>
                   widget.decoration.titlePadding ??
                   const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: DefaultTextStyle.merge(
-                style: m3eTheme.typeScale.titleMedium,
+                style: m3eTheme.textTheme.titleMedium!,
                 child: widget.decoration.title!,
               ),
             ),
@@ -229,12 +229,12 @@ class _MultiSelectBottomSheetState<T>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                M3EButton.text(
                   onPressed: () => Navigator.of(context).pop(<T>[]),
                   child: const Text('Clear'),
                 ),
                 const SizedBox(width: 8),
-                FilledButton(
+                M3EButton.filled(
                   onPressed: _onDone,
                   child: Text(
                     _selectedValues.isEmpty

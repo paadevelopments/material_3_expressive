@@ -224,7 +224,12 @@ class _M3EIconButtonState extends State<M3EIconButton> {
             badge = null;
           } else {
             badge = Badge(
-              label: Text(v),
+              label: Text(
+                v,
+                style: theme.typeScale.labelSmall.copyWith(
+                  color: scheme.onPrimary,
+                ),
+              ),
               backgroundColor: scheme.primary,
               textColor: scheme.onPrimary,
             );

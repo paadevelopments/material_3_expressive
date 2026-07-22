@@ -218,7 +218,6 @@ class _MonthNavRow extends StatelessWidget {
                             ),
                             Icon(
                               M3EIcons.arrow_drop_down,
-                              color: theme.colorScheme.onSurfaceVariant,
                               size: dateTheme.arrowIconSize,
                             ),
                           ],
@@ -249,7 +248,7 @@ class _MonthNavRow extends StatelessWidget {
                         M3EIcons.chevron_left,
                         size: dateTheme.arrowIconSize,
                         color: canGoPrevious
-                            ? theme.colorScheme.onSurfaceVariant
+                            ? null
                             : M3EColorUtils.withOpacity(
                                 theme.colorScheme.onSurface,
                                 0.38,
@@ -269,7 +268,7 @@ class _MonthNavRow extends StatelessWidget {
                         M3EIcons.chevron_right,
                         size: dateTheme.arrowIconSize,
                         color: canGoNext
-                            ? theme.colorScheme.onSurfaceVariant
+                            ? null
                             : M3EColorUtils.withOpacity(
                                 theme.colorScheme.onSurface,
                                 0.38,

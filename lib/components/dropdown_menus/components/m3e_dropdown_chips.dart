@@ -133,12 +133,27 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
 
   Widget _buildChipBody() {
     final cd = widget.cd;
+    final theme = M3ETheme.of(context);
+    final disabledOpacity = theme.dropdownMenuTheme.disabledOpacity;
+    final disabledFg = M3EColorUtils.withOpacity(
+      widget.scheme.onSurface,
+      disabledOpacity,
+    );
+    final disabledBg = M3EColorUtils.withOpacity(
+      widget.scheme.onSurface,
+      0.12,
+    );
+    final labelStyle = widget.labelStyle ??
+        theme.dropdownMenuTheme.chipLabelStyle(
+          theme.typeScale,
+          widget.scheme,
+        );
     return MouseRegion(
       cursor: cd.mouseCursor ?? SystemMouseCursors.click,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: cd.borderRadius,
-          color: widget.enabled ? widget.chipColor : Colors.grey.withAlpha(30),
+          color: widget.enabled ? widget.chipColor : disabledBg,
           border: cd.border != null ? Border.fromBorderSide(cd.border!) : null,
         ),
         padding: cd.padding,
@@ -147,13 +162,9 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
           children: [
             Text(
               widget.item.label,
-              style:
-                  widget.labelStyle?.copyWith(
-                    color: widget.enabled
-                        ? widget.labelStyle?.color
-                        : Colors.grey,
-                  ) ??
-                  TextStyle(color: widget.enabled ? null : Colors.grey),
+              style: labelStyle.copyWith(
+                color: widget.enabled ? labelStyle.color : disabledFg,
+              ),
             ),
             if (widget.enabled) ...[
               const SizedBox(width: 4),
@@ -169,7 +180,7 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
                         widget.cd.deleteIcon ??
                         Icon(
                           Icons.close,
-                          size: 16,
+                          size: theme.resolvedIconTheme.size,
                           color: widget.scheme.onSecondaryContainer,
                         ),
                   ),
@@ -323,16 +334,28 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: widget.cd.borderRadius,
-          color: widget.chipColor,
-          border: widget.cd.border != null
-              ? Border.fromBorderSide(widget.cd.border!)
-              : null,
-        ),
-        padding: widget.cd.padding,
-        child: Text('+${widget.count}', style: widget.labelStyle),
+      child: Builder(
+        builder: (context) {
+          final theme = M3ETheme.of(context);
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: widget.cd.borderRadius,
+              color: widget.chipColor,
+              border: widget.cd.border != null
+                  ? Border.fromBorderSide(widget.cd.border!)
+                  : null,
+            ),
+            padding: widget.cd.padding,
+            child: Text(
+              '+${widget.count}',
+              style: widget.labelStyle ??
+                  theme.dropdownMenuTheme.chipLabelStyle(
+                    theme.typeScale,
+                    theme.colorScheme,
+                  ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -94,7 +94,6 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
                         ),
                         Icon(
                           M3EIcons.arrow_drop_up,
-                          color: theme.colorScheme.onSurfaceVariant,
                           size: dateTheme.arrowIconSize,
                         ),
                       ],

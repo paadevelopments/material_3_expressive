@@ -13,6 +13,7 @@ class M3ETimeDialPainter extends CustomPainter {
     required this.accentColor,
     required this.onAccentColor,
     required this.labelColor,
+    required this.labelStyle,
     required this.textDirection,
     required this.timeTheme,
   });
@@ -27,6 +28,7 @@ class M3ETimeDialPainter extends CustomPainter {
   final Color accentColor;
   final Color onAccentColor;
   final Color labelColor;
+  final TextStyle labelStyle;
   final TextDirection textDirection;
   final M3ETimePickerTheme timeTheme;
 
@@ -70,7 +72,7 @@ class M3ETimeDialPainter extends CustomPainter {
     final painter = TextPainter(
       text: TextSpan(
         text: labels[i],
-        style: TextStyle(
+        style: labelStyle.copyWith(
           color: selected ? onAccentColor : labelColor,
           fontSize: timeTheme.dialLabelFontSize,
         ),
@@ -93,6 +95,7 @@ class M3ETimeDialPainter extends CustomPainter {
     return oldDelegate.selectedIndex != selectedIndex ||
         oldDelegate.labels != labels ||
         oldDelegate.accentColor != accentColor ||
+        oldDelegate.labelStyle != labelStyle ||
         oldDelegate.timeTheme != timeTheme;
   }
 }

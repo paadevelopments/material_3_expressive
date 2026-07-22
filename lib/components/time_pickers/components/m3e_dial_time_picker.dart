@@ -228,6 +228,7 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
               accentColor: scheme.primary,
               onAccentColor: scheme.onPrimary,
               labelColor: scheme.onSurface,
+              labelStyle: theme.typeScale.labelLarge,
               textDirection: Directionality.of(context),
               timeTheme: timeTheme,
             ),

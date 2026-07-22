@@ -34,7 +34,8 @@ class M3EBadgeTheme extends M3EThemeExtension<M3EBadgeTheme> {
 
   Color labelColor(M3EColorScheme scheme) => scheme.onErrorContainer;
 
-  TextStyle labelStyle(M3EColorScheme scheme) => TextStyle(
+  TextStyle labelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
+      type.labelSmall.copyWith(
         fontSize: labelFontSize,
         fontWeight: labelFontWeight,
         color: labelColor(scheme),

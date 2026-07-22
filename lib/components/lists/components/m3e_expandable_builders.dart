@@ -23,8 +23,14 @@ Widget buildM3ESimpleHeader(
     resolvedStyle = data.titleStyle![0];
   } else {
     resolvedStyle = TextStyle.lerp(
-      theme.typeScale.titleSmall.copyWith(fontWeight: FontWeight.w400),
-      theme.typeScale.titleSmall.copyWith(fontWeight: FontWeight.bold),
+      theme.typeScale.titleSmall.copyWith(
+        fontWeight: FontWeight.w400,
+        color: theme.colorScheme.onSurface,
+      ),
+      theme.typeScale.titleSmall.copyWith(
+        fontWeight: FontWeight.bold,
+        color: theme.colorScheme.onSurface,
+      ),
       clampedProgress,
     )!;
   }
@@ -58,8 +64,12 @@ Widget buildM3ESimpleBody(
       collapsedSubtitleStyle = data.subtitleStyle![0];
       expandedSubtitleStyle = data.subtitleStyle![0];
     } else {
-      collapsedSubtitleStyle = theme.typeScale.bodyMedium;
-      expandedSubtitleStyle = theme.typeScale.bodyMedium;
+      collapsedSubtitleStyle = theme.typeScale.bodyMedium.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      );
+      expandedSubtitleStyle = theme.typeScale.bodyMedium.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      );
     }
 
     final alignment = decoration.bodyAlignment;

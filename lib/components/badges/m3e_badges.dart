@@ -48,6 +48,7 @@ class M3EBadge extends StatelessWidget {
     final Widget badge = showDot
         ? _dot(badgeTheme, bg)
         : _label(
+            theme.typeScale,
             badgeTheme,
             scheme,
             bg,
@@ -82,6 +83,7 @@ class M3EBadge extends StatelessWidget {
   }
 
   Widget _label(
+    M3ETypeScale typeScale,
     M3EBadgeTheme badgeTheme,
     M3EColorScheme scheme,
     Color bg,
@@ -102,7 +104,7 @@ class M3EBadge extends StatelessWidget {
         minHeight: badgeTheme.labelMinSize,
       ),
       child: DefaultTextStyle(
-        style: badgeTheme.labelStyle(scheme).copyWith(color: fg),
+        style: badgeTheme.labelStyle(typeScale, scheme).copyWith(color: fg),
         child: Text(text, textAlign: TextAlign.center),
       ),
     );
