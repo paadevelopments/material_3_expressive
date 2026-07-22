@@ -383,10 +383,11 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   }
 
   bool _shouldAnimateExpandPadding(M3ESearchBarTheme barTheme) {
+    // Read-only bars can still use the resting (unexpanded) inset; they just
+    // never animate to the focused width because they do not take focus.
     if (!widget.expandOnFocus ||
         !barTheme.expandOnFocus ||
-        !widget.enabled ||
-        widget.readOnly) {
+        !widget.enabled) {
       return false;
     }
     return _restingExpandPadding(barTheme) > 0.5;
@@ -440,6 +441,11 @@ class _M3ESearchBarState extends State<M3ESearchBar>
 
   void _handleTap() {
     widget.onTap?.call();
+    // Read-only bars (e.g. SearchAnchor.bar) open a view and must not take
+    // keyboard focus — the view's search field owns editing.
+    if (widget.readOnly || !widget.enabled) {
+      return;
+    }
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     } else {

@@ -120,6 +120,11 @@ void main() {
       ),
     );
 
+    final M3ESearchBar anchorBar = tester.widget<M3ESearchBar>(
+      find.byType(M3ESearchBar),
+    );
+    expect(anchorBar.readOnly, isTrue);
+
     await tester.tap(find.byType(M3ESearchBar));
     await tester.pumpAndSettle();
     await tester.pump();
@@ -127,6 +132,12 @@ void main() {
     expect(controller.isOpen, isTrue);
     expect(controller.text, isEmpty);
     expect(find.text('Result for '), findsOneWidget);
+
+    // View search bar is editable and focused; anchor bar stays unfocused.
+    final Iterable<M3ESearchBar> bars =
+        tester.widgetList<M3ESearchBar>(find.byType(M3ESearchBar));
+    final M3ESearchBar viewBar = bars.firstWhere((M3ESearchBar bar) => !bar.readOnly);
+    expect(viewBar.autoFocus, isTrue);
   });
 
   testWidgets('full-screen back closes view without reopening',
@@ -204,7 +215,8 @@ void main() {
     expect(controller.isOpen, isFalse);
   });
 
-  testWidgets('closeView sets controller text', (WidgetTester tester) async {
+  testWidgets('closeView populates the read-only anchor bar',
+      (WidgetTester tester) async {
     final M3ESearchController controller = M3ESearchController();
 
     await tester.pumpWidget(
@@ -228,16 +240,60 @@ void main() {
       ),
     );
 
-    controller.openView();
+    expect(
+      tester.widget<M3ESearchBar>(find.byType(M3ESearchBar)).readOnly,
+      isTrue,
+    );
+    expect(find.byIcon(M3EIcons.close), findsNothing);
+
+    await tester.tap(find.byType(M3ESearchBar));
     await tester.pumpAndSettle();
     await tester.pump();
     await tester.tap(find.text('Buttons'));
     await tester.pumpAndSettle();
 
-    expect(controller.text, 'Buttons');
     expect(controller.isOpen, isFalse);
+    expect(controller.text, 'Buttons');
+    expect(find.text('Buttons'), findsOneWidget);
+    expect(find.byIcon(M3EIcons.close), findsOneWidget);
+
+    await tester.tap(find.byIcon(M3EIcons.close));
+    await tester.pumpAndSettle();
+    expect(controller.text, isEmpty);
+    expect(find.byIcon(M3EIcons.close), findsNothing);
   });
 
+  testWidgets('anchor bar stays at resting unexpanded inset',
+      (WidgetTester tester) async {
+    final M3ESearchController controller = M3ESearchController();
+    const double hostWidth = 420;
+
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: hostWidth,
+          child: M3ESearchAnchor.bar(
+            searchController: controller,
+            isFullScreen: false,
+            barHintText: 'Find',
+            suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+              return const <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder barMaterial = find.descendant(
+      of: find.byType(M3ESearchBar),
+      matching: find.byType(Material),
+    ).first;
+    final double barWidth = tester.getSize(barMaterial).width;
+    final double restingInset =
+        M3ESearchBarTheme.defaults.restingExpandPadding * 2;
+    expect(barWidth, closeTo(hostWidth - restingInset, 0.1));
+  });
   testWidgets('full-screen search view header uses contained search bar styling',
       (WidgetTester tester) async {
     final M3ESearchController controller = M3ESearchController();

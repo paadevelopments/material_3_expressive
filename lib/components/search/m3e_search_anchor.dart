@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import '../icon_buttons/m3e_icon_buttons.dart';
 import 'components/m3e_search_view.dart';
 import 'controllers/m3e_search_controller.dart';
 import 'm3e_search_bar.dart';
@@ -134,8 +135,6 @@ class M3ESearchAnchor extends StatefulWidget {
           barTrailing: barTrailing,
           barHintText: barHintText,
           onTap: onTap,
-          onChanged: onChanged,
-          onSubmitted: onSubmitted,
           barElevation: barElevation,
           barBackgroundColor: barBackgroundColor,
           barOverlayColor: barOverlayColor,
@@ -200,8 +199,6 @@ class _M3ESearchAnchorBar extends StatefulWidget {
     this.barTrailing,
     this.barHintText,
     this.onTap,
-    this.onChanged,
-    this.onSubmitted,
     this.barElevation,
     this.barBackgroundColor,
     this.barOverlayColor,
@@ -225,8 +222,6 @@ class _M3ESearchAnchorBar extends StatefulWidget {
   final Iterable<Widget>? barTrailing;
   final String? barHintText;
   final GestureTapCallback? onTap;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
   final WidgetStateProperty<double?>? barElevation;
   final WidgetStateProperty<Color?>? barBackgroundColor;
   final WidgetStateProperty<Color?>? barOverlayColor;
@@ -248,27 +243,36 @@ class _M3ESearchAnchorBar extends StatefulWidget {
 }
 
 class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
-  late final FocusNode _focusNode = FocusNode();
+  // Anchor bar is display-only; the search view owns focus and editing.
+  late final FocusNode _focusNode = FocusNode(
+    canRequestFocus: false,
+    skipTraversal: true,
+  );
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_handleFocusChange);
+    widget.controller.addListener(_handleControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _M3ESearchAnchorBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_handleControllerChanged);
+      widget.controller.addListener(_handleControllerChanged);
+    }
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_handleFocusChange);
+    widget.controller.removeListener(_handleControllerChanged);
     _focusNode.dispose();
     super.dispose();
   }
 
-  void _handleFocusChange() {
-    if (_focusNode.hasFocus &&
-        !widget.controller.isOpen &&
-        !widget.controller.suppressFocusOpen) {
-      widget.controller.openView();
-    }
+  void _handleControllerChanged() {
+    setState(() {});
   }
 
   void _openView() {
@@ -277,18 +281,36 @@ class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
     }
   }
 
+  List<Widget>? _buildTrailing() {
+    if (widget.barTrailing != null) {
+      return widget.barTrailing!.toList();
+    }
+    if (widget.controller.text.isEmpty) {
+      return null;
+    }
+    return <Widget>[
+      M3EIconButton(
+        icon: const Icon(M3EIcons.close),
+        tooltip: M3ESearchConstants.clearButtonTooltip,
+        onPressed: widget.controller.clear,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return M3ESearchBar(
       focusNode: _focusNode,
       constraints: widget.constraints,
       controller: widget.controller,
+      readOnly: true,
+      // Keep the resting (unexpanded) horizontal inset; read-only bars never
+      // take focus so they will not animate to the focused width.
+      expandOnFocus: true,
       onTap: () {
         _openView();
         widget.onTap?.call();
       },
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
       hintText: widget.barHintText,
       hintStyle: widget.barHintStyle,
       textStyle: widget.barTextStyle,
@@ -299,7 +321,7 @@ class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
       shape: widget.barShape,
       padding: widget.barPadding,
       leading: widget.barLeading ?? const Icon(M3EIcons.search),
-      trailing: widget.barTrailing,
+      trailing: _buildTrailing(),
       textCapitalization: widget.textCapitalization,
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
