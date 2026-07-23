@@ -134,6 +134,37 @@ void main() {
     expect(value, closeTo(0.5, 0.05));
   });
 
+  testWidgets('vertical min is at bottom and max at top', (tester) async {
+    double value = 0.5;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return _host(
+            SizedBox(
+              width: 48,
+              height: 200,
+              child: M3ESlider.vertical(
+                value: value,
+                onChanged: (double v) => setState(() => value = v),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(M3ESlider));
+    // Near the top → high value.
+    await tester.tapAt(topLeft + const Offset(24, 20));
+    await tester.pump();
+    expect(value, greaterThan(0.75));
+
+    // Near the bottom → low value.
+    await tester.tapAt(topLeft + const Offset(24, 180));
+    await tester.pump();
+    expect(value, lessThan(0.25));
+  });
+
   testWidgets('disabled when onChanged is null', (tester) async {
     await tester.pumpWidget(
       _host(

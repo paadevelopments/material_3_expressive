@@ -80,6 +80,9 @@ class M3ESlider extends StatefulWidget {
         assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider (Compose `VerticalSlider`).
+  ///
+  /// By default [topToBottom] is `false`: [min] is at the bottom and [max] at
+  /// the top (slide up to increase).
   const M3ESlider.vertical({
     required this.value,
     required this.onChanged,
@@ -92,13 +95,16 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
-    this.topToBottom = true,
+    this.topToBottom = false,
     super.key,
   })  : axis = Axis.vertical,
         trackKind = M3ESliderTrackKind.standard,
         assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider with a centered active track.
+  ///
+  /// By default [topToBottom] is `false`: [min] is at the bottom and [max] at
+  /// the top (slide up to increase).
   const M3ESlider.verticalCentered({
     required this.value,
     required this.onChanged,
@@ -111,7 +117,7 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
-    this.topToBottom = true,
+    this.topToBottom = false,
     super.key,
   })  : axis = Axis.vertical,
         trackKind = M3ESliderTrackKind.centered,
@@ -161,7 +167,10 @@ class M3ESlider extends StatefulWidget {
   final Axis axis;
   final M3ESliderTrackKind trackKind;
 
-  /// When [axis] is vertical, `true` maps top → [min] (Compose `topToBottom`).
+  /// When [axis] is vertical, `true` maps the top edge to [min].
+  ///
+  /// Defaults to `false` on vertical constructors so [min] is at the bottom
+  /// and sliding up increases the value.
   final bool topToBottom;
 
   @override
@@ -254,6 +263,11 @@ class _M3ESliderState extends State<M3ESlider> {
                   axis: widget.axis,
                   child: track,
                 );
+              }
+
+              // Bottom-min vertical: flip track paint so active grows upward.
+              if (_vertical && reverse) {
+                track = Transform.flip(flipY: true, child: track);
               }
 
               final Widget thumb = widget.thumbBuilder?.call(

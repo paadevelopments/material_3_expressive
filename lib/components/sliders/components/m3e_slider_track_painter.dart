@@ -238,12 +238,22 @@ class M3ESliderTrackPainter extends CustomPainter {
     if (primary >= activeStart && primary <= activeEnd) {
       return true;
     }
-    if (_centered || _range) {
-      if (primary >= valueStart - startGap && primary <= valueStart + startGap) {
-        return true;
-      }
+    // Range has thumbs at both ends. Centered single-thumb only has [valueEnd]
+    // — [valueStart] is always 0 and must not hide the leading stop.
+    if (_range &&
+        primary >= valueStart - startGap &&
+        primary <= valueStart + startGap) {
+      return true;
     }
     if (primary >= valueEnd - endGap && primary <= valueEnd + endGap) {
+      return true;
+    }
+    // Centered: when the thumb is left of center, the leading gap uses
+    // [startGap] around the thumb (still [valueEnd]), not the track origin.
+    if (_centered &&
+        startGap > 0 &&
+        primary >= valueEnd - startGap &&
+        primary <= valueEnd + startGap) {
       return true;
     }
     return false;
