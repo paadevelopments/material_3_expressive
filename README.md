@@ -715,7 +715,9 @@ Row(
 
 #### M3EDialog
 
-Modal dialog — use the static `.show` helper.
+Modal dialog — use the static `.show` helper. Optional `topDivider` /
+`bottomDivider` draw full-bleed lines between header, content, and actions
+(padding lives on those sections so dividers can reach the edges).
 
 ```dart
 M3EDialog.show<void>(
@@ -723,6 +725,8 @@ M3EDialog.show<void>(
   dialog: M3EDialog(
     title: 'Reset settings?',
     content: const Text('This restores default values.'),
+    topDivider: true,
+    bottomDivider: true,
     actions: [
       M3EButton(
         style: M3EButtonStyle.text,

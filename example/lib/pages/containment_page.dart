@@ -295,6 +295,11 @@ class _ContainmentPageState extends State<ContainmentPage>
             ),
             M3EButton(
               style: M3EButtonStyle.tonal,
+              onPressed: () => _showDialogWithDividers(context),
+              child: const Text('Dialog + dividers'),
+            ),
+            M3EButton(
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showFullScreen(context),
               child: const Text('Full screen'),
             ),
@@ -332,6 +337,32 @@ class _ContainmentPageState extends State<ContainmentPage>
           M3EButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDialogWithDividers(BuildContext context) {
+    M3EDialog.show<void>(
+      context,
+      dialog: M3EDialog(
+        title: 'Choose a plan',
+        topDivider: true,
+        bottomDivider: true,
+        content: const Text(
+          'Dividers span the full dialog width between the header, '
+          'content, and actions.',
+        ),
+        actions: <Widget>[
+          M3EButton(
+            style: M3EButtonStyle.text,
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          M3EButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Continue'),
           ),
         ],
       ),

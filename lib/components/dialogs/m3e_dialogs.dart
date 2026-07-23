@@ -18,6 +18,8 @@ class M3EDialog extends StatelessWidget {
     this.icon,
     this.content,
     this.actions = const <Widget>[],
+    this.topDivider = false,
+    this.bottomDivider = false,
     super.key,
   });
 
@@ -25,6 +27,12 @@ class M3EDialog extends StatelessWidget {
   final Widget? icon;
   final Widget? content;
   final List<Widget> actions;
+
+  /// Full-bleed divider between the header and the section below it.
+  final bool topDivider;
+
+  /// Full-bleed divider above the actions row.
+  final bool bottomDivider;
 
   /// Presents a standard dialog and completes with the popped result.
   static Future<T?> show<T>(
@@ -121,15 +129,14 @@ class M3EDialog extends StatelessWidget {
   }
 
   Widget _buildDialog(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final dialogTheme = theme.dialogTheme;
-    final scheme = theme.colorScheme;
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EDialogTheme dialogTheme = theme.dialogTheme;
+    final M3EColorScheme scheme = theme.colorScheme;
     return Container(
       constraints: BoxConstraints(
         minWidth: dialogTheme.minWidth,
         maxWidth: dialogTheme.maxWidth,
       ),
-      padding: dialogTheme.padding,
       decoration: BoxDecoration(
         color: dialogTheme.containerColor(scheme),
         borderRadius: dialogTheme.borderRadius,
@@ -148,43 +155,66 @@ class M3EDialog extends StatelessWidget {
   }
 
   List<Widget> _buildChildren(M3EThemeData theme, M3EDialogTheme dialogTheme) {
-    final scheme = theme.colorScheme;
+    final M3EColorScheme scheme = theme.colorScheme;
+    final EdgeInsets padding = dialogTheme.padding;
+    final bool hasContent = content != null;
+    final bool hasActions = actions.isNotEmpty;
+    final bool hasBelowHeader = hasContent || hasActions;
+
     return <Widget>[
-      if (icon != null) ...<Widget>[
-        IconTheme.merge(
-          data: IconThemeData(
-            color: scheme.secondary,
-            size: dialogTheme.iconSize,
-          ),
-          child: icon!,
-        ),
-        SizedBox(height: dialogTheme.gapAfterIcon),
-      ],
-      Text(
-        title,
-        textAlign: icon == null ? TextAlign.start : TextAlign.center,
-        style: theme.typeScale.headlineSmall.copyWith(color: scheme.onSurface),
-      ),
-      if (content != null) ...<Widget>[
-        SizedBox(height: dialogTheme.gapAfterTitle),
-        DefaultTextStyle(
-          style: theme.typeScale.bodyMedium
-              .copyWith(color: scheme.onSurfaceVariant),
-          child: content!,
-        ),
-      ],
-      if (actions.isNotEmpty) ...<Widget>[
-        SizedBox(height: dialogTheme.gapBeforeActions),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+      Padding(
+        padding: padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: icon == null
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
           children: <Widget>[
-            for (final Widget action in actions) ...<Widget>[
-              action,
-              SizedBox(width: dialogTheme.actionGap),
+            if (icon != null) ...<Widget>[
+              IconTheme.merge(
+                data: IconThemeData(
+                  color: scheme.secondary,
+                  size: dialogTheme.iconSize,
+                ),
+                child: icon!,
+              ),
+              SizedBox(height: dialogTheme.gapAfterIcon),
             ],
+            Text(
+              title,
+              textAlign: icon == null ? TextAlign.start : TextAlign.center,
+              style: theme.typeScale.headlineSmall
+                  .copyWith(color: scheme.onSurface),
+            ),
           ],
         ),
-      ],
+      ),
+      if (topDivider && hasBelowHeader)
+        M3EDivider(color: scheme.outlineVariant),
+      if (hasContent)
+        Padding(
+          padding: padding,
+          child: DefaultTextStyle(
+            style: theme.typeScale.bodyMedium
+                .copyWith(color: scheme.onSurfaceVariant),
+            child: content!,
+          ),
+        ),
+      if (bottomDivider && hasActions)
+        M3EDivider(color: scheme.outlineVariant),
+      if (hasActions)
+        Padding(
+          padding: padding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              for (int i = 0; i < actions.length; i++) ...<Widget>[
+                if (i > 0) SizedBox(width: dialogTheme.actionGap),
+                actions[i],
+              ],
+            ],
+          ),
+        ),
     ];
   }
 }
