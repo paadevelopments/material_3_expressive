@@ -1,23 +1,21 @@
 // Vendored from the `navigation_bar_m3e` package
 // (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
-// The logic is kept identical to the reference `NavigationBarM3E`; only the
-// public class name carries the `M3E` prefix and theme tokens are read from
-// this package's own `M3ETheme` instead of the external `m3e_design` package.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
+// Adapted for material_3_expressive: liquid selection indicator (spatial springs).
 
 import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
+import '../navigation_rail/components/m3e_nav_selection_indicator.dart';
+import 'components/m3e_nav_bar_destination_button.dart';
 import 'enums/m3e_nav_bar_enums.dart';
 import 'models/m3e_navigation_bar_destination.dart';
 import 'styles/m3e_navigation_bar_theme.dart';
 
-class M3ENavigationBar extends StatelessWidget {
+/// A Material 3 Expressive navigation bar.
+///
+/// Pill selection uses a lead/trail spring indicator that stretches between
+/// destinations (spatial springs motion spec).
+class M3ENavigationBar extends StatefulWidget {
   const M3ENavigationBar({
     super.key,
     required this.destinations,
@@ -57,162 +55,119 @@ class M3ENavigationBar extends StatelessWidget {
   final String? semanticLabel;
 
   @override
+  State<M3ENavigationBar> createState() => _M3ENavigationBarState();
+}
+
+class _M3ENavigationBarState extends State<M3ENavigationBar> {
+  late List<GlobalKey> _keys;
+
+  static const double _indicatorWidth = 64;
+  static const double _indicatorHeight = 32;
+
+  @override
+  void initState() {
+    super.initState();
+    _keys = _makeKeys(widget.destinations.length);
+  }
+
+  @override
+  void didUpdateWidget(covariant M3ENavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.destinations.length != widget.destinations.length) {
+      _keys = _makeKeys(widget.destinations.length);
+    }
+  }
+
+  List<GlobalKey> _makeKeys(int count) =>
+      List<GlobalKey>.generate(count, (_) => GlobalKey());
+
+  @override
   Widget build(BuildContext context) {
-    assert(destinations.isNotEmpty, 'Provide at least one destination');
+    assert(widget.destinations.isNotEmpty, 'Provide at least one destination');
     return M3EComponentTheme(builder: _buildNavigationBar);
   }
 
   Widget _buildNavigationBar(BuildContext context) {
-    final m3e = M3ETheme.of(context);
-    final navTheme = m3e.navigationBarTheme;
-    final scheme = m3e.colorScheme;
-    final metrics = navTheme.metrics(density, m3e.spacing);
+    final M3EThemeData m3e = M3ETheme.of(context);
+    final M3ENavigationBarTheme navTheme = m3e.navigationBarTheme;
+    final M3EColorScheme scheme = m3e.colorScheme;
+    final metrics = navTheme.metrics(widget.density, m3e.spacing);
 
-    final height = size == M3ENavBarSize.small
+    final double height = widget.size == M3ENavBarSize.small
         ? metrics.heightSmall
         : metrics.heightMedium;
-    final bg = backgroundColor ?? navTheme.containerColor(scheme);
-    final shape = navTheme.containerShape(shapeFamily);
-
-    final bottomInset =
-        safeArea ? MediaQuery.viewPaddingOf(context).bottom : 0.0;
+    final Color bg = widget.backgroundColor ?? navTheme.containerColor(scheme);
+    final ShapeBorder shape = navTheme.containerShape(widget.shapeFamily);
+    final double bottomInset =
+        widget.safeArea ? MediaQuery.viewPaddingOf(context).bottom : 0.0;
 
     final Color selected = navTheme.selectedColor(scheme);
     final Color unselected = navTheme.unselectedColor(scheme);
     final TextStyle labelBase = navTheme.labelStyle(m3e.typeScale);
+    final Color indicator =
+        widget.indicatorColor ?? navTheme.indicatorColor(scheme);
+    final bool usePill =
+        widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
 
-    final WidgetStateProperty<IconThemeData?> iconTheme =
-        WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final Color color;
-      if (states.contains(WidgetState.disabled)) {
-        color = unselected.withValues(alpha: 0.38);
-      } else if (states.contains(WidgetState.selected)) {
-        color = selected;
-      } else {
-        color = unselected;
-      }
-      return IconThemeData(size: metrics.iconSize, color: color);
-    });
+    final Widget destinationsRow = Row(
+      children: <Widget>[
+        for (int i = 0; i < widget.destinations.length; i++)
+          Expanded(
+            child: M3ENavBarDestinationButton(
+              destination: widget.destinations[i],
+              selected: i == widget.selectedIndex,
+              selectedColor: selected,
+              unselectedColor: unselected,
+              labelStyle: labelBase,
+              iconSize: metrics.iconSize,
+              labelBehavior: widget.labelBehavior,
+              indicatorStyle: widget.indicatorStyle,
+              indicatorKey: _keys[i],
+              indicatorWidth: _indicatorWidth,
+              indicatorHeight: _indicatorHeight,
+              underlineThickness: metrics.indicatorThickness,
+              underlineColor: indicator,
+              onTap: () => widget.onDestinationSelected?.call(i),
+            ),
+          ),
+      ],
+    );
 
-    final WidgetStateProperty<TextStyle?> labelTextStyle =
-        WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final Color color;
-      if (states.contains(WidgetState.disabled)) {
-        color = unselected.withValues(alpha: 0.38);
-      } else if (states.contains(WidgetState.selected)) {
-        color = selected;
-      } else {
-        color = unselected;
-      }
-      return labelBase.copyWith(color: color);
-    });
+    final Widget body = usePill
+        ? M3ENavSelectionIndicator(
+            selectedIndex: widget.selectedIndex,
+            targetKeys: _keys,
+            axis: Axis.horizontal,
+            color: indicator,
+            child: destinationsRow,
+          )
+        : destinationsRow;
 
-    final nav = Material(
+    Widget nav = Material(
       color: bg,
-      elevation: elevation ?? 0,
+      elevation: widget.elevation ?? 0,
       shape: shape,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
         child: SizedBox(
           height: height,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            removeBottom: safeArea,
-            child: NavigationBarTheme(
-              data: NavigationBarThemeData(
-                iconTheme: iconTheme,
-                labelTextStyle: labelTextStyle,
-              ),
-              child: NavigationBar(
-                height: height,
-                elevation: elevation ?? 0,
-                indicatorColor: indicatorStyle == M3ENavBarIndicatorStyle.none
-                    ? Colors.transparent
-                    : (indicatorColor ?? navTheme.indicatorColor(scheme)),
-                indicatorShape: switch (indicatorStyle) {
-                  M3ENavBarIndicatorStyle.pill => navTheme.indicatorShapePill(),
-                  M3ENavBarIndicatorStyle.underline => const StadiumBorder(),
-                  M3ENavBarIndicatorStyle.none => const StadiumBorder(),
-                },
-                backgroundColor: Colors.transparent,
-                labelBehavior: switch (labelBehavior) {
-                  M3ENavBarLabelBehavior.alwaysShow =>
-                    NavigationDestinationLabelBehavior.alwaysShow,
-                  M3ENavBarLabelBehavior.onlySelected =>
-                    NavigationDestinationLabelBehavior.onlyShowSelected,
-                  M3ENavBarLabelBehavior.alwaysHide =>
-                    NavigationDestinationLabelBehavior.alwaysHide,
-                },
-                labelTextStyle: labelTextStyle,
-                selectedIndex: selectedIndex,
-                destinations: List.generate(destinations.length, (i) {
-                  final d = destinations[i];
-                  return NavigationDestination(
-                    icon: _icon(context, false, d, metrics.iconSize),
-                    selectedIcon: _selectedIcon(
-                      context,
-                      true,
-                      d,
-                      metrics.iconSize,
-                      navTheme,
-                      indicatorStyle,
-                    ),
-                    label: d.label,
-                    tooltip: d.semanticLabel,
-                  );
-                }),
-                onDestinationSelected: onDestinationSelected,
-              ),
-            ),
-          ),
+          child: body,
         ),
       ),
     );
 
-    final padded = Padding(
-      padding: padding ?? EdgeInsets.zero,
+    nav = Padding(
+      padding: widget.padding ?? EdgeInsets.zero,
       child: nav,
     );
 
-    Widget result = padded;
-    if (semanticLabel != null) {
-      result = Semantics(
+    if (widget.semanticLabel != null) {
+      nav = Semantics(
         container: true,
-        label: semanticLabel!,
-        child: result,
+        label: widget.semanticLabel,
+        child: nav,
       );
     }
-    return result;
-  }
-
-  Widget _icon(BuildContext context, bool selected,
-      M3ENavigationBarDestination d, double iconSize) {
-    return SizedBox(
-      width: iconSize + 8, // give a little space for underline
-      height: iconSize + 8,
-      child: Center(child: d.buildIcon(selected)),
-    );
-  }
-
-  Widget _selectedIcon(
-      BuildContext context,
-      bool selected,
-      M3ENavigationBarDestination d,
-      double iconSize,
-      M3ENavigationBarTheme navTheme,
-      M3ENavBarIndicatorStyle style,
-      ) {
-    final w = _icon(context, selected, d, iconSize);
-    if (style != M3ENavBarIndicatorStyle.underline) return w;
-
-    final metrics = navTheme.metrics(density, M3ETheme.of(context).spacing);
-    final deco = navTheme.underlineDecoration(
-        navTheme.indicatorColor(M3ETheme.of(context).colorScheme),
-        metrics.indicatorThickness);
-    return DecoratedBox(
-      decoration: deco,
-      child: w,
-    );
+    return nav;
   }
 }

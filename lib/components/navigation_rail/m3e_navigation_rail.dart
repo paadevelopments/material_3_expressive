@@ -17,6 +17,7 @@ import '../../../foundations/foundations.dart';
 import '../extended_fabs/m3e_extended_fabs.dart';
 import '../floating_action_buttons/m3e_floating_action_buttons.dart';
 import '../icon_buttons/m3e_icon_buttons.dart';
+import 'components/m3e_nav_selection_indicator.dart';
 import 'components/m3e_rail_item.dart';
 import 'enums/m3e_navigation_rail_enums.dart';
 import 'models/m3e_navigation_rail_destination.dart';
@@ -74,6 +75,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   bool _suppressInk = false;
 
   bool _expanded = false;
+  List<GlobalKey> _destinationKeys = <GlobalKey>[];
 
   bool get _isExpanded => _expanded;
   bool get _isModal => widget.modality == M3ENavigationRailModality.modal;
@@ -85,6 +87,17 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       widget.type == M3ENavigationRailType.collapsed ||
           widget.type == M3ENavigationRailType.expanded;
 
+  int get _destinationCount =>
+      widget.sections.fold<int>(0, (int n, s) => n + s.destinations.length);
+
+  void _ensureDestinationKeys() {
+    final int count = _destinationCount;
+    if (_destinationKeys.length == count) {
+      return;
+    }
+    _destinationKeys = List<GlobalKey>.generate(count, (_) => GlobalKey());
+  }
+
   M3ENavigationRailType get _notifiedType => _expanded
       ? M3ENavigationRailType.expanded
       : M3ENavigationRailType.collapsed;
@@ -92,6 +105,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   @override
   void initState() {
     super.initState();
+    _ensureDestinationKeys();
     if (_canToggle) {
       _expanded = widget.type == M3ENavigationRailType.expanded;
     } else {
@@ -111,6 +125,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   @override
   void didUpdateWidget(covariant M3ENavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _ensureDestinationKeys();
 
     if (oldWidget.type != widget.type) {
       setState(() => _suppressInk = true);
@@ -369,6 +384,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               expanded: true,
               labelBehavior: widget.labelBehavior,
               suppressInk: _suppressInk,
+              useLocalIndicator: false,
+              indicatorKey: _destinationKeys[index],
             ),
           ));
         }
@@ -389,6 +406,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             expanded: false,
             labelBehavior: widget.labelBehavior,
             suppressInk: _suppressInk,
+            useLocalIndicator: false,
+            indicatorKey: _destinationKeys[i],
           ),
         ));
       }
@@ -406,6 +425,9 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final width = _targetWidth(context);
     final Color containerColor =
         widget.background ?? theme.containerColorResolved(m3e.colorScheme);
+    final Color indicatorColor =
+        theme.activeIndicatorColorResolved(m3e.colorScheme);
+    _ensureDestinationKeys();
 
     return AnimatedContainer(
       duration: M3ENavigationRailLayout.expandDuration,
@@ -422,9 +444,10 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               ? _buildTrailing(ctx)
               : null;
 
+          Widget destinations;
           if (widget.scrollable) {
             if (bottomTrailing != null) {
-              return Column(
+              destinations = Column(
                 children: [
                   Expanded(
                     child: ListView(
@@ -435,14 +458,15 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
                   bottomTrailing,
                 ],
               );
+            } else {
+              destinations = ListView(
+                padding: EdgeInsets.zero,
+                children: children,
+              );
             }
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: children,
-            );
           } else {
             if (bottomTrailing != null) {
-              return Column(
+              destinations = Column(
                 children: [
                   Expanded(
                     child: Column(
@@ -453,12 +477,21 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
                   bottomTrailing,
                 ],
               );
+            } else {
+              destinations = Column(
+                mainAxisSize: MainAxisSize.min,
+                children: children,
+              );
             }
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: children,
-            );
           }
+
+          return M3ENavSelectionIndicator(
+            selectedIndex: widget.selectedIndex,
+            targetKeys: _destinationKeys,
+            axis: Axis.vertical,
+            color: indicatorColor,
+            child: destinations,
+          );
         },
       ),
     );

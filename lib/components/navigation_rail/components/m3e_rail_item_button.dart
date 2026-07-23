@@ -16,6 +16,7 @@ import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
+import 'm3e_nav_icon_scale.dart';
 import 'm3e_rail_badge_view.dart';
 
 /// Internal button used by the NavigationRail item that can look like
@@ -37,6 +38,8 @@ class M3ERailItemButton extends StatelessWidget {
     this.suppressInk = false,
     this.badgeCount,
     this.heightOverride,
+    this.useLocalIndicator = true,
+    this.indicatorKey,
   });
 
   /// Icon to display.
@@ -74,6 +77,12 @@ class M3ERailItemButton extends StatelessWidget {
   /// [M3ENavigationRailTheme.itemCollapsedHeight] depending on [expanded].
   final double? heightOverride;
 
+  /// When false, selection fill is drawn by [M3ENavSelectionIndicator] instead.
+  final bool useLocalIndicator;
+
+  /// Key on the region the shared selection indicator should cover.
+  final GlobalKey? indicatorKey;
+
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context).navigationRailTheme;
@@ -97,13 +106,23 @@ class M3ERailItemButton extends StatelessWidget {
         RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs);
 
     final Color fg = selected ? activeIconLabel : inactiveIconLabel;
-    final Color bg = expanded && selected ? activeIndicator : Colors.transparent;
+    final Color bg = useLocalIndicator && expanded && selected
+        ? activeIndicator
+        : Colors.transparent;
     final ShapeBorder shape =
         expanded ? indicatorShape : const RoundedRectangleBorder();
 
     // Content
     final Widget effectiveIcon =
         selected && selectedIcon != null ? selectedIcon! : icon;
+
+    final Widget scaledIcon = M3ENavIconScale(
+      selected: selected,
+      child: IconTheme.merge(
+        data: IconThemeData(color: fg, size: theme.iconSize),
+        child: effectiveIcon,
+      ),
+    );
 
     Widget content;
     if (expanded) {
@@ -123,10 +142,7 @@ class M3ERailItemButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconTheme.merge(
-                  data: IconThemeData(color: fg, size: theme.iconSize),
-                  child: effectiveIcon,
-                ),
+                scaledIcon,
                 SizedBox(width: theme.iconLabelGap),
                 textExpanded,
               ],
@@ -149,21 +165,23 @@ class M3ERailItemButton extends StatelessWidget {
         ),
       );
 
+      final Widget iconButton = KeyedSubtree(
+        key: indicatorKey,
+        child: M3EIconButton(
+          icon: scaledIcon,
+          width: M3EIconButtonWidth.wide,
+          badgeValue: badgeCount,
+          onPressed: onPressed,
+          variant: useLocalIndicator && isSelected
+              ? M3EIconButtonVariant.tonal
+              : M3EIconButtonVariant.standard,
+          shape: M3EIconButtonShapeVariant.round,
+        ),
+      );
+
       content = Column(
         children: [
-          M3EIconButton(
-            icon: IconTheme.merge(
-              data: IconThemeData(color: fg, size: theme.iconSize),
-              child: effectiveIcon,
-            ),
-            width: M3EIconButtonWidth.wide,
-            badgeValue: badgeCount,
-            onPressed: onPressed,
-            variant: isSelected
-                ? M3EIconButtonVariant.tonal
-                : M3EIconButtonVariant.standard,
-            shape: M3EIconButtonShapeVariant.round,
-          ),
+          iconButton,
           if (labelBehavior == M3ENavigationRailLabelBehavior.alwaysShow ||
               (isSelected == true &&
                   labelBehavior != M3ENavigationRailLabelBehavior.alwaysHide))
@@ -175,6 +193,7 @@ class M3ERailItemButton extends StatelessWidget {
     // Material/Ink wrapper. Respect [suppressInk] to avoid flicker during transitions.
     final bool noInk = suppressInk || !expanded;
     final Material material = Material(
+      key: expanded ? indicatorKey : null,
       color: bg,
       shape: shape,
       clipBehavior: Clip.antiAlias,
