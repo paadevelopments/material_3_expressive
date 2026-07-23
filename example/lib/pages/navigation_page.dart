@@ -280,16 +280,7 @@ class _NavigationPageState extends State<NavigationPage>
       required EdgeInsets padding,
       required Widget child,
     }) {
-      return MediaQuery(
-        data: MediaQuery.of(context).copyWith(padding: padding),
-        child: ColoredBox(
-          color: M3ETheme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.4),
-          child: child,
-        ),
-      );
+      return child;
     }
 
     return GallerySection(
@@ -374,12 +365,17 @@ class _NavigationPageState extends State<NavigationPage>
           label: 'Floating safeArea on / off',
           children: <Widget>[
             SizedBox(
-              width: 280,
+              // width: 280,
+              // height: 120,
               child: insetFrame(
-                padding: const EdgeInsets.all(24),
-                child: M3EToolbar(
-                  safeArea: true,
-                  actions: sampleActions,
+                padding: const EdgeInsets.only(bottom: 0),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: M3EToolbar(
+                    safeArea: true,
+                    dockEdge: M3EToolbarDockEdge.bottom,
+                    actions: sampleActions,
+                  ),
                 ),
               ),
             ),
@@ -390,7 +386,7 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label: 'Docked bottom (safeArea on / off)',
+          label: 'Docked bottom icons-only (evenly spaced)',
           children: <Widget>[
             SizedBox(
               width: 280,

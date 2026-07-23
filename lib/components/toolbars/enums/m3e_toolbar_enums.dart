@@ -16,7 +16,10 @@ enum M3EToolbarColorStyle {
   vibrant,
 }
 
-/// Edge used by a docked toolbar for placement and safe-area padding.
+/// Edge used for docked placement and single-edge safe-area padding.
+///
+/// Floating toolbars with [M3EToolbar.safeArea] apply this edge as an
+/// **external** inset only (outside the pill).
 enum M3EToolbarDockEdge {
   top,
   bottom,

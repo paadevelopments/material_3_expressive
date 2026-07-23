@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 
 import '../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
+import '../icon_buttons/enums/m3e_icon_button_enums.dart';
+import '../icon_buttons/styles/m3e_icon_button_theme.dart';
 import 'components/m3e_toolbar_actions_row.dart';
 import 'components/m3e_toolbar_body.dart';
 import 'components/m3e_toolbar_fab_slot.dart';
@@ -31,6 +33,9 @@ export 'styles/m3e_toolbar_theme.dart';
 /// - [M3EToolbar.docked] → `FlexibleBottomAppBar` (docked toolbar tokens)
 class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   /// Floating toolbar (default). Horizontal unless [axis] is vertical.
+  ///
+  /// When [safeArea] is true, only [dockEdge] gets an **external** system
+  /// inset (outside the pill) — never inside [Material].
   const M3EToolbar({
     this.leading,
     this.title,
@@ -52,6 +57,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.fabIcon,
     this.onFabPressed,
     this.fabPosition = M3EToolbarFabPosition.end,
+    this.dockEdge = M3EToolbarDockEdge.bottom,
     this.backgroundColor,
     this.foregroundColor,
     this.elevation,
@@ -60,10 +66,12 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     super.key,
-  })  : placement = M3EToolbarPlacement.floating,
-        dockEdge = M3EToolbarDockEdge.bottom;
+  }) : placement = M3EToolbarPlacement.floating;
 
   /// Explicit floating constructor (same as default).
+  ///
+  /// When [safeArea] is true, only [dockEdge] gets an **external** system
+  /// inset (outside the pill) — never inside [Material].
   const M3EToolbar.floating({
     this.leading,
     this.title,
@@ -85,6 +93,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.fabIcon,
     this.onFabPressed,
     this.fabPosition = M3EToolbarFabPosition.end,
+    this.dockEdge = M3EToolbarDockEdge.bottom,
     this.backgroundColor,
     this.foregroundColor,
     this.elevation,
@@ -93,8 +102,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     super.key,
-  })  : placement = M3EToolbarPlacement.floating,
-        dockEdge = M3EToolbarDockEdge.bottom;
+  }) : placement = M3EToolbarPlacement.floating;
 
   /// Docked full-bleed bar (Compose `FlexibleBottomAppBar`).
   ///
@@ -194,10 +202,8 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     final ShapeBorder shape =
         _floating ? toolbarTheme.floatingShape() : toolbarTheme.dockedShape();
 
-    final EdgeInsets contentPadding = _resolveContentPadding(
-      context,
-      metrics.contentPadding.resolve(Directionality.of(context)),
-    );
+    final EdgeInsets contentPadding =
+        metrics.contentPadding.resolve(Directionality.of(context));
 
     final Widget? resolvedTitle = title ??
         (titleText != null
@@ -222,6 +228,12 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     final bool hasTitle =
         resolvedTitle != null || resolvedSubtitle != null;
 
+    final bool iconsOnly = !hasTitle &&
+        leading == null &&
+        trailing == null &&
+        actions.isNotEmpty;
+    final bool dockedIconsOnly = !_floating && iconsOnly;
+
     final Widget actionsRow = M3EToolbarActionsRow(
       actions: actions,
       maxInline: maxInlineActions,
@@ -231,24 +243,33 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
           theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
       destructiveColor: scheme.error,
       axis: axis,
+      expand: dockedIconsOnly,
+      mainAxisAlignment: dockedIconsOnly
+          ? MainAxisAlignment.spaceEvenly
+          : MainAxisAlignment.start,
     );
 
     Widget? content;
     if (hasTitle) {
+      final double titleStartExtra = _floating
+          ? _titleOpticalStartInset(toolbarTheme, theme.iconButtonTheme)
+          : 0;
       content = Row(
-        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(
-            child: M3EToolbarTitleBlock(
-              title: resolvedTitle,
-              subtitle: resolvedSubtitle,
-              center: centerTitle,
-              titleStyle: toolbarTheme
-                  .titleStyle(theme.typeScale)
-                  .copyWith(color: foreground),
-              subtitleStyle: toolbarTheme
-                  .subtitleStyle(theme.typeScale)
-                  .copyWith(color: foreground.withValues(alpha: 0.8)),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: titleStartExtra),
+              child: M3EToolbarTitleBlock(
+                title: resolvedTitle,
+                subtitle: resolvedSubtitle,
+                center: centerTitle,
+                titleStyle: toolbarTheme
+                    .titleStyle(theme.typeScale)
+                    .copyWith(color: foreground),
+                subtitleStyle: toolbarTheme
+                    .subtitleStyle(theme.typeScale)
+                    .copyWith(color: foreground.withValues(alpha: 0.8)),
+              ),
             ),
           ),
           SizedBox(width: metrics.gap),
@@ -278,11 +299,9 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
             ? metrics.elevationWithFab
             : metrics.elevation);
 
-    final EdgeInsets resolvedPadding = padding?.resolve(Directionality.of(context)) ??
-        contentPadding;
-    // Docked: keep the 64dp content band; apply edge safe-area outside it so
-    // the container grows instead of crushing the row (Compose insets behavior).
-    final EdgeInsets edgeInset = _dockedEdgeInset(context);
+    final EdgeInsets resolvedPadding =
+        padding?.resolve(Directionality.of(context)) ?? contentPadding;
+    // Design-token padding only inside the pill / 64dp band — never system insets.
     final EdgeInsets innerPadding = EdgeInsets.only(
       left: resolvedPadding.left,
       right: resolvedPadding.right,
@@ -290,27 +309,33 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       bottom: _floating ? resolvedPadding.bottom : 0,
     );
 
+    final Widget contentBand = SizedBox(
+      height: axis == Axis.horizontal ? metrics.crossAxisSize : null,
+      width: axis == Axis.vertical
+          ? metrics.crossAxisSize
+          : (_floating && !hasTitle ? null : double.infinity),
+      child: Padding(
+        padding: innerPadding,
+        child: M3ETheme(
+          data: toolbarTheme.scopedTheme(theme, foreground),
+          child: body,
+        ),
+      ),
+    );
+
+    // Floating: Material is the pill only (token padding, fixed 64dp).
+    // Docked: edge safe-area may grow Material outside the 64dp band.
     Widget bar = Material(
       color: background,
       elevation: elev,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: Padding(
-        padding: edgeInset,
-        child: SizedBox(
-          height: axis == Axis.horizontal ? metrics.crossAxisSize : null,
-          width: axis == Axis.vertical
-              ? metrics.crossAxisSize
-              : (_floating && !hasTitle ? null : double.infinity),
-          child: Padding(
-            padding: innerPadding,
-            child: M3ETheme(
-              data: toolbarTheme.scopedTheme(theme, foreground),
-              child: body,
+      child: _floating
+          ? contentBand
+          : Padding(
+              padding: _edgeSafeAreaInset(context),
+              child: contentBand,
             ),
-          ),
-        ),
-      ),
     );
 
     if (_hasFab) {
@@ -326,9 +351,12 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
+    // Floating safe-area: external, single-edge only (never inside the pill).
     if (_floating && safeArea) {
-      final EdgeInsets mq = MediaQuery.paddingOf(context);
-      bar = Padding(padding: mq, child: bar);
+      bar = Padding(
+        padding: _edgeSafeAreaInset(context),
+        child: bar,
+      );
     }
 
     if (semanticLabel != null) {
@@ -341,13 +369,9 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     return bar;
   }
 
-  EdgeInsets _resolveContentPadding(BuildContext context, EdgeInsets base) {
-    // Docked edge inset is applied outside the 64dp band via [_dockedEdgeInset].
-    return base;
-  }
-
-  EdgeInsets _dockedEdgeInset(BuildContext context) {
-    if (_floating || !safeArea) {
+  /// System inset for [dockEdge] only — top XOR bottom, never all sides.
+  EdgeInsets _edgeSafeAreaInset(BuildContext context) {
+    if (!safeArea) {
       return EdgeInsets.zero;
     }
     final EdgeInsets mq = MediaQuery.paddingOf(context);
@@ -355,6 +379,19 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       top: dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
       bottom: dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,
     );
+  }
+
+  /// Extra start inset so title text matches trailing icon glyph edge inset.
+  double _titleOpticalStartInset(
+    M3EToolbarTheme toolbarTheme,
+    M3EIconButtonTheme iconButtonTheme,
+  ) {
+    final M3EIconButtonSize buttonSize = toolbarTheme.iconButtonSize(size);
+    final double targetWidth = iconButtonTheme
+        .target(buttonSize, M3EIconButtonWidth.defaultWidth)
+        .width;
+    final double iconPx = iconButtonTheme.iconSize(buttonSize);
+    return (targetWidth - iconPx) / 2;
   }
 
   Widget _withFab(Widget toolbar, M3EToolbarColorStyle style) {

@@ -69,6 +69,110 @@ void main() {
     expect(size.width, 64);
   });
 
+  testWidgets('floating safeArea pads outside the pill on one edge',
+      (tester) async {
+    await tester.pumpWidget(
+      _host(
+        padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
+        child: M3EToolbar(
+          safeArea: true,
+          dockEdge: M3EToolbarDockEdge.bottom,
+          actions: _actions(),
+        ),
+      ),
+    );
+
+    final Size toolbarSize = tester.getSize(find.byType(M3EToolbar));
+    final Size materialSize = tester.getSize(
+      find
+          .descendant(
+            of: find.byType(M3EToolbar),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+
+    // Pill stays token size; only bottom inset is added outside Material.
+    expect(materialSize.height, 64);
+    expect(toolbarSize.height, 64 + 40);
+    expect(toolbarSize.width, materialSize.width);
+  });
+
+  testWidgets('floating safeArea top pads only top outside pill',
+      (tester) async {
+    await tester.pumpWidget(
+      _host(
+        padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
+        child: M3EToolbar(
+          safeArea: true,
+          dockEdge: M3EToolbarDockEdge.top,
+          actions: _actions(),
+        ),
+      ),
+    );
+
+    final Size toolbarSize = tester.getSize(find.byType(M3EToolbar));
+    final Size materialSize = tester.getSize(
+      find
+          .descendant(
+            of: find.byType(M3EToolbar),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+
+    expect(materialSize.height, 64);
+    expect(toolbarSize.height, 64 + 20);
+    expect(toolbarSize.width, materialSize.width);
+  });
+
+  testWidgets('docked icons-only spaces actions evenly', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        child: const SizedBox(
+          width: 300,
+          child: M3EToolbar.docked(
+            safeArea: false,
+            actions: <M3EToolbarAction>[
+              M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
+              M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
+              M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double editX = tester.getCenter(find.byIcon(M3EIcons.edit)).dx;
+    final double shareX = tester.getCenter(find.byIcon(M3EIcons.share)).dx;
+    final double favoriteX =
+        tester.getCenter(find.byIcon(M3EIcons.favorite)).dx;
+
+    expect(shareX - editX, closeTo(favoriteX - shareX, 0.5));
+  });
+
+  testWidgets('floating title gets optical start inset', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        child: const SizedBox(
+          width: 360,
+          child: M3EToolbar(
+            titleText: 'Inbox',
+            actions: <M3EToolbarAction>[
+              M3EToolbarAction(icon: M3EIcons.search, onPressed: _noop),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double titleLeft = tester.getTopLeft(find.text('Inbox')).dx;
+    final double toolbarLeft =
+        tester.getTopLeft(find.byType(M3EToolbar)).dx;
+    // contentPadding 8 + (48 target - 24 icon) / 2 = 20
+    expect(titleLeft - toolbarLeft, closeTo(20, 0.5));
+  });
+
   testWidgets('docked bottom safeArea pads only bottom', (tester) async {
     await tester.pumpWidget(
       _host(

@@ -15,6 +15,8 @@ class M3EToolbarActionsRow extends StatelessWidget {
     required this.overflowTextStyle,
     required this.destructiveColor,
     this.axis = Axis.horizontal,
+    this.expand = false,
+    this.mainAxisAlignment = MainAxisAlignment.start,
     super.key,
   });
 
@@ -25,6 +27,10 @@ class M3EToolbarActionsRow extends StatelessWidget {
   final TextStyle overflowTextStyle;
   final Color destructiveColor;
   final Axis axis;
+
+  /// When true, the row fills the cross-axis parent's main-axis extent.
+  final bool expand;
+  final MainAxisAlignment mainAxisAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +60,19 @@ class M3EToolbarActionsRow extends StatelessWidget {
         ),
     ];
 
+    final MainAxisSize mainAxisSize =
+        expand ? MainAxisSize.max : MainAxisSize.min;
+
     if (axis == Axis.vertical) {
       return Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: mainAxisAlignment,
         children: children,
       );
     }
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: mainAxisSize,
+      mainAxisAlignment: mainAxisAlignment,
       children: children,
     );
   }
