@@ -20,7 +20,6 @@ class _ContainmentPageState extends State<ContainmentPage>
   bool get wantKeepAlive => true;
 
   late final List<Widget> _heroCarouselItems = _buildCarouselItems();
-  late final List<Widget> _uncontainedCarouselItems = _buildCarouselItems();
 
   static List<Widget> _buildCarouselItems() {
     return List<Widget>.generate(10, (int index) {
@@ -117,18 +116,6 @@ class _ContainmentPageState extends State<ContainmentPage>
           ),
         ),
         const SizedBox(height: 16),
-        RepaintBoundary(
-          child: SizedBox(
-            height: 160,
-            child: M3ECarousel(
-              type: M3ECarouselType.uncontained,
-              heroAlignment: M3ECarouselHeroAlignment.center,
-              onTap: (int tapIndex) => log(tapIndex.toString()),
-              children: _uncontainedCarouselItems,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
         const Text('Vertical hero'),
         const SizedBox(height: 8),
         RepaintBoundary(
@@ -141,37 +128,6 @@ class _ContainmentPageState extends State<ContainmentPage>
               heroAlignment: M3ECarouselHeroAlignment.center,
               onTap: (int tapIndex) => log(tapIndex.toString()),
               children: _heroCarouselItems,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text('Vertical contained'),
-        const SizedBox(height: 8),
-        RepaintBoundary(
-          child: SizedBox(
-            height: 280,
-            width: 180,
-            child: M3ECarousel(
-              axis: Axis.vertical,
-              type: M3ECarouselType.contained,
-              onTap: (int tapIndex) => log(tapIndex.toString()),
-              children: _heroCarouselItems,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text('Vertical uncontained'),
-        const SizedBox(height: 8),
-        RepaintBoundary(
-          child: SizedBox(
-            height: 280,
-            width: 160,
-            child: M3ECarousel(
-              axis: Axis.vertical,
-              type: M3ECarouselType.uncontained,
-              uncontainedItemExtent: 80,
-              onTap: (int tapIndex) => log(tapIndex.toString()),
-              children: _uncontainedCarouselItems,
             ),
           ),
         ),
