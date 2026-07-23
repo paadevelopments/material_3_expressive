@@ -52,7 +52,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
         ),
       if (overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
-          actions: overflow,
+          actions: overflow.where((M3EToolbarAction a) => !a.isExpandTrigger).toList(),
           icon: overflowIcon,
           iconButtonSize: iconButtonSize,
           textStyle: overflowTextStyle,

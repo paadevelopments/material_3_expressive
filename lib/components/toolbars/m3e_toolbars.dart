@@ -7,6 +7,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
@@ -14,6 +15,7 @@ import '../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../icon_buttons/styles/m3e_icon_button_theme.dart';
 import 'components/m3e_toolbar_actions_row.dart';
 import 'components/m3e_toolbar_body.dart';
+import 'components/m3e_toolbar_expanding_actions.dart';
 import 'components/m3e_toolbar_fab_slot.dart';
 import 'components/m3e_toolbar_title_block.dart';
 import 'enums/m3e_toolbar_enums.dart';
@@ -31,7 +33,11 @@ export 'styles/m3e_toolbar_theme.dart';
 /// - [M3EToolbar] / [M3EToolbar.floating] → `HorizontalFloatingToolbar` /
 ///   `VerticalFloatingToolbar`
 /// - [M3EToolbar.docked] → `FlexibleBottomAppBar` (docked toolbar tokens)
-class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
+///
+/// Floating toolbars own expand/collapse when an action sets
+/// [M3EToolbarAction.isExpandTrigger]. The pill grows left/right (or
+/// top/bottom) from that filled trigger with a spatial spring.
+class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// Floating toolbar (default). Horizontal unless [axis] is vertical.
   ///
   /// When [safeArea] is true, only [dockEdge] gets an **external** system
@@ -53,6 +59,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.size = M3EToolbarSize.medium,
     this.axis = Axis.horizontal,
     this.expanded = true,
+    this.onExpandedChanged,
     this.floatingActionButton,
     this.fabIcon,
     this.onFabPressed,
@@ -69,9 +76,6 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   }) : placement = M3EToolbarPlacement.floating;
 
   /// Explicit floating constructor (same as default).
-  ///
-  /// When [safeArea] is true, only [dockEdge] gets an **external** system
-  /// inset (outside the pill) — never inside [Material].
   const M3EToolbar.floating({
     this.leading,
     this.title,
@@ -89,6 +93,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.size = M3EToolbarSize.medium,
     this.axis = Axis.horizontal,
     this.expanded = true,
+    this.onExpandedChanged,
     this.floatingActionButton,
     this.fabIcon,
     this.onFabPressed,
@@ -134,6 +139,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
         axis = Axis.horizontal,
         alignment = Alignment.center,
         expanded = true,
+        onExpandedChanged = null,
         floatingActionButton = null,
         fabIcon = null,
         onFabPressed = null,
@@ -162,8 +168,13 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   final M3EToolbarVariant? variant;
   final M3EToolbarSize size;
 
-  /// When false, floating leading/trailing slots collapse.
+  /// Initial expand state for floating toolbars that have an expand trigger.
+  ///
+  /// The toolbar owns subsequent toggles. Listen via [onExpandedChanged].
   final bool expanded;
+
+  /// Called whenever the owned expand state changes.
+  final ValueChanged<bool>? onExpandedChanged;
 
   final Widget? floatingActionButton;
   final Widget? fabIcon;
@@ -178,12 +189,86 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   final Clip clipBehavior;
   final String? semanticLabel;
 
-  bool get _floating => placement == M3EToolbarPlacement.floating;
-  bool get _hasFab =>
-      _floating && (floatingActionButton != null || fabIcon != null);
-
   @override
   Size get preferredSize => Size.fromHeight(M3EToolbarTokens.containerSize);
+
+  @override
+  State<M3EToolbar> createState() => _M3EToolbarState();
+}
+
+class _M3EToolbarState extends State<M3EToolbar>
+    with TickerProviderStateMixin {
+  late bool _expanded;
+  late SingleMotionController _expandCtrl;
+
+  bool get _floating => widget.placement == M3EToolbarPlacement.floating;
+  bool get _hasFab =>
+      _floating &&
+      (widget.floatingActionButton != null || widget.fabIcon != null);
+  bool get _hasTrigger =>
+      widget.actions.any((M3EToolbarAction a) => a.isExpandTrigger);
+
+  @override
+  void initState() {
+    super.initState();
+    assert(
+      widget.actions.where((M3EToolbarAction a) => a.isExpandTrigger).length <=
+          1,
+      'At most one M3EToolbarAction may set isExpandTrigger.',
+    );
+    _expanded = widget.expanded;
+    _expandCtrl = SingleMotionController(
+      motion: m3eToolbarExpandMotion(),
+      vsync: this,
+      initialValue: _expanded || !_hasTrigger ? 1 : 0,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant M3EToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Docked / no-trigger always stay fully open.
+    if (!_floating || !_hasTrigger) {
+      if (_expandCtrl.value != 1) {
+        _expandCtrl.value = 1;
+      }
+      if (!_expanded) {
+        _expanded = true;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _expandCtrl.dispose();
+    super.dispose();
+  }
+
+  void _setExpanded(bool value) {
+    if (!_floating || !_hasTrigger || _expanded == value) {
+      return;
+    }
+    setState(() => _expanded = value);
+    widget.onExpandedChanged?.call(value);
+    _expandCtrl
+      ..motion = m3eToolbarExpandMotion()
+      ..animateTo(value ? 1 : 0);
+  }
+
+  void _toggleExpanded() => _setExpanded(!_expanded);
+
+  void _onTriggerPressed(M3EToolbarAction trigger) {
+    _toggleExpanded();
+    trigger.onPressed();
+  }
+
+  void _onFabPressed() {
+    // Collapsed + FAB alone: FAB expands the pill (trigger is not visible).
+    if (_hasFab && !_expanded && _hasTrigger) {
+      _setExpanded(true);
+    }
+    widget.onFabPressed?.call();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,33 +279,36 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EToolbarTheme toolbarTheme = theme.toolbarTheme;
     final M3EColorScheme scheme = theme.colorScheme;
-    final M3EToolbarMetrics metrics = toolbarTheme.metricsFor(placement);
-    final M3EToolbarColorStyle style =
-        variant != null ? toolbarTheme.colorStyleFromVariant(variant!) : colorStyle;
+    final M3EToolbarMetrics metrics =
+        toolbarTheme.metricsFor(widget.placement);
+    final M3EToolbarColorStyle style = widget.variant != null
+        ? toolbarTheme.colorStyleFromVariant(widget.variant!)
+        : widget.colorStyle;
     final M3EToolbarColors colors = toolbarTheme.colors(scheme, style);
 
-    final Color background = backgroundColor ?? colors.container;
-    final Color foreground = foregroundColor ?? colors.content;
-    final ShapeBorder shape =
-        _floating ? toolbarTheme.floatingShape() : toolbarTheme.dockedShape();
+    final Color background = widget.backgroundColor ?? colors.container;
+    final Color foreground = widget.foregroundColor ?? colors.content;
+    final ShapeBorder shape = _floating
+        ? toolbarTheme.floatingShape()
+        : toolbarTheme.dockedShape();
 
     final EdgeInsets contentPadding =
         metrics.contentPadding.resolve(Directionality.of(context));
 
-    final Widget? resolvedTitle = title ??
-        (titleText != null
+    final Widget? resolvedTitle = widget.title ??
+        (widget.titleText != null
             ? Text(
-                titleText!,
+                widget.titleText!,
                 style: toolbarTheme
                     .titleStyle(theme.typeScale)
                     .copyWith(color: foreground),
                 overflow: TextOverflow.ellipsis,
               )
             : null);
-    final Widget? resolvedSubtitle = subtitle ??
-        (subtitleText != null
+    final Widget? resolvedSubtitle = widget.subtitle ??
+        (widget.subtitleText != null
             ? Text(
-                subtitleText!,
+                widget.subtitleText!,
                 style: toolbarTheme
                     .subtitleStyle(theme.typeScale)
                     .copyWith(color: foreground.withValues(alpha: 0.8)),
@@ -231,26 +319,54 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
         resolvedTitle != null || resolvedSubtitle != null;
 
     final bool iconsOnly = !hasTitle &&
-        leading == null &&
-        trailing == null &&
-        actions.isNotEmpty;
+        widget.leading == null &&
+        widget.trailing == null &&
+        widget.actions.isNotEmpty;
     final bool dockedIconsOnly = !_floating && iconsOnly;
 
-    final Widget actionsRow = M3EToolbarActionsRow(
-      actions: actions,
-      maxInline: maxInlineActions,
-      overflowIcon: overflowIcon,
-      iconButtonSize: toolbarTheme.iconButtonSize(size),
-      overflowTextStyle:
-          theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
-      destructiveColor: scheme.error,
-      axis: axis,
-      expand: dockedIconsOnly,
-      // spaceBetween: first/last sit on the padded edges; free space is between.
-      mainAxisAlignment: dockedIconsOnly
-          ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.start,
-    );
+    final bool useExpanding =
+        _floating && _hasTrigger && !hasTitle;
+
+    final Widget actionsContent = useExpanding
+        ? AnimatedBuilder(
+            animation: _expandCtrl,
+            builder: (BuildContext context, Widget? child) {
+              return M3EToolbarExpandingActions(
+                actions: widget.actions,
+                maxInline: widget.maxInlineActions,
+                overflowIcon: widget.overflowIcon,
+                iconButtonSize: toolbarTheme.iconButtonSize(widget.size),
+                overflowTextStyle: theme.typeScale.labelLarge
+                    .copyWith(color: scheme.onSurface),
+                destructiveColor: scheme.error,
+                axis: widget.axis,
+                expandProgress: _expandCtrl.value,
+                onTriggerPressed: () {
+                  final M3EToolbarAction trigger = widget.actions.firstWhere(
+                    (M3EToolbarAction a) => a.isExpandTrigger,
+                  );
+                  _onTriggerPressed(trigger);
+                },
+                leading: widget.leading,
+                trailing: widget.trailing,
+                gap: metrics.gap,
+              );
+            },
+          )
+        : M3EToolbarActionsRow(
+            actions: widget.actions,
+            maxInline: widget.maxInlineActions,
+            overflowIcon: widget.overflowIcon,
+            iconButtonSize: toolbarTheme.iconButtonSize(widget.size),
+            overflowTextStyle:
+                theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
+            destructiveColor: scheme.error,
+            axis: widget.axis,
+            expand: dockedIconsOnly,
+            mainAxisAlignment: dockedIconsOnly
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.start,
+          );
 
     Widget? content;
     if (hasTitle) {
@@ -265,7 +381,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
               child: M3EToolbarTitleBlock(
                 title: resolvedTitle,
                 subtitle: resolvedSubtitle,
-                center: centerTitle,
+                center: widget.centerTitle,
                 titleStyle: toolbarTheme
                     .titleStyle(theme.typeScale)
                     .copyWith(color: foreground),
@@ -276,35 +392,36 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
           SizedBox(width: metrics.gap),
-          actionsRow,
+          actionsContent,
         ],
       );
-    } else if (actions.isNotEmpty) {
-      content = actionsRow;
+    } else if (widget.actions.isNotEmpty || useExpanding) {
+      content = actionsContent;
     }
 
-    final Widget body = M3EToolbarBody(
-      axis: axis,
-      expanded: expanded,
-      gap: metrics.gap,
-      leading: leading,
-      trailing: trailing,
-      content: content,
-      mainAxisSize: _floating && !hasTitle ? MainAxisSize.min : MainAxisSize.max,
-      mainAxisAlignment: _floating
-          ? MainAxisAlignment.center
-          : MainAxisAlignment.spaceBetween,
-      expandContent: !_floating || hasTitle,
-    );
+    // Expanding actions already host leading/trailing inside the morph.
+    final Widget body = useExpanding
+        ? (content ?? const SizedBox.shrink())
+        : M3EToolbarBody(
+            axis: widget.axis,
+            gap: metrics.gap,
+            leading: widget.leading,
+            trailing: widget.trailing,
+            content: content,
+            mainAxisSize:
+                _floating && !hasTitle ? MainAxisSize.min : MainAxisSize.max,
+            mainAxisAlignment: _floating
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.spaceBetween,
+            expandContent: !_floating || hasTitle,
+          );
 
-    final double elev = elevation ??
-        (_hasFab && expanded
-            ? metrics.elevationWithFab
-            : metrics.elevation);
+    final bool showFabElevation = _hasFab && _expanded;
+    final double elev = widget.elevation ??
+        (showFabElevation ? metrics.elevationWithFab : metrics.elevation);
 
     final EdgeInsets resolvedPadding =
-        padding?.resolve(Directionality.of(context)) ?? contentPadding;
-    // Design-token padding only inside the pill / 64dp band — never system insets.
+        widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
     final EdgeInsets innerPadding = EdgeInsets.only(
       left: resolvedPadding.left,
       right: resolvedPadding.right,
@@ -313,8 +430,8 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     );
 
     final Widget contentBand = SizedBox(
-      height: axis == Axis.horizontal ? metrics.crossAxisSize : null,
-      width: axis == Axis.vertical
+      height: widget.axis == Axis.horizontal ? metrics.crossAxisSize : null,
+      width: widget.axis == Axis.vertical
           ? metrics.crossAxisSize
           : (_floating && !hasTitle ? null : double.infinity),
       child: Padding(
@@ -326,13 +443,11 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    // Floating: Material is the pill only (token padding, fixed 64dp).
-    // Docked: edge safe-area may grow Material outside the 64dp band.
     Widget bar = Material(
       color: background,
       elevation: elev,
       shape: shape,
-      clipBehavior: clipBehavior,
+      clipBehavior: widget.clipBehavior,
       child: _floating
           ? contentBand
           : Padding(
@@ -345,53 +460,47 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       bar = _withFab(bar, style);
     }
 
-    // Floating safe-area: external, single-edge only (never inside the pill).
-    if (_floating && safeArea) {
+    if (_floating && widget.safeArea) {
       bar = Padding(
         padding: _edgeSafeAreaInset(context),
         child: bar,
       );
     }
 
-    // Floating: position within parent (default center; override via [alignment]).
     if (_floating) {
       bar = Align(
-        alignment: alignment,
+        alignment: widget.alignment,
         child: bar,
       );
     }
 
-    if (semanticLabel != null) {
+    if (widget.semanticLabel != null) {
       bar = Semantics(
         container: true,
-        label: semanticLabel,
+        label: widget.semanticLabel,
         child: bar,
       );
     }
     return bar;
   }
 
-  /// System inset for [dockEdge] only — top XOR bottom, never all sides.
-  ///
-  /// Uses [MediaQuery.viewPaddingOf] so insets remain available when ancestors
-  /// have consumed / zeroed [MediaQuery.paddingOf] (e.g. edge-to-edge).
   EdgeInsets _edgeSafeAreaInset(BuildContext context) {
-    if (!safeArea) {
+    if (!widget.safeArea) {
       return EdgeInsets.zero;
     }
     final EdgeInsets mq = MediaQuery.viewPaddingOf(context);
     return EdgeInsets.only(
-      top: dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
-      bottom: dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,
+      top: widget.dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
+      bottom: widget.dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,
     );
   }
 
-  /// Extra start inset so title text matches trailing icon glyph edge inset.
   double _titleOpticalStartInset(
     M3EToolbarTheme toolbarTheme,
     M3EIconButtonTheme iconButtonTheme,
   ) {
-    final M3EIconButtonSize buttonSize = toolbarTheme.iconButtonSize(size);
+    final M3EIconButtonSize buttonSize =
+        toolbarTheme.iconButtonSize(widget.size);
     final double targetWidth = iconButtonTheme
         .target(buttonSize, M3EIconButtonWidth.defaultWidth)
         .width;
@@ -401,21 +510,17 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _withFab(Widget toolbar, M3EToolbarColorStyle style) {
     final Widget fab = M3EToolbarFabSlot(
-      expanded: expanded,
-      fab: floatingActionButton,
-      icon: fabIcon,
-      onPressed: onFabPressed,
+      fab: widget.floatingActionButton,
+      icon: widget.fabIcon,
+      onPressed: _onFabPressed,
       color: style == M3EToolbarColorStyle.vibrant
           ? M3EFabColor.tertiary
           : M3EFabColor.primary,
     );
 
-    if (!expanded) {
-      return fab;
-    }
-
-    final bool horizontal = axis == Axis.horizontal;
-    final bool fabFirst = switch (fabPosition) {
+    final bool horizontal = widget.axis == Axis.horizontal;
+    // FAB stays on the outer end — unaffected by pill expand/collapse.
+    final bool fabFirst = switch (widget.fabPosition) {
       M3EToolbarFabPosition.start || M3EToolbarFabPosition.top => true,
       M3EToolbarFabPosition.end || M3EToolbarFabPosition.bottom => false,
     };
@@ -429,12 +534,20 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
         ? <Widget>[fab, gap, toolbar]
         : <Widget>[toolbar, gap, fab];
 
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: horizontal
-          ? Row(mainAxisSize: MainAxisSize.min, children: children)
-          : Column(mainAxisSize: MainAxisSize.min, children: children),
+    return AnimatedBuilder(
+      animation: _expandCtrl,
+      builder: (BuildContext context, Widget? child) {
+        // Collapsed + FAB → FAB alone. With a trigger, wait for the spring to
+        // settle near 0 so the pill can retract first.
+        final bool hidePill = !_expanded &&
+            (!_hasTrigger || _expandCtrl.value < 0.02);
+        if (hidePill) {
+          return fab;
+        }
+        return horizontal
+            ? Row(mainAxisSize: MainAxisSize.min, children: children)
+            : Column(mainAxisSize: MainAxisSize.min, children: children);
+      },
     );
   }
 }

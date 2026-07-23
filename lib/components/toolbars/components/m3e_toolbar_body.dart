@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 class M3EToolbarBody extends StatelessWidget {
   const M3EToolbarBody({
     required this.axis,
-    required this.expanded,
     required this.gap,
     this.leading,
     this.trailing,
@@ -19,7 +18,6 @@ class M3EToolbarBody extends StatelessWidget {
   });
 
   final Axis axis;
-  final bool expanded;
   final double gap;
   final Widget? leading;
   final Widget? trailing;
@@ -39,7 +37,7 @@ class M3EToolbarBody extends StatelessWidget {
     }
 
     final List<Widget> children = <Widget>[
-      if (expanded && leading != null) ...<Widget>[
+      if (leading != null) ...<Widget>[
         leading!,
         SizedBox(
           width: axis == Axis.horizontal ? gap : 0,
@@ -47,7 +45,7 @@ class M3EToolbarBody extends StatelessWidget {
         ),
       ],
       if (resolvedContent != null) resolvedContent,
-      if (expanded && trailing != null) ...<Widget>[
+      if (trailing != null) ...<Widget>[
         SizedBox(
           width: axis == Axis.horizontal ? gap : 0,
           height: axis == Axis.vertical ? gap : 0,

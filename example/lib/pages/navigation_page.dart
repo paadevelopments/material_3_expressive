@@ -272,7 +272,11 @@ class _NavigationPageState extends State<NavigationPage>
   Widget _toolbarAndMenu() {
     final List<M3EToolbarAction> sampleActions = <M3EToolbarAction>[
       M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
-      M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+      M3EToolbarAction(
+        icon: M3EIcons.share,
+        onPressed: () {},
+        isExpandTrigger: true,
+      ),
       M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
     ];
 
@@ -287,7 +291,7 @@ class _NavigationPageState extends State<NavigationPage>
       title: 'Toolbar & menu',
       children: <Widget>[
         DemoRow(
-          label: 'Floating (standard / vibrant)',
+          label: 'Floating (tap filled trigger to expand / collapse)',
           children: <Widget>[
             M3EToolbar(
               actions: sampleActions,
@@ -299,17 +303,8 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label: 'Floating + leading (expanded / collapsed)',
+          label: 'Floating + leading (starts collapsed)',
           children: <Widget>[
-            M3EToolbar(
-              expanded: true,
-              leading: M3EIconButton(
-                icon: const Icon(M3EIcons.arrow_back),
-                onPressed: () {},
-                size: M3EIconButtonSize.sm,
-              ),
-              actions: sampleActions,
-            ),
             M3EToolbar(
               expanded: false,
               leading: M3EIconButton(
@@ -322,7 +317,7 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label: 'Floating + FAB (expanded / collapsed)',
+          label: 'Floating + FAB (collapsed = FAB alone; tap FAB to expand)',
           children: <Widget>[
             M3EToolbar(
               actions: sampleActions,

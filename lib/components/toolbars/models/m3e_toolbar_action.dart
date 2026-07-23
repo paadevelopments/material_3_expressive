@@ -10,6 +10,7 @@ class M3EToolbarAction {
     this.enabled = true,
     this.label,
     this.isDestructive = false,
+    this.isExpandTrigger = false,
   });
 
   final IconData icon;
@@ -23,4 +24,10 @@ class M3EToolbarAction {
 
   /// When true, the overflow menu entry uses the error color.
   final bool isDestructive;
+
+  /// Marks this action as the floating-toolbar expand/collapse trigger.
+  ///
+  /// At most one action in a toolbar may set this. The trigger uses filled
+  /// icon-button styling and toggles expansion while still calling [onPressed].
+  final bool isExpandTrigger;
 }
