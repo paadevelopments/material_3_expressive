@@ -490,6 +490,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             targetKeys: _destinationKeys,
             axis: Axis.vertical,
             color: indicatorColor,
+            layoutToken: _isExpanded,
+            layoutSettleDuration: M3ENavigationRailLayout.expandDuration,
             child: destinations,
           );
         },

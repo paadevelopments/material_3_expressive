@@ -16,6 +16,8 @@ class M3ENavSelectionIndicator extends StatefulWidget {
     required this.color,
     required this.child,
     this.enabled = true,
+    this.layoutToken,
+    this.layoutSettleDuration = Duration.zero,
     super.key,
   });
 
@@ -25,6 +27,14 @@ class M3ENavSelectionIndicator extends StatefulWidget {
   final Color color;
   final Widget child;
   final bool enabled;
+
+  /// When this value changes (e.g. rail expanded ↔ collapsed), the pill
+  /// remeasures and snaps to the new destination geometry.
+  final Object? layoutToken;
+
+  /// How long to keep remeasuring after [layoutToken] changes (e.g. width
+  /// animation). The pill tracks the selected item without a travel morph.
+  final Duration layoutSettleDuration;
 
   @override
   State<M3ENavSelectionIndicator> createState() =>
@@ -44,6 +54,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   double _baseMain = 0;
   double _crossSize = 0;
   bool _ready = false;
+  int _layoutTrackId = 0;
 
   /// Lead moves with snappier shape spring; trail follows with position spring.
   SpringMotion get _leadMotion =>
@@ -67,6 +78,8 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedIndex != widget.selectedIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+    } else if (oldWidget.layoutToken != widget.layoutToken) {
+      _trackLayoutChange();
     } else if (oldWidget.targetKeys.length != widget.targetKeys.length ||
         oldWidget.enabled != widget.enabled) {
       WidgetsBinding.instance
@@ -74,8 +87,32 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     }
   }
 
+  /// Remeasure through a layout transition (expand/collapse) so the pill
+  /// matches the new item size/position without a selection morph.
+  void _trackLayoutChange() {
+    final int track = ++_layoutTrackId;
+    void tick() {
+      if (!mounted || track != _layoutTrackId) {
+        return;
+      }
+      _sync(forceJump: true);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => tick());
+
+    final Duration settle = widget.layoutSettleDuration;
+    if (settle <= Duration.zero) {
+      return;
+    }
+    final int frames = (settle.inMilliseconds / 16).ceil().clamp(1, 60);
+    for (int i = 1; i <= frames; i++) {
+      Future<void>.delayed(Duration(milliseconds: 16 * i), tick);
+    }
+  }
+
   @override
   void dispose() {
+    _layoutTrackId++;
     _lead.dispose();
     _trail.dispose();
     super.dispose();

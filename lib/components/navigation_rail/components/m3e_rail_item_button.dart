@@ -172,6 +172,7 @@ class M3ERailItemButton extends StatelessWidget {
           width: M3EIconButtonWidth.wide,
           badgeValue: badgeCount,
           onPressed: onPressed,
+          suppressInk: true,
           variant: useLocalIndicator && isSelected
               ? M3EIconButtonVariant.tonal
               : M3EIconButtonVariant.standard,
@@ -190,8 +191,7 @@ class M3ERailItemButton extends StatelessWidget {
       );
     }
 
-    // Material/Ink wrapper. Respect [suppressInk] to avoid flicker during transitions.
-    final bool noInk = suppressInk || !expanded;
+    // No ink splash — the shared selection indicator is the selection feedback.
     final Material material = Material(
       key: expanded ? indicatorKey : null,
       color: bg,
@@ -199,9 +199,10 @@ class M3ERailItemButton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        splashFactory: noInk ? NoSplash.splashFactory : null,
-        hoverColor: noInk ? Colors.transparent : null,
-        highlightColor: noInk ? Colors.transparent : null,
+        splashFactory: NoSplash.splashFactory,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
         child: Padding(
           // Horizontal padding similar to ButtonM3E sm; for collapsed, none.
           padding: expanded

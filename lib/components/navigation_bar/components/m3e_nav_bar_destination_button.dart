@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
 import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_navigation_bar_destination.dart';
-import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
 
 /// Single destination cell inside [M3ENavigationBar].
+///
+/// No ink splash — the shared selection indicator is the selection feedback.
 class M3ENavBarDestinationButton extends StatelessWidget {
   const M3ENavBarDestinationButton({
     required this.destination,
@@ -88,9 +90,9 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: destination.semanticLabel ?? destination.label,
-      child: InkWell(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        customBorder: const StadiumBorder(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
