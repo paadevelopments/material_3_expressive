@@ -741,6 +741,14 @@ M3EDialog.show<void>(
   ),
 );
 
+// Selection list (single or multi); confirm disabled until a choice is made
+final List<String>? picked = await M3EDialog.showSelectionScreen(
+  context,
+  title: 'Choose a plan',
+  options: const <String>['Standard', 'Pro', 'Team'],
+  multiSelect: false,
+);
+
 // Full-screen variant
 M3EDialog.showFullScreen<void>(
   context,

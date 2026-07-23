@@ -300,6 +300,16 @@ class _ContainmentPageState extends State<ContainmentPage>
             ),
             M3EButton(
               style: M3EButtonStyle.tonal,
+              onPressed: () => _showSelectionDialog(context),
+              child: const Text('Selection'),
+            ),
+            M3EButton(
+              style: M3EButtonStyle.tonal,
+              onPressed: () => _showMultiSelectionDialog(context),
+              child: const Text('Multi selection'),
+            ),
+            M3EButton(
+              style: M3EButtonStyle.tonal,
               onPressed: () => _showFullScreen(context),
               child: const Text('Full screen'),
             ),
@@ -367,6 +377,31 @@ class _ContainmentPageState extends State<ContainmentPage>
         ],
       ),
     );
+  }
+
+  Future<void> _showSelectionDialog(BuildContext context) async {
+    final List<String>? selected = await M3EDialog.showSelectionScreen(
+      context,
+      title: 'Choose a plan',
+      options: const <String>['Standard', 'Pro', 'Team', 'Enterprise'],
+    );
+    if (!context.mounted || selected == null) {
+      return;
+    }
+    // Selection confirmed — demo only logs via no-op pop already handled.
+  }
+
+  Future<void> _showMultiSelectionDialog(BuildContext context) async {
+    final List<String>? selected = await M3EDialog.showSelectionScreen(
+      context,
+      title: 'Select topics',
+      multiSelect: true,
+      options: const <String>['Design', 'Engineering', 'Marketing', 'Sales'],
+      confirmLabel: 'Done',
+    );
+    if (!context.mounted || selected == null) {
+      return;
+    }
   }
 
   void _showFullScreen(BuildContext context) {

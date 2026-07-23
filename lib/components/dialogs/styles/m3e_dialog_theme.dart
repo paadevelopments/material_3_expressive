@@ -16,6 +16,7 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     this.gapAfterTitle = 16,
     this.gapBeforeActions = 24,
     this.actionGap = 8,
+    this.selectionItemHeight = 56,
     this.fullScreenHeaderHeight = 64,
     this.headerEdgeGap = 4,
     this.closeButtonPadding = const EdgeInsets.all(12),
@@ -35,6 +36,9 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   final double gapAfterTitle;
   final double gapBeforeActions;
   final double actionGap;
+
+  /// Height of each selectable row in selection dialogs.
+  final double selectionItemHeight;
   final double fullScreenHeaderHeight;
   final double headerEdgeGap;
   final EdgeInsets closeButtonPadding;
@@ -62,6 +66,7 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     double? gapAfterTitle,
     double? gapBeforeActions,
     double? actionGap,
+    double? selectionItemHeight,
     double? fullScreenHeaderHeight,
     double? headerEdgeGap,
     EdgeInsets? closeButtonPadding,
@@ -79,6 +84,7 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
       gapAfterTitle: gapAfterTitle ?? this.gapAfterTitle,
       gapBeforeActions: gapBeforeActions ?? this.gapBeforeActions,
       actionGap: actionGap ?? this.actionGap,
+      selectionItemHeight: selectionItemHeight ?? this.selectionItemHeight,
       fullScreenHeaderHeight:
           fullScreenHeaderHeight ?? this.fullScreenHeaderHeight,
       headerEdgeGap: headerEdgeGap ?? this.headerEdgeGap,
@@ -104,6 +110,8 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
       gapAfterTitle: _lerpDouble(gapAfterTitle, other.gapAfterTitle, t)!,
       gapBeforeActions: _lerpDouble(gapBeforeActions, other.gapBeforeActions, t)!,
       actionGap: _lerpDouble(actionGap, other.actionGap, t)!,
+      selectionItemHeight:
+          _lerpDouble(selectionItemHeight, other.selectionItemHeight, t)!,
       fullScreenHeaderHeight:
           _lerpDouble(fullScreenHeaderHeight, other.fullScreenHeaderHeight, t)!,
       headerEdgeGap: _lerpDouble(headerEdgeGap, other.headerEdgeGap, t)!,
