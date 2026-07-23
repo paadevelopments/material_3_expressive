@@ -56,6 +56,12 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   bool _ready = false;
   int _layoutTrackId = 0;
 
+  /// Cached geometries so selection changes can animate without waiting a frame.
+  final Map<int, ({double main, double cross, double mainSize, double crossSize})>
+      _geoCache =
+      <int, ({double main, double cross, double mainSize, double crossSize})>{};
+
+
   /// Lead moves with snappier shape spring; trail follows with position spring.
   SpringMotion get _leadMotion =>
       const MaterialSpringMotion.expressiveSpatialDefault()
@@ -77,11 +83,13 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   void didUpdateWidget(covariant M3ENavSelectionIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedIndex != widget.selectedIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+      // Item slots don't move on selection — start the morph immediately.
+      _sync();
     } else if (oldWidget.layoutToken != widget.layoutToken) {
       _trackLayoutChange();
     } else if (oldWidget.targetKeys.length != widget.targetKeys.length ||
         oldWidget.enabled != widget.enabled) {
+      _geoCache.clear();
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _sync(forceJump: true));
     }
@@ -91,6 +99,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   /// matches the new item size/position without a selection morph.
   void _trackLayoutChange() {
     final int track = ++_layoutTrackId;
+    _geoCache.clear();
     void tick() {
       if (!mounted || track != _layoutTrackId) {
         return;
@@ -129,8 +138,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   RenderBox? get _stackBox =>
       _stackKey.currentContext?.findRenderObject() as RenderBox?;
 
-  /// Target center along the main axis + geometry, in stack-local coords.
-  ({double main, double cross, double mainSize, double crossSize})? _geometryOf(
+  ({double main, double cross, double mainSize, double crossSize})? _readGeometry(
     int index,
   ) {
     if (index < 0 || index >= widget.targetKeys.length) {
@@ -159,6 +167,26 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     );
   }
 
+  void _refreshCache() {
+    for (int i = 0; i < widget.targetKeys.length; i++) {
+      final geo = _readGeometry(i);
+      if (geo != null) {
+        _geoCache[i] = geo;
+      }
+    }
+  }
+
+  ({double main, double cross, double mainSize, double crossSize})? _geometryOf(
+    int index,
+  ) {
+    final live = _readGeometry(index);
+    if (live != null) {
+      _geoCache[index] = live;
+      return live;
+    }
+    return _geoCache[index];
+  }
+
   void _sync({bool forceJump = false}) {
     if (!mounted || !widget.enabled) {
       if (_ready) {
@@ -168,6 +196,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     }
     final geo = _geometryOf(widget.selectedIndex);
     if (geo == null) {
+      // First layout: try again next frame.
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _sync(forceJump: forceJump));
       return;
     }
 
@@ -178,7 +209,13 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     if (!_ready || forceJump) {
       _lead.value = geo.main;
       _trail.value = geo.main;
-      setState(() => _ready = true);
+      if (!_ready) {
+        setState(() => _ready = true);
+      } else {
+        // Geometry-only snap (expand/collapse).
+        setState(() {});
+      }
+      _refreshCache();
       return;
     }
 
@@ -188,15 +225,16 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     _trail
       ..motion = _trailMotion
       ..animateTo(geo.main);
-    // Cross-axis / size may change (expand/collapse); refresh layout.
-    setState(() {});
+    // No setState — AnimatedBuilder rebuilds the pill; avoid rebuilding
+    // the destination list (that felt like tap latency).
   }
 
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification n) {
-        _sync();
+        _refreshCache();
+        _sync(forceJump: true);
         return false;
       },
       child: Stack(
@@ -223,7 +261,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     final double maxMain = math.max(lead, trail);
     final double mainExtent = (maxMain - minMain) + _baseMain;
     final double mainStart = minMain - _baseMain / 2;
-    final double radius = _crossSize / 2;
+    final double radius = math.min(_crossSize, _baseMain) / 2;
 
     if (widget.axis == Axis.vertical) {
       return Positioned(

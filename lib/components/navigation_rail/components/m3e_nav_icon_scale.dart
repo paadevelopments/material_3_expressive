@@ -38,9 +38,10 @@ class _M3ENavIconScaleState extends State<M3ENavIconScale>
   void didUpdateWidget(covariant M3ENavIconScale oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!oldWidget.selected && widget.selected) {
+      // Overshoot spring from slightly under 1 — no shrink-first dip.
       _scale
         ..motion = _motion
-        ..value = 0.92
+        ..value = 0.98
         ..animateTo(1);
     }
   }
