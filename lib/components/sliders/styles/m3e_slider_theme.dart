@@ -79,13 +79,14 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     final Color activeTrack = active(scheme.primary);
     final Color inactiveTrack = inactive(scheme.secondaryContainer);
     // Compose reverses tick colors relative to track roles.
+    // Stop indicators use active-track color (visible on inactive ends).
     return M3ESliderColors(
       thumb: active(scheme.primary),
       activeTrack: activeTrack,
       inactiveTrack: inactiveTrack,
       activeTick: inactiveTrack,
       inactiveTick: activeTrack,
-      stopIndicator: inactiveTrack,
+      stopIndicator: activeTrack,
       valueIndicator: scheme.inverseSurface,
       valueIndicatorLabel: scheme.onInverseSurface,
     );

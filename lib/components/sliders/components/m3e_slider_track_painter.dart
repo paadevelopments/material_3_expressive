@@ -102,14 +102,6 @@ class M3ESliderTrackPainter extends CustomPainter {
           startCorner: _rtl ? insideCornerSize : corner,
           endCorner: _rtl ? corner : insideCornerSize,
         );
-        if (drawStops) {
-          _drawStop(
-            canvas,
-            trackBounds,
-            start + corner,
-            colors.stopIndicator,
-          );
-        }
       }
     }
 
@@ -129,14 +121,6 @@ class M3ESliderTrackPainter extends CustomPainter {
           startCorner: _rtl ? corner : insideCornerSize,
           endCorner: _rtl ? insideCornerSize : corner,
         );
-        if (drawStops) {
-          _drawStop(
-            canvas,
-            trackBounds,
-            end - corner,
-            colors.stopIndicator,
-          );
-        }
       }
     }
 
@@ -167,7 +151,36 @@ class M3ESliderTrackPainter extends CustomPainter {
       );
     }
 
-    // Discrete ticks (skip stops and handle gaps).
+    // Track-end stop indicators — only on inactive track (never on the
+    // active/value segment). Compose draws these with active-track color.
+    final double stopStart = sliderStart + corner;
+    final double stopEnd = sliderEnd - corner;
+    if (drawStops && stopEnd > stopStart) {
+      if (!_onActiveOrGap(
+        stopStart,
+        activeStart: activeStart,
+        activeEnd: activeEnd,
+        valueStart: valueStart,
+        valueEnd: valueEnd,
+        startGap: startGap,
+        endGap: endGap,
+      )) {
+        _drawStop(canvas, trackBounds, stopStart, colors.inactiveTick);
+      }
+      if (!_onActiveOrGap(
+        stopEnd,
+        activeStart: activeStart,
+        activeEnd: activeEnd,
+        valueStart: valueStart,
+        valueEnd: valueEnd,
+        startGap: startGap,
+        endGap: endGap,
+      )) {
+        _drawStop(canvas, trackBounds, stopEnd, colors.inactiveTick);
+      }
+    }
+
+    // Discrete ticks (skip track-end stops and handle gaps).
     if (tickFractions.isEmpty) {
       return;
     }
@@ -181,11 +194,9 @@ class M3ESliderTrackPainter extends CustomPainter {
     final double tickEndGapHi = valueEnd + endGap;
 
     for (int i = 0; i < tickFractions.length; i++) {
-      if (drawStops) {
-        final bool stopAtStart = (_centered || _range) && i == 0;
-        if (stopAtStart || i == tickFractions.length - 1) {
-          continue;
-        }
+      // Ends are owned by stop indicators when enabled.
+      if (drawStops && (i == 0 || i == tickFractions.length - 1)) {
+        continue;
       }
       final double centerTick =
           M3ESliderMath.lerp(tickStart, tickEnd, tickFractions[i]);
@@ -212,6 +223,30 @@ class M3ESliderTrackPainter extends CustomPainter {
         size: tickSize,
       );
     }
+  }
+
+  /// True when [primary] sits on the active/value fill or in a thumb gap.
+  bool _onActiveOrGap(
+    double primary, {
+    required double activeStart,
+    required double activeEnd,
+    required double valueStart,
+    required double valueEnd,
+    required double startGap,
+    required double endGap,
+  }) {
+    if (primary >= activeStart && primary <= activeEnd) {
+      return true;
+    }
+    if (_centered || _range) {
+      if (primary >= valueStart - startGap && primary <= valueStart + startGap) {
+        return true;
+      }
+    }
+    if (primary >= valueEnd - endGap && primary <= valueEnd + endGap) {
+      return true;
+    }
+    return false;
   }
 
   Rect _trackBounds(Size size, double trackCross) {
