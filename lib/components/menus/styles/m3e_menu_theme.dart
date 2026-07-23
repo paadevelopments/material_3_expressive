@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/styles/m3e_button_motion.dart';
 import '../enums/m3e_menu_item_shape.dart';
 
 /// Theme values for `M3EMenu` (Compose `MenuDefaults` expressive tokens).
@@ -24,8 +23,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     this.disabledOpacity = 0.38,
     this.scrimAlpha = 0.0,
     this.screenEdgePadding = 12,
-    this.scaleFrom = 0.72,
-    this.motion = M3EButtonMotion.standardPopup,
+    this.openMotion = M3EMotion.expressiveSpatialDefault,
+    this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.itemGap = 0,
   });
 
@@ -47,8 +46,13 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   final double disabledOpacity;
   final double scrimAlpha;
   final double screenEdgePadding;
-  final double scaleFrom;
-  final M3EButtonMotion motion;
+
+  /// Spring for expand — same default as [M3EDropdownMenu.openMotion].
+  final M3ESpring openMotion;
+
+  /// Spring for collapse — same default as [M3EDropdownMenu.closeMotion].
+  final M3ESpring closeMotion;
+
   final double itemGap;
 
   BorderRadius get borderRadius => M3EShapes.radiusExtraSmall;
@@ -163,8 +167,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     double? disabledOpacity,
     double? scrimAlpha,
     double? screenEdgePadding,
-    double? scaleFrom,
-    M3EButtonMotion? motion,
+    M3ESpring? openMotion,
+    M3ESpring? closeMotion,
     double? itemGap,
   }) {
     return M3EMenuTheme(
@@ -187,8 +191,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
       scrimAlpha: scrimAlpha ?? this.scrimAlpha,
       screenEdgePadding: screenEdgePadding ?? this.screenEdgePadding,
-      scaleFrom: scaleFrom ?? this.scaleFrom,
-      motion: motion ?? this.motion,
+      openMotion: openMotion ?? this.openMotion,
+      closeMotion: closeMotion ?? this.closeMotion,
       itemGap: itemGap ?? this.itemGap,
     );
   }
@@ -225,8 +229,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       scrimAlpha: _lerpDouble(scrimAlpha, other.scrimAlpha, t)!,
       screenEdgePadding:
           _lerpDouble(screenEdgePadding, other.screenEdgePadding, t)!,
-      scaleFrom: _lerpDouble(scaleFrom, other.scaleFrom, t)!,
-      motion: t < 0.5 ? motion : other.motion,
+      openMotion: t < 0.5 ? openMotion : other.openMotion,
+      closeMotion: t < 0.5 ? closeMotion : other.closeMotion,
       itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
     );
   }

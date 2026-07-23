@@ -40,7 +40,6 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
           maxWidth: dec.maxWidth,
           maxHeight: dec.maxHeight,
           elevation: dec.elevation,
-          motion: dec.motion,
         );
 
     final itemNodes = <M3EMenuNode>[

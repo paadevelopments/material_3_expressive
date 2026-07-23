@@ -1074,7 +1074,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
           maxWidth: popupDec.maxWidth,
           maxHeight: popupDec.maxHeight,
           elevation: popupDec.elevation ?? _splitTheme.popupElevation,
-          motion: popupDec.motion,
           scrimAlpha: _splitTheme.popupScrimAlpha,
           anchorOffset: popupDec.offset.dy != 0
               ? popupDec.offset.dy

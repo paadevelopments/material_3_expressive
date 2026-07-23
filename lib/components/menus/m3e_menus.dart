@@ -14,6 +14,7 @@ export 'enums/m3e_menu_item_shape.dart';
 export 'models/m3e_menu_node.dart';
 export 'styles/m3e_menu_theme.dart';
 export 'utils/m3e_menu_placer.dart';
+export 'utils/m3e_menu_spring_motion.dart';
 
 /// Builds the anchor for an [M3EMenu], given a callback to open the menu.
 typedef M3EMenuAnchorBuilder = Widget Function(

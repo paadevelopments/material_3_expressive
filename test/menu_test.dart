@@ -14,6 +14,12 @@ Widget _host(Widget child) {
   );
 }
 
+Future<void> _settleSpring(WidgetTester tester) async {
+  // Expressive spatial springs can overshoot; settle fully like dropdown tests.
+  await tester.pump();
+  await tester.pumpAndSettle(const Duration(milliseconds: 50));
+}
+
 void main() {
   testWidgets('M3EMenu opens and dismisses on scrim tap', (tester) async {
     await tester.pumpWidget(
@@ -33,15 +39,13 @@ void main() {
     expect(find.text('One'), findsNothing);
 
     await tester.tap(find.text('Open'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     expect(find.text('One'), findsOneWidget);
     expect(find.text('Two'), findsOneWidget);
 
     await tester.tapAt(const Offset(10, 10));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     expect(find.text('One'), findsNothing);
   });
@@ -66,12 +70,10 @@ void main() {
     );
 
     await tester.tap(find.text('Open'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     await tester.tap(find.text('Action'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     expect(pressed, isTrue);
     expect(find.text('Action'), findsNothing);
@@ -105,12 +107,10 @@ void main() {
     );
 
     await tester.tap(find.text('Show'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     await tester.tap(find.text('Beta'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     expect(selected, 'b');
   });
@@ -136,8 +136,7 @@ void main() {
     );
 
     await tester.tap(find.text('Open'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settleSpring(tester);
 
     await tester.tap(find.text('Nope'));
     await tester.pump();

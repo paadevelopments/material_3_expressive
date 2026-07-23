@@ -9,6 +9,7 @@ import '../enums/m3e_menu_anchor_position.dart';
 import '../models/m3e_menu_node.dart';
 import '../styles/m3e_menu_theme.dart';
 import '../utils/m3e_menu_placer.dart';
+import '../utils/m3e_menu_spring_motion.dart';
 import 'm3e_menu_content.dart';
 
 /// Shows an expressive menu popup anchored to [anchor].
@@ -92,11 +93,12 @@ class M3EMenuPopup<T> extends StatefulWidget {
   State<M3EMenuPopup<T>> createState() => _M3EMenuPopupState<T>();
 }
 
-class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
-  double _springTarget = 0;
-  double _opacity = 0;
+class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
+    with SingleTickerProviderStateMixin {
+  late final SingleMotionController _expandCtrl;
   bool _isDismissing = false;
   bool _selected = false;
+  bool _removed = false;
   late final bool _keyboardActivated;
 
   OverlayEntry? _submenuEntry;
@@ -106,18 +108,33 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
   );
 
+  M3EMenuTheme get _menuTheme =>
+      widget.themeOverride ?? M3ETheme.of(context).menuTheme;
+
   @override
   void initState() {
     super.initState();
     _keyboardActivated = widget.callerFocusNode?.hasFocus ?? false;
+
+    // Same controller setup as [M3EDropdownMenu].
+    _expandCtrl = SingleMotionController(
+      motion: M3EMotion.expressiveSpatialDefault.toMotion(),
+      vsync: this,
+    );
+    _expandCtrl.addListener(_onExpandTick);
+    // Expand immediately after insert (dropdown calls animateTo right after show).
+    _expandCtrl.animateTo(1);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
       }
-      setState(() {
-        _springTarget = 1;
-        _opacity = 1;
-      });
+      // Apply theme open spring if it differs from the default used above.
+      final open = _menuTheme.openMotion;
+      _expandCtrl.motion = open.toMotion();
+      if (_expandCtrl.value < 1) {
+        _expandCtrl.animateTo(1);
+      }
       if (_keyboardActivated) {
         _focusScopeNode.requestFocus();
       }
@@ -126,9 +143,22 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
 
   @override
   void dispose() {
+    _expandCtrl
+      ..removeListener(_onExpandTick)
+      ..dispose();
     _removeSubmenu();
     _focusScopeNode.dispose();
     super.dispose();
+  }
+
+  void _onExpandTick() {
+    if (_isDismissing &&
+        !_removed &&
+        _expandCtrl.value <= 0.01 &&
+        mounted) {
+      _removed = true;
+      widget.onRemove();
+    }
   }
 
   void _removeSubmenu() {
@@ -144,17 +174,12 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
     if (!_selected) {
       widget.onDismiss();
     }
-    setState(() {
-      _isDismissing = true;
-      _springTarget = 0;
-      _opacity = 0;
-    });
+    _isDismissing = true;
     if (_keyboardActivated && restoreFocus) {
       widget.callerFocusNode?.requestFocus();
     }
-    Future<void>.delayed(const Duration(milliseconds: 180), () {
-      widget.onRemove();
-    });
+    _expandCtrl.motion = _menuTheme.closeMotion.toMotion();
+    _expandCtrl.animateTo(0);
   }
 
   void _handleSelect(Object? value) {
@@ -215,7 +240,9 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
       preferredWidth: widget.preferredWidth,
     );
 
-    final motion = menuTheme.motion.toMotion();
+    // Same vertical scale origin as [M3EDropdownMenu] panel.
+    final scaleAlignment =
+        placement.opensAbove ? Alignment.bottomCenter : Alignment.topCenter;
 
     return M3EScrimSystemUi.wrap(
       FocusScope(
@@ -247,61 +274,57 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>> {
                 width: placement.width,
                 top: placement.top,
                 bottom: placement.bottom,
-                child: AnimatedOpacity(
-                  opacity: _opacity,
-                  duration: Duration(
-                    milliseconds: _isDismissing ? 80 : 200,
-                  ),
-                  curve: Curves.easeOut,
-                  child: SingleMotionBuilder(
-                    motion: motion,
-                    value: _springTarget,
-                    builder: (BuildContext context, double t, Widget? child) {
-                      final scale =
-                          menuTheme.scaleFrom + (t * (1 - menuTheme.scaleFrom));
-                      // Grow away from the anchor: down when below, up when above.
-                      final slideY = (1 - t) * (placement.opensAbove ? 8.0 : -8.0);
-                      return Transform.translate(
-                        offset: Offset(0, slideY),
-                        child: Transform.scale(
-                          scale: scale,
-                          alignment: placement.scaleAlignment,
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: menuTheme.minWidth,
-                        maxWidth: placement.width,
-                        maxHeight: placement.maxHeight,
+                child: AnimatedBuilder(
+                  animation: _expandCtrl,
+                  builder: (BuildContext context, Widget? child) {
+                    // Exact same transform as dropdown panel expand/collapse.
+                    final progress = _expandCtrl.value.clamp(0.0, 1.5);
+                    final clampedScale = progress.clamp(0.0, 1.2);
+
+                    if (progress <= 0.01) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Opacity(
+                      opacity: progress.clamp(0.0, 1.0),
+                      child: Transform.scale(
+                        alignment: scaleAlignment,
+                        scaleY: clampedScale,
+                        child: child,
                       ),
-                      child: Container(
-                        width: placement.width,
-                        decoration: BoxDecoration(
-                          color: menuTheme.containerColor(scheme),
-                          borderRadius: menuTheme.borderRadius,
-                          boxShadow: M3EElevation.shadows(
-                            menuTheme.elevation,
-                            shadowColor: scheme.shadow,
-                          ),
+                    );
+                  },
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: menuTheme.minWidth,
+                      maxWidth: placement.width,
+                      maxHeight: placement.maxHeight,
+                    ),
+                    child: Container(
+                      width: placement.width,
+                      decoration: BoxDecoration(
+                        color: menuTheme.containerColor(scheme),
+                        borderRadius: menuTheme.borderRadius,
+                        boxShadow: M3EElevation.shadows(
+                          menuTheme.elevation,
+                          shadowColor: scheme.shadow,
                         ),
-                        clipBehavior: Clip.antiAlias,
-                        child: ListView(
-                          padding: EdgeInsets.symmetric(
-                            vertical: menuTheme.verticalPadding,
-                          ),
-                          shrinkWrap: true,
-                          children: <Widget>[
-                            M3EMenuContent(
-                              nodes: widget.children,
-                              selectedValue: widget.selectedValue,
-                              closeOnSelect: widget.closeOnSelect,
-                              onSelect: _handleSelect,
-                              onOpenSubmenu: _openSubmenu,
-                            ),
-                          ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ListView(
+                        padding: EdgeInsets.symmetric(
+                          vertical: menuTheme.verticalPadding,
                         ),
+                        shrinkWrap: true,
+                        children: <Widget>[
+                          M3EMenuContent(
+                            nodes: widget.children,
+                            selectedValue: widget.selectedValue,
+                            closeOnSelect: widget.closeOnSelect,
+                            onSelect: _handleSelect,
+                            onOpenSubmenu: _openSubmenu,
+                          ),
+                        ],
                       ),
                     ),
                   ),
