@@ -33,13 +33,6 @@ enum M3EToolbarFabPosition {
   bottom,
 }
 
-/// Horizontal alignment of a compact floating toolbar within its parent.
-enum M3EToolbarAlignment {
-  start,
-  center,
-  end,
-}
-
 /// Legacy size enum — maps to icon-button density, not container height.
 enum M3EToolbarSize {
   small,

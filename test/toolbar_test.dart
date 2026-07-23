@@ -66,8 +66,15 @@ void main() {
         ),
       ),
     );
-    final Size size = tester.getSize(find.byType(M3EToolbar));
-    expect(size.width, 64);
+    final Size pillSize = tester.getSize(
+      find
+          .descendant(
+            of: find.byType(M3EToolbar),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    expect(pillSize.width, 64);
   });
 
   testWidgets('floating safeArea pads outside the pill on one edge',
@@ -83,7 +90,6 @@ void main() {
       ),
     );
 
-    final Size toolbarSize = tester.getSize(find.byType(M3EToolbar));
     final Size materialSize = tester.getSize(
       find
           .descendant(
@@ -92,11 +98,24 @@ void main() {
           )
           .first,
     );
-
-    // Pill stays token size; only bottom inset is added outside Material.
     expect(materialSize.height, 64);
-    expect(toolbarSize.height, 64 + 40);
-    expect(toolbarSize.width, materialSize.width);
+
+    final Padding safePadding = tester.widget(
+      find.descendant(
+        of: find.byType(M3EToolbar),
+        matching: find.byWidgetPredicate((Widget w) {
+          if (w is! Padding) {
+            return false;
+          }
+          final EdgeInsets insets = w.padding.resolve(TextDirection.ltr);
+          return insets.bottom == 40 &&
+              insets.top == 0 &&
+              insets.left == 0 &&
+              insets.right == 0;
+        }),
+      ),
+    );
+    expect(safePadding.padding.resolve(TextDirection.ltr).bottom, 40);
   });
 
   testWidgets('floating safeArea top pads only top outside pill',
@@ -112,7 +131,6 @@ void main() {
       ),
     );
 
-    final Size toolbarSize = tester.getSize(find.byType(M3EToolbar));
     final Size materialSize = tester.getSize(
       find
           .descendant(
@@ -121,10 +139,51 @@ void main() {
           )
           .first,
     );
-
     expect(materialSize.height, 64);
-    expect(toolbarSize.height, 64 + 20);
-    expect(toolbarSize.width, materialSize.width);
+
+    expect(
+      find.descendant(
+        of: find.byType(M3EToolbar),
+        matching: find.byWidgetPredicate((Widget w) {
+          if (w is! Padding) {
+            return false;
+          }
+          final EdgeInsets insets = w.padding.resolve(TextDirection.ltr);
+          return insets.top == 20 &&
+              insets.bottom == 0 &&
+              insets.left == 0 &&
+              insets.right == 0;
+        }),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('floating alignment positions pill in parent', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        child: SizedBox(
+          width: 300,
+          height: 200,
+          child: M3EToolbar(
+            alignment: Alignment.bottomCenter,
+            actions: _actions(),
+          ),
+        ),
+      ),
+    );
+
+    final Rect parent = tester.getRect(find.byType(SizedBox).first);
+    final Rect pill = tester.getRect(
+      find
+          .descendant(
+            of: find.byType(M3EToolbar),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    expect(pill.center.dx, closeTo(parent.center.dx, 0.5));
+    expect(pill.bottom, closeTo(parent.bottom, 0.5));
   });
 
   testWidgets('docked icons-only pins first/last to padded edges',

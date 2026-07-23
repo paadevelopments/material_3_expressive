@@ -47,7 +47,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
-    this.alignment = M3EToolbarAlignment.center,
+    this.alignment = Alignment.center,
     this.colorStyle = M3EToolbarColorStyle.standard,
     this.variant,
     this.size = M3EToolbarSize.medium,
@@ -83,7 +83,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
-    this.alignment = M3EToolbarAlignment.center,
+    this.alignment = Alignment.center,
     this.colorStyle = M3EToolbarColorStyle.standard,
     this.variant,
     this.size = M3EToolbarSize.medium,
@@ -132,7 +132,7 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
   })  : placement = M3EToolbarPlacement.docked,
         axis = Axis.horizontal,
-        alignment = M3EToolbarAlignment.start,
+        alignment = Alignment.center,
         expanded = true,
         floatingActionButton = null,
         fabIcon = null,
@@ -153,7 +153,9 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   final int maxInlineActions;
   final Widget overflowIcon;
   final bool centerTitle;
-  final M3EToolbarAlignment alignment;
+
+  /// Positions a floating toolbar within its parent. Ignored when docked.
+  final AlignmentGeometry alignment;
   final M3EToolbarColorStyle colorStyle;
 
   /// Legacy variant; when set, overrides [colorStyle].
@@ -343,19 +345,18 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       bar = _withFab(bar, style);
     }
 
-    if (_floating && !hasTitle && !_hasFab) {
-      bar = Align(
-        alignment: _alignmentFor(alignment),
-        widthFactor: 1,
-        heightFactor: 1,
-        child: bar,
-      );
-    }
-
     // Floating safe-area: external, single-edge only (never inside the pill).
     if (_floating && safeArea) {
       bar = Padding(
         padding: _edgeSafeAreaInset(context),
+        child: bar,
+      );
+    }
+
+    // Floating: position within parent (default center; override via [alignment]).
+    if (_floating) {
+      bar = Align(
+        alignment: alignment,
         child: bar,
       );
     }
@@ -435,13 +436,5 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
           ? Row(mainAxisSize: MainAxisSize.min, children: children)
           : Column(mainAxisSize: MainAxisSize.min, children: children),
     );
-  }
-
-  static AlignmentDirectional _alignmentFor(M3EToolbarAlignment alignment) {
-    return switch (alignment) {
-      M3EToolbarAlignment.start => AlignmentDirectional.centerStart,
-      M3EToolbarAlignment.center => AlignmentDirectional.center,
-      M3EToolbarAlignment.end => AlignmentDirectional.centerEnd,
-    };
   }
 }

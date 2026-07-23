@@ -365,13 +365,11 @@ class _NavigationPageState extends State<NavigationPage>
           children: <Widget>[
             insetFrame(
               padding: const EdgeInsets.only(bottom: 0),
-              child: Align(
+              child: M3EToolbar(
+                safeArea: true,
+                dockEdge: M3EToolbarDockEdge.bottom,
                 alignment: Alignment.bottomCenter,
-                child: M3EToolbar(
-                  safeArea: true,
-                  dockEdge: M3EToolbarDockEdge.bottom,
-                  actions: sampleActions,
-                ),
+                actions: sampleActions,
               ),
             ),
             M3EToolbar(
