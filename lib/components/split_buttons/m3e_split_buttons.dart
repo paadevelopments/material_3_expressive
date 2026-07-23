@@ -11,7 +11,7 @@ import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_theme.dart';
 import 'components/m3e_split_button_bottom_sheet.dart';
-import 'components/m3e_split_button_popup.dart';
+import '../menus/m3e_menus.dart';
 import 'enums/m3e_split_button_menu_style.dart';
 import 'enums/m3e_split_button_selection_mode.dart';
 import 'enums/m3e_split_button_trailing_alignment.dart';
@@ -1067,20 +1067,95 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
           motion: _splitTheme.popupMotion,
         );
 
-    final res = await showSplitButtonPopup<T>(
+    final iconSize = _splitTheme.splitIcon(widget.size);
+    final fg = widget.decorationMenuForegroundColor ?? onCont;
+    final menuTheme = M3ETheme.of(context).menuTheme.copyWith(
+          minWidth: popupDec.minWidth,
+          maxWidth: popupDec.maxWidth,
+          maxHeight: popupDec.maxHeight,
+          elevation: popupDec.elevation ?? _splitTheme.popupElevation,
+          motion: popupDec.motion,
+          scrimAlpha: _splitTheme.popupScrimAlpha,
+          anchorOffset: popupDec.offset.dy != 0
+              ? popupDec.offset.dy
+              : M3ETheme.of(context).menuTheme.anchorOffset,
+        );
+
+    final nodes = <M3EMenuNode>[
+      for (final item in items)
+        _splitItemToMenuNode(item, foreground: fg, iconSize: iconSize),
+    ];
+
+    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
+    final res = await showM3EMenu<T>(
       context: context,
-      items: items,
-      decoration: popupDec,
-      foregroundColor: widget.decorationMenuForegroundColor ?? onCont,
-      iconSize: _splitTheme.splitIcon(widget.size),
-      triggerRenderBox: tb,
+      anchor: anchor,
+      children: nodes,
+      position: M3EMenuAnchorPosition.bottomEnd,
       selectedValue: widget.selectedValue,
+      preferredWidth: (tb.size.width + 176.0).clamp(
+        popupDec.minWidth,
+        popupDec.maxWidth,
+      ),
       callerFocusNode: _trailingFocusNode,
+      themeOverride: menuTheme,
     );
 
     if (!mounted) return;
     _closeMenu();
     if (res != null && widget.onSelected != null) widget.onSelected!(res);
+  }
+
+  M3EMenuNode _splitItemToMenuNode(
+    M3ESplitButtonItem<T> item, {
+    required Color foreground,
+    required double iconSize,
+  }) {
+    final selected =
+        widget.selectedValue != null && widget.selectedValue == item.value;
+    final effective = item.enabled
+        ? foreground
+        : foreground.withValues(
+            alpha: M3EButtonConstants.kDisabledForegroundAlpha,
+          );
+
+    if (item.child is IconData) {
+      return M3EMenuSelectable(
+        label: item.child.toString(),
+        value: item.value as Object,
+        enabled: item.enabled,
+        selected: selected,
+        leading: Icon(
+          item.child as IconData,
+          size: iconSize,
+          color: effective,
+        ),
+      );
+    }
+
+    if (item.child is Widget) {
+      return M3EMenuWidget(
+        value: item.value,
+        enabled: item.enabled,
+        selected: selected,
+        child: IconTheme.merge(
+          data: IconThemeData(color: effective, size: iconSize),
+          child: DefaultTextStyle.merge(
+            style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
+                  color: effective,
+                ),
+            child: item.child as Widget,
+          ),
+        ),
+      );
+    }
+
+    return M3EMenuSelectable(
+      label: item.child.toString(),
+      value: item.value as Object,
+      enabled: item.enabled,
+      selected: selected,
+    );
   }
 
   Future<void> _showBottomSheet(
@@ -1142,8 +1217,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
     Size tSize = Size.zero;
     final tCtx = _trailingKey.currentContext;
+    RenderBox? tb;
     if (tCtx != null) {
-      final tb = tCtx.findRenderObject() as RenderBox?;
+      tb = tCtx.findRenderObject() as RenderBox?;
       if (tb != null) tSize = tb.size;
     }
     final double minMenuWidth = tSize.width > 0
@@ -1152,44 +1228,41 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
     final (_, onCont, _, _) = _resolveColorsAndShapes(context);
 
-    List<PopupMenuEntry<T>> menuItems;
-    if (items != null) {
-      menuItems = items.map((e) {
-        final Color effective = e.enabled
-            ? onCont
-            : onCont.withValues(
-          alpha: M3EButtonConstants.kDisabledForegroundAlpha,
-        );
-        final Widget baseChild = e.child is Widget
-            ? e.child as Widget
-            : Text('${e.child}');
-        final Widget styledChild = IconTheme.merge(
-          data: IconThemeData(
-            color: effective,
-            size: _splitTheme.splitIcon(widget.size),
-          ),
-          child: DefaultTextStyle.merge(
-            style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
-              color: effective,
-            ),
-            child: baseChild,
-          ),
-        );
-        return PopupMenuItem<T>(
-          value: e.value,
-          enabled: e.enabled,
-          child: styledChild,
-        );
-      }).toList();
-    } else {
-      menuItems = widget.menuBuilder!(context);
+    // Custom PopupMenuEntry builder — keep Material showMenu.
+    if (items == null) {
+      final res = await showMenu<T>(
+        context: context,
+        position: _menuPosition(context),
+        constraints: BoxConstraints(minWidth: minMenuWidth),
+        items: widget.menuBuilder!(context),
+      );
+      if (!mounted) return;
+      _closeMenu();
+      if (res != null && widget.onSelected != null) widget.onSelected!(res);
+      return;
     }
 
-    final res = await showMenu<T>(
+    if (tb == null) {
+      _closeMenu();
+      return;
+    }
+
+    final iconSize = _splitTheme.splitIcon(widget.size);
+    final fg = onCont;
+    final nodes = <M3EMenuNode>[
+      for (final item in items)
+        _splitItemToMenuNode(item, foreground: fg, iconSize: iconSize),
+    ];
+
+    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
+    final res = await showM3EMenu<T>(
       context: context,
-      position: _menuPosition(context),
-      constraints: BoxConstraints(minWidth: minMenuWidth),
-      items: menuItems,
+      anchor: anchor,
+      children: nodes,
+      position: M3EMenuAnchorPosition.bottomEnd,
+      selectedValue: widget.selectedValue,
+      preferredWidth: minMenuWidth,
+      callerFocusNode: _trailingFocusNode,
     );
 
     if (!mounted) return;

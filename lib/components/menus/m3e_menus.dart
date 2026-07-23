@@ -1,9 +1,19 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import 'models/m3e_menu_entry.dart';
+import 'components/m3e_menu_popup.dart';
+import 'enums/m3e_menu_anchor_position.dart';
+import 'models/m3e_menu_node.dart';
 
-export 'models/m3e_menu_entry.dart';
+export 'components/m3e_menu_content.dart';
+export 'components/m3e_menu_divider.dart';
+export 'components/m3e_menu_item.dart';
+export 'components/m3e_menu_popup.dart';
+export 'enums/m3e_menu_anchor_position.dart';
+export 'enums/m3e_menu_item_shape.dart';
+export 'models/m3e_menu_node.dart';
+export 'styles/m3e_menu_theme.dart';
+export 'utils/m3e_menu_placer.dart';
 
 /// Builds the anchor for an [M3EMenu], given a callback to open the menu.
 typedef M3EMenuAnchorBuilder = Widget Function(
@@ -11,189 +21,105 @@ typedef M3EMenuAnchorBuilder = Widget Function(
   VoidCallback open,
 );
 
-/// A Material 3 Expressive menu.
+/// A Material 3 Expressive menu (Compose `DropdownMenu` + `DropdownMenuPopup`).
 ///
-/// Displays a temporary surface of [entries] anchored to a widget built by
-/// [anchorBuilder]. The menu scales open from the anchor and closes when an
+/// Displays a temporary surface of [children] anchored to a widget built by
+/// [anchorBuilder]. The menu springs open from the anchor and closes when an
 /// entry is chosen or the scrim is tapped.
 class M3EMenu extends StatefulWidget {
   const M3EMenu({
     required this.anchorBuilder,
-    required this.entries,
+    this.children,
+    this.entries,
+    this.position = M3EMenuAnchorPosition.bottomStart,
+    this.closeOnSelect = true,
+    this.onSelected,
+    this.selectedValue,
     super.key,
-  });
+  }) : assert(
+          children != null || entries != null,
+          'Provide children or entries.',
+        );
+
+  /// Convenience constructor for a flat list of action [M3EMenuEntry]s.
+  factory M3EMenu.entries({
+    Key? key,
+    required M3EMenuAnchorBuilder anchorBuilder,
+    required List<M3EMenuEntry> entries,
+    M3EMenuAnchorPosition position = M3EMenuAnchorPosition.bottomStart,
+    bool closeOnSelect = true,
+    ValueChanged<Object?>? onSelected,
+    Object? selectedValue,
+  }) {
+    return M3EMenu(
+      key: key,
+      anchorBuilder: anchorBuilder,
+      children: entries,
+      position: position,
+      closeOnSelect: closeOnSelect,
+      onSelected: onSelected,
+      selectedValue: selectedValue,
+    );
+  }
 
   final M3EMenuAnchorBuilder anchorBuilder;
-  final List<M3EMenuEntry> entries;
+
+  /// Full menu content tree (items, groups, dividers, submenus).
+  final List<M3EMenuNode>? children;
+
+  /// Convenience alias for a flat list of [M3EMenuEntry] action rows.
+  final List<M3EMenuEntry>? entries;
+
+  final M3EMenuAnchorPosition position;
+  final bool closeOnSelect;
+  final ValueChanged<Object?>? onSelected;
+  final Object? selectedValue;
+
+  List<M3EMenuNode> get _nodes => children ?? entries!;
 
   @override
   State<M3EMenu> createState() => _M3EMenuState();
 }
 
-class _M3EMenuState extends State<M3EMenu>
-    with SingleTickerProviderStateMixin {
-  final LayerLink _link = LayerLink();
-  final OverlayPortalController _portal = OverlayPortalController();
-  late final AnimationController _controller;
+class _M3EMenuState extends State<M3EMenu> {
+  final GlobalKey _anchorKey = GlobalKey();
+  bool _open = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: M3EMotion.medium1,
-      reverseDuration: M3EMotion.short3,
+  Future<void> _openMenu() async {
+    if (_open) {
+      return;
+    }
+    final box = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) {
+      return;
+    }
+    final anchor = box.localToGlobal(Offset.zero) & box.size;
+    setState(() => _open = true);
+
+    final result = await showM3EMenu<Object>(
+      context: context,
+      anchor: anchor,
+      children: widget._nodes,
+      position: widget.position,
+      closeOnSelect: widget.closeOnSelect,
+      selectedValue: widget.selectedValue,
     );
-  }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _open() {
-    _portal.show();
-    _controller.forward();
-  }
-
-  Future<void> _close() async {
-    await _controller.reverse();
     if (mounted) {
-      _portal.hide();
+      setState(() => _open = false);
+    }
+    if (result != null) {
+      widget.onSelected?.call(result);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(builder: (context) => OverlayPortal(
-        controller: _portal,
-        overlayChildBuilder: _buildOverlay,
-        child: CompositedTransformTarget(
-          link: _link,
-          child: widget.anchorBuilder(context, _open),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOverlay(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final menuTheme = theme.menuTheme;
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _close,
-          ),
-        ),
-        CompositedTransformFollower(
-          link: _link,
-          targetAnchor: Alignment.bottomLeft,
-          offset: Offset(0, menuTheme.anchorOffset),
-          child: _buildMenu(theme),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenu(M3EThemeData theme) {
-    final menuTheme = theme.menuTheme;
-    final scheme = theme.colorScheme;
-    return ScaleTransition(
-      scale: CurvedAnimation(
-        parent: _controller,
-        curve: M3EMotion.emphasizedDecelerate,
-      ),
-      alignment: Alignment.topLeft,
-      child: FadeTransition(
-        opacity: _controller,
-        child: Container(
-          constraints: BoxConstraints(
-            minWidth: menuTheme.minWidth,
-            maxWidth: menuTheme.maxWidth,
-          ),
-          padding: EdgeInsets.symmetric(
-            vertical: menuTheme.verticalPadding,
-          ),
-          decoration: BoxDecoration(
-            color: menuTheme.containerColor(scheme),
-            borderRadius: menuTheme.borderRadius,
-            boxShadow: M3EElevation.shadows(
-              menuTheme.elevation,
-              shadowColor: scheme.shadow,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              for (final M3EMenuEntry entry in widget.entries)
-                _buildEntry(theme, entry),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEntry(M3EThemeData theme, M3EMenuEntry entry) {
-    final menuTheme = theme.menuTheme;
-    final scheme = theme.colorScheme;
-    final Color foreground = menuTheme.entryForegroundColor(
-      scheme,
-      enabled: entry.enabled,
-    );
-    return M3ETappable(
-      enabled: entry.enabled,
-      onTap: () {
-        entry.onPressed?.call();
-        _close();
-      },
-      semanticLabel: entry.label,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return Container(
-          height: menuTheme.entryHeight,
-          padding: EdgeInsets.symmetric(
-            horizontal: menuTheme.entryHorizontalPadding,
-          ),
-          color: scheme.onSurface.withValues(alpha: state.opacity),
-          child: Row(
-            children: <Widget>[
-              if (entry.leading != null) ...<Widget>[
-                IconTheme.merge(
-                  data: IconThemeData(
-                    color: foreground,
-                    size: menuTheme.iconSize,
-                  ),
-                  child: entry.leading!,
-                ),
-                SizedBox(width: menuTheme.iconGap),
-              ],
-              Expanded(
-                child: Text(
-                  entry.label,
-                  style: menuTheme.entryLabelStyle(
-                    theme.typeScale,
-                    scheme,
-                    enabled: entry.enabled,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (entry.trailing != null) ...<Widget>[
-                SizedBox(width: menuTheme.iconGap),
-                IconTheme.merge(
-                  data: IconThemeData(
-                    color: foreground,
-                    size: menuTheme.iconSize,
-                  ),
-                  child: entry.trailing!,
-                ),
-              ],
-            ],
-          ),
+    return M3EComponentTheme(
+      builder: (BuildContext context) {
+        return KeyedSubtree(
+          key: _anchorKey,
+          child: widget.anchorBuilder(context, _openMenu),
         );
       },
     );

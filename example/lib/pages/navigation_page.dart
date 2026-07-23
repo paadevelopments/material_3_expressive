@@ -457,6 +457,7 @@ class _NavigationPageState extends State<NavigationPage>
           label: 'Anchored menu',
           children: <Widget>[
             M3EMenu(
+              position: M3EMenuAnchorPosition.bottomStart,
               anchorBuilder: (BuildContext context, VoidCallback open) {
                 return M3EButton.icon(
                   style: M3EButtonStyle.outlined,
@@ -465,7 +466,7 @@ class _NavigationPageState extends State<NavigationPage>
                   onPressed: open,
                 );
               },
-              entries: <M3EMenuEntry>[
+              children: <M3EMenuNode>[
                 M3EMenuEntry(
                   label: 'Edit',
                   leading: const Icon(M3EIcons.edit),
@@ -476,8 +477,87 @@ class _NavigationPageState extends State<NavigationPage>
                   leading: const Icon(M3EIcons.schedule),
                   onPressed: () {},
                 ),
+                const M3EMenuDivider(),
                 const M3EMenuEntry(label: 'Disabled', enabled: false),
+                M3EMenuEntry(
+                  label: 'Delete',
+                  leading: const Icon(M3EIcons.delete),
+                  isDestructive: true,
+                  onPressed: () {},
+                ),
               ],
+            ),
+            _ExpressiveMenuDemo(),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ExpressiveMenuDemo extends StatefulWidget {
+  @override
+  State<_ExpressiveMenuDemo> createState() => _ExpressiveMenuDemoState();
+}
+
+class _ExpressiveMenuDemoState extends State<_ExpressiveMenuDemo> {
+  String _selected = 'Inbox';
+  bool _starred = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return M3EMenu(
+      position: M3EMenuAnchorPosition.bottomEnd,
+      selectedValue: _selected,
+      onSelected: (Object? value) {
+        if (value is String) {
+          setState(() => _selected = value);
+        }
+      },
+      anchorBuilder: (BuildContext context, VoidCallback open) {
+        return M3EButton.icon(
+          style: M3EButtonStyle.tonal,
+          icon: const Icon(M3EIcons.more_vert),
+          label: Text(_selected),
+          onPressed: open,
+        );
+      },
+      children: <M3EMenuNode>[
+        M3EMenuGroup(
+          label: 'Mailbox',
+          children: <M3EMenuNode>[
+            M3EMenuSelectable(
+              label: 'Inbox',
+              value: 'Inbox',
+              selected: _selected == 'Inbox',
+              leading: const Icon(M3EIcons.inbox),
+            ),
+            M3EMenuSelectable(
+              label: 'Sent',
+              value: 'Sent',
+              selected: _selected == 'Sent',
+              leading: const Icon(M3EIcons.send),
+            ),
+          ],
+        ),
+        M3EMenuToggleable(
+          label: 'Starred',
+          checked: _starred,
+          onChanged: (bool value) => setState(() => _starred = value),
+        ),
+        M3EMenuSubmenu(
+          label: 'More actions',
+          leading: const Icon(M3EIcons.more_horiz),
+          children: <M3EMenuNode>[
+            M3EMenuEntry(
+              label: 'Archive',
+              leading: const Icon(M3EIcons.archive),
+              onPressed: () {},
+            ),
+            M3EMenuEntry(
+              label: 'Report',
+              leading: const Icon(M3EIcons.report),
+              onPressed: () {},
             ),
           ],
         ),
