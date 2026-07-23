@@ -583,7 +583,8 @@ M3ECard(
 
 #### M3ECarousel
 
-Hero and uncontained carousel layouts.
+Hero, contained, and uncontained layouts — horizontal by default, or vertical
+via `axis`.
 
 ```dart
 M3ECarousel(
@@ -591,6 +592,25 @@ M3ECarousel(
   heroAlignment: M3ECarouselHeroAlignment.center,
   onTap: (index) {},
   children: List.generate(10, (i) => ColoredBox(color: Colors.blue)),
+);
+
+M3ECarousel(
+  type: M3ECarouselType.contained,
+  isExtended: true,
+  children: items,
+);
+
+M3ECarousel(
+  type: M3ECarouselType.uncontained,
+  uncontainedItemExtent: 80,
+  children: items,
+);
+
+// Vertical (hero left/right map to top/bottom)
+M3ECarousel(
+  axis: Axis.vertical,
+  type: M3ECarouselType.hero,
+  children: items,
 );
 ```
 
@@ -924,7 +944,9 @@ M3ENavigationDrawer(
 
 #### M3EToolbar
 
-Compose Material 3 expressive floating and docked toolbars.
+Compose Material 3 expressive floating and docked toolbars. Floating toolbars
+own expand/collapse when one action sets `isExpandTrigger` (`expanded` is the
+initial state; the adjacent FAB stays visible and does not toggle expansion).
 
 ```dart
 // Floating (default) — pill, wrap-content
@@ -935,12 +957,21 @@ M3EToolbar(
   ],
 );
 
-// Floating + adjacent FAB
+// Floating + expand trigger + adjacent FAB
 M3EToolbar(
-  actions: [...],
+  expanded: true,
+  onExpandedChanged: (open) {},
+  actions: [
+    M3EToolbarAction(
+      icon: M3EIcons.menu,
+      isExpandTrigger: true,
+      onPressed: () {},
+    ),
+    M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+    M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+  ],
   fabIcon: const Icon(M3EIcons.add),
   onFabPressed: () {},
-  expanded: true,
 );
 
 // Vertical floating
