@@ -17,6 +17,7 @@ class M3EDialog extends StatelessWidget {
     required this.title,
     this.icon,
     this.content,
+    this.contentPadding,
     this.actions = const <Widget>[],
     this.topDivider = false,
     this.bottomDivider = false,
@@ -26,6 +27,7 @@ class M3EDialog extends StatelessWidget {
   final String title;
   final Widget? icon;
   final Widget? content;
+  final EdgeInsets? contentPadding;
   final List<Widget> actions;
 
   /// Full-bleed divider between the header and the section below it.
@@ -51,12 +53,11 @@ class M3EDialog extends StatelessWidget {
       transitionDuration: M3EMotion.medium2,
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrap(
-          M3EComponentTheme(builder: (context) => Center(
-            child: Padding(
-              padding: dialogTheme.screenMargin,
-              child: dialog,
+          M3EComponentTheme(
+            builder: (context) => Center(
+              child: Padding(padding: dialogTheme.screenMargin, child: dialog),
             ),
-          )),
+          ),
         );
       },
       transitionBuilder: (context, animation, secondary, child) =>
@@ -76,7 +77,9 @@ class M3EDialog extends StatelessWidget {
       barrierLabel: 'Full screen dialog',
       transitionDuration: M3EMotion.long2,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(builder: (context) => _FullScreenDialog(title: title, body: body, action: action),
+        return M3EComponentTheme(
+          builder: (context) =>
+              _FullScreenDialog(title: title, body: body, action: action),
         );
       },
       transitionBuilder: _slide,
@@ -97,8 +100,10 @@ class M3EDialog extends StatelessWidget {
     return FadeTransition(
       opacity: curved,
       child: ScaleTransition(
-        scale: Tween<double>(begin: dialogTheme.entranceScale, end: 1)
-            .animate(curved),
+        scale: Tween<double>(
+          begin: dialogTheme.entranceScale,
+          end: 1,
+        ).animate(curved),
         child: child,
       ),
     );
@@ -111,21 +116,20 @@ class M3EDialog extends StatelessWidget {
     Widget child,
   ) {
     return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 1),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(parent: animation, curve: M3EMotion.emphasizedDecelerate),
-      ),
+      position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+          .animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: M3EMotion.emphasizedDecelerate,
+            ),
+          ),
       child: child,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildDialog,
-    );
+    return M3EComponentTheme(builder: _buildDialog);
   }
 
   Widget _buildDialog(BuildContext context) {
@@ -147,8 +151,9 @@ class M3EDialog extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            icon == null ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: icon == null
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: _buildChildren(theme, dialogTheme),
       ),
     );
@@ -183,8 +188,9 @@ class M3EDialog extends StatelessWidget {
             Text(
               title,
               textAlign: icon == null ? TextAlign.start : TextAlign.center,
-              style: theme.typeScale.headlineSmall
-                  .copyWith(color: scheme.onSurface),
+              style: theme.typeScale.headlineSmall.copyWith(
+                color: scheme.onSurface,
+              ),
             ),
           ],
         ),
@@ -193,15 +199,19 @@ class M3EDialog extends StatelessWidget {
         M3EDivider(color: scheme.outlineVariant),
       if (hasContent)
         Padding(
-          padding: padding,
+          padding:
+              contentPadding ??
+              (topDivider && bottomDivider
+                  ? padding
+                  : EdgeInsets.only(left: padding.left, right: padding.right)),
           child: DefaultTextStyle(
-            style: theme.typeScale.bodyMedium
-                .copyWith(color: scheme.onSurfaceVariant),
+            style: theme.typeScale.bodyMedium.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
             child: content!,
           ),
         ),
-      if (bottomDivider && hasActions)
-        M3EDivider(color: scheme.outlineVariant),
+      if (bottomDivider && hasActions) M3EDivider(color: scheme.outlineVariant),
       if (hasActions)
         Padding(
           padding: padding,
@@ -232,9 +242,7 @@ class _FullScreenDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildFullScreen,
-    );
+    return M3EComponentTheme(builder: _buildFullScreen);
   }
 
   Widget _buildFullScreen(BuildContext context) {
@@ -283,8 +291,9 @@ class _FullScreenDialog extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style:
-                  theme.typeScale.titleLarge.copyWith(color: scheme.onSurface),
+              style: theme.typeScale.titleLarge.copyWith(
+                color: scheme.onSurface,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
