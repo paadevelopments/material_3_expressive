@@ -354,6 +354,9 @@ class _SelectionSlidersSection extends StatefulWidget {
 class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
   double _volume = 0.5;
   double _brightness = 3;
+  double _balance = 0;
+  M3ESliderRange _range = const M3ESliderRange(0.2, 0.7);
+  double _vertical = 0.4;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +386,46 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 divisions: 5,
                 onChanged: (double value) =>
                     setState(() => _brightness = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Centered (−100…100)',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider.centered(
+                value: _balance,
+                min: -100,
+                max: 100,
+                onChanged: (double value) => setState(() => _balance = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Range',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ERangeSlider(
+                values: _range,
+                onChanged: (M3ESliderRange value) =>
+                    setState(() => _range = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Vertical',
+          children: <Widget>[
+            SizedBox(
+              height: 160,
+              width: 48,
+              child: M3ESlider.vertical(
+                value: _vertical,
+                onChanged: (double value) => setState(() => _vertical = value),
               ),
             ),
           ],

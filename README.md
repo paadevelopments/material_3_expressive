@@ -469,7 +469,7 @@ M3EDropdownMenu<String>.future(
 
 #### M3ESlider
 
-Continuous and discrete sliders.
+Compose Material 3 expressive slider — standard, centered, vertical, and range.
 
 ```dart
 // in State
@@ -483,6 +483,27 @@ M3ESlider(
   max: 5,
   divisions: 5,
   onChanged: (v) => setState(() => brightness = v),
+);
+
+M3ESlider.centered(
+  value: balance,
+  min: -100,
+  max: 100,
+  onChanged: (v) => setState(() => balance = v),
+);
+
+M3ERangeSlider(
+  values: range,
+  onChanged: (v) => setState(() => range = v),
+);
+
+SizedBox(
+  height: 160,
+  width: 48,
+  child: M3ESlider.vertical(
+    value: level,
+    onChanged: (v) => setState(() => level = v),
+  ),
 );
 ```
 
@@ -1159,6 +1180,7 @@ implementations. Thanks to the original authors:
 | [Emily](https://github.com/EmilyMoonstone) | Navigation rail | [navigation_rail_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e) |
 | [Emily](https://github.com/EmilyMoonstone) | Loading indicator (Flutter package) | [loading_indicator_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e) |
 | [The Android Open Source Project](https://source.android.com/) | Loading indicator (Compose reference) | [`LoadingIndicator.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt) |
+| [The Android Open Source Project](https://source.android.com/) | Slider / RangeSlider / VerticalSlider (Compose reference, `material3:1.4.0-alpha01`) | [`Slider.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/Slider.kt) / [`SliderTokens.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/SliderTokens.kt) |
 | [The Flutter Authors](https://github.com/flutter/flutter) | Carousel view layout (`CarouselView`) | Flutter SDK / [m3_carousel](https://pub.dev/packages/m3_carousel) |
 
 Copyright notices and licenses from those sources are retained in the
