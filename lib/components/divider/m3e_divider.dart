@@ -37,11 +37,13 @@ class M3EDivider extends StatelessWidget {
     final dividerTheme = M3ETheme.of(context).dividerTheme;
     final Color line =
         color ?? dividerTheme.color(M3ETheme.of(context).colorScheme);
+    final double lineThickness = thickness;
     if (axis == M3EDividerAxis.vertical) {
       return Padding(
         padding: EdgeInsets.only(top: indent, bottom: endIndent),
         child: SizedBox(
-          width: thickness,
+          width: lineThickness,
+          height: double.infinity,
           child: ColoredBox(color: line),
         ),
       );
@@ -49,7 +51,8 @@ class M3EDivider extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(left: indent, right: endIndent),
       child: SizedBox(
-        height: thickness,
+        height: lineThickness,
+        width: double.infinity,
         child: ColoredBox(color: line),
       ),
     );
