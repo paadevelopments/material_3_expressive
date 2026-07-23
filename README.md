@@ -384,13 +384,15 @@ M3ECheckbox(
 
 #### M3ERadio
 
-Mutually exclusive selection within a group.
+Mutually exclusive selection within a group. Optional [label] is part of the
+tap target.
 
 ```dart
 // in State
 M3ERadio<String>(
   value: 'pro',
   groupValue: plan,
+  label: const Text('Pro'),
   onChanged: (v) => setState(() => plan = v),
 );
 ```

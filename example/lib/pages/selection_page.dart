@@ -66,21 +66,12 @@ class _SelectionPageState extends State<SelectionPage>
             for (final String plan in <String>['standard', 'pro', 'team'])
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: <Widget>[
-                    M3ERadio<String>(
-                      value: plan,
-                      groupValue: _plan,
-                      onChanged: (String value) =>
-                          setState(() => _plan = value),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      plan,
-                      style: theme.typeScale.bodyLarge
-                          .copyWith(color: theme.colorScheme.onSurface),
-                    ),
-                  ],
+                child: M3ERadio<String>(
+                  value: plan,
+                  groupValue: _plan,
+                  label: Text(plan),
+                  onChanged: (String value) =>
+                      setState(() => _plan = value),
                 ),
               ),
           ],

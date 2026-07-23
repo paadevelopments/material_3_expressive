@@ -9,11 +9,14 @@ export 'styles/m3e_radio_theme.dart';
 ///
 /// Selecting one value from a set. The inner dot springs in when selected and
 /// a 40dp state layer surrounds the 20dp ring.
+///
+/// When [label] is set, tapping the label also selects this value.
 class M3ERadio<T> extends StatelessWidget {
   const M3ERadio({
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    this.label,
     this.error = false,
     this.focusNode,
     this.autofocus = false,
@@ -24,6 +27,10 @@ class M3ERadio<T> extends StatelessWidget {
   final T value;
   final T? groupValue;
   final ValueChanged<T>? onChanged;
+
+  /// Optional text or widget beside the control; included in the tap target.
+  final Widget? label;
+
   final bool error;
   final FocusNode? focusNode;
   final bool autofocus;
@@ -34,18 +41,19 @@ class M3ERadio<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final radioTheme = theme.radioTheme;
-    final scheme = theme.colorScheme;
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3ERadioTheme radioTheme = theme.radioTheme;
+    final M3EColorScheme scheme = theme.colorScheme;
 
-    return M3EComponentTheme(builder: (context) => M3ETappable(
+    return M3EComponentTheme(
+      builder: (BuildContext context) => M3ETappable(
         onTap: _enabled ? () => onChanged!(value) : null,
         enabled: _enabled,
         focusNode: focusNode,
         autofocus: autofocus,
         semanticLabel: semanticLabel,
         builder: (BuildContext context, M3EInteractionState state) {
-          return SizedBox(
+          final Widget control = SizedBox(
             width: radioTheme.hitSize,
             height: radioTheme.hitSize,
             child: Stack(
@@ -55,6 +63,28 @@ class M3ERadio<T> extends StatelessWidget {
                 _buildRing(radioTheme, scheme),
               ],
             ),
+          );
+
+          if (label == null) {
+            return control;
+          }
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              control,
+              SizedBox(width: radioTheme.labelGap),
+              DefaultTextStyle.merge(
+                style: theme.typeScale.bodyLarge.copyWith(
+                  color: _enabled
+                      ? scheme.onSurface
+                      : scheme.onSurface.withValues(
+                          alpha: radioTheme.disabledOpacity,
+                        ),
+                ),
+                child: label!,
+              ),
+            ],
           );
         },
       ),

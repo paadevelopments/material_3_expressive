@@ -10,6 +10,7 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
     this.hitSize = 40,
     this.dotSize = 10,
     this.borderWidth = 2,
+    this.labelGap = 8,
     this.disabledOpacity = 0.38,
   });
 
@@ -19,6 +20,9 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
   final double hitSize;
   final double dotSize;
   final double borderWidth;
+
+  /// Space between the control and an optional label.
+  final double labelGap;
   final double disabledOpacity;
 
   Color stateLayerColor(M3EColorScheme scheme, {required bool selected}) =>
@@ -45,6 +49,7 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
     double? hitSize,
     double? dotSize,
     double? borderWidth,
+    double? labelGap,
     double? disabledOpacity,
   }) {
     return M3ERadioTheme(
@@ -52,6 +57,7 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
       hitSize: hitSize ?? this.hitSize,
       dotSize: dotSize ?? this.dotSize,
       borderWidth: borderWidth ?? this.borderWidth,
+      labelGap: labelGap ?? this.labelGap,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
     );
   }
@@ -66,6 +72,7 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
       hitSize: _lerpDouble(hitSize, other.hitSize, t)!,
       dotSize: _lerpDouble(dotSize, other.dotSize, t)!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
+      labelGap: _lerpDouble(labelGap, other.labelGap, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
     );
   }
