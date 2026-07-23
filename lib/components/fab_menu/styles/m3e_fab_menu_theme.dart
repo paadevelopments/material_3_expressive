@@ -7,7 +7,7 @@ import '../../../foundations/foundations.dart';
 class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
   const M3EFabMenuTheme({
     this.menuOffset = 16,
-    this.scrimOpacity = 0.32,
+    this.scrimOpacity = 0.0,
     this.itemGap = 12,
     this.itemHeight = 56,
     this.itemHorizontalPadding = 20,

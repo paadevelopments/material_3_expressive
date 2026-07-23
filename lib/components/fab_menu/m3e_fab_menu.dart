@@ -9,9 +9,10 @@ export 'models/m3e_fab_menu_item.dart';
 
 /// A Material 3 Expressive FAB menu.
 ///
-/// A FAB that opens into a vertical list of labelled actions above a scrim.
-/// The trigger icon morphs between the open and close glyphs and the items
-/// animate in with a staggered spring.
+/// A FAB that opens into a vertical list of labelled actions. The trigger icon
+/// morphs between the open and close glyphs and the items animate in with a
+/// staggered spring. Tap outside the items to dismiss (no visible scrim by
+/// default; override [M3EFabMenuTheme.scrimOpacity] to restore one).
 class M3EFabMenu extends StatefulWidget {
   const M3EFabMenu({
     required this.items,
@@ -94,27 +95,27 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   }
 
   Widget _buildOverlay(BuildContext context) {
-    return M3EScrimSystemUi.wrap(
-      Stack(
-        children: <Widget>[
-          _buildScrim(context),
-          CompositedTransformFollower(
-            link: _link,
-            targetAnchor: Alignment.topRight,
-            followerAnchor: Alignment.bottomRight,
-            offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
-            child: _buildMenu(context),
-          ),
-        ],
-      ),
+    return Stack(
+      children: <Widget>[
+        _buildDismissBarrier(context),
+        CompositedTransformFollower(
+          link: _link,
+          targetAnchor: Alignment.topRight,
+          followerAnchor: Alignment.bottomRight,
+          offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
+          child: _buildMenu(context),
+        ),
+      ],
     );
   }
 
-  Widget _buildScrim(BuildContext context) {
+  /// Tap-outside dismiss; transparent unless [M3EFabMenuTheme.scrimOpacity] > 0.
+  Widget _buildDismissBarrier(BuildContext context) {
     final theme = M3ETheme.of(context);
     final fabMenuTheme = theme.fabMenuTheme;
     return Positioned.fill(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: _close,
         child: FadeTransition(
           opacity: _controller,

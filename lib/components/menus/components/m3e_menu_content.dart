@@ -245,13 +245,35 @@ class M3EMenuContent extends StatelessWidget {
                 ),
                 child: Row(
                   children: <Widget>[
-                    Expanded(child: item.child),
+                    Expanded(
+                      child: IconTheme.merge(
+                        data: IconThemeData(
+                          color: menuTheme.entryForegroundColor(
+                            scheme,
+                            enabled: item.enabled,
+                          ),
+                          size: menuTheme.iconSize,
+                        ),
+                        child: DefaultTextStyle.merge(
+                          style: menuTheme.entryLabelStyle(
+                            M3ETheme.of(context).typeScale,
+                            scheme,
+                            enabled: item.enabled,
+                          ),
+                          child: item.child,
+                        ),
+                      ),
+                    ),
                     if (item.selected)
                       Padding(
                         padding: EdgeInsets.only(left: menuTheme.iconGap),
                         child: Icon(
                           M3EIcons.check_rounded,
                           size: menuTheme.iconSize * 0.9,
+                          color: menuTheme.entryForegroundColor(
+                            scheme,
+                            enabled: item.enabled,
+                          ),
                         ),
                       ),
                   ],

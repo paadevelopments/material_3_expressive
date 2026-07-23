@@ -1040,8 +1040,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       ) async {
     setState(() => _menuOpen = true);
 
-    final (_, onCont, _, _) = _resolveColorsAndShapes(context);
-
     final tCtx = _trailingKey.currentContext;
     if (tCtx == null) {
       _closeMenu();
@@ -1068,13 +1066,12 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         );
 
     final iconSize = _splitTheme.splitIcon(widget.size);
-    final fg = widget.decorationMenuForegroundColor ?? onCont;
     final menuTheme = M3ETheme.of(context).menuTheme.copyWith(
           minWidth: popupDec.minWidth,
           maxWidth: popupDec.maxWidth,
           maxHeight: popupDec.maxHeight,
           elevation: popupDec.elevation ?? _splitTheme.popupElevation,
-          scrimAlpha: _splitTheme.popupScrimAlpha,
+          backgroundColor: popupDec.backgroundColor,
           anchorOffset: popupDec.offset.dy != 0
               ? popupDec.offset.dy
               : M3ETheme.of(context).menuTheme.anchorOffset,
@@ -1082,7 +1079,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
     final nodes = <M3EMenuNode>[
       for (final item in items)
-        _splitItemToMenuNode(item, foreground: fg, iconSize: iconSize),
+        _splitItemToMenuNode(item, iconSize: iconSize),
     ];
 
     final anchor = tb.localToGlobal(Offset.zero) & tb.size;
@@ -1105,18 +1102,26 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     if (res != null && widget.onSelected != null) widget.onSelected!(res);
   }
 
+  /// Maps a split-button item to a menu node using [M3EMenuTheme] colors
+  /// (not the split button's on-container color).
   M3EMenuNode _splitItemToMenuNode(
     M3ESplitButtonItem<T> item, {
-    required Color foreground,
     required double iconSize,
   }) {
     final selected =
         widget.selectedValue != null && widget.selectedValue == item.value;
-    final effective = item.enabled
-        ? foreground
-        : foreground.withValues(
-            alpha: M3EButtonConstants.kDisabledForegroundAlpha,
-          );
+    final theme = M3ETheme.of(context);
+    final menuTheme = theme.menuTheme;
+    final scheme = theme.colorScheme;
+    final foreground = menuTheme.entryForegroundColor(
+      scheme,
+      enabled: item.enabled,
+    );
+    final labelStyle = menuTheme.entryLabelStyle(
+      theme.typeScale,
+      scheme,
+      enabled: item.enabled,
+    );
 
     if (item.child is IconData) {
       return M3EMenuSelectable(
@@ -1127,7 +1132,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         leading: Icon(
           item.child as IconData,
           size: iconSize,
-          color: effective,
         ),
       );
     }
@@ -1138,11 +1142,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         enabled: item.enabled,
         selected: selected,
         child: IconTheme.merge(
-          data: IconThemeData(color: effective, size: iconSize),
+          data: IconThemeData(color: foreground, size: iconSize),
           child: DefaultTextStyle.merge(
-            style: M3ETheme.of(context).typeScale.labelLarge.copyWith(
-                  color: effective,
-                ),
+            style: labelStyle,
             child: item.child as Widget,
           ),
         ),
@@ -1225,8 +1227,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         ? tSize.width
         : _splitTheme.splitTrailingWidth(widget.size);
 
-    final (_, onCont, _, _) = _resolveColorsAndShapes(context);
-
     // Custom PopupMenuEntry builder — keep Material showMenu.
     if (items == null) {
       final res = await showMenu<T>(
@@ -1247,10 +1247,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     }
 
     final iconSize = _splitTheme.splitIcon(widget.size);
-    final fg = onCont;
     final nodes = <M3EMenuNode>[
       for (final item in items)
-        _splitItemToMenuNode(item, foreground: fg, iconSize: iconSize),
+        _splitItemToMenuNode(item, iconSize: iconSize),
     ];
 
     final anchor = tb.localToGlobal(Offset.zero) & tb.size;
