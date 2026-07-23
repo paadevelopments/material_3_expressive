@@ -149,30 +149,37 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
   double _fallbackExtent() => widget.itemExtent ?? 100.0;
 
-  double _contentWidthFor(int index) {
+  bool get _vertical => widget.scrollDirection == Axis.vertical;
+
+  double _contentExtentFor(int index) {
     final box = _itemBoxes[index];
-    final width = (box != null && box.hasSize) ? box.size.width : null;
-    if (width == null || width <= 0) {
+    if (box == null || !box.hasSize) {
       return _fallbackExtent();
     }
-    return width;
+    final double extent = _vertical ? box.size.height : box.size.width;
+    if (extent <= 0) {
+      return _fallbackExtent();
+    }
+    return extent;
   }
 
-  (bool expandLeft, bool expandRight) _expandSidesForActiveIndex(int index) {
-    final leftVisible = _leftVisibleNeighborIndex != null;
-    final rightVisible = _rightVisibleNeighborIndex != null;
-    final noVisibleNeighbors = !leftVisible && !rightVisible;
+  (bool expandLeading, bool expandTrailing) _expandSidesForActiveIndex(
+    int index,
+  ) {
+    final leadingVisible = _leftVisibleNeighborIndex != null;
+    final trailingVisible = _rightVisibleNeighborIndex != null;
+    final noVisibleNeighbors = !leadingVisible && !trailingVisible;
     final lastIndex = widget.children.length - 1;
 
-    final expandLeft =
-        leftVisible ||
+    final expandLeading =
+        leadingVisible ||
         (noVisibleNeighbors && index == lastIndex) ||
         (noVisibleNeighbors && index > 0 && index < lastIndex);
-    final expandRight =
-        rightVisible ||
+    final expandTrailing =
+        trailingVisible ||
         (noVisibleNeighbors && index == 0) ||
         (noVisibleNeighbors && index > 0 && index < lastIndex);
-    return (expandLeft, expandRight);
+    return (expandLeading, expandTrailing);
   }
 
   bool _isNeighborViewportVisible(int index, RenderBox carouselBox) {
@@ -181,35 +188,69 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     }
 
     final box = _itemBoxes[index];
-    if (box == null || !box.hasSize || !box.attached || box.size.width <= 1.0) {
+    if (box == null || !box.hasSize || !box.attached) {
       return false;
     }
 
-    final double carouselLeft = carouselBox.localToGlobal(Offset.zero).dx;
+    final Offset carouselOrigin = carouselBox.localToGlobal(Offset.zero);
+    final Offset itemOrigin = box.localToGlobal(Offset.zero);
+
+    if (_vertical) {
+      if (box.size.height <= 1.0) {
+        return false;
+      }
+      final double carouselTop = carouselOrigin.dy;
+      final double carouselBottom = carouselTop + carouselBox.size.height;
+      final double itemTop = itemOrigin.dy;
+      final double itemBottom = itemTop + box.size.height;
+      return itemBottom > (carouselTop + 1.0) &&
+          itemTop < (carouselBottom - 1.0);
+    }
+
+    if (box.size.width <= 1.0) {
+      return false;
+    }
+    final double carouselLeft = carouselOrigin.dx;
     final double carouselRight = carouselLeft + carouselBox.size.width;
-
-    final double itemLeft = box.localToGlobal(Offset.zero).dx;
+    final double itemLeft = itemOrigin.dx;
     final double itemRight = itemLeft + box.size.width;
-
     return itemRight > (carouselLeft + 1.0) && itemLeft < (carouselRight - 1.0);
   }
 
   Alignment _expandAlignmentForActiveIndex(int index) {
-    final (expandLeft, expandRight) = _expandSidesForActiveIndex(index);
+    final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
 
-    if (expandLeft && expandRight) {
+    if (expandLeading && expandTrailing) {
       return Alignment.center;
     }
-    if (expandLeft) {
+    if (_vertical) {
+      if (expandLeading) {
+        return Alignment.bottomCenter;
+      }
+      if (expandTrailing) {
+        return Alignment.topCenter;
+      }
+      return Alignment.center;
+    }
+    if (expandLeading) {
       return Alignment.centerRight;
     }
-    if (expandRight) {
+    if (expandTrailing) {
       return Alignment.centerLeft;
     }
     return Alignment.center;
   }
 
   Alignment _squishAlignmentForNeighborIndex(int index) {
+    if (_vertical) {
+      if (index == _leftVisibleNeighborIndex) {
+        return Alignment.topCenter;
+      }
+      if (index == _rightVisibleNeighborIndex) {
+        return Alignment.bottomCenter;
+      }
+      return Alignment.center;
+    }
     if (index == _leftVisibleNeighborIndex) {
       return Alignment.centerLeft;
     }
@@ -241,7 +282,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
     setState(() {
       _activeIndex = index;
-      _currentGrowBaseWidth = _contentWidthFor(index);
+      _currentGrowBaseWidth = _contentExtentFor(index);
       _snapshotVisibleNeighbors(index, _viewportBox);
     });
 
@@ -274,7 +315,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
           final isLeftNeighbor = _leftVisibleNeighborIndex == index;
           final isRightNeighbor = _rightVisibleNeighborIndex == index;
 
-          var scaleX = 1.0;
+          var scaleMain = 1.0;
 
           Alignment individualAlignment = Alignment.center;
           if (isActive) {
@@ -285,23 +326,22 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
           if (_activeIndex != null) {
             if (isActive) {
-              final double width = _currentGrowBaseWidth > 0
+              final double extent = _currentGrowBaseWidth > 0
                   ? _currentGrowBaseWidth
                   : _fallbackExtent();
-              final (expandLeft, expandRight) = _expandSidesForActiveIndex(
-                index,
-              );
-              final growTotal =
-                  (expandLeft ? edgeDelta : 0) + (expandRight ? edgeDelta : 0);
-              scaleX = (width + growTotal) / width;
+              final (expandLeading, expandTrailing) =
+                  _expandSidesForActiveIndex(index);
+              final growTotal = (expandLeading ? edgeDelta : 0) +
+                  (expandTrailing ? edgeDelta : 0);
+              scaleMain = (extent + growTotal) / extent;
             } else if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
-              final double neighborWidth = _contentWidthFor(index);
+              final double neighborExtent = _contentExtentFor(index);
               final shrinkPixels = edgeDelta;
-              final double targetWidth = math.max(
-                neighborWidth - shrinkPixels,
+              final double targetExtent = math.max(
+                neighborExtent - shrinkPixels,
                 1,
               );
-              scaleX = targetWidth / neighborWidth;
+              scaleMain = targetExtent / neighborExtent;
             }
           }
 
@@ -317,7 +357,9 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
             onUnregister: _unregisterItemBox,
             child: RepaintBoundary(
               child: Transform(
-                transform: Matrix4.identity()..scaleByDouble(scaleX, 1, 1, 1),
+                transform: _vertical
+                    ? (Matrix4.identity()..scaleByDouble(1, scaleMain, 1, 1))
+                    : (Matrix4.identity()..scaleByDouble(scaleMain, 1, 1, 1)),
                 alignment: individualAlignment,
                 child: ClipRRect(
                   borderRadius: finalRadius,

@@ -20,18 +20,17 @@ export 'styles/m3e_carousel_theme.dart';
 ///    container.
 ///  * Hero: shows at least one large and one small item at a time.
 ///
+/// Scrolls along [axis] (horizontal by default, or vertical).
+///
 /// For more info checkout the
 /// [Official Docs](https://m3.material.io/components/carousel).
-///
-/// .
 class M3ECarousel extends StatefulWidget {
   /// Creates a Material Design carousel.
-  ///
-  /// .
   const M3ECarousel({
     super.key,
     this.width,
     this.height,
+    this.axis = Axis.horizontal,
     this.type = M3ECarouselType.hero,
     this.isExtended = false,
     this.freeScroll = false,
@@ -51,58 +50,44 @@ class M3ECarousel extends StatefulWidget {
   });
 
   /// The explicit bounded width allocation applied to the root carousel container wrapper.
-  ///
-  /// .
   final double? width;
 
   /// The explicit bounded height allocation applied to the root carousel container wrapper.
-  ///
-  /// .
   final double? height;
 
+  /// Scroll and layout axis. Defaults to [Axis.horizontal].
+  final Axis axis;
+
   /// Specifies the structural layout rule type determining element sizes and scaling constraints.
-  ///
-  /// .
   final M3ECarouselType type;
 
   /// Flag indicating whether item bounding sizes shift into altered or expanded aspect footprints.
-  ///
-  /// .
   final bool isExtended;
 
   /// True if item canvas movements can glide smoothly without forcing standard snap boundary stops.
-  ///
-  /// .
   final bool freeScroll;
 
-  /// The alignment anchor profile positioning focal items when running inside hero layouts.
+  /// Focal-item alignment for [M3ECarouselType.hero].
   ///
-  /// .
+  /// Horizontal: left / center / right.
+  /// Vertical: [M3ECarouselHeroAlignment.left] is top (start),
+  /// [M3ECarouselHeroAlignment.right] is bottom (end).
   final M3ECarouselHeroAlignment heroAlignment;
 
-  /// The baseline horizontal dimension assigned to items inside uncontained structural layouts.
-  ///
-  /// .
+  /// Baseline main-axis extent for items in uncontained layouts
+  /// (width when horizontal, height when vertical).
   final double uncontainedItemExtent;
 
   /// The minimal compressed dimension boundary applied to items scaling down near container thresholds.
-  ///
-  /// .
   final double uncontainedShrinkExtent;
 
   /// The curvature factor mapping circular corner clipping arcs over nested item view layouts.
-  ///
-  /// .
   final double childElementBorderRadius;
 
   /// The total lifespan millisecond count allocated to complete layout transition slide curves.
-  ///
-  /// .
   final int scrollAnimationDuration;
 
   /// The dimensional drag delta requirement needed to trigger single-item sweep navigation actions.
-  ///
-  /// .
   final int singleSwipeGestureSensitivityRange;
 
   /// Fixed logical pixels added or removed per animating edge at peak pulse.
@@ -112,13 +97,9 @@ class M3ECarousel extends StatefulWidget {
   final double fixedPulseDelta;
 
   /// Click event notification pipe exposing the zero-based list tracking index of the interacted element.
-  ///
-  /// .
   final void Function(int selectedIndex)? onTap;
 
-  /// The continuous structured row sequence of elements rendered inside the carousel container scroll track.
-  ///
-  /// .
+  /// The continuous structured sequence of elements rendered inside the carousel scroll track.
   final List<Widget> children;
 
   @override
@@ -132,6 +113,11 @@ class _M3ECarouselState extends State<M3ECarousel> {
   int itemScrolled = 0;
   late M3ECarouselController controller;
 
+  bool get _horizontal => widget.axis == Axis.horizontal;
+
+  /// Viewport extent along the scroll axis.
+  double get _mainExtent => _horizontal ? frameWidth : frameHeight;
+
   void scrollFrame(int direction) {
     double prevScrollPosition = controller.position.pixels,
         nextScrollPosition = 0;
@@ -144,7 +130,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
                   ) *
                   10) /
               100) *
-          frameWidth;
+          _mainExtent;
       var limit = 0;
       switch (widget.heroAlignment) {
         case M3ECarouselHeroAlignment.center:
@@ -169,7 +155,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
       }
     } else if (widget.type == M3ECarouselType.contained) {
       double shouldAddOrSubtract =
-          ((layoutWeight.reduce(max) * 10) / 100) * frameWidth;
+          ((layoutWeight.reduce(max) * 10) / 100) * _mainExtent;
       if (direction == 0) {
         if (itemScrolled <= 0) {
           return;
@@ -206,19 +192,28 @@ class _M3ECarouselState extends State<M3ECarousel> {
     );
   }
 
-  void onHorizontalDragEnd(DragEndDetails details) {
-    if (details.primaryVelocity! >
-        (kIsWeb ? 0 : widget.singleSwipeGestureSensitivityRange)) {
+  void onDragEnd(DragEndDetails details) {
+    final double? velocity = details.primaryVelocity;
+    if (velocity == null) {
+      return;
+    }
+    if (velocity > (kIsWeb ? 0 : widget.singleSwipeGestureSensitivityRange)) {
       scrollFrame(0);
-    } else if (details.primaryVelocity! <
+    } else if (velocity <
         -(kIsWeb ? 0 : widget.singleSwipeGestureSensitivityRange)) {
       scrollFrame(1);
     }
   }
 
-  Widget setGestureLayer(Widget child) => widget.freeScroll
-      ? child
-      : GestureDetector(onHorizontalDragEnd: onHorizontalDragEnd, child: child);
+  Widget setGestureLayer(Widget child) {
+    if (widget.freeScroll) {
+      return child;
+    }
+    if (_horizontal) {
+      return GestureDetector(onHorizontalDragEnd: onDragEnd, child: child);
+    }
+    return GestureDetector(onVerticalDragEnd: onDragEnd, child: child);
+  }
 
   @override
   void initState() {
@@ -227,6 +222,25 @@ class _M3ECarouselState extends State<M3ECarousel> {
     // consumeMaxWeight with a non-zero initialItem inserts a phantom leading
     // extent that theme rebuilds can leave offstage.
     controller = M3ECarouselController();
+    _applyLayoutWeights();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant M3ECarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.type != widget.type ||
+        oldWidget.heroAlignment != widget.heroAlignment ||
+        oldWidget.isExtended != widget.isExtended) {
+      _applyLayoutWeights();
+      itemScrolled = 0;
+      if (controller.hasClients) {
+        controller.jumpTo(0);
+      }
+    }
+  }
+
+  void _applyLayoutWeights() {
     switch (widget.type) {
       case M3ECarouselType.hero:
         switch (widget.heroAlignment) {
@@ -240,10 +254,8 @@ class _M3ECarouselState extends State<M3ECarousel> {
       case M3ECarouselType.contained:
         layoutWeight = widget.isExtended ? [4, 3, 2, 1] : [5, 4, 1];
       case M3ECarouselType.uncontained:
-        // No layout weights needed for uncontained type
-        break;
+        layoutWeight = [];
     }
-    super.initState();
   }
 
   @override
@@ -267,6 +279,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
                 freeScroll: widget.freeScroll,
                 itemSnapping: widget.freeScroll,
                 consumeMaxWeight: false,
+                scrollDirection: widget.axis,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     widget.childElementBorderRadius,

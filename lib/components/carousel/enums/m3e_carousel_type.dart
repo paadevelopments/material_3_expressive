@@ -15,16 +15,19 @@ enum M3ECarouselType {
   uncontained,
 }
 
-/// The horizontal alignment of the focal item in a [M3ECarouselType.hero]
-/// carousel.
+/// The alignment of the focal item in a [M3ECarouselType.hero] carousel.
+///
+/// For [Axis.horizontal]: leading / center / trailing along the row.
+/// For [Axis.vertical]: [left] is top (start), [right] is bottom (end).
 enum M3ECarouselHeroAlignment {
-  /// The focal item is aligned to the leading edge, with one small peek after.
+  /// Focal item at the leading edge (left when horizontal, top when vertical),
+  /// with one small peek after.
   left,
 
   /// The focal item is centered, with a small peek on either side.
   center,
 
-  /// The focal item is aligned to the trailing edge, with one small peek
-  /// before.
+  /// Focal item at the trailing edge (right when horizontal, bottom when
+  /// vertical), with one small peek before.
   right,
 }

@@ -30,6 +30,7 @@ void main() {
   testWidgets('hero left/right alignments render', _heroAlignments);
   testWidgets('contained layout renders', _contained);
   testWidgets('uncontained layout renders and swipes', _uncontained);
+  testWidgets('vertical hero / contained / uncontained render', _vertical);
   testWidgets('tap reports the item index', _tap);
   testWidgets('free scroll snaps on drag', _freeScroll);
   testWidgets('tap pulse with neighbors completes', _tapPulseWithNeighbors);
@@ -99,6 +100,40 @@ Future<void> _uncontained(WidgetTester tester) async {
   expect(tester.takeException(), isNull);
 
   await tester.fling(find.byType(M3ECarousel), const Offset(-400, 0), 800);
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _vertical(WidgetTester tester) async {
+  for (final M3ECarouselType type in M3ECarouselType.values) {
+    await tester.pumpWidget(
+      _host(
+        M3ECarousel(
+          key: ValueKey<M3ECarouselType>(type),
+          axis: Axis.vertical,
+          type: type,
+          uncontainedItemExtent: 80,
+          children: _items(6),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull, reason: '$type');
+    expect(find.text('item0'), findsOneWidget);
+  }
+
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        axis: Axis.vertical,
+        type: M3ECarouselType.uncontained,
+        uncontainedItemExtent: 80,
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pump();
+  await tester.fling(find.byType(M3ECarousel), const Offset(0, -300), 800);
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
 }
