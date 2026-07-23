@@ -244,94 +244,94 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     final scaleAlignment =
         placement.opensAbove ? Alignment.bottomCenter : Alignment.topCenter;
 
-    return M3EScrimSystemUi.wrap(
-      FocusScope(
-        node: _focusScopeNode,
-        child: Focus(
-          focusNode: FocusNode(skipTraversal: true),
-          onKeyEvent: (FocusNode node, KeyEvent event) {
-            if (event.logicalKey == LogicalKeyboardKey.escape) {
-              if (event is KeyDownEvent) {
-                _dismiss(restoreFocus: true);
-              }
-              return KeyEventResult.handled;
+    // No system-bar overlay override — menus use a transparent dismiss layer,
+    // not a dark scrim that needs light status/nav icons.
+    return FocusScope(
+      node: _focusScopeNode,
+      child: Focus(
+        focusNode: FocusNode(skipTraversal: true),
+        onKeyEvent: (FocusNode node, KeyEvent event) {
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            if (event is KeyDownEvent) {
+              _dismiss(restoreFocus: true);
             }
-            return KeyEventResult.ignored;
-          },
-          child: Stack(
-            children: <Widget>[
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _dismiss,
-                  child: ColoredBox(
-                    color: menuTheme.scrimColor(scheme),
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _dismiss,
+                child: ColoredBox(
+                  color: menuTheme.scrimColor(scheme),
+                ),
+              ),
+            ),
+            Positioned(
+              left: placement.left,
+              width: placement.width,
+              top: placement.top,
+              bottom: placement.bottom,
+              child: AnimatedBuilder(
+                animation: _expandCtrl,
+                builder: (BuildContext context, Widget? child) {
+                  // Exact same transform as dropdown panel expand/collapse.
+                  final progress = _expandCtrl.value.clamp(0.0, 1.5);
+                  final clampedScale = progress.clamp(0.0, 1.2);
+
+                  if (progress <= 0.01) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Opacity(
+                    opacity: progress.clamp(0.0, 1.0),
+                    child: Transform.scale(
+                      alignment: scaleAlignment,
+                      scaleY: clampedScale,
+                      child: child,
+                    ),
+                  );
+                },
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: menuTheme.minWidth,
+                    maxWidth: placement.width,
+                    maxHeight: placement.maxHeight,
+                  ),
+                  child: Container(
+                    width: placement.width,
+                    decoration: BoxDecoration(
+                      color: menuTheme.containerColor(scheme),
+                      borderRadius: menuTheme.borderRadius,
+                      boxShadow: M3EElevation.shadows(
+                        menuTheme.elevation,
+                        shadowColor: scheme.shadow,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(
+                        vertical: menuTheme.verticalPadding,
+                      ),
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        M3EMenuContent(
+                          nodes: widget.children,
+                          selectedValue: widget.selectedValue,
+                          closeOnSelect: widget.closeOnSelect,
+                          onSelect: _handleSelect,
+                          onOpenSubmenu: _openSubmenu,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Positioned(
-                left: placement.left,
-                width: placement.width,
-                top: placement.top,
-                bottom: placement.bottom,
-                child: AnimatedBuilder(
-                  animation: _expandCtrl,
-                  builder: (BuildContext context, Widget? child) {
-                    // Exact same transform as dropdown panel expand/collapse.
-                    final progress = _expandCtrl.value.clamp(0.0, 1.5);
-                    final clampedScale = progress.clamp(0.0, 1.2);
-
-                    if (progress <= 0.01) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return Opacity(
-                      opacity: progress.clamp(0.0, 1.0),
-                      child: Transform.scale(
-                        alignment: scaleAlignment,
-                        scaleY: clampedScale,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: menuTheme.minWidth,
-                      maxWidth: placement.width,
-                      maxHeight: placement.maxHeight,
-                    ),
-                    child: Container(
-                      width: placement.width,
-                      decoration: BoxDecoration(
-                        color: menuTheme.containerColor(scheme),
-                        borderRadius: menuTheme.borderRadius,
-                        boxShadow: M3EElevation.shadows(
-                          menuTheme.elevation,
-                          shadowColor: scheme.shadow,
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: ListView(
-                        padding: EdgeInsets.symmetric(
-                          vertical: menuTheme.verticalPadding,
-                        ),
-                        shrinkWrap: true,
-                        children: <Widget>[
-                          M3EMenuContent(
-                            nodes: widget.children,
-                            selectedValue: widget.selectedValue,
-                            closeOnSelect: widget.closeOnSelect,
-                            onSelect: _handleSelect,
-                            onOpenSubmenu: _openSubmenu,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

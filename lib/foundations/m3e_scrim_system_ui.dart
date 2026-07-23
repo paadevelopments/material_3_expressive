@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 /// System UI overlay for modal surfaces shown over a dark scrim.
 ///
-/// Use [wrap] for full-scrim modals (dialogs, FAB menu, nav-rail modal, popups)
+/// Use [wrap] for full-scrim modals (dialogs, FAB menu, nav-rail modal)
 /// to apply light status and navigation bar icons.
 ///
 /// Use [wrapBottomSheet] for bottom sheets to apply light status-bar icons only;

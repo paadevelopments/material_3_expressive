@@ -14,6 +14,7 @@ class M3EFab extends StatelessWidget {
     this.onPressed,
     this.size = M3EFabSize.medium,
     this.color = M3EFabColor.primary,
+    this.cornerRadius,
     this.tooltip,
     this.focusNode,
     this.autofocus = false,
@@ -24,6 +25,9 @@ class M3EFab extends StatelessWidget {
   final VoidCallback? onPressed;
   final M3EFabSize size;
   final M3EFabColor color;
+
+  /// When set, overrides the themed corner radius (e.g. for open/close morph).
+  final double? cornerRadius;
   final String? tooltip;
   final FocusNode? focusNode;
   final bool autofocus;
@@ -39,8 +43,11 @@ class M3EFab extends StatelessWidget {
       color: color,
       scheme: theme.colorScheme,
     );
-    final borderRadius = M3EShapes.resolve(metrics.radius);
+    final borderRadius = M3EShapes.resolve(cornerRadius ?? metrics.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
+    // External radius is driven frame-by-frame; skip AnimatedContainer lerp.
+    final Duration radiusDuration =
+        cornerRadius != null ? Duration.zero : M3EMotion.short4;
 
     return M3EComponentTheme(builder: (context) => M3ETappable(
         onTap: onPressed,
@@ -54,7 +61,7 @@ class M3EFab extends StatelessWidget {
           final double elevation =
               state.hovered ? M3EElevation.level4 : M3EElevation.level3;
           return AnimatedContainer(
-            duration: M3EMotion.short4,
+            duration: radiusDuration,
             curve: M3EMotion.standard,
             width: metrics.container,
             height: metrics.container,
