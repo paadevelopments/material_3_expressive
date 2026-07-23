@@ -262,14 +262,6 @@ class _M3EToolbarState extends State<M3EToolbar>
     trigger.onPressed();
   }
 
-  void _onFabPressed() {
-    // Collapsed + FAB alone: FAB expands the pill (trigger is not visible).
-    if (_hasFab && !_expanded && _hasTrigger) {
-      _setExpanded(true);
-    }
-    widget.onFabPressed?.call();
-  }
-
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(builder: _buildToolbar);
@@ -416,9 +408,8 @@ class _M3EToolbarState extends State<M3EToolbar>
             expandContent: !_floating || hasTitle,
           );
 
-    final bool showFabElevation = _hasFab && _expanded;
     final double elev = widget.elevation ??
-        (showFabElevation ? metrics.elevationWithFab : metrics.elevation);
+        (_hasFab ? metrics.elevationWithFab : metrics.elevation);
 
     final EdgeInsets resolvedPadding =
         widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
@@ -512,14 +503,14 @@ class _M3EToolbarState extends State<M3EToolbar>
     final Widget fab = M3EToolbarFabSlot(
       fab: widget.floatingActionButton,
       icon: widget.fabIcon,
-      onPressed: _onFabPressed,
+      onPressed: widget.onFabPressed,
       color: style == M3EToolbarColorStyle.vibrant
           ? M3EFabColor.tertiary
           : M3EFabColor.primary,
     );
 
     final bool horizontal = widget.axis == Axis.horizontal;
-    // FAB stays on the outer end — unaffected by pill expand/collapse.
+    // FAB stays on the outer end — never toggles or hides with the pill.
     final bool fabFirst = switch (widget.fabPosition) {
       M3EToolbarFabPosition.start || M3EToolbarFabPosition.top => true,
       M3EToolbarFabPosition.end || M3EToolbarFabPosition.bottom => false,
@@ -534,20 +525,8 @@ class _M3EToolbarState extends State<M3EToolbar>
         ? <Widget>[fab, gap, toolbar]
         : <Widget>[toolbar, gap, fab];
 
-    return AnimatedBuilder(
-      animation: _expandCtrl,
-      builder: (BuildContext context, Widget? child) {
-        // Collapsed + FAB → FAB alone. With a trigger, wait for the spring to
-        // settle near 0 so the pill can retract first.
-        final bool hidePill = !_expanded &&
-            (!_hasTrigger || _expandCtrl.value < 0.02);
-        if (hidePill) {
-          return fab;
-        }
-        return horizontal
-            ? Row(mainAxisSize: MainAxisSize.min, children: children)
-            : Column(mainAxisSize: MainAxisSize.min, children: children);
-      },
-    );
+    return horizontal
+        ? Row(mainAxisSize: MainAxisSize.min, children: children)
+        : Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 }

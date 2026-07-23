@@ -342,11 +342,19 @@ void main() {
     expect(find.byType(M3EFab), findsOneWidget);
   });
 
-  testWidgets('collapsed with FAB shows FAB only', (tester) async {
+  testWidgets('collapsed with FAB keeps FAB beside trigger pill', (tester) async {
     await tester.pumpWidget(
       _host(
         child: M3EToolbar(
-          actions: _actions(),
+          actions: <M3EToolbarAction>[
+            M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
+            M3EToolbarAction(
+              icon: M3EIcons.share,
+              onPressed: _noop,
+              isExpandTrigger: true,
+            ),
+            M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
+          ],
           fabIcon: const Icon(M3EIcons.add),
           onFabPressed: () {},
           expanded: false,
@@ -354,8 +362,10 @@ void main() {
       ),
     );
     expect(find.byType(M3EFab), findsOneWidget);
-    // Actions are not in the collapsed FAB-only presentation.
+    // Trigger stays in the collapsed pill; side actions are hidden.
+    expect(find.byIcon(M3EIcons.share), findsOneWidget);
     expect(find.byIcon(M3EIcons.edit), findsNothing);
+    expect(find.byIcon(M3EIcons.favorite), findsNothing);
   });
 }
 

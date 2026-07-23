@@ -317,7 +317,7 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label: 'Floating + FAB (collapsed = FAB alone; tap FAB to expand)',
+          label: 'Floating + FAB (pill expands independently; FAB always shown)',
           children: <Widget>[
             M3EToolbar(
               actions: sampleActions,

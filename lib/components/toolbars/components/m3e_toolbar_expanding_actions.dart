@@ -75,6 +75,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
 
     final double widthFactor = expandProgress.clamp(0.0, 1.5);
     final double reveal = _iconReveal(expandProgress);
+    final bool sidesVisible = widthFactor > 0.01;
 
     final Widget triggerButton = M3EToolbarIconButton(
       action: trigger,
@@ -82,24 +83,28 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       onPressed: onTriggerPressed,
     );
 
-    final Widget? beforeSide = _sideGroup(
-      actions: before,
-      leading: leading,
-      trailing: null,
-      overflow: null,
-      reveal: reveal,
-      widthFactor: widthFactor,
-      alignStart: false,
-    );
-    final Widget? afterSide = _sideGroup(
-      actions: after,
-      leading: null,
-      trailing: trailing,
-      overflow: overflow.isEmpty ? null : overflow,
-      reveal: reveal,
-      widthFactor: widthFactor,
-      alignStart: true,
-    );
+    final Widget? beforeSide = sidesVisible
+        ? _sideGroup(
+            actions: before,
+            leading: leading,
+            trailing: null,
+            overflow: null,
+            reveal: reveal,
+            widthFactor: widthFactor,
+            alignStart: false,
+          )
+        : null;
+    final Widget? afterSide = sidesVisible
+        ? _sideGroup(
+            actions: after,
+            leading: null,
+            trailing: trailing,
+            overflow: overflow.isEmpty ? null : overflow,
+            reveal: reveal,
+            widthFactor: widthFactor,
+            alignStart: true,
+          )
+        : null;
 
     final List<Widget> children = <Widget>[
       if (beforeSide != null) beforeSide,

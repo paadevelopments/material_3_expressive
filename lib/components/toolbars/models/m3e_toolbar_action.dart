@@ -27,7 +27,8 @@ class M3EToolbarAction {
 
   /// Marks this action as the floating-toolbar expand/collapse trigger.
   ///
-  /// At most one action in a toolbar may set this. The trigger uses filled
-  /// icon-button styling and toggles expansion while still calling [onPressed].
+  /// At most one action may set this. Meaningful only on floating toolbars:
+  /// the trigger uses filled icon-button styling and toggles pill expansion
+  /// while still calling [onPressed]. Docked toolbars ignore this flag.
   final bool isExpandTrigger;
 }

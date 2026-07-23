@@ -6,6 +6,9 @@ import 'm3e_toolbar_icon_button.dart';
 import 'm3e_toolbar_overflow_menu.dart';
 
 /// Inline and overflow actions for [M3EToolbar].
+///
+/// Used for docked bars and non-expanding floating layouts. Expand-trigger
+/// styling is ignored here — all actions render as standard icon buttons.
 class M3EToolbarActionsRow extends StatelessWidget {
   const M3EToolbarActionsRow({
     required this.actions,
@@ -49,10 +52,12 @@ class M3EToolbarActionsRow extends StatelessWidget {
         M3EToolbarIconButton(
           action: action,
           size: iconButtonSize,
+          // Docked / static rows never emphasize expand triggers.
+          variant: M3EIconButtonVariant.standard,
         ),
       if (overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
-          actions: overflow.where((M3EToolbarAction a) => !a.isExpandTrigger).toList(),
+          actions: overflow,
           icon: overflowIcon,
           iconButtonSize: iconButtonSize,
           textStyle: overflowTextStyle,
