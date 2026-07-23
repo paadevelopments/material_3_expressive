@@ -18,6 +18,7 @@ import 'styles/m3e_icon_button_shapes.dart';
 import 'styles/m3e_icon_button_theme.dart';
 
 export 'styles/m3e_icon_button_theme.dart';
+export 'enums/m3e_icon_button_enums.dart';
 
 /// Material 3 Expressive Icon Button
 ///

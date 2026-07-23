@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart' show M3EToolbar;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EToolbar;
+import 'package:flutter/widgets.dart';
 
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../models/m3e_toolbar_action.dart';
@@ -16,6 +14,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     required this.iconButtonSize,
     required this.overflowTextStyle,
     required this.destructiveColor,
+    this.axis = Axis.horizontal,
     super.key,
   });
 
@@ -25,6 +24,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
   final M3EIconButtonSize iconButtonSize;
   final TextStyle overflowTextStyle;
   final Color destructiveColor;
+  final Axis axis;
 
   @override
   Widget build(BuildContext context) {
@@ -38,23 +38,31 @@ class M3EToolbarActionsRow extends StatelessWidget {
         ? actions.sublist(maxInline)
         : const <M3EToolbarAction>[];
 
+    final List<Widget> children = <Widget>[
+      for (final M3EToolbarAction action in inline)
+        M3EToolbarIconButton(
+          action: action,
+          size: iconButtonSize,
+        ),
+      if (overflow.isNotEmpty)
+        M3EToolbarOverflowMenu(
+          actions: overflow,
+          icon: overflowIcon,
+          iconButtonSize: iconButtonSize,
+          textStyle: overflowTextStyle,
+          destructiveColor: destructiveColor,
+        ),
+    ];
+
+    if (axis == Axis.vertical) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      );
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        for (final M3EToolbarAction action in inline)
-          M3EToolbarIconButton(
-            action: action,
-            size: iconButtonSize,
-          ),
-        if (overflow.isNotEmpty)
-          M3EToolbarOverflowMenu(
-            actions: overflow,
-            icon: overflowIcon,
-            iconButtonSize: iconButtonSize,
-            textStyle: overflowTextStyle,
-            destructiveColor: destructiveColor,
-          ),
-      ],
+      children: children,
     );
   }
 }

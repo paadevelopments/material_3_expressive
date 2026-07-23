@@ -910,16 +910,39 @@ M3ENavigationDrawer(
 
 #### M3EToolbar
 
-Docked toolbar with optional title and overflow menu.
+Compose Material 3 expressive floating and docked toolbars.
 
 ```dart
+// Floating (default) — pill, wrap-content
 M3EToolbar(
+  actions: [
+    M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+    M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+  ],
+);
+
+// Floating + adjacent FAB
+M3EToolbar(
+  actions: [...],
+  fabIcon: const Icon(M3EIcons.add),
+  onFabPressed: () {},
+  expanded: true,
+);
+
+// Vertical floating
+M3EToolbar(
+  axis: Axis.vertical,
+  colorStyle: M3EToolbarColorStyle.vibrant,
+  actions: [...],
+);
+
+// Docked — full width; safeArea pads only the dock edge
+M3EToolbar.docked(
+  dockEdge: M3EToolbarDockEdge.bottom,
+  safeArea: true,
   titleText: 'Inbox',
-  subtitleText: '12 unread',
-  maxInlineActions: 3,
   actions: [
     M3EToolbarAction(icon: M3EIcons.search, onPressed: () {}),
-    M3EToolbarAction(icon: M3EIcons.filter_list, onPressed: () {}),
     M3EToolbarAction(
       icon: M3EIcons.delete,
       label: 'Delete',
@@ -1181,6 +1204,7 @@ implementations. Thanks to the original authors:
 | [Emily](https://github.com/EmilyMoonstone) | Loading indicator (Flutter package) | [loading_indicator_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e) |
 | [The Android Open Source Project](https://source.android.com/) | Loading indicator (Compose reference) | [`LoadingIndicator.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt) |
 | [The Android Open Source Project](https://source.android.com/) | Slider / RangeSlider / VerticalSlider (Compose reference, `material3:1.4.0-alpha01`) | [`Slider.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/Slider.kt) / [`SliderTokens.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/SliderTokens.kt) |
+| [The Android Open Source Project](https://source.android.com/) | Floating / docked toolbars (Compose reference, `material3:1.4.0-alpha01`) | [`FloatingToolbar.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/FloatingToolbar.kt) / [`FlexibleBottomAppBar`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/AppBar.kt) / [`DockedToolbarTokens`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/DockedToolbarTokens.kt) |
 | [The Flutter Authors](https://github.com/flutter/flutter) | Carousel view layout (`CarouselView`) | Flutter SDK / [m3_carousel](https://pub.dev/packages/m3_carousel) |
 
 Copyright notices and licenses from those sources are retained in the

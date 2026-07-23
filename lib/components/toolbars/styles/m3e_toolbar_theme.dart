@@ -1,41 +1,65 @@
+// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
+// FloatingToolbarColors / DockedToolbarTokens
+
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../enums/m3e_toolbar_enums.dart';
+import '../res/m3e_toolbar_tokens.dart';
 
-/// Resolved height, padding, and elevation metrics for a toolbar.
+/// Resolved colors for a toolbar (+ optional FAB).
+@immutable
+class M3EToolbarColors {
+  const M3EToolbarColors({
+    required this.container,
+    required this.content,
+    required this.fabContainer,
+    required this.fabContent,
+  });
+
+  final Color container;
+  final Color content;
+  final Color fabContainer;
+  final Color fabContent;
+}
+
+/// Resolved layout metrics for floating / docked toolbars.
 @immutable
 class M3EToolbarMetrics {
   const M3EToolbarMetrics({
-    required this.heightSmall,
-    required this.heightMedium,
-    required this.heightLarge,
-    required this.horizontalPadding,
+    required this.crossAxisSize,
+    required this.contentPadding,
     required this.gap,
     required this.iconSize,
-    required this.elevationSurface,
-    required this.elevationProminent,
+    required this.elevation,
+    required this.elevationWithFab,
   });
 
-  final double heightSmall;
-  final double heightMedium;
-  final double heightLarge;
-  final EdgeInsetsGeometry horizontalPadding;
+  final double crossAxisSize;
+  final EdgeInsetsGeometry contentPadding;
   final double gap;
   final double iconSize;
-  final double elevationSurface;
-  final double elevationProminent;
+  final double elevation;
+  final double elevationWithFab;
 }
 
-/// Theme values for `M3EToolbar`.
+/// Theme values for [M3EToolbar].
 @immutable
 class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
   const M3EToolbarTheme({
+    this.containerSize = M3EToolbarTokens.containerSize,
+    this.floatingPadding = M3EToolbarTokens.floatingContentPadding,
+    this.dockedHorizontalPadding = M3EToolbarTokens.dockedHorizontalPadding,
+    this.iconSize = 24,
+    this.elevation = M3EToolbarTokens.elevationNone,
+    this.elevationWithFab = M3EToolbarTokens.elevationWithFabExpanded,
+    this.toolbarToFabGap = M3EToolbarTokens.toolbarToFabGap,
+    this.screenOffset = M3EToolbarTokens.screenOffset,
+    // Legacy fields retained for copyWith / lerp compatibility.
     this.heightSmall = 40,
     this.heightMedium = 48,
     this.heightLarge = 56,
-    this.iconSize = 24,
     this.compactHeightReduction = 4,
     this.elevationSurface = 0,
     this.elevationProminent = 2,
@@ -43,74 +67,102 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
 
   static const M3EToolbarTheme defaults = M3EToolbarTheme();
 
+  final double containerSize;
+  final double floatingPadding;
+  final double dockedHorizontalPadding;
+  final double iconSize;
+  final double elevation;
+  final double elevationWithFab;
+  final double toolbarToFabGap;
+  final double screenOffset;
+
   final double heightSmall;
   final double heightMedium;
   final double heightLarge;
-  final double iconSize;
   final double compactHeightReduction;
   final double elevationSurface;
   final double elevationProminent;
 
+  M3EToolbarMetrics metricsFor(M3EToolbarPlacement placement) {
+    final EdgeInsetsGeometry padding = placement == M3EToolbarPlacement.floating
+        ? EdgeInsets.all(floatingPadding)
+        : EdgeInsets.symmetric(horizontal: dockedHorizontalPadding);
+    return M3EToolbarMetrics(
+      crossAxisSize: containerSize,
+      contentPadding: padding,
+      gap: M3EToolbarTokens.containerBetweenSpace,
+      iconSize: iconSize,
+      elevation: elevation,
+      elevationWithFab: elevationWithFab,
+    );
+  }
+
+  /// Legacy metrics API used by older call sites.
   M3EToolbarMetrics metrics(
     M3EToolbarDensity density,
     M3ESpacing spacing,
   ) {
-    var small = heightSmall;
-    var medium = heightMedium;
-    var large = heightLarge;
+    return metricsFor(M3EToolbarPlacement.floating).copyWithGap(spacing.sm);
+  }
 
-    if (density == M3EToolbarDensity.compact) {
-      small -= compactHeightReduction;
-      medium -= compactHeightReduction;
-      large -= compactHeightReduction;
+  M3EToolbarColors colors(
+    M3EColorScheme scheme,
+    M3EToolbarColorStyle style,
+  ) {
+    switch (style) {
+      case M3EToolbarColorStyle.standard:
+        return M3EToolbarColors(
+          container: scheme.surfaceContainer,
+          content: scheme.onSurface,
+          fabContainer: scheme.primaryContainer,
+          fabContent: scheme.onPrimaryContainer,
+        );
+      case M3EToolbarColorStyle.vibrant:
+        return M3EToolbarColors(
+          container: scheme.primaryContainer,
+          content: scheme.onPrimaryContainer,
+          fabContainer: scheme.tertiaryContainer,
+          fabContent: scheme.onTertiaryContainer,
+        );
     }
+  }
 
-    return M3EToolbarMetrics(
-      heightSmall: small,
-      heightMedium: medium,
-      heightLarge: large,
-      horizontalPadding: EdgeInsets.symmetric(horizontal: spacing.md),
-      gap: spacing.sm,
-      iconSize: iconSize,
-      elevationSurface: elevationSurface,
-      elevationProminent: elevationProminent,
-    );
+  /// Maps legacy [M3EToolbarVariant] onto [M3EToolbarColorStyle].
+  M3EToolbarColorStyle colorStyleFromVariant(M3EToolbarVariant variant) {
+    return switch (variant) {
+      M3EToolbarVariant.primary => M3EToolbarColorStyle.vibrant,
+      M3EToolbarVariant.surface ||
+      M3EToolbarVariant.tonal =>
+        M3EToolbarColorStyle.standard,
+    };
   }
 
   Color containerColor(M3EColorScheme scheme, M3EToolbarVariant variant) {
-    switch (variant) {
-      case M3EToolbarVariant.surface:
-        return scheme.surfaceContainerHigh;
-      case M3EToolbarVariant.tonal:
-        return scheme.secondaryContainer;
-      case M3EToolbarVariant.primary:
-        return scheme.primaryContainer;
-    }
+    return colors(scheme, colorStyleFromVariant(variant)).container;
   }
 
   Color foregroundColor(M3EColorScheme scheme, M3EToolbarVariant variant) {
-    switch (variant) {
-      case M3EToolbarVariant.surface:
-        return scheme.onSurface;
-      case M3EToolbarVariant.tonal:
-        return scheme.onSecondaryContainer;
-      case M3EToolbarVariant.primary:
-        return scheme.onPrimaryContainer;
-    }
+    return colors(scheme, colorStyleFromVariant(variant)).content;
+  }
+
+  ShapeBorder floatingShape() {
+    return const StadiumBorder();
+  }
+
+  ShapeBorder dockedShape() {
+    return const RoundedRectangleBorder();
   }
 
   ShapeBorder shape(M3EToolbarShapeFamily family) {
-    final BorderRadius radius = family == M3EToolbarShapeFamily.round
-        ? M3EShapes.roundSet.md
-        : M3EShapes.squareSet.md;
-    return RoundedRectangleBorder(borderRadius: radius);
+    return family == M3EToolbarShapeFamily.round
+        ? floatingShape()
+        : dockedShape();
   }
 
   TextStyle titleStyle(M3ETypeScale typeScale) => typeScale.titleSmall;
 
   TextStyle subtitleStyle(M3ETypeScale typeScale) => typeScale.bodySmall;
 
-  /// Scopes [base] so toolbar content uses [foreground] for on-surface roles.
   M3EThemeData scopedTheme(M3EThemeData base, Color foreground) {
     return base.copyWith(
       colorScheme: base.colorScheme.copyWith(
@@ -132,19 +184,34 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
 
   @override
   M3EToolbarTheme copyWith({
+    double? containerSize,
+    double? floatingPadding,
+    double? dockedHorizontalPadding,
+    double? iconSize,
+    double? elevation,
+    double? elevationWithFab,
+    double? toolbarToFabGap,
+    double? screenOffset,
     double? heightSmall,
     double? heightMedium,
     double? heightLarge,
-    double? iconSize,
     double? compactHeightReduction,
     double? elevationSurface,
     double? elevationProminent,
   }) {
     return M3EToolbarTheme(
+      containerSize: containerSize ?? this.containerSize,
+      floatingPadding: floatingPadding ?? this.floatingPadding,
+      dockedHorizontalPadding:
+          dockedHorizontalPadding ?? this.dockedHorizontalPadding,
+      iconSize: iconSize ?? this.iconSize,
+      elevation: elevation ?? this.elevation,
+      elevationWithFab: elevationWithFab ?? this.elevationWithFab,
+      toolbarToFabGap: toolbarToFabGap ?? this.toolbarToFabGap,
+      screenOffset: screenOffset ?? this.screenOffset,
       heightSmall: heightSmall ?? this.heightSmall,
       heightMedium: heightMedium ?? this.heightMedium,
       heightLarge: heightLarge ?? this.heightLarge,
-      iconSize: iconSize ?? this.iconSize,
       compactHeightReduction:
           compactHeightReduction ?? this.compactHeightReduction,
       elevationSurface: elevationSurface ?? this.elevationSurface,
@@ -158,18 +225,37 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
       return this;
     }
     return M3EToolbarTheme(
-      heightSmall: _lerpDouble(heightSmall, other.heightSmall, t)!,
-      heightMedium: _lerpDouble(heightMedium, other.heightMedium, t)!,
-      heightLarge: _lerpDouble(heightLarge, other.heightLarge, t)!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
+      containerSize: _lerp(containerSize, other.containerSize, t),
+      floatingPadding: _lerp(floatingPadding, other.floatingPadding, t),
+      dockedHorizontalPadding:
+          _lerp(dockedHorizontalPadding, other.dockedHorizontalPadding, t),
+      iconSize: _lerp(iconSize, other.iconSize, t),
+      elevation: _lerp(elevation, other.elevation, t),
+      elevationWithFab: _lerp(elevationWithFab, other.elevationWithFab, t),
+      toolbarToFabGap: _lerp(toolbarToFabGap, other.toolbarToFabGap, t),
+      screenOffset: _lerp(screenOffset, other.screenOffset, t),
+      heightSmall: _lerp(heightSmall, other.heightSmall, t),
+      heightMedium: _lerp(heightMedium, other.heightMedium, t),
+      heightLarge: _lerp(heightLarge, other.heightLarge, t),
       compactHeightReduction:
-          _lerpDouble(compactHeightReduction, other.compactHeightReduction, t)!,
-      elevationSurface:
-          _lerpDouble(elevationSurface, other.elevationSurface, t)!,
-      elevationProminent:
-          _lerpDouble(elevationProminent, other.elevationProminent, t)!,
+          _lerp(compactHeightReduction, other.compactHeightReduction, t),
+      elevationSurface: _lerp(elevationSurface, other.elevationSurface, t),
+      elevationProminent: _lerp(elevationProminent, other.elevationProminent, t),
     );
   }
 
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
+  double _lerp(double a, double b, double t) => a + (b - a) * t;
+}
+
+extension on M3EToolbarMetrics {
+  M3EToolbarMetrics copyWithGap(double gap) {
+    return M3EToolbarMetrics(
+      crossAxisSize: crossAxisSize,
+      contentPadding: contentPadding,
+      gap: gap,
+      iconSize: iconSize,
+      elevation: elevation,
+      elevationWithFab: elevationWithFab,
+    );
+  }
 }

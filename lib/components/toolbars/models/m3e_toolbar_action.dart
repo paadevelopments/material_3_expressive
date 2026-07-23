@@ -1,6 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart' show M3EToolbar;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EToolbar;
 
 /// A single action hosted by [M3EToolbar].
 class M3EToolbarAction {

@@ -270,51 +270,172 @@ class _NavigationPageState extends State<NavigationPage>
   }
 
   Widget _toolbarAndMenu() {
+    final List<M3EToolbarAction> sampleActions = <M3EToolbarAction>[
+      M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+      M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+      M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+    ];
+
+    Widget insetFrame({
+      required EdgeInsets padding,
+      required Widget child,
+    }) {
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(padding: padding),
+        child: ColoredBox(
+          color: M3ETheme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.4),
+          child: child,
+        ),
+      );
+    }
+
     return GallerySection(
       title: 'Toolbar & menu',
       children: <Widget>[
         DemoRow(
-          label: 'Toolbars',
+          label: 'Floating (standard / vibrant)',
           children: <Widget>[
             M3EToolbar(
-              actions: <M3EToolbarAction>[
-                M3EToolbarAction(
-                  icon: M3EIcons.arrow_back,
-                  onPressed: () {},
-                ),
-                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
-                M3EToolbarAction(
-                  icon: M3EIcons.arrow_forward,
-                  onPressed: () {},
-                ),
-              ],
+              actions: sampleActions,
             ),
             M3EToolbar(
-              variant: M3EToolbarVariant.primary,
-              actions: <M3EToolbarAction>[
-                M3EToolbarAction(icon: M3EIcons.remove, onPressed: () {}),
-                M3EToolbarAction(icon: M3EIcons.add, onPressed: () {}),
-              ],
+              colorStyle: M3EToolbarColorStyle.vibrant,
+              actions: sampleActions,
             ),
           ],
         ),
         DemoRow(
-          label: 'Toolbar alignment',
+          label: 'Floating + leading (expanded / collapsed)',
+          children: <Widget>[
+            M3EToolbar(
+              expanded: true,
+              leading: M3EIconButton(
+                icon: const Icon(M3EIcons.arrow_back),
+                onPressed: () {},
+                size: M3EIconButtonSize.sm,
+              ),
+              actions: sampleActions,
+            ),
+            M3EToolbar(
+              expanded: false,
+              leading: M3EIconButton(
+                icon: const Icon(M3EIcons.arrow_back),
+                onPressed: () {},
+                size: M3EIconButtonSize.sm,
+              ),
+              actions: sampleActions,
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Floating + FAB (expanded / collapsed)',
+          children: <Widget>[
+            M3EToolbar(
+              actions: sampleActions,
+              fabIcon: const Icon(M3EIcons.add),
+              onFabPressed: () {},
+              expanded: true,
+            ),
+            M3EToolbar(
+              actions: sampleActions,
+              fabIcon: const Icon(M3EIcons.add),
+              onFabPressed: () {},
+              expanded: false,
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Floating vertical',
           children: <Widget>[
             SizedBox(
-              width: double.infinity,
+              height: 220,
               child: M3EToolbar(
-                alignment: M3EToolbarAlignment.center,
-                actions: <M3EToolbarAction>[
-                  M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
-                  M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
-                ],
+                axis: Axis.vertical,
+                actions: sampleActions,
+              ),
+            ),
+            SizedBox(
+              height: 220,
+              child: M3EToolbar(
+                axis: Axis.vertical,
+                colorStyle: M3EToolbarColorStyle.vibrant,
+                actions: sampleActions,
+                fabIcon: const Icon(M3EIcons.add),
+                onFabPressed: () {},
+                fabPosition: M3EToolbarFabPosition.bottom,
               ),
             ),
           ],
         ),
         DemoRow(
-          label: 'Toolbar with title and overflow',
+          label: 'Floating safeArea on / off',
+          children: <Widget>[
+            SizedBox(
+              width: 280,
+              child: insetFrame(
+                padding: const EdgeInsets.all(24),
+                child: M3EToolbar(
+                  safeArea: true,
+                  actions: sampleActions,
+                ),
+              ),
+            ),
+            M3EToolbar(
+              safeArea: false,
+              actions: sampleActions,
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Docked bottom (safeArea on / off)',
+          children: <Widget>[
+            SizedBox(
+              width: 280,
+              child: insetFrame(
+                padding: const EdgeInsets.only(bottom: 34),
+                child: M3EToolbar.docked(
+                  safeArea: true,
+                  dockEdge: M3EToolbarDockEdge.bottom,
+                  actions: sampleActions,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 280,
+              child: insetFrame(
+                padding: const EdgeInsets.only(bottom: 34),
+                child: M3EToolbar.docked(
+                  safeArea: false,
+                  dockEdge: M3EToolbarDockEdge.bottom,
+                  actions: sampleActions,
+                ),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Docked top (safeArea on)',
+          children: <Widget>[
+            SizedBox(
+              width: 320,
+              child: insetFrame(
+                padding: const EdgeInsets.only(top: 44),
+                child: M3EToolbar.docked(
+                  safeArea: true,
+                  dockEdge: M3EToolbarDockEdge.top,
+                  colorStyle: M3EToolbarColorStyle.vibrant,
+                  titleText: 'Docked top',
+                  actions: sampleActions,
+                ),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Floating with title + overflow',
           children: <Widget>[
             M3EToolbar(
               titleText: 'Inbox',
