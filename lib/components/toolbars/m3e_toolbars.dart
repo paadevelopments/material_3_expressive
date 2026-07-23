@@ -244,8 +244,9 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
       destructiveColor: scheme.error,
       axis: axis,
       expand: dockedIconsOnly,
+      // spaceBetween: first/last sit on the padded edges; free space is between.
       mainAxisAlignment: dockedIconsOnly
-          ? MainAxisAlignment.spaceEvenly
+          ? MainAxisAlignment.spaceBetween
           : MainAxisAlignment.start,
     );
 

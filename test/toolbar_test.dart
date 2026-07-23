@@ -127,7 +127,8 @@ void main() {
     expect(toolbarSize.width, materialSize.width);
   });
 
-  testWidgets('docked icons-only spaces actions evenly', (tester) async {
+  testWidgets('docked icons-only pins first/last to padded edges',
+      (tester) async {
     await tester.pumpWidget(
       _host(
         child: const SizedBox(
@@ -144,11 +145,25 @@ void main() {
       ),
     );
 
+    final Finder buttons = find.descendant(
+      of: find.byType(M3EToolbar),
+      matching: find.byType(M3EIconButton),
+    );
+    final double toolbarLeft =
+        tester.getTopLeft(find.byType(M3EToolbar)).dx;
+    final double toolbarRight =
+        tester.getTopRight(find.byType(M3EToolbar)).dx;
+    final double firstLeft = tester.getTopLeft(buttons.at(0)).dx;
+    final double lastRight = tester.getTopRight(buttons.at(2)).dx;
+
+    // dockedHorizontalPadding = 16
+    expect(firstLeft - toolbarLeft, closeTo(16, 0.5));
+    expect(toolbarRight - lastRight, closeTo(16, 0.5));
+
     final double editX = tester.getCenter(find.byIcon(M3EIcons.edit)).dx;
     final double shareX = tester.getCenter(find.byIcon(M3EIcons.share)).dx;
     final double favoriteX =
         tester.getCenter(find.byIcon(M3EIcons.favorite)).dx;
-
     expect(shareX - editX, closeTo(favoriteX - shareX, 0.5));
   });
 
