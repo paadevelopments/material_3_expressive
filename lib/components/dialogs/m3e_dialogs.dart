@@ -162,7 +162,7 @@ class M3EDialog extends StatelessWidget {
   List<Widget> _buildChildren(M3EThemeData theme, M3EDialogTheme dialogTheme) {
     final M3EColorScheme scheme = theme.colorScheme;
     final EdgeInsets padding = dialogTheme.padding;
-    final bool hasContent = content != null;
+    final hasContent = content != null;
     final bool hasActions = actions.isNotEmpty;
     final bool hasBelowHeader = hasContent || hasActions;
 
