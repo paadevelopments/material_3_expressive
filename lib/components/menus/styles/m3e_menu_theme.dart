@@ -23,6 +23,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     this.disabledOpacity = 0.38,
     this.scrimAlpha = 0.0,
     this.screenEdgePadding = 12,
+    this.containerRadius = 28,
+    this.backgroundColor,
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.itemGap = 0,
@@ -47,6 +49,14 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   final double scrimAlpha;
   final double screenEdgePadding;
 
+  /// Corner radius of the menu surface.
+  ///
+  /// Same default as [M3EDropdownMenuTheme.containerRadius] / dropdown panel.
+  final double containerRadius;
+
+  /// When non-null, overrides the scheme-derived menu surface color.
+  final Color? backgroundColor;
+
   /// Spring for expand — same default as [M3EDropdownMenu.openMotion].
   final M3ESpring openMotion;
 
@@ -55,7 +65,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
 
   final double itemGap;
 
-  BorderRadius get borderRadius => M3EShapes.radiusExtraSmall;
+  BorderRadius get borderRadius => BorderRadius.circular(containerRadius);
 
   /// Standalone / ungrouped item radius.
   BorderRadius get standaloneItemShape => M3EShapes.radiusExtraSmall;
@@ -97,7 +107,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     return M3EMenuItemShape.middle;
   }
 
-  Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainer;
+  Color containerColor(M3EColorScheme scheme) =>
+      backgroundColor ?? scheme.surfaceContainer;
 
   Color dividerColor(M3EColorScheme scheme) => scheme.outlineVariant;
 
@@ -167,6 +178,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     double? disabledOpacity,
     double? scrimAlpha,
     double? screenEdgePadding,
+    double? containerRadius,
+    Color? backgroundColor,
     M3ESpring? openMotion,
     M3ESpring? closeMotion,
     double? itemGap,
@@ -191,6 +204,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
       scrimAlpha: scrimAlpha ?? this.scrimAlpha,
       screenEdgePadding: screenEdgePadding ?? this.screenEdgePadding,
+      containerRadius: containerRadius ?? this.containerRadius,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       openMotion: openMotion ?? this.openMotion,
       closeMotion: closeMotion ?? this.closeMotion,
       itemGap: itemGap ?? this.itemGap,
@@ -229,6 +244,10 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       scrimAlpha: _lerpDouble(scrimAlpha, other.scrimAlpha, t)!,
       screenEdgePadding:
           _lerpDouble(screenEdgePadding, other.screenEdgePadding, t)!,
+      containerRadius:
+          _lerpDouble(containerRadius, other.containerRadius, t)!,
+      backgroundColor:
+          Color.lerp(backgroundColor, other.backgroundColor, t),
       openMotion: t < 0.5 ? openMotion : other.openMotion,
       closeMotion: t < 0.5 ? closeMotion : other.closeMotion,
       itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
