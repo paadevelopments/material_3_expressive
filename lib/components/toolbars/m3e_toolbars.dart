@@ -370,11 +370,14 @@ class M3EToolbar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// System inset for [dockEdge] only — top XOR bottom, never all sides.
+  ///
+  /// Uses [MediaQuery.viewPaddingOf] so insets remain available when ancestors
+  /// have consumed / zeroed [MediaQuery.paddingOf] (e.g. edge-to-edge).
   EdgeInsets _edgeSafeAreaInset(BuildContext context) {
     if (!safeArea) {
       return EdgeInsets.zero;
     }
-    final EdgeInsets mq = MediaQuery.paddingOf(context);
+    final EdgeInsets mq = MediaQuery.viewPaddingOf(context);
     return EdgeInsets.only(
       top: dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
       bottom: dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,

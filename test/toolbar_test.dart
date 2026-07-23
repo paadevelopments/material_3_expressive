@@ -10,7 +10,8 @@ Widget _host({
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
-      data: MediaQueryData(padding: padding),
+      // padding zeroed (edge-to-edge); viewPadding still carries system insets.
+      data: MediaQueryData(padding: EdgeInsets.zero, viewPadding: padding),
       child: M3ETheme(
         data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
         child: Center(child: child),

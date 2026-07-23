@@ -341,41 +341,36 @@ class _NavigationPageState extends State<NavigationPage>
         DemoRow(
           label: 'Floating vertical',
           children: <Widget>[
-            SizedBox(
-              height: 220,
-              child: M3EToolbar(
-                axis: Axis.vertical,
-                actions: sampleActions,
-              ),
-            ),
-            SizedBox(
-              height: 220,
-              child: M3EToolbar(
-                axis: Axis.vertical,
-                colorStyle: M3EToolbarColorStyle.vibrant,
-                actions: sampleActions,
-                fabIcon: const Icon(M3EIcons.add),
-                onFabPressed: () {},
-                fabPosition: M3EToolbarFabPosition.bottom,
-              ),
+            Row(
+              spacing: 16,
+              children: [
+                M3EToolbar(
+                  axis: Axis.vertical,
+                  actions: sampleActions,
+                ),
+                M3EToolbar(
+                  axis: Axis.vertical,
+                  colorStyle: M3EToolbarColorStyle.vibrant,
+                  actions: sampleActions,
+                  fabIcon: const Icon(M3EIcons.add),
+                  onFabPressed: () {},
+                  fabPosition: M3EToolbarFabPosition.bottom,
+                )
+              ],
             ),
           ],
         ),
         DemoRow(
           label: 'Floating safeArea on / off',
           children: <Widget>[
-            SizedBox(
-              // width: 280,
-              // height: 120,
-              child: insetFrame(
-                padding: const EdgeInsets.only(bottom: 0),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: M3EToolbar(
-                    safeArea: true,
-                    dockEdge: M3EToolbarDockEdge.bottom,
-                    actions: sampleActions,
-                  ),
+            insetFrame(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: M3EToolbar(
+                  safeArea: true,
+                  dockEdge: M3EToolbarDockEdge.bottom,
+                  actions: sampleActions,
                 ),
               ),
             ),
@@ -388,26 +383,20 @@ class _NavigationPageState extends State<NavigationPage>
         DemoRow(
           label: 'Docked bottom icons-only (evenly spaced)',
           children: <Widget>[
-            SizedBox(
-              width: 280,
-              child: insetFrame(
-                padding: const EdgeInsets.only(bottom: 34),
-                child: M3EToolbar.docked(
-                  safeArea: true,
-                  dockEdge: M3EToolbarDockEdge.bottom,
-                  actions: sampleActions,
-                ),
+            insetFrame(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: M3EToolbar.docked(
+                safeArea: true,
+                dockEdge: M3EToolbarDockEdge.bottom,
+                actions: sampleActions,
               ),
             ),
-            SizedBox(
-              width: 280,
-              child: insetFrame(
-                padding: const EdgeInsets.only(bottom: 34),
-                child: M3EToolbar.docked(
-                  safeArea: false,
-                  dockEdge: M3EToolbarDockEdge.bottom,
-                  actions: sampleActions,
-                ),
+            insetFrame(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: M3EToolbar.docked(
+                safeArea: false,
+                dockEdge: M3EToolbarDockEdge.bottom,
+                actions: sampleActions,
               ),
             ),
           ],
@@ -415,17 +404,14 @@ class _NavigationPageState extends State<NavigationPage>
         DemoRow(
           label: 'Docked top (safeArea on)',
           children: <Widget>[
-            SizedBox(
-              width: 320,
-              child: insetFrame(
-                padding: const EdgeInsets.only(top: 44),
-                child: M3EToolbar.docked(
-                  safeArea: true,
-                  dockEdge: M3EToolbarDockEdge.top,
-                  colorStyle: M3EToolbarColorStyle.vibrant,
-                  titleText: 'Docked top',
-                  actions: sampleActions,
-                ),
+            insetFrame(
+              padding: const EdgeInsets.only(top: 0),
+              child: M3EToolbar.docked(
+                safeArea: true,
+                dockEdge: M3EToolbarDockEdge.top,
+                colorStyle: M3EToolbarColorStyle.vibrant,
+                titleText: 'Docked top',
+                actions: sampleActions,
               ),
             ),
           ],
