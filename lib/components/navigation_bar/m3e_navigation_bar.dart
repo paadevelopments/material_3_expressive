@@ -3,6 +3,7 @@
 // Adapted for material_3_expressive: liquid selection indicator (spatial springs).
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../../foundations/foundations.dart';
 import '../navigation_rail/components/m3e_nav_selection_indicator.dart';
@@ -86,7 +87,19 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     if (_traveling == traveling || !mounted) {
       return;
     }
-    setState(() => _traveling = traveling);
+    // Indicator may notify from a motion status during build; defer rebuild.
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      setState(() => _traveling = traveling);
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _traveling == traveling) {
+        return;
+      }
+      setState(() => _traveling = traveling);
+    });
   }
 
   @override

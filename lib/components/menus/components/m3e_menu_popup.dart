@@ -267,6 +267,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
           return KeyEventResult.ignored;
         },
         child: Stack(
+          clipBehavior: Clip.none,
           children: <Widget>[
             Positioned.fill(
               child: GestureDetector(
@@ -309,7 +310,6 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
                     maxHeight: placement.maxHeight,
                   ),
                   child: _buildSurfaces(
-                    width: placement.width,
                     menuTheme: menuTheme,
                     scheme: scheme,
                   ),
@@ -323,11 +323,13 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
   }
 
   Widget _buildSurfaces({
-    required double width,
     required M3EMenuTheme menuTheme,
     required M3EColorScheme scheme,
   }) {
     final palette = menuTheme.colors(scheme, widget.colorStyle);
+    // Ambient blur reaches ~2x elevation; keep it inside the scroll viewport.
+    // Do not clip the same box that paints [boxShadow] — that hides elevation.
+    final double shadowPad = menuTheme.elevation * 2;
     final surfaces = m3eMenuPartitionSurfaces(widget.children);
     final cards = <Widget>[];
     for (var i = 0; i < surfaces.length; i++) {
@@ -336,31 +338,34 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       }
       final surface = surfaces[i];
       cards.add(
-        Container(
-          width: width,
+        DecoratedBox(
           decoration: BoxDecoration(
-            color: palette.container,
             borderRadius: menuTheme.borderRadius,
             boxShadow: M3EElevation.shadows(
               menuTheme.elevation,
               shadowColor: scheme.shadow,
             ),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: menuTheme.verticalPadding,
-              horizontal: menuTheme.contentHorizontalPadding,
-            ),
-            child: M3EMenuContent(
-              nodes: surface.children,
-              sectionLabel: surface.label,
-              selectedValue: widget.selectedValue,
-              closeOnSelect: widget.closeOnSelect,
-              onSelect: _handleSelect,
-              onOpenSubmenu: _openSubmenu,
-              autofocusFirst: i == 0,
-              applyGroupShapes: false,
+          child: ClipRRect(
+            borderRadius: menuTheme.borderRadius,
+            child: ColoredBox(
+              color: palette.container,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: menuTheme.verticalPadding,
+                  horizontal: menuTheme.contentHorizontalPadding,
+                ),
+                child: M3EMenuContent(
+                  nodes: surface.children,
+                  sectionLabel: surface.label,
+                  selectedValue: widget.selectedValue,
+                  closeOnSelect: widget.closeOnSelect,
+                  onSelect: _handleSelect,
+                  onOpenSubmenu: _openSubmenu,
+                  autofocusFirst: i == 0,
+                  applyGroupShapes: false,
+                ),
+              ),
             ),
           ),
         ),
@@ -371,7 +376,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       colorStyle: widget.colorStyle,
       colors: palette,
       child: ListView(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.all(shadowPad),
         shrinkWrap: true,
         children: cards,
       ),

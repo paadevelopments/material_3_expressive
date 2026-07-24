@@ -98,12 +98,34 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   }
 
   void _updateTraveling() {
-    final bool traveling = _animating;
+    _setTraveling(_animating);
+  }
+
+  /// Updates traveling without calling [setState] during build.
+  ///
+  /// [animateTo] from [didUpdateWidget] can fire status listeners while the
+  /// tree is still building; hosts must not be notified until after the frame.
+  void _setTraveling(bool traveling) {
     if (traveling == _traveling) {
       return;
     }
-    setState(() => _traveling = traveling);
-    widget.onTravelingChanged?.call(traveling);
+    _traveling = traveling;
+
+    void notify() {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+      widget.onTravelingChanged?.call(_traveling);
+    }
+
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      notify();
+    } else {
+      SchedulerBinding.instance.addPostFrameCallback((_) => notify());
+    }
   }
 
   @override
@@ -325,10 +347,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       ..animateTo(geo.main);
     // Ensure host hides resting pills for this travel even if the ticker
     // reports inactive for a beat before the first spring tick.
-    if (!_traveling) {
-      setState(() => _traveling = true);
-      widget.onTravelingChanged?.call(true);
-    }
+    _setTraveling(true);
   }
 
   @override
