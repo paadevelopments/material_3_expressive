@@ -56,6 +56,28 @@ abstract final class M3EToolbarItemLayout {
     };
   }
 
+  /// Inserts [gap] between consecutive [children] along [axis].
+  static List<Widget> withGaps(
+    List<Widget> children, {
+    required double gap,
+    required Axis axis,
+  }) {
+    if (children.length <= 1 || gap <= 0) {
+      return children;
+    }
+    final Widget spacer = SizedBox(
+      width: axis == Axis.horizontal ? gap : 0,
+      height: axis == Axis.vertical ? gap : 0,
+    );
+    final List<Widget> out = <Widget>[children.first];
+    for (var i = 1; i < children.length; i++) {
+      out
+        ..add(spacer)
+        ..add(children[i]);
+    }
+    return out;
+  }
+
   /// Keeps all widgets inline; only excess non-trigger actions overflow.
   ///
   /// Returns `(inline, overflowActions)` preserving relative order in [inline].

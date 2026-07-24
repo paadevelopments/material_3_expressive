@@ -295,12 +295,9 @@ class _M3EToolbarState extends State<M3EToolbar>
 
     final EdgeInsets resolvedPadding =
         widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
-    final EdgeInsets innerPadding = EdgeInsets.only(
-      left: resolvedPadding.left,
-      right: resolvedPadding.right,
-      top: _floating ? resolvedPadding.top : 0,
-      bottom: _floating ? resolvedPadding.bottom : 0,
-    );
+    // Content padding (incl. vertical) applies to floating and docked; safe
+    // area insets stay outside Material via [_edgeSafeAreaInset].
+    final EdgeInsets innerPadding = resolvedPadding;
     final double availableExtent = M3EToolbarItemLayout.availableCrossExtent(
       crossAxisSize: metrics.crossAxisSize,
       padding: innerPadding,
@@ -378,6 +375,7 @@ class _M3EToolbarState extends State<M3EToolbar>
             destructiveColor: scheme.error,
             axis: widget.axis,
             availableExtent: availableExtent,
+            gap: metrics.gap,
             expand: dockedIconsOnly,
             mainAxisAlignment: dockedIconsOnly
                 ? MainAxisAlignment.spaceBetween

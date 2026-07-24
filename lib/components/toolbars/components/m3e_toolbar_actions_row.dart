@@ -19,6 +19,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     required this.overflowTextStyle,
     required this.destructiveColor,
     required this.availableExtent,
+    this.gap = 0,
     this.axis = Axis.horizontal,
     this.expand = false,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -34,6 +35,9 @@ class M3EToolbarActionsRow extends StatelessWidget {
 
   /// Remaining cross-axis size after bar content padding.
   final double availableExtent;
+
+  /// Space between consecutive inline items (actions, widgets, overflow).
+  final double gap;
   final Axis axis;
 
   /// When true, the row fills the cross-axis parent's main-axis extent.
@@ -53,7 +57,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     final List<M3EToolbarItem> inline = partitioned.inline;
     final List<M3EToolbarAction> overflow = partitioned.overflow;
 
-    final List<Widget> children = <Widget>[
+    final List<Widget> slots = <Widget>[
       for (final M3EToolbarItem item in inline)
         M3EToolbarItemLayout.buildItem(
           item: item,
@@ -75,6 +79,13 @@ class M3EToolbarActionsRow extends StatelessWidget {
           destructiveColor: destructiveColor,
         ),
     ];
+
+    // spaceBetween already distributes free space — skip fixed gaps there.
+    final bool insertGaps =
+        gap > 0 && mainAxisAlignment != MainAxisAlignment.spaceBetween;
+    final List<Widget> children = insertGaps
+        ? M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis)
+        : slots;
 
     final MainAxisSize mainAxisSize =
         expand ? MainAxisSize.max : MainAxisSize.min;

@@ -86,7 +86,12 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
   M3EToolbarMetrics metricsFor(M3EToolbarPlacement placement) {
     final EdgeInsetsGeometry padding = placement == M3EToolbarPlacement.floating
         ? EdgeInsets.all(floatingPadding)
-        : EdgeInsets.symmetric(horizontal: dockedHorizontalPadding);
+        : EdgeInsets.fromLTRB(
+            dockedHorizontalPadding,
+            floatingPadding,
+            dockedHorizontalPadding,
+            floatingPadding,
+          );
     return M3EToolbarMetrics(
       crossAxisSize: containerSize,
       contentPadding: padding,

@@ -139,11 +139,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       maxInline: maxInline,
     );
 
-    final List<Widget> children = <Widget>[
-      if (leading != null) ...<Widget>[
-        leading!,
-        _gapBox(),
-      ],
+    final List<Widget> slots = <Widget>[
       for (final M3EToolbarItem item in partitioned.inline)
         M3EToolbarItemLayout.buildItem(
           item: item,
@@ -162,6 +158,14 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           textStyle: overflowTextStyle,
           destructiveColor: destructiveColor,
         ),
+    ];
+
+    final List<Widget> children = <Widget>[
+      if (leading != null) ...<Widget>[
+        leading!,
+        _gapBox(),
+      ],
+      ...M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis),
       if (trailing != null) ...<Widget>[
         _gapBox(),
         trailing!,
@@ -194,8 +198,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       return null;
     }
 
-    final List<Widget> children = <Widget>[
-      if (leading != null) ...<Widget>[leading, _gapBox()],
+    final List<Widget> slots = <Widget>[
       for (final M3EToolbarItem item in items)
         M3EToolbarItemLayout.buildItem(
           item: item,
@@ -214,6 +217,11 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           textStyle: overflowTextStyle,
           destructiveColor: destructiveColor,
         ),
+    ];
+
+    final List<Widget> children = <Widget>[
+      if (leading != null) ...<Widget>[leading, _gapBox()],
+      ...M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis),
       if (trailing != null) ...<Widget>[_gapBox(), trailing],
     ];
 
