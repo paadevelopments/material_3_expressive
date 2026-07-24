@@ -337,6 +337,10 @@ class M3ESliderTrackPainter extends CustomPainter {
   }
 
   /// Active value as a traveling sine wave (linear wavy progress recipe).
+  ///
+  /// Path endpoints are inset by half the stroke so [StrokeCap.round] tips sit
+  /// flush with [start]/[end] — the same outer edges as the flat RRect, which
+  /// keeps the handle ↔ track gap identical to non-wavy sliders.
   void _drawWavyActive(
     Canvas canvas,
     Rect trackBounds,
@@ -347,6 +351,13 @@ class M3ESliderTrackPainter extends CustomPainter {
     if (end <= start || wavelength <= 0) {
       return;
     }
+    final double halfStroke = trackHeight / 2;
+    final double pathStart = start + halfStroke;
+    final double pathEnd = end - halfStroke;
+    if (pathEnd <= pathStart) {
+      return;
+    }
+
     final double amp =
         waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
     final double crossCenter =
@@ -362,24 +373,26 @@ class M3ESliderTrackPainter extends CustomPainter {
     const double step = 1.5;
     final double k = 2 * math.pi / wavelength;
 
+    // Phase is anchored to [start] (pre-inset) so travel stays stable as the
+    // thumb moves and the visible segment length changes.
     double crossAt(double primary) {
       return crossCenter + amp * math.sin(phase + (primary - start) * k);
     }
 
     if (_vertical) {
-      double y = start;
+      double y = pathStart;
       path.moveTo(crossAt(y), y);
-      for (y = start + step; y <= end; y += step) {
+      for (y = pathStart + step; y <= pathEnd; y += step) {
         path.lineTo(crossAt(y), y);
       }
-      path.lineTo(crossAt(end), end);
+      path.lineTo(crossAt(pathEnd), pathEnd);
     } else {
-      double x = start;
+      double x = pathStart;
       path.moveTo(x, crossAt(x));
-      for (x = start + step; x <= end; x += step) {
+      for (x = pathStart + step; x <= pathEnd; x += step) {
         path.lineTo(x, crossAt(x));
       }
-      path.lineTo(end, crossAt(end));
+      path.lineTo(pathEnd, crossAt(pathEnd));
     }
     canvas.drawPath(path, paint);
   }
