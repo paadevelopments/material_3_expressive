@@ -1,12 +1,16 @@
 # Material 3 Expressive
 
-A faithful, dependency-light Flutter implementation of the
+A faithful Flutter implementation of the
 [Material 3](https://m3.material.io/components) **Expressive** component set.
 
 Every widget is exposed as a direct `M3E*` class with spring-driven press
 feedback, shape morphing, and hover/focus/press state layers. Design tokens
 (color, typography, motion, shapes, elevation) are provided through
 `M3ETheme`.
+
+Runtime dependencies are intentionally small — see
+[Dependencies](#dependencies) for the packages declared in
+[`pubspec.yaml`](pubspec.yaml).
 
 ## Example app
 
@@ -17,9 +21,9 @@ official Material 3 catalog:
 | Tab | Page | Components |
 | --- | ---- | ---------- |
 | **Do** | [`actions_page.dart`](example/lib/pages/actions_page.dart) | Buttons, FABs, groups, toggles, segmented & split buttons |
-| **Pick** | [`selection_page.dart`](example/lib/pages/selection_page.dart) | Checkbox, radio, switch, chips, dropdown, slider, pickers |
+| **Pick** | [`selection_page.dart`](example/lib/pages/selection_page.dart) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
 | **View** | [`containment_page.dart`](example/lib/pages/containment_page.dart) | Cards, carousel, lists, divider, dialogs, sheets |
-| **Nav** | [`navigation_page.dart`](example/lib/pages/navigation_page.dart) | App bars, tabs, nav bar/rail/drawer, toolbar, menu |
+| **Nav** | [`navigation_page.dart`](example/lib/pages/navigation_page.dart) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
 | **Find** | [`feedback_page.dart`](example/lib/pages/feedback_page.dart) | Badges, progress, refresh, tooltip, snackbar, inputs |
 
 The gallery shell in [`example/lib/main.dart`](example/lib/main.dart) uses
@@ -36,10 +40,12 @@ flutter run
   Containment, Navigation, and Feedback (communication + text input).
 - **Direct component API** — construct each `M3E*` widget directly; enums and
   models are exported from a single library import.
-- **Expressive motion & interaction** — spring physics, shape morphing, and
-  proper state layers on every interactive surface.
-- **Design token foundations** — color schemes, typography, motion, shapes,
-  elevation, and state layers via the `M3ETheme` inherited widget.
+- **Expressive motion & interaction** — spring physics (via [`motor`](https://pub.dev/packages/motor)),
+  shape morphing, liquid selection indicators, and proper state layers on every
+  interactive surface.
+- **Design token foundations** — color schemes, typography, motion, shapes
+  (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
+  morph polygons), elevation, and state layers via the `M3ETheme` inherited widget.
 - **Interactive example gallery** in [`example/`](example/) with live demos
   for every component.
 
@@ -70,6 +76,20 @@ Or add it from the command line:
 ```bash
 flutter pub add material_3_expressive
 ```
+
+## Dependencies
+
+External packages declared in [`pubspec.yaml`](pubspec.yaml):
+
+| Package | Role in this library |
+| ------- | -------------------- |
+| [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures, and Material primitives used throughout |
+| [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
+| [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`) |
+| [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |
+| [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`) used by loading / shape-driven surfaces |
+
+Dev-only: [`flutter_lints`](https://pub.dev/packages/flutter_lints), [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html), and [`custom_lint`](https://pub.dev/packages/custom_lint).
 
 ## Quick start
 
@@ -471,7 +491,9 @@ M3EDropdownMenu<String>.future(
 
 #### M3ESlider
 
-Compose Material 3 expressive slider — standard, centered, vertical, and range.
+Compose Material 3 expressive slider — standard, centered, wavy, vertical, and
+range. Optional `trackThickness`, `thumbLength`, `dotSize`, `dotSpacing`, and
+`dotBuilder` customize track, thumb, and stop/tick markers.
 
 ```dart
 // in State
@@ -487,6 +509,12 @@ M3ESlider(
   onChanged: (v) => setState(() => brightness = v),
 );
 
+// Wavy active value (inactive track stays flat)
+M3ESlider.wavy(
+  value: progress,
+  onChanged: (v) => setState(() => progress = v),
+);
+
 M3ESlider.centered(
   value: balance,
   min: -100,
@@ -494,7 +522,33 @@ M3ESlider.centered(
   onChanged: (v) => setState(() => balance = v),
 );
 
+// Custom track / thumb / end dots (size & edge padding)
+M3ESlider(
+  value: level,
+  max: 4,
+  divisions: 4,
+  trackThickness: 20,
+  thumbLength: 36,
+  dotSize: 12,
+  dotSpacing: 8,
+  onChanged: (v) => setState(() => level = v),
+  dotBuilder: ({
+    required context,
+    required color,
+    required size,
+    required active,
+  }) {
+    // e.g. paint M3EMaterialNewShapes.cookie4Sided / softBurst
+    return ColoredBox(color: color);
+  },
+);
+
 M3ERangeSlider(
+  values: range,
+  onChanged: (v) => setState(() => range = v),
+);
+
+M3ERangeSlider.wavy(
   values: range,
   onChanged: (v) => setState(() => range = v),
 );
@@ -817,13 +871,26 @@ M3ESideSheet.show<void>(
 
 #### M3EAppBar
 
-Top, sliver, and bottom app bar variants.
+Top, search, sliver, and bottom app bar variants. Docked top/bottom bars apply
+single-edge `safeArea` padding from `MediaQuery.viewPadding` by default
+(opt out with `safeArea: false`).
 
 ```dart
 M3EAppBar.top(
   titleText: 'Inbox',
   leading: const Icon(M3EIcons.menu),
   actions: const [Icon(M3EIcons.search)],
+);
+
+// Anchored search title — tap opens fullscreen (or docked) search
+M3EAppBar.search(
+  searchController: searchController,
+  barHintText: 'Search mail',
+  leading: const Icon(M3EIcons.menu),
+  actions: const [Icon(M3EIcons.tune)],
+  suggestionsBuilder: (context, controller) sync* {
+    yield const ListTile(title: Text('Suggestion'));
+  },
 );
 
 // Sliver (inside CustomScrollView)
@@ -1186,6 +1253,8 @@ const M3ETextField(
 #### M3ESearchBar / M3ESearchAnchor
 
 Inline search field, or a bar that opens a full search view with suggestions.
+When embedded in toolbars or app bars, `expandOnFocus` / `expandRestPadding`
+control the horizontal inset spring on focus.
 
 ```dart
 // Inline bar
@@ -1283,8 +1352,10 @@ implementations. Thanks to the original authors:
 | [Emily](https://github.com/EmilyMoonstone) | Loading indicator (Flutter package) | [loading_indicator_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e) |
 | [The Android Open Source Project](https://source.android.com/) | Loading indicator (Compose reference) | [`LoadingIndicator.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt) |
 | [The Android Open Source Project](https://source.android.com/) | Slider / RangeSlider / VerticalSlider (Compose reference, `material3:1.4.0-alpha01`) | [`Slider.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/Slider.kt) / [`SliderTokens.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/SliderTokens.kt) |
+| [The Android Open Source Project](https://source.android.com/) | Linear / circular wavy progress (Compose reference) | [`LinearWavyProgressIndicator`](https://developer.android.com/reference/kotlin/androidx/compose/material3/LinearWavyProgressIndicator.composable) / [`CircularWavyProgressIndicator`](https://developer.android.com/reference/kotlin/androidx/compose/material3/CircularWavyProgressIndicator.composable) |
 | [The Android Open Source Project](https://source.android.com/) | Floating / docked toolbars (Compose reference, `material3:1.4.0-alpha01`) | [`FloatingToolbar.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/FloatingToolbar.kt) / [`FlexibleBottomAppBar`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/AppBar.kt) / [`DockedToolbarTokens`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/DockedToolbarTokens.kt) |
 | [The Flutter Authors](https://github.com/flutter/flutter) | Carousel view layout (`CarouselView`) | Flutter SDK / [m3_carousel](https://pub.dev/packages/m3_carousel) |
+| [pub.dev](https://pub.dev/) | Spring motion (`motor`), expressive morph polygons (`material_new_shapes`), dynamic color (`dynamic_color`) | See [Dependencies](#dependencies) |
 
 Copyright notices and licenses from those sources are retained in the
 corresponding source files where applicable.
