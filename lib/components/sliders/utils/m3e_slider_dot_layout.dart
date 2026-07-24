@@ -40,6 +40,7 @@ abstract final class M3ESliderDotLayout {
     required double handleThickness,
     required double stopIndicatorSize,
     required double tickSize,
+    required double edgeInset,
     required Axis axis,
     required TextDirection textDirection,
   }) {
@@ -57,7 +58,6 @@ abstract final class M3ESliderDotLayout {
       return const <M3ESliderDotPlacement>[];
     }
 
-    final double corner = trackHeight / 2;
     final double startGap =
         (centered || range) ? handleThickness / 2 + handleGap : 0;
     final double endGap = handleThickness / 2 + handleGap;
@@ -84,8 +84,10 @@ abstract final class M3ESliderDotLayout {
 
     final List<M3ESliderDotPlacement> out = <M3ESliderDotPlacement>[];
 
-    final double stopStart = sliderStart + corner;
-    final double stopEnd = sliderEnd - corner;
+    // Edge inset from track ends (Compose StopIndicatorTrailingSpace).
+    final double inset = edgeInset;
+    final double stopStart = sliderStart + inset;
+    final double stopEnd = sliderEnd - inset;
     if (stopEnd > stopStart) {
       if (!_onActiveOrGap(
         stopStart,
@@ -133,8 +135,8 @@ abstract final class M3ESliderDotLayout {
       return out;
     }
 
-    final double tickStart = sliderStart + corner;
-    final double tickEnd = sliderEnd - corner;
+    final double tickStart = sliderStart + inset;
+    final double tickEnd = sliderEnd - inset;
     final double tickCenterGapStart = centered ? centerAxis - endGap : 0;
     final double tickCenterGapEnd = centered ? centerAxis + endGap : 0;
     final double tickStartGapLo = valueStart - startGap;

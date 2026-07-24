@@ -31,6 +31,7 @@ class M3ESliderTrackPainter extends CustomPainter {
     required this.axis,
     required this.textDirection,
     this.drawDots = true,
+    this.edgeInset,
     this.isWavy = false,
     this.waveAmplitude = 0,
     this.wavelength = 40,
@@ -56,6 +57,10 @@ class M3ESliderTrackPainter extends CustomPainter {
   /// When false, skip stop indicators and discrete ticks (custom overlay owns
   /// them via a [M3ESliderDotBuilder]).
   final bool drawDots;
+
+  /// Inset of stop/tick markers from each track end. Defaults to
+  /// [M3ESliderTokens.stopIndicatorTrailingSpace] when null.
+  final double? edgeInset;
   final bool isWavy;
   final double waveAmplitude;
   final double wavelength;
@@ -184,6 +189,7 @@ class M3ESliderTrackPainter extends CustomPainter {
       handleThickness: handleThickness,
       stopIndicatorSize: stopIndicatorSize,
       tickSize: tickSize,
+      edgeInset: edgeInset ?? trackHeight / 2,
       axis: axis,
       textDirection: textDirection,
     );
@@ -337,6 +343,7 @@ class M3ESliderTrackPainter extends CustomPainter {
         oldDelegate.axis != axis ||
         oldDelegate.textDirection != textDirection ||
         oldDelegate.drawDots != drawDots ||
+        oldDelegate.edgeInset != edgeInset ||
         oldDelegate.isWavy != isWavy ||
         oldDelegate.waveAmplitude != waveAmplitude ||
         oldDelegate.wavelength != wavelength ||

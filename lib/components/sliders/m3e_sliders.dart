@@ -62,6 +62,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     super.key,
   })  : axis = Axis.horizontal,
@@ -89,6 +91,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     super.key,
   })  : axis = Axis.horizontal,
@@ -119,6 +123,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
@@ -146,6 +152,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
@@ -176,6 +184,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     this.topToBottom = false,
     super.key,
@@ -206,6 +216,8 @@ class M3ESlider extends StatefulWidget {
     this.trackBuilder,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     this.topToBottom = false,
     super.key,
@@ -288,6 +300,14 @@ class M3ESlider extends StatefulWidget {
 
   /// Length of the thumb along its long axis. Defaults to theme handle height.
   final double? thumbLength;
+
+  /// Diameter of stop/tick markers. Defaults to theme stop indicator size.
+  final double? dotSize;
+
+  /// Inset of stop/tick markers from each track end.
+  ///
+  /// Defaults to theme [M3ESliderTheme.stopIndicatorTrailingSpace].
+  final double? dotSpacing;
 
   /// Custom stop/tick markers. When null, default circular dots are painted.
   final M3ESliderDotBuilder? dotBuilder;
@@ -387,6 +407,10 @@ class _M3ESliderState extends State<M3ESlider>
         widget.trackThickness ?? sliderTheme.trackHeight;
     final double thumbLength =
         widget.thumbLength ?? sliderTheme.handleHeight;
+    final double dotSize =
+        widget.dotSize ?? sliderTheme.stopIndicatorSize;
+    final double dotSpacing =
+        widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
     final bool useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
@@ -426,6 +450,9 @@ class _M3ESliderState extends State<M3ESlider>
                             textDirection: direction,
                             handleThickness: handleThickness,
                             trackHeight: trackThickness,
+                            stopIndicatorSize: dotSize,
+                            tickSize: dotSize,
+                            edgeInset: dotSpacing,
                             drawDots: !useCustomDots,
                             isWavy: widget.wavy,
                             waveAmplitude: sliderTheme.waveAmplitude,
@@ -442,6 +469,9 @@ class _M3ESliderState extends State<M3ESlider>
                             textDirection: direction,
                             handleThickness: handleThickness,
                             trackHeight: trackThickness,
+                            stopIndicatorSize: dotSize,
+                            tickSize: dotSize,
+                            edgeInset: dotSpacing,
                             drawDots: !useCustomDots,
                             isWavy: widget.wavy,
                             waveAmplitude: sliderTheme.waveAmplitude,
@@ -489,8 +519,9 @@ class _M3ESliderState extends State<M3ESlider>
                       trackHeight: trackThickness,
                       handleGap: sliderTheme.handleGap,
                       handleThickness: handleThickness,
-                      stopIndicatorSize: sliderTheme.stopIndicatorSize,
-                      tickSize: sliderTheme.tickSize,
+                      stopIndicatorSize: dotSize,
+                      tickSize: dotSize,
+                      edgeInset: dotSpacing,
                       axis: widget.axis,
                       textDirection: direction,
                     ),

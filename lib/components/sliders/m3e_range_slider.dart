@@ -37,6 +37,8 @@ class M3ERangeSlider extends StatefulWidget {
     this.trackIcons,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     super.key,
   })  : wavy = false,
@@ -62,6 +64,8 @@ class M3ERangeSlider extends StatefulWidget {
     this.trackIcons,
     this.trackThickness,
     this.thumbLength,
+    this.dotSize,
+    this.dotSpacing,
     this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
@@ -110,6 +114,14 @@ class M3ERangeSlider extends StatefulWidget {
 
   /// Length of each thumb along its long axis. Defaults to theme handle height.
   final double? thumbLength;
+
+  /// Diameter of stop/tick markers. Defaults to theme stop indicator size.
+  final double? dotSize;
+
+  /// Inset of stop/tick markers from each track end.
+  ///
+  /// Defaults to theme [M3ESliderTheme.stopIndicatorTrailingSpace].
+  final double? dotSpacing;
 
   /// Custom stop/tick markers. When null, default circular dots are painted.
   final M3ESliderDotBuilder? dotBuilder;
@@ -204,6 +216,10 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
         widget.trackThickness ?? sliderTheme.trackHeight;
     final double thumbLength =
         widget.thumbLength ?? sliderTheme.handleHeight;
+    final double dotSize =
+        widget.dotSize ?? sliderTheme.stopIndicatorSize;
+    final double dotSpacing =
+        widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
     final bool useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
@@ -229,6 +245,9 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                   textDirection: direction,
                   handleThickness: handleThickness,
                   trackHeight: trackThickness,
+                  stopIndicatorSize: dotSize,
+                  tickSize: dotSize,
+                  edgeInset: dotSpacing,
                   drawDots: !useCustomDots,
                   isWavy: widget.wavy,
                   waveAmplitude: sliderTheme.waveAmplitude,
@@ -265,8 +284,9 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                       trackHeight: trackThickness,
                       handleGap: sliderTheme.handleGap,
                       handleThickness: handleThickness,
-                      stopIndicatorSize: sliderTheme.stopIndicatorSize,
-                      tickSize: sliderTheme.tickSize,
+                      stopIndicatorSize: dotSize,
+                      tickSize: dotSize,
+                      edgeInset: dotSpacing,
                       axis: Axis.horizontal,
                       textDirection: direction,
                     ),

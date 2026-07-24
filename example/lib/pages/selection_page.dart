@@ -407,6 +407,8 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 divisions: 4,
                 trackThickness: 30,
                 thumbLength: 50,
+                dotSize: 12,
+                dotSpacing: 10,
                 onChanged: (double value) =>
                     setState(() => _shapeDots = value),
                 dotBuilder: ({

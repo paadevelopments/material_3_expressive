@@ -43,6 +43,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     this.trackInsideCornerSize = M3ESliderTokens.trackInsideCornerSize,
     this.stopIndicatorSize = M3ESliderTokens.stopIndicatorSize,
     this.tickSize = M3ESliderTokens.tickSize,
+    this.stopIndicatorTrailingSpace =
+        M3ESliderTokens.stopIndicatorTrailingSpace,
     this.valueIndicatorBottomSpace =
         M3ESliderTokens.valueIndicatorActiveBottomSpace,
     this.disabledActiveOpacity = M3ESliderTokens.disabledActiveTrackOpacity,
@@ -65,6 +67,9 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
   final double trackInsideCornerSize;
   final double stopIndicatorSize;
   final double tickSize;
+
+  /// Inset of stop/tick markers from each track end.
+  final double stopIndicatorTrailingSpace;
   final double valueIndicatorBottomSpace;
   final double disabledActiveOpacity;
   final double disabledInactiveOpacity;
@@ -131,6 +136,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     double? trackInsideCornerSize,
     double? stopIndicatorSize,
     double? tickSize,
+    double? stopIndicatorTrailingSpace,
     double? valueIndicatorBottomSpace,
     double? disabledActiveOpacity,
     double? disabledInactiveOpacity,
@@ -148,6 +154,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
           trackInsideCornerSize ?? this.trackInsideCornerSize,
       stopIndicatorSize: stopIndicatorSize ?? this.stopIndicatorSize,
       tickSize: tickSize ?? this.tickSize,
+      stopIndicatorTrailingSpace:
+          stopIndicatorTrailingSpace ?? this.stopIndicatorTrailingSpace,
       valueIndicatorBottomSpace:
           valueIndicatorBottomSpace ?? this.valueIndicatorBottomSpace,
       disabledActiveOpacity:
@@ -175,6 +183,11 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
           _lerp(trackInsideCornerSize, other.trackInsideCornerSize, t),
       stopIndicatorSize: _lerp(stopIndicatorSize, other.stopIndicatorSize, t),
       tickSize: _lerp(tickSize, other.tickSize, t),
+      stopIndicatorTrailingSpace: _lerp(
+        stopIndicatorTrailingSpace,
+        other.stopIndicatorTrailingSpace,
+        t,
+      ),
       valueIndicatorBottomSpace:
           _lerp(valueIndicatorBottomSpace, other.valueIndicatorBottomSpace, t),
       disabledActiveOpacity:

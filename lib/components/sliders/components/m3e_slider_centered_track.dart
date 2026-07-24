@@ -18,6 +18,9 @@ class M3ESliderCenteredTrack extends StatelessWidget {
     required this.textDirection,
     required this.handleThickness,
     this.trackHeight,
+    this.stopIndicatorSize,
+    this.tickSize,
+    this.edgeInset,
     this.drawDots = true,
     this.isWavy = false,
     this.waveAmplitude = 0,
@@ -35,6 +38,9 @@ class M3ESliderCenteredTrack extends StatelessWidget {
   final TextDirection textDirection;
   final double handleThickness;
   final double? trackHeight;
+  final double? stopIndicatorSize;
+  final double? tickSize;
+  final double? edgeInset;
   final bool drawDots;
   final bool isWavy;
   final double waveAmplitude;
@@ -54,6 +60,9 @@ class M3ESliderCenteredTrack extends StatelessWidget {
       handleThickness: handleThickness,
       trackKind: M3ESliderTrackKind.centered,
       trackHeight: trackHeight,
+      stopIndicatorSize: stopIndicatorSize,
+      tickSize: tickSize,
+      edgeInset: edgeInset,
       drawDots: drawDots,
       isWavy: isWavy,
       waveAmplitude: waveAmplitude,

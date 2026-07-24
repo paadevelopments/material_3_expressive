@@ -138,6 +138,8 @@ void main() {
             divisions: 4,
             trackThickness: 20,
             thumbLength: 32,
+            dotSize: 10,
+            dotSpacing: 8,
             onChanged: (_) {},
             dotBuilder: ({
               required BuildContext context,

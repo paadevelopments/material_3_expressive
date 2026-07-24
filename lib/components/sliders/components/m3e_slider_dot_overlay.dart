@@ -22,6 +22,7 @@ class M3ESliderDotOverlay extends StatelessWidget {
     required this.tickSize,
     required this.axis,
     required this.textDirection,
+    this.edgeInset,
     super.key,
   });
 
@@ -39,6 +40,7 @@ class M3ESliderDotOverlay extends StatelessWidget {
   final double tickSize;
   final Axis axis;
   final TextDirection textDirection;
+  final double? edgeInset;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,7 @@ class M3ESliderDotOverlay extends StatelessWidget {
           handleThickness: handleThickness,
           stopIndicatorSize: stopIndicatorSize,
           tickSize: tickSize,
+          edgeInset: edgeInset ?? trackHeight / 2,
           axis: axis,
           textDirection: textDirection,
         );
