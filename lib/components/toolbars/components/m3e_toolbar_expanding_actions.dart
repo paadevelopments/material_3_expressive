@@ -2,7 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
-import '../models/m3e_toolbar_action.dart';
+import '../models/m3e_toolbar_item.dart';
+import '../utils/m3e_toolbar_item_layout.dart';
 import 'm3e_toolbar_icon_button.dart';
 import 'm3e_toolbar_overflow_menu.dart';
 
@@ -22,13 +23,14 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     required this.axis,
     required this.expandProgress,
     required this.onTriggerPressed,
+    required this.availableExtent,
     this.leading,
     this.trailing,
     this.gap = 0,
     super.key,
   });
 
-  final List<M3EToolbarAction> actions;
+  final List<M3EToolbarItem> actions;
   final int maxInline;
   final Widget overflowIcon;
   final M3EIconButtonSize iconButtonSize;
@@ -41,6 +43,9 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   final double expandProgress;
 
   final VoidCallback onTriggerPressed;
+
+  /// Remaining cross-axis size after bar content padding.
+  final double availableExtent;
   final Widget? leading;
   final Widget? trailing;
   final double gap;
@@ -49,28 +54,32 @@ class M3EToolbarExpandingActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int triggerIndex =
-        actions.indexWhere((M3EToolbarAction a) => a.isExpandTrigger);
+    final int triggerIndex = actions.indexWhere(
+      (M3EToolbarItem item) =>
+          item is M3EToolbarAction && item.isExpandTrigger,
+    );
 
     // No trigger → always show full actions row (no expand morph).
     if (triggerIndex < 0) {
       return _staticRow(actions);
     }
 
-    final List<M3EToolbarAction> inline = _inlineActions(actions, triggerIndex);
-    final List<M3EToolbarAction> overflow = actions.length > maxInline
-        ? actions
-            .where((M3EToolbarAction a) => !a.isExpandTrigger)
-            .skip(maxInline - 1)
-            .toList(growable: false)
-        : const <M3EToolbarAction>[];
+    final partitioned = M3EToolbarItemLayout.partitionInline(
+      items: actions,
+      maxInline: maxInline,
+      triggerIndex: triggerIndex,
+    );
+    final List<M3EToolbarItem> inline = partitioned.inline;
+    final List<M3EToolbarAction> overflow = partitioned.overflow;
 
-    final int inlineTriggerIndex =
-        inline.indexWhere((M3EToolbarAction a) => a.isExpandTrigger);
-    final List<M3EToolbarAction> before =
-        inline.sublist(0, inlineTriggerIndex);
-    final M3EToolbarAction trigger = inline[inlineTriggerIndex];
-    final List<M3EToolbarAction> after =
+    final int inlineTriggerIndex = inline.indexWhere(
+      (M3EToolbarItem item) =>
+          item is M3EToolbarAction && item.isExpandTrigger,
+    );
+    final List<M3EToolbarItem> before = inline.sublist(0, inlineTriggerIndex);
+    final M3EToolbarAction trigger =
+        inline[inlineTriggerIndex] as M3EToolbarAction;
+    final List<M3EToolbarItem> after =
         inline.sublist(inlineTriggerIndex + 1);
 
     final double widthFactor = expandProgress.clamp(0.0, 1.5);
@@ -85,7 +94,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
 
     final Widget? beforeSide = sidesVisible
         ? _sideGroup(
-            actions: before,
+            items: before,
             leading: leading,
             trailing: null,
             overflow: null,
@@ -96,7 +105,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
         : null;
     final Widget? afterSide = sidesVisible
         ? _sideGroup(
-            actions: after,
+            items: after,
             leading: null,
             trailing: trailing,
             overflow: overflow.isEmpty ? null : overflow,
@@ -124,50 +133,30 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     );
   }
 
-  List<M3EToolbarAction> _inlineActions(
-    List<M3EToolbarAction> all,
-    int triggerIndex,
-  ) {
-    final M3EToolbarAction trigger = all[triggerIndex];
-    final List<M3EToolbarAction> others = all
-        .where((M3EToolbarAction a) => !a.isExpandTrigger)
-        .toList(growable: false);
-
-    // Keep trigger always inline; fill remaining slots around it.
-    final int otherSlots = (maxInline - 1).clamp(0, others.length);
-    final List<M3EToolbarAction> inlineOthers =
-        others.take(otherSlots).toList(growable: false);
-
-    // Preserve relative order: items before trigger, trigger, items after.
-    final List<M3EToolbarAction> before = <M3EToolbarAction>[];
-    final List<M3EToolbarAction> after = <M3EToolbarAction>[];
-    for (final M3EToolbarAction a in inlineOthers) {
-      if (all.indexOf(a) < triggerIndex) {
-        before.add(a);
-      } else {
-        after.add(a);
-      }
-    }
-    return <M3EToolbarAction>[...before, trigger, ...after];
-  }
-
-  Widget _staticRow(List<M3EToolbarAction> all) {
-    final List<M3EToolbarAction> inline =
-        all.take(maxInline).toList(growable: false);
-    final List<M3EToolbarAction> overflow = all.length > maxInline
-        ? all.sublist(maxInline)
-        : const <M3EToolbarAction>[];
+  Widget _staticRow(List<M3EToolbarItem> all) {
+    final partitioned = M3EToolbarItemLayout.partitionInline(
+      items: all,
+      maxInline: maxInline,
+    );
 
     final List<Widget> children = <Widget>[
       if (leading != null) ...<Widget>[
         leading!,
         _gapBox(),
       ],
-      for (final M3EToolbarAction action in inline)
-        M3EToolbarIconButton(action: action, size: iconButtonSize),
-      if (overflow.isNotEmpty)
+      for (final M3EToolbarItem item in partitioned.inline)
+        M3EToolbarItemLayout.buildItem(
+          item: item,
+          availableExtent: availableExtent,
+          axis: axis,
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+          ),
+        ),
+      if (partitioned.overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
-          actions: overflow,
+          actions: partitioned.overflow,
           icon: overflowIcon,
           iconButtonSize: iconButtonSize,
           textStyle: overflowTextStyle,
@@ -189,7 +178,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   ///
   /// [alignStart] true → anchored at start (grows toward end / right / down).
   Widget? _sideGroup({
-    required List<M3EToolbarAction> actions,
+    required List<M3EToolbarItem> items,
     required Widget? leading,
     required Widget? trailing,
     required List<M3EToolbarAction>? overflow,
@@ -197,18 +186,26 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     required double widthFactor,
     required bool alignStart,
   }) {
-    final bool hasActions = actions.isNotEmpty ||
+    final bool hasItems = items.isNotEmpty ||
         (overflow != null && overflow.isNotEmpty) ||
         leading != null ||
         trailing != null;
-    if (!hasActions) {
+    if (!hasItems) {
       return null;
     }
 
     final List<Widget> children = <Widget>[
       if (leading != null) ...<Widget>[leading, _gapBox()],
-      for (final M3EToolbarAction action in actions)
-        M3EToolbarIconButton(action: action, size: iconButtonSize),
+      for (final M3EToolbarItem item in items)
+        M3EToolbarItemLayout.buildItem(
+          item: item,
+          availableExtent: availableExtent,
+          axis: axis,
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+          ),
+        ),
       if (overflow != null && overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
           actions: overflow,

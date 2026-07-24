@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../../menus/m3e_menus.dart';
-import '../models/m3e_toolbar_action.dart';
+import '../models/m3e_toolbar_item.dart';
 
 /// Overflow menu for toolbar actions beyond the inline limit.
 class M3EToolbarOverflowMenu extends StatelessWidget {

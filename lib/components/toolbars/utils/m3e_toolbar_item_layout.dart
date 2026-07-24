@@ -1,0 +1,105 @@
+import 'package:flutter/widgets.dart';
+
+import '../models/m3e_toolbar_item.dart';
+
+/// Shared helpers for partitioning and laying out [M3EToolbarItem]s.
+abstract final class M3EToolbarItemLayout {
+  const M3EToolbarItemLayout._();
+
+  /// Cross-axis room left for item content after [padding] on [axis].
+  static double availableCrossExtent({
+    required double crossAxisSize,
+    required EdgeInsets padding,
+    required Axis axis,
+  }) {
+    final double inset = axis == Axis.horizontal
+        ? padding.top + padding.bottom
+        : padding.left + padding.right;
+    return (crossAxisSize - inset).clamp(0.0, double.infinity);
+  }
+
+  /// Wraps a [M3EToolbarWidget] so it cannot exceed the bar content extent.
+  static Widget constrainWidget({
+    required M3EToolbarWidget item,
+    required double availableExtent,
+    required Axis axis,
+  }) {
+    Widget child = item.child;
+    if (item.semanticLabel != null) {
+      child = Semantics(
+        label: item.semanticLabel,
+        child: child,
+      );
+    }
+    return ConstrainedBox(
+      constraints: axis == Axis.horizontal
+          ? BoxConstraints(maxHeight: availableExtent)
+          : BoxConstraints(maxWidth: availableExtent),
+      child: child,
+    );
+  }
+
+  /// Builds the visual for one item (icon button or constrained widget).
+  static Widget buildItem({
+    required M3EToolbarItem item,
+    required double availableExtent,
+    required Axis axis,
+    required Widget Function(M3EToolbarAction action) buildAction,
+  }) {
+    return switch (item) {
+      M3EToolbarAction action => buildAction(action),
+      M3EToolbarWidget widget => constrainWidget(
+          item: widget,
+          availableExtent: availableExtent,
+          axis: axis,
+        ),
+    };
+  }
+
+  /// Keeps all widgets inline; only excess non-trigger actions overflow.
+  ///
+  /// Returns `(inline, overflowActions)` preserving relative order in [inline].
+  static ({List<M3EToolbarItem> inline, List<M3EToolbarAction> overflow})
+      partitionInline({
+    required List<M3EToolbarItem> items,
+    required int maxInline,
+    int? triggerIndex,
+  }) {
+    if (items.isEmpty) {
+      return (
+        inline: const <M3EToolbarItem>[],
+        overflow: const <M3EToolbarAction>[],
+      );
+    }
+
+    // Count how many non-trigger icon actions may stay inline.
+    final int reservedTrigger = triggerIndex != null ? 1 : 0;
+    final int actionBudget =
+        (maxInline - reservedTrigger).clamp(0, maxInline);
+
+    final List<M3EToolbarItem> inline = <M3EToolbarItem>[];
+    final List<M3EToolbarAction> overflow = <M3EToolbarAction>[];
+    var usedActionSlots = 0;
+
+    for (var i = 0; i < items.length; i++) {
+      final M3EToolbarItem item = items[i];
+      if (item is M3EToolbarWidget) {
+        inline.add(item);
+        continue;
+      }
+      final M3EToolbarAction action = item as M3EToolbarAction;
+      if (action.isExpandTrigger) {
+        inline.add(action);
+        continue;
+      }
+      if (usedActionSlots < actionBudget) {
+        inline.add(action);
+        usedActionSlots++;
+      } else {
+        overflow.add(action);
+      }
+    }
+
+    return (inline: inline, overflow: overflow);
+  }
+}

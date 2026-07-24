@@ -19,12 +19,13 @@ import 'components/m3e_toolbar_expanding_actions.dart';
 import 'components/m3e_toolbar_fab_slot.dart';
 import 'components/m3e_toolbar_title_block.dart';
 import 'enums/m3e_toolbar_enums.dart';
-import 'models/m3e_toolbar_action.dart';
+import 'models/m3e_toolbar_item.dart';
 import 'res/m3e_toolbar_tokens.dart';
 import 'styles/m3e_toolbar_theme.dart';
+import 'utils/m3e_toolbar_item_layout.dart';
 
 export 'enums/m3e_toolbar_enums.dart';
-export 'models/m3e_toolbar_action.dart';
+export 'models/m3e_toolbar_item.dart';
 export 'styles/m3e_toolbar_theme.dart';
 
 /// A Material 3 Expressive toolbar.
@@ -49,7 +50,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.subtitle,
     this.subtitleText,
     this.trailing,
-    this.actions = const <M3EToolbarAction>[],
+    this.actions = const <M3EToolbarItem>[],
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
@@ -83,7 +84,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.subtitle,
     this.subtitleText,
     this.trailing,
-    this.actions = const <M3EToolbarAction>[],
+    this.actions = const <M3EToolbarItem>[],
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
@@ -119,7 +120,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.subtitle,
     this.subtitleText,
     this.trailing,
-    this.actions = const <M3EToolbarAction>[],
+    this.actions = const <M3EToolbarItem>[],
     this.maxInlineActions = 4,
     this.overflowIcon = const Icon(M3EIcons.more_vert),
     this.centerTitle = false,
@@ -155,7 +156,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? subtitle;
   final String? subtitleText;
   final Widget? trailing;
-  final List<M3EToolbarAction> actions;
+  final List<M3EToolbarItem> actions;
   final int maxInlineActions;
   final Widget overflowIcon;
   final bool centerTitle;
@@ -205,14 +206,19 @@ class _M3EToolbarState extends State<M3EToolbar>
   bool get _hasFab =>
       _floating &&
       (widget.floatingActionButton != null || widget.fabIcon != null);
-  bool get _hasTrigger =>
-      widget.actions.any((M3EToolbarAction a) => a.isExpandTrigger);
+  bool get _hasTrigger => widget.actions.any(
+        (M3EToolbarItem item) =>
+            item is M3EToolbarAction && item.isExpandTrigger,
+      );
 
   @override
   void initState() {
     super.initState();
     assert(
-      widget.actions.where((M3EToolbarAction a) => a.isExpandTrigger).length <=
+      widget.actions
+              .whereType<M3EToolbarAction>()
+              .where((M3EToolbarAction a) => a.isExpandTrigger)
+              .length <=
           1,
       'At most one M3EToolbarAction may set isExpandTrigger.',
     );
@@ -287,6 +293,20 @@ class _M3EToolbarState extends State<M3EToolbar>
     final EdgeInsets contentPadding =
         metrics.contentPadding.resolve(Directionality.of(context));
 
+    final EdgeInsets resolvedPadding =
+        widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
+    final EdgeInsets innerPadding = EdgeInsets.only(
+      left: resolvedPadding.left,
+      right: resolvedPadding.right,
+      top: _floating ? resolvedPadding.top : 0,
+      bottom: _floating ? resolvedPadding.bottom : 0,
+    );
+    final double availableExtent = M3EToolbarItemLayout.availableCrossExtent(
+      crossAxisSize: metrics.crossAxisSize,
+      padding: innerPadding,
+      axis: widget.axis,
+    );
+
     final Widget? resolvedTitle = widget.title ??
         (widget.titleText != null
             ? Text(
@@ -333,10 +353,13 @@ class _M3EToolbarState extends State<M3EToolbar>
                 destructiveColor: scheme.error,
                 axis: widget.axis,
                 expandProgress: _expandCtrl.value,
+                availableExtent: availableExtent,
                 onTriggerPressed: () {
-                  final M3EToolbarAction trigger = widget.actions.firstWhere(
-                    (M3EToolbarAction a) => a.isExpandTrigger,
-                  );
+                  final M3EToolbarAction trigger = widget.actions
+                      .whereType<M3EToolbarAction>()
+                      .firstWhere(
+                        (M3EToolbarAction a) => a.isExpandTrigger,
+                      );
                   _onTriggerPressed(trigger);
                 },
                 leading: widget.leading,
@@ -354,6 +377,7 @@ class _M3EToolbarState extends State<M3EToolbar>
                 theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
             destructiveColor: scheme.error,
             axis: widget.axis,
+            availableExtent: availableExtent,
             expand: dockedIconsOnly,
             mainAxisAlignment: dockedIconsOnly
                 ? MainAxisAlignment.spaceBetween
@@ -410,15 +434,6 @@ class _M3EToolbarState extends State<M3EToolbar>
 
     final double elev = widget.elevation ??
         (_hasFab ? metrics.elevationWithFab : metrics.elevation);
-
-    final EdgeInsets resolvedPadding =
-        widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
-    final EdgeInsets innerPadding = EdgeInsets.only(
-      left: resolvedPadding.left,
-      right: resolvedPadding.right,
-      top: _floating ? resolvedPadding.top : 0,
-      bottom: _floating ? resolvedPadding.bottom : 0,
-    );
 
     final Widget contentBand = SizedBox(
       height: widget.axis == Axis.horizontal ? metrics.crossAxisSize : null,

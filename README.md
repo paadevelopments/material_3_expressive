@@ -951,7 +951,7 @@ initial state; the adjacent FAB stays visible and does not toggle expansion).
 ```dart
 // Floating (default) — pill, wrap-content
 M3EToolbar(
-  actions: [
+  actions: <M3EToolbarItem>[
     M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
     M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
   ],
@@ -961,7 +961,7 @@ M3EToolbar(
 M3EToolbar(
   expanded: true,
   onExpandedChanged: (open) {},
-  actions: [
+  actions: <M3EToolbarItem>[
     M3EToolbarAction(
       icon: M3EIcons.menu,
       isExpandTrigger: true,
@@ -974,11 +974,30 @@ M3EToolbar(
   onFabPressed: () {},
 );
 
+// Mixed icon actions + custom widgets (widgets stay inline; height-capped)
+M3EToolbar(
+  actions: <M3EToolbarItem>[
+    M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+    M3EToolbarWidget(
+      child: M3ESplitButton<String>(
+        size: M3EButtonSize.sm,
+        label: 'Sort',
+        items: const [
+          M3ESplitButtonItem(value: 'name', child: 'Name'),
+          M3ESplitButtonItem(value: 'date', child: 'Date'),
+        ],
+        onSelected: (_) {},
+      ),
+    ),
+    M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+  ],
+);
+
 // Vertical floating
 M3EToolbar(
   axis: Axis.vertical,
   colorStyle: M3EToolbarColorStyle.vibrant,
-  actions: [...],
+  actions: <M3EToolbarItem>[...],
 );
 
 // Docked — full width; safeArea pads only the dock edge
@@ -986,7 +1005,7 @@ M3EToolbar.docked(
   dockEdge: M3EToolbarDockEdge.bottom,
   safeArea: true,
   titleText: 'Inbox',
-  actions: [
+  actions: <M3EToolbarItem>[
     M3EToolbarAction(icon: M3EIcons.search, onPressed: () {}),
     M3EToolbarAction(
       icon: M3EIcons.delete,

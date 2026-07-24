@@ -6,6 +6,7 @@ import 'package:material_3_expressive/components/navigation_drawer/models/m3e_na
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_fab_slot.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
+import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';
@@ -270,7 +271,7 @@ class _NavigationPageState extends State<NavigationPage>
   }
 
   Widget _toolbarAndMenu() {
-    final List<M3EToolbarAction> sampleActions = <M3EToolbarAction>[
+    final List<M3EToolbarItem> sampleActions = <M3EToolbarItem>[
       M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
       M3EToolbarAction(
         icon: M3EIcons.share,
@@ -416,7 +417,7 @@ class _NavigationPageState extends State<NavigationPage>
               titleText: 'Inbox',
               subtitleText: '12 unread',
               maxInlineActions: 3,
-              actions: <M3EToolbarAction>[
+              actions: <M3EToolbarItem>[
                 M3EToolbarAction(
                   icon: M3EIcons.search,
                   tooltip: 'Search',
@@ -445,6 +446,69 @@ class _NavigationPageState extends State<NavigationPage>
                   onPressed: () {},
                 ),
               ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Floating + custom widget items',
+          children: <Widget>[
+            M3EToolbar(
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                M3EToolbarWidget(
+                  semanticLabel: 'Sort',
+                  child: M3ESplitButton<String>(
+                    size: M3EButtonSize.sm,
+                    label: 'Sort',
+                    items: const <M3ESplitButtonItem<String>>[
+                      M3ESplitButtonItem(value: 'name', child: 'Name'),
+                      M3ESplitButtonItem(value: 'date', child: 'Date'),
+                    ],
+                    onSelected: (_) {},
+                  ),
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.share,
+                  onPressed: () {},
+                  isExpandTrigger: true,
+                ),
+                M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+              ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Docked + input widget',
+          children: <Widget>[
+            insetFrame(
+              padding: EdgeInsets.zero,
+              child: M3EToolbar.docked(
+                safeArea: false,
+                dockEdge: M3EToolbarDockEdge.bottom,
+                actions: <M3EToolbarItem>[
+                  M3EToolbarAction(icon: M3EIcons.menu, onPressed: () {}),
+                  M3EToolbarWidget(
+                    semanticLabel: 'Search',
+                    child: SizedBox(
+                      width: 160,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: const Color(0x33000000),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text('Search…'),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  M3EToolbarAction(icon: M3EIcons.mic, onPressed: () {}),
+                ],
+              ),
             ),
           ],
         ),

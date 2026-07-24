@@ -20,7 +20,7 @@ Widget _host({
   );
 }
 
-List<M3EToolbarAction> _actions() => <M3EToolbarAction>[
+List<M3EToolbarItem> _actions() => <M3EToolbarItem>[
       M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
       M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
     ];
@@ -42,7 +42,7 @@ void main() {
           width: 400,
           child: M3EToolbar.docked(
             safeArea: false,
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
             ],
           ),
@@ -194,7 +194,7 @@ void main() {
           width: 300,
           child: M3EToolbar.docked(
             safeArea: false,
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
               M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
               M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
@@ -233,7 +233,7 @@ void main() {
           width: 360,
           child: M3EToolbar(
             titleText: 'Inbox',
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.search, onPressed: _noop),
             ],
           ),
@@ -257,7 +257,7 @@ void main() {
           child: M3EToolbar.docked(
             safeArea: true,
             dockEdge: M3EToolbarDockEdge.bottom,
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
             ],
           ),
@@ -280,7 +280,7 @@ void main() {
           child: M3EToolbar.docked(
             safeArea: true,
             dockEdge: M3EToolbarDockEdge.top,
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
             ],
           ),
@@ -303,7 +303,7 @@ void main() {
             safeArea: true,
             dockEdge: M3EToolbarDockEdge.top,
             titleText: 'Docked top',
-            actions: <M3EToolbarAction>[
+            actions: <M3EToolbarItem>[
               M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
               M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
               M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
@@ -346,7 +346,7 @@ void main() {
     await tester.pumpWidget(
       _host(
         child: M3EToolbar(
-          actions: <M3EToolbarAction>[
+          actions: <M3EToolbarItem>[
             M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
             M3EToolbarAction(
               icon: M3EIcons.share,
@@ -374,7 +374,7 @@ void main() {
     await tester.pumpWidget(
       _host(
         child: M3EToolbar(
-          actions: <M3EToolbarAction>[
+          actions: <M3EToolbarItem>[
             M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
             M3EToolbarAction(
               icon: M3EIcons.menu,
@@ -398,6 +398,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.byIcon(M3EIcons.edit), findsNothing);
+  });
+
+  testWidgets('toolbar widget items stay inline and height-capped',
+      (tester) async {
+    await tester.pumpWidget(
+      _host(
+        child: M3EToolbar(
+          actions: <M3EToolbarItem>[
+            M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
+            const M3EToolbarWidget(
+              child: SizedBox(
+                width: 72,
+                height: 120,
+                child: ColoredBox(color: Color(0xFF00FF00)),
+              ),
+            ),
+            M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(ConstrainedBox), findsWidgets);
+    expect(find.byType(ColoredBox), findsOneWidget);
+    // Floating content padding is 8 on each side → 64 - 16 = 48.
+    final Size size = tester.getSize(find.byType(ColoredBox));
+    expect(size.height, lessThanOrEqualTo(48.01));
   });
 }
 

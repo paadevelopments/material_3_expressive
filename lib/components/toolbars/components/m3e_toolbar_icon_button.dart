@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
-import '../models/m3e_toolbar_action.dart';
+import '../models/m3e_toolbar_item.dart';
 
 /// Inline icon action for [M3EToolbar] — thin adapter over [M3EIconButton].
 class M3EToolbarIconButton extends StatelessWidget {
