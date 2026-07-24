@@ -20,6 +20,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     required this.destructiveColor,
     required this.availableExtent,
     this.gap = 0,
+    this.opticalInset = 0,
     this.axis = Axis.horizontal,
     this.expand = false,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -38,6 +39,9 @@ class M3EToolbarActionsRow extends StatelessWidget {
 
   /// Space between consecutive inline items (actions, widgets, overflow).
   final double gap;
+
+  /// Icon-button target overhang; applied to widget slots for optical parity.
+  final double opticalInset;
   final Axis axis;
 
   /// When true, the row fills the cross-axis parent's main-axis extent.
@@ -63,6 +67,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
           item: item,
           availableExtent: availableExtent,
           axis: axis,
+          opticalInset: opticalInset,
           buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
             action: action,
             size: iconButtonSize,

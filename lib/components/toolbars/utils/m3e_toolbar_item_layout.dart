@@ -19,10 +19,14 @@ abstract final class M3EToolbarItemLayout {
   }
 
   /// Wraps a [M3EToolbarWidget] so it cannot exceed the bar content extent.
+  ///
+  /// [opticalInset] mirrors the icon-button target overhang beyond its visual
+  /// so widget↔action spacing matches action↔action spacing.
   static Widget constrainWidget({
     required M3EToolbarWidget item,
     required double availableExtent,
     required Axis axis,
+    double opticalInset = 0,
   }) {
     Widget child = item.child;
     if (item.semanticLabel != null) {
@@ -31,10 +35,19 @@ abstract final class M3EToolbarItemLayout {
         child: child,
       );
     }
-    return ConstrainedBox(
+    child = ConstrainedBox(
       constraints: axis == Axis.horizontal
           ? BoxConstraints(maxHeight: availableExtent)
           : BoxConstraints(maxWidth: availableExtent),
+      child: child,
+    );
+    if (opticalInset <= 0) {
+      return child;
+    }
+    return Padding(
+      padding: axis == Axis.horizontal
+          ? EdgeInsets.symmetric(horizontal: opticalInset)
+          : EdgeInsets.symmetric(vertical: opticalInset),
       child: child,
     );
   }
@@ -45,6 +58,7 @@ abstract final class M3EToolbarItemLayout {
     required double availableExtent,
     required Axis axis,
     required Widget Function(M3EToolbarAction action) buildAction,
+    double opticalInset = 0,
   }) {
     return switch (item) {
       M3EToolbarAction action => buildAction(action),
@@ -52,6 +66,7 @@ abstract final class M3EToolbarItemLayout {
           item: widget,
           availableExtent: availableExtent,
           axis: axis,
+          opticalInset: opticalInset,
         ),
     };
   }

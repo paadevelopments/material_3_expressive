@@ -27,6 +27,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     this.leading,
     this.trailing,
     this.gap = 0,
+    this.opticalInset = 0,
     super.key,
   });
 
@@ -49,6 +50,9 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final double gap;
+
+  /// Icon-button target overhang; applied to widget slots for optical parity.
+  final double opticalInset;
 
   static const double _iconRevealStart = 0.4;
 
@@ -145,6 +149,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           item: item,
           availableExtent: availableExtent,
           axis: axis,
+          opticalInset: opticalInset,
           buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
             action: action,
             size: iconButtonSize,
@@ -204,6 +209,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           item: item,
           availableExtent: availableExtent,
           axis: axis,
+          opticalInset: opticalInset,
           buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
             action: action,
             size: iconButtonSize,

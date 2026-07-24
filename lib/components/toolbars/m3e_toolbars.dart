@@ -303,6 +303,21 @@ class _M3EToolbarState extends State<M3EToolbar>
       padding: innerPadding,
       axis: widget.axis,
     );
+    final M3EIconButtonSize iconButtonSize =
+        toolbarTheme.iconButtonSize(widget.size);
+    // Match action↔action optical gaps: icon buttons overhang their visual
+    // inside the target; widget slots get the same inset on each side.
+    final Size iconTarget = theme.iconButtonTheme.target(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final Size iconVisual = theme.iconButtonTheme.visual(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final double opticalInset = widget.axis == Axis.horizontal
+        ? (iconTarget.width - iconVisual.width) / 2
+        : (iconTarget.height - iconVisual.height) / 2;
 
     final Widget? resolvedTitle = widget.title ??
         (widget.titleText != null
@@ -344,13 +359,14 @@ class _M3EToolbarState extends State<M3EToolbar>
                 actions: widget.actions,
                 maxInline: widget.maxInlineActions,
                 overflowIcon: widget.overflowIcon,
-                iconButtonSize: toolbarTheme.iconButtonSize(widget.size),
+                iconButtonSize: iconButtonSize,
                 overflowTextStyle: theme.typeScale.labelLarge
                     .copyWith(color: scheme.onSurface),
                 destructiveColor: scheme.error,
                 axis: widget.axis,
                 expandProgress: _expandCtrl.value,
                 availableExtent: availableExtent,
+                opticalInset: opticalInset,
                 onTriggerPressed: () {
                   final M3EToolbarAction trigger = widget.actions
                       .whereType<M3EToolbarAction>()
@@ -369,12 +385,13 @@ class _M3EToolbarState extends State<M3EToolbar>
             actions: widget.actions,
             maxInline: widget.maxInlineActions,
             overflowIcon: widget.overflowIcon,
-            iconButtonSize: toolbarTheme.iconButtonSize(widget.size),
+            iconButtonSize: iconButtonSize,
             overflowTextStyle:
                 theme.typeScale.labelLarge.copyWith(color: scheme.onSurface),
             destructiveColor: scheme.error,
             axis: widget.axis,
             availableExtent: availableExtent,
+            opticalInset: opticalInset,
             gap: metrics.gap,
             expand: dockedIconsOnly,
             mainAxisAlignment: dockedIconsOnly
