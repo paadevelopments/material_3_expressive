@@ -1000,7 +1000,8 @@ M3EToolbar.docked(
 
 #### M3EMenu
 
-Anchored dropdown menu.
+Anchored dropdown menu. Top-level `M3EMenuGroup`s each render as an elevated
+surface with a gap between them; dividers stay inside a surface.
 
 ```dart
 M3EMenu(
@@ -1010,13 +1011,27 @@ M3EMenu(
     label: const Text('Open menu'),
     onPressed: open,
   ),
-  entries: [
-    M3EMenuEntry(
-      label: 'Edit',
-      leading: const Icon(M3EIcons.edit),
-      onPressed: () {},
+  children: [
+    M3EMenuGroup.entries(
+      entries: [
+        M3EMenuEntry(
+          label: 'Edit',
+          leading: const Icon(M3EIcons.edit),
+          onPressed: () {},
+        ),
+        const M3EMenuEntry(label: 'Disabled', enabled: false),
+      ],
     ),
-    const M3EMenuEntry(label: 'Disabled', enabled: false),
+    M3EMenuGroup.entries(
+      label: 'More',
+      entries: [
+        M3EMenuEntry(
+          label: 'Copy',
+          trailingText: '⌘C',
+          onPressed: () {},
+        ),
+      ],
+    ),
   ],
 );
 ```

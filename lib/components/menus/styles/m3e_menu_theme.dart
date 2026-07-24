@@ -11,23 +11,26 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     this.maxWidth = 280,
     this.maxHeight = 320,
     this.verticalPadding = 8,
+    this.contentHorizontalPadding = 8,
     this.anchorOffset = 4,
     this.entryHeight = 48,
     this.entryHorizontalPadding = 12,
     this.iconSize = 24,
     this.iconGap = 12,
     this.groupSpacing = 8,
+    this.sectionGap = 8,
     this.groupLabelHorizontalPadding = 12,
     this.groupLabelVerticalPadding = 8,
     this.elevation = M3EElevation.level2,
     this.disabledOpacity = 0.38,
     this.scrimAlpha = 0.0,
     this.screenEdgePadding = 12,
-    this.containerRadius = 28,
+    this.containerRadius = 16,
+    this.itemRadius = 12,
     this.backgroundColor,
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
-    this.itemGap = 0,
+    this.itemGap = 4,
   });
 
   static const M3EMenuTheme defaults = M3EMenuTheme();
@@ -36,12 +39,22 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   final double maxWidth;
   final double maxHeight;
   final double verticalPadding;
+
+  /// Inset of the item column from the left/right of each elevated surface.
+  final double contentHorizontalPadding;
+
   final double anchorOffset;
   final double entryHeight;
   final double entryHorizontalPadding;
   final double iconSize;
   final double iconGap;
+
+  /// Legacy alias for spacing near groups; prefer [sectionGap] between surfaces.
   final double groupSpacing;
+
+  /// Vertical gap between elevated menu surfaces.
+  final double sectionGap;
+
   final double groupLabelHorizontalPadding;
   final double groupLabelVerticalPadding;
   final double elevation;
@@ -49,10 +62,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   final double scrimAlpha;
   final double screenEdgePadding;
 
-  /// Corner radius of the menu surface.
-  ///
-  /// Same default as [M3EDropdownMenuTheme.containerRadius] / dropdown panel.
+  /// Corner radius of each elevated menu surface.
   final double containerRadius;
+
+  /// Corner radius of the item highlight / background.
+  final double itemRadius;
 
   /// When non-null, overrides the scheme-derived menu surface color.
   final Color? backgroundColor;
@@ -63,26 +77,23 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// Spring for collapse — same default as [M3EDropdownMenu.closeMotion].
   final M3ESpring closeMotion;
 
+  /// Vertical space between items inside a surface.
   final double itemGap;
 
   BorderRadius get borderRadius => BorderRadius.circular(containerRadius);
 
+  BorderRadius get itemBorderRadius => BorderRadius.circular(itemRadius);
+
   /// Standalone / ungrouped item radius.
-  BorderRadius get standaloneItemShape => M3EShapes.radiusExtraSmall;
+  BorderRadius get standaloneItemShape => itemBorderRadius;
 
-  /// Leading item in a group (top corners rounded).
-  BorderRadius get leadingItemShape => const BorderRadius.only(
-        topLeft: Radius.circular(M3EShapes.extraSmall),
-        topRight: Radius.circular(M3EShapes.extraSmall),
-      );
+  /// Leading item in a group — full radius (gapped items are not connected).
+  BorderRadius get leadingItemShape => itemBorderRadius;
 
-  BorderRadius get middleItemShape => BorderRadius.zero;
+  BorderRadius get middleItemShape => itemBorderRadius;
 
-  /// Trailing item in a group (bottom corners rounded).
-  BorderRadius get trailingItemShape => const BorderRadius.only(
-        bottomLeft: Radius.circular(M3EShapes.extraSmall),
-        bottomRight: Radius.circular(M3EShapes.extraSmall),
-      );
+  /// Trailing item in a group — full radius (gapped items are not connected).
+  BorderRadius get trailingItemShape => itemBorderRadius;
 
   BorderRadius itemShape(M3EMenuItemShape shape) {
     return switch (shape) {
@@ -157,6 +168,13 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
             : M3EColorUtils.withOpacity(scheme.onSurface, disabledOpacity),
       );
 
+  TextStyle trailingTextStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, {
+    required bool enabled,
+  }) =>
+      supportingTextStyle(type, scheme, enabled: enabled);
+
   TextStyle groupLabelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.labelLarge.copyWith(color: scheme.onSurfaceVariant);
 
@@ -166,12 +184,14 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     double? maxWidth,
     double? maxHeight,
     double? verticalPadding,
+    double? contentHorizontalPadding,
     double? anchorOffset,
     double? entryHeight,
     double? entryHorizontalPadding,
     double? iconSize,
     double? iconGap,
     double? groupSpacing,
+    double? sectionGap,
     double? groupLabelHorizontalPadding,
     double? groupLabelVerticalPadding,
     double? elevation,
@@ -179,6 +199,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     double? scrimAlpha,
     double? screenEdgePadding,
     double? containerRadius,
+    double? itemRadius,
     Color? backgroundColor,
     M3ESpring? openMotion,
     M3ESpring? closeMotion,
@@ -189,6 +210,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       maxWidth: maxWidth ?? this.maxWidth,
       maxHeight: maxHeight ?? this.maxHeight,
       verticalPadding: verticalPadding ?? this.verticalPadding,
+      contentHorizontalPadding:
+          contentHorizontalPadding ?? this.contentHorizontalPadding,
       anchorOffset: anchorOffset ?? this.anchorOffset,
       entryHeight: entryHeight ?? this.entryHeight,
       entryHorizontalPadding:
@@ -196,6 +219,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       iconSize: iconSize ?? this.iconSize,
       iconGap: iconGap ?? this.iconGap,
       groupSpacing: groupSpacing ?? this.groupSpacing,
+      sectionGap: sectionGap ?? this.sectionGap,
       groupLabelHorizontalPadding:
           groupLabelHorizontalPadding ?? this.groupLabelHorizontalPadding,
       groupLabelVerticalPadding:
@@ -205,6 +229,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       scrimAlpha: scrimAlpha ?? this.scrimAlpha,
       screenEdgePadding: screenEdgePadding ?? this.screenEdgePadding,
       containerRadius: containerRadius ?? this.containerRadius,
+      itemRadius: itemRadius ?? this.itemRadius,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       openMotion: openMotion ?? this.openMotion,
       closeMotion: closeMotion ?? this.closeMotion,
@@ -222,6 +247,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,
       maxHeight: _lerpDouble(maxHeight, other.maxHeight, t)!,
       verticalPadding: _lerpDouble(verticalPadding, other.verticalPadding, t)!,
+      contentHorizontalPadding: _lerpDouble(
+        contentHorizontalPadding,
+        other.contentHorizontalPadding,
+        t,
+      )!,
       anchorOffset: _lerpDouble(anchorOffset, other.anchorOffset, t)!,
       entryHeight: _lerpDouble(entryHeight, other.entryHeight, t)!,
       entryHorizontalPadding:
@@ -229,6 +259,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
       groupSpacing: _lerpDouble(groupSpacing, other.groupSpacing, t)!,
+      sectionGap: _lerpDouble(sectionGap, other.sectionGap, t)!,
       groupLabelHorizontalPadding: _lerpDouble(
         groupLabelHorizontalPadding,
         other.groupLabelHorizontalPadding,
@@ -246,6 +277,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
           _lerpDouble(screenEdgePadding, other.screenEdgePadding, t)!,
       containerRadius:
           _lerpDouble(containerRadius, other.containerRadius, t)!,
+      itemRadius: _lerpDouble(itemRadius, other.itemRadius, t)!,
       backgroundColor:
           Color.lerp(backgroundColor, other.backgroundColor, t),
       openMotion: t < 0.5 ? openMotion : other.openMotion,

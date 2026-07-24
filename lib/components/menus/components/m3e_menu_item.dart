@@ -10,6 +10,8 @@ class M3EMenuItem extends StatelessWidget {
     required this.onTap,
     this.leading,
     this.trailing,
+    this.trailingText,
+    this.badge,
     this.supportingText,
     this.enabled = true,
     this.isDestructive = false,
@@ -23,6 +25,8 @@ class M3EMenuItem extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? leading;
   final Widget? trailing;
+  final String? trailingText;
+  final Widget? badge;
   final String? supportingText;
   final bool enabled;
   final bool isDestructive;
@@ -109,6 +113,21 @@ class M3EMenuItem extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (badge != null) ...<Widget>[
+                  SizedBox(width: menuTheme.iconGap),
+                  badge!,
+                ],
+                if (trailingText != null) ...<Widget>[
+                  SizedBox(width: menuTheme.iconGap),
+                  Text(
+                    trailingText!,
+                    style: menuTheme.trailingTextStyle(
+                      theme.typeScale,
+                      scheme,
+                      enabled: enabled,
+                    ),
+                  ),
+                ],
                 if (trailing != null) ...<Widget>[
                   SizedBox(width: menuTheme.iconGap),
                   IconTheme.merge(

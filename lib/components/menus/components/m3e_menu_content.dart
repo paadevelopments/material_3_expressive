@@ -15,7 +15,7 @@ typedef M3EMenuOpenSubmenuCallback = void Function(
   List<M3EMenuNode> children,
 );
 
-/// Renders a tree of [M3EMenuNode]s inside a menu surface.
+/// Renders a tree of [M3EMenuNode]s inside one elevated menu surface.
 class M3EMenuContent extends StatelessWidget {
   const M3EMenuContent({
     required this.nodes,
@@ -25,6 +25,7 @@ class M3EMenuContent extends StatelessWidget {
     this.selectedValue,
     this.applyGroupShapes = true,
     this.autofocusFirst = true,
+    this.sectionLabel,
     super.key,
   });
 
@@ -36,12 +37,33 @@ class M3EMenuContent extends StatelessWidget {
   final bool applyGroupShapes;
   final bool autofocusFirst;
 
+  /// Optional section header drawn above [nodes] (callout 9).
+  final String? sectionLabel;
+
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final menuTheme = theme.menuTheme;
     final children = <Widget>[];
     var focused = false;
+
+    if (sectionLabel != null) {
+      children.add(
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: menuTheme.groupLabelHorizontalPadding,
+            vertical: menuTheme.groupLabelVerticalPadding,
+          ),
+          child: Text(
+            sectionLabel!,
+            style: menuTheme.groupLabelStyle(
+              theme.typeScale,
+              theme.colorScheme,
+            ),
+          ),
+        ),
+      );
+    }
 
     for (var i = 0; i < nodes.length; i++) {
       final node = nodes[i];
@@ -95,6 +117,8 @@ class M3EMenuContent extends StatelessWidget {
             label: entry.label,
             leading: entry.leading,
             trailing: entry.trailing,
+            trailingText: entry.trailingText,
+            badge: entry.badge,
             supportingText: entry.supportingText,
             enabled: entry.enabled,
             isDestructive: entry.isDestructive,
@@ -128,6 +152,8 @@ class M3EMenuContent extends StatelessWidget {
                         size: menuTheme.iconSize * 0.9,
                       )
                     : null),
+            trailingText: item.trailingText,
+            badge: item.badge,
             supportingText: item.supportingText,
             enabled: item.enabled,
             selected: selected,
@@ -157,6 +183,8 @@ class M3EMenuContent extends StatelessWidget {
                   size: menuTheme.iconSize,
                 ),
             trailing: item.trailing,
+            trailingText: item.trailingText,
+            badge: item.badge,
             supportingText: item.supportingText,
             enabled: item.enabled,
             selected: item.checked,
@@ -184,6 +212,7 @@ class M3EMenuContent extends StatelessWidget {
               return M3EMenuItem(
                 label: item.label,
                 leading: item.leading,
+                badge: item.badge,
                 trailing: Icon(
                   M3EIcons.arrow_right_rounded,
                   size: menuTheme.iconSize,
@@ -217,69 +246,72 @@ class M3EMenuContent extends StatelessWidget {
             ? menuTheme.selectedContainerColor(scheme)
             : const Color(0x00000000);
         return <Widget>[
-          M3ETappable(
-            enabled: item.enabled,
-            autofocus: autofocus,
-            semanticLabel: item.semanticLabel,
-            onTap: item.enabled
-                ? () {
-                    item.onPressed?.call();
-                    if (closeOnSelect || item.value != null) {
-                      onSelect(item.value);
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: menuTheme.itemGap / 2),
+            child: M3ETappable(
+              enabled: item.enabled,
+              autofocus: autofocus,
+              semanticLabel: item.semanticLabel,
+              onTap: item.enabled
+                  ? () {
+                      item.onPressed?.call();
+                      if (closeOnSelect || item.value != null) {
+                        onSelect(item.value);
+                      }
                     }
-                  }
-                : null,
-            builder: (BuildContext context, M3EInteractionState state) {
-              return Container(
-                constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
-                padding: EdgeInsets.symmetric(
-                  horizontal: menuTheme.entryHorizontalPadding,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Color.alphaBlend(
-                    scheme.onSurface.withValues(alpha: state.opacity),
-                    background,
+                  : null,
+              builder: (BuildContext context, M3EInteractionState state) {
+                return Container(
+                  constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: menuTheme.entryHorizontalPadding,
+                    vertical: 10,
                   ),
-                  borderRadius: radius,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: IconTheme.merge(
-                        data: IconThemeData(
-                          color: menuTheme.entryForegroundColor(
-                            scheme,
-                            enabled: item.enabled,
-                          ),
-                          size: menuTheme.iconSize,
-                        ),
-                        child: DefaultTextStyle.merge(
-                          style: menuTheme.entryLabelStyle(
-                            M3ETheme.of(context).typeScale,
-                            scheme,
-                            enabled: item.enabled,
-                          ),
-                          child: item.child,
-                        ),
-                      ),
+                  decoration: BoxDecoration(
+                    color: Color.alphaBlend(
+                      scheme.onSurface.withValues(alpha: state.opacity),
+                      background,
                     ),
-                    if (item.selected)
-                      Padding(
-                        padding: EdgeInsets.only(left: menuTheme.iconGap),
-                        child: Icon(
-                          M3EIcons.check_rounded,
-                          size: menuTheme.iconSize * 0.9,
-                          color: menuTheme.entryForegroundColor(
-                            scheme,
-                            enabled: item.enabled,
+                    borderRadius: radius,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: IconTheme.merge(
+                          data: IconThemeData(
+                            color: menuTheme.entryForegroundColor(
+                              scheme,
+                              enabled: item.enabled,
+                            ),
+                            size: menuTheme.iconSize,
+                          ),
+                          child: DefaultTextStyle.merge(
+                            style: menuTheme.entryLabelStyle(
+                              M3ETheme.of(context).typeScale,
+                              scheme,
+                              enabled: item.enabled,
+                            ),
+                            child: item.child,
                           ),
                         ),
                       ),
-                  ],
-                ),
-              );
-            },
+                      if (item.selected)
+                        Padding(
+                          padding: EdgeInsets.only(left: menuTheme.iconGap),
+                          child: Icon(
+                            M3EIcons.check_rounded,
+                            size: menuTheme.iconSize * 0.9,
+                            color: menuTheme.entryForegroundColor(
+                              scheme,
+                              enabled: item.enabled,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ];
     }
@@ -344,6 +376,8 @@ class M3EMenuContent extends StatelessWidget {
           label: e.label,
           leading: e.leading,
           trailing: e.trailing,
+          trailingText: e.trailingText,
+          badge: e.badge,
           supportingText: e.supportingText,
           onPressed: e.onPressed,
           enabled: e.enabled,
@@ -356,6 +390,8 @@ class M3EMenuContent extends StatelessWidget {
           value: e.value,
           leading: e.leading,
           trailing: e.trailing,
+          trailingText: e.trailingText,
+          badge: e.badge,
           supportingText: e.supportingText,
           selected: e.selected,
           onPressed: e.onPressed,
@@ -367,6 +403,8 @@ class M3EMenuContent extends StatelessWidget {
           checked: e.checked,
           leading: e.leading,
           trailing: e.trailing,
+          trailingText: e.trailingText,
+          badge: e.badge,
           supportingText: e.supportingText,
           onChanged: e.onChanged,
           enabled: e.enabled,
@@ -376,6 +414,7 @@ class M3EMenuContent extends StatelessWidget {
           label: e.label,
           children: e.children,
           leading: e.leading,
+          badge: e.badge,
           enabled: e.enabled,
           shape: shape,
         ),

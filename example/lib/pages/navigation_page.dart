@@ -462,23 +462,65 @@ class _NavigationPageState extends State<NavigationPage>
                 );
               },
               children: <M3EMenuNode>[
-                M3EMenuEntry(
-                  label: 'Edit',
-                  leading: const Icon(M3EIcons.edit),
-                  onPressed: () {},
+                M3EMenuGroup.entries(
+                  entries: <M3EMenuNode>[
+                    M3EMenuEntry(
+                      label: 'Item 1',
+                      leading: const Icon(M3EIcons.visibility),
+                      onPressed: () {},
+                    ),
+                    M3EMenuEntry(
+                      label: 'Item 2',
+                      leading: const Icon(M3EIcons.content_copy),
+                      trailing: const Icon(M3EIcons.chevron_right),
+                      onPressed: () {},
+                    ),
+                    const M3EMenuDivider(),
+                    M3EMenuEntry(
+                      label: 'Item 3',
+                      leading: const Icon(M3EIcons.edit),
+                      badge: Builder(
+                        builder: (BuildContext context) {
+                          final scheme = M3ETheme.of(context).colorScheme;
+                          return DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: scheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              child: Text(
+                                'New',
+                                style: M3ETheme.of(context)
+                                    .typeScale
+                                    .labelSmall
+                                    .copyWith(
+                                      color: scheme.onSecondaryContainer,
+                                    ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      trailing: const Icon(M3EIcons.chevron_right),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
-                M3EMenuEntry(
-                  label: 'Schedule',
-                  leading: const Icon(M3EIcons.schedule),
-                  onPressed: () {},
-                ),
-                const M3EMenuDivider(),
-                const M3EMenuEntry(label: 'Disabled', enabled: false),
-                M3EMenuEntry(
-                  label: 'Delete',
-                  leading: const Icon(M3EIcons.delete),
-                  isDestructive: true,
-                  onPressed: () {},
+                M3EMenuGroup.entries(
+                  label: 'Label text',
+                  entries: <M3EMenuNode>[
+                    M3EMenuEntry(
+                      label: 'Item 4',
+                      leading: const Icon(M3EIcons.cloud),
+                      supportingText: 'Supporting text',
+                      trailingText: '⌘C',
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -535,24 +577,28 @@ class _ExpressiveMenuDemoState extends State<_ExpressiveMenuDemo> {
             ),
           ],
         ),
-        M3EMenuToggleable(
-          label: 'Starred',
-          checked: _starred,
-          onChanged: (bool value) => setState(() => _starred = value),
-        ),
-        M3EMenuSubmenu(
-          label: 'More actions',
-          leading: const Icon(M3EIcons.more_horiz),
+        M3EMenuGroup(
           children: <M3EMenuNode>[
-            M3EMenuEntry(
-              label: 'Archive',
-              leading: const Icon(M3EIcons.archive),
-              onPressed: () {},
+            M3EMenuToggleable(
+              label: 'Starred',
+              checked: _starred,
+              onChanged: (bool value) => setState(() => _starred = value),
             ),
-            M3EMenuEntry(
-              label: 'Report',
-              leading: const Icon(M3EIcons.report),
-              onPressed: () {},
+            M3EMenuSubmenu(
+              label: 'More actions',
+              leading: const Icon(M3EIcons.more_horiz),
+              children: <M3EMenuNode>[
+                M3EMenuEntry(
+                  label: 'Archive',
+                  leading: const Icon(M3EIcons.archive),
+                  onPressed: () {},
+                ),
+                M3EMenuEntry(
+                  label: 'Report',
+                  leading: const Icon(M3EIcons.report),
+                  onPressed: () {},
+                ),
+              ],
             ),
           ],
         ),

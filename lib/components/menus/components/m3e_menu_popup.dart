@@ -301,32 +301,10 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
                     maxWidth: placement.width,
                     maxHeight: placement.maxHeight,
                   ),
-                  child: Container(
+                  child: _buildSurfaces(
                     width: placement.width,
-                    decoration: BoxDecoration(
-                      color: menuTheme.containerColor(scheme),
-                      borderRadius: menuTheme.borderRadius,
-                      boxShadow: M3EElevation.shadows(
-                        menuTheme.elevation,
-                        shadowColor: scheme.shadow,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(
-                        vertical: menuTheme.verticalPadding,
-                      ),
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        M3EMenuContent(
-                          nodes: widget.children,
-                          selectedValue: widget.selectedValue,
-                          closeOnSelect: widget.closeOnSelect,
-                          onSelect: _handleSelect,
-                          onOpenSubmenu: _openSubmenu,
-                        ),
-                      ],
-                    ),
+                    menuTheme: menuTheme,
+                    scheme: scheme,
                   ),
                 ),
               ),
@@ -334,6 +312,57 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSurfaces({
+    required double width,
+    required M3EMenuTheme menuTheme,
+    required M3EColorScheme scheme,
+  }) {
+    final surfaces = m3eMenuPartitionSurfaces(widget.children);
+    final cards = <Widget>[];
+    for (var i = 0; i < surfaces.length; i++) {
+      if (i > 0) {
+        cards.add(SizedBox(height: menuTheme.sectionGap));
+      }
+      final surface = surfaces[i];
+      cards.add(
+        Container(
+          width: width,
+          decoration: BoxDecoration(
+            color: menuTheme.containerColor(scheme),
+            borderRadius: menuTheme.borderRadius,
+            boxShadow: M3EElevation.shadows(
+              menuTheme.elevation,
+              shadowColor: scheme.shadow,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: menuTheme.verticalPadding,
+              horizontal: menuTheme.contentHorizontalPadding,
+            ),
+            child: M3EMenuContent(
+              nodes: surface.children,
+              sectionLabel: surface.label,
+              selectedValue: widget.selectedValue,
+              closeOnSelect: widget.closeOnSelect,
+              onSelect: _handleSelect,
+              onOpenSubmenu: _openSubmenu,
+              autofocusFirst: i == 0,
+              applyGroupShapes: false,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      children: cards,
     );
   }
 }
