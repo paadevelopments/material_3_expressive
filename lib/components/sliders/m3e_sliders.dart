@@ -12,10 +12,12 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_slider_centered_track.dart';
+import 'components/m3e_slider_dot_overlay.dart';
 import 'components/m3e_slider_thumb.dart';
 import 'components/m3e_slider_track.dart';
 import 'components/m3e_slider_value_indicator.dart';
 import 'enums/m3e_slider_enums.dart';
+import 'models/m3e_slider_dot_builder.dart';
 import 'models/m3e_slider_track_icons.dart';
 import 'res/m3e_slider_tokens.dart';
 import 'styles/m3e_slider_theme.dart';
@@ -27,6 +29,7 @@ export 'components/m3e_slider_track.dart';
 export 'components/m3e_slider_value_indicator.dart';
 export 'enums/m3e_slider_enums.dart';
 export 'm3e_range_slider.dart';
+export 'models/m3e_slider_dot_builder.dart';
 export 'models/m3e_slider_range.dart';
 export 'models/m3e_slider_range_labels.dart';
 export 'models/m3e_slider_track_icons.dart';
@@ -57,6 +60,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     super.key,
   })  : axis = Axis.horizontal,
         trackKind = M3ESliderTrackKind.standard,
@@ -81,6 +87,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     super.key,
   })  : axis = Axis.horizontal,
         trackKind = M3ESliderTrackKind.centered,
@@ -108,6 +117,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
     this.wavelength,
@@ -132,6 +144,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
     this.wavelength,
@@ -159,6 +174,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     this.topToBottom = false,
     super.key,
   })  : axis = Axis.vertical,
@@ -186,6 +204,9 @@ class M3ESlider extends StatefulWidget {
     this.trackIcons,
     this.thumbBuilder,
     this.trackBuilder,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     this.topToBottom = false,
     super.key,
   })  : axis = Axis.vertical,
@@ -261,6 +282,15 @@ class M3ESlider extends StatefulWidget {
 
   /// Wave travel speed in logical pixels per second ([wavy] only).
   final double? waveSpeed;
+
+  /// Thickness of both active and inactive tracks. Defaults to theme track height.
+  final double? trackThickness;
+
+  /// Length of the thumb along its long axis. Defaults to theme handle height.
+  final double? thumbLength;
+
+  /// Custom stop/tick markers. When null, default circular dots are painted.
+  final M3ESliderDotBuilder? dotBuilder;
 
   @override
   State<M3ESlider> createState() => _M3ESliderState();
@@ -353,6 +383,11 @@ class _M3ESliderState extends State<M3ESlider>
     final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
     final double waveSpeed = widget.waveSpeed ?? wavelength;
     final double amplitudeFactor = _amplitudeFactor(sliderTheme);
+    final double trackThickness =
+        widget.trackThickness ?? sliderTheme.trackHeight;
+    final double thumbLength =
+        widget.thumbLength ?? sliderTheme.handleHeight;
+    final bool useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
       builder: (BuildContext context) {
@@ -369,8 +404,8 @@ class _M3ESliderState extends State<M3ESlider>
               final double cross = _vertical
                   ? (constraints.maxWidth.isFinite
                       ? constraints.maxWidth
-                      : sliderTheme.height)
-                  : sliderTheme.height;
+                      : math.max(sliderTheme.height, thumbLength))
+                  : math.max(sliderTheme.height, thumbLength);
 
               Widget buildTrack({required double phase}) {
                 return widget.trackBuilder?.call(
@@ -390,6 +425,8 @@ class _M3ESliderState extends State<M3ESlider>
                             axis: widget.axis,
                             textDirection: direction,
                             handleThickness: handleThickness,
+                            trackHeight: trackThickness,
+                            drawDots: !useCustomDots,
                             isWavy: widget.wavy,
                             waveAmplitude: sliderTheme.waveAmplitude,
                             wavelength: wavelength,
@@ -404,6 +441,8 @@ class _M3ESliderState extends State<M3ESlider>
                             axis: widget.axis,
                             textDirection: direction,
                             handleThickness: handleThickness,
+                            trackHeight: trackThickness,
+                            drawDots: !useCustomDots,
                             isWavy: widget.wavy,
                             waveAmplitude: sliderTheme.waveAmplitude,
                             wavelength: wavelength,
@@ -433,9 +472,35 @@ class _M3ESliderState extends State<M3ESlider>
                 );
               }
 
+              Widget trackLayer = track;
+              if (useCustomDots) {
+                trackLayer = Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    track,
+                    M3ESliderDotOverlay(
+                      builder: widget.dotBuilder!,
+                      mode: M3ESliderPaintMode.single,
+                      trackKind: widget.trackKind,
+                      activeStartFraction: 0,
+                      activeEndFraction: _fraction,
+                      tickFractions: _ticks,
+                      colors: colors,
+                      trackHeight: trackThickness,
+                      handleGap: sliderTheme.handleGap,
+                      handleThickness: handleThickness,
+                      stopIndicatorSize: sliderTheme.stopIndicatorSize,
+                      tickSize: sliderTheme.tickSize,
+                      axis: widget.axis,
+                      textDirection: direction,
+                    ),
+                  ],
+                );
+              }
+
               // Bottom-min vertical: flip track paint so active grows upward.
               if (_vertical && reverse) {
-                track = Transform.flip(flipY: true, child: track);
+                trackLayer = Transform.flip(flipY: true, child: trackLayer);
               }
 
               final Widget thumb = widget.thumbBuilder?.call(
@@ -447,12 +512,10 @@ class _M3ESliderState extends State<M3ESlider>
                     color: colors.thumb,
                     pressed: _pressed,
                     axis: widget.axis,
-                    width: _vertical
-                        ? M3ESliderTokens.verticalHandleWidth
-                        : sliderTheme.handleWidth,
+                    width: _vertical ? thumbLength : sliderTheme.handleWidth,
                     height: _vertical
                         ? M3ESliderTokens.verticalHandleHeight
-                        : sliderTheme.handleHeight,
+                        : thumbLength,
                     pressedThickness: sliderTheme.pressedHandleWidth,
                   );
 
@@ -504,7 +567,7 @@ class _M3ESliderState extends State<M3ESlider>
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
                     children: <Widget>[
-                      Positioned.fill(child: track),
+                      Positioned.fill(child: trackLayer),
                       Positioned(
                         left: _vertical ? null : thumbPrimary - 12,
                         top: _vertical ? thumbPrimary - 12 : null,

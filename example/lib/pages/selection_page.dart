@@ -345,6 +345,7 @@ class _SelectionSlidersSection extends StatefulWidget {
 class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
   double _volume = 0.5;
   double _brightness = 3;
+  double _shapeDots = 2;
   double _balance = 0;
   double _wavy = 0.55;
   M3ESliderRange _range = const M3ESliderRange(0.2, 0.7);
@@ -391,6 +392,38 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 divisions: 5,
                 onChanged: (double value) =>
                     setState(() => _brightness = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Shape dots • thick track',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider(
+                value: _shapeDots,
+                max: 4,
+                divisions: 4,
+                trackThickness: 30,
+                thumbLength: 50,
+                onChanged: (double value) =>
+                    setState(() => _shapeDots = value),
+                dotBuilder: ({
+                  required BuildContext context,
+                  required Color color,
+                  required double size,
+                  required bool active,
+                }) {
+                  return CustomPaint(
+                    painter: _M3EShapeDotPainter(
+                      polygon: active
+                          ? M3EMaterialNewShapes.cookie4Sided
+                          : M3EMaterialNewShapes.softBurst,
+                      color: color,
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -450,5 +483,38 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
         ),
       ],
     );
+  }
+}
+
+/// Fills a [M3EMaterialNewShapes] polygon into the available paint size.
+class _M3EShapeDotPainter extends CustomPainter {
+  const _M3EShapeDotPainter({
+    required this.polygon,
+    required this.color,
+  });
+
+  final RoundedPolygon polygon;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path path = polygon.toPath();
+    final Matrix4 scale = Matrix4.diagonal3Values(size.width, size.height, 1);
+    final Path scaled = path.transform(scale.storage);
+    final Rect bounds = scaled.getBounds();
+    final Path centered =
+        scaled.shift(Offset(size.width / 2, size.height / 2) - bounds.center);
+    canvas.drawPath(
+      centered,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = color
+        ..isAntiAlias = true,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _M3EShapeDotPainter oldDelegate) {
+    return oldDelegate.polygon != polygon || oldDelegate.color != color;
   }
 }

@@ -9,3 +9,12 @@ enum M3ESliderTrackKind {
   /// Active track grows from the midpoint toward the thumb.
   centered,
 }
+
+/// How the track interprets active fill extents.
+enum M3ESliderPaintMode {
+  /// Single thumb; active from start → thumb (or centered).
+  single,
+
+  /// Dual thumbs; active between start and end.
+  range,
+}

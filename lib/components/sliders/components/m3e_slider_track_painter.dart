@@ -7,16 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import '../enums/m3e_slider_enums.dart';
 import '../styles/m3e_slider_theme.dart';
-import '../utils/m3e_slider_math.dart';
-
-/// How the track interprets active fill extents.
-enum M3ESliderPaintMode {
-  /// Single thumb; active from start → thumb (or centered).
-  single,
-
-  /// Dual thumbs; active between start and end.
-  range,
-}
+import '../utils/m3e_slider_dot_layout.dart';
 
 /// Paints expressive track segments, stop indicators, and discrete ticks.
 ///
@@ -39,7 +30,7 @@ class M3ESliderTrackPainter extends CustomPainter {
     required this.tickSize,
     required this.axis,
     required this.textDirection,
-    this.drawStops = true,
+    this.drawDots = true,
     this.isWavy = false,
     this.waveAmplitude = 0,
     this.wavelength = 40,
@@ -61,7 +52,10 @@ class M3ESliderTrackPainter extends CustomPainter {
   final double tickSize;
   final Axis axis;
   final TextDirection textDirection;
-  final bool drawStops;
+
+  /// When false, skip stop indicators and discrete ticks (custom overlay owns
+  /// them via a [M3ESliderDotBuilder]).
+  final bool drawDots;
   final bool isWavy;
   final double waveAmplitude;
   final double wavelength;
@@ -173,112 +167,29 @@ class M3ESliderTrackPainter extends CustomPainter {
       }
     }
 
-    // Track-end stop indicators — only on inactive track (never on the
-    // active/value segment). Compose draws these with active-track color.
-    final double stopStart = sliderStart + corner;
-    final double stopEnd = sliderEnd - corner;
-    if (drawStops && stopEnd > stopStart) {
-      if (!_onActiveOrGap(
-        stopStart,
-        activeStart: activeStart,
-        activeEnd: activeEnd,
-        valueStart: valueStart,
-        valueEnd: valueEnd,
-        startGap: startGap,
-        endGap: endGap,
-      )) {
-        _drawStop(canvas, trackBounds, stopStart, colors.inactiveTick);
-      }
-      if (!_onActiveOrGap(
-        stopEnd,
-        activeStart: activeStart,
-        activeEnd: activeEnd,
-        valueStart: valueStart,
-        valueEnd: valueEnd,
-        startGap: startGap,
-        endGap: endGap,
-      )) {
-        _drawStop(canvas, trackBounds, stopEnd, colors.inactiveTick);
-      }
-    }
-
-    // Discrete ticks (skip track-end stops and handle gaps).
-    if (tickFractions.isEmpty) {
+    if (!drawDots) {
       return;
     }
-    final double tickStart = sliderStart + corner;
-    final double tickEnd = sliderEnd - corner;
-    final double tickCenterGapStart = _centered ? centerAxis - endGap : 0;
-    final double tickCenterGapEnd = _centered ? centerAxis + endGap : 0;
-    final double tickStartGapLo = valueStart - startGap;
-    final double tickStartGapHi = valueStart + startGap;
-    final double tickEndGapLo = valueEnd - endGap;
-    final double tickEndGapHi = valueEnd + endGap;
 
-    for (int i = 0; i < tickFractions.length; i++) {
-      // Ends are owned by stop indicators when enabled.
-      if (drawStops && (i == 0 || i == tickFractions.length - 1)) {
-        continue;
-      }
-      final double centerTick =
-          M3ESliderMath.lerp(tickStart, tickEnd, tickFractions[i]);
-      if (_centered &&
-          centerTick >= tickCenterGapStart &&
-          centerTick <= tickCenterGapEnd) {
-        continue;
-      }
-      if (_range &&
-          centerTick >= tickStartGapLo &&
-          centerTick <= tickStartGapHi) {
-        continue;
-      }
-      if (centerTick >= tickEndGapLo && centerTick <= tickEndGapHi) {
-        continue;
-      }
-      final bool inActive =
-          centerTick >= activeStart && centerTick <= activeEnd;
-      _drawStop(
-        canvas,
-        trackBounds,
-        centerTick,
-        inActive ? colors.activeTick : colors.inactiveTick,
-        size: tickSize,
-      );
+    final List<M3ESliderDotPlacement> dots = M3ESliderDotLayout.resolve(
+      size: size,
+      mode: mode,
+      trackKind: trackKind,
+      activeStartFraction: activeStartFraction,
+      activeEndFraction: activeEndFraction,
+      tickFractions: tickFractions,
+      colors: colors,
+      trackHeight: trackHeight,
+      handleGap: handleGap,
+      handleThickness: handleThickness,
+      stopIndicatorSize: stopIndicatorSize,
+      tickSize: tickSize,
+      axis: axis,
+      textDirection: textDirection,
+    );
+    for (final M3ESliderDotPlacement dot in dots) {
+      _drawStop(canvas, trackBounds, dot.primary, dot.color, size: dot.size);
     }
-  }
-
-  /// True when [primary] sits on the active/value fill or in a thumb gap.
-  bool _onActiveOrGap(
-    double primary, {
-    required double activeStart,
-    required double activeEnd,
-    required double valueStart,
-    required double valueEnd,
-    required double startGap,
-    required double endGap,
-  }) {
-    if (primary >= activeStart && primary <= activeEnd) {
-      return true;
-    }
-    // Range has thumbs at both ends. Centered single-thumb only has [valueEnd]
-    // — [valueStart] is always 0 and must not hide the leading stop.
-    if (_range &&
-        primary >= valueStart - startGap &&
-        primary <= valueStart + startGap) {
-      return true;
-    }
-    if (primary >= valueEnd - endGap && primary <= valueEnd + endGap) {
-      return true;
-    }
-    // Centered: when the thumb is left of center, the leading gap uses
-    // [startGap] around the thumb (still [valueEnd]), not the track origin.
-    if (_centered &&
-        startGap > 0 &&
-        primary >= valueEnd - startGap &&
-        primary <= valueEnd + startGap) {
-      return true;
-    }
-    return false;
   }
 
   Rect _trackBounds(Size size, double trackCross) {
@@ -315,8 +226,6 @@ class M3ESliderTrackPainter extends CustomPainter {
         bottomRight: Radius.circular(endCorner),
       );
     } else if (_rtl) {
-      // Mirror primary axis: paint from size-relative coordinates already
-      // computed in LTR space by callers using physical offsets.
       rrect = RRect.fromRectAndCorners(
         Rect.fromLTRB(start, trackBounds.top, end, trackBounds.bottom),
         topLeft: Radius.circular(startCorner),
@@ -427,7 +336,7 @@ class M3ESliderTrackPainter extends CustomPainter {
         oldDelegate.tickSize != tickSize ||
         oldDelegate.axis != axis ||
         oldDelegate.textDirection != textDirection ||
-        oldDelegate.drawStops != drawStops ||
+        oldDelegate.drawDots != drawDots ||
         oldDelegate.isWavy != isWavy ||
         oldDelegate.waveAmplitude != waveAmplitude ||
         oldDelegate.wavelength != wavelength ||

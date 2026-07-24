@@ -7,8 +7,11 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_range_slider_track.dart';
+import 'components/m3e_slider_dot_overlay.dart';
 import 'components/m3e_slider_thumb.dart';
 import 'components/m3e_slider_value_indicator.dart';
+import 'enums/m3e_slider_enums.dart';
+import 'models/m3e_slider_dot_builder.dart';
 import 'models/m3e_slider_range.dart';
 import 'models/m3e_slider_range_labels.dart';
 import 'models/m3e_slider_track_icons.dart';
@@ -32,6 +35,9 @@ class M3ERangeSlider extends StatefulWidget {
     this.labels,
     this.semanticFormatterCallback,
     this.trackIcons,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     super.key,
   })  : wavy = false,
         amplitude = null,
@@ -54,6 +60,9 @@ class M3ERangeSlider extends StatefulWidget {
     this.labels,
     this.semanticFormatterCallback,
     this.trackIcons,
+    this.trackThickness,
+    this.thumbLength,
+    this.dotBuilder,
     this.amplitude,
     this.amplitudeForProgress,
     this.wavelength,
@@ -95,6 +104,15 @@ class M3ERangeSlider extends StatefulWidget {
 
   /// Wave travel speed in logical pixels per second ([wavy] only).
   final double? waveSpeed;
+
+  /// Thickness of both active and inactive tracks. Defaults to theme track height.
+  final double? trackThickness;
+
+  /// Length of each thumb along its long axis. Defaults to theme handle height.
+  final double? thumbLength;
+
+  /// Custom stop/tick markers. When null, default circular dots are painted.
+  final M3ESliderDotBuilder? dotBuilder;
 
   @override
   State<M3ERangeSlider> createState() => _M3ERangeSliderState();
@@ -182,6 +200,11 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
     final double waveSpeed = widget.waveSpeed ?? wavelength;
     final double amplitudeFactor = _amplitudeFactor(sliderTheme);
+    final double trackThickness =
+        widget.trackThickness ?? sliderTheme.trackHeight;
+    final double thumbLength =
+        widget.thumbLength ?? sliderTheme.handleHeight;
+    final bool useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
       builder: (BuildContext context) {
@@ -192,7 +215,8 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double width = constraints.maxWidth;
-              final double height = sliderTheme.height;
+              final double height =
+                  math.max(sliderTheme.height, thumbLength);
 
               Widget buildTrack({required double phase}) {
                 return M3ERangeSliderTrack(
@@ -204,6 +228,8 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                   axis: Axis.horizontal,
                   textDirection: direction,
                   handleThickness: handleThickness,
+                  trackHeight: trackThickness,
+                  drawDots: !useCustomDots,
                   isWavy: widget.wavy,
                   waveAmplitude: sliderTheme.waveAmplitude,
                   wavelength: wavelength,
@@ -212,7 +238,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                 );
               }
 
-              final Widget track = widget.wavy
+              Widget track = widget.wavy
                   ? AnimatedBuilder(
                       animation: _waveController,
                       builder: (BuildContext context, Widget? child) {
@@ -222,6 +248,31 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                       },
                     )
                   : buildTrack(phase: 0);
+
+              if (useCustomDots) {
+                track = Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    track,
+                    M3ESliderDotOverlay(
+                      builder: widget.dotBuilder!,
+                      mode: M3ESliderPaintMode.range,
+                      trackKind: M3ESliderTrackKind.standard,
+                      activeStartFraction: _startFraction,
+                      activeEndFraction: _endFraction,
+                      tickFractions: _ticks,
+                      colors: colors,
+                      trackHeight: trackThickness,
+                      handleGap: sliderTheme.handleGap,
+                      handleThickness: handleThickness,
+                      stopIndicatorSize: sliderTheme.stopIndicatorSize,
+                      tickSize: sliderTheme.tickSize,
+                      axis: Axis.horizontal,
+                      textDirection: direction,
+                    ),
+                  ],
+                );
+              }
 
               double thumbX(double fraction) {
                 final double f = rtl ? 1.0 - fraction : fraction;
@@ -235,7 +286,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                     color: colors.thumb,
                     pressed: pressed,
                     width: sliderTheme.handleWidth,
-                    height: sliderTheme.handleHeight,
+                    height: thumbLength,
                     pressedThickness: sliderTheme.pressedHandleWidth,
                   );
 

@@ -126,6 +126,40 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   });
 
+  testWidgets('custom trackThickness thumbLength and dotBuilder', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: 200,
+          height: 48,
+          child: M3ESlider(
+            value: 0.5,
+            max: 4,
+            divisions: 4,
+            trackThickness: 20,
+            thumbLength: 32,
+            onChanged: (_) {},
+            dotBuilder: ({
+              required BuildContext context,
+              required Color color,
+              required double size,
+              required bool active,
+            }) {
+              return CustomPaint(
+                painter: _TestShapeDotPainter(
+                  polygon: M3EMaterialNewShapes.cookie4Sided,
+                  color: color,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(CustomPaint), findsWidgets);
+  });
+
   testWidgets('range thumbs cannot cross', (tester) async {
     M3ESliderRange values = const M3ESliderRange(0.4, 0.6);
     await tester.pumpWidget(
@@ -224,4 +258,30 @@ void main() {
     await tester.pump();
     expect(find.byType(M3ESlider), findsOneWidget);
   });
+}
+
+class _TestShapeDotPainter extends CustomPainter {
+  const _TestShapeDotPainter({
+    required this.polygon,
+    required this.color,
+  });
+
+  final RoundedPolygon polygon;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path path = polygon.toPath();
+    final Matrix4 scale = Matrix4.diagonal3Values(size.width, size.height, 1);
+    final Path scaled = path.transform(scale.storage);
+    final Rect bounds = scaled.getBounds();
+    final Path centered =
+        scaled.shift(Offset(size.width / 2, size.height / 2) - bounds.center);
+    canvas.drawPath(centered, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TestShapeDotPainter oldDelegate) {
+    return oldDelegate.polygon != polygon || oldDelegate.color != color;
+  }
 }
