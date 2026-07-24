@@ -360,7 +360,23 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final dir = Directionality.of(context);
     final size = widget.size;
 
-    final (cont, onCont, outlineSide, _) = _resolveColorsAndShapes(context);
+    final leadingEnabled = widget.enabled && widget.onPressed != null;
+    final trailingEnabled = widget.enabled;
+
+    final (cont, onCont, outlineSide, _) = _resolveColorsAndShapes(
+      context,
+      segmentEnabled: widget.enabled,
+    );
+    final (leadingCont, leadingOnCont, leadingOutline, _) =
+        _resolveColorsAndShapes(
+      context,
+      segmentEnabled: leadingEnabled,
+    );
+    final (trailingCont, trailingOnCont, trailingOutline, _) =
+        _resolveColorsAndShapes(
+      context,
+      segmentEnabled: trailingEnabled,
+    );
 
     final leadingCustomSize = widget.decorationLeadingCustomSize;
     final trailingCustomSize = widget.decorationTrailingCustomSize;
@@ -406,9 +422,6 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final eitherFocused = focused || _isTrailingFocused;
     final focusRingExtra = eitherFocused ? focusRingOutset : 0.0;
     final gap = baseGap + focusRingExtra;
-
-    final leadingEnabled = widget.enabled && widget.onPressed != null;
-    final trailingEnabled = widget.enabled;
 
     final leadingPressed = leadingEnabled && (pressed || _leadingPressed);
     final trailingPressed = trailingEnabled && (_trailingPressed || _menuOpen);
@@ -498,18 +511,20 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       context: context,
       height: leadingHeight,
       minTap: minTap,
-      color: cont,
-      onColor: onCont,
+      color: leadingCont,
+      onColor: leadingOnCont,
       elevation: _segmentElevation(
         hovered: leadingHovered,
         pressed: leadingPressed,
+        segmentEnabled: leadingEnabled,
       ),
-      outlineSide: outlineSide,
+      outlineSide: leadingOutline,
       radius: leadingRadius,
       customSize: leadingCustomSize,
       focused: focused,
       hovered: leadingHovered,
       pressed: leadingPressed,
+      enabled: leadingEnabled,
     );
 
     final trailing = _buildTrailingSegment(
@@ -517,13 +532,14 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       height: trailingHeight,
       minTap: minTap,
       fixedWidth: trailingFixedWidth,
-      color: cont,
-      onColor: onCont,
+      color: trailingCont,
+      onColor: trailingOnCont,
       elevation: _segmentElevation(
         hovered: trailingHovered,
         pressed: trailingPressed,
+        segmentEnabled: trailingEnabled,
       ),
-      outlineSide: outlineSide,
+      outlineSide: trailingOutline,
       radius: trailingRadius,
       trailingLeftPad: trailingLeftPad,
       trailingRightPad: trailingRightPad,
@@ -533,6 +549,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       focused: _isTrailingFocused,
       hovered: trailingHovered,
       pressed: trailingPressed,
+      enabled: trailingEnabled,
     );
 
     final m3eTheme = M3ETheme.of(context);
@@ -564,16 +581,19 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       ),
       child: FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: minTap),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            textDirection: dir,
-            children: [
-              leading,
-              SizedBox(width: gap),
-              trailing,
-            ],
+        child: IgnorePointer(
+          ignoring: !widget.enabled,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: minTap),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: dir,
+              children: [
+                leading,
+                SizedBox(width: gap),
+                trailing,
+              ],
+            ),
           ),
         ),
       ),
@@ -593,6 +613,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     required bool focused,
     required bool hovered,
     required bool pressed,
+    required bool enabled,
   }) {
     final size = widget.size;
     final targetRadius = radius.toBorderRadius(Directionality.of(context));
@@ -600,6 +621,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       focused: focused,
       hovered: hovered,
       pressed: pressed,
+      enabled: enabled,
     );
     final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
 
@@ -630,9 +652,11 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         child: Focus(
           focusNode: effectiveFocusNode,
           autofocus: widget.autofocus,
+          canRequestFocus: enabled,
+          skipTraversal: !enabled,
           onFocusChange: widget.onFocusChange,
           onKeyEvent: (node, event) {
-            if (widget.enabled &&
+            if (enabled &&
                 event is KeyDownEvent &&
                 (event.logicalKey == LogicalKeyboardKey.enter ||
                     event.logicalKey == LogicalKeyboardKey.space ||
@@ -643,29 +667,30 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             return KeyEventResult.ignored;
           },
           child: InkWell(
-            onTap: widget.enabled
+            onTap: enabled
                 ? () {
               widget.onPressed?.call();
               _triggerHaptic();
             }
                 : null,
-            onLongPress: widget.enabled ? widget.onLongPress : null,
-            onHover: widget.onHover,
-            onTapDown: widget.enabled && widget.onPressed != null
+            onLongPress: enabled ? widget.onLongPress : null,
+            onHover: enabled ? widget.onHover : null,
+            onTapDown: enabled
                 ? (_) => setState(() => _leadingPressed = true)
                 : null,
-            onTapUp: widget.enabled && widget.onPressed != null
+            onTapUp: enabled
                 ? (_) => setState(() => _leadingPressed = false)
                 : null,
-            onTapCancel: widget.enabled && widget.onPressed != null
+            onTapCancel: enabled
                 ? () => setState(() => _leadingPressed = false)
                 : null,
             statesController: statesController,
             canRequestFocus: false,
-            mouseCursor:
-            widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
-                widget.mouseCursor ??
-                SystemMouseCursors.click,
+            mouseCursor: enabled
+                ? (widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
+                    widget.mouseCursor ??
+                    SystemMouseCursors.click)
+                : SystemMouseCursors.basic,
             enableFeedback: widget.enableFeedback,
             splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
             splashColor: M3EStateLayer.splashColor(onColor),
@@ -732,6 +757,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     required bool focused,
     required bool hovered,
     required bool pressed,
+    required bool enabled,
   }) {
     final targetRadius = radius.toBorderRadius(Directionality.of(context));
     final effectiveWidth = fixedWidth < minTap ? minTap : fixedWidth;
@@ -740,6 +766,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       hovered: hovered,
       pressed: pressed,
       selected: _menuOpen,
+      enabled: enabled,
     );
     final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
 
@@ -789,8 +816,10 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
         borderRadius: targetRadius,
         child: Focus(
           focusNode: _trailingFocusNode,
+          canRequestFocus: enabled,
+          skipTraversal: !enabled,
           onKeyEvent: (node, event) {
-            if (widget.enabled &&
+            if (enabled &&
                 event is KeyDownEvent &&
                 (event.logicalKey == LogicalKeyboardKey.enter ||
                     event.logicalKey == LogicalKeyboardKey.space ||
@@ -801,17 +830,18 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
             return KeyEventResult.ignored;
           },
           child: InkWell(
-            onTap: widget.enabled
+            onTap: enabled
                 ? () {
               _openMenu(_trailingKey.currentContext ?? context);
               _triggerHaptic();
             }
                 : null,
-            mouseCursor:
-            widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
-                widget.mouseCursor ??
-                SystemMouseCursors.click,
-            onHover: widget.enabled
+            mouseCursor: enabled
+                ? (widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
+                    widget.mouseCursor ??
+                    SystemMouseCursors.click)
+                : SystemMouseCursors.basic,
+            onHover: enabled
                 ? (value) {
               if (_isTrailingHovered != value) {
                 setState(() => _isTrailingHovered = value);
@@ -819,13 +849,13 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
               widget.onHover?.call(value);
             }
                 : null,
-            onTapDown: widget.enabled
+            onTapDown: enabled
                 ? (_) => setState(() => _trailingPressed = true)
                 : null,
-            onTapUp: widget.enabled
+            onTapUp: enabled
                 ? (_) => setState(() => _trailingPressed = false)
                 : null,
-            onTapCancel: widget.enabled
+            onTapCancel: enabled
                 ? () => setState(() => _trailingPressed = false)
                 : null,
             canRequestFocus: false,
@@ -879,10 +909,11 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     required bool focused,
     required bool hovered,
     required bool pressed,
+    required bool enabled,
     bool selected = false,
   }) {
     return {
-      if (!widget.enabled) WidgetState.disabled,
+      if (!enabled) WidgetState.disabled,
       if (focused) WidgetState.focused,
       if (hovered) WidgetState.hovered,
       if (pressed) WidgetState.pressed,
@@ -916,8 +947,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   }
 
   (Color, Color, BorderSide?, double?) _resolveColorsAndShapes(
-      BuildContext context,
-      ) {
+      BuildContext context, {
+    required bool segmentEnabled,
+  }) {
     Color fgColor =
         widget.decorationForegroundColor?.resolve({}) ??
             _buttonTheme.foreground(_scheme, widget.style);
@@ -934,7 +966,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
               BorderSide(color: _buttonTheme.outline(_scheme));
     }
 
-    if (!widget.enabled || widget.onPressed == null) {
+    if (!segmentEnabled) {
       final cs = _scheme;
       fgColor =
           widget.decoration?.foregroundColor?.resolve({WidgetState.disabled}) ??
@@ -998,9 +1030,13 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     return _CornerRadii(topStart: i, bottomStart: i, topEnd: o, bottomEnd: o);
   }
 
-  double? _segmentElevation({required bool hovered, required bool pressed}) {
+  double? _segmentElevation({
+    required bool hovered,
+    required bool pressed,
+    required bool segmentEnabled,
+  }) {
     final states = <WidgetState>{
-      if (!widget.enabled) WidgetState.disabled,
+      if (!segmentEnabled) WidgetState.disabled,
       if (hovered) WidgetState.hovered,
       if (pressed) WidgetState.pressed,
     };
@@ -1015,6 +1051,9 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   }
 
   Future<void> _openMenu(BuildContext context) async {
+    if (!widget.enabled) {
+      return;
+    }
     if (widget.menuBuilder != null) {
       await _showNativeMenu(context);
       return;
@@ -1165,7 +1204,10 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       ) async {
     setState(() => _menuOpen = true);
 
-    final (_, onCont, _, _) = _resolveColorsAndShapes(context);
+    final (_, onCont, _, _) = _resolveColorsAndShapes(
+      context,
+      segmentEnabled: widget.enabled,
+    );
 
     final bottomSheetDec =
         widget.decoration?.bottomSheetDecoration ??

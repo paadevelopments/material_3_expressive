@@ -325,6 +325,23 @@ class _ActionsPageState extends State<ActionsPage>
                 ),
               ],
             ),
+            M3ESplitButton<String>(
+              label: 'Save',
+              leadingIcon: M3EIcons.check,
+              enabled: false,
+              onPressed: () {},
+              onSelected: (String value) {},
+              items: const <M3ESplitButtonItem<String>>[
+                M3ESplitButtonItem<String>(
+                  value: 'draft',
+                  child: Text('Save as draft'),
+                ),
+                M3ESplitButtonItem<String>(
+                  value: 'copy',
+                  child: Text('Save a copy'),
+                ),
+              ],
+            ),
           ],
         ),
       ],
