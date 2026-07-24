@@ -360,7 +360,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     final dir = Directionality.of(context);
     final size = widget.size;
 
-    final leadingEnabled = widget.enabled && widget.onPressed != null;
+    final leadingEnabled = widget.enabled;
     final trailingEnabled = widget.enabled;
 
     final (cont, onCont, outlineSide, _) = _resolveColorsAndShapes(
