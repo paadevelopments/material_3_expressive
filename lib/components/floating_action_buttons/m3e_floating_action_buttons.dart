@@ -7,7 +7,7 @@ import 'enums/m3e_fab.dart';
 ///
 /// Renders at one of three [M3EFabSize]s with any of the four container
 /// [M3EFabColor]s. It sits at elevation level 3 and lifts to level 4 on hover,
-/// and plays a subtle spring press scale.
+/// and plays a spatial spring press scale (380 / 0.55).
 class M3EFab extends StatelessWidget {
   const M3EFab({
     required this.icon,
@@ -46,10 +46,11 @@ class M3EFab extends StatelessWidget {
     final borderRadius = M3EShapes.resolve(cornerRadius ?? metrics.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
     // External radius is driven frame-by-frame; skip AnimatedContainer lerp.
-    final Duration radiusDuration =
+    final radiusDuration =
         cornerRadius != null ? Duration.zero : M3EMotion.short4;
 
-    return M3EComponentTheme(builder: (context) => M3ETappable(
+    return M3EComponentTheme(
+      builder: (context) => M3ETappable(
         onTap: onPressed,
         enabled: _enabled,
         focusNode: focusNode,
@@ -57,8 +58,8 @@ class M3EFab extends StatelessWidget {
         semanticLabel: tooltip,
         pressedScale: fabTheme.pressedScale,
         materialInk: true,
-        builder: (BuildContext context, M3EInteractionState state) {
-          final double elevation =
+        builder: (context, state) {
+          final elevation =
               state.hovered ? M3EElevation.level4 : M3EElevation.level3;
           return AnimatedContainer(
             duration: radiusDuration,

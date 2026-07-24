@@ -7,7 +7,8 @@ import '../floating_action_buttons/styles/m3e_fab_theme.dart';
 /// A Material 3 Expressive extended floating action button.
 ///
 /// A pill shaped FAB pairing an icon with a label. Setting [extended] to false
-/// animates the label away, collapsing it toward an icon only FAB.
+/// animates the label away, collapsing it toward an icon only FAB. Press uses
+/// spatial spring scale only (380 / 0.55).
 class M3EExtendedFab extends StatelessWidget {
   const M3EExtendedFab({
     required this.label,
@@ -46,7 +47,8 @@ class M3EExtendedFab extends StatelessWidget {
     final borderRadius = M3EShapes.resolve(extendedTheme.cornerRadius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
 
-    return M3EComponentTheme(builder: (context) => M3ETappable(
+    return M3EComponentTheme(
+      builder: (context) => M3ETappable(
         onTap: onPressed,
         enabled: _enabled,
         focusNode: focusNode,
@@ -54,8 +56,8 @@ class M3EExtendedFab extends StatelessWidget {
         semanticLabel: label,
         pressedScale: extendedTheme.pressedScale,
         materialInk: true,
-        builder: (BuildContext context, M3EInteractionState state) {
-          final double elevation = extendedTheme.elevation(
+        builder: (context, state) {
+          final elevation = extendedTheme.elevation(
             hovered: state.hovered,
           );
           return AnimatedContainer(

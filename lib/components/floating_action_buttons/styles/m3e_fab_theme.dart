@@ -85,8 +85,8 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     required M3EFabColor color,
     required M3EColorScheme scheme,
   }) {
-    final _FabDimensions dims = _dimensions(size);
-    final _FabPalette palette = _palette(color, scheme);
+    final dims = _dimensions(size);
+    final palette = _palette(color, scheme);
     return M3EFabMetrics(
       container: dims.container,
       iconSize: dims.iconSize,
@@ -180,6 +180,7 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
       largeContainer: _lerpDouble(largeContainer, other.largeContainer, t)!,
       largeIconSize: _lerpDouble(largeIconSize, other.largeIconSize, t)!,
       largeRadius: _lerpDouble(largeRadius, other.largeRadius, t)!,
+      extended: extended,
     );
   }
 

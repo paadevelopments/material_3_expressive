@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -69,6 +70,7 @@ class _M3ETappableState extends State<M3ETappable>
     with SingleTickerProviderStateMixin {
   M3EInteractionState _state = const M3EInteractionState();
   late final AnimationController _scaleController;
+  int? _activePointer;
 
   @override
   void initState() {
@@ -78,6 +80,7 @@ class _M3ETappableState extends State<M3ETappable>
 
   @override
   void dispose() {
+    _clearPointerRoute();
     _scaleController.dispose();
     super.dispose();
   }
@@ -104,33 +107,69 @@ class _M3ETappableState extends State<M3ETappable>
     );
   }
 
-  void _handlePointerDown() {
+  void _clearPointerRoute() {
+    if (_activePointer == null) {
+      return;
+    }
+    GestureBinding.instance.pointerRouter
+        .removeGlobalRoute(_handleGlobalPointerEvent);
+    _activePointer = null;
+  }
+
+  void _handleGlobalPointerEvent(PointerEvent event) {
+    if (event.pointer != _activePointer) {
+      return;
+    }
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _clearPointerRoute();
+      _releasePress();
+    }
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _clearPointerRoute();
+    _activePointer = event.pointer;
+    GestureBinding.instance.pointerRouter
+        .addGlobalRoute(_handleGlobalPointerEvent);
     _update(_state.copyWith(pressed: true));
     _animateScale(widget.pressedScale);
   }
 
-  void _handlePointerUp() {
+  void _handlePointerUp(PointerUpEvent event) {
+    if (event.pointer != _activePointer) {
+      return;
+    }
+    _clearPointerRoute();
+    _releasePress();
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (_activePointer != null && event.pointer != _activePointer) {
+      return;
+    }
+    _clearPointerRoute();
+    _releasePress();
+  }
+
+  void _releasePress() {
+    if (!_state.pressed) {
+      return;
+    }
     _update(_state.copyWith(pressed: false));
     _animateScale(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool interactive = widget._isInteractive;
+    final interactive = widget._isInteractive;
     Widget content = widget.builder(context, _state);
     if (widget.materialInk) {
+      // InkWell owns splash/tap; press scale is driven by [Listener] below so
+      // setState rebuilds cannot cancel the press gesture mid-spring.
       content = M3ETappableInkScope(
         onTap: interactive ? widget.onTap : null,
         onLongPress: interactive ? widget.onLongPress : null,
         mouseCursor: _resolveCursor(interactive),
-        onTapDown: interactive && widget.pressedScale != 1
-            ? (_) => _handlePointerDown()
-            : null,
-        onTapUp: interactive && widget.pressedScale != 1
-            ? (_) => _handlePointerUp()
-            : null,
-        onTapCancel:
-            interactive && widget.pressedScale != 1 ? _handlePointerUp : null,
         onHover: interactive
             ? (bool hovered) => _update(_state.copyWith(hovered: hovered))
             : null,
@@ -156,31 +195,33 @@ class _M3ETappableState extends State<M3ETappable>
   }
 
   Widget _wrapPointer(Widget child, bool interactive) {
-    if (widget.materialInk) {
-      return child;
-    }
+    var wrapped = child;
 
-    Widget wrapped = MouseRegion(
-      cursor: _resolveCursor(interactive),
-      onEnter: (_) => _update(_state.copyWith(hovered: true)),
-      onExit: (_) => _update(_state.copyWith(hovered: false)),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: interactive ? widget.onTap : null,
-        onLongPress: interactive ? widget.onLongPress : null,
-        child: child,
-      ),
-    );
+    if (!widget.materialInk) {
+      wrapped = MouseRegion(
+        cursor: _resolveCursor(interactive),
+        onEnter: (_) => _update(_state.copyWith(hovered: true)),
+        onExit: (_) => _update(_state.copyWith(hovered: false)),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: interactive ? widget.onTap : null,
+          onLongPress: interactive ? widget.onLongPress : null,
+          child: wrapped,
+        ),
+      );
+    }
 
     if (!interactive) {
       return wrapped;
     }
 
+    // Always track press with Listener so scale springs in both directions,
+    // including when Material ink handles the actual tap.
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => _handlePointerDown(),
-      onPointerUp: (_) => _handlePointerUp(),
-      onPointerCancel: (_) => _handlePointerUp(),
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      onPointerCancel: _handlePointerCancel,
       child: wrapped,
     );
   }
