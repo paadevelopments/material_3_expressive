@@ -12,6 +12,20 @@ Runtime dependencies are intentionally small — see
 [Dependencies](#dependencies) for the packages declared in
 [`pubspec.yaml`](pubspec.yaml).
 
+### Samples
+
+| Actions | Selection |
+| :-----: | :-------: |
+| ![Actions — buttons, FABs, and button groups](assets/asset_1.gif) | ![Selection — segmented controls, chips, menus, and sliders](assets/asset_2.gif) |
+
+| Containment | Navigation |
+| :---------: | :--------: |
+| ![Containment — pickers, cards, lists, and dialogs](assets/asset_3.gif) | ![Navigation — app bars, tabs, nav bar, and toolbars](assets/asset_4.gif) |
+
+| Feedback |
+| :------: |
+| ![Feedback — progress, badges, text fields, and snackbars](assets/asset_5.gif) |
+
 ## Example app
 
 An interactive gallery demonstrating **all 44 widgets** lives in the
