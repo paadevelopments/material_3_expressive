@@ -93,7 +93,7 @@ void main() {
         matching: find.byType(SizedBox),
       ).first,
     );
-    expect(box.height, 56);
+    expect(box.height, 64);
   });
 
   testWidgets('M3EAppBar.sliver renders an expanded large title',

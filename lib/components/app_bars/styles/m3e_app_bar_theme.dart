@@ -11,16 +11,17 @@ class M3EAppBarMetrics {
     required this.collapsedHeight,
     required this.mediumExpanded,
     required this.largeExpanded,
-    required this.horizontalPadding,
+    required this.contentPadding,
     required this.iconSize,
     required this.elevation,
   });
 
+  /// Content band height (includes [contentPadding], excludes system insets).
   final double smallHeight;
   final double collapsedHeight;
   final double mediumExpanded;
   final double largeExpanded;
-  final EdgeInsetsGeometry horizontalPadding;
+  final EdgeInsetsGeometry contentPadding;
   final double iconSize;
   final double elevation;
 }
@@ -29,22 +30,27 @@ class M3EAppBarMetrics {
 @immutable
 class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
   const M3EAppBarTheme({
-    this.horizontalPadding = const EdgeInsets.symmetric(horizontal: 16),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
     this.iconSize = 24,
     this.elevation = 0,
     this.compactHeightReduction = 8,
-    this.smallHeight = 64,
-    this.collapsedHeight = 64,
+    // 8 + 56 (search / controls) + 8 — matches toolbar content-padding model.
+    this.smallHeight = 72,
+    this.collapsedHeight = 72,
     this.mediumExpanded = 112,
     this.largeExpanded = 152,
     this.bottomHeight = 80,
     this.bottomIconSize = 24,
-    this.bottomPadding = const EdgeInsets.symmetric(horizontal: 4),
+    this.bottomPadding = const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
   });
 
   static const M3EAppBarTheme defaults = M3EAppBarTheme();
 
-  final EdgeInsetsGeometry horizontalPadding;
+  /// Padding around the toolbar content row (inside the bar, outside safe area).
+  final EdgeInsetsGeometry contentPadding;
   final double iconSize;
   final double elevation;
   final double compactHeightReduction;
@@ -74,7 +80,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
       collapsedHeight: collapsed,
       mediumExpanded: medium,
       largeExpanded: large,
-      horizontalPadding: horizontalPadding,
+      contentPadding: contentPadding,
       iconSize: iconSize,
       elevation: elevation,
     );
@@ -96,7 +102,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
 
   @override
   M3EAppBarTheme copyWith({
-    EdgeInsetsGeometry? horizontalPadding,
+    EdgeInsetsGeometry? contentPadding,
     double? iconSize,
     double? elevation,
     double? compactHeightReduction,
@@ -109,7 +115,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     EdgeInsetsGeometry? bottomPadding,
   }) {
     return M3EAppBarTheme(
-      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      contentPadding: contentPadding ?? this.contentPadding,
       iconSize: iconSize ?? this.iconSize,
       elevation: elevation ?? this.elevation,
       compactHeightReduction:
@@ -130,6 +136,9 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
       return this;
     }
     return M3EAppBarTheme(
+      contentPadding:
+          EdgeInsetsGeometry.lerp(contentPadding, other.contentPadding, t) ??
+              contentPadding,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       elevation: _lerpDouble(elevation, other.elevation, t)!,
       compactHeightReduction:
@@ -140,6 +149,9 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
       largeExpanded: _lerpDouble(largeExpanded, other.largeExpanded, t)!,
       bottomHeight: _lerpDouble(bottomHeight, other.bottomHeight, t)!,
       bottomIconSize: _lerpDouble(bottomIconSize, other.bottomIconSize, t)!,
+      bottomPadding:
+          EdgeInsetsGeometry.lerp(bottomPadding, other.bottomPadding, t) ??
+              bottomPadding,
     );
   }
 

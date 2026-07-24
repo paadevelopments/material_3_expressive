@@ -30,6 +30,8 @@ class _NavigationPageState extends State<NavigationPage>
   int _primaryTab = 0;
   int _secondaryTab = 0;
   final M3ESearchController _appBarSearchController = M3ESearchController();
+  final M3ESearchController _appBarSafeAreaSearchController =
+      M3ESearchController();
 
   static const List<String> _appBarSearchSuggestions = <String>[
     'Inbox',
@@ -43,6 +45,7 @@ class _NavigationPageState extends State<NavigationPage>
   @override
   void dispose() {
     _appBarSearchController.dispose();
+    _appBarSafeAreaSearchController.dispose();
     super.dispose();
   }
 
@@ -125,6 +128,27 @@ class _NavigationPageState extends State<NavigationPage>
     );
   }
 
+  Iterable<Widget> _appBarSuggestions(
+    BuildContext context,
+    M3ESearchController controller,
+  ) {
+    final query = controller.text.trim().toLowerCase();
+    final matches = query.isEmpty
+        ? _appBarSearchSuggestions
+        : _appBarSearchSuggestions.where(
+            (String name) => name.toLowerCase().contains(query),
+          );
+    return matches.map(
+      (String name) => GestureDetector(
+        onTap: () => controller.closeView(name),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(name),
+        ),
+      ),
+    );
+  }
+
   Widget _appBars(M3EThemeData theme) {
     return GallerySection(
       title: 'App bars',
@@ -135,6 +159,7 @@ class _NavigationPageState extends State<NavigationPage>
             titleText: 'Small',
             leading: const Icon(M3EIcons.menu),
             actions: const <Widget>[Icon(M3EIcons.search)],
+            safeArea: false,
           ),
         ),
         const SizedBox(height: 12),
@@ -146,6 +171,7 @@ class _NavigationPageState extends State<NavigationPage>
             density: M3EAppBarDensity.compact,
             shapeFamily: M3EAppBarShapeFamily.square,
             actions: const <Widget>[Icon(M3EIcons.file_copy)],
+            safeArea: false,
           ),
         ),
         const SizedBox(height: 12),
@@ -159,27 +185,25 @@ class _NavigationPageState extends State<NavigationPage>
               Icon(M3EIcons.tune),
               Icon(M3EIcons.account_circle),
             ],
-            suggestionsBuilder:
-                (BuildContext context, M3ESearchController controller) {
-              final query = controller.text.trim().toLowerCase();
-              final matches = query.isEmpty
-                  ? _appBarSearchSuggestions
-                  : _appBarSearchSuggestions.where(
-                      (String name) => name.toLowerCase().contains(query),
-                    );
-              return matches.map(
-                (String name) => GestureDetector(
-                  onTap: () => controller.closeView(name),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Text(name),
-                  ),
-                ),
-              );
-            },
+            suggestionsBuilder: _appBarSuggestions,
+            safeArea: false,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _framed(
+          theme,
+          // Default safeArea: true + viewPadding shows the top system inset.
+          MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              viewPadding: const EdgeInsets.only(top: 44),
+            ),
+            child: M3EAppBar.search(
+              searchController: _appBarSafeAreaSearchController,
+              barHintText: 'Search • safe area',
+              leading: const Icon(M3EIcons.menu),
+              actions: const <Widget>[Icon(M3EIcons.account_circle)],
+              suggestionsBuilder: _appBarSuggestions,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -216,6 +240,7 @@ class _NavigationPageState extends State<NavigationPage>
         _framed(
           theme,
           M3EAppBar.bottom(
+            safeArea: false,
             actions: const <Widget>[
               Icon(M3EIcons.menu),
               Icon(M3EIcons.search),

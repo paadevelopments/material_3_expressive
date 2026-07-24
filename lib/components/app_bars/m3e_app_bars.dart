@@ -13,9 +13,15 @@ export 'enums/m3e_app_bar_enums.dart';
 /// Which app bar layout an [M3EAppBar] renders.
 enum _M3EAppBarKind { top, bottom, sliver }
 
+/// Dock edge for single-sided system inset padding (toolbar-compatible).
+enum _M3EAppBarDockEdge { top, bottom }
+
 /// A Material 3 Expressive app bar with `top`, `bottom`, and `sliver` variants.
 class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// A fixed top app bar for use in `Scaffold.appBar`.
+  ///
+  /// When [safeArea] is true, only the top [MediaQuery.viewPadding] is applied
+  /// outside the content band (same model as [M3EToolbar.docked]).
   const M3EAppBar.top({
     super.key,
     this.leading,
@@ -30,9 +36,11 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.density = M3EAppBarDensity.regular,
     this.toolbarHeight,
     this.automaticallyImplyLeading = false,
+    this.safeArea = true,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
   })  : _kind = _M3EAppBarKind.top,
+        _dockEdge = _M3EAppBarDockEdge.top,
         floatingActionButton = null,
         pinned = true,
         floating = false,
@@ -55,6 +63,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     String? barHintText,
     Widget? barLeading,
     Iterable<Widget>? barTrailing,
+    WidgetStateProperty<Color?>? barBackgroundColor,
     bool isFullScreen = true,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -63,6 +72,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     M3EAppBarDensity density = M3EAppBarDensity.regular,
     double? toolbarHeight,
     bool automaticallyImplyLeading = false,
+    bool safeArea = true,
     Clip clipBehavior = Clip.none,
     String? semanticLabel,
     ValueChanged<String>? onSubmitted,
@@ -83,34 +93,37 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       density: density,
       toolbarHeight: toolbarHeight,
       automaticallyImplyLeading: automaticallyImplyLeading,
+      safeArea: safeArea,
       clipBehavior: clipBehavior,
       semanticLabel: semanticLabel,
-      title: M3ESearchAnchor.bar(
+      title: _M3EAppBarSearchTitle(
         searchController: searchController,
         suggestionsBuilder: suggestionsBuilder,
         barHintText: barHintText,
         barLeading: barLeading,
         barTrailing: barTrailing,
+        barBackgroundColor: barBackgroundColor,
         isFullScreen: isFullScreen,
         onSubmitted: onSubmitted,
         onChanged: onChanged,
         onClose: onClose,
         onOpen: onOpen,
-        // Fill the title slot; theme minWidth (360) would overflow toolbars.
-        constraints: searchConstraints ??
-            const BoxConstraints(minWidth: 0, minHeight: 56),
-        expandOnFocus: false,
-        expandRestPadding: 0,
+        searchConstraints: searchConstraints,
       ),
     );
   }
 
   /// A bottom app bar with actions and an optional floating action button.
+  ///
+  /// When [safeArea] is true, only the bottom [MediaQuery.viewPadding] is
+  /// applied outside the content band.
   const M3EAppBar.bottom({
     super.key,
     this.actions = const <Widget>[],
     this.floatingActionButton,
+    this.safeArea = true,
   })  : _kind = _M3EAppBarKind.bottom,
+        _dockEdge = _M3EAppBarDockEdge.bottom,
         leading = null,
         title = null,
         titleText = null,
@@ -147,13 +160,16 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.variant = M3EAppBarVariant.medium,
     this.semanticLabel,
   })  : _kind = _M3EAppBarKind.sliver,
+        _dockEdge = _M3EAppBarDockEdge.top,
         elevation = null,
         toolbarHeight = null,
         automaticallyImplyLeading = true,
+        safeArea = true,
         clipBehavior = Clip.none,
         floatingActionButton = null;
 
   final _M3EAppBarKind _kind;
+  final _M3EAppBarDockEdge _dockEdge;
 
   final Widget? leading;
   final Widget? title;
@@ -167,6 +183,10 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   final M3EAppBarDensity density;
   final double? toolbarHeight;
   final bool automaticallyImplyLeading;
+
+  /// When true, applies [MediaQuery.viewPadding] on the docked edge only
+  /// (top for [.top]/[.search], bottom for [.bottom]).
+  final bool safeArea;
   final Clip clipBehavior;
   final String? semanticLabel;
 
@@ -180,7 +200,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   final M3EAppBarVariant variant;
 
   @override
-  Size get preferredSize => Size.fromHeight(toolbarHeight ?? 64);
+  Size get preferredSize => Size.fromHeight(toolbarHeight ?? 72);
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +210,18 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
         _M3EAppBarKind.bottom => _buildBottom(context),
         _M3EAppBarKind.sliver => _buildSliver(context),
       },
+    );
+  }
+
+  /// System inset for the docked edge only — same recipe as docked toolbars.
+  EdgeInsets _edgeSafeAreaInset(BuildContext context) {
+    if (!safeArea) {
+      return EdgeInsets.zero;
+    }
+    final EdgeInsets mq = MediaQuery.viewPaddingOf(context);
+    return EdgeInsets.only(
+      top: _dockEdge == _M3EAppBarDockEdge.top ? mq.top : 0,
+      bottom: _dockEdge == _M3EAppBarDockEdge.bottom ? mq.bottom : 0,
     );
   }
 
@@ -203,6 +235,8 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final height = toolbarHeight ?? metrics.smallHeight;
     final tStyle = appBarTheme.titleStyle(theme.typeScale);
     final searchMaxWidth = theme.searchBarTheme.maxWidth;
+    final contentPadding =
+        metrics.contentPadding.resolve(Directionality.of(context));
 
     final resolvedLeading = leading ??
         (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
@@ -212,45 +246,49 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
             ? Text(titleText!, style: tStyle, overflow: TextOverflow.ellipsis)
             : null);
 
+    // Content band height includes content padding; system insets sit outside
+    // it but inside Material (toolbar docked model).
+    final Widget contentBand = SizedBox(
+      height: height,
+      child: Padding(
+        padding: contentPadding,
+        child: IconTheme.merge(
+          data: IconThemeData(size: metrics.iconSize, color: fg),
+          child: DefaultTextStyle(
+            style: tStyle.copyWith(color: fg),
+            child: Row(
+              children: [
+                ?resolvedLeading,
+                if (resolvedLeading != null) const SizedBox(width: 8),
+                if (resolvedTitle != null)
+                  Expanded(
+                    child: _TitleSlot(
+                      centerTitle: centerTitle,
+                      maxContentWidth: searchMaxWidth,
+                      child: resolvedTitle,
+                    ),
+                  )
+                else
+                  const Spacer(),
+                if (actions != null) ...[
+                  const SizedBox(width: 8),
+                  ..._withSpacers(actions!),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
     final bar = Material(
       color: bg,
       elevation: elevation ?? metrics.elevation,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: SafeArea(
-        bottom: false,
-        child: SizedBox(
-          height: height,
-          child: Padding(
-            padding: metrics.horizontalPadding,
-            child: IconTheme.merge(
-              data: IconThemeData(size: metrics.iconSize, color: fg),
-              child: DefaultTextStyle(
-                style: tStyle.copyWith(color: fg),
-                child: Row(
-                  children: [
-                    ?resolvedLeading,
-                    if (resolvedLeading != null) const SizedBox(width: 8),
-                    if (resolvedTitle != null)
-                      Expanded(
-                        child: _TitleSlot(
-                          centerTitle: centerTitle,
-                          maxContentWidth: searchMaxWidth,
-                          child: resolvedTitle,
-                        ),
-                      )
-                    else
-                      const Spacer(),
-                    if (actions != null) ...[
-                      const SizedBox(width: 8),
-                      ..._withSpacers(actions!),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      child: Padding(
+        padding: _edgeSafeAreaInset(context),
+        child: contentBand,
       ),
     );
 
@@ -268,12 +306,13 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final theme = M3ETheme.of(context);
     final appBarTheme = theme.appBarTheme;
     final scheme = theme.colorScheme;
-    return Container(
+    final contentPadding =
+        appBarTheme.bottomPadding.resolve(Directionality.of(context));
+
+    final Widget contentBand = SizedBox(
       height: appBarTheme.bottomHeight,
-      color: appBarTheme.bottomBackgroundColor(scheme),
-      padding: appBarTheme.bottomPadding,
-      child: SafeArea(
-        top: false,
+      child: Padding(
+        padding: contentPadding,
         child: Row(
           children: <Widget>[
             IconTheme.merge(
@@ -290,6 +329,14 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
             ?floatingActionButton,
           ],
         ),
+      ),
+    );
+
+    return Material(
+      color: appBarTheme.bottomBackgroundColor(scheme),
+      child: Padding(
+        padding: _edgeSafeAreaInset(context),
+        child: contentBand,
       ),
     );
   }
@@ -397,7 +444,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Places an app bar title between leading and actions.
 ///
-/// [M3ESearchAnchor] titles fill up to [maxContentWidth], then follow
+/// Anchored search titles fill up to [maxContentWidth], then follow
 /// [centerTitle]. Other titles keep intrinsic width and only use alignment.
 class _TitleSlot extends StatelessWidget {
   const _TitleSlot({
@@ -415,7 +462,9 @@ class _TitleSlot extends StatelessWidget {
     final alignment =
         centerTitle ? Alignment.center : AlignmentDirectional.centerStart;
 
-    if (child is! M3ESearchAnchor) {
+    final bool fillSlot =
+        child is M3ESearchAnchor || child is _M3EAppBarSearchTitle;
+    if (!fillSlot) {
       return Align(alignment: alignment, child: child);
     }
 
@@ -427,6 +476,62 @@ class _TitleSlot extends StatelessWidget {
           child: SizedBox(width: width, child: child),
         );
       },
+    );
+  }
+}
+
+/// Read-only anchored search title with a default [ColorScheme.surface] fill.
+class _M3EAppBarSearchTitle extends StatelessWidget {
+  const _M3EAppBarSearchTitle({
+    required this.searchController,
+    required this.suggestionsBuilder,
+    this.barHintText,
+    this.barLeading,
+    this.barTrailing,
+    this.barBackgroundColor,
+    this.isFullScreen = true,
+    this.onSubmitted,
+    this.onChanged,
+    this.onClose,
+    this.onOpen,
+    this.searchConstraints,
+  });
+
+  final M3ESearchController searchController;
+  final M3ESearchSuggestionsBuilder suggestionsBuilder;
+  final String? barHintText;
+  final Widget? barLeading;
+  final Iterable<Widget>? barTrailing;
+  final WidgetStateProperty<Color?>? barBackgroundColor;
+  final bool isFullScreen;
+  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final VoidCallback? onClose;
+  final VoidCallback? onOpen;
+  final BoxConstraints? searchConstraints;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color surface = M3ETheme.of(context).colorScheme.surface;
+    return M3ESearchAnchor.bar(
+      searchController: searchController,
+      suggestionsBuilder: suggestionsBuilder,
+      barHintText: barHintText,
+      barLeading: barLeading,
+      barTrailing: barTrailing,
+      // Surface contrasts against the app bar's surfaceContainerHigh.
+      barBackgroundColor:
+          barBackgroundColor ?? WidgetStatePropertyAll<Color>(surface),
+      isFullScreen: isFullScreen,
+      onSubmitted: onSubmitted,
+      onChanged: onChanged,
+      onClose: onClose,
+      onOpen: onOpen,
+      // minHeight 0 so the bar fills the content band after vertical padding.
+      constraints:
+          searchConstraints ?? const BoxConstraints(minWidth: 0, minHeight: 0),
+      expandOnFocus: false,
+      expandRestPadding: 0,
     );
   }
 }
