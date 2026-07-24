@@ -371,35 +371,29 @@ class _M3ERadiusAndPaddingMotionState extends State<M3ERadiusAndPaddingMotion> {
         motion: widget.motion,
         value: _progressTarget,
         builder: (context, t, _) {
+          // Allow spatial overshoot past the target (toolbar/FAB recipe).
           final double rawFactor = _progressTarget == 1.0 ? t : 1.0 - t;
           final double factor = rawFactor.isFinite
-              ? rawFactor.clamp(0.0, 1.0)
+              ? rawFactor.clamp(0.0, 1.5)
               : 0.0;
+
+          double corner(double from, double to) {
+            final double v = lerpDouble(from, to, factor)!;
+            return v < 0 ? 0.0 : v;
+          }
 
           final double tl = widget.freezeTopLeft
               ? widget.targetRadius.topLeft.x
-              : lerpDouble(_srcTopLeft, widget.targetRadius.topLeft.x, factor)!;
+              : corner(_srcTopLeft, widget.targetRadius.topLeft.x);
           final double tr = widget.freezeTopRight
               ? widget.targetRadius.topRight.x
-              : lerpDouble(
-                  _srcTopRight,
-                  widget.targetRadius.topRight.x,
-                  factor,
-                )!;
+              : corner(_srcTopRight, widget.targetRadius.topRight.x);
           final double bl = widget.freezeBottomLeft
               ? widget.targetRadius.bottomLeft.x
-              : lerpDouble(
-                  _srcBottomLeft,
-                  widget.targetRadius.bottomLeft.x,
-                  factor,
-                )!;
+              : corner(_srcBottomLeft, widget.targetRadius.bottomLeft.x);
           final double br = widget.freezeBottomRight
               ? widget.targetRadius.bottomRight.x
-              : lerpDouble(
-                  _srcBottomRight,
-                  widget.targetRadius.bottomRight.x,
-                  factor,
-                )!;
+              : corner(_srcBottomRight, widget.targetRadius.bottomRight.x);
           final double curL = lerpDouble(
             _srcLeft,
             widget.internalLeft,

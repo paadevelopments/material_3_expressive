@@ -28,7 +28,6 @@ const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
 const Duration _kDurationZero = Duration.zero;
 const bool _kDefaultEnableFeedback = true;
-final _kPressedRadiusMotion = M3EButtonMotion.expressiveEffectsFast.toMotion();
 
 class M3EButton extends StatefulWidget {
   const M3EButton({
@@ -611,10 +610,7 @@ class _M3EButtonState extends State<M3EButton>
 
         Widget core = RepaintBoundary(
           child: M3ERadiusAndPaddingMotion(
-            snapToTarget: effectivelyEnabled && pressed,
-            motion: (effectivelyEnabled && pressed)
-                ? _kPressedRadiusMotion
-                : springMotion,
+            motion: springMotion,
             internalLeft: baseInternalPadding.left,
             internalRight: baseInternalPadding.right,
             internalTop: baseInternalPadding.top,

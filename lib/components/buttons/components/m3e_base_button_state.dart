@@ -148,7 +148,8 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   }
 
   void updateSpringMotion() {
-    springMotion = (effectiveMotion ?? M3EButtonMotion.standard).toMotion();
+    springMotion =
+        (effectiveMotion ?? M3EButtonMotion.expressiveSpatialPress).toMotion();
   }
 
   void handleStatesControllerUpdate(

@@ -35,9 +35,16 @@ class M3EButtonMotion {
     damping: 0.6,
   );
 
+  /// Matches foundation [M3EMotion.expressiveSpatialDefault] (380 / 0.8).
   static const M3EButtonMotion expressiveSpatialDefault = M3EButtonMotion(
-    stiffness: 1200,
-    damping: 0.9,
+    stiffness: 380,
+    damping: 0.8,
+  );
+
+  /// Interactive press/release morph — same recipe as floating toolbar / FAB menu.
+  static const M3EButtonMotion expressiveSpatialPress = M3EButtonMotion(
+    stiffness: 380,
+    damping: 0.55,
   );
 
   static const M3EButtonMotion standardSpatialFast = M3EButtonMotion(
