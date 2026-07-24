@@ -655,10 +655,11 @@ class _M3ESearchBarState extends State<M3ESearchBar>
         return AnimatedBuilder(
           animation: _expandPaddingController,
           builder: (BuildContext context, Widget? child) {
+            // Allow spring overshoot past the resting inset; never go negative.
+            final pad = _expandPaddingController.value;
+            final horizontal = pad.isFinite && pad > 0 ? pad : 0.0;
             return Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: _expandPaddingController.value,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: horizontal),
               child: ConstrainedBox(
                 constraints: barConstraints,
                 child: bar,

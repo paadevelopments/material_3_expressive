@@ -16,7 +16,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     this.minHeight = 56,
     this.restingExpandPadding = 8,
     this.expandOnFocus = true,
-    this.focusExpandSpring = M3EMotion.expressiveSpatialFast,
+    this.focusExpandSpring = M3EMotion.expressiveSpatialPress,
     this.noLeadingHintExtraPadding = 12,
     this.pressedOverlayOpacity = 0.1,
     this.hoveredOverlayOpacity = 0.08,
@@ -34,6 +34,11 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   final double minHeight;
   final double restingExpandPadding;
   final bool expandOnFocus;
+
+  /// Spring for the minor expand/collapse inset on focus.
+  ///
+  /// Defaults to [M3EMotion.expressiveSpatialPress] (380 / 0.55) — same
+  /// bouncy spatial recipe as the floating toolbar.
   final M3ESpring focusExpandSpring;
   final double noLeadingHintExtraPadding;
   final double pressedOverlayOpacity;
