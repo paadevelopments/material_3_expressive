@@ -18,6 +18,11 @@ class M3ESliderCenteredTrack extends StatelessWidget {
     required this.textDirection,
     required this.handleThickness,
     this.drawStops = true,
+    this.isWavy = false,
+    this.waveAmplitude = 0,
+    this.wavelength = 40,
+    this.phase = 0,
+    this.amplitudeFactor = 1,
     super.key,
   });
 
@@ -29,6 +34,11 @@ class M3ESliderCenteredTrack extends StatelessWidget {
   final TextDirection textDirection;
   final double handleThickness;
   final bool drawStops;
+  final bool isWavy;
+  final double waveAmplitude;
+  final double wavelength;
+  final double phase;
+  final double amplitudeFactor;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +52,11 @@ class M3ESliderCenteredTrack extends StatelessWidget {
       handleThickness: handleThickness,
       trackKind: M3ESliderTrackKind.centered,
       drawStops: drawStops,
+      isWavy: isWavy,
+      waveAmplitude: waveAmplitude,
+      wavelength: wavelength,
+      phase: phase,
+      amplitudeFactor: amplitudeFactor,
     );
   }
 }

@@ -21,6 +21,8 @@ enum M3ESliderPaintMode {
 /// Paints expressive track segments, stop indicators, and discrete ticks.
 ///
 /// The thumb is painted separately by [M3ESliderThumb] so it can animate.
+/// When [isWavy] is true, the active value segment is a traveling sine wave
+/// (same recipe as linear wavy progress); inactive segments stay flat.
 class M3ESliderTrackPainter extends CustomPainter {
   const M3ESliderTrackPainter({
     required this.mode,
@@ -38,6 +40,11 @@ class M3ESliderTrackPainter extends CustomPainter {
     required this.axis,
     required this.textDirection,
     this.drawStops = true,
+    this.isWavy = false,
+    this.waveAmplitude = 0,
+    this.wavelength = 40,
+    this.phase = 0,
+    this.amplitudeFactor = 1,
   });
 
   final M3ESliderPaintMode mode;
@@ -55,6 +62,11 @@ class M3ESliderTrackPainter extends CustomPainter {
   final Axis axis;
   final TextDirection textDirection;
   final bool drawStops;
+  final bool isWavy;
+  final double waveAmplitude;
+  final double wavelength;
+  final double phase;
+  final double amplitudeFactor;
 
   bool get _vertical => axis == Axis.vertical;
   bool get _rtl => !_vertical && textDirection == TextDirection.rtl;
@@ -140,15 +152,25 @@ class M3ESliderTrackPainter extends CustomPainter {
         (_rtl && !_centered && !_range) ? corner : insideCornerSize;
     final double activeWidth = activeEnd - activeStart;
     if (activeWidth > startCorner) {
-      _drawSegment(
-        canvas,
-        trackBounds,
-        activeStart,
-        activeEnd,
-        colors.activeTrack,
-        startCorner: startCorner,
-        endCorner: endCorner,
-      );
+      if (isWavy) {
+        _drawWavyActive(
+          canvas,
+          trackBounds,
+          activeStart,
+          activeEnd,
+          colors.activeTrack,
+        );
+      } else {
+        _drawSegment(
+          canvas,
+          trackBounds,
+          activeStart,
+          activeEnd,
+          colors.activeTrack,
+          startCorner: startCorner,
+          endCorner: endCorner,
+        );
+      }
     }
 
     // Track-end stop indicators — only on inactive track (never on the
@@ -314,6 +336,54 @@ class M3ESliderTrackPainter extends CustomPainter {
     canvas.drawRRect(rrect, Paint()..color = color);
   }
 
+  /// Active value as a traveling sine wave (linear wavy progress recipe).
+  void _drawWavyActive(
+    Canvas canvas,
+    Rect trackBounds,
+    double start,
+    double end,
+    Color color,
+  ) {
+    if (end <= start || wavelength <= 0) {
+      return;
+    }
+    final double amp =
+        waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
+    final double crossCenter =
+        _vertical ? trackBounds.center.dx : trackBounds.center.dy;
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = trackHeight
+      ..isAntiAlias = true
+      ..color = color;
+
+    final Path path = Path();
+    const double step = 1.5;
+    final double k = 2 * math.pi / wavelength;
+
+    double crossAt(double primary) {
+      return crossCenter + amp * math.sin(phase + (primary - start) * k);
+    }
+
+    if (_vertical) {
+      double y = start;
+      path.moveTo(crossAt(y), y);
+      for (y = start + step; y <= end; y += step) {
+        path.lineTo(crossAt(y), y);
+      }
+      path.lineTo(crossAt(end), end);
+    } else {
+      double x = start;
+      path.moveTo(x, crossAt(x));
+      for (x = start + step; x <= end; x += step) {
+        path.lineTo(x, crossAt(x));
+      }
+      path.lineTo(end, crossAt(end));
+    }
+    canvas.drawPath(path, paint);
+  }
+
   void _drawStop(
     Canvas canvas,
     Rect trackBounds,
@@ -344,6 +414,11 @@ class M3ESliderTrackPainter extends CustomPainter {
         oldDelegate.tickSize != tickSize ||
         oldDelegate.axis != axis ||
         oldDelegate.textDirection != textDirection ||
-        oldDelegate.drawStops != drawStops;
+        oldDelegate.drawStops != drawStops ||
+        oldDelegate.isWavy != isWavy ||
+        oldDelegate.waveAmplitude != waveAmplitude ||
+        oldDelegate.wavelength != wavelength ||
+        oldDelegate.phase != phase ||
+        oldDelegate.amplitudeFactor != amplitudeFactor;
   }
 }

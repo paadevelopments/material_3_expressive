@@ -1,6 +1,8 @@
 // Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
 // RangeSlider
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
@@ -31,7 +33,34 @@ class M3ERangeSlider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.trackIcons,
     super.key,
-  }) : assert(max > min, 'max must be greater than min.');
+  })  : wavy = false,
+        amplitude = null,
+        amplitudeForProgress = null,
+        wavelength = null,
+        waveSpeed = null,
+        assert(max > min, 'max must be greater than min.');
+
+  /// Range slider whose active span is a traveling sine wave.
+  ///
+  /// Inactive track, thumbs, gaps, and interaction match [M3ERangeSlider];
+  /// only the active value span uses the linear-wavy progress recipe.
+  const M3ERangeSlider.wavy({
+    required this.values,
+    required this.onChanged,
+    this.min = 0,
+    this.max = 1,
+    this.divisions,
+    this.onChangeEnd,
+    this.labels,
+    this.semanticFormatterCallback,
+    this.trackIcons,
+    this.amplitude,
+    this.amplitudeForProgress,
+    this.wavelength,
+    this.waveSpeed,
+    super.key,
+  })  : wavy = true,
+        assert(max > min, 'max must be greater than min.');
 
   /// Current start/end values within [min]..[max].
   final M3ESliderRange values;
@@ -52,12 +81,30 @@ class M3ERangeSlider extends StatefulWidget {
   /// Reserved for parity with [M3ESlider.trackIcons] (Compose sample pattern).
   final M3ESliderTrackIcons? trackIcons;
 
+  /// When true, paints the active span as a traveling sine wave.
+  final bool wavy;
+
+  /// Fixed amplitude factor `0..1` for [wavy] tracks.
+  final double? amplitude;
+
+  /// Amplitude factor as a function of span progress for [wavy] tracks.
+  final double Function(double progress)? amplitudeForProgress;
+
+  /// Wave length in logical pixels ([wavy] only).
+  final double? wavelength;
+
+  /// Wave travel speed in logical pixels per second ([wavy] only).
+  final double? waveSpeed;
+
   @override
   State<M3ERangeSlider> createState() => _M3ERangeSliderState();
 }
 
-class _M3ERangeSliderState extends State<M3ERangeSlider> {
+class _M3ERangeSliderState extends State<M3ERangeSlider>
+    with SingleTickerProviderStateMixin {
   _M3ERangeThumb? _activeThumb;
+  late final AnimationController _waveController;
+
   bool get _enabled => widget.onChanged != null;
   bool get _pressed => _activeThumb != null;
 
@@ -67,6 +114,57 @@ class _M3ERangeSliderState extends State<M3ERangeSlider> {
       M3ESliderMath.fraction(widget.values.end, widget.min, widget.max);
 
   List<double> get _ticks => M3ESliderMath.tickFractions(widget.divisions);
+
+  @override
+  void initState() {
+    super.initState();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: M3EMotion.extraLong2,
+    );
+    if (widget.wavy) {
+      _waveController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(M3ERangeSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.wavy) {
+      if (!_waveController.isAnimating) {
+        _waveController.repeat();
+      }
+    } else if (_waveController.isAnimating) {
+      _waveController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _waveController.dispose();
+    super.dispose();
+  }
+
+  double _phase(double wavelength, double waveSpeed) {
+    final Duration elapsed =
+        _waveController.lastElapsedDuration ?? Duration.zero;
+    final double seconds = elapsed.inMicroseconds / 1e6;
+    if (wavelength <= 0) {
+      return 0;
+    }
+    return seconds * waveSpeed / wavelength * 2 * math.pi;
+  }
+
+  double _amplitudeFactor(M3ESliderTheme theme) {
+    final double progress = (_endFraction - _startFraction).clamp(0.0, 1.0);
+    if (widget.amplitudeForProgress != null) {
+      return widget.amplitudeForProgress!(progress).clamp(0.0, 1.0);
+    }
+    if (widget.amplitude != null) {
+      return widget.amplitude!.clamp(0.0, 1.0);
+    }
+    return theme.amplitudeForProgress(progress).clamp(0.0, 1.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +179,10 @@ class _M3ERangeSliderState extends State<M3ERangeSlider> {
         ? sliderTheme.pressedHandleWidth
         : sliderTheme.handleWidth;
 
+    final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
+    final double waveSpeed = widget.waveSpeed ?? wavelength;
+    final double amplitudeFactor = _amplitudeFactor(sliderTheme);
+
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
@@ -92,16 +194,34 @@ class _M3ERangeSliderState extends State<M3ERangeSlider> {
               final double width = constraints.maxWidth;
               final double height = sliderTheme.height;
 
-              final Widget track = M3ERangeSliderTrack(
-                startFraction: _startFraction,
-                endFraction: _endFraction,
-                tickFractions: _ticks,
-                colors: colors,
-                theme: sliderTheme,
-                axis: Axis.horizontal,
-                textDirection: direction,
-                handleThickness: handleThickness,
-              );
+              Widget buildTrack({required double phase}) {
+                return M3ERangeSliderTrack(
+                  startFraction: _startFraction,
+                  endFraction: _endFraction,
+                  tickFractions: _ticks,
+                  colors: colors,
+                  theme: sliderTheme,
+                  axis: Axis.horizontal,
+                  textDirection: direction,
+                  handleThickness: handleThickness,
+                  isWavy: widget.wavy,
+                  waveAmplitude: sliderTheme.waveAmplitude,
+                  wavelength: wavelength,
+                  phase: phase,
+                  amplitudeFactor: amplitudeFactor,
+                );
+              }
+
+              final Widget track = widget.wavy
+                  ? AnimatedBuilder(
+                      animation: _waveController,
+                      builder: (BuildContext context, Widget? child) {
+                        return buildTrack(
+                          phase: _phase(wavelength, waveSpeed),
+                        );
+                      },
+                    )
+                  : buildTrack(phase: 0);
 
               double thumbX(double fraction) {
                 final double f = rtl ? 1.0 - fraction : fraction;

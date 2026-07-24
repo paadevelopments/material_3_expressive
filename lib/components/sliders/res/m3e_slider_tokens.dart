@@ -38,4 +38,8 @@ abstract final class M3ESliderTokens {
   static const double verticalHandleWidth = handleHeight;
   static const double verticalHandleHeight = handleWidth;
   static const double verticalPressedHandleHeight = pressedHandleWidth;
+
+  /// Wavy active-track defaults (aligned with linear wavy progress).
+  static const double waveAmplitude = 3;
+  static const double wavelength = 40;
 }

@@ -48,6 +48,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     this.disabledActiveOpacity = M3ESliderTokens.disabledActiveTrackOpacity,
     this.disabledInactiveOpacity =
         M3ESliderTokens.disabledInactiveTrackOpacity,
+    this.waveAmplitude = M3ESliderTokens.waveAmplitude,
+    this.wavelength = M3ESliderTokens.wavelength,
   });
 
   static const M3ESliderTheme defaults = M3ESliderTheme();
@@ -66,6 +68,20 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
   final double valueIndicatorBottomSpace;
   final double disabledActiveOpacity;
   final double disabledInactiveOpacity;
+
+  /// Peak offset of the wavy active track from the centerline.
+  final double waveAmplitude;
+
+  /// Length of one full sine cycle on a wavy active track.
+  final double wavelength;
+
+  /// Compose wavy determinate amplitude: full mid-progress, zero near ends.
+  double amplitudeForProgress(double progress) {
+    if (progress <= 0.1 || progress >= 0.95) {
+      return 0;
+    }
+    return 1;
+  }
 
   /// Resolves Compose-accurate slider colors for the current [scheme].
   M3ESliderColors colors(M3EColorScheme scheme, {required bool enabled}) {
@@ -118,6 +134,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     double? valueIndicatorBottomSpace,
     double? disabledActiveOpacity,
     double? disabledInactiveOpacity,
+    double? waveAmplitude,
+    double? wavelength,
   }) {
     return M3ESliderTheme(
       height: height ?? this.height,
@@ -136,6 +154,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
           disabledActiveOpacity ?? this.disabledActiveOpacity,
       disabledInactiveOpacity:
           disabledInactiveOpacity ?? this.disabledInactiveOpacity,
+      waveAmplitude: waveAmplitude ?? this.waveAmplitude,
+      wavelength: wavelength ?? this.wavelength,
     );
   }
 
@@ -161,6 +181,8 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
           _lerp(disabledActiveOpacity, other.disabledActiveOpacity, t),
       disabledInactiveOpacity:
           _lerp(disabledInactiveOpacity, other.disabledInactiveOpacity, t),
+      waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
+      wavelength: _lerp(wavelength, other.wavelength, t),
     );
   }
 

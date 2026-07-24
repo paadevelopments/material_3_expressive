@@ -346,7 +346,9 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
   double _volume = 0.5;
   double _brightness = 3;
   double _balance = 0;
+  double _wavy = 0.55;
   M3ESliderRange _range = const M3ESliderRange(0.2, 0.7);
+  M3ESliderRange _wavyRange = const M3ESliderRange(0.25, 0.75);
   double _vertical = 0.4;
 
   @override
@@ -362,6 +364,18 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
               child: M3ESlider(
                 value: _volume,
                 onChanged: (double value) => setState(() => _volume = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Wavy',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider.wavy(
+                value: _wavy,
+                onChanged: (double value) => setState(() => _wavy = value),
               ),
             ),
           ],
@@ -404,6 +418,19 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 values: _range,
                 onChanged: (M3ESliderRange value) =>
                     setState(() => _range = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Wavy range',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ERangeSlider.wavy(
+                values: _wavyRange,
+                onChanged: (M3ESliderRange value) =>
+                    setState(() => _wavyRange = value),
               ),
             ),
           ],

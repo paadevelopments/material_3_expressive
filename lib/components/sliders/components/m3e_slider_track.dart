@@ -19,6 +19,11 @@ class M3ESliderTrack extends StatelessWidget {
     required this.handleThickness,
     this.trackKind = M3ESliderTrackKind.standard,
     this.drawStops = true,
+    this.isWavy = false,
+    this.waveAmplitude = 0,
+    this.wavelength = 40,
+    this.phase = 0,
+    this.amplitudeFactor = 1,
     super.key,
   });
 
@@ -31,6 +36,11 @@ class M3ESliderTrack extends StatelessWidget {
   final double handleThickness;
   final M3ESliderTrackKind trackKind;
   final bool drawStops;
+  final bool isWavy;
+  final double waveAmplitude;
+  final double wavelength;
+  final double phase;
+  final double amplitudeFactor;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +61,11 @@ class M3ESliderTrack extends StatelessWidget {
         axis: axis,
         textDirection: textDirection,
         drawStops: drawStops,
+        isWavy: isWavy,
+        waveAmplitude: waveAmplitude,
+        wavelength: wavelength,
+        phase: phase,
+        amplitudeFactor: amplitudeFactor,
       ),
       child: const SizedBox.expand(),
     );

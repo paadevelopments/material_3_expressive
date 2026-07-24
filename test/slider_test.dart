@@ -82,6 +82,50 @@ void main() {
     expect(find.byType(M3ESlider), findsOneWidget);
   });
 
+  testWidgets('wavy constructor builds and updates', (tester) async {
+    double value = 0.3;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return _host(
+            SizedBox(
+              width: 200,
+              height: 48,
+              child: M3ESlider.wavy(
+                value: value,
+                onChanged: (double v) => setState(() => value = v),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.byType(M3ESlider), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(tester.getCenter(find.byType(M3ESlider)));
+    await tester.pump();
+    expect(value, closeTo(0.5, 0.05));
+  });
+
+  testWidgets('wavy range constructor builds', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          width: 200,
+          height: 48,
+          child: M3ERangeSlider.wavy(
+            values: const M3ESliderRange(0.2, 0.8),
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(M3ERangeSlider), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 100));
+  });
+
   testWidgets('range thumbs cannot cross', (tester) async {
     M3ESliderRange values = const M3ESliderRange(0.4, 0.6);
     await tester.pumpWidget(

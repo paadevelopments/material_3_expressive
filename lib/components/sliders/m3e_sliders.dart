@@ -6,6 +6,8 @@
 //   implementation("androidx.compose.material3:material3:1.4.0-alpha01") // or 1.3.x stable
 // }
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
@@ -35,6 +37,7 @@ export 'styles/m3e_slider_theme.dart';
 /// Mirrors Compose Material 3:
 /// - [M3ESlider] → `Slider` + `SliderDefaults.Track`
 /// - [M3ESlider.centered] → `Slider` + `SliderDefaults.CenteredTrack`
+/// - [M3ESlider.wavy] → `Slider` with a wavy active value (linear track)
 /// - [M3ESlider.vertical] → `VerticalSlider`
 /// - [M3ESlider.verticalCentered] → `VerticalSlider` + `CenteredTrack`
 ///
@@ -58,6 +61,11 @@ class M3ESlider extends StatefulWidget {
   })  : axis = Axis.horizontal,
         trackKind = M3ESliderTrackKind.standard,
         topToBottom = true,
+        wavy = false,
+        amplitude = null,
+        amplitudeForProgress = null,
+        wavelength = null,
+        waveSpeed = null,
         assert(max > min, 'max must be greater than min.');
 
   /// Horizontal slider with a centered active track.
@@ -77,6 +85,62 @@ class M3ESlider extends StatefulWidget {
   })  : axis = Axis.horizontal,
         trackKind = M3ESliderTrackKind.centered,
         topToBottom = true,
+        wavy = false,
+        amplitude = null,
+        amplitudeForProgress = null,
+        wavelength = null,
+        waveSpeed = null,
+        assert(max > min, 'max must be greater than min.');
+
+  /// Horizontal slider whose active value is a traveling sine wave.
+  ///
+  /// Inactive track, thumb, gaps, ticks, and interaction match [M3ESlider];
+  /// only the active value segment uses the linear-wavy progress recipe.
+  const M3ESlider.wavy({
+    required this.value,
+    required this.onChanged,
+    this.min = 0,
+    this.max = 1,
+    this.divisions,
+    this.onChangeEnd,
+    this.label,
+    this.semanticFormatterCallback,
+    this.trackIcons,
+    this.thumbBuilder,
+    this.trackBuilder,
+    this.amplitude,
+    this.amplitudeForProgress,
+    this.wavelength,
+    this.waveSpeed,
+    super.key,
+  })  : axis = Axis.horizontal,
+        trackKind = M3ESliderTrackKind.standard,
+        topToBottom = true,
+        wavy = true,
+        assert(max > min, 'max must be greater than min.');
+
+  /// Horizontal centered slider with a wavy active value segment.
+  const M3ESlider.wavyCentered({
+    required this.value,
+    required this.onChanged,
+    this.min = 0,
+    this.max = 1,
+    this.divisions,
+    this.onChangeEnd,
+    this.label,
+    this.semanticFormatterCallback,
+    this.trackIcons,
+    this.thumbBuilder,
+    this.trackBuilder,
+    this.amplitude,
+    this.amplitudeForProgress,
+    this.wavelength,
+    this.waveSpeed,
+    super.key,
+  })  : axis = Axis.horizontal,
+        trackKind = M3ESliderTrackKind.centered,
+        topToBottom = true,
+        wavy = true,
         assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider (Compose `VerticalSlider`).
@@ -99,6 +163,11 @@ class M3ESlider extends StatefulWidget {
     super.key,
   })  : axis = Axis.vertical,
         trackKind = M3ESliderTrackKind.standard,
+        wavy = false,
+        amplitude = null,
+        amplitudeForProgress = null,
+        wavelength = null,
+        waveSpeed = null,
         assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider with a centered active track.
@@ -121,6 +190,11 @@ class M3ESlider extends StatefulWidget {
     super.key,
   })  : axis = Axis.vertical,
         trackKind = M3ESliderTrackKind.centered,
+        wavy = false,
+        amplitude = null,
+        amplitudeForProgress = null,
+        wavelength = null,
+        waveSpeed = null,
         assert(max > min, 'max must be greater than min.');
 
   /// Current value in [min]..[max].
@@ -173,12 +247,29 @@ class M3ESlider extends StatefulWidget {
   /// and sliding up increases the value.
   final bool topToBottom;
 
+  /// When true, paints the active value as a traveling sine wave.
+  final bool wavy;
+
+  /// Fixed amplitude factor `0..1` for [wavy] tracks.
+  final double? amplitude;
+
+  /// Amplitude factor as a function of progress for [wavy] tracks.
+  final double Function(double progress)? amplitudeForProgress;
+
+  /// Wave length in logical pixels ([wavy] only).
+  final double? wavelength;
+
+  /// Wave travel speed in logical pixels per second ([wavy] only).
+  final double? waveSpeed;
+
   @override
   State<M3ESlider> createState() => _M3ESliderState();
 }
 
-class _M3ESliderState extends State<M3ESlider> {
+class _M3ESliderState extends State<M3ESlider>
+    with SingleTickerProviderStateMixin {
   bool _pressed = false;
+  late final AnimationController _waveController;
 
   bool get _enabled => widget.onChanged != null;
   bool get _vertical => widget.axis == Axis.vertical;
@@ -187,6 +278,56 @@ class _M3ESliderState extends State<M3ESlider> {
       M3ESliderMath.fraction(widget.value, widget.min, widget.max);
 
   List<double> get _ticks => M3ESliderMath.tickFractions(widget.divisions);
+
+  @override
+  void initState() {
+    super.initState();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: M3EMotion.extraLong2,
+    );
+    if (widget.wavy) {
+      _waveController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(M3ESlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.wavy) {
+      if (!_waveController.isAnimating) {
+        _waveController.repeat();
+      }
+    } else if (_waveController.isAnimating) {
+      _waveController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _waveController.dispose();
+    super.dispose();
+  }
+
+  double _phase(double wavelength, double waveSpeed) {
+    final Duration elapsed =
+        _waveController.lastElapsedDuration ?? Duration.zero;
+    final double seconds = elapsed.inMicroseconds / 1e6;
+    if (wavelength <= 0) {
+      return 0;
+    }
+    return seconds * waveSpeed / wavelength * 2 * math.pi;
+  }
+
+  double _amplitudeFactor(M3ESliderTheme theme) {
+    if (widget.amplitudeForProgress != null) {
+      return widget.amplitudeForProgress!(_fraction).clamp(0.0, 1.0);
+    }
+    if (widget.amplitude != null) {
+      return widget.amplitude!.clamp(0.0, 1.0);
+    }
+    return theme.amplitudeForProgress(_fraction).clamp(0.0, 1.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +350,10 @@ class _M3ESliderState extends State<M3ESlider> {
             ? widget.value.round().toString()
             : widget.value.toStringAsFixed(2));
 
+    final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
+    final double waveSpeed = widget.waveSpeed ?? wavelength;
+    final double amplitudeFactor = _amplitudeFactor(sliderTheme);
+
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
@@ -227,33 +372,56 @@ class _M3ESliderState extends State<M3ESlider> {
                       : sliderTheme.height)
                   : sliderTheme.height;
 
-              Widget track = widget.trackBuilder?.call(
-                    context: context,
-                    colors: colors,
-                    theme: sliderTheme,
-                    fraction: _fraction,
-                    tickFractions: _ticks,
-                    handleThickness: handleThickness,
-                  ) ??
-                  (widget.trackKind == M3ESliderTrackKind.centered
-                      ? M3ESliderCenteredTrack(
-                          fraction: _fraction,
-                          tickFractions: _ticks,
-                          colors: colors,
-                          theme: sliderTheme,
-                          axis: widget.axis,
-                          textDirection: direction,
-                          handleThickness: handleThickness,
-                        )
-                      : M3ESliderTrack(
-                          fraction: _fraction,
-                          tickFractions: _ticks,
-                          colors: colors,
-                          theme: sliderTheme,
-                          axis: widget.axis,
-                          textDirection: direction,
-                          handleThickness: handleThickness,
-                        ));
+              Widget buildTrack({required double phase}) {
+                return widget.trackBuilder?.call(
+                      context: context,
+                      colors: colors,
+                      theme: sliderTheme,
+                      fraction: _fraction,
+                      tickFractions: _ticks,
+                      handleThickness: handleThickness,
+                    ) ??
+                    (widget.trackKind == M3ESliderTrackKind.centered
+                        ? M3ESliderCenteredTrack(
+                            fraction: _fraction,
+                            tickFractions: _ticks,
+                            colors: colors,
+                            theme: sliderTheme,
+                            axis: widget.axis,
+                            textDirection: direction,
+                            handleThickness: handleThickness,
+                            isWavy: widget.wavy,
+                            waveAmplitude: sliderTheme.waveAmplitude,
+                            wavelength: wavelength,
+                            phase: phase,
+                            amplitudeFactor: amplitudeFactor,
+                          )
+                        : M3ESliderTrack(
+                            fraction: _fraction,
+                            tickFractions: _ticks,
+                            colors: colors,
+                            theme: sliderTheme,
+                            axis: widget.axis,
+                            textDirection: direction,
+                            handleThickness: handleThickness,
+                            isWavy: widget.wavy,
+                            waveAmplitude: sliderTheme.waveAmplitude,
+                            wavelength: wavelength,
+                            phase: phase,
+                            amplitudeFactor: amplitudeFactor,
+                          ));
+              }
+
+              Widget track = widget.wavy
+                  ? AnimatedBuilder(
+                      animation: _waveController,
+                      builder: (BuildContext context, Widget? child) {
+                        return buildTrack(
+                          phase: _phase(wavelength, waveSpeed),
+                        );
+                      },
+                    )
+                  : buildTrack(phase: 0);
 
               if (widget.trackIcons != null && widget.trackIcons!.hasAny) {
                 track = _TrackIconsOverlay(
