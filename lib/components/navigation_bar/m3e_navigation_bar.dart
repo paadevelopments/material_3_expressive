@@ -60,6 +60,7 @@ class M3ENavigationBar extends StatefulWidget {
 
 class _M3ENavigationBarState extends State<M3ENavigationBar> {
   late List<GlobalKey> _keys;
+  bool _traveling = false;
 
   static const double _indicatorWidth = 64;
   static const double _indicatorHeight = 32;
@@ -80,6 +81,13 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
 
   List<GlobalKey> _makeKeys(int count) =>
       List<GlobalKey>.generate(count, (_) => GlobalKey());
+
+  void _onTravelingChanged(bool traveling) {
+    if (_traveling == traveling || !mounted) {
+      return;
+    }
+    setState(() => _traveling = traveling);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +135,10 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
               indicatorHeight: _indicatorHeight,
               underlineThickness: metrics.indicatorThickness,
               underlineColor: indicator,
+              indicatorColor: indicator,
+              // Resting fill is local so cold start never waits on measure.
+              // Hide it while the liquid overlay is traveling.
+              showRestingPill: !_traveling,
               onTap: () => widget.onDestinationSelected?.call(i),
             ),
           ),
@@ -139,6 +151,8 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
             targetKeys: _keys,
             axis: Axis.horizontal,
             color: indicator,
+            layoutToken: bottomInset,
+            onTravelingChanged: _onTravelingChanged,
             child: destinationsRow,
           )
         : destinationsRow;

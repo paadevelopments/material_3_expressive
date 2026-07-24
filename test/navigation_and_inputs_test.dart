@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
+import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'package:material_3_expressive/components/navigation_rail/enums/m3e_navigation_rail_enums.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
@@ -50,6 +51,52 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
     await tester.tap(find.text('Search'));
     expect(selected, 1);
+  });
+
+  testWidgets(
+      'M3ENavigationBar liquid indicator appears without interaction',
+      (tester) async {
+    await tester.pumpWidget(
+      _host(
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: M3ENavigationBar(
+            selectedIndex: 0,
+            destinations: const <M3ENavigationBarDestination>[
+              M3ENavigationBarDestination(
+                icon: Icon(M3EIcons.home),
+                label: 'Home',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(M3EIcons.search),
+                label: 'Search',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    // Resting pill is painted by the selected destination on first build.
+    await tester.pump();
+
+    expect(find.byType(M3ENavSelectionIndicator), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    // Selected destination's resting DecoratedBox uses a non-transparent fill.
+    final Iterable<DecoratedBox> boxes = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(M3ENavigationBar),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    expect(
+      boxes.any((DecoratedBox box) {
+        final Decoration? d = box.decoration;
+        return d is BoxDecoration &&
+            d.color != null &&
+            d.color!.alpha > 0;
+      }),
+      isTrue,
+    );
   });
 
   testWidgets('M3ENavigationRail renders section destinations', (tester) async {

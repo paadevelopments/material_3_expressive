@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
@@ -6,7 +8,8 @@ import '../models/m3e_navigation_bar_destination.dart';
 
 /// Single destination cell inside [M3ENavigationBar].
 ///
-/// No ink splash — the shared selection indicator is the selection feedback.
+/// No ink splash — selection feedback is the pill (local resting fill plus the
+/// shared liquid morph overlay while traveling).
 class M3ENavBarDestinationButton extends StatelessWidget {
   const M3ENavBarDestinationButton({
     required this.destination,
@@ -22,7 +25,9 @@ class M3ENavBarDestinationButton extends StatelessWidget {
     required this.indicatorHeight,
     required this.underlineThickness,
     required this.underlineColor,
+    required this.indicatorColor,
     required this.onTap,
+    this.showRestingPill = true,
     super.key,
   });
 
@@ -39,7 +44,11 @@ class M3ENavBarDestinationButton extends StatelessWidget {
   final double indicatorHeight;
   final double underlineThickness;
   final Color underlineColor;
+  final Color indicatorColor;
   final VoidCallback onTap;
+
+  /// When false, the shared liquid overlay owns the pill (during travel).
+  final bool showRestingPill;
 
   bool get _showLabel {
     switch (labelBehavior) {
@@ -63,12 +72,24 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       ),
     );
 
+    final bool paintRestingPill = selected &&
+        showRestingPill &&
+        indicatorStyle == M3ENavBarIndicatorStyle.pill;
+
     icon = KeyedSubtree(
       key: indicatorKey,
       child: SizedBox(
         width: indicatorWidth,
         height: indicatorHeight,
-        child: Center(child: icon),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: paintRestingPill ? indicatorColor : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(
+              math.min(indicatorWidth, indicatorHeight) / 2,
+            ),
+          ),
+          child: Center(child: icon),
+        ),
       ),
     );
 
