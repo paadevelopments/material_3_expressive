@@ -7,13 +7,15 @@ import '../styles/m3e_navigation_drawer_theme.dart';
 
 /// Single destination row in [M3ENavigationDrawer].
 ///
-/// No ink splash — selection feedback comes from the shared liquid indicator.
+/// Resting selection fill is local; the shared liquid overlay paints while
+/// traveling between destinations.
 class M3EDrawerDestinationButton extends StatelessWidget {
   const M3EDrawerDestinationButton({
     required this.destination,
     required this.selected,
     required this.onTap,
     required this.indicatorKey,
+    this.showRestingFill = true,
     super.key,
   });
 
@@ -21,6 +23,9 @@ class M3EDrawerDestinationButton extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final GlobalKey indicatorKey;
+
+  /// When false, the shared liquid overlay owns the pill (during travel).
+  final bool showRestingFill;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,9 @@ class M3EDrawerDestinationButton extends StatelessWidget {
       selected: selected,
     );
     final ShapeBorder border = drawerTheme.destinationShape();
+    final Color fill = selected && showRestingFill
+        ? drawerTheme.destinationBackgroundColor(scheme, selected: true)
+        : const Color(0x00000000);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -53,8 +61,7 @@ class M3EDrawerDestinationButton extends StatelessWidget {
               child: DecoratedBox(
                 decoration: ShapeDecoration(
                   shape: border,
-                  // Fill drawn by [M3ENavSelectionIndicator].
-                  color: const Color(0x00000000),
+                  color: fill,
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(

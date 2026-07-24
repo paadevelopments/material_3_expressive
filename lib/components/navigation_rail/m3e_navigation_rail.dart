@@ -12,6 +12,7 @@
 // ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../../foundations/foundations.dart';
 import '../extended_fabs/m3e_extended_fabs.dart';
@@ -73,6 +74,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   OverlayEntry? _collapsedPeekEntry;
   final LayerLink _anchor = LayerLink();
   bool _suppressInk = false;
+  bool _traveling = false;
 
   bool _expanded = false;
   List<GlobalKey> _destinationKeys = <GlobalKey>[];
@@ -96,6 +98,24 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       return;
     }
     _destinationKeys = List<GlobalKey>.generate(count, (_) => GlobalKey());
+  }
+
+  void _onTravelingChanged(bool traveling) {
+    if (_traveling == traveling || !mounted) {
+      return;
+    }
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      setState(() => _traveling = traveling);
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _traveling == traveling) {
+        return;
+      }
+      setState(() => _traveling = traveling);
+    });
   }
 
   M3ENavigationRailType get _notifiedType => _expanded
@@ -384,7 +404,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               expanded: true,
               labelBehavior: widget.labelBehavior,
               suppressInk: _suppressInk,
-              useLocalIndicator: false,
+              useLocalIndicator: !_traveling,
               indicatorKey: _destinationKeys[index],
             ),
           ));
@@ -406,7 +426,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             expanded: false,
             labelBehavior: widget.labelBehavior,
             suppressInk: _suppressInk,
-            useLocalIndicator: false,
+            useLocalIndicator: !_traveling,
             indicatorKey: _destinationKeys[i],
           ),
         ));
@@ -492,6 +512,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             color: indicatorColor,
             layoutToken: _isExpanded,
             layoutSettleDuration: M3ENavigationRailLayout.expandDuration,
+            onTravelingChanged: _onTravelingChanged,
             child: destinations,
           );
         },

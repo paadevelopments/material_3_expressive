@@ -130,7 +130,7 @@ void main() {
   });
 
   testWidgets(
-      'M3ENavigationRail indicator tracks selection while scrolling',
+      'M3ENavigationRail resting indicator tracks selection while scrolling',
       (tester) async {
     final List<M3ENavigationRailDestination> destinations =
         List<M3ENavigationRailDestination>.generate(
@@ -160,20 +160,94 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    Positioned readPill() => tester.widget<Positioned>(
-          find.descendant(
-            of: find.byType(M3ENavSelectionIndicator),
-            matching: find.byType(Positioned),
-          ),
-        );
-
-    final double before = readPill().top!;
+    final Finder selectedLabel = find.text('Item 0');
+    final double before = tester.getTopLeft(selectedLabel).dy;
 
     await tester.drag(find.byType(Scrollable), const Offset(0, -40));
     await tester.pump();
     await tester.pump();
 
-    expect(readPill().top, lessThan(before));
+    // Resting fill is local on the destination, so it scrolls with the row.
+    expect(tester.getTopLeft(selectedLabel).dy, lessThan(before));
+    final Iterable<Material> materials = tester.widgetList<Material>(
+      find.descendant(
+        of: find.byType(M3ENavigationRail),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(
+      materials.any((Material m) => m.color != null && m.color!.alpha > 0),
+      isTrue,
+    );
+  });
+
+  testWidgets(
+      'M3ENavigationRail indicator stays on selection after MediaQuery churn',
+      (tester) async {
+    Widget buildRail({required EdgeInsets viewInsets}) {
+      return MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(viewInsets: viewInsets),
+              child: Scaffold(
+                body: M3ENavigationRail(
+                  type: M3ENavigationRailType.alwaysExpand,
+                  selectedIndex: 2,
+                  onDestinationSelected: (_) {},
+                  sections: const <M3ENavigationRailSection>[
+                    M3ENavigationRailSection(
+                      destinations: <M3ENavigationRailDestination>[
+                        M3ENavigationRailDestination(
+                          icon: Icon(M3EIcons.inbox),
+                          label: 'Inbox',
+                        ),
+                        M3ENavigationRailDestination(
+                          icon: Icon(M3EIcons.send),
+                          label: 'Sent',
+                        ),
+                        M3ENavigationRailDestination(
+                          icon: Icon(M3EIcons.favorite),
+                          label: 'Starred',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRail(viewInsets: EdgeInsets.zero));
+    await tester.pump();
+    await tester.pump();
+
+    final double starredY = tester.getTopLeft(find.text('Starred')).dy;
+
+    // Simulate fullscreen search keyboard / route MediaQuery settle.
+    await tester.pumpWidget(
+      buildRail(viewInsets: const EdgeInsets.only(bottom: 300)),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pumpWidget(buildRail(viewInsets: EdgeInsets.zero));
+    await tester.pump();
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Starred')).dy, closeTo(starredY, 1));
+    final Iterable<Material> materials = tester.widgetList<Material>(
+      find.descendant(
+        of: find.byType(M3ENavigationRail),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(
+      materials.any((Material m) => m.color != null && m.color!.alpha > 0),
+      isTrue,
+    );
   });
 
   testWidgets('M3ESlider reports value changes', (tester) async {

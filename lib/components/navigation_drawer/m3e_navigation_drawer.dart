@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
@@ -30,6 +31,7 @@ class M3ENavigationDrawer extends StatefulWidget {
 
 class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
   late List<GlobalKey> _keys;
+  bool _traveling = false;
 
   @override
   void initState() {
@@ -47,6 +49,24 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
 
   List<GlobalKey> _makeKeys(int count) =>
       List<GlobalKey>.generate(count, (_) => GlobalKey());
+
+  void _onTravelingChanged(bool traveling) {
+    if (_traveling == traveling || !mounted) {
+      return;
+    }
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      setState(() => _traveling = traveling);
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _traveling == traveling) {
+        return;
+      }
+      setState(() => _traveling = traveling);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +98,8 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
             destination: widget.destinations[i],
             selected: i == widget.selectedIndex,
             indicatorKey: _keys[i],
+            // Resting fill is local so MediaQuery churn can't snap it away.
+            showRestingFill: !_traveling,
             onTap: () => widget.onDestinationSelected(i),
           ),
       ],
@@ -92,6 +114,7 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
           targetKeys: _keys,
           axis: Axis.vertical,
           color: scheme.secondaryContainer,
+          onTravelingChanged: _onTravelingChanged,
           child: list,
         ),
       ),

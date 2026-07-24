@@ -66,6 +66,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   int _layoutTrackId = 0;
   int _measureAttempts = 0;
   bool _measureScheduled = false;
+  bool _pendingForceJump = false;
+  bool _layoutTracking = false;
+  EdgeInsets? _viewPadding;
 
   /// Cached geometries so selection changes can animate without waiting a frame.
   final Map<int, ({double main, double cross, double mainSize, double crossSize})>
@@ -146,14 +149,25 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Safe-area / MediaQuery often settles after the first frame in release.
-    _scheduleMeasure(forceJump: true);
+    // Safe-area often settles after first paint. Other MediaQuery churn
+    // (keyboard viewInsets from fullscreen search) must not force-jump the
+    // pill — that snaps to transitional / bogus geometry.
+    final EdgeInsets padding = MediaQuery.viewPaddingOf(context);
+    final bool first = _viewPadding == null;
+    final bool paddingChanged = !first && _viewPadding != padding;
+    _viewPadding = padding;
+    if (!_ready || first || paddingChanged) {
+      _scheduleMeasure(forceJump: !_ready || first);
+      return;
+    }
+    _scheduleMeasure(forceJump: false);
   }
 
   /// Remeasure through a layout transition (expand/collapse) so the pill
   /// matches the new item size/position without a selection morph.
   void _trackLayoutChange() {
     final int track = ++_layoutTrackId;
+    _layoutTracking = true;
     _geoCache.clear();
     void tick() {
       if (!mounted || track != _layoutTrackId) {
@@ -162,30 +176,48 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       _sync(forceJump: true);
     }
 
+    void finish() {
+      if (!mounted || track != _layoutTrackId) {
+        return;
+      }
+      _layoutTracking = false;
+      _sync(forceJump: true);
+    }
+
     _scheduleMeasure(forceJump: true);
 
     final Duration settle = widget.layoutSettleDuration;
     if (settle <= Duration.zero) {
+      // Single post-frame snap; tracking ends after that measure.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && track == _layoutTrackId) {
+          _layoutTracking = false;
+        }
+      });
       return;
     }
     final int frames = (settle.inMilliseconds / 16).ceil().clamp(1, 60);
     for (int i = 1; i <= frames; i++) {
       Future<void>.delayed(Duration(milliseconds: 16 * i), tick);
     }
+    Future<void>.delayed(Duration(milliseconds: 16 * frames), finish);
   }
 
   /// Post-frame measure, and [scheduleFrame] so release builds retry when idle.
   void _scheduleMeasure({required bool forceJump}) {
+    _pendingForceJump = _pendingForceJump || forceJump;
     if (_measureScheduled) {
       return;
     }
     _measureScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _measureScheduled = false;
+      final bool jump = _pendingForceJump;
+      _pendingForceJump = false;
       if (!mounted) {
         return;
       }
-      _sync(forceJump: forceJump);
+      _sync(forceJump: jump);
     });
     SchedulerBinding.instance.scheduleFrame();
   }
@@ -251,7 +283,18 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     }
     // global → stack-local is more reliable than localToGlobal(ancestor:) when
     // transforms are still settling (common on cold start / MediaQuery updates).
-    final Offset topLeft = stack.globalToLocal(item.localToGlobal(Offset.zero));
+    final Offset itemGlobal = item.localToGlobal(Offset.zero);
+    final Offset stackGlobal = stack.localToGlobal(Offset.zero);
+    final Rect itemGlobalRect = itemGlobal & item.size;
+    final Rect stackGlobalRect = stackGlobal & stack.size;
+    // Reject frames where transforms report the item far from the stack
+    // (route / keyboard settle often yields a bogus top-of-bar snap).
+    if (!itemGlobalRect.overlaps(
+      stackGlobalRect.inflate(item.size.longestSide),
+    )) {
+      return null;
+    }
+    final Offset topLeft = stack.globalToLocal(itemGlobal);
     final Rect rect = topLeft & item.size;
     if (rect.width <= 0 || rect.height <= 0) {
       return null;
@@ -281,15 +324,36 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     }
   }
 
+  bool _isSuspiciousJump({
+    required ({double main, double cross, double mainSize, double crossSize})
+        live,
+    required ({double main, double cross, double mainSize, double crossSize})
+        cached,
+  }) {
+    if (_layoutTracking) {
+      return false;
+    }
+    final double threshold = math.max(cached.mainSize * 2.5, 64);
+    return (live.main - cached.main).abs() > threshold;
+  }
+
   ({double main, double cross, double mainSize, double crossSize})? _geometryOf(
     int index,
   ) {
     final live = _readGeometry(index);
+    final cached = _geoCache[index];
     if (live != null) {
+      if (cached != null &&
+          _ready &&
+          _isSuspiciousJump(live: live, cached: cached)) {
+        // Keep last good geometry; retry once the tree settles.
+        _scheduleMeasure(forceJump: false);
+        return cached;
+      }
       _geoCache[index] = live;
       return live;
     }
-    return _geoCache[index];
+    return cached;
   }
 
   void _sync({bool forceJump = false}) {
@@ -369,8 +433,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       },
       child: NotificationListener<SizeChangedLayoutNotification>(
         onNotification: (SizeChangedLayoutNotification notification) {
-          _geoCache.clear();
-          _scheduleMeasure(forceJump: !_animating);
+          // Soft remasure keeps last-good geometry if this frame is transitional
+          // (keyboard / route MediaQuery), instead of snapping to a bad top.
+          _scheduleMeasure(forceJump: !_ready);
           return false;
         },
         child: Stack(
