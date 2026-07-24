@@ -84,14 +84,18 @@ class _M3EIconButtonState extends State<M3EIconButton> {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    if (widget.onPressed == null) return;
+    if (widget.onPressed == null || !mounted) return;
     setState(() => _isPointerDown = true);
     _statesController.update(WidgetState.pressed, true);
   }
 
   void _handlePointerUp() {
     if (!_isPointerDown) return;
-    setState(() => _isPointerDown = false);
+    _isPointerDown = false;
+    // onPressed may rebuild/remove this button (e.g. toolbar expand trigger)
+    // before pointer-up is delivered to the Listener.
+    if (!mounted) return;
+    setState(() {});
     _statesController.update(WidgetState.pressed, false);
   }
 

@@ -367,6 +367,38 @@ void main() {
     expect(find.byIcon(M3EIcons.edit), findsNothing);
     expect(find.byIcon(M3EIcons.favorite), findsNothing);
   });
+
+  testWidgets(
+      'expand trigger tap does not throw on pointer up after rebuild',
+      (tester) async {
+    await tester.pumpWidget(
+      _host(
+        child: M3EToolbar(
+          actions: <M3EToolbarAction>[
+            M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
+            M3EToolbarAction(
+              icon: M3EIcons.menu,
+              onPressed: _noop,
+              isExpandTrigger: true,
+            ),
+            M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
+          ],
+          expanded: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(M3EIcons.menu));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byIcon(M3EIcons.edit), findsOneWidget);
+
+    await tester.tap(find.byIcon(M3EIcons.menu));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byIcon(M3EIcons.edit), findsNothing);
+  });
 }
 
 void _noop() {}
