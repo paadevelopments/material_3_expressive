@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_item_shape.dart';
+import 'm3e_menu_style_scope.dart';
 
 /// A single interactive row inside an [M3EMenu] popup.
 class M3EMenuItem extends StatelessWidget {
@@ -39,15 +40,19 @@ class M3EMenuItem extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final menuTheme = theme.menuTheme;
     final scheme = theme.colorScheme;
-    final foreground = menuTheme.entryForegroundColor(
+    final style = M3EMenuStyleScope.styleOf(context);
+    final palette =
+        M3EMenuStyleScope.colorsOf(context) ?? menuTheme.colors(scheme, style);
+    final iconForeground = menuTheme.entryIconForegroundColor(
       scheme,
       enabled: enabled,
       isDestructive: isDestructive,
+      selected: selected,
+      style: style,
     );
     final radius = menuTheme.itemShape(shape);
-    final background = selected
-        ? menuTheme.selectedContainerColor(scheme)
-        : const Color(0x00000000);
+    final background =
+        selected ? palette.selectedContainer : const Color(0x00000000);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: menuTheme.itemGap / 2),
@@ -65,7 +70,7 @@ class M3EMenuItem extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: Color.alphaBlend(
-                scheme.onSurface.withValues(alpha: state.opacity),
+                palette.stateLayer.withValues(alpha: state.opacity),
                 background,
               ),
               borderRadius: radius,
@@ -75,7 +80,7 @@ class M3EMenuItem extends StatelessWidget {
                 if (leading != null) ...<Widget>[
                   IconTheme.merge(
                     data: IconThemeData(
-                      color: foreground,
+                      color: iconForeground,
                       size: menuTheme.iconSize,
                     ),
                     child: leading!,
@@ -95,6 +100,8 @@ class M3EMenuItem extends StatelessWidget {
                           scheme,
                           enabled: enabled,
                           isDestructive: isDestructive,
+                          selected: selected,
+                          style: style,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -106,6 +113,8 @@ class M3EMenuItem extends StatelessWidget {
                             theme.typeScale,
                             scheme,
                             enabled: enabled,
+                            selected: selected,
+                            style: style,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -125,6 +134,8 @@ class M3EMenuItem extends StatelessWidget {
                       theme.typeScale,
                       scheme,
                       enabled: enabled,
+                      selected: selected,
+                      style: style,
                     ),
                   ),
                 ],
@@ -132,7 +143,7 @@ class M3EMenuItem extends StatelessWidget {
                   SizedBox(width: menuTheme.iconGap),
                   IconTheme.merge(
                     data: IconThemeData(
-                      color: foreground,
+                      color: iconForeground,
                       size: menuTheme.iconSize,
                     ),
                     child: trailing!,

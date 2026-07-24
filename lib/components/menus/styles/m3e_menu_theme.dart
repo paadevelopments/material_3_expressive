@@ -1,7 +1,71 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../enums/m3e_menu_color_style.dart';
 import '../enums/m3e_menu_item_shape.dart';
+
+/// Resolved colors for one [M3EMenuColorStyle].
+@immutable
+class M3EMenuColors {
+  const M3EMenuColors({
+    required this.container,
+    required this.content,
+    required this.iconContent,
+    required this.supportingContent,
+    required this.selectedContainer,
+    required this.selectedContent,
+    required this.stateLayer,
+    required this.divider,
+  });
+
+  /// Elevated surface fill (callout 4).
+  final Color container;
+
+  /// Idle item label (callout 2 / 9).
+  final Color content;
+
+  /// Idle leading / trailing icons (callouts 1, 6).
+  final Color iconContent;
+
+  /// Idle supporting text, shortcuts, section labels (callouts 5, 8, 10).
+  final Color supportingContent;
+
+  /// Selected item fill (callout 7).
+  final Color selectedContainer;
+
+  /// Selected item icon / label (callouts 8 selected, 11).
+  final Color selectedContent;
+
+  /// Hover / focus / pressed overlay ink (callout 3).
+  final Color stateLayer;
+
+  final Color divider;
+
+  @override
+  bool operator ==(Object other) {
+    return other is M3EMenuColors &&
+        other.container == container &&
+        other.content == content &&
+        other.iconContent == iconContent &&
+        other.supportingContent == supportingContent &&
+        other.selectedContainer == selectedContainer &&
+        other.selectedContent == selectedContent &&
+        other.stateLayer == stateLayer &&
+        other.divider == divider;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        container,
+        content,
+        iconContent,
+        supportingContent,
+        selectedContainer,
+        selectedContent,
+        stateLayer,
+        divider,
+      );
+}
 
 /// Theme values for `M3EMenu` (Compose `MenuDefaults` expressive tokens).
 @immutable
@@ -118,13 +182,54 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     return M3EMenuItemShape.middle;
   }
 
-  Color containerColor(M3EColorScheme scheme) =>
-      backgroundColor ?? scheme.surfaceContainer;
+  /// Color roles for [style].
+  M3EMenuColors colors(
+    M3EColorScheme scheme, [
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  ]) {
+    switch (style) {
+      case M3EMenuColorStyle.standard:
+        return M3EMenuColors(
+          container: backgroundColor ?? scheme.surfaceContainerLow,
+          content: scheme.onSurface,
+          iconContent: scheme.onSurfaceVariant,
+          supportingContent: scheme.onSurfaceVariant,
+          selectedContainer: scheme.tertiaryContainer,
+          selectedContent: scheme.onTertiaryContainer,
+          stateLayer: scheme.onSurface,
+          divider: scheme.outlineVariant,
+        );
+      case M3EMenuColorStyle.vibrant:
+        return M3EMenuColors(
+          container: backgroundColor ?? scheme.tertiaryContainer,
+          content: scheme.onTertiaryContainer,
+          iconContent: scheme.onTertiaryContainer,
+          supportingContent: scheme.onTertiaryContainer,
+          selectedContainer: scheme.tertiary,
+          selectedContent: scheme.onTertiary,
+          stateLayer: scheme.onTertiaryContainer,
+          divider: scheme.onTertiaryContainer.withValues(alpha: 0.24),
+        );
+    }
+  }
 
-  Color dividerColor(M3EColorScheme scheme) => scheme.outlineVariant;
+  Color containerColor(
+    M3EColorScheme scheme, [
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  ]) =>
+      colors(scheme, style).container;
 
-  Color selectedContainerColor(M3EColorScheme scheme) =>
-      scheme.secondaryContainer;
+  Color dividerColor(
+    M3EColorScheme scheme, [
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  ]) =>
+      colors(scheme, style).divider;
+
+  Color selectedContainerColor(
+    M3EColorScheme scheme, [
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  ]) =>
+      colors(scheme, style).selectedContainer;
 
   Color scrimColor(M3EColorScheme scheme) =>
       M3EColorUtils.withOpacity(scheme.scrim, scrimAlpha);
@@ -133,14 +238,35 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     M3EColorScheme scheme, {
     required bool enabled,
     bool isDestructive = false,
+    bool selected = false,
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) {
+    final palette = colors(scheme, style);
     if (!enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, disabledOpacity);
+      return M3EColorUtils.withOpacity(palette.content, disabledOpacity);
     }
     if (isDestructive) {
       return scheme.error;
     }
-    return scheme.onSurface;
+    return selected ? palette.selectedContent : palette.content;
+  }
+
+  /// Leading / trailing icon color (callouts 1, 6, 11).
+  Color entryIconForegroundColor(
+    M3EColorScheme scheme, {
+    required bool enabled,
+    bool isDestructive = false,
+    bool selected = false,
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  }) {
+    final palette = colors(scheme, style);
+    if (!enabled) {
+      return M3EColorUtils.withOpacity(palette.iconContent, disabledOpacity);
+    }
+    if (isDestructive) {
+      return scheme.error;
+    }
+    return selected ? palette.selectedContent : palette.iconContent;
   }
 
   TextStyle entryLabelStyle(
@@ -148,12 +274,16 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     M3EColorScheme scheme, {
     required bool enabled,
     bool isDestructive = false,
+    bool selected = false,
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) =>
       type.labelLarge.copyWith(
         color: entryForegroundColor(
           scheme,
           enabled: enabled,
           isDestructive: isDestructive,
+          selected: selected,
+          style: style,
         ),
       );
 
@@ -161,22 +291,40 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     M3ETypeScale type,
     M3EColorScheme scheme, {
     required bool enabled,
-  }) =>
-      type.labelMedium.copyWith(
-        color: enabled
-            ? scheme.onSurfaceVariant
-            : M3EColorUtils.withOpacity(scheme.onSurface, disabledOpacity),
-      );
+    bool selected = false,
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  }) {
+    final palette = colors(scheme, style);
+    final Color base =
+        selected ? palette.selectedContent : palette.supportingContent;
+    return type.labelMedium.copyWith(
+      color: enabled
+          ? base
+          : M3EColorUtils.withOpacity(palette.content, disabledOpacity),
+    );
+  }
 
   TextStyle trailingTextStyle(
     M3ETypeScale type,
     M3EColorScheme scheme, {
     required bool enabled,
+    bool selected = false,
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) =>
-      supportingTextStyle(type, scheme, enabled: enabled);
+      supportingTextStyle(
+        type,
+        scheme,
+        enabled: enabled,
+        selected: selected,
+        style: style,
+      );
 
-  TextStyle groupLabelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.labelLarge.copyWith(color: scheme.onSurfaceVariant);
+  TextStyle groupLabelStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, [
+    M3EMenuColorStyle style = M3EMenuColorStyle.standard,
+  ]) =>
+      type.labelLarge.copyWith(color: colors(scheme, style).supportingContent);
 
   @override
   M3EMenuTheme copyWith({

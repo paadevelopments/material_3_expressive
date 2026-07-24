@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../foundations/foundations.dart';
 import 'components/m3e_menu_popup.dart';
 import 'enums/m3e_menu_anchor_position.dart';
+import 'enums/m3e_menu_color_style.dart';
 import 'models/m3e_menu_node.dart';
 
 export 'components/m3e_menu_content.dart';
@@ -10,6 +11,7 @@ export 'components/m3e_menu_divider.dart';
 export 'components/m3e_menu_item.dart';
 export 'components/m3e_menu_popup.dart';
 export 'enums/m3e_menu_anchor_position.dart';
+export 'enums/m3e_menu_color_style.dart';
 export 'enums/m3e_menu_item_shape.dart';
 export 'models/m3e_menu_node.dart';
 export 'styles/m3e_menu_theme.dart';
@@ -33,6 +35,7 @@ class M3EMenu extends StatefulWidget {
     this.children,
     this.entries,
     this.position = M3EMenuAnchorPosition.bottomStart,
+    this.colorStyle = M3EMenuColorStyle.standard,
     this.closeOnSelect = true,
     this.onSelected,
     this.selectedValue,
@@ -48,6 +51,7 @@ class M3EMenu extends StatefulWidget {
     required M3EMenuAnchorBuilder anchorBuilder,
     required List<M3EMenuEntry> entries,
     M3EMenuAnchorPosition position = M3EMenuAnchorPosition.bottomStart,
+    M3EMenuColorStyle colorStyle = M3EMenuColorStyle.standard,
     bool closeOnSelect = true,
     ValueChanged<Object?>? onSelected,
     Object? selectedValue,
@@ -57,6 +61,7 @@ class M3EMenu extends StatefulWidget {
       anchorBuilder: anchorBuilder,
       children: entries,
       position: position,
+      colorStyle: colorStyle,
       closeOnSelect: closeOnSelect,
       onSelected: onSelected,
       selectedValue: selectedValue,
@@ -72,6 +77,10 @@ class M3EMenu extends StatefulWidget {
   final List<M3EMenuEntry>? entries;
 
   final M3EMenuAnchorPosition position;
+
+  /// Standard (surface) vs vibrant (tertiary) color mapping.
+  final M3EMenuColorStyle colorStyle;
+
   final bool closeOnSelect;
   final ValueChanged<Object?>? onSelected;
   final Object? selectedValue;
@@ -102,6 +111,7 @@ class _M3EMenuState extends State<M3EMenu> {
       anchor: anchor,
       children: widget._nodes,
       position: widget.position,
+      colorStyle: widget.colorStyle,
       closeOnSelect: widget.closeOnSelect,
       selectedValue: widget.selectedValue,
     );

@@ -451,80 +451,81 @@ class _NavigationPageState extends State<NavigationPage>
         DemoRow(
           label: 'Anchored menu',
           children: <Widget>[
-            M3EMenu(
-              position: M3EMenuAnchorPosition.bottomStart,
-              anchorBuilder: (BuildContext context, VoidCallback open) {
-                return M3EButton.icon(
-                  style: M3EButtonStyle.outlined,
-                  icon: const Icon(M3EIcons.arrow_drop_down),
-                  label: const Text('Open menu'),
-                  onPressed: open,
-                );
-              },
-              children: <M3EMenuNode>[
-                M3EMenuGroup.entries(
-                  entries: <M3EMenuNode>[
-                    M3EMenuEntry(
-                      label: 'Item 1',
-                      leading: const Icon(M3EIcons.visibility),
-                      onPressed: () {},
-                    ),
-                    M3EMenuEntry(
-                      label: 'Item 2',
-                      leading: const Icon(M3EIcons.content_copy),
-                      trailing: const Icon(M3EIcons.chevron_right),
-                      onPressed: () {},
-                    ),
-                    const M3EMenuDivider(),
-                    M3EMenuEntry(
-                      label: 'Item 3',
-                      leading: const Icon(M3EIcons.edit),
-                      badge: Builder(
-                        builder: (BuildContext context) {
-                          final scheme = M3ETheme.of(context).colorScheme;
-                          return DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: scheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              child: Text(
-                                'New',
-                                style: M3ETheme.of(context)
-                                    .typeScale
-                                    .labelSmall
-                                    .copyWith(
-                                      color: scheme.onSecondaryContainer,
-                                    ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      trailing: const Icon(M3EIcons.chevron_right),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                M3EMenuGroup.entries(
-                  label: 'Label text',
-                  entries: <M3EMenuNode>[
-                    M3EMenuEntry(
-                      label: 'Item 4',
-                      leading: const Icon(M3EIcons.cloud),
-                      supportingText: 'Supporting text',
-                      trailingText: '⌘C',
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
+            _SpecMenuDemo(
+              label: 'Standard menu',
+              colorStyle: M3EMenuColorStyle.standard,
+            ),
+            _SpecMenuDemo(
+              label: 'Vibrant menu',
+              colorStyle: M3EMenuColorStyle.vibrant,
             ),
             _ExpressiveMenuDemo(),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SpecMenuDemo extends StatelessWidget {
+  const _SpecMenuDemo({
+    required this.label,
+    required this.colorStyle,
+  });
+
+  final String label;
+  final M3EMenuColorStyle colorStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return M3EMenu(
+      position: M3EMenuAnchorPosition.bottomStart,
+      colorStyle: colorStyle,
+      selectedValue: 'Item 4',
+      anchorBuilder: (BuildContext context, VoidCallback open) {
+        return M3EButton.icon(
+          style: M3EButtonStyle.outlined,
+          icon: const Icon(M3EIcons.arrow_drop_down),
+          label: Text(label),
+          onPressed: open,
+        );
+      },
+      children: <M3EMenuNode>[
+        M3EMenuGroup.entries(
+          entries: <M3EMenuNode>[
+            M3EMenuEntry(
+              label: 'Item 1',
+              leading: const Icon(M3EIcons.visibility),
+              onPressed: () {},
+            ),
+            M3EMenuEntry(
+              label: 'Item 2',
+              leading: const Icon(M3EIcons.star_outline),
+              trailingText: '⌘C',
+              onPressed: () {},
+            ),
+            M3EMenuEntry(
+              label: 'Item 3',
+              leading: const Icon(M3EIcons.edit),
+              trailing: const Icon(M3EIcons.chevron_right),
+              onPressed: () {},
+            ),
+            const M3EMenuSelectable(
+              label: 'Item 4',
+              value: 'Item 4',
+              selected: true,
+            ),
+          ],
+        ),
+        M3EMenuGroup.entries(
+          label: 'Label text',
+          entries: <M3EMenuNode>[
+            M3EMenuEntry(
+              label: 'Item 5',
+              supportingText: 'Supporting text',
+              trailing: const Icon(M3EIcons.chevron_right),
+              onPressed: () {},
+            ),
           ],
         ),
       ],

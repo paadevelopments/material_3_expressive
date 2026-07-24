@@ -6,11 +6,13 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_anchor_position.dart';
+import '../enums/m3e_menu_color_style.dart';
 import '../models/m3e_menu_node.dart';
 import '../styles/m3e_menu_theme.dart';
 import '../utils/m3e_menu_placer.dart';
 import '../utils/m3e_menu_spring_motion.dart';
 import 'm3e_menu_content.dart';
+import 'm3e_menu_style_scope.dart';
 
 /// Shows an expressive menu popup anchored to [anchor].
 ///
@@ -21,6 +23,7 @@ Future<T?> showM3EMenu<T>({
   required Rect anchor,
   required List<M3EMenuNode> children,
   M3EMenuAnchorPosition position = M3EMenuAnchorPosition.bottomEnd,
+  M3EMenuColorStyle colorStyle = M3EMenuColorStyle.standard,
   T? selectedValue,
   bool closeOnSelect = true,
   double? preferredWidth,
@@ -36,6 +39,7 @@ Future<T?> showM3EMenu<T>({
         anchor: anchor,
         children: children,
         position: position,
+        colorStyle: colorStyle,
         selectedValue: selectedValue,
         closeOnSelect: closeOnSelect,
         preferredWidth: preferredWidth,
@@ -69,6 +73,7 @@ class M3EMenuPopup<T> extends StatefulWidget {
     required this.onDismiss,
     required this.onRemove,
     this.position = M3EMenuAnchorPosition.bottomEnd,
+    this.colorStyle = M3EMenuColorStyle.standard,
     this.selectedValue,
     this.closeOnSelect = true,
     this.preferredWidth,
@@ -80,6 +85,7 @@ class M3EMenuPopup<T> extends StatefulWidget {
   final Rect anchor;
   final List<M3EMenuNode> children;
   final M3EMenuAnchorPosition position;
+  final M3EMenuColorStyle colorStyle;
   final T? selectedValue;
   final bool closeOnSelect;
   final double? preferredWidth;
@@ -197,6 +203,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
           anchor: itemRect,
           children: children,
           position: M3EMenuAnchorPosition.end,
+          colorStyle: widget.colorStyle,
           selectedValue: widget.selectedValue,
           closeOnSelect: widget.closeOnSelect,
           callerFocusNode: widget.callerFocusNode,
@@ -320,6 +327,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     required M3EMenuTheme menuTheme,
     required M3EColorScheme scheme,
   }) {
+    final palette = menuTheme.colors(scheme, widget.colorStyle);
     final surfaces = m3eMenuPartitionSurfaces(widget.children);
     final cards = <Widget>[];
     for (var i = 0; i < surfaces.length; i++) {
@@ -331,7 +339,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
         Container(
           width: width,
           decoration: BoxDecoration(
-            color: menuTheme.containerColor(scheme),
+            color: palette.container,
             borderRadius: menuTheme.borderRadius,
             boxShadow: M3EElevation.shadows(
               menuTheme.elevation,
@@ -359,10 +367,14 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       );
     }
 
-    return ListView(
-      padding: EdgeInsets.zero,
-      shrinkWrap: true,
-      children: cards,
+    return M3EMenuStyleScope(
+      colorStyle: widget.colorStyle,
+      colors: palette,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        shrinkWrap: true,
+        children: cards,
+      ),
     );
   }
 }

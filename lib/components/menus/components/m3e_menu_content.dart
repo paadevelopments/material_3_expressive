@@ -5,6 +5,7 @@ import '../models/m3e_menu_node.dart';
 import '../styles/m3e_menu_theme.dart';
 import 'm3e_menu_divider.dart';
 import 'm3e_menu_item.dart';
+import 'm3e_menu_style_scope.dart';
 
 /// Callback when a menu node produces a selection result.
 typedef M3EMenuSelectCallback = void Function(Object? value);
@@ -48,6 +49,7 @@ class M3EMenuContent extends StatelessWidget {
     var focused = false;
 
     if (sectionLabel != null) {
+      final style = M3EMenuStyleScope.styleOf(context);
       children.add(
         Padding(
           padding: EdgeInsets.symmetric(
@@ -59,6 +61,7 @@ class M3EMenuContent extends StatelessWidget {
             style: menuTheme.groupLabelStyle(
               theme.typeScale,
               theme.colorScheme,
+              style,
             ),
           ),
         ),
@@ -144,14 +147,14 @@ class M3EMenuContent extends StatelessWidget {
         return <Widget>[
           M3EMenuItem(
             label: item.label,
-            leading: item.leading,
-            trailing: item.trailing ??
+            leading: item.leading ??
                 (selected
                     ? Icon(
                         M3EIcons.check_rounded,
                         size: menuTheme.iconSize * 0.9,
                       )
                     : null),
+            trailing: item.trailing,
             trailingText: item.trailingText,
             badge: item.badge,
             supportingText: item.supportingText,
@@ -241,9 +244,12 @@ class M3EMenuContent extends StatelessWidget {
           onFocused();
         }
         final scheme = M3ETheme.of(context).colorScheme;
+        final style = M3EMenuStyleScope.styleOf(context);
+        final palette = M3EMenuStyleScope.colorsOf(context) ??
+            menuTheme.colors(scheme, style);
         final radius = menuTheme.itemShape(item.shape);
         final background = item.selected
-            ? menuTheme.selectedContainerColor(scheme)
+            ? palette.selectedContainer
             : const Color(0x00000000);
         return <Widget>[
           Padding(
@@ -269,7 +275,7 @@ class M3EMenuContent extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: Color.alphaBlend(
-                      scheme.onSurface.withValues(alpha: state.opacity),
+                      palette.stateLayer.withValues(alpha: state.opacity),
                       background,
                     ),
                     borderRadius: radius,
@@ -279,9 +285,11 @@ class M3EMenuContent extends StatelessWidget {
                       Expanded(
                         child: IconTheme.merge(
                           data: IconThemeData(
-                            color: menuTheme.entryForegroundColor(
+                            color: menuTheme.entryIconForegroundColor(
                               scheme,
                               enabled: item.enabled,
+                              selected: item.selected,
+                              style: style,
                             ),
                             size: menuTheme.iconSize,
                           ),
@@ -290,6 +298,8 @@ class M3EMenuContent extends StatelessWidget {
                               M3ETheme.of(context).typeScale,
                               scheme,
                               enabled: item.enabled,
+                              selected: item.selected,
+                              style: style,
                             ),
                             child: item.child,
                           ),
@@ -301,9 +311,11 @@ class M3EMenuContent extends StatelessWidget {
                           child: Icon(
                             M3EIcons.check_rounded,
                             size: menuTheme.iconSize * 0.9,
-                            color: menuTheme.entryForegroundColor(
+                            color: menuTheme.entryIconForegroundColor(
                               scheme,
                               enabled: item.enabled,
+                              selected: true,
+                              style: style,
                             ),
                           ),
                         ),
@@ -328,6 +340,7 @@ class M3EMenuContent extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final out = <Widget>[];
     if (label != null) {
+      final style = M3EMenuStyleScope.styleOf(context);
       out.add(
         Padding(
           padding: EdgeInsets.symmetric(
@@ -336,7 +349,11 @@ class M3EMenuContent extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: menuTheme.groupLabelStyle(theme.typeScale, theme.colorScheme),
+            style: menuTheme.groupLabelStyle(
+              theme.typeScale,
+              theme.colorScheme,
+              style,
+            ),
           ),
         ),
       );
