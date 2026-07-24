@@ -1,8 +1,7 @@
 // Vendored from the `icon_button_m3e` package
 // (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e/lib).
-// The logic is kept identical to the reference `IconButtonM3E`; only the public
-// class name carries the `M3E` prefix and theme tokens are read from this
-// package's own `M3ETheme` instead of the external `m3e_design` package.
+// Adapted for material_3_expressive: spatial spring press morph via
+// [M3ERadiusAndPaddingMotion] (Phase 2 button morph).
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
@@ -11,14 +10,20 @@
 // ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
+import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
+import '../buttons/components/m3e_radius_and_padding_motion.dart';
+import '../buttons/styles/m3e_button_motion.dart';
 import 'enums/m3e_icon_button_enums.dart';
 import 'styles/m3e_icon_button_shapes.dart';
 import 'styles/m3e_icon_button_theme.dart';
 
 export 'styles/m3e_icon_button_theme.dart';
 export 'enums/m3e_icon_button_enums.dart';
+
+final SpringMotion _kIconButtonMorphMotion =
+    M3EButtonMotion.expressiveSpatialPress.toMotion();
 
 /// Material 3 Expressive Icon Button
 ///
@@ -117,7 +122,8 @@ class _M3EIconButtonState extends State<M3EIconButton> {
 
     final bool selected = widget.isSelected ?? false;
     // Consider it a toggle control if selection can be represented.
-    final bool isToggle = widget.isSelected != null || widget.selectedIcon != null;
+    final bool isToggle =
+        widget.isSelected != null || widget.selectedIcon != null;
 
     // Colors per variant (selected tint for standard).
     Color bg;
@@ -149,18 +155,17 @@ class _M3EIconButtonState extends State<M3EIconButton> {
         break;
     }
 
-    // Resolve shape radius based on states (pressed) and toggle/selection.
-    OutlinedBorder shapeFor(Set<WidgetState> states) {
-      final r = M3EIconButtonShapes.effectiveRadius(
-        theme: iconButtonTheme,
-        size: widget.size,
-        baseVariant: widget.shape,
-        isToggle: isToggle,
-        isSelected: selected,
-        states: states,
-      );
-      return RoundedRectangleBorder(borderRadius: BorderRadius.circular(r));
-    }
+    final Set<WidgetState> morphStates = <WidgetState>{
+      if (_isPointerDown && widget.onPressed != null) WidgetState.pressed,
+    };
+    final double targetRadius = M3EIconButtonShapes.effectiveRadius(
+      theme: iconButtonTheme,
+      size: widget.size,
+      baseVariant: widget.shape,
+      isToggle: isToggle,
+      isSelected: selected,
+      states: morphStates,
+    );
 
     final Widget innerIcon = IconTheme.merge(
       data: IconThemeData(size: iconPx, color: fg),
@@ -169,36 +174,47 @@ class _M3EIconButtonState extends State<M3EIconButton> {
           : widget.icon,
     );
 
-    final Widget button = M3EInkSplashTheme(
-      color: fg,
-      child: IconButton(
-        onPressed: widget.onPressed,
-        isSelected: widget.isSelected,
-        selectedIcon: widget.selectedIcon,
-        icon: innerIcon,
-        tooltip: widget.tooltip,
-        enableFeedback: widget.enableFeedback,
-        statesController: _statesController,
-        style: ButtonStyle(
-          // Visual (painted) size
-          fixedSize: WidgetStateProperty.all(visual),
-          padding: WidgetStateProperty.all(EdgeInsets.zero),
-          shape: WidgetStateProperty.resolveWith(shapeFor),
-          backgroundColor: WidgetStateProperty.all(bg),
-          foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
-          side: WidgetStateProperty.resolveWith((_) => side),
-          splashFactory: widget.suppressInk
-              ? NoSplash.splashFactory
-              : InkSparkle.splashFactory,
-          overlayColor: widget.suppressInk
-              ? WidgetStateProperty.all(Colors.transparent)
-              : M3EStateLayer.overlayColorHoverFocus(fg),
-          animationDuration: _isPointerDown
-              ? Duration.zero
-              : iconButtonTheme.morphDuration,
-          visualDensity: VisualDensity.standard,
-        ),
-      ),
+    final Widget button = M3ERadiusAndPaddingMotion(
+      motion: _kIconButtonMorphMotion,
+      internalLeft: 0,
+      internalRight: 0,
+      internalTop: 0,
+      internalBottom: 0,
+      targetRadius: BorderRadius.circular(targetRadius),
+      builder: (padding, animatedRadius) {
+        return M3EInkSplashTheme(
+          color: fg,
+          child: IconButton(
+            onPressed: widget.onPressed,
+            isSelected: widget.isSelected,
+            selectedIcon: widget.selectedIcon,
+            icon: innerIcon,
+            tooltip: widget.tooltip,
+            enableFeedback: widget.enableFeedback,
+            statesController: _statesController,
+            style: ButtonStyle(
+              // Visual (painted) size
+              fixedSize: WidgetStateProperty.all(visual),
+              padding: WidgetStateProperty.all(EdgeInsets.zero),
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: animatedRadius),
+              ),
+              backgroundColor: WidgetStateProperty.all(bg),
+              foregroundColor: WidgetStateProperty.resolveWith((_) => fg),
+              side: WidgetStateProperty.resolveWith((_) => side),
+              splashFactory: widget.suppressInk
+                  ? NoSplash.splashFactory
+                  : InkSparkle.splashFactory,
+              overlayColor: widget.suppressInk
+                  ? WidgetStateProperty.all(Colors.transparent)
+                  : M3EStateLayer.overlayColorHoverFocus(fg),
+              // Radius morph is owned by [M3ERadiusAndPaddingMotion].
+              animationDuration: Duration.zero,
+              visualDensity: VisualDensity.standard,
+            ),
+          ),
+        );
+      },
     );
 
     Widget paintedButton = SizedBox(

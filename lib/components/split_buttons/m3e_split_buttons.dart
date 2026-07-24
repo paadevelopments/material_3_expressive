@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_base_button_state.dart';
 import '../buttons/components/m3e_focus_ring.dart';
+import '../buttons/components/m3e_radius_and_padding_motion.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_motion.dart';
@@ -625,109 +626,117 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
     );
     final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
 
-    final animatedButton = AnimatedContainer(
-      duration: pressed
-          ? Duration.zero
-          : const Duration(milliseconds: 120),
-      curve: Curves.easeOut,
-      height: height,
-      decoration: BoxDecoration(
-        color: hasBackgroundBuilder ? Colors.transparent : color,
-        borderRadius: targetRadius,
-        border: outlineSide != null ? Border.fromBorderSide(outlineSide) : null,
-        boxShadow: (elevation != null && elevation > 0)
-            ? [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: elevation * 2,
-            offset: Offset(0, elevation),
-          ),
-        ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        borderRadius: targetRadius,
-        child: Focus(
-          focusNode: effectiveFocusNode,
-          autofocus: widget.autofocus,
-          canRequestFocus: enabled,
-          skipTraversal: !enabled,
-          onFocusChange: widget.onFocusChange,
-          onKeyEvent: (node, event) {
-            if (enabled &&
-                event is KeyDownEvent &&
-                (event.logicalKey == LogicalKeyboardKey.enter ||
-                    event.logicalKey == LogicalKeyboardKey.space ||
-                    event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-              widget.onPressed?.call();
-              return KeyEventResult.handled;
-            }
-            return KeyEventResult.ignored;
-          },
-          child: InkWell(
-            onTap: enabled
-                ? () {
-              widget.onPressed?.call();
-              _triggerHaptic();
-            }
-                : null,
-            onLongPress: enabled ? widget.onLongPress : null,
-            onHover: enabled ? widget.onHover : null,
-            onTapDown: enabled
-                ? (_) => setState(() => _leadingPressed = true)
-                : null,
-            onTapUp: enabled
-                ? (_) => setState(() => _leadingPressed = false)
-                : null,
-            onTapCancel: enabled
-                ? () => setState(() => _leadingPressed = false)
-                : null,
-            statesController: statesController,
-            canRequestFocus: false,
-            mouseCursor: enabled
-                ? (widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
-                    widget.mouseCursor ??
-                    SystemMouseCursors.click)
-                : SystemMouseCursors.basic,
-            enableFeedback: widget.enableFeedback,
-            splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
-            splashColor: M3EStateLayer.splashColor(onColor),
-            highlightColor: Colors.transparent,
-            overlayColor: widget.decorationOverlayColor ??
-                M3EStateLayer.overlayColorHoverFocus(onColor),
-            child: _applyDecorationLayers(
-              context: context,
-              states: segmentStates,
-              radius: targetRadius,
-              child: SizedBox(
-                height: height,
-                child: Center(
-                  child: _LeadingContent(
-                    size: size,
-                    icon: widget.leadingIcon,
-                    label: widget.label,
-                    color: onColor,
-                    customSize: customSize,
+    final animatedButton = M3ERadiusAndPaddingMotion(
+      motion: springMotion,
+      internalLeft: 0,
+      internalRight: 0,
+      internalTop: 0,
+      internalBottom: 0,
+      targetRadius: targetRadius,
+      builder: (padding, animatedRadius) {
+        return M3EFocusRing(
+          focused: focused,
+          radius: animatedRadius,
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: hasBackgroundBuilder ? Colors.transparent : color,
+              borderRadius: animatedRadius,
+              border: outlineSide != null
+                  ? Border.fromBorderSide(outlineSide)
+                  : null,
+              boxShadow: (elevation != null && elevation > 0)
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: elevation * 2,
+                        offset: Offset(0, elevation),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              clipBehavior: Clip.antiAlias,
+              borderRadius: animatedRadius,
+              child: Focus(
+                focusNode: effectiveFocusNode,
+                autofocus: widget.autofocus,
+                canRequestFocus: enabled,
+                skipTraversal: !enabled,
+                onFocusChange: widget.onFocusChange,
+                onKeyEvent: (node, event) {
+                  if (enabled &&
+                      event is KeyDownEvent &&
+                      (event.logicalKey == LogicalKeyboardKey.enter ||
+                          event.logicalKey == LogicalKeyboardKey.space ||
+                          event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+                    widget.onPressed?.call();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: InkWell(
+                  onTap: enabled
+                      ? () {
+                          widget.onPressed?.call();
+                          _triggerHaptic();
+                        }
+                      : null,
+                  onLongPress: enabled ? widget.onLongPress : null,
+                  onHover: enabled ? widget.onHover : null,
+                  onTapDown: enabled
+                      ? (_) => setState(() => _leadingPressed = true)
+                      : null,
+                  onTapUp: enabled
+                      ? (_) => setState(() => _leadingPressed = false)
+                      : null,
+                  onTapCancel: enabled
+                      ? () => setState(() => _leadingPressed = false)
+                      : null,
+                  statesController: statesController,
+                  canRequestFocus: false,
+                  mouseCursor: enabled
+                      ? (widget.decoration?.mouseCursor
+                              ?.resolve({...segmentStates}) ??
+                          widget.mouseCursor ??
+                          SystemMouseCursors.click)
+                      : SystemMouseCursors.basic,
+                  enableFeedback: widget.enableFeedback,
+                  splashFactory:
+                      widget.splashFactory ?? InkSparkle.splashFactory,
+                  splashColor: M3EStateLayer.splashColor(onColor),
+                  highlightColor: Colors.transparent,
+                  overlayColor: widget.decorationOverlayColor ??
+                      M3EStateLayer.overlayColorHoverFocus(onColor),
+                  child: _applyDecorationLayers(
+                    context: context,
+                    states: segmentStates,
+                    radius: animatedRadius,
+                    child: SizedBox(
+                      height: height,
+                      child: Center(
+                        child: _LeadingContent(
+                          size: size,
+                          icon: widget.leadingIcon,
+                          label: widget.label,
+                          color: onColor,
+                          customSize: customSize,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     Widget wrapped = ConstrainedBox(
       constraints: BoxConstraints(minWidth: 0, minHeight: minTap),
-      child: Center(
-        child: M3EFocusRing(
-          focused: focused,
-          radius: targetRadius,
-          child: animatedButton,
-        ),
-      ),
+      child: Center(child: animatedButton),
     );
 
     final fixedWidth = customSize?.width;
@@ -786,113 +795,121 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
       ),
     );
 
-    final animatedButton = AnimatedContainer(
-      duration: pressed
-          ? Duration.zero
-          : const Duration(milliseconds: 120),
-      curve: Curves.easeOut,
-      width: effectiveWidth,
-      height: height,
-      decoration: BoxDecoration(
-        color: hasBackgroundBuilder ? Colors.transparent : color,
-        borderRadius: targetRadius,
-        border: outlineSide != null ? Border.fromBorderSide(outlineSide) : null,
-        boxShadow: (elevation != null && elevation > 0)
-            ? [
-          BoxShadow(
-            color: M3ETheme.of(context)
-                .colorScheme
-                .shadow
-                .withValues(alpha: 0.15),
-            blurRadius: elevation * 2,
-            offset: Offset(0, elevation),
-          ),
-        ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        borderRadius: targetRadius,
-        child: Focus(
-          focusNode: _trailingFocusNode,
-          canRequestFocus: enabled,
-          skipTraversal: !enabled,
-          onKeyEvent: (node, event) {
-            if (enabled &&
-                event is KeyDownEvent &&
-                (event.logicalKey == LogicalKeyboardKey.enter ||
-                    event.logicalKey == LogicalKeyboardKey.space ||
-                    event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-              _openMenu(_trailingKey.currentContext ?? context);
-              return KeyEventResult.handled;
-            }
-            return KeyEventResult.ignored;
-          },
-          child: InkWell(
-            onTap: enabled
-                ? () {
-              _openMenu(_trailingKey.currentContext ?? context);
-              _triggerHaptic();
-            }
-                : null,
-            mouseCursor: enabled
-                ? (widget.decoration?.mouseCursor?.resolve({...segmentStates}) ??
-                    widget.mouseCursor ??
-                    SystemMouseCursors.click)
-                : SystemMouseCursors.basic,
-            onHover: enabled
-                ? (value) {
-              if (_isTrailingHovered != value) {
-                setState(() => _isTrailingHovered = value);
-              }
-              widget.onHover?.call(value);
-            }
-                : null,
-            onTapDown: enabled
-                ? (_) => setState(() => _trailingPressed = true)
-                : null,
-            onTapUp: enabled
-                ? (_) => setState(() => _trailingPressed = false)
-                : null,
-            onTapCancel: enabled
-                ? () => setState(() => _trailingPressed = false)
-                : null,
-            canRequestFocus: false,
-            enableFeedback: widget.enableFeedback,
-            splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
-            splashColor: M3EStateLayer.splashColor(onColor),
-            highlightColor: Colors.transparent,
-            overlayColor: widget.decorationOverlayColor ??
-                M3EStateLayer.overlayColorHoverFocus(onColor),
-            child: _applyDecorationLayers(
-              context: context,
-              states: segmentStates,
-              radius: targetRadius,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: trailingLeftPad,
-                  right: trailingRightPad,
+    final animatedButton = M3ERadiusAndPaddingMotion(
+      motion: springMotion,
+      internalLeft: 0,
+      internalRight: 0,
+      internalTop: 0,
+      internalBottom: 0,
+      targetRadius: targetRadius,
+      builder: (padding, animatedRadius) {
+        return M3EFocusRing(
+          focused: focused,
+          radius: animatedRadius,
+          child: Container(
+            width: effectiveWidth,
+            height: height,
+            decoration: BoxDecoration(
+              color: hasBackgroundBuilder ? Colors.transparent : color,
+              borderRadius: animatedRadius,
+              border: outlineSide != null
+                  ? Border.fromBorderSide(outlineSide)
+                  : null,
+              boxShadow: (elevation != null && elevation > 0)
+                  ? [
+                      BoxShadow(
+                        color: M3ETheme.of(context)
+                            .colorScheme
+                            .shadow
+                            .withValues(alpha: 0.15),
+                        blurRadius: elevation * 2,
+                        offset: Offset(0, elevation),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              clipBehavior: Clip.antiAlias,
+              borderRadius: animatedRadius,
+              child: Focus(
+                focusNode: _trailingFocusNode,
+                canRequestFocus: enabled,
+                skipTraversal: !enabled,
+                onKeyEvent: (node, event) {
+                  if (enabled &&
+                      event is KeyDownEvent &&
+                      (event.logicalKey == LogicalKeyboardKey.enter ||
+                          event.logicalKey == LogicalKeyboardKey.space ||
+                          event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+                    _openMenu(_trailingKey.currentContext ?? context);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: InkWell(
+                  onTap: enabled
+                      ? () {
+                          _openMenu(_trailingKey.currentContext ?? context);
+                          _triggerHaptic();
+                        }
+                      : null,
+                  mouseCursor: enabled
+                      ? (widget.decoration?.mouseCursor
+                              ?.resolve({...segmentStates}) ??
+                          widget.mouseCursor ??
+                          SystemMouseCursors.click)
+                      : SystemMouseCursors.basic,
+                  onHover: enabled
+                      ? (value) {
+                          if (_isTrailingHovered != value) {
+                            setState(() => _isTrailingHovered = value);
+                          }
+                          widget.onHover?.call(value);
+                        }
+                      : null,
+                  onTapDown: enabled
+                      ? (_) => setState(() => _trailingPressed = true)
+                      : null,
+                  onTapUp: enabled
+                      ? (_) => setState(() => _trailingPressed = false)
+                      : null,
+                  onTapCancel: enabled
+                      ? () => setState(() => _trailingPressed = false)
+                      : null,
+                  canRequestFocus: false,
+                  enableFeedback: widget.enableFeedback,
+                  splashFactory:
+                      widget.splashFactory ?? InkSparkle.splashFactory,
+                  splashColor: M3EStateLayer.splashColor(onColor),
+                  highlightColor: Colors.transparent,
+                  overlayColor: widget.decorationOverlayColor ??
+                      M3EStateLayer.overlayColorHoverFocus(onColor),
+                  child: _applyDecorationLayers(
+                    context: context,
+                    states: segmentStates,
+                    radius: animatedRadius,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: trailingLeftPad,
+                        right: trailingRightPad,
+                      ),
+                      child: Center(child: chevron),
+                    ),
+                  ),
                 ),
-                child: Center(child: chevron),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     Widget wrapped = KeyedSubtree(
       key: _trailingKey,
       child: ConstrainedBox(
         constraints: BoxConstraints(minWidth: 0, minHeight: minTap),
-        child: Center(
-          child: M3EFocusRing(
-            focused: focused,
-            radius: targetRadius,
-            child: animatedButton,
-          ),
-        ),
+        child: Center(child: animatedButton),
       ),
     );
 

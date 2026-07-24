@@ -29,7 +29,7 @@ class M3ETappable extends StatefulWidget {
     this.semanticButton = true,
     this.excludeSemantics = false,
     this.pressedScale = 1,
-    this.spring = M3EMotion.expressiveSpatialFast,
+    this.spring = M3EMotion.expressiveSpatialPress,
     this.onStateChanged,
     this.materialInk = false,
     super.key,
@@ -90,15 +90,6 @@ class _M3ETappableState extends State<M3ETappable>
     widget.onStateChanged?.call(next);
   }
 
-  void _snapScale(double target) {
-    if (widget.pressedScale == 1) {
-      return;
-    }
-    _scaleController
-      ..stop()
-      ..value = target;
-  }
-
   void _animateScale(double target) {
     if (widget.pressedScale == 1) {
       return;
@@ -115,7 +106,7 @@ class _M3ETappableState extends State<M3ETappable>
 
   void _handlePointerDown() {
     _update(_state.copyWith(pressed: true));
-    _snapScale(widget.pressedScale);
+    _animateScale(widget.pressedScale);
   }
 
   void _handlePointerUp() {

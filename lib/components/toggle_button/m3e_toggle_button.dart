@@ -21,7 +21,6 @@ const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
 const Duration _kDurationZero = Duration.zero;
 const bool _kDefaultEnableFeedback = true;
-final SpringMotion _kPressedRadiusMotion = M3EButtonMotion.expressiveEffectsFast.toMotion();
 
 /// Material 3 Expressive Toggle Button.
 ///
@@ -354,7 +353,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
   @override
   M3EButtonMotion? get effectiveMotion =>
-      widget.decorationMotion ?? M3EButtonMotion.expressiveSpatialDefault;
+      widget.decorationMotion ?? M3EButtonMotion.expressiveSpatialPress;
 
   @override
   void initState() {
@@ -532,10 +531,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
         Widget core = RepaintBoundary(
           child: M3ERadiusAndPaddingMotion(
-            snapToTarget: effectivelyEnabled && pressed,
-            motion: (effectivelyEnabled && pressed)
-                ? _kPressedRadiusMotion
-                : springMotion,
+            motion: springMotion,
             internalLeft: hPad,
             internalRight: hPad,
             internalTop: 0,

@@ -52,6 +52,11 @@ abstract final class M3EMotion {
       M3ESpring(stiffness: 800, damping: 0.6);
   static const M3ESpring expressiveSpatialDefault =
       M3ESpring(stiffness: 380, damping: 0.8);
+
+  /// Interactive press scale — same recipe as floating toolbar / button morph.
+  static const M3ESpring expressiveSpatialPress =
+      M3ESpring(stiffness: 380, damping: 0.55);
+
   static const M3ESpring expressiveSpatialSlow =
       M3ESpring(stiffness: 200, damping: 0.8);
 
