@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../foundations/foundations.dart';
+import '../search/controllers/m3e_search_controller.dart';
+import '../search/m3e_search_anchor.dart';
 import 'components/m3e_app_bar_semantics.dart';
 import 'enums/m3e_app_bar_enums.dart';
 
@@ -34,6 +38,72 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
         floating = false,
         snap = false,
         variant = M3EAppBarVariant.medium;
+
+  /// A top app bar whose title is a read-only anchored [M3ESearchAnchor.bar].
+  ///
+  /// Tapping the bar opens the fullscreen (or docked) search view. Below the
+  /// search bar theme max width, the bar fills the space between [leading] and
+  /// [actions] while keeping the existing action gaps. Above that width it is
+  /// capped and positioned with [centerTitle].
+  factory M3EAppBar.search({
+    Key? key,
+    required M3ESearchController searchController,
+    required M3ESearchSuggestionsBuilder suggestionsBuilder,
+    Widget? leading,
+    List<Widget>? actions,
+    bool centerTitle = false,
+    String? barHintText,
+    Widget? barLeading,
+    Iterable<Widget>? barTrailing,
+    bool isFullScreen = true,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    double? elevation,
+    M3EAppBarShapeFamily shapeFamily = M3EAppBarShapeFamily.square,
+    M3EAppBarDensity density = M3EAppBarDensity.regular,
+    double? toolbarHeight,
+    bool automaticallyImplyLeading = false,
+    Clip clipBehavior = Clip.none,
+    String? semanticLabel,
+    ValueChanged<String>? onSubmitted,
+    ValueChanged<String>? onChanged,
+    VoidCallback? onClose,
+    VoidCallback? onOpen,
+    BoxConstraints? searchConstraints,
+  }) {
+    return M3EAppBar.top(
+      key: key,
+      leading: leading,
+      actions: actions,
+      centerTitle: centerTitle,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: elevation,
+      shapeFamily: shapeFamily,
+      density: density,
+      toolbarHeight: toolbarHeight,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      clipBehavior: clipBehavior,
+      semanticLabel: semanticLabel,
+      title: M3ESearchAnchor.bar(
+        searchController: searchController,
+        suggestionsBuilder: suggestionsBuilder,
+        barHintText: barHintText,
+        barLeading: barLeading,
+        barTrailing: barTrailing,
+        isFullScreen: isFullScreen,
+        onSubmitted: onSubmitted,
+        onChanged: onChanged,
+        onClose: onClose,
+        onOpen: onOpen,
+        // Fill the title slot; theme minWidth (360) would overflow toolbars.
+        constraints: searchConstraints ??
+            const BoxConstraints(minWidth: 0, minHeight: 56),
+        expandOnFocus: false,
+        expandRestPadding: 0,
+      ),
+    );
+  }
 
   /// A bottom app bar with actions and an optional floating action button.
   const M3EAppBar.bottom({
@@ -114,7 +184,8 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(builder: (context) => switch (_kind) {
+    return M3EComponentTheme(
+      builder: (context) => switch (_kind) {
         _M3EAppBarKind.top => _buildTop(context),
         _M3EAppBarKind.bottom => _buildBottom(context),
         _M3EAppBarKind.sliver => _buildSliver(context),
@@ -131,6 +202,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final shape = appBarTheme.shape(shapeFamily);
     final height = toolbarHeight ?? metrics.smallHeight;
     final tStyle = appBarTheme.titleStyle(theme.typeScale);
+    final searchMaxWidth = theme.searchBarTheme.maxWidth;
 
     final resolvedLeading = leading ??
         (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
@@ -161,10 +233,9 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
                     if (resolvedLeading != null) const SizedBox(width: 8),
                     if (resolvedTitle != null)
                       Expanded(
-                        child: Align(
-                          alignment: centerTitle
-                              ? Alignment.center
-                              : Alignment.centerLeft,
+                        child: _TitleSlot(
+                          centerTitle: centerTitle,
+                          maxContentWidth: searchMaxWidth,
                           child: resolvedTitle,
                         ),
                       )
@@ -231,8 +302,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     final fg = foregroundColor ?? theme.colorScheme.onSurface;
     final shape = appBarTheme.shape(shapeFamily);
 
-    final collapsedStyle =
-        appBarTheme.titleStyle(theme.typeScale);
+    final collapsedStyle = appBarTheme.titleStyle(theme.typeScale);
     final expandedStyle =
         appBarTheme.titleStyle(theme.typeScale, collapsed: false);
 
@@ -322,5 +392,41 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
           expandedTitleScale: 1,
         );
     }
+  }
+}
+
+/// Places an app bar title between leading and actions.
+///
+/// [M3ESearchAnchor] titles fill up to [maxContentWidth], then follow
+/// [centerTitle]. Other titles keep intrinsic width and only use alignment.
+class _TitleSlot extends StatelessWidget {
+  const _TitleSlot({
+    required this.centerTitle,
+    required this.maxContentWidth,
+    required this.child,
+  });
+
+  final bool centerTitle;
+  final double maxContentWidth;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final alignment =
+        centerTitle ? Alignment.center : AlignmentDirectional.centerStart;
+
+    if (child is! M3ESearchAnchor) {
+      return Align(alignment: alignment, child: child);
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = math.min(constraints.maxWidth, maxContentWidth);
+        return Align(
+          alignment: alignment,
+          child: SizedBox(width: width, child: child),
+        );
+      },
+    );
   }
 }

@@ -120,4 +120,46 @@ void main() {
 
     expect(find.text(_large), findsWidgets);
   });
+
+  testWidgets('M3EAppBar.search fills title slot and opens the search view',
+      (tester) async {
+    final controller = M3ESearchController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(),
+        home: Scaffold(
+          appBar: M3EAppBar.search(
+            searchController: controller,
+            barHintText: 'Search',
+            leading: const Icon(M3EIcons.menu),
+            actions: const <Widget>[
+              Icon(M3EIcons.tune),
+              Icon(M3EIcons.account_circle),
+            ],
+            suggestionsBuilder:
+                (BuildContext context, M3ESearchController c) {
+              return const <Widget>[];
+            },
+          ),
+          body: const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.byIcon(M3EIcons.menu), findsOneWidget);
+    expect(find.byIcon(M3EIcons.tune), findsOneWidget);
+
+    final barBox = tester.getSize(find.byType(M3ESearchBar));
+    final appBarBox = tester.getSize(find.byType(M3EAppBar));
+    // Below max width the bar should occupy most of the toolbar (not min 360).
+    expect(barBox.width, greaterThan(200));
+    expect(barBox.width, lessThan(appBarBox.width));
+
+    await tester.tap(find.byType(M3ESearchBar));
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, isTrue);
+  });
 }

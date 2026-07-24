@@ -84,6 +84,8 @@ class M3ESearchAnchor extends StatefulWidget {
     EdgeInsetsGeometry? viewPadding,
     bool? shrinkWrap,
     bool? isFullScreen,
+    bool expandOnFocus = true,
+    double? expandRestPadding,
     required M3ESearchController searchController,
     TextCapitalization textCapitalization = TextCapitalization.none,
     required M3ESearchSuggestionsBuilder suggestionsBuilder,
@@ -143,6 +145,8 @@ class M3ESearchAnchor extends StatefulWidget {
           barPadding: barPadding,
           barTextStyle: barTextStyle,
           barHintStyle: barHintStyle,
+          expandOnFocus: expandOnFocus,
+          expandRestPadding: expandRestPadding,
           textCapitalization: textCapitalization,
           textInputAction: textInputAction,
           keyboardType: keyboardType,
@@ -207,6 +211,8 @@ class _M3ESearchAnchorBar extends StatefulWidget {
     this.barPadding,
     this.barTextStyle,
     this.barHintStyle,
+    this.expandOnFocus = true,
+    this.expandRestPadding,
     this.textCapitalization = TextCapitalization.none,
     this.textInputAction,
     this.keyboardType,
@@ -230,6 +236,8 @@ class _M3ESearchAnchorBar extends StatefulWidget {
   final WidgetStateProperty<EdgeInsetsGeometry?>? barPadding;
   final WidgetStateProperty<TextStyle?>? barTextStyle;
   final WidgetStateProperty<TextStyle?>? barHintStyle;
+  final bool expandOnFocus;
+  final double? expandRestPadding;
   final TextCapitalization textCapitalization;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
@@ -304,9 +312,8 @@ class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
       constraints: widget.constraints,
       controller: widget.controller,
       readOnly: true,
-      // Keep the resting (unexpanded) horizontal inset; read-only bars never
-      // take focus so they will not animate to the focused width.
-      expandOnFocus: true,
+      expandOnFocus: widget.expandOnFocus,
+      expandRestPadding: widget.expandRestPadding,
       onTap: () {
         _openView();
         widget.onTap?.call();

@@ -29,6 +29,22 @@ class _NavigationPageState extends State<NavigationPage>
   int _drawerIndex = 0;
   int _primaryTab = 0;
   int _secondaryTab = 0;
+  final M3ESearchController _appBarSearchController = M3ESearchController();
+
+  static const List<String> _appBarSearchSuggestions = <String>[
+    'Inbox',
+    'Starred',
+    'Snoozed',
+    'Important',
+    'Sent',
+    'Drafts',
+  ];
+
+  @override
+  void dispose() {
+    _appBarSearchController.dispose();
+    super.dispose();
+  }
 
   static const List<M3ENavigationBarDestination> _barDestinations =
       <M3ENavigationBarDestination>[
@@ -130,6 +146,40 @@ class _NavigationPageState extends State<NavigationPage>
             density: M3EAppBarDensity.compact,
             shapeFamily: M3EAppBarShapeFamily.square,
             actions: const <Widget>[Icon(M3EIcons.file_copy)],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _framed(
+          theme,
+          M3EAppBar.search(
+            searchController: _appBarSearchController,
+            barHintText: 'Search mail',
+            leading: const Icon(M3EIcons.menu),
+            actions: const <Widget>[
+              Icon(M3EIcons.tune),
+              Icon(M3EIcons.account_circle),
+            ],
+            suggestionsBuilder:
+                (BuildContext context, M3ESearchController controller) {
+              final query = controller.text.trim().toLowerCase();
+              final matches = query.isEmpty
+                  ? _appBarSearchSuggestions
+                  : _appBarSearchSuggestions.where(
+                      (String name) => name.toLowerCase().contains(query),
+                    );
+              return matches.map(
+                (String name) => GestureDetector(
+                  onTap: () => controller.closeView(name),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Text(name),
+                  ),
+                ),
+              );
+            },
           ),
         ),
         const SizedBox(height: 12),
