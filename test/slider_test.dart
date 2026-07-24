@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/components/sliders/enums/m3e_slider_enums.dart';
+import 'package:material_3_expressive/components/sliders/utils/m3e_slider_dot_layout.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 Widget _host(Widget child) {
@@ -160,6 +162,41 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     expect(find.byType(CustomPaint), findsWidgets);
+  });
+
+  test('dotSpacing pads outer edge of end stops from track ends', () {
+    const Size size = Size(200, 48);
+    const double trackHeight = 16;
+    const double dotSize = 12;
+    const double spacing = 8;
+    final M3ESliderColors colors = M3ESliderTheme.defaults.colors(
+      M3EThemeData.light(seedColor: const Color(0xFF6750A4)).colorScheme,
+      enabled: true,
+    );
+
+    final List<M3ESliderDotPlacement> dots = M3ESliderDotLayout.resolve(
+      size: size,
+      mode: M3ESliderPaintMode.single,
+      trackKind: M3ESliderTrackKind.standard,
+      activeStartFraction: 0,
+      activeEndFraction: 0.5,
+      tickFractions: const <double>[],
+      colors: colors,
+      trackHeight: trackHeight,
+      handleGap: 6,
+      handleThickness: 4,
+      stopIndicatorSize: dotSize,
+      tickSize: dotSize,
+      edgeInset: spacing,
+      axis: Axis.horizontal,
+      textDirection: TextDirection.ltr,
+    );
+
+    // Only the trailing stop is on the inactive track for value 0.5.
+    expect(dots, isNotEmpty);
+    final M3ESliderDotPlacement end = dots.last;
+    final double outerEdge = end.primary + end.size / 2;
+    expect(size.width - outerEdge, closeTo(spacing, 0.001));
   });
 
   testWidgets('range thumbs cannot cross', (tester) async {

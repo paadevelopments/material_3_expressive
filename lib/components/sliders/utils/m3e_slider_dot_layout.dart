@@ -84,10 +84,11 @@ abstract final class M3ESliderDotLayout {
 
     final List<M3ESliderDotPlacement> out = <M3ESliderDotPlacement>[];
 
-    // Edge inset from track ends (Compose StopIndicatorTrailingSpace).
-    final double inset = edgeInset;
-    final double stopStart = sliderStart + inset;
-    final double stopEnd = sliderEnd - inset;
+    // [edgeInset] is clear space between the track edge and the marker's outer
+    // edge; centers are therefore inset by spacing + half the marker size.
+    final double stopRadius = stopIndicatorSize / 2;
+    final double stopStart = sliderStart + edgeInset + stopRadius;
+    final double stopEnd = sliderEnd - edgeInset - stopRadius;
     if (stopEnd > stopStart) {
       if (!_onActiveOrGap(
         stopStart,
@@ -135,8 +136,9 @@ abstract final class M3ESliderDotLayout {
       return out;
     }
 
-    final double tickStart = sliderStart + inset;
-    final double tickEnd = sliderEnd - inset;
+    // Discrete ticks share the same padded span as the end stops.
+    final double tickStart = stopStart;
+    final double tickEnd = stopEnd;
     final double tickCenterGapStart = centered ? centerAxis - endGap : 0;
     final double tickCenterGapEnd = centered ? centerAxis + endGap : 0;
     final double tickStartGapLo = valueStart - startGap;

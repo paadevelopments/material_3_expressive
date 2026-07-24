@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../enums/m3e_slider_enums.dart';
+import '../res/m3e_slider_tokens.dart';
 import '../styles/m3e_slider_theme.dart';
 import '../utils/m3e_slider_dot_layout.dart';
 
@@ -189,7 +190,7 @@ class M3ESliderTrackPainter extends CustomPainter {
       handleThickness: handleThickness,
       stopIndicatorSize: stopIndicatorSize,
       tickSize: tickSize,
-      edgeInset: edgeInset ?? trackHeight / 2,
+      edgeInset: edgeInset ?? M3ESliderTokens.stopIndicatorTrailingSpace,
       axis: axis,
       textDirection: textDirection,
     );

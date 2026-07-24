@@ -68,7 +68,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
   final double stopIndicatorSize;
   final double tickSize;
 
-  /// Inset of stop/tick markers from each track end.
+  /// Clear space between each track end and the outer edge of end markers.
   final double stopIndicatorTrailingSpace;
   final double valueIndicatorBottomSpace;
   final double disabledActiveOpacity;

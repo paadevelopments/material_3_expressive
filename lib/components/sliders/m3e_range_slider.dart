@@ -118,7 +118,7 @@ class M3ERangeSlider extends StatefulWidget {
   /// Diameter of stop/tick markers. Defaults to theme stop indicator size.
   final double? dotSize;
 
-  /// Inset of stop/tick markers from each track end.
+  /// Clear space between each track end and the outer edge of the end dots.
   ///
   /// Defaults to theme [M3ESliderTheme.stopIndicatorTrailingSpace].
   final double? dotSpacing;
