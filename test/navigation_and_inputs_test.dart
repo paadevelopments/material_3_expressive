@@ -129,6 +129,53 @@ void main() {
     expect(find.byIcon(M3EIcons.inbox), findsOneWidget);
   });
 
+  testWidgets(
+      'M3ENavigationRail indicator tracks selection while scrolling',
+      (tester) async {
+    final List<M3ENavigationRailDestination> destinations =
+        List<M3ENavigationRailDestination>.generate(
+      20,
+      (int i) => M3ENavigationRailDestination(
+        icon: const Icon(M3EIcons.menu),
+        label: 'Item $i',
+      ),
+    );
+
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          height: 240,
+          child: M3ENavigationRail(
+            type: M3ENavigationRailType.alwaysExpand,
+            scrollable: true,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            sections: <M3ENavigationRailSection>[
+              M3ENavigationRailSection(destinations: destinations),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    Positioned readPill() => tester.widget<Positioned>(
+          find.descendant(
+            of: find.byType(M3ENavSelectionIndicator),
+            matching: find.byType(Positioned),
+          ),
+        );
+
+    final double before = readPill().top!;
+
+    await tester.drag(find.byType(Scrollable), const Offset(0, -40));
+    await tester.pump();
+    await tester.pump();
+
+    expect(readPill().top, lessThan(before));
+  });
+
   testWidgets('M3ESlider reports value changes', (tester) async {
     var value = 0.5;
     await tester.pumpWidget(

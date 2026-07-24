@@ -340,29 +340,38 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       _scheduleMeasure(forceJump: true);
     }
 
-    return NotificationListener<SizeChangedLayoutNotification>(
-      onNotification: (SizeChangedLayoutNotification notification) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        // Scroll notifications fire before the viewport lays out children at
+        // the new offset — remeasure on the following frame.
         _geoCache.clear();
-        _scheduleMeasure(forceJump: !_animating);
+        _scheduleMeasure(forceJump: true);
         return false;
       },
-      child: Stack(
-        key: _stackKey,
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          // When [onTravelingChanged] is set, resting fill is owned by the host
-          // (cold-start safe). Overlay only paints while traveling.
-          if (widget.enabled &&
-              _ready &&
-              (widget.onTravelingChanged == null || _traveling))
-            AnimatedBuilder(
-              animation: Listenable.merge(<Listenable>[_lead, _trail]),
-              builder: (BuildContext context, Widget? child) {
-                return _buildPill();
-              },
-            ),
-          SizeChangedLayoutNotifier(child: widget.child),
-        ],
+      child: NotificationListener<SizeChangedLayoutNotification>(
+        onNotification: (SizeChangedLayoutNotification notification) {
+          _geoCache.clear();
+          _scheduleMeasure(forceJump: !_animating);
+          return false;
+        },
+        child: Stack(
+          key: _stackKey,
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            // When [onTravelingChanged] is set, resting fill is owned by the host
+            // (cold-start safe). Overlay only paints while traveling.
+            if (widget.enabled &&
+                _ready &&
+                (widget.onTravelingChanged == null || _traveling))
+              AnimatedBuilder(
+                animation: Listenable.merge(<Listenable>[_lead, _trail]),
+                builder: (BuildContext context, Widget? child) {
+                  return _buildPill();
+                },
+              ),
+            SizeChangedLayoutNotifier(child: widget.child),
+          ],
+        ),
       ),
     );
   }
