@@ -16,15 +16,15 @@ Runtime dependencies are intentionally small — see
 
 | Actions | Selection |
 | :-----: | :-------: |
-| ![Actions — buttons, FABs, and button groups](assets/asset_1.gif) | ![Selection — segmented controls, chips, menus, and sliders](assets/asset_2.gif) |
+| ![Actions — buttons, FABs, and button groups](https://raw.githubusercontent.com/paadevelopments/material_3_expressive/main/assets/asset_1.gif) | ![Selection — segmented controls, chips, menus, and sliders](https://raw.githubusercontent.com/paadevelopments/material_3_expressive/main/assets/asset_2.gif) |
 
 | Containment | Navigation |
 | :---------: | :--------: |
-| ![Containment — pickers, cards, lists, and dialogs](assets/asset_3.gif) | ![Navigation — app bars, tabs, nav bar, and toolbars](assets/asset_4.gif) |
+| ![Containment — pickers, cards, lists, and dialogs](https://raw.githubusercontent.com/paadevelopments/material_3_expressive/main/assets/asset_3.gif) | ![Navigation — app bars, tabs, nav bar, and toolbars](https://raw.githubusercontent.com/paadevelopments/material_3_expressive/main/assets/asset_4.gif) |
 
 | Feedback |
 | :------: |
-| ![Feedback — progress, badges, text fields, and snackbars](assets/asset_5.gif) |
+| ![Feedback — progress, badges, text fields, and snackbars](https://raw.githubusercontent.com/paadevelopments/material_3_expressive/main/assets/asset_5.gif) |
 
 ## Example app
 
