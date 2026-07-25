@@ -252,81 +252,16 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     final DateTime currentDate = M3EDatePickerUtils.dateOnly(
       widget.currentDate ?? DateTime.now(),
     );
-
     final String titleText = _selectedDate.value == null
         ? ''
         : localizations.formatMediumDate(_selectedDate.value!);
-
-    Widget? entryModeButton;
-    late Widget picker;
-    switch (_entryMode.value) {
-      case M3EDatePickerEntryMode.calendar:
-        picker = M3ECalendarDatePicker(
-          key: ValueKey<DateTime?>(_selectedDate.value),
-          initialDate: _selectedDate.value,
+    final ({Widget picker, Widget? entryModeButton}) resolved =
+        _resolvePickerAndEntryButton(
+          localizations: localizations,
           firstDate: firstDate,
           lastDate: lastDate,
           currentDate: currentDate,
-          initialCalendarMode: widget.initialCalendarMode,
-          selectableDayPredicate: widget.selectableDayPredicate,
-          onDateChanged: _handleDateChanged,
-          onDisplayedMonthChanged: _handleDisplayedMonthChanged,
-          onCalendarModeChanged: _handleCalendarModeChanged,
-          expandToFit: true,
         );
-        entryModeButton = M3EDatePickerEntryModeButton(
-          icon: M3EIcons.edit_outlined,
-          tooltip: localizations.inputDateModeButtonLabel,
-          onPressed: _handleEntryModeToggle,
-        );
-      case M3EDatePickerEntryMode.calendarOnly:
-        picker = M3ECalendarDatePicker(
-          key: ValueKey<DateTime?>(_selectedDate.value),
-          initialDate: _selectedDate.value,
-          firstDate: firstDate,
-          lastDate: lastDate,
-          currentDate: currentDate,
-          initialCalendarMode: widget.initialCalendarMode,
-          selectableDayPredicate: widget.selectableDayPredicate,
-          onDateChanged: _handleDateChanged,
-          onDisplayedMonthChanged: _handleDisplayedMonthChanged,
-          onCalendarModeChanged: _handleCalendarModeChanged,
-          expandToFit: true,
-        );
-      case M3EDatePickerEntryMode.input:
-      case M3EDatePickerEntryMode.inputOnly:
-        picker = Form(
-          key: _formKey,
-          autovalidateMode: _autovalidateMode.value,
-          child: Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
-            },
-            child: M3EInputDatePickerFormField(
-              initialDate: _selectedDate.value,
-              firstDate: firstDate,
-              lastDate: lastDate,
-              onDateSubmitted: _handleDateChanged,
-              onDateSaved: _handleDateChanged,
-              selectableDayPredicate: widget.selectableDayPredicate,
-              errorFormatText: widget.errorFormatText,
-              errorInvalidText: widget.errorInvalidText,
-              fieldHintText: widget.fieldHintText,
-              fieldLabelText: widget.fieldLabelText,
-              keyboardType: widget.keyboardType,
-              autofocus: true,
-            ),
-          ),
-        );
-        if (_entryMode.value == M3EDatePickerEntryMode.input) {
-          entryModeButton = M3EDatePickerEntryModeButton(
-            icon: M3EIcons.calendar_today,
-            tooltip: localizations.calendarModeButtonLabel,
-            onPressed: _handleEntryModeToggle,
-          );
-        }
-    }
-
     final Widget header = M3EDatePickerHeader(
       helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: titleText,
@@ -336,36 +271,28 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           orientation == Orientation.landscape &&
           (_entryMode.value == M3EDatePickerEntryMode.input ||
               _entryMode.value == M3EDatePickerEntryMode.inputOnly),
-      entryModeButton: entryModeButton,
+      entryModeButton: resolved.entryModeButton,
     );
-
     final Widget actions = M3EDatePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
     );
-
     final double textScaleFactor =
         MediaQuery.textScalerOf(context)
             .clamp(maxScaleFactor: M3EDatePickerConstants.maxTextScaleFactor)
             .scale(M3EDatePickerConstants.fontSizeToScale) /
         M3EDatePickerConstants.fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-
     final bool isInputMode =
         _entryMode.value == M3EDatePickerEntryMode.input ||
         _entryMode.value == M3EDatePickerEntryMode.inputOnly;
-    final double? calendarBodyHeight = isInputMode
-        ? null
-        : _calendarBodyHeight(context);
-
     final Widget pickerBody = _buildPickerBody(
-      picker: picker,
+      picker: resolved.picker,
       isInputMode: isInputMode,
-      calendarHeight: calendarBodyHeight,
+      calendarHeight: isInputMode ? null : _calendarBodyHeight(context),
     );
-
     return Padding(
       padding: widget.insetPadding,
       child: Material(
@@ -409,6 +336,92 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           },
         ),
       ),
+    );
+  }
+
+  ({Widget picker, Widget? entryModeButton}) _resolvePickerAndEntryButton({
+    required MaterialLocalizations localizations,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required DateTime currentDate,
+  }) {
+    switch (_entryMode.value) {
+      case M3EDatePickerEntryMode.calendar:
+        return (
+          picker: _buildCalendarPicker(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            currentDate: currentDate,
+          ),
+          entryModeButton: M3EDatePickerEntryModeButton(
+            icon: M3EIcons.edit_outlined,
+            tooltip: localizations.inputDateModeButtonLabel,
+            onPressed: _handleEntryModeToggle,
+          ),
+        );
+      case M3EDatePickerEntryMode.calendarOnly:
+        return (
+          picker: _buildCalendarPicker(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            currentDate: currentDate,
+          ),
+          entryModeButton: null,
+        );
+      case M3EDatePickerEntryMode.input:
+      case M3EDatePickerEntryMode.inputOnly:
+        return (
+          picker: Form(
+            key: _formKey,
+            autovalidateMode: _autovalidateMode.value,
+            child: Shortcuts(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
+              },
+              child: M3EInputDatePickerFormField(
+                initialDate: _selectedDate.value,
+                firstDate: firstDate,
+                lastDate: lastDate,
+                onDateSubmitted: _handleDateChanged,
+                onDateSaved: _handleDateChanged,
+                selectableDayPredicate: widget.selectableDayPredicate,
+                errorFormatText: widget.errorFormatText,
+                errorInvalidText: widget.errorInvalidText,
+                fieldHintText: widget.fieldHintText,
+                fieldLabelText: widget.fieldLabelText,
+                keyboardType: widget.keyboardType,
+                autofocus: true,
+              ),
+            ),
+          ),
+          entryModeButton: _entryMode.value == M3EDatePickerEntryMode.input
+              ? M3EDatePickerEntryModeButton(
+                  icon: M3EIcons.calendar_today,
+                  tooltip: localizations.calendarModeButtonLabel,
+                  onPressed: _handleEntryModeToggle,
+                )
+              : null,
+        );
+    }
+  }
+
+  Widget _buildCalendarPicker({
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required DateTime currentDate,
+  }) {
+    return M3ECalendarDatePicker(
+      key: ValueKey<DateTime?>(_selectedDate.value),
+      initialDate: _selectedDate.value,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      currentDate: currentDate,
+      initialCalendarMode: widget.initialCalendarMode,
+      selectableDayPredicate: widget.selectableDayPredicate,
+      onDateChanged: _handleDateChanged,
+      onDisplayedMonthChanged: _handleDisplayedMonthChanged,
+      onCalendarModeChanged: _handleCalendarModeChanged,
+      expandToFit: true,
     );
   }
 }

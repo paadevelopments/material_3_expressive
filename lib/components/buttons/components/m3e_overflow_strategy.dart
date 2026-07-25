@@ -36,7 +36,12 @@ abstract class M3EOverflowStrategy {
     required M3EToggleButtonDecoration? decoration,
     required bool connected,
     required bool isRtl,
-    required Widget Function(int index, bool isFirst, bool isLast) buildButton,
+    required Widget Function(
+      int index, {
+      required bool isFirst,
+      required bool isLast,
+    })
+    buildButton,
   });
 
   /// buildOverflowTrigger.
@@ -72,13 +77,18 @@ abstract class M3EOverflowStrategy {
   static List<Widget> buildVisibleButtons({
     required int count,
     required bool isRtl,
-    required Widget Function(int index, bool isFirst, bool isLast) buildButton,
+    required Widget Function(
+      int index, {
+      required bool isFirst,
+      required bool isLast,
+    })
+    buildButton,
   }) {
     final children = <Widget>[];
     for (var i = 0; i < count; i++) {
       final isFirst = isRtl ? (i == count - 1) : (i == 0);
       final isLast = isRtl ? (i == 0) : (i == count - 1);
-      children.add(buildButton(i, isFirst, isLast));
+      children.add(buildButton(i, isFirst: isFirst, isLast: isLast));
     }
     return children;
   }

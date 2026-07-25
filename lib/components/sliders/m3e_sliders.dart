@@ -48,6 +48,7 @@ export 'styles/m3e_slider_theme.dart';
 /// discrete range. Pass a null `onChanged` to disable.
 
 part 'components/m3e_slider_track_icons_overlay.dart';
+part 'components/m3e_slider_build.dart';
 
 /// M3ESlider.
 
@@ -396,39 +397,7 @@ class _M3ESliderState extends State<M3ESlider>
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme sliderTheme = theme.sliderTheme;
-    final M3ESliderColors colors = sliderTheme.colors(
-      theme.colorScheme,
-      enabled: _enabled,
-    );
-    final TextDirection direction = Directionality.of(context);
-    final bool rtl = !_vertical && direction == TextDirection.rtl;
-    final bool reverse = _vertical ? !widget.topToBottom : rtl;
-
-    final double handleThickness = _pressed
-        ? sliderTheme.pressedHandleWidth
-        : (_vertical
-              ? M3ESliderTokens.verticalHandleHeight
-              : sliderTheme.handleWidth);
-
-    final String indicatorLabel =
-        widget.label ??
-        (widget.divisions != null
-            ? widget.value.round().toString()
-            : widget.value.toStringAsFixed(2));
-
-    final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
-    final double waveSpeed = widget.waveSpeed ?? wavelength;
-    final double amplitudeFactor = _amplitudeFactor(sliderTheme);
-    final double trackThickness =
-        widget.trackThickness ?? sliderTheme.trackHeight;
-    final double thumbLength = widget.thumbLength ?? sliderTheme.handleHeight;
-    final double dotSize = widget.dotSize ?? sliderTheme.stopIndicatorSize;
-    final double dotSpacing =
-        widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
-    final useCustomDots = widget.dotBuilder != null;
-
+    final _M3ESliderResolved resolved = _resolve(context);
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
@@ -436,209 +405,10 @@ class _M3ESliderState extends State<M3ESlider>
           enabled: _enabled,
           value:
               widget.semanticFormatterCallback?.call(widget.value) ??
-              indicatorLabel,
+              resolved.indicatorLabel,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              final double extent = _vertical
-                  ? constraints.maxHeight
-                  : constraints.maxWidth;
-              final double cross = _vertical
-                  ? (constraints.maxWidth.isFinite
-                        ? constraints.maxWidth
-                        : math.max(sliderTheme.height, thumbLength))
-                  : math.max(sliderTheme.height, thumbLength);
-
-              Widget buildTrack({required double phase}) {
-                return widget.trackBuilder?.call(
-                      context: context,
-                      colors: colors,
-                      theme: sliderTheme,
-                      fraction: _fraction,
-                      tickFractions: _ticks,
-                      handleThickness: handleThickness,
-                    ) ??
-                    (widget.trackKind == M3ESliderTrackKind.centered
-                        ? M3ESliderCenteredTrack(
-                            fraction: _fraction,
-                            tickFractions: _ticks,
-                            colors: colors,
-                            theme: sliderTheme,
-                            axis: widget.axis,
-                            textDirection: direction,
-                            handleThickness: handleThickness,
-                            trackHeight: trackThickness,
-                            stopIndicatorSize: dotSize,
-                            tickSize: dotSize,
-                            edgeInset: dotSpacing,
-                            drawDots: !useCustomDots,
-                            isWavy: widget.wavy,
-                            waveAmplitude: sliderTheme.waveAmplitude,
-                            wavelength: wavelength,
-                            phase: phase,
-                            amplitudeFactor: amplitudeFactor,
-                          )
-                        : M3ESliderTrack(
-                            fraction: _fraction,
-                            tickFractions: _ticks,
-                            colors: colors,
-                            theme: sliderTheme,
-                            axis: widget.axis,
-                            textDirection: direction,
-                            handleThickness: handleThickness,
-                            trackHeight: trackThickness,
-                            stopIndicatorSize: dotSize,
-                            tickSize: dotSize,
-                            edgeInset: dotSpacing,
-                            drawDots: !useCustomDots,
-                            isWavy: widget.wavy,
-                            waveAmplitude: sliderTheme.waveAmplitude,
-                            wavelength: wavelength,
-                            phase: phase,
-                            amplitudeFactor: amplitudeFactor,
-                          ));
-              }
-
-              Widget track = widget.wavy
-                  ? AnimatedBuilder(
-                      animation: _waveController,
-                      builder: (BuildContext context, Widget? child) {
-                        return buildTrack(phase: _phase(wavelength, waveSpeed));
-                      },
-                    )
-                  : buildTrack(phase: 0);
-
-              if (widget.trackIcons != null && widget.trackIcons!.hasAny) {
-                track = _TrackIconsOverlay(
-                  icons: widget.trackIcons!,
-                  fraction: _fraction,
-                  trackKind: widget.trackKind,
-                  axis: widget.axis,
-                  child: track,
-                );
-              }
-
-              var trackLayer = track;
-              if (useCustomDots) {
-                trackLayer = Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    track,
-                    M3ESliderDotOverlay(
-                      builder: widget.dotBuilder!,
-                      mode: M3ESliderPaintMode.single,
-                      trackKind: widget.trackKind,
-                      activeStartFraction: 0,
-                      activeEndFraction: _fraction,
-                      tickFractions: _ticks,
-                      colors: colors,
-                      trackHeight: trackThickness,
-                      handleGap: sliderTheme.handleGap,
-                      handleThickness: handleThickness,
-                      stopIndicatorSize: dotSize,
-                      tickSize: dotSize,
-                      edgeInset: dotSpacing,
-                      axis: widget.axis,
-                      textDirection: direction,
-                    ),
-                  ],
-                );
-              }
-
-              // Bottom-min vertical: flip track paint so active grows upward.
-              if (_vertical && reverse) {
-                trackLayer = Transform.flip(flipY: true, child: trackLayer);
-              }
-
-              final Widget thumb =
-                  widget.thumbBuilder?.call(
-                    context: context,
-                    colors: colors,
-                    pressed: _pressed,
-                  ) ??
-                  M3ESliderThumb(
-                    color: colors.thumb,
-                    pressed: _pressed,
-                    axis: widget.axis,
-                    width: _vertical ? thumbLength : sliderTheme.handleWidth,
-                    height: _vertical
-                        ? M3ESliderTokens.verticalHandleHeight
-                        : thumbLength,
-                    pressedThickness: sliderTheme.pressedHandleWidth,
-                  );
-
-              final double thumbPrimary = reverse
-                  ? (1.0 - _fraction) * extent
-                  : _fraction * extent;
-
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragStart: !_enabled || _vertical
-                    ? null
-                    : (_) => setState(() => _pressed = true),
-                onHorizontalDragUpdate: !_enabled || _vertical
-                    ? null
-                    : (DragUpdateDetails d) =>
-                          _update(d.localPosition.dx, extent, reverse),
-                onHorizontalDragEnd: !_enabled || _vertical
-                    ? null
-                    : (_) => _endInteraction(),
-                onHorizontalDragCancel: !_enabled || _vertical
-                    ? null
-                    : _endInteraction,
-                onVerticalDragStart: !_enabled || !_vertical
-                    ? null
-                    : (_) => setState(() => _pressed = true),
-                onVerticalDragUpdate: !_enabled || !_vertical
-                    ? null
-                    : (DragUpdateDetails d) =>
-                          _update(d.localPosition.dy, extent, reverse),
-                onVerticalDragEnd: !_enabled || !_vertical
-                    ? null
-                    : (_) => _endInteraction(),
-                onVerticalDragCancel: !_enabled || !_vertical
-                    ? null
-                    : _endInteraction,
-                onTapDown: !_enabled
-                    ? null
-                    : (TapDownDetails d) {
-                        setState(() => _pressed = true);
-                        final double primary = _vertical
-                            ? d.localPosition.dy
-                            : d.localPosition.dx;
-                        _update(primary, extent, reverse);
-                      },
-                onTapUp: !_enabled ? null : (_) => _endInteraction(),
-                onTapCancel: !_enabled ? null : _endInteraction,
-                child: SizedBox(
-                  width: _vertical ? cross : extent,
-                  height: _vertical ? extent : cross,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Positioned.fill(child: trackLayer),
-                      Positioned(
-                        left: _vertical ? null : thumbPrimary - 12,
-                        top: _vertical ? thumbPrimary - 12 : null,
-                        width: _vertical ? cross : 24,
-                        height: _vertical ? 24 : cross,
-                        child: Center(child: thumb),
-                      ),
-                      if (_pressed)
-                        Positioned(
-                          left: _vertical ? cross + 8 : thumbPrimary - 24,
-                          top: _vertical
-                              ? thumbPrimary - 12
-                              : -sliderTheme.valueIndicatorBottomSpace - 24,
-                          child: M3ESliderValueIndicator(
-                            label: indicatorLabel,
-                            colors: colors,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
+              return _buildLayout(context, constraints, resolved);
             },
           ),
         );

@@ -22,6 +22,8 @@ import 'models/m3e_slider_track_icons.dart';
 import 'styles/m3e_slider_theme.dart';
 import 'utils/m3e_slider_math.dart';
 
+part 'components/m3e_range_slider_build.dart';
+
 /// Which thumb is being dragged on an [M3ERangeSlider].
 enum _M3ERangeThumb { start, end }
 
@@ -213,30 +215,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme sliderTheme = theme.sliderTheme;
-    final M3ESliderColors colors = sliderTheme.colors(
-      theme.colorScheme,
-      enabled: _enabled,
-    );
-    final TextDirection direction = Directionality.of(context);
-    final rtl = direction == TextDirection.rtl;
-
-    final double handleThickness = _pressed
-        ? sliderTheme.pressedHandleWidth
-        : sliderTheme.handleWidth;
-
-    final double wavelength = widget.wavelength ?? sliderTheme.wavelength;
-    final double waveSpeed = widget.waveSpeed ?? wavelength;
-    final double amplitudeFactor = _amplitudeFactor(sliderTheme);
-    final double trackThickness =
-        widget.trackThickness ?? sliderTheme.trackHeight;
-    final double thumbLength = widget.thumbLength ?? sliderTheme.handleHeight;
-    final double dotSize = widget.dotSize ?? sliderTheme.stopIndicatorSize;
-    final double dotSpacing =
-        widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
-    final useCustomDots = widget.dotBuilder != null;
-
+    final _M3ERangeSliderResolved resolved = _resolve(context);
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
@@ -246,165 +225,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
               '${widget.values.start} – ${widget.values.end}',
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              final double width = constraints.maxWidth;
-              final double height = math.max(sliderTheme.height, thumbLength);
-
-              Widget buildTrack({required double phase}) {
-                return M3ERangeSliderTrack(
-                  startFraction: _startFraction,
-                  endFraction: _endFraction,
-                  tickFractions: _ticks,
-                  colors: colors,
-                  theme: sliderTheme,
-                  axis: Axis.horizontal,
-                  textDirection: direction,
-                  handleThickness: handleThickness,
-                  trackHeight: trackThickness,
-                  stopIndicatorSize: dotSize,
-                  tickSize: dotSize,
-                  edgeInset: dotSpacing,
-                  drawDots: !useCustomDots,
-                  isWavy: widget.wavy,
-                  waveAmplitude: sliderTheme.waveAmplitude,
-                  wavelength: wavelength,
-                  phase: phase,
-                  amplitudeFactor: amplitudeFactor,
-                );
-              }
-
-              Widget track = widget.wavy
-                  ? AnimatedBuilder(
-                      animation: _waveController,
-                      builder: (BuildContext context, Widget? child) {
-                        return buildTrack(phase: _phase(wavelength, waveSpeed));
-                      },
-                    )
-                  : buildTrack(phase: 0);
-
-              if (useCustomDots) {
-                track = Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    track,
-                    M3ESliderDotOverlay(
-                      builder: widget.dotBuilder!,
-                      mode: M3ESliderPaintMode.range,
-                      trackKind: M3ESliderTrackKind.standard,
-                      activeStartFraction: _startFraction,
-                      activeEndFraction: _endFraction,
-                      tickFractions: _ticks,
-                      colors: colors,
-                      trackHeight: trackThickness,
-                      handleGap: sliderTheme.handleGap,
-                      handleThickness: handleThickness,
-                      stopIndicatorSize: dotSize,
-                      tickSize: dotSize,
-                      edgeInset: dotSpacing,
-                      axis: Axis.horizontal,
-                      textDirection: direction,
-                    ),
-                  ],
-                );
-              }
-
-              double thumbX(double fraction) {
-                final double f = rtl ? 1.0 - fraction : fraction;
-                return f * width;
-              }
-
-              final double startX = thumbX(_startFraction);
-              final double endX = thumbX(_endFraction);
-
-              Widget buildThumb({required bool pressed}) => M3ESliderThumb(
-                color: colors.thumb,
-                pressed: pressed,
-                width: sliderTheme.handleWidth,
-                height: thumbLength,
-                pressedThickness: sliderTheme.pressedHandleWidth,
-              );
-
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragStart: !_enabled
-                    ? null
-                    : (DragStartDetails d) {
-                        final double dx = d.localPosition.dx;
-                        final double distStart = (dx - startX).abs();
-                        final double distEnd = (dx - endX).abs();
-                        setState(() {
-                          _activeThumb = distStart <= distEnd
-                              ? _M3ERangeThumb.start
-                              : _M3ERangeThumb.end;
-                        });
-                      },
-                onHorizontalDragUpdate: !_enabled
-                    ? null
-                    : (DragUpdateDetails d) =>
-                          _update(d.localPosition.dx, width, rtl),
-                onHorizontalDragEnd: !_enabled
-                    ? null
-                    : (_) => _endInteraction(),
-                onHorizontalDragCancel: !_enabled ? null : _endInteraction,
-                onTapDown: !_enabled
-                    ? null
-                    : (TapDownDetails d) {
-                        final double dx = d.localPosition.dx;
-                        final double distStart = (dx - startX).abs();
-                        final double distEnd = (dx - endX).abs();
-                        setState(() {
-                          _activeThumb = distStart <= distEnd
-                              ? _M3ERangeThumb.start
-                              : _M3ERangeThumb.end;
-                        });
-                        _update(dx, width, rtl);
-                      },
-                onTapUp: !_enabled ? null : (_) => _endInteraction(),
-                onTapCancel: !_enabled ? null : _endInteraction,
-                child: SizedBox(
-                  width: width,
-                  height: height,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Positioned.fill(child: track),
-                      Positioned(
-                        left: startX - 12,
-                        width: 24,
-                        height: height,
-                        child: Center(
-                          child: buildThumb(
-                            pressed: _activeThumb == _M3ERangeThumb.start,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: endX - 12,
-                        width: 24,
-                        height: height,
-                        child: Center(
-                          child: buildThumb(
-                            pressed: _activeThumb == _M3ERangeThumb.end,
-                          ),
-                        ),
-                      ),
-                      if (_pressed)
-                        Positioned(
-                          left:
-                              (_activeThumb == _M3ERangeThumb.start
-                                  ? startX
-                                  : endX) -
-                              24,
-                          top: -sliderTheme.valueIndicatorBottomSpace - 24,
-                          child: M3ESliderValueIndicator(
-                            label: _indicatorLabel(),
-                            colors: colors,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
+              return _buildLayout(context, constraints, resolved);
             },
           ),
         );

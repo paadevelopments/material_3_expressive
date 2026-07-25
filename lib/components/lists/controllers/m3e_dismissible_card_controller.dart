@@ -124,35 +124,43 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   void _syncSlots() {
     final visibleCount = _slots.where((s) => s.isVisible).length;
     if (visibleCount > swipeItemCount) {
-      int toRemove = visibleCount - swipeItemCount;
-      for (int i = _slots.length - 1; i >= 0 && toRemove > 0; i--) {
-        if (_slots[i].isVisible) {
-          final slot = _slots[i];
-          _slots.removeAt(i);
-          _measureKeys.remove(slot);
-          slot.dispose();
-          toRemove--;
-        }
-      }
+      _removeExcessVisibleSlots(visibleCount - swipeItemCount);
     } else if (visibleCount < swipeItemCount) {
-      final toAdd = swipeItemCount - visibleCount;
-      for (var i = 0; i < toAdd; i++) {
-        _slots.add(M3EDismissibleSlot());
-      }
+      _addMissingSlots(swipeItemCount - visibleCount);
     }
     _reindexDragSlot();
   }
 
-  void _reindexDragSlot() {
-    if (_dragSlotRef != null) {
-      _dragSlotIndex = _slots.indexOf(_dragSlotRef!);
-      if (_dragSlotIndex < 0) {
-        _dragSlotRef = null;
-        _dragOffset = 0.0;
-        _detachPush = 0.0;
+  void _removeExcessVisibleSlots(int toRemove) {
+    var remaining = toRemove;
+    for (var i = _slots.length - 1; i >= 0 && remaining > 0; i--) {
+      if (!_slots[i].isVisible) {
+        continue;
       }
-    } else {
+      final slot = _slots[i];
+      _slots.removeAt(i);
+      _measureKeys.remove(slot);
+      slot.dispose();
+      remaining--;
+    }
+  }
+
+  void _addMissingSlots(int toAdd) {
+    for (var i = 0; i < toAdd; i++) {
+      _slots.add(M3EDismissibleSlot());
+    }
+  }
+
+  void _reindexDragSlot() {
+    if (_dragSlotRef == null) {
       _dragSlotIndex = -1;
+      return;
+    }
+    _dragSlotIndex = _slots.indexOf(_dragSlotRef!);
+    if (_dragSlotIndex < 0) {
+      _dragSlotRef = null;
+      _dragOffset = 0.0;
+      _detachPush = 0.0;
     }
   }
 

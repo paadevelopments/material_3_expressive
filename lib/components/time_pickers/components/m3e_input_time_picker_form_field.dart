@@ -177,64 +177,10 @@ class _M3EInputTimePickerFormFieldState
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: M3ETextField(
-                    controller: _hourController,
-                    focusNode: _hourFocus,
-                    label:
-                        widget.hourLabelText ??
-                        localizations.timePickerHourLabel,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    errorText: field.errorText,
-                    onSubmitted: (_) => _minuteFocus.requestFocus(),
-                    onChanged: (_) => field.didChange(null),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: M3ETextField(
-                    controller: _minuteController,
-                    focusNode: _minuteFocus,
-                    label:
-                        widget.minuteLabelText ??
-                        localizations.timePickerMinuteLabel,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) {
-                      if (field.validate()) {
-                        _handleSubmitted();
-                      }
-                    },
-                    onChanged: (_) => field.didChange(null),
-                  ),
-                ),
-              ],
-            ),
+            _buildHourMinuteRow(localizations, field),
             if (!_use24HourFormat) ...<Widget>[
               const SizedBox(height: 16),
-              Row(
-                children: <Widget>[
-                  M3EButton(
-                    style: _isPm
-                        ? M3EButtonStyle.outlined
-                        : M3EButtonStyle.filled,
-                    onPressed: () => setState(() => _isPm = false),
-                    child: Text(localizations.anteMeridiemAbbreviation),
-                  ),
-                  const SizedBox(width: 8),
-                  M3EButton(
-                    style: _isPm
-                        ? M3EButtonStyle.filled
-                        : M3EButtonStyle.outlined,
-                    onPressed: () => setState(() => _isPm = true),
-                    child: Text(localizations.postMeridiemAbbreviation),
-                  ),
-                ],
-              ),
+              _buildMeridiemRow(localizations),
             ],
           ],
         );
@@ -247,6 +193,64 @@ class _M3EInputTimePickerFormFieldState
         return _validateMinute(_minuteController.text.trim());
       },
       onSaved: (_) => _handleSaved(),
+    );
+  }
+
+  Widget _buildHourMinuteRow(
+    MaterialLocalizations localizations,
+    FormFieldState<void> field,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: M3ETextField(
+            controller: _hourController,
+            focusNode: _hourFocus,
+            label: widget.hourLabelText ?? localizations.timePickerHourLabel,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            errorText: field.errorText,
+            onSubmitted: (_) => _minuteFocus.requestFocus(),
+            onChanged: (_) => field.didChange(null),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: M3ETextField(
+            controller: _minuteController,
+            focusNode: _minuteFocus,
+            label:
+                widget.minuteLabelText ?? localizations.timePickerMinuteLabel,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              if (field.validate()) {
+                _handleSubmitted();
+              }
+            },
+            onChanged: (_) => field.didChange(null),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMeridiemRow(MaterialLocalizations localizations) {
+    return Row(
+      children: <Widget>[
+        M3EButton(
+          style: _isPm ? M3EButtonStyle.outlined : M3EButtonStyle.filled,
+          onPressed: () => setState(() => _isPm = false),
+          child: Text(localizations.anteMeridiemAbbreviation),
+        ),
+        const SizedBox(width: 8),
+        M3EButton(
+          style: _isPm ? M3EButtonStyle.filled : M3EButtonStyle.outlined,
+          onPressed: () => setState(() => _isPm = true),
+          child: Text(localizations.postMeridiemAbbreviation),
+        ),
+      ],
     );
   }
 }

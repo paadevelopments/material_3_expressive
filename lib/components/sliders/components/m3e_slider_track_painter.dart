@@ -13,6 +13,7 @@ import '../enums/m3e_slider_enums.dart';
 import '../res/m3e_slider_tokens.dart';
 import '../styles/m3e_slider_theme.dart';
 import '../utils/m3e_slider_dot_layout.dart';
+import '../utils/m3e_slider_track_paint_metrics.dart';
 
 /// Paints expressive track segments, stop indicators, and discrete ticks.
 ///
@@ -129,102 +130,116 @@ class M3ESliderTrackPainter extends CustomPainter {
       return;
     }
 
-    final double corner = trackCross / 2;
-    final double startGap = (_centered || _range)
-        ? handleThickness / 2 + handleGap
-        : 0;
-    final double endGap = handleThickness / 2 + handleGap;
+    final metrics = M3ESliderTrackPaintMetrics.from(
+      sliderStart: sliderStart,
+      sliderEnd: sliderEnd,
+      span: span,
+      trackCross: trackCross,
+      centered: _centered,
+      range: _range,
+      handleThickness: handleThickness,
+      handleGap: handleGap,
+      activeStartFraction: activeStartFraction,
+      activeEndFraction: activeEndFraction,
+    );
 
-    final double valueStart =
-        sliderStart + span * activeStartFraction.clamp(0.0, 1.0);
-    final double valueEnd =
-        sliderStart + span * activeEndFraction.clamp(0.0, 1.0);
-    final double centerAxis = (sliderStart + sliderEnd) / 2;
-
-    // Leading inactive (centered / range).
-    final double adjustedValueEnd = _centered
-        ? math.min(valueEnd, centerAxis)
-        : valueStart;
-    if ((_centered || _range) &&
-        adjustedValueEnd > sliderStart + startGap + corner) {
-      final start = sliderStart;
-      final double end = adjustedValueEnd - startGap;
-      if (end > start) {
-        _drawSegment(
-          canvas,
-          trackBounds,
-          start,
-          end,
-          colors.inactiveTrack,
-          startCorner: _rtl ? insideCornerSize : corner,
-          endCorner: _rtl ? corner : insideCornerSize,
-        );
-      }
+    _paintInactiveLeading(canvas, trackBounds, metrics);
+    _paintInactiveTrailing(canvas, trackBounds, metrics);
+    _paintActive(canvas, trackBounds, metrics);
+    if (drawDots) {
+      _paintDots(canvas, size, trackBounds);
     }
+  }
 
-    // Trailing inactive.
-    final double adjustedValueStart = _centered
-        ? math.max(valueEnd, centerAxis)
-        : valueEnd;
-    if (adjustedValueStart < sliderEnd - endGap - corner) {
-      final double start = adjustedValueStart + endGap;
-      final end = sliderEnd;
-      if (end > start) {
-        _drawSegment(
-          canvas,
-          trackBounds,
-          start,
-          end,
-          colors.inactiveTrack,
-          startCorner: _rtl ? corner : insideCornerSize,
-          endCorner: _rtl ? insideCornerSize : corner,
-        );
-      }
-    }
-
-    // Active track.
-    final double activeStart = _centered
-        ? adjustedValueEnd + (adjustedValueEnd < centerAxis ? startGap : 0)
-        : _range
-        ? valueStart + startGap
-        : sliderStart;
-    final double activeEnd = _centered
-        ? adjustedValueStart - (adjustedValueStart > centerAxis ? endGap : 0)
-        : valueEnd - endGap;
-
-    final double startCorner = (_rtl || _centered || _range)
-        ? insideCornerSize
-        : corner;
-    final double endCorner = (_rtl && !_centered && !_range)
-        ? corner
-        : insideCornerSize;
-    final double activeWidth = activeEnd - activeStart;
-    if (activeWidth > startCorner) {
-      if (isWavy) {
-        _drawWavyActive(
-          canvas,
-          trackBounds,
-          activeStart,
-          activeEnd,
-          colors.activeTrack,
-        );
-      } else {
-        _drawSegment(
-          canvas,
-          trackBounds,
-          activeStart,
-          activeEnd,
-          colors.activeTrack,
-          startCorner: startCorner,
-          endCorner: endCorner,
-        );
-      }
-    }
-
-    if (!drawDots) {
+  void _paintInactiveLeading(
+    Canvas canvas,
+    Rect trackBounds,
+    M3ESliderTrackPaintMetrics metrics,
+  ) {
+    if (!(_centered || _range) ||
+        metrics.adjustedValueEnd <=
+            metrics.sliderStart + metrics.startGap + metrics.corner) {
       return;
     }
+    final start = metrics.sliderStart;
+    final double end = metrics.adjustedValueEnd - metrics.startGap;
+    if (end <= start) {
+      return;
+    }
+    _drawSegment(
+      canvas,
+      trackBounds,
+      start,
+      end,
+      colors.inactiveTrack,
+      startCorner: _rtl ? insideCornerSize : metrics.corner,
+      endCorner: _rtl ? metrics.corner : insideCornerSize,
+    );
+  }
 
+  void _paintInactiveTrailing(
+    Canvas canvas,
+    Rect trackBounds,
+    M3ESliderTrackPaintMetrics metrics,
+  ) {
+    if (metrics.adjustedValueStart >=
+        metrics.sliderEnd - metrics.endGap - metrics.corner) {
+      return;
+    }
+    final double start = metrics.adjustedValueStart + metrics.endGap;
+    final end = metrics.sliderEnd;
+    if (end <= start) {
+      return;
+    }
+    _drawSegment(
+      canvas,
+      trackBounds,
+      start,
+      end,
+      colors.inactiveTrack,
+      startCorner: _rtl ? metrics.corner : insideCornerSize,
+      endCorner: _rtl ? insideCornerSize : metrics.corner,
+    );
+  }
+
+  void _paintActive(
+    Canvas canvas,
+    Rect trackBounds,
+    M3ESliderTrackPaintMetrics metrics,
+  ) {
+    final double activeStart = metrics.activeStart;
+    final double activeEnd = metrics.activeEnd;
+    final double startCorner = (_rtl || _centered || _range)
+        ? insideCornerSize
+        : metrics.corner;
+    final double endCorner = (_rtl && !_centered && !_range)
+        ? metrics.corner
+        : insideCornerSize;
+    if (activeEnd - activeStart <= startCorner) {
+      return;
+    }
+    if (isWavy) {
+      _drawWavyActive(
+        canvas,
+        trackBounds,
+        activeStart,
+        activeEnd,
+        colors.activeTrack,
+      );
+      return;
+    }
+    _drawSegment(
+      canvas,
+      trackBounds,
+      activeStart,
+      activeEnd,
+      colors.activeTrack,
+      startCorner: startCorner,
+      endCorner: endCorner,
+    );
+  }
+
+  void _paintDots(Canvas canvas, Size size, Rect trackBounds) {
     final List<M3ESliderDotPlacement> dots = M3ESliderDotLayout.resolve(
       size: size,
       mode: mode,

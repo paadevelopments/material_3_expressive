@@ -1,10 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 
 import '../enums/m3e_slider_enums.dart';
 import '../styles/m3e_slider_theme.dart';
 import '../utils/m3e_slider_math.dart';
+import 'm3e_slider_dot_geometry.dart';
 
 /// One stop/tick marker along the slider track.
 @immutable
@@ -35,7 +34,6 @@ abstract final class M3ESliderDotLayout {
   const M3ESliderDotLayout._();
 
   /// resolve.
-
   static List<M3ESliderDotPlacement> resolve({
     required Size size,
     required M3ESliderPaintMode mode,
@@ -53,110 +51,105 @@ abstract final class M3ESliderDotLayout {
     required Axis axis,
     required TextDirection textDirection,
   }) {
-    final vertical = axis == Axis.vertical;
-    final bool centered =
-        mode == M3ESliderPaintMode.single &&
-        trackKind == M3ESliderTrackKind.centered;
-    final range = mode == M3ESliderPaintMode.range;
-
-    final Rect trackBounds = _trackBounds(size, trackHeight, vertical);
-    final double sliderStart = vertical ? trackBounds.top : trackBounds.left;
-    final double sliderEnd = vertical ? trackBounds.bottom : trackBounds.right;
-    final double span = sliderEnd - sliderStart;
-    if (span <= 0) {
+    final M3ESliderDotGeometry? geometry = M3ESliderDotGeometry.resolve(
+      size: size,
+      mode: mode,
+      trackKind: trackKind,
+      activeStartFraction: activeStartFraction,
+      activeEndFraction: activeEndFraction,
+      trackHeight: trackHeight,
+      handleGap: handleGap,
+      handleThickness: handleThickness,
+      axis: axis,
+    );
+    if (geometry == null) {
       return const <M3ESliderDotPlacement>[];
     }
 
-    final double startGap = (centered || range)
-        ? handleThickness / 2 + handleGap
-        : 0;
-    final double endGap = handleThickness / 2 + handleGap;
-
-    final double valueStart =
-        sliderStart + span * activeStartFraction.clamp(0.0, 1.0);
-    final double valueEnd =
-        sliderStart + span * activeEndFraction.clamp(0.0, 1.0);
-    final double centerAxis = (sliderStart + sliderEnd) / 2;
-
-    final double adjustedValueEnd = centered
-        ? math.min(valueEnd, centerAxis)
-        : valueStart;
-    final double adjustedValueStart = centered
-        ? math.max(valueEnd, centerAxis)
-        : valueEnd;
-
-    final double activeStart = centered
-        ? adjustedValueEnd + (adjustedValueEnd < centerAxis ? startGap : 0)
-        : range
-        ? valueStart + startGap
-        : sliderStart;
-    final double activeEnd = centered
-        ? adjustedValueStart - (adjustedValueStart > centerAxis ? endGap : 0)
-        : valueEnd - endGap;
-
     final out = <M3ESliderDotPlacement>[];
+    _appendEndStops(
+      out,
+      geometry: geometry,
+      colors: colors,
+      stopIndicatorSize: stopIndicatorSize,
+      edgeInset: edgeInset,
+    );
+    _appendTicks(
+      out,
+      geometry: geometry,
+      tickFractions: tickFractions,
+      colors: colors,
+      tickSize: tickSize,
+      stopIndicatorSize: stopIndicatorSize,
+      edgeInset: edgeInset,
+    );
+    return out;
+  }
 
+  static void _appendEndStops(
+    List<M3ESliderDotPlacement> out, {
+    required M3ESliderDotGeometry geometry,
+    required M3ESliderColors colors,
+    required double stopIndicatorSize,
+    required double edgeInset,
+  }) {
     // [edgeInset] is clear space between the track edge and the marker's outer
     // edge; centers are therefore inset by spacing + half the marker size.
     final double stopRadius = stopIndicatorSize / 2;
-    final double stopStart = sliderStart + edgeInset + stopRadius;
-    final double stopEnd = sliderEnd - edgeInset - stopRadius;
-    if (stopEnd > stopStart) {
-      if (!_onActiveOrGap(
-        stopStart,
-        centered: centered,
-        range: range,
-        activeStart: activeStart,
-        activeEnd: activeEnd,
-        valueStart: valueStart,
-        valueEnd: valueEnd,
-        startGap: startGap,
-        endGap: endGap,
-      )) {
-        out.add(
-          M3ESliderDotPlacement(
-            primary: stopStart,
-            color: colors.inactiveTick,
-            size: stopIndicatorSize,
-            active: false,
-          ),
-        );
-      }
-      if (!_onActiveOrGap(
-        stopEnd,
-        centered: centered,
-        range: range,
-        activeStart: activeStart,
-        activeEnd: activeEnd,
-        valueStart: valueStart,
-        valueEnd: valueEnd,
-        startGap: startGap,
-        endGap: endGap,
-      )) {
-        out.add(
-          M3ESliderDotPlacement(
-            primary: stopEnd,
-            color: colors.inactiveTick,
-            size: stopIndicatorSize,
-            active: false,
-          ),
-        );
-      }
+    final double stopStart = geometry.sliderStart + edgeInset + stopRadius;
+    final double stopEnd = geometry.sliderEnd - edgeInset - stopRadius;
+    if (stopEnd <= stopStart) {
+      return;
     }
+    if (!_onActiveOrGap(stopStart, geometry)) {
+      out.add(
+        M3ESliderDotPlacement(
+          primary: stopStart,
+          color: colors.inactiveTick,
+          size: stopIndicatorSize,
+          active: false,
+        ),
+      );
+    }
+    if (!_onActiveOrGap(stopEnd, geometry)) {
+      out.add(
+        M3ESliderDotPlacement(
+          primary: stopEnd,
+          color: colors.inactiveTick,
+          size: stopIndicatorSize,
+          active: false,
+        ),
+      );
+    }
+  }
 
+  static void _appendTicks(
+    List<M3ESliderDotPlacement> out, {
+    required M3ESliderDotGeometry geometry,
+    required List<double> tickFractions,
+    required M3ESliderColors colors,
+    required double tickSize,
+    required double stopIndicatorSize,
+    required double edgeInset,
+  }) {
     if (tickFractions.isEmpty) {
-      return out;
+      return;
     }
 
     // Discrete ticks share the same padded span as the end stops.
-    final tickStart = stopStart;
-    final tickEnd = stopEnd;
-    final double tickCenterGapStart = centered ? centerAxis - endGap : 0;
-    final double tickCenterGapEnd = centered ? centerAxis + endGap : 0;
-    final double tickStartGapLo = valueStart - startGap;
-    final double tickStartGapHi = valueStart + startGap;
-    final double tickEndGapLo = valueEnd - endGap;
-    final double tickEndGapHi = valueEnd + endGap;
+    final double stopRadius = stopIndicatorSize / 2;
+    final double tickStart = geometry.sliderStart + edgeInset + stopRadius;
+    final double tickEnd = geometry.sliderEnd - edgeInset - stopRadius;
+    final double tickCenterGapStart = geometry.centered
+        ? geometry.centerAxis - geometry.endGap
+        : 0;
+    final double tickCenterGapEnd = geometry.centered
+        ? geometry.centerAxis + geometry.endGap
+        : 0;
+    final double tickStartGapLo = geometry.valueStart - geometry.startGap;
+    final double tickStartGapHi = geometry.valueStart + geometry.startGap;
+    final double tickEndGapLo = geometry.valueEnd - geometry.endGap;
+    final double tickEndGapHi = geometry.valueEnd + geometry.endGap;
 
     for (var i = 0; i < tickFractions.length; i++) {
       // Ends are owned by stop indicators.
@@ -168,21 +161,21 @@ abstract final class M3ESliderDotLayout {
         tickEnd,
         tickFractions[i],
       );
-      if (centered &&
-          centerTick >= tickCenterGapStart &&
-          centerTick <= tickCenterGapEnd) {
-        continue;
-      }
-      if (range &&
-          centerTick >= tickStartGapLo &&
-          centerTick <= tickStartGapHi) {
-        continue;
-      }
-      if (centerTick >= tickEndGapLo && centerTick <= tickEndGapHi) {
+      if (_skipTick(
+        centerTick,
+        geometry: geometry,
+        tickCenterGapStart: tickCenterGapStart,
+        tickCenterGapEnd: tickCenterGapEnd,
+        tickStartGapLo: tickStartGapLo,
+        tickStartGapHi: tickStartGapHi,
+        tickEndGapLo: tickEndGapLo,
+        tickEndGapHi: tickEndGapHi,
+      )) {
         continue;
       }
       final bool inActive =
-          centerTick >= activeStart && centerTick <= activeEnd;
+          centerTick >= geometry.activeStart &&
+          centerTick <= geometry.activeEnd;
       out.add(
         M3ESliderDotPlacement(
           primary: centerTick,
@@ -192,45 +185,48 @@ abstract final class M3ESliderDotLayout {
         ),
       );
     }
-
-    return out;
   }
 
-  static Rect _trackBounds(Size size, double trackCross, bool vertical) {
-    if (vertical) {
-      final double left = (size.width - trackCross) / 2;
-      return Rect.fromLTWH(left, 0, trackCross, size.height);
-    }
-    final double top = (size.height - trackCross) / 2;
-    return Rect.fromLTWH(0, top, size.width, trackCross);
-  }
-
-  static bool _onActiveOrGap(
-    double primary, {
-    required bool centered,
-    required bool range,
-    required double activeStart,
-    required double activeEnd,
-    required double valueStart,
-    required double valueEnd,
-    required double startGap,
-    required double endGap,
+  static bool _skipTick(
+    double centerTick, {
+    required M3ESliderDotGeometry geometry,
+    required double tickCenterGapStart,
+    required double tickCenterGapEnd,
+    required double tickStartGapLo,
+    required double tickStartGapHi,
+    required double tickEndGapLo,
+    required double tickEndGapHi,
   }) {
-    if (primary >= activeStart && primary <= activeEnd) {
+    if (geometry.centered &&
+        centerTick >= tickCenterGapStart &&
+        centerTick <= tickCenterGapEnd) {
       return true;
     }
-    if (range &&
-        primary >= valueStart - startGap &&
-        primary <= valueStart + startGap) {
+    if (geometry.range &&
+        centerTick >= tickStartGapLo &&
+        centerTick <= tickStartGapHi) {
       return true;
     }
-    if (primary >= valueEnd - endGap && primary <= valueEnd + endGap) {
+    return centerTick >= tickEndGapLo && centerTick <= tickEndGapHi;
+  }
+
+  static bool _onActiveOrGap(double primary, M3ESliderDotGeometry geometry) {
+    if (primary >= geometry.activeStart && primary <= geometry.activeEnd) {
       return true;
     }
-    if (centered &&
-        startGap > 0 &&
-        primary >= valueEnd - startGap &&
-        primary <= valueEnd + startGap) {
+    if (geometry.range &&
+        primary >= geometry.valueStart - geometry.startGap &&
+        primary <= geometry.valueStart + geometry.startGap) {
+      return true;
+    }
+    if (primary >= geometry.valueEnd - geometry.endGap &&
+        primary <= geometry.valueEnd + geometry.endGap) {
+      return true;
+    }
+    if (geometry.centered &&
+        geometry.startGap > 0 &&
+        primary >= geometry.valueEnd - geometry.startGap &&
+        primary <= geometry.valueEnd + geometry.startGap) {
       return true;
     }
     return false;

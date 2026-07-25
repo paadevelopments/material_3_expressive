@@ -9,6 +9,7 @@ import '../../../foundations/foundations.dart';
 import '../navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'components/m3e_nav_bar_destination_button.dart';
 import 'enums/m3e_nav_bar_enums.dart';
+import 'models/m3e_nav_metrics.dart';
 import 'models/m3e_navigation_bar_destination.dart';
 import 'styles/m3e_navigation_bar_theme.dart';
 
@@ -142,7 +143,6 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     final M3ENavigationBarTheme navTheme = m3e.navigationBarTheme;
     final M3EColorScheme scheme = m3e.colorScheme;
     final metrics = navTheme.metrics(widget.density, m3e.spacing);
-
     final double height = widget.size == M3ENavBarSize.small
         ? metrics.heightSmall
         : metrics.heightMedium;
@@ -151,14 +151,44 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     final double bottomInset = widget.safeArea
         ? MediaQuery.viewPaddingOf(context).bottom
         : 0.0;
+    final Color indicator =
+        widget.indicatorColor ?? navTheme.indicatorColor(scheme);
+    final Widget body = _buildDestinationsBody(
+      m3e: m3e,
+      navTheme: navTheme,
+      scheme: scheme,
+      metrics: metrics,
+      indicator: indicator,
+      bottomInset: bottomInset,
+    );
 
+    Widget nav = Material(
+      color: bg,
+      elevation: widget.elevation ?? 0,
+      shape: shape,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SizedBox(height: height, child: body),
+      ),
+    );
+    nav = Padding(padding: widget.padding ?? EdgeInsets.zero, child: nav);
+    if (widget.semanticLabel != null) {
+      nav = Semantics(container: true, label: widget.semanticLabel, child: nav);
+    }
+    return nav;
+  }
+
+  Widget _buildDestinationsBody({
+    required M3EThemeData m3e,
+    required M3ENavigationBarTheme navTheme,
+    required M3EColorScheme scheme,
+    required M3ENavMetrics metrics,
+    required Color indicator,
+    required double bottomInset,
+  }) {
     final Color selected = navTheme.selectedColor(scheme);
     final Color unselected = navTheme.unselectedColor(scheme);
     final TextStyle labelBase = navTheme.labelStyle(m3e.typeScale);
-    final Color indicator =
-        widget.indicatorColor ?? navTheme.indicatorColor(scheme);
-    final usePill = widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
-
     final Widget destinationsRow = Row(
       children: <Widget>[
         for (int i = 0; i < widget.destinations.length; i++)
@@ -178,42 +208,23 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
               underlineThickness: metrics.indicatorThickness,
               underlineColor: indicator,
               indicatorColor: indicator,
-              // Resting fill is local so cold start never waits on measure.
-              // Hide it while the liquid overlay is traveling.
               showRestingPill: !_traveling,
               onTap: () => widget.onDestinationSelected?.call(i),
             ),
           ),
       ],
     );
-
-    final Widget body = usePill
-        ? M3ENavSelectionIndicator(
-            selectedIndex: widget.selectedIndex,
-            targetKeys: _keys,
-            axis: Axis.horizontal,
-            color: indicator,
-            layoutToken: bottomInset,
-            onTravelingChanged: _onTravelingChanged,
-            child: destinationsRow,
-          )
-        : destinationsRow;
-
-    Widget nav = Material(
-      color: bg,
-      elevation: widget.elevation ?? 0,
-      shape: shape,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: SizedBox(height: height, child: body),
-      ),
-    );
-
-    nav = Padding(padding: widget.padding ?? EdgeInsets.zero, child: nav);
-
-    if (widget.semanticLabel != null) {
-      nav = Semantics(container: true, label: widget.semanticLabel, child: nav);
+    if (widget.indicatorStyle != M3ENavBarIndicatorStyle.pill) {
+      return destinationsRow;
     }
-    return nav;
+    return M3ENavSelectionIndicator(
+      selectedIndex: widget.selectedIndex,
+      targetKeys: _keys,
+      axis: Axis.horizontal,
+      color: indicator,
+      layoutToken: bottomInset,
+      onTravelingChanged: _onTravelingChanged,
+      child: destinationsRow,
+    );
   }
 }

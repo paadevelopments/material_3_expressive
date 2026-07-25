@@ -54,107 +54,132 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     final double maxStroke = math.max(strokeWidth, trackStrokeWidth);
     final double amplitude = maxAmplitude * amplitudeFactor.clamp(0.0, 1.0);
     final double radius = (size.shortestSide - maxStroke) / 2 - amplitude;
-
     if (radius <= 0) {
       return;
     }
-
     const double tau = 2 * math.pi;
-    final double circumference = tau * radius;
-    final int waveCount = math.max(1, (circumference / wavelength).round());
-    final double waveK = waveCount * tau / circumference;
-
-    // Match Compose: inflate gap for round stroke caps.
-    final double adjustedGap = gapSize + (strokeWidth + trackStrokeWidth) / 2;
-    final double gapAngle = adjustedGap / radius;
-    final indeterminate = progress == null;
-    final double p = (progress ?? 1).clamp(0.0, 1.0);
-    // Start at 12 o'clock.
+    final double waveK =
+        math.max(1, ((tau * radius) / wavelength).round()) *
+        tau /
+        (tau * radius);
+    final double gapAngle =
+        (gapSize + (strokeWidth + trackStrokeWidth) / 2) / radius;
     const double startAngle = -math.pi / 2;
-
-    final trackPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = trackStrokeWidth
-      ..strokeCap = StrokeCap.round
-      ..color = trackColor
-      ..isAntiAlias = true;
-
-    final activePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..color = activeColor
-      ..isAntiAlias = true;
-
-    if (indeterminate) {
-      final double activeSweep = tau - gapAngle;
-      canvas.drawPath(
-        _wavyArc(
-          center: center,
-          radius: radius,
-          startAngle: startAngle,
-          sweepAngle: activeSweep,
-          amplitude: amplitude,
-          waveK: waveK,
-          phase: phase,
-        ),
-        activePaint,
+    final Paint trackPaint = _strokePaint(trackColor, trackStrokeWidth);
+    final Paint activePaint = _strokePaint(activeColor, strokeWidth);
+    if (progress == null) {
+      _drawWavy(
+        canvas,
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        sweepAngle: tau - gapAngle,
+        amplitude: amplitude,
+        waveK: waveK,
+        paint: activePaint,
       );
       return;
     }
+    _paintDeterminate(
+      canvas,
+      center: center,
+      radius: radius,
+      startAngle: startAngle,
+      tau: tau,
+      gapAngle: gapAngle,
+      amplitude: amplitude,
+      waveK: waveK,
+      trackPaint: trackPaint,
+      activePaint: activePaint,
+    );
+  }
 
-    // Compose determinate: active = progress * full circle.
-    // Track uses two gaps (front + back). At 100% active is a complete ring.
+  void _paintDeterminate(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required double startAngle,
+    required double tau,
+    required double gapAngle,
+    required double amplitude,
+    required double waveK,
+    required Paint trackPaint,
+    required Paint activePaint,
+  }) {
+    final double p = progress!.clamp(0.0, 1.0);
     final double activeSweep = p * tau;
     if (p >= 1.0) {
-      canvas.drawPath(
-        _wavyArc(
-          center: center,
-          radius: radius,
-          startAngle: startAngle,
-          sweepAngle: tau,
-          amplitude: amplitude,
-          waveK: waveK,
-          phase: phase,
-        ),
-        activePaint,
+      _drawWavy(
+        canvas,
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        sweepAngle: tau,
+        amplitude: amplitude,
+        waveK: waveK,
+        paint: activePaint,
       );
       return;
     }
-
     final double appliedGap = math.min(activeSweep, gapAngle);
-    final double trackStart = startAngle + activeSweep + appliedGap;
     final double trackSweep = tau - activeSweep - appliedGap * 2;
-
     if (trackSweep > 0) {
-      canvas.drawPath(
-        _wavyArc(
-          center: center,
-          radius: radius,
-          startAngle: trackStart,
-          sweepAngle: trackSweep,
-          amplitude: 0,
-          waveK: waveK,
-          phase: phase,
-        ),
-        trackPaint,
+      _drawWavy(
+        canvas,
+        center: center,
+        radius: radius,
+        startAngle: startAngle + activeSweep + appliedGap,
+        sweepAngle: trackSweep,
+        amplitude: 0,
+        waveK: waveK,
+        paint: trackPaint,
       );
     }
-
     if (activeSweep > 0) {
-      canvas.drawPath(
-        _wavyArc(
-          center: center,
-          radius: radius,
-          startAngle: startAngle,
-          sweepAngle: activeSweep,
-          amplitude: amplitude,
-          waveK: waveK,
-          phase: phase,
-        ),
-        activePaint,
+      _drawWavy(
+        canvas,
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        sweepAngle: activeSweep,
+        amplitude: amplitude,
+        waveK: waveK,
+        paint: activePaint,
       );
     }
+  }
+
+  Paint _strokePaint(Color color, double width) {
+    return Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..strokeCap = StrokeCap.round
+      ..color = color
+      ..isAntiAlias = true;
+  }
+
+  void _drawWavy(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required double startAngle,
+    required double sweepAngle,
+    required double amplitude,
+    required double waveK,
+    required Paint paint,
+  }) {
+    canvas.drawPath(
+      _wavyArc(
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        sweepAngle: sweepAngle,
+        amplitude: amplitude,
+        waveK: waveK,
+        phase: phase,
+      ),
+      paint,
+    );
   }
 
   Path _wavyArc({

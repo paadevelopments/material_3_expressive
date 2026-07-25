@@ -267,35 +267,11 @@ class _MultiSelectBottomSheetState<T>
             alpha: M3EButtonConstants.kDisabledForegroundAlpha,
           );
 
-    Widget child;
-    if (item.child is IconData) {
-      child = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            item.child as IconData,
-            size: widget.iconSize,
-            color: effectiveColor,
-          ),
-          const SizedBox(width: 16),
-          Flexible(
-            child: Text(
-              item.child.toString(),
-              style: m3eTheme.typeScale.bodyLarge.copyWith(
-                color: effectiveColor,
-              ),
-            ),
-          ),
-        ],
-      );
-    } else if (item.child is Widget) {
-      child = item.child as Widget;
-    } else {
-      child = Text(
-        item.child.toString(),
-        style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
-      );
-    }
+    final child = _multiSelectItemChild(
+      item: item,
+      effectiveColor: effectiveColor,
+      m3eTheme: m3eTheme,
+    );
 
     final activeColor = checkboxStyle?.activeColor ?? cs.primary;
     final iconColor = checkboxStyle?.iconColor ?? cs.onPrimary;
@@ -334,6 +310,41 @@ class _MultiSelectBottomSheetState<T>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _multiSelectItemChild({
+    required M3ESplitButtonItem<T> item,
+    required Color effectiveColor,
+    required M3EThemeData m3eTheme,
+  }) {
+    if (item.child is IconData) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            item.child as IconData,
+            size: widget.iconSize,
+            color: effectiveColor,
+          ),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              item.child.toString(),
+              style: m3eTheme.typeScale.bodyLarge.copyWith(
+                color: effectiveColor,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    if (item.child is Widget) {
+      return item.child as Widget;
+    }
+    return Text(
+      item.child.toString(),
+      style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
     );
   }
 

@@ -22,6 +22,7 @@ import 'models/m3e_navigation_rail_destination.dart';
 import 'models/m3e_navigation_rail_fab_slot.dart';
 import 'models/m3e_navigation_rail_section.dart';
 import 'res/m3e_navigation_rail_layout.dart';
+import 'styles/m3e_navigation_rail_theme.dart';
 
 part 'components/m3e_navigation_rail_children_mixin.dart';
 
@@ -179,35 +180,42 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   void didUpdateWidget(covariant M3ENavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
     _ensureDestinationKeys();
+    _syncTypeInkSuppression(oldWidget);
+    _syncExpandedFromType(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverlay());
+  }
 
-    if (oldWidget.type != widget.type) {
-      setState(() => _suppressInk = true);
-      Future.delayed(M3ENavigationRailLayout.selectionDelay, () {
-        if (mounted) {
-          setState(() => _suppressInk = false);
-        }
-      });
+  void _syncTypeInkSuppression(M3ENavigationRail oldWidget) {
+    if (oldWidget.type == widget.type) {
+      return;
     }
+    setState(() => _suppressInk = true);
+    Future.delayed(M3ENavigationRailLayout.selectionDelay, () {
+      if (mounted) {
+        setState(() => _suppressInk = false);
+      }
+    });
+  }
 
+  void _syncExpandedFromType(M3ENavigationRail oldWidget) {
     final bool oldCanToggle =
         oldWidget.type == M3ENavigationRailType.collapsed ||
         oldWidget.type == M3ENavigationRailType.expanded;
     final bool newCanToggle = _canToggle;
-
     if (!newCanToggle) {
       final name = widget.type.toString();
       final bool lockExpanded = !name.contains('alwaysCollapse');
       if (_expanded != lockExpanded) {
         setState(() => _expanded = lockExpanded);
       }
-    } else if (!oldCanToggle && newCanToggle) {
+      return;
+    }
+    if (!oldCanToggle && newCanToggle) {
       final startExpanded = widget.type == M3ENavigationRailType.expanded;
       if (_expanded != startExpanded) {
         setState(() => _expanded = startExpanded);
       }
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverlay());
   }
 
   @override
@@ -414,48 +422,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               (widget.trailing != null && widget.trailingAtBottom)
               ? _buildTrailing(ctx)
               : null;
-
-          Widget destinations;
-          if (widget.scrollable) {
-            if (bottomTrailing != null) {
-              destinations = Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: children,
-                    ),
-                  ),
-                  bottomTrailing,
-                ],
-              );
-            } else {
-              destinations = ListView(
-                padding: EdgeInsets.zero,
-                children: children,
-              );
-            }
-          } else {
-            if (bottomTrailing != null) {
-              destinations = Column(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: children,
-                    ),
-                  ),
-                  bottomTrailing,
-                ],
-              );
-            } else {
-              destinations = Column(
-                mainAxisSize: MainAxisSize.min,
-                children: children,
-              );
-            }
-          }
-
           return M3ENavSelectionIndicator(
             selectedIndex: widget.selectedIndex,
             targetKeys: _destinationKeys,
@@ -464,11 +430,44 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             layoutToken: _isExpanded,
             layoutSettleDuration: M3ENavigationRailLayout.expandDuration,
             onTravelingChanged: _onTravelingChanged,
-            child: destinations,
+            child: _buildDestinationsColumn(
+              children: children,
+              bottomTrailing: bottomTrailing,
+            ),
           );
         },
       ),
     );
+  }
+
+  Widget _buildDestinationsColumn({
+    required List<Widget> children,
+    required Widget? bottomTrailing,
+  }) {
+    if (widget.scrollable) {
+      if (bottomTrailing != null) {
+        return Column(
+          children: [
+            Expanded(
+              child: ListView(padding: EdgeInsets.zero, children: children),
+            ),
+            bottomTrailing,
+          ],
+        );
+      }
+      return ListView(padding: EdgeInsets.zero, children: children);
+    }
+    if (bottomTrailing != null) {
+      return Column(
+        children: [
+          Expanded(
+            child: Column(mainAxisSize: MainAxisSize.min, children: children),
+          ),
+          bottomTrailing,
+        ],
+      );
+    }
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 
   @override

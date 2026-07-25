@@ -55,12 +55,11 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       return;
     }
 
-    final double swipeSpeed = d.delta.dx.abs();
-    final double multiplier = (1.0 + (swipeSpeed / 5.0)).clamp(1.0, 4.0);
-
-    double newOffset = _dragOffset + d.delta.dx;
-    double newNeighbour = _neighbourFraction;
-    double newRoundness = _roundnessFraction;
+    final swipeSpeed = d.delta.dx.abs();
+    final multiplier = (1.0 + (swipeSpeed / 5.0)).clamp(1.0, 4.0);
+    final newOffset = _dragOffset + d.delta.dx;
+    var newNeighbour = _neighbourFraction;
+    var newRoundness = _roundnessFraction;
 
     final savedOffset = _dragOffset;
     _dragOffset = newOffset;
@@ -68,128 +67,14 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     _dragOffset = savedOffset;
 
     final crossedNow = newProgress >= 1.0;
-
     if (crossedNow && !_pastThreshold) {
-      _pastThreshold = true;
-      M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
-
-      final pushDir = newOffset.sign;
-      _pushCtrl?.dispose();
-      _pushCtrl =
-          SingleMotionController(
-              motion: _kDetachPush.copyWith(stiffness: 800 * multiplier),
-              vsync: this,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _detachPush = _pushCtrl!.value);
-              }
-            })
-            ..animateTo(
-              style.background == null || style.secondaryBackground == null
-                  ? pushDir * _kDetachPushPixels
-                  : 0,
-            );
-
-      _nbrCtrl?.dispose();
-      _nbrCtrl =
-          SingleMotionController(
-              motion: const MaterialSpringMotion.expressiveSpatialDefault()
-                  .copyWith(stiffness: 800 * multiplier, damping: 0.7),
-              vsync: this,
-              initialValue: _neighbourFraction,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _neighbourFraction = _nbrCtrl!.value);
-              }
-            })
-            ..animateTo(0);
-
-      _roundnessCtrl?.dispose();
-      _roundnessCtrl =
-          SingleMotionController(
-              motion: _kRoundnessSnap.copyWith(stiffness: 1000 * multiplier),
-              vsync: this,
-              initialValue: _roundnessFraction,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _roundnessFraction = _roundnessCtrl!.value);
-              }
-            })
-            ..animateTo(1);
+      _onCrossThreshold(newOffset, multiplier);
     } else if (!crossedNow && _pastThreshold) {
-      _pastThreshold = false;
-      _reEngaging = true;
-      M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
-
-      _pushCtrl?.dispose();
-      _pushCtrl =
-          SingleMotionController(
-              motion: _kDetachPush.copyWith(stiffness: 800 * multiplier),
-              vsync: this,
-              initialValue: _detachPush,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _detachPush = _pushCtrl!.value);
-              }
-            })
-            ..animateTo(0);
-
-      _dragOffset = newOffset;
-      final target = _dragProgress;
-      _dragOffset = savedOffset;
-
-      _nbrCtrl?.dispose();
-      _nbrCtrl =
-          SingleMotionController(
-              motion: const MaterialSpringMotion.expressiveSpatialDefault()
-                  .copyWith(stiffness: 800 * multiplier, damping: 0.7),
-              vsync: this,
-              initialValue: _neighbourFraction,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _neighbourFraction = _nbrCtrl!.value);
-              }
-            })
-            ..addStatusListener((s) {
-              if (s == AnimationStatus.completed ||
-                  s == AnimationStatus.dismissed) {
-                _reEngaging = false;
-              }
-            })
-            ..animateTo(target);
-
-      _roundnessCtrl?.dispose();
-      _roundnessCtrl =
-          SingleMotionController(
-              motion: _kReEngageSpring.copyWith(stiffness: 800 * multiplier),
-              vsync: this,
-              initialValue: _roundnessFraction,
-            )
-            ..addListener(() {
-              if (mounted) {
-                setState(() => _roundnessFraction = _roundnessCtrl!.value);
-              }
-            })
-            ..animateTo(target * _kPreThresholdRoundnessScale);
+      _onReEngageThreshold(newOffset, savedOffset, multiplier);
     } else if (!_pastThreshold) {
-      if (_reEngaging) {
-        _reEngaging = false;
-        _nbrCtrl?.stop(canceled: true);
-        _roundnessCtrl?.stop(canceled: true);
-      }
-      newNeighbour = newProgress;
-      newRoundness = (newProgress * _kMaxPreDetachRoundness).clamp(
-        0.0,
-        _kMaxPreDetachRoundness,
-      );
-      if (style.dismissHapticStream) {
-        _playPullHaptics();
-      }
+      final pre = _onPreThreshold(newProgress);
+      newNeighbour = pre.neighbour;
+      newRoundness = pre.roundness;
     }
 
     setState(() {
@@ -197,6 +82,153 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       _neighbourFraction = newNeighbour;
       _roundnessFraction = newRoundness;
     });
+  }
+
+  void _onCrossThreshold(double newOffset, double multiplier) {
+    _pastThreshold = true;
+    M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
+
+    final pushDir = newOffset.sign;
+    _startPushController(
+      multiplier: multiplier,
+      target: style.background == null || style.secondaryBackground == null
+          ? pushDir * _kDetachPushPixels
+          : 0,
+    );
+    _startNeighbourController(multiplier: multiplier, target: 0);
+    _startRoundnessController(multiplier: multiplier, target: 1);
+  }
+
+  void _onReEngageThreshold(
+    double newOffset,
+    double savedOffset,
+    double multiplier,
+  ) {
+    _pastThreshold = false;
+    _reEngaging = true;
+    M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
+
+    _startPushController(
+      multiplier: multiplier,
+      initialValue: _detachPush,
+      target: 0,
+    );
+
+    _dragOffset = newOffset;
+    final target = _dragProgress;
+    _dragOffset = savedOffset;
+
+    _nbrCtrl?.dispose();
+    _nbrCtrl =
+        SingleMotionController(
+            motion: const MaterialSpringMotion.expressiveSpatialDefault()
+                .copyWith(stiffness: 800 * multiplier, damping: 0.7),
+            vsync: this,
+            initialValue: _neighbourFraction,
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() => _neighbourFraction = _nbrCtrl!.value);
+            }
+          })
+          ..addStatusListener((s) {
+            if (s == AnimationStatus.completed ||
+                s == AnimationStatus.dismissed) {
+              _reEngaging = false;
+            }
+          })
+          ..animateTo(target);
+
+    _roundnessCtrl?.dispose();
+    _roundnessCtrl =
+        SingleMotionController(
+            motion: _kReEngageSpring.copyWith(stiffness: 800 * multiplier),
+            vsync: this,
+            initialValue: _roundnessFraction,
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() => _roundnessFraction = _roundnessCtrl!.value);
+            }
+          })
+          ..animateTo(target * _kPreThresholdRoundnessScale);
+  }
+
+  ({double neighbour, double roundness}) _onPreThreshold(double newProgress) {
+    if (_reEngaging) {
+      _reEngaging = false;
+      _nbrCtrl?.stop(canceled: true);
+      _roundnessCtrl?.stop(canceled: true);
+    }
+    if (style.dismissHapticStream) {
+      _playPullHaptics();
+    }
+    return (
+      neighbour: newProgress,
+      roundness: (newProgress * _kMaxPreDetachRoundness).clamp(
+        0.0,
+        _kMaxPreDetachRoundness,
+      ),
+    );
+  }
+
+  void _startPushController({
+    required double multiplier,
+    required double target,
+    double? initialValue,
+  }) {
+    _pushCtrl?.dispose();
+    _pushCtrl =
+        SingleMotionController(
+            motion: _kDetachPush.copyWith(stiffness: 800 * multiplier),
+            vsync: this,
+            initialValue: initialValue ?? 0,
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() => _detachPush = _pushCtrl!.value);
+            }
+          })
+          ..animateTo(target);
+  }
+
+  void _startNeighbourController({
+    required double multiplier,
+    required double target,
+  }) {
+    _nbrCtrl?.dispose();
+    _nbrCtrl =
+        SingleMotionController(
+            motion: const MaterialSpringMotion.expressiveSpatialDefault()
+                .copyWith(stiffness: 800 * multiplier, damping: 0.7),
+            vsync: this,
+            initialValue: _neighbourFraction,
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() => _neighbourFraction = _nbrCtrl!.value);
+            }
+          })
+          ..animateTo(target);
+  }
+
+  void _startRoundnessController({
+    required double multiplier,
+    required double target,
+  }) {
+    _roundnessCtrl?.dispose();
+    _roundnessCtrl =
+        SingleMotionController(
+            motion: _kRoundnessSnap.copyWith(stiffness: 1000 * multiplier),
+            vsync: this,
+            initialValue: _roundnessFraction,
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() => _roundnessFraction = _roundnessCtrl!.value);
+            }
+          })
+          ..animateTo(target);
   }
 
   /// handleDragEnd.
@@ -213,7 +245,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     }
 
     final velocity = d.velocity.pixelsPerSecond.dx.abs();
-    final double speedMul = (1.0 + (velocity / 1000.0)).clamp(1.0, 4.0);
+    final speedMul = (1.0 + (velocity / 1000.0)).clamp(1.0, 4.0);
 
     if (_dragProgress >= 1.0) {
       final direction = _dragOffset > 0
@@ -312,6 +344,20 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       return;
     }
 
+    final flyInitial = _captureDismissSlot(slot, dataIndex, direction);
+    _disposeDragControllers();
+    _markSlotCollapsing(slot);
+
+    final colCtrl = _createCollapseController(slot, speedMul);
+    _startFlyOut(slot, flyInitial, speedMul, colCtrl);
+    onDismissCallback?.call(dataIndex, direction);
+  }
+
+  double _captureDismissSlot(
+    M3EDismissibleSlot slot,
+    int dataIndex,
+    DismissDirection direction,
+  ) {
     final size = _cardSize(slot);
     slot
       ..capturedHeight = size.height
@@ -321,14 +367,19 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
 
     final flyInitial = _dragOffset + _detachPush;
     slot.flyNotifier.value = flyInitial;
+    return flyInitial;
+  }
 
+  void _disposeDragControllers() {
     _pushCtrl?.dispose();
     _pushCtrl = null;
     _nbrCtrl?.dispose();
     _nbrCtrl = null;
     _roundnessCtrl?.dispose();
     _roundnessCtrl = null;
+  }
 
+  void _markSlotCollapsing(M3EDismissibleSlot slot) {
     setState(() {
       slot.markCollapsing();
       _collapsingCount++;
@@ -341,7 +392,12 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       _reEngaging = false;
       _roundnessFraction = 0.0;
     });
+  }
 
+  SingleMotionController _createCollapseController(
+    M3EDismissibleSlot slot,
+    double speedMul,
+  ) {
     final colCtrl = SingleMotionController(
       motion: _kSpatialSpringBack.copyWith(
         stiffness: style.collapseSpeed * speedMul,
@@ -349,27 +405,41 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       vsync: this,
     );
     slot.collapseCtrl = colCtrl;
-
     colCtrl.addStatusListener((s) {
       if (s == AnimationStatus.completed || s == AnimationStatus.dismissed) {
-        if (mounted) {
-          final idx = _slots.indexOf(slot);
-          if (idx >= 0) {
-            setState(() {
-              _slots.removeAt(idx);
-              _collapsingCount--;
-              _reindexDragSlot();
-            });
-            _measureKeys.remove(slot);
-          }
-        }
-        slot
-          ..disposeFlyNotifier()
-          ..dispose();
-        colCtrl.dispose();
+        _finishCollapse(slot, colCtrl);
       }
     });
+    return colCtrl;
+  }
 
+  void _finishCollapse(
+    M3EDismissibleSlot slot,
+    SingleMotionController colCtrl,
+  ) {
+    if (mounted) {
+      final idx = _slots.indexOf(slot);
+      if (idx >= 0) {
+        setState(() {
+          _slots.removeAt(idx);
+          _collapsingCount--;
+          _reindexDragSlot();
+        });
+        _measureKeys.remove(slot);
+      }
+    }
+    slot
+      ..disposeFlyNotifier()
+      ..dispose();
+    colCtrl.dispose();
+  }
+
+  void _startFlyOut(
+    M3EDismissibleSlot slot,
+    double flyInitial,
+    double speedMul,
+    SingleMotionController colCtrl,
+  ) {
     final flySign = flyInitial.sign;
     final flyTarget = flySign == 0
         ? slot.capturedWidth + 80.0
@@ -387,15 +457,22 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     slot.flyCtrl = flyCtrl;
 
     var collapseStarted = false;
+    void startCollapse() {
+      if (collapseStarted) {
+        return;
+      }
+      collapseStarted = true;
+      colCtrl.animateTo(1);
+    }
+
     flyCtrl
       ..addListener(() {
         slot.flyNotifier.value = flyCtrl.value;
         final totalDist = (flyTarget - flyInitial).abs();
         if (totalDist > 0) {
           final currentDist = (flyCtrl.value - flyInitial).abs();
-          if (currentDist / totalDist > 0.9 && !collapseStarted) {
-            collapseStarted = true;
-            colCtrl.animateTo(1);
+          if (currentDist / totalDist > 0.9) {
+            startCollapse();
           }
         }
       })
@@ -403,15 +480,10 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
         if (s == AnimationStatus.completed || s == AnimationStatus.dismissed) {
           slot.flyCtrl = null;
           flyCtrl.dispose();
-          if (!collapseStarted) {
-            collapseStarted = true;
-            colCtrl.animateTo(1);
-          }
+          startCollapse();
         }
       })
       ..animateTo(flyTarget);
-
-    onDismissCallback?.call(dataIndex, direction);
   }
 
   /// buildSlot.

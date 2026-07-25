@@ -195,79 +195,13 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
     final DateTime currentDate = M3EDatePickerUtils.dateOnly(
       widget.currentDate ?? DateTime.now(),
     );
-
-    Widget? entryModeButton;
-    late Widget picker;
-    switch (_entryMode.value) {
-      case M3EDatePickerEntryMode.calendar:
-        picker = M3ECalendarDateRangePicker(
+    final ({Widget picker, Widget? entryModeButton}) resolved =
+        _resolveRangePickerAndEntryButton(
+          localizations: localizations,
           firstDate: firstDate,
           lastDate: lastDate,
           currentDate: currentDate,
-          initialStartDate: _startDate.value,
-          initialEndDate: _endDate.value,
-          selectableDayPredicate: widget.selectableDayPredicate,
-          onStartDateChanged: (DateTime value) {
-            setState(() => _startDate.value = value);
-          },
-          onEndDateChanged: (DateTime value) {
-            setState(() => _endDate.value = value);
-          },
         );
-        entryModeButton = M3EDatePickerEntryModeButton(
-          icon: M3EIcons.edit_outlined,
-          tooltip: localizations.inputDateModeButtonLabel,
-          onPressed: _handleEntryModeToggle,
-        );
-      case M3EDatePickerEntryMode.calendarOnly:
-        picker = M3ECalendarDateRangePicker(
-          firstDate: firstDate,
-          lastDate: lastDate,
-          currentDate: currentDate,
-          initialStartDate: _startDate.value,
-          initialEndDate: _endDate.value,
-          selectableDayPredicate: widget.selectableDayPredicate,
-          onStartDateChanged: (DateTime value) {
-            setState(() => _startDate.value = value);
-          },
-          onEndDateChanged: (DateTime value) {
-            setState(() => _endDate.value = value);
-          },
-        );
-      case M3EDatePickerEntryMode.input:
-      case M3EDatePickerEntryMode.inputOnly:
-        picker = Form(
-          key: _formKey,
-          autovalidateMode: _autovalidateMode.value,
-          child: M3EInputDateRangePickerFormField(
-            firstDate: firstDate,
-            lastDate: lastDate,
-            initialStartDate: _startDate.value,
-            initialEndDate: _endDate.value,
-            onStartDateSaved: (DateTime value) {
-              setState(() => _startDate.value = value);
-            },
-            onEndDateSaved: (DateTime value) {
-              setState(() => _endDate.value = value);
-            },
-            selectableDayPredicate: widget.selectableDayPredicate,
-            errorFormatText: widget.errorFormatText,
-            errorInvalidText: widget.errorInvalidText,
-            fieldStartHintText: widget.fieldStartHintText,
-            fieldEndHintText: widget.fieldEndHintText,
-            fieldStartLabelText: widget.fieldStartLabelText,
-            fieldEndLabelText: widget.fieldEndLabelText,
-          ),
-        );
-        if (_entryMode.value == M3EDatePickerEntryMode.input) {
-          entryModeButton = M3EDatePickerEntryModeButton(
-            icon: M3EIcons.calendar_today,
-            tooltip: localizations.calendarModeButtonLabel,
-            onPressed: _handleEntryModeToggle,
-          );
-        }
-    }
-
     final Size dialogSize =
         M3EDatePickerConstants.calendarPortraitDialogSize *
         (MediaQuery.textScalerOf(context)
@@ -277,23 +211,23 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 )
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
-
     final bool isInputMode =
         _entryMode.value == M3EDatePickerEntryMode.input ||
         _entryMode.value == M3EDatePickerEntryMode.inputOnly;
-
     final Widget pickerBody = AnimatedSize(
       duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
       curve: Curves.easeIn,
       alignment: Alignment.topCenter,
       child: isInputMode
-          ? M3EDatePickerDialogContent(isInputMode: true, child: picker)
+          ? M3EDatePickerDialogContent(
+              isInputMode: true,
+              child: resolved.picker,
+            )
           : SizedBox(
               height: M3EDatePickerConstants.dialogPickerBodyHeight,
-              child: picker,
+              child: resolved.picker,
             ),
     );
-
     return Padding(
       padding: widget.insetPadding,
       child: Material(
@@ -313,7 +247,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 titleText: _headerTitle(localizations),
                 showTitle: _startDate.value != null,
                 orientation: orientation,
-                entryModeButton: entryModeButton,
+                entryModeButton: resolved.entryModeButton,
               ),
               M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
               pickerBody,
@@ -328,6 +262,93 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
           ),
         ),
       ),
+    );
+  }
+
+  ({Widget picker, Widget? entryModeButton}) _resolveRangePickerAndEntryButton({
+    required MaterialLocalizations localizations,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required DateTime currentDate,
+  }) {
+    switch (_entryMode.value) {
+      case M3EDatePickerEntryMode.calendar:
+        return (
+          picker: _buildRangeCalendar(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            currentDate: currentDate,
+          ),
+          entryModeButton: M3EDatePickerEntryModeButton(
+            icon: M3EIcons.edit_outlined,
+            tooltip: localizations.inputDateModeButtonLabel,
+            onPressed: _handleEntryModeToggle,
+          ),
+        );
+      case M3EDatePickerEntryMode.calendarOnly:
+        return (
+          picker: _buildRangeCalendar(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            currentDate: currentDate,
+          ),
+          entryModeButton: null,
+        );
+      case M3EDatePickerEntryMode.input:
+      case M3EDatePickerEntryMode.inputOnly:
+        return (
+          picker: Form(
+            key: _formKey,
+            autovalidateMode: _autovalidateMode.value,
+            child: M3EInputDateRangePickerFormField(
+              firstDate: firstDate,
+              lastDate: lastDate,
+              initialStartDate: _startDate.value,
+              initialEndDate: _endDate.value,
+              onStartDateSaved: (DateTime value) {
+                setState(() => _startDate.value = value);
+              },
+              onEndDateSaved: (DateTime value) {
+                setState(() => _endDate.value = value);
+              },
+              selectableDayPredicate: widget.selectableDayPredicate,
+              errorFormatText: widget.errorFormatText,
+              errorInvalidText: widget.errorInvalidText,
+              fieldStartHintText: widget.fieldStartHintText,
+              fieldEndHintText: widget.fieldEndHintText,
+              fieldStartLabelText: widget.fieldStartLabelText,
+              fieldEndLabelText: widget.fieldEndLabelText,
+            ),
+          ),
+          entryModeButton: _entryMode.value == M3EDatePickerEntryMode.input
+              ? M3EDatePickerEntryModeButton(
+                  icon: M3EIcons.calendar_today,
+                  tooltip: localizations.calendarModeButtonLabel,
+                  onPressed: _handleEntryModeToggle,
+                )
+              : null,
+        );
+    }
+  }
+
+  Widget _buildRangeCalendar({
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required DateTime currentDate,
+  }) {
+    return M3ECalendarDateRangePicker(
+      firstDate: firstDate,
+      lastDate: lastDate,
+      currentDate: currentDate,
+      initialStartDate: _startDate.value,
+      initialEndDate: _endDate.value,
+      selectableDayPredicate: widget.selectableDayPredicate,
+      onStartDateChanged: (DateTime value) {
+        setState(() => _startDate.value = value);
+      },
+      onEndDateChanged: (DateTime value) {
+        setState(() => _endDate.value = value);
+      },
     );
   }
 }

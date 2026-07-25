@@ -26,57 +26,52 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
   // many items are placed before the current one in the view.
   double _buildItemExtent(
     int index,
+    // Signature matches ItemExtentBuilder; extents come from scroll state.
     SliverLayoutDimensions currentLayoutDimensions,
   ) {
     // If constraints.viewportMainAxisExtent is 0, firstChildExtent will be 0 and cause division error.
     if (constraints.viewportMainAxisExtent == 0) {
       return 0;
     }
-
-    double extent;
     if (index == _firstVisibleItemIndex) {
-      extent = math.max(_distanceToLeadingEdge, effectiveShrinkExtent);
+      return math.max(_distanceToLeadingEdge, effectiveShrinkExtent);
     }
-    // Calculate the extents of items located within the range defined by the
-    // weights array relative to the first visible item. This allows us to
-    // precisely determine each item's extent based on its initial extent
-    // (calculated from the weights) and the scrolling progress (the off-screen
-    // portion of the first item).
-    else if (index > _firstVisibleItemIndex &&
+    if (index > _firstVisibleItemIndex &&
         index - _firstVisibleItemIndex + 1 <= weights.length) {
-      assert(
-        index - _firstVisibleItemIndex < weights.length,
-        'carousel layout invariant',
-      );
-      final int currIndexOnWeightList = index - _firstVisibleItemIndex;
-      final int currWeight = weights[currIndexOnWeightList];
-      extent = extentUnit * currWeight; // initial extent
-      final double progress =
-          _firstVisibleItemOffscreenExtent / firstChildExtent;
-
-      final int prevWeight = weights[currIndexOnWeightList - 1];
-      final double finalIncrease = (prevWeight - currWeight) / weights.max;
-      extent = extent + finalIncrease * progress * maxChildExtent;
+      return _extentWithinWeights(index);
     }
-    // Calculate the extents of items located beyond the range defined by the
-    // weights array relative to the first visible item. During scrolling transition,
-    // it is possible that the number of visible items is larger than the length
-    // of `weights`. The extra item extent should be calculated here to fill
-    // the remaining space.
-    else if (index > _firstVisibleItemIndex &&
+    if (index > _firstVisibleItemIndex &&
         index - _firstVisibleItemIndex + 1 > weights.length) {
-      double visibleItemsTotalExtent = _distanceToLeadingEdge;
-      for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-        visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
-      }
-      extent = math.max(
-        constraints.remainingPaintExtent - visibleItemsTotalExtent,
-        effectiveShrinkExtent,
-      );
-    } else {
-      extent = math.max(minChildExtent, effectiveShrinkExtent);
+      return _extentBeyondWeights(index, currentLayoutDimensions);
     }
-    return extent;
+    return math.max(minChildExtent, effectiveShrinkExtent);
+  }
+
+  double _extentWithinWeights(int index) {
+    assert(
+      index - _firstVisibleItemIndex < weights.length,
+      'carousel layout invariant',
+    );
+    final int currIndexOnWeightList = index - _firstVisibleItemIndex;
+    final int currWeight = weights[currIndexOnWeightList];
+    final double progress = _firstVisibleItemOffscreenExtent / firstChildExtent;
+    final int prevWeight = weights[currIndexOnWeightList - 1];
+    final double finalIncrease = (prevWeight - currWeight) / weights.max;
+    return extentUnit * currWeight + finalIncrease * progress * maxChildExtent;
+  }
+
+  double _extentBeyondWeights(
+    int index,
+    SliverLayoutDimensions currentLayoutDimensions,
+  ) {
+    double visibleItemsTotalExtent = _distanceToLeadingEdge;
+    for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
+      visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
+    }
+    return math.max(
+      constraints.remainingPaintExtent - visibleItemsTotalExtent,
+      effectiveShrinkExtent,
+    );
   }
 
   // To ge the extent unit based on the viewport extent and the sum of weights.
@@ -198,38 +193,44 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
     double itemExtent,
   ) {
     final int? childCount = childManager.estimatedChildCount;
-
-    // For infinite scrolling, calculate how many items fit in the viewport
     if (infinite && childCount == null) {
-      double visibleItemsTotalExtent = _distanceToLeadingEdge;
-      int index = _firstVisibleItemIndex + 1;
-      // Calculate upper bound based on viewport extent and minimum possible item extent.
-      // In worst case, all items would be at minimum extent i.e. minChildExtent.
-      final double safeMinExtent = math.max(minChildExtent, 1);
-      final int estimatedUpperBound =
-          _firstVisibleItemIndex +
-          (constraints.viewportMainAxisExtent / safeMinExtent).ceil();
-      while (visibleItemsTotalExtent < constraints.viewportMainAxisExtent &&
-          index < estimatedUpperBound) {
-        visibleItemsTotalExtent += _buildItemExtent(index, layoutDimensions);
-        if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
-          return index;
-        }
-        index++;
-      }
-      return index;
+      return _maxIndexForInfiniteViewport();
     }
-
     if (childCount != null) {
-      double visibleItemsTotalExtent = _distanceToLeadingEdge;
-      for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
-        visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
-        if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
-          return i;
-        }
+      return _maxIndexForFiniteChildren(childCount);
+    }
+    return 0;
+  }
+
+  int _maxIndexForInfiniteViewport() {
+    double visibleItemsTotalExtent = _distanceToLeadingEdge;
+    int index = _firstVisibleItemIndex + 1;
+    // Calculate upper bound based on viewport extent and minimum possible item extent.
+    // In worst case, all items would be at minimum extent i.e. minChildExtent.
+    final double safeMinExtent = math.max(minChildExtent, 1);
+    final int estimatedUpperBound =
+        _firstVisibleItemIndex +
+        (constraints.viewportMainAxisExtent / safeMinExtent).ceil();
+    while (visibleItemsTotalExtent < constraints.viewportMainAxisExtent &&
+        index < estimatedUpperBound) {
+      visibleItemsTotalExtent += _buildItemExtent(index, layoutDimensions);
+      if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
+        return index;
+      }
+      index++;
+    }
+    return index;
+  }
+
+  int _maxIndexForFiniteChildren(int childCount) {
+    double visibleItemsTotalExtent = _distanceToLeadingEdge;
+    for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
+      visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
+      if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
+        return i;
       }
     }
-    return childCount ?? 0;
+    return childCount;
   }
 
   @override
@@ -278,14 +279,13 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
     assert(scrollOffset >= 0.0, 'scrollOffset must be non-negative');
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0, 'remainingCacheExtent must be non-negative');
-    final double targetEndScrollOffset = scrollOffset + remainingExtent;
     // TODO(Piinks): Clean up when deprecation expires.
     const double deprecatedExtraItemExtent = -1;
-
     final int firstIndex = getMinChildIndexForScrollOffset(
       scrollOffset,
       deprecatedExtraItemExtent,
     );
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
     final int? targetLastIndex = targetEndScrollOffset.isFinite
         ? getMaxChildIndexForScrollOffset(
             targetEndScrollOffset,
@@ -293,6 +293,46 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
           )
         : null;
 
+    _collectLayoutGarbage(
+      firstIndex: firstIndex,
+      targetLastIndex: targetLastIndex,
+    );
+    if (!_ensureInitialChild(
+      firstIndex: firstIndex,
+      constraints: constraints,
+      deprecatedExtraItemExtent: deprecatedExtraItemExtent,
+    )) {
+      return;
+    }
+
+    final RenderBox? trailingSeed = _layoutLeadingOrSeed(
+      firstIndex: firstIndex,
+      deprecatedExtraItemExtent: deprecatedExtraItemExtent,
+    );
+    if (trailingSeed == null) {
+      return;
+    }
+    final double extraLayoutOffset = _trailingExtraLayoutOffset();
+    final double estimatedFromChildren = _layoutTrailingChildren(
+      trailingChildWithLayout: trailingSeed,
+      targetLastIndex: targetLastIndex,
+      extraLayoutOffset: extraLayoutOffset,
+      deprecatedExtraItemExtent: deprecatedExtraItemExtent,
+    );
+    _finalizeWeightedGeometry(
+      constraints: constraints,
+      firstIndex: firstIndex,
+      targetLastIndex: targetLastIndex,
+      extraLayoutOffset: extraLayoutOffset,
+      estimatedMaxScrollOffset: estimatedFromChildren,
+      deprecatedExtraItemExtent: deprecatedExtraItemExtent,
+    );
+  }
+
+  void _collectLayoutGarbage({
+    required int firstIndex,
+    required int? targetLastIndex,
+  }) {
     if (firstChild != null) {
       final int leadingGarbage = calculateLeadingGarbage(
         firstIndex: firstIndex,
@@ -301,31 +341,42 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
           ? calculateTrailingGarbage(lastIndex: targetLastIndex)
           : 0;
       collectGarbage(leadingGarbage, trailingGarbage);
-    } else {
-      collectGarbage(0, 0);
+      return;
     }
+    collectGarbage(0, 0);
+  }
 
-    if (firstChild == null) {
-      final double layoutOffset = indexToLayoutOffset(
-        deprecatedExtraItemExtent,
-        firstIndex,
-      );
-      if (!addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
-        // There are either no children, or we are past the end of all our children.
-        final double max;
-        if (firstIndex <= 0) {
-          max = 0.0;
-        } else {
-          max = computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
-        }
-        geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max);
-        childManager.didFinishLayout();
-        return;
-      }
+  bool _ensureInitialChild({
+    required int firstIndex,
+    required SliverConstraints constraints,
+    required double deprecatedExtraItemExtent,
+  }) {
+    if (firstChild != null) {
+      return true;
     }
+    final double layoutOffset = indexToLayoutOffset(
+      deprecatedExtraItemExtent,
+      firstIndex,
+    );
+    if (addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
+      return true;
+    }
+    // There are either no children, or we are past the end of all our children.
+    final double max = firstIndex <= 0
+        ? 0.0
+        : computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
+    geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max);
+    childManager.didFinishLayout();
+    return false;
+  }
 
+  /// Returns the trailing seed after leading inserts, or `null` when a scroll
+  /// offset correction was applied and layout must abort.
+  RenderBox? _layoutLeadingOrSeed({
+    required int firstIndex,
+    required double deprecatedExtraItemExtent,
+  }) {
     RenderBox? trailingChildWithLayout;
-
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
       final RenderBox? child = insertAndLayoutLeadingChild(
         _getChildConstraints(index),
@@ -340,7 +391,7 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
             index,
           ),
         );
-        return;
+        return null;
       }
       final childParentData =
           child.parentData! as SliverMultiBoxAdaptorParentData
@@ -351,40 +402,54 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
       assert(childParentData.index == index, 'carousel invariant');
       trailingChildWithLayout ??= child;
     }
-
-    if (trailingChildWithLayout == null) {
-      firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
-      (firstChild!.parentData! as SliverMultiBoxAdaptorParentData)
-          .layoutOffset = indexToLayoutOffset(
-        deprecatedExtraItemExtent,
-        firstIndex,
-      );
-      trailingChildWithLayout = firstChild;
+    if (trailingChildWithLayout != null) {
+      return trailingChildWithLayout;
     }
+    return _layoutFirstChildSeed(firstIndex, deprecatedExtraItemExtent);
+  }
 
-    // From the last item to the firstly encountered max item
+  RenderBox _layoutFirstChildSeed(
+    int firstIndex,
+    double deprecatedExtraItemExtent,
+  ) {
+    firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
+    (firstChild!.parentData! as SliverMultiBoxAdaptorParentData).layoutOffset =
+        indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+    return firstChild!;
+  }
+
+  double _trailingExtraLayoutOffset() {
+    if (!consumeMaxWeight) {
+      return 0;
+    }
     double extraLayoutOffset = 0;
-    if (consumeMaxWeight) {
-      for (int i = weights.length - 1; i >= 0; i--) {
-        if (weights[i] == weights.max) {
-          break;
-        }
-        extraLayoutOffset += weights[i] * extentUnit;
+    for (int i = weights.length - 1; i >= 0; i--) {
+      if (weights[i] == weights.max) {
+        break;
       }
+      extraLayoutOffset += weights[i] * extentUnit;
     }
+    return extraLayoutOffset;
+  }
 
-    double estimatedMaxScrollOffset = double.infinity;
-    // Layout visible items after the first visible item.
+  double _layoutTrailingChildren({
+    required RenderBox trailingChildWithLayout,
+    required int? targetLastIndex,
+    required double extraLayoutOffset,
+    required double deprecatedExtraItemExtent,
+  }) {
+    var trailing = trailingChildWithLayout;
+    var estimatedMaxScrollOffset = double.infinity;
     for (
-      int index = indexOf(trailingChildWithLayout!) + 1;
+      int index = indexOf(trailing) + 1;
       targetLastIndex == null || index <= targetLastIndex;
       ++index
     ) {
-      RenderBox? child = childAfter(trailingChildWithLayout!);
+      RenderBox? child = childAfter(trailing);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(
           _getChildConstraints(index),
-          after: trailingChildWithLayout,
+          after: trailing,
         );
         if (child == null) {
           // We have run out of children.
@@ -396,7 +461,7 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
       } else {
         child.layout(_getChildConstraints(index));
       }
-      trailingChildWithLayout = child;
+      trailing = child;
       final childParentData =
           child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index, 'carousel invariant');
@@ -405,31 +470,46 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
         childParentData.index!,
       );
     }
+    return estimatedMaxScrollOffset;
+  }
 
+  double _trailingScrollOffset({
+    required int lastIndex,
+    required double extraLayoutOffset,
+    required double deprecatedExtraItemExtent,
+  }) {
+    if (!infinite && lastIndex + 1 == childManager.childCount) {
+      var trailingScrollOffset = indexToLayoutOffset(
+        deprecatedExtraItemExtent,
+        lastIndex,
+      );
+      trailingScrollOffset += math.max(
+        weights.last * extentUnit,
+        _buildItemExtent(lastIndex, layoutDimensions),
+      );
+      return trailingScrollOffset + extraLayoutOffset;
+    }
+    return indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1);
+  }
+
+  void _finalizeWeightedGeometry({
+    required SliverConstraints constraints,
+    required int firstIndex,
+    required int? targetLastIndex,
+    required double extraLayoutOffset,
+    required double estimatedMaxScrollOffset,
+    required double deprecatedExtraItemExtent,
+  }) {
     final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(
       deprecatedExtraItemExtent,
       firstIndex,
     );
-    double trailingScrollOffset;
-
-    if (!infinite && lastIndex + 1 == childManager.childCount) {
-      trailingScrollOffset = indexToLayoutOffset(
-        deprecatedExtraItemExtent,
-        lastIndex,
-      );
-
-      trailingScrollOffset += math.max(
-        weights.last * extentUnit,
-        _buildItemExtent(lastIndex, layoutDimensions),
-      );
-      trailingScrollOffset += extraLayoutOffset;
-    } else {
-      trailingScrollOffset = indexToLayoutOffset(
-        deprecatedExtraItemExtent,
-        lastIndex + 1,
-      );
-    }
+    final double trailingScrollOffset = _trailingScrollOffset(
+      lastIndex: lastIndex,
+      extraLayoutOffset: extraLayoutOffset,
+      deprecatedExtraItemExtent: deprecatedExtraItemExtent,
+    );
 
     assert(debugAssertChildListIsNonEmptyAndContiguous(), 'carousel invariant');
     assert(indexOf(firstChild!) == firstIndex, 'carousel invariant');
@@ -438,7 +518,7 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
       'carousel invariant',
     );
 
-    estimatedMaxScrollOffset = math.min(
+    final double estimated = math.min(
       estimatedMaxScrollOffset,
       estimateMaxScrollOffset(
         constraints,
@@ -448,19 +528,16 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
         trailingScrollOffset: trailingScrollOffset,
       ),
     );
-
     final double paintExtent = calculatePaintOffset(
       constraints,
       from: consumeMaxWeight ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
-
     final double cacheExtent = calculateCacheOffset(
       constraints,
       from: consumeMaxWeight ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
-
     final double targetEndScrollOffsetForPaint =
         constraints.scrollOffset + constraints.remainingPaintExtent;
     final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
@@ -471,10 +548,10 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
         : null;
 
     geometry = SliverGeometry(
-      scrollExtent: estimatedMaxScrollOffset,
+      scrollExtent: estimated,
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,
-      maxPaintExtent: estimatedMaxScrollOffset,
+      maxPaintExtent: estimated,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow:
           (targetLastIndexForPaint != null &&
@@ -484,7 +561,7 @@ mixin _M3EWeightedCarouselLayoutMixin on RenderSliverFixedExtentBoxAdaptor {
 
     // We may have started the layout while scrolled to the end, which would not
     // expose a new child.
-    if (estimatedMaxScrollOffset == trailingScrollOffset) {
+    if (estimated == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
     }
     childManager.didFinishLayout();

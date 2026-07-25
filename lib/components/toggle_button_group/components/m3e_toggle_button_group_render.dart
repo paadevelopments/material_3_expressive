@@ -197,87 +197,21 @@ class M3ERenderButtonGroup extends RenderBox
 
   @override
   void performLayout() {
-    int childCount = this.childCount;
+    final childCount = this.childCount;
     if (childCount == 0) {
       size = constraints.smallest;
       return;
     }
 
     final isHorizontal = direction == Axis.horizontal;
-
-    // First pass: Calculate natural sizes for squish math
-    final List<double> naturalSizes = [];
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final dryConstraints = isHorizontal
-          ? BoxConstraints(maxHeight: constraints.maxHeight)
-          : BoxConstraints(maxWidth: constraints.maxWidth);
-      // We cannot use getDryLayout or computeMaxIntrinsicWidth because children
-      // may contain a LayoutBuilder which prohibits speculative sizing.
-      // Instead, we perform a real layout pass with unconstrained main axis to
-      // discover the true natural size.
-      child.layout(dryConstraints, parentUsesSize: true);
-      final double naturalMain = isHorizontal
-          ? child.size.width
-          : child.size.height;
-      naturalSizes.add(naturalMain);
-      child = childAfter(child);
-    }
-
-    // Apply squish
-    final List<double> sizes = List.of(naturalSizes);
-    if (pressedIndex != null &&
-        pressedIndex! >= 0 &&
-        pressedIndex! < childCount &&
-        animValue > 0) {
-      final int pIndex = pressedIndex!;
-      final double childNaturalSize = naturalSizes[pIndex];
-      final double growth = childNaturalSize * expandedRatio * animValue;
-
-      sizes[pIndex] += growth;
-
-      if (pIndex > 0 && pIndex < childCount - 1) {
-        // Middle child
-        sizes[pIndex - 1] = math.max(0, sizes[pIndex - 1] - growth / 2);
-        sizes[pIndex + 1] = math.max(0, sizes[pIndex + 1] - growth / 2);
-      } else if (pIndex == 0 && childCount > 1) {
-        // First child
-        sizes[pIndex + 1] = math.max(0, sizes[pIndex + 1] - growth);
-      } else if (pIndex == childCount - 1 && childCount > 1) {
-        // Last child
-        sizes[pIndex - 1] = math.max(0, sizes[pIndex - 1] - growth);
-      }
-    }
-
-    child = firstChild;
-    var maxCross = 0.toDouble();
-
-    final List<RenderBox> children = [];
-    while (child != null) {
-      children.add(child);
-      child = childAfter(child);
-    }
-
-    for (var i = 0; i < children.length; i++) {
-      final c = children[i];
-      final double mainSize = sizes[i];
-
-      BoxConstraints childConstraints;
-      if (isHorizontal) {
-        childConstraints = BoxConstraints.tightFor(
-          width: mainSize,
-        ).copyWith(minHeight: 0, maxHeight: constraints.maxHeight);
-      } else {
-        childConstraints = BoxConstraints.tightFor(
-          height: mainSize,
-        ).copyWith(minWidth: 0, maxWidth: constraints.maxWidth);
-      }
-      c.layout(childConstraints, parentUsesSize: true);
-      maxCross = math.max(
-        maxCross,
-        isHorizontal ? c.size.height : c.size.width,
-      );
-    }
+    final naturalSizes = _layoutNaturalMainSizes(isHorizontal: isHorizontal);
+    final sizes = _applySquishSizes(naturalSizes, childCount: childCount);
+    final children = _collectChildren();
+    final maxCross = _layoutChildrenWithMainSizes(
+      children,
+      sizes,
+      isHorizontal: isHorizontal,
+    );
 
     final totalMain =
         sizes.fold<double>(0, (a, b) => a + b) +
@@ -286,30 +220,140 @@ class M3ERenderButtonGroup extends RenderBox
     size = constraints.constrain(
       isHorizontal ? Size(totalMain, maxCross) : Size(maxCross, totalMain),
     );
+    _positionChildren(
+      children,
+      sizes,
+      maxCross: maxCross,
+      isHorizontal: isHorizontal,
+    );
+  }
 
+  List<double> _layoutNaturalMainSizes({required bool isHorizontal}) {
+    final naturalSizes = <double>[];
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final dryConstraints = isHorizontal
+          ? BoxConstraints(maxHeight: constraints.maxHeight)
+          : BoxConstraints(maxWidth: constraints.maxWidth);
+      child.layout(dryConstraints, parentUsesSize: true);
+      naturalSizes.add(isHorizontal ? child.size.width : child.size.height);
+      child = childAfter(child);
+    }
+    return naturalSizes;
+  }
+
+  List<double> _applySquishSizes(
+    List<double> naturalSizes, {
+    required int childCount,
+  }) {
+    final sizes = List<double>.of(naturalSizes);
+    if (!_canApplySquish(childCount)) {
+      return sizes;
+    }
+
+    final pIndex = pressedIndex!;
+    final growth = naturalSizes[pIndex] * expandedRatio * animValue;
+    sizes[pIndex] += growth;
+    _shrinkNeighborsForSquish(
+      sizes,
+      pressedIndex: pIndex,
+      childCount: childCount,
+      growth: growth,
+    );
+    return sizes;
+  }
+
+  bool _canApplySquish(int childCount) {
+    return pressedIndex != null &&
+        pressedIndex! >= 0 &&
+        pressedIndex! < childCount &&
+        animValue > 0;
+  }
+
+  void _shrinkNeighborsForSquish(
+    List<double> sizes, {
+    required int pressedIndex,
+    required int childCount,
+    required double growth,
+  }) {
+    final isMiddle = pressedIndex > 0 && pressedIndex < childCount - 1;
+    if (isMiddle) {
+      sizes[pressedIndex - 1] = math.max(
+        0,
+        sizes[pressedIndex - 1] - growth / 2,
+      );
+      sizes[pressedIndex + 1] = math.max(
+        0,
+        sizes[pressedIndex + 1] - growth / 2,
+      );
+      return;
+    }
+    if (pressedIndex == 0 && childCount > 1) {
+      sizes[1] = math.max(0, sizes[1] - growth);
+      return;
+    }
+    if (pressedIndex == childCount - 1 && childCount > 1) {
+      sizes[pressedIndex - 1] = math.max(0, sizes[pressedIndex - 1] - growth);
+    }
+  }
+
+  List<RenderBox> _collectChildren() {
+    final children = <RenderBox>[];
+    RenderBox? child = firstChild;
+    while (child != null) {
+      children.add(child);
+      child = childAfter(child);
+    }
+    return children;
+  }
+
+  double _layoutChildrenWithMainSizes(
+    List<RenderBox> children,
+    List<double> sizes, {
+    required bool isHorizontal,
+  }) {
+    var maxCross = 0.toDouble();
+    for (var i = 0; i < children.length; i++) {
+      final c = children[i];
+      final mainSize = sizes[i];
+      final childConstraints = isHorizontal
+          ? BoxConstraints.tightFor(
+              width: mainSize,
+            ).copyWith(minHeight: 0, maxHeight: constraints.maxHeight)
+          : BoxConstraints.tightFor(
+              height: mainSize,
+            ).copyWith(minWidth: 0, maxWidth: constraints.maxWidth);
+      c.layout(childConstraints, parentUsesSize: true);
+      maxCross = math.max(
+        maxCross,
+        isHorizontal ? c.size.height : c.size.width,
+      );
+    }
+    return maxCross;
+  }
+
+  void _positionChildren(
+    List<RenderBox> children,
+    List<double> sizes, {
+    required double maxCross,
+    required bool isHorizontal,
+  }) {
     var currentMainOffset = 0.toDouble();
     for (var i = 0; i < children.length; i++) {
       final c = children[i];
       final childParentData = c.parentData! as M3EButtonGroupParentData;
+      final alignment = childParentData.alignment ?? CrossAxisAlignment.center;
+      final childCross = isHorizontal ? c.size.height : c.size.width;
+      final freeSpace = maxCross - childCross;
+      final crossOffset = switch (alignment) {
+        CrossAxisAlignment.center => freeSpace / 2,
+        CrossAxisAlignment.end => freeSpace,
+        _ => 0.toDouble(),
+      };
 
-      var crossOffset = 0.toDouble();
-      final CrossAxisAlignment alignment =
-          childParentData.alignment ?? CrossAxisAlignment.center;
-
-      final double childCross = isHorizontal ? c.size.height : c.size.width;
-      final double freeSpace = maxCross - childCross;
-
-      if (alignment == CrossAxisAlignment.center) {
-        crossOffset = freeSpace / 2;
-      } else if (alignment == CrossAxisAlignment.end) {
-        crossOffset = freeSpace;
-      }
-
-      if (isHorizontal) {
-        childParentData.offset = Offset(currentMainOffset, crossOffset);
-      } else {
-        childParentData.offset = Offset(crossOffset, currentMainOffset);
-      }
+      childParentData.offset = isHorizontal
+          ? Offset(currentMainOffset, crossOffset)
+          : Offset(crossOffset, currentMainOffset);
       currentMainOffset += sizes[i] + spacing;
     }
   }

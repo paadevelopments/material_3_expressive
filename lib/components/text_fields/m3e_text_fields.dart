@@ -202,30 +202,19 @@ class _M3ETextFieldState extends State<M3ETextField> {
     final TextStyle inputStyle = theme.typeScale.bodyLarge.copyWith(
       color: scheme.onSurface,
     );
+    final Widget editable = _buildEditableText(
+      theme: theme,
+      scheme: scheme,
+      accent: accent,
+      inputStyle: inputStyle,
+    );
 
     if (widget.label == null) {
       return SizedBox(
         height: textFieldTheme.contentHeight,
         child: Align(
           alignment: AlignmentDirectional.centerStart,
-          child: EditableText(
-            controller: _controller,
-            focusNode: _focusNode,
-            readOnly: !widget.enabled,
-            obscureText: widget.obscureText,
-            maxLines: widget.maxLines,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            onSubmitted: widget.onSubmitted,
-            onTapOutside:
-                widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
-            style: inputStyle,
-            cursorColor: accent,
-            backgroundCursorColor: scheme.outlineVariant,
-            selectionColor: scheme.primary.withValues(
-              alpha: theme.textFieldTheme.selectionOpacity,
-            ),
-          ),
+          child: editable,
         ),
       );
     }
@@ -252,30 +241,34 @@ class _M3ETextFieldState extends State<M3ETextField> {
               child: Text(widget.label!),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: EditableText(
-              controller: _controller,
-              focusNode: _focusNode,
-              readOnly: !widget.enabled,
-              obscureText: widget.obscureText,
-              maxLines: widget.maxLines,
-              keyboardType: widget.keyboardType,
-              textInputAction: widget.textInputAction,
-              onSubmitted: widget.onSubmitted,
-              onTapOutside:
-                  widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
-              style: inputStyle,
-              cursorColor: accent,
-              backgroundCursorColor: scheme.outlineVariant,
-              selectionColor: scheme.primary.withValues(
-                alpha: theme.textFieldTheme.selectionOpacity,
-              ),
-            ),
-          ),
+          Positioned(left: 0, right: 0, bottom: 0, child: editable),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEditableText({
+    required M3EThemeData theme,
+    required M3EColorScheme scheme,
+    required Color accent,
+    required TextStyle inputStyle,
+  }) {
+    return EditableText(
+      controller: _controller,
+      focusNode: _focusNode,
+      readOnly: !widget.enabled,
+      obscureText: widget.obscureText,
+      maxLines: widget.maxLines,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      onSubmitted: widget.onSubmitted,
+      onTapOutside:
+          widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
+      style: inputStyle,
+      cursorColor: accent,
+      backgroundCursorColor: scheme.outlineVariant,
+      selectionColor: scheme.primary.withValues(
+        alpha: theme.textFieldTheme.selectionOpacity,
       ),
     );
   }

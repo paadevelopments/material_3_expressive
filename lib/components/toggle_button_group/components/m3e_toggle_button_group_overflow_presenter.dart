@@ -207,24 +207,15 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     final isLast = listIndex == total - 1;
     final isSingle = total == 1;
 
-    BorderRadius borderRadius;
-    if (selected) {
-      borderRadius = BorderRadius.circular(selectedR);
-    } else if (isSingle) {
-      borderRadius = BorderRadius.circular(outerR);
-    } else if (isFirst) {
-      borderRadius = BorderRadius.vertical(
-        top: Radius.circular(outerR),
-        bottom: Radius.circular(innerR),
-      );
-    } else if (isLast) {
-      borderRadius = BorderRadius.vertical(
-        top: Radius.circular(innerR),
-        bottom: Radius.circular(outerR),
-      );
-    } else {
-      borderRadius = BorderRadius.circular(innerR);
-    }
+    final borderRadius = _bottomSheetItemBorderRadius(
+      selected: selected,
+      isSingle: isSingle,
+      isFirst: isFirst,
+      isLast: isLast,
+      outerR: outerR,
+      innerR: innerR,
+      selectedR: selectedR,
+    );
 
     final bgColor = selected
         ? (dec.selectedBackgroundColor ?? cs.secondaryContainer)
@@ -271,6 +262,36 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
         ),
       ),
     );
+  }
+
+  BorderRadius _bottomSheetItemBorderRadius({
+    required bool selected,
+    required bool isSingle,
+    required bool isFirst,
+    required bool isLast,
+    required double outerR,
+    required double innerR,
+    required double selectedR,
+  }) {
+    if (selected) {
+      return BorderRadius.circular(selectedR);
+    }
+    if (isSingle) {
+      return BorderRadius.circular(outerR);
+    }
+    if (isFirst) {
+      return BorderRadius.vertical(
+        top: Radius.circular(outerR),
+        bottom: Radius.circular(innerR),
+      );
+    }
+    if (isLast) {
+      return BorderRadius.vertical(
+        top: Radius.circular(innerR),
+        bottom: Radius.circular(outerR),
+      );
+    }
+    return BorderRadius.circular(innerR);
   }
 
   Widget _buildBottomSheetStandardList(

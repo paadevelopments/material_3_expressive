@@ -317,36 +317,50 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final M3EColorScheme scheme = theme.colorScheme;
     final Color active = widget.color ?? scheme.primary;
     final Color track = widget.trackColor ?? scheme.surfaceContainerHighest;
-
     if (!wavy) {
-      final M3ELinearProgressLayout layout = linear.resolveFlat(
-        widget.linearSize,
-      );
-      return RepaintBoundary(
-        child: SizedBox(
-          height: layout.trackHeight,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: M3ELinearProgressPainter(
-              value: widget.value,
-              active: active,
-              track: track,
-              strokeWidth: layout.trackHeight,
-              trackStrokeWidth: layout.trackHeight,
-              gap: layout.gap,
-              stopSize: layout.dotDiameter,
-              isWavy: false,
-              waveAmplitude: 0,
-              wavelength: 40,
-              phase: 0,
-              amplitudeFactor: 0,
-              flatLayout: layout,
-            ),
+      return _buildLinearFlat(linear: linear, active: active, track: track);
+    }
+    return _buildLinearWavy(linear: linear, active: active, track: track);
+  }
+
+  Widget _buildLinearFlat({
+    required M3ELinearProgressTheme linear,
+    required Color active,
+    required Color track,
+  }) {
+    final M3ELinearProgressLayout layout = linear.resolveFlat(
+      widget.linearSize,
+    );
+    return RepaintBoundary(
+      child: SizedBox(
+        height: layout.trackHeight,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: M3ELinearProgressPainter(
+            value: widget.value,
+            active: active,
+            track: track,
+            strokeWidth: layout.trackHeight,
+            trackStrokeWidth: layout.trackHeight,
+            gap: layout.gap,
+            stopSize: layout.dotDiameter,
+            isWavy: false,
+            waveAmplitude: 0,
+            wavelength: 40,
+            phase: 0,
+            amplitudeFactor: 0,
+            flatLayout: layout,
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
+  Widget _buildLinearWavy({
+    required M3ELinearProgressTheme linear,
+    required Color active,
+    required Color track,
+  }) {
     final double stroke = widget.strokeWidth ?? linear.strokeWidth;
     final double trackStroke =
         widget.trackStrokeWidth ?? linear.trackStrokeWidth;

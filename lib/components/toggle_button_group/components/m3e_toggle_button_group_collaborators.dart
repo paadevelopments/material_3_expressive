@@ -119,25 +119,29 @@ class _ToggleGroupFocusManager {
     if (actions.isEmpty) {
       return null;
     }
-    int nextIndex = currentIndex + direction;
-    final start = nextIndex;
+    final start = currentIndex + direction;
+    var nextIndex = start;
 
     while (true) {
-      if (nextIndex < 0) {
-        nextIndex = actions.length - 1;
-      } else if (nextIndex >= actions.length) {
-        nextIndex = 0;
-      }
-
+      nextIndex = _wrapIndex(nextIndex, actions.length);
       if (actions[nextIndex].enabled) {
         return nextIndex;
       }
-
       nextIndex += direction;
       if (nextIndex == start || nextIndex == currentIndex) {
         return null;
       }
     }
+  }
+
+  static int _wrapIndex(int index, int length) {
+    if (index < 0) {
+      return length - 1;
+    }
+    if (index >= length) {
+      return 0;
+    }
+    return index;
   }
 }
 

@@ -35,7 +35,6 @@ Future<T?> showM3EMenu<T>({
 }) {
   final completer = Completer<T?>();
   late OverlayEntry entry;
-
   entry = OverlayEntry(
     builder: (BuildContext overlayContext) {
       return M3EMenuPopup<T>(
@@ -48,23 +47,20 @@ Future<T?> showM3EMenu<T>({
         preferredWidth: preferredWidth,
         callerFocusNode: callerFocusNode,
         themeOverride: themeOverride,
-        onSelected: (Object? value) {
-          if (!completer.isCompleted) {
-            completer.complete(value as T?);
-          }
-        },
-        onDismiss: () {
-          if (!completer.isCompleted) {
-            completer.complete(null);
-          }
-        },
+        onSelected: (Object? value) => _completeOnce(completer, value as T?),
+        onDismiss: () => _completeOnce(completer, null),
         onRemove: () => entry.remove(),
       );
     },
   );
-
   Overlay.of(context, rootOverlay: true).insert(entry);
   return completer.future;
+}
+
+void _completeOnce<T>(Completer<T?> completer, T? value) {
+  if (!completer.isCompleted) {
+    completer.complete(value);
+  }
 }
 
 /// Overlay surface for [showM3EMenu] / [M3EMenu] (Compose `DropdownMenuPopup`).
@@ -258,19 +254,15 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     final theme = M3ETheme.of(context);
     final menuTheme = widget.themeOverride ?? theme.menuTheme;
     final scheme = theme.colorScheme;
-    final screenSize = MediaQuery.sizeOf(context);
-    final textDirection = Directionality.of(context);
-
     final placement = M3EMenuPlacer.compute(
-      screenSize: screenSize,
+      screenSize: MediaQuery.sizeOf(context),
       anchorRect: widget.anchor,
       theme: menuTheme,
       position: widget.position,
-      textDirection: textDirection,
+      textDirection: Directionality.of(context),
       approximateItemCount: M3EMenuPlacer.approximateItemCount(widget.children),
       preferredWidth: widget.preferredWidth,
     );
-
     // Same vertical scale origin as [M3EDropdownMenu] panel.
     final scaleAlignment = placement.opensAbove
         ? Alignment.bottomCenter
@@ -282,15 +274,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       node: _focusScopeNode,
       child: Focus(
         focusNode: FocusNode(skipTraversal: true),
-        onKeyEvent: (FocusNode node, KeyEvent event) {
-          if (event.logicalKey == LogicalKeyboardKey.escape) {
-            if (event is KeyDownEvent) {
-              _dismiss(restoreFocus: true);
-            }
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        },
+        onKeyEvent: _onKeyEvent,
         child: Stack(
           clipBehavior: Clip.none,
           children: <Widget>[
@@ -309,21 +293,10 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
               child: AnimatedBuilder(
                 animation: _expandCtrl,
                 builder: (BuildContext context, Widget? child) {
-                  // Exact same transform as dropdown panel expand/collapse.
-                  final progress = _expandCtrl.value.clamp(0.0, 1.5);
-                  final clampedScale = progress.clamp(0.0, 1.2);
-
-                  if (progress <= 0.01) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return Opacity(
-                    opacity: progress.clamp(0.0, 1.0),
-                    child: Transform.scale(
-                      alignment: scaleAlignment,
-                      scaleY: clampedScale,
-                      child: child,
-                    ),
+                  return _expandTransform(
+                    progress: _expandCtrl.value,
+                    scaleAlignment: scaleAlignment,
+                    child: child,
                   );
                 },
                 child: ConstrainedBox(
@@ -338,6 +311,37 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event.logicalKey != LogicalKeyboardKey.escape) {
+      return KeyEventResult.ignored;
+    }
+    if (event is KeyDownEvent) {
+      _dismiss(restoreFocus: true);
+    }
+    return KeyEventResult.handled;
+  }
+
+  Widget _expandTransform({
+    required double progress,
+    required Alignment scaleAlignment,
+    required Widget? child,
+  }) {
+    // Exact same transform as dropdown panel expand/collapse.
+    final clampedProgress = progress.clamp(0.0, 1.5);
+    final clampedScale = clampedProgress.clamp(0.0, 1.2);
+    if (clampedProgress <= 0.01) {
+      return const SizedBox.shrink();
+    }
+    return Opacity(
+      opacity: clampedProgress.clamp(0.0, 1.0),
+      child: Transform.scale(
+        alignment: scaleAlignment,
+        scaleY: clampedScale,
+        child: child,
       ),
     );
   }

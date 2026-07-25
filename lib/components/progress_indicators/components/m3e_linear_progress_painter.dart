@@ -163,7 +163,6 @@ class M3ELinearProgressPainter extends CustomPainter {
   }
 
   void _paintWavy(Canvas canvas, Size size) {
-    // Active and track share the same thickness.
     final double stroke = strokeWidth;
     final double visualGap = _visualGap(stroke);
     final double left = inset;
@@ -177,7 +176,6 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
     final double amplitude = waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
-
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -186,29 +184,8 @@ class M3ELinearProgressPainter extends CustomPainter {
 
     final indeterminate = value == null;
     final bool complete = !indeterminate && p >= 1.0;
-    final bool waveOnly = indeterminate || complete;
-
-    void drawWave(double start, double end, double amp) {
-      if (end <= start) {
-        return;
-      }
-      final path = Path();
-      const step = 1.5;
-      final double k = 2 * math.pi / wavelength;
-      var x = start;
-      double y = cy + amp * math.sin(phase + (x - start) * k);
-      path.moveTo(x, y);
-      for (x = start + step; x <= end; x += step) {
-        y = cy + amp * math.sin(phase + (x - start) * k);
-        path.lineTo(x, y);
-      }
-      y = cy + amp * math.sin(phase + (end - start) * k);
-      path.lineTo(end, y);
-      canvas.drawPath(path, paint..color = active);
-    }
-
-    if (waveOnly) {
-      drawWave(left, trackRight, amplitude);
+    if (indeterminate || complete) {
+      _drawWave(canvas, paint, left, trackRight, cy, amplitude);
       if (complete) {
         canvas.drawCircle(
           Offset(stop.centerX, cy),
@@ -221,7 +198,6 @@ class M3ELinearProgressPainter extends CustomPainter {
 
     final double activeEndX = left + width * p;
     final double trackStartX = math.min(trackRight, activeEndX + visualGap);
-
     if (trackStartX < trackRight) {
       canvas.drawLine(
         Offset(trackStartX, cy),
@@ -229,14 +205,38 @@ class M3ELinearProgressPainter extends CustomPainter {
         paint..color = track,
       );
     }
-
-    drawWave(left, activeEndX, amplitude);
-
+    _drawWave(canvas, paint, left, activeEndX, cy, amplitude);
     canvas.drawCircle(
       Offset(stop.centerX, cy),
       stop.diameter / 2,
       Paint()..color = active,
     );
+  }
+
+  void _drawWave(
+    Canvas canvas,
+    Paint paint,
+    double start,
+    double end,
+    double cy,
+    double amp,
+  ) {
+    if (end <= start) {
+      return;
+    }
+    final path = Path();
+    const step = 1.5;
+    final double k = 2 * math.pi / wavelength;
+    var x = start;
+    double y = cy + amp * math.sin(phase + (x - start) * k);
+    path.moveTo(x, y);
+    for (x = start + step; x <= end; x += step) {
+      y = cy + amp * math.sin(phase + (x - start) * k);
+      path.lineTo(x, y);
+    }
+    y = cy + amp * math.sin(phase + (end - start) * k);
+    path.lineTo(end, y);
+    canvas.drawPath(path, paint..color = active);
   }
 
   @override

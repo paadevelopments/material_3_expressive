@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_date_picker_enums.dart';
 import '../res/m3e_date_picker_constants.dart';
+import '../styles/m3e_date_picker_theme.dart';
 import '../utils/m3e_date_picker_utils.dart';
 
 /// Scrollable year grid for calendar date pickers.
@@ -90,36 +91,7 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (widget.mode != null && widget.onModeChanged != null)
-          SizedBox(
-            height: M3EDatePickerConstants.subHeaderHeight,
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: M3ETappable(
-                onTap: () => widget.onModeChanged!(M3EDatePickerMode.day),
-                semanticLabel: localizations.formatMonthYear(monthDate),
-                builder: (BuildContext context, M3EInteractionState state) {
-                  return Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 16),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          localizations.formatYear(DateTime(monthDate.year)),
-                          style: theme.typeScale.titleSmall.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        Icon(
-                          M3EIcons.arrow_drop_up,
-                          size: dateTheme.arrowIconSize,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+          _buildModeHeader(theme, dateTheme, localizations, monthDate),
         SizedBox(
           height: gridHeight,
           child: GridView.builder(
@@ -136,66 +108,106 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
             ),
             itemCount: yearCount,
             itemBuilder: (BuildContext context, int index) {
-              final int year = firstYear + index;
-              final DateTime normalized = M3EDatePickerUtils.clampDate(
-                M3EDatePickerUtils.normalizeSelectedDay(
-                  widget.selectedDate ?? DateTime(year),
-                  DateTime(year, widget.selectedDate?.month ?? 1),
-                ),
-                widget.firstDate,
-                widget.lastDate,
-              );
-              final candidate = DateTime(
-                year,
-                normalized.month,
-                normalized.day,
-              );
-              final bool enabled = M3EDatePickerUtils.isSelectable(
-                candidate,
-                widget.firstDate,
-                widget.lastDate,
-                predicate: widget.selectableDayPredicate,
-              );
-              final selected = year == selectedYear;
-              final Color foreground = dateTheme.yearForegroundColor(
-                theme.colorScheme,
-                selected: selected,
-                enabled: enabled,
-              );
-
-              return M3ETappable(
-                enabled: enabled,
-                onTap: enabled ? () => widget.onChanged(candidate) : null,
-                semanticLabel: localizations.formatYear(DateTime(year)),
-                builder: (BuildContext context, M3EInteractionState state) {
-                  return Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected
-                          ? dateTheme.selectedDayBackgroundColor(
-                              theme.colorScheme,
-                            )
-                          : null,
-                    ),
-                    child: Text(
-                      localizations.formatYear(DateTime(year)),
-                      style:
-                          (selected
-                                  ? dateTheme.selectedYearStyle
-                                  : dateTheme.yearStyle)(
-                                theme.typeScale,
-                                theme.colorScheme,
-                              )
-                              .copyWith(color: foreground),
-                    ),
-                  );
-                },
+              return _buildYearCell(
+                theme: theme,
+                dateTheme: dateTheme,
+                localizations: localizations,
+                year: firstYear + index,
+                selectedYear: selectedYear,
               );
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildModeHeader(
+    M3EThemeData theme,
+    M3EDatePickerTheme dateTheme,
+    MaterialLocalizations localizations,
+    DateTime monthDate,
+  ) {
+    return SizedBox(
+      height: M3EDatePickerConstants.subHeaderHeight,
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: M3ETappable(
+          onTap: () => widget.onModeChanged!(M3EDatePickerMode.day),
+          semanticLabel: localizations.formatMonthYear(monthDate),
+          builder: (BuildContext context, M3EInteractionState state) {
+            return Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    localizations.formatYear(DateTime(monthDate.year)),
+                    style: theme.typeScale.titleSmall.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Icon(M3EIcons.arrow_drop_up, size: dateTheme.arrowIconSize),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYearCell({
+    required M3EThemeData theme,
+    required M3EDatePickerTheme dateTheme,
+    required MaterialLocalizations localizations,
+    required int year,
+    required int selectedYear,
+  }) {
+    final DateTime normalized = M3EDatePickerUtils.clampDate(
+      M3EDatePickerUtils.normalizeSelectedDay(
+        widget.selectedDate ?? DateTime(year),
+        DateTime(year, widget.selectedDate?.month ?? 1),
+      ),
+      widget.firstDate,
+      widget.lastDate,
+    );
+    final candidate = DateTime(year, normalized.month, normalized.day);
+    final bool enabled = M3EDatePickerUtils.isSelectable(
+      candidate,
+      widget.firstDate,
+      widget.lastDate,
+      predicate: widget.selectableDayPredicate,
+    );
+    final selected = year == selectedYear;
+    final Color foreground = dateTheme.yearForegroundColor(
+      theme.colorScheme,
+      selected: selected,
+      enabled: enabled,
+    );
+    return M3ETappable(
+      enabled: enabled,
+      onTap: enabled ? () => widget.onChanged(candidate) : null,
+      semanticLabel: localizations.formatYear(DateTime(year)),
+      builder: (BuildContext context, M3EInteractionState state) {
+        return Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: selected
+                ? dateTheme.selectedDayBackgroundColor(theme.colorScheme)
+                : null,
+          ),
+          child: Text(
+            localizations.formatYear(DateTime(year)),
+            style:
+                (selected ? dateTheme.selectedYearStyle : dateTheme.yearStyle)(
+                  theme.typeScale,
+                  theme.colorScheme,
+                ).copyWith(color: foreground),
+          ),
+        );
+      },
     );
   }
 

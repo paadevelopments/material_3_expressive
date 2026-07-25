@@ -24,6 +24,8 @@ export 'res/m3e_button_constants.dart';
 export 'styles/m3e_button_theme.dart';
 
 part 'components/m3e_button_state.dart';
+part 'components/m3e_button_style.dart';
+part 'components/m3e_button_content.dart';
 
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;

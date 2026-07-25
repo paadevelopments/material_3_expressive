@@ -345,141 +345,172 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
             (_leftVisibleNeighborIndex != null ? 1 : 0) +
             (_rightVisibleNeighborIndex != null ? 1 : 0);
         final double edgeDelta = widget.fixedPulseDelta * _bump.value;
-
-        final carouselChildren = List<Widget>.generate(widget.children.length, (
-          int index,
-        ) {
-          final isActive = _activeIndex == index;
-          final isLeftNeighbor = _leftVisibleNeighborIndex == index;
-          final isRightNeighbor = _rightVisibleNeighborIndex == index;
-
-          var scaleMain = 1.0;
-
-          Alignment individualAlignment = Alignment.center;
-          if (isActive) {
-            individualAlignment = _expandAlignmentForActiveIndex(index);
-          } else if (isLeftNeighbor || isRightNeighbor) {
-            individualAlignment = _squishAlignmentForNeighborIndex(index);
-          }
-
-          if (_activeIndex != null) {
-            if (isActive) {
-              final double extent = _currentGrowBaseWidth > 0
-                  ? _currentGrowBaseWidth
-                  : _fallbackExtent();
-              final (expandLeading, expandTrailing) =
-                  _expandSidesForActiveIndex(index);
-              final growTotal =
-                  (expandLeading ? edgeDelta : 0) +
-                  (expandTrailing ? edgeDelta : 0);
-              scaleMain = (extent + growTotal) / extent;
-            } else if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
-              final double neighborExtent = _contentExtentFor(index);
-              final shrinkPixels = edgeDelta;
-              final double targetExtent = math.max(
-                neighborExtent - shrinkPixels,
-                1,
-              );
-              scaleMain = targetExtent / neighborExtent;
-            }
-          }
-
-          final BorderRadius finalRadius =
-              widget.shape is RoundedRectangleBorder
-              ? ((widget.shape! as RoundedRectangleBorder).borderRadius
-                    as BorderRadius)
-              : BorderRadius.zero;
-
-          return _CarouselItemAnchor(
+        final carouselChildren = List<Widget>.generate(
+          widget.children.length,
+          (int index) => _buildPulsedChild(
             index: index,
-            onRegister: _registerItemBox,
-            onUnregister: _unregisterItemBox,
-            child: RepaintBoundary(
-              child: Transform(
-                transform: _vertical
-                    ? (Matrix4.identity()..scaleByDouble(1, scaleMain, 1, 1))
-                    : (Matrix4.identity()..scaleByDouble(scaleMain, 1, 1, 1)),
-                alignment: individualAlignment,
-                child: ClipRRect(
-                  borderRadius: finalRadius,
-                  clipBehavior: widget.itemClipBehavior != Clip.none
-                      ? widget.itemClipBehavior
-                      : Clip.antiAlias,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      IgnorePointer(child: widget.children[index]),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          enableFeedback: widget.enableSplash,
-                          onTap: () => _handleTap(index),
-                          overlayColor: widget.overlayColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        });
-
-        final Widget view = widget.flexWeights != null
-            ? M3ECarouselView.weighted(
-                physics: widget.freeScroll
-                    ? null
-                    : const NeverScrollableScrollPhysics().applyTo(
-                        const M3ECarouselScrollPhysics(),
-                      ),
-                padding: widget.padding,
-                backgroundColor: widget.backgroundColor,
-                elevation: widget.elevation,
-                shape: widget.shape,
-                itemClipBehavior: Clip.none,
-                overlayColor: widget.overlayColor,
-                itemSnapping: widget.itemSnapping,
-                consumeMaxWeight: widget.consumeMaxWeight,
-                shrinkExtent: widget.shrinkExtent,
-                controller: _internalController,
-                scrollDirection: widget.scrollDirection,
-                reverse: widget.reverse,
-                enableSplash: false,
-                infinite: widget.infinite,
-                flexWeights: widget.flexWeights!,
-                onIndexChanged: widget.onIndexChanged,
-                children: carouselChildren,
-              )
-            : M3ECarouselView(
-                physics: widget.freeScroll
-                    ? null
-                    : const NeverScrollableScrollPhysics().applyTo(
-                        const M3ECarouselScrollPhysics(),
-                      ),
-                padding: widget.padding,
-                backgroundColor: widget.backgroundColor,
-                elevation: widget.elevation,
-                shape: widget.shape,
-                itemClipBehavior: Clip.none,
-                overlayColor: widget.overlayColor,
-                itemSnapping: widget.itemSnapping,
-                shrinkExtent: widget.shrinkExtent,
-                controller: _internalController,
-                scrollDirection: widget.scrollDirection,
-                reverse: widget.reverse,
-                enableSplash: false,
-                infinite: widget.infinite,
-                itemExtent: widget.itemExtent!,
-                onIndexChanged: widget.onIndexChanged,
-                children: carouselChildren,
-              );
-
+            squishCount: squishCount,
+            edgeDelta: edgeDelta,
+          ),
+        );
         return _CarouselViewportAnchor(
           onRegister: (RenderBox box) => _viewportBox = box,
           onUnregister: _unregisterViewportBox,
-          child: view,
+          child: _buildCarouselView(carouselChildren),
         );
       },
+    );
+  }
+
+  Widget _buildPulsedChild({
+    required int index,
+    required int squishCount,
+    required double edgeDelta,
+  }) {
+    final isActive = _activeIndex == index;
+    final isLeftNeighbor = _leftVisibleNeighborIndex == index;
+    final isRightNeighbor = _rightVisibleNeighborIndex == index;
+    final scaleMain = _scaleForChild(
+      index: index,
+      isActive: isActive,
+      isLeftNeighbor: isLeftNeighbor,
+      isRightNeighbor: isRightNeighbor,
+      squishCount: squishCount,
+      edgeDelta: edgeDelta,
+    );
+    final Alignment individualAlignment = _alignmentForChild(
+      index: index,
+      isActive: isActive,
+      isNeighbor: isLeftNeighbor || isRightNeighbor,
+    );
+    final BorderRadius finalRadius = widget.shape is RoundedRectangleBorder
+        ? ((widget.shape! as RoundedRectangleBorder).borderRadius
+              as BorderRadius)
+        : BorderRadius.zero;
+
+    return _CarouselItemAnchor(
+      index: index,
+      onRegister: _registerItemBox,
+      onUnregister: _unregisterItemBox,
+      child: RepaintBoundary(
+        child: Transform(
+          transform: _vertical
+              ? (Matrix4.identity()..scaleByDouble(1, scaleMain, 1, 1))
+              : (Matrix4.identity()..scaleByDouble(scaleMain, 1, 1, 1)),
+          alignment: individualAlignment,
+          child: ClipRRect(
+            borderRadius: finalRadius,
+            clipBehavior: widget.itemClipBehavior != Clip.none
+                ? widget.itemClipBehavior
+                : Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                IgnorePointer(child: widget.children[index]),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    enableFeedback: widget.enableSplash,
+                    onTap: () => _handleTap(index),
+                    overlayColor: widget.overlayColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  double _scaleForChild({
+    required int index,
+    required bool isActive,
+    required bool isLeftNeighbor,
+    required bool isRightNeighbor,
+    required int squishCount,
+    required double edgeDelta,
+  }) {
+    if (_activeIndex == null) {
+      return 1;
+    }
+    if (isActive) {
+      final double extent = _currentGrowBaseWidth > 0
+          ? _currentGrowBaseWidth
+          : _fallbackExtent();
+      final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
+      final growTotal =
+          (expandLeading ? edgeDelta : 0) + (expandTrailing ? edgeDelta : 0);
+      return (extent + growTotal) / extent;
+    }
+    if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
+      final double neighborExtent = _contentExtentFor(index);
+      final double targetExtent = math.max(neighborExtent - edgeDelta, 1);
+      return targetExtent / neighborExtent;
+    }
+    return 1;
+  }
+
+  Alignment _alignmentForChild({
+    required int index,
+    required bool isActive,
+    required bool isNeighbor,
+  }) {
+    if (isActive) {
+      return _expandAlignmentForActiveIndex(index);
+    }
+    if (isNeighbor) {
+      return _squishAlignmentForNeighborIndex(index);
+    }
+    return Alignment.center;
+  }
+
+  Widget _buildCarouselView(List<Widget> carouselChildren) {
+    final ScrollPhysics? physics = widget.freeScroll
+        ? null
+        : const NeverScrollableScrollPhysics().applyTo(
+            const M3ECarouselScrollPhysics(),
+          );
+    if (widget.flexWeights != null) {
+      return M3ECarouselView.weighted(
+        physics: physics,
+        padding: widget.padding,
+        backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        itemClipBehavior: Clip.none,
+        overlayColor: widget.overlayColor,
+        itemSnapping: widget.itemSnapping,
+        consumeMaxWeight: widget.consumeMaxWeight,
+        shrinkExtent: widget.shrinkExtent,
+        controller: _internalController,
+        scrollDirection: widget.scrollDirection,
+        reverse: widget.reverse,
+        enableSplash: false,
+        infinite: widget.infinite,
+        flexWeights: widget.flexWeights!,
+        onIndexChanged: widget.onIndexChanged,
+        children: carouselChildren,
+      );
+    }
+    return M3ECarouselView(
+      physics: physics,
+      padding: widget.padding,
+      backgroundColor: widget.backgroundColor,
+      elevation: widget.elevation,
+      shape: widget.shape,
+      itemClipBehavior: Clip.none,
+      overlayColor: widget.overlayColor,
+      itemSnapping: widget.itemSnapping,
+      shrinkExtent: widget.shrinkExtent,
+      controller: _internalController,
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      enableSplash: false,
+      infinite: widget.infinite,
+      itemExtent: widget.itemExtent!,
+      onIndexChanged: widget.onIndexChanged,
+      children: carouselChildren,
     );
   }
 }

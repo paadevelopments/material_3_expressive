@@ -13,29 +13,7 @@ Widget buildM3ESimpleHeader(
 ) {
   final theme = M3ETheme.of(context);
   final clampedProgress = progress.clamp(0.0, 1.0);
-  TextStyle resolvedStyle;
-
-  if (data.titleStyle != null && data.titleStyle!.length == 2) {
-    resolvedStyle = TextStyle.lerp(
-      data.titleStyle![0],
-      data.titleStyle![1],
-      clampedProgress,
-    )!;
-  } else if (data.titleStyle != null && data.titleStyle!.length == 1) {
-    resolvedStyle = data.titleStyle![0];
-  } else {
-    resolvedStyle = TextStyle.lerp(
-      theme.typeScale.titleSmall.copyWith(
-        fontWeight: FontWeight.w400,
-        color: theme.colorScheme.onSurface,
-      ),
-      theme.typeScale.titleSmall.copyWith(
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
-      ),
-      clampedProgress,
-    )!;
-  }
+  final resolvedStyle = _resolveTitleStyle(theme, data, clampedProgress);
 
   return Row(
     children: [
@@ -44,6 +22,34 @@ Widget buildM3ESimpleHeader(
       if (data.trailing != null) ...[const SizedBox(width: 16), data.trailing!],
     ],
   );
+}
+
+TextStyle _resolveTitleStyle(
+  M3EThemeData theme,
+  M3EExpandableData data,
+  double clampedProgress,
+) {
+  if (data.titleStyle != null && data.titleStyle!.length == 2) {
+    return TextStyle.lerp(
+      data.titleStyle![0],
+      data.titleStyle![1],
+      clampedProgress,
+    )!;
+  }
+  if (data.titleStyle != null && data.titleStyle!.length == 1) {
+    return data.titleStyle![0];
+  }
+  return TextStyle.lerp(
+    theme.typeScale.titleSmall.copyWith(
+      fontWeight: FontWeight.w400,
+      color: theme.colorScheme.onSurface,
+    ),
+    theme.typeScale.titleSmall.copyWith(
+      fontWeight: FontWeight.bold,
+      color: theme.colorScheme.onSurface,
+    ),
+    clampedProgress,
+  )!;
 }
 
 /// buildM3ESimpleBody.
@@ -55,91 +61,16 @@ Widget buildM3ESimpleBody(
   M3EExpandableStyle decoration,
 ) {
   final theme = M3ETheme.of(context);
-  final List<Widget> children = [];
+  final children = <Widget>[];
 
-  if (data.subtitle != null && data.subtitle!.isNotEmpty) {
-    TextStyle collapsedSubtitleStyle;
-    TextStyle expandedSubtitleStyle;
-
-    if (data.subtitleStyle != null && data.subtitleStyle!.length == 2) {
-      collapsedSubtitleStyle = data.subtitleStyle![0];
-      expandedSubtitleStyle = data.subtitleStyle![1];
-    } else if (data.subtitleStyle != null && data.subtitleStyle!.length == 1) {
-      collapsedSubtitleStyle = data.subtitleStyle![0];
-      expandedSubtitleStyle = data.subtitleStyle![0];
-    } else {
-      collapsedSubtitleStyle = theme.typeScale.bodyMedium.copyWith(
-        color: theme.colorScheme.onSurfaceVariant,
-      );
-      expandedSubtitleStyle = theme.typeScale.bodyMedium.copyWith(
-        color: theme.colorScheme.onSurfaceVariant,
-      );
-    }
-
-    final alignment = decoration.bodyAlignment;
-    final maxLines = data.subtitleMaxLines ?? 1;
-
-    TextAlign mappedTextAlign = TextAlign.start;
-    if (alignment == Alignment.topCenter ||
-        alignment == Alignment.center ||
-        alignment == Alignment.bottomCenter) {
-      mappedTextAlign = TextAlign.center;
-    } else if (alignment == Alignment.topRight ||
-        alignment == Alignment.centerRight ||
-        alignment == Alignment.bottomRight) {
-      mappedTextAlign = TextAlign.right;
-    }
-
-    final showCollapsedSubtitle = progress < 0.5;
-    final showExpandedSubtitle = progress >= 0.5;
-
-    children.add(
-      Padding(
-        padding: EdgeInsets.only(top: decoration.titleSubtitleGap),
-        child: Stack(
-          children: [
-            if (showCollapsedSubtitle)
-              Align(
-                alignment: alignment,
-                child: Text(
-                  data.subtitle!,
-                  maxLines: maxLines,
-                  overflow: TextOverflow.ellipsis,
-                  style: collapsedSubtitleStyle,
-                  textAlign: mappedTextAlign,
-                ),
-              ),
-            if (showExpandedSubtitle)
-              ClipRect(
-                child: Align(
-                  alignment: alignment,
-                  heightFactor: 1,
-                  child: Text(
-                    data.subtitle!,
-                    style: expandedSubtitleStyle,
-                    textAlign: mappedTextAlign,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  final subtitle = _buildSubtitleSection(theme, data, progress, decoration);
+  if (subtitle != null) {
+    children.add(subtitle);
   }
 
-  if ((data.body != null || data.bodyBuilder != null) && progress > 0.0) {
-    children.add(
-      ClipRect(
-        child: Align(
-          alignment: decoration.bodyAlignment,
-          heightFactor: progress.clamp(0.0, 1.0),
-          child: Padding(
-            padding: EdgeInsets.only(top: children.isEmpty ? 0 : 12),
-            child: data.bodyBuilder?.call(context) ?? data.body!,
-          ),
-        ),
-      ),
-    );
+  final body = _buildBodySection(context, data, progress, decoration, children);
+  if (body != null) {
+    children.add(body);
   }
 
   if (children.isEmpty) {
@@ -153,6 +84,113 @@ Widget buildM3ESimpleBody(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: children,
+  );
+}
+
+Widget? _buildSubtitleSection(
+  M3EThemeData theme,
+  M3EExpandableData data,
+  double progress,
+  M3EExpandableStyle decoration,
+) {
+  if (data.subtitle == null || data.subtitle!.isEmpty) {
+    return null;
+  }
+
+  final styles = _resolveSubtitleStyles(theme, data);
+  final alignment = decoration.bodyAlignment;
+  final mappedTextAlign = _textAlignForAlignment(alignment);
+  final maxLines = data.subtitleMaxLines ?? 1;
+  final showCollapsedSubtitle = progress < 0.5;
+  final showExpandedSubtitle = progress >= 0.5;
+
+  return Padding(
+    padding: EdgeInsets.only(top: decoration.titleSubtitleGap),
+    child: Stack(
+      children: [
+        if (showCollapsedSubtitle)
+          Align(
+            alignment: alignment,
+            child: Text(
+              data.subtitle!,
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: styles.collapsed,
+              textAlign: mappedTextAlign,
+            ),
+          ),
+        if (showExpandedSubtitle)
+          ClipRect(
+            child: Align(
+              alignment: alignment,
+              heightFactor: 1,
+              child: Text(
+                data.subtitle!,
+                style: styles.expanded,
+                textAlign: mappedTextAlign,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+({TextStyle collapsed, TextStyle expanded}) _resolveSubtitleStyles(
+  M3EThemeData theme,
+  M3EExpandableData data,
+) {
+  if (data.subtitleStyle != null && data.subtitleStyle!.length == 2) {
+    return (
+      collapsed: data.subtitleStyle![0],
+      expanded: data.subtitleStyle![1],
+    );
+  }
+  if (data.subtitleStyle != null && data.subtitleStyle!.length == 1) {
+    return (
+      collapsed: data.subtitleStyle![0],
+      expanded: data.subtitleStyle![0],
+    );
+  }
+  final fallback = theme.typeScale.bodyMedium.copyWith(
+    color: theme.colorScheme.onSurfaceVariant,
+  );
+  return (collapsed: fallback, expanded: fallback);
+}
+
+TextAlign _textAlignForAlignment(AlignmentGeometry alignment) {
+  if (alignment == Alignment.topCenter ||
+      alignment == Alignment.center ||
+      alignment == Alignment.bottomCenter) {
+    return TextAlign.center;
+  }
+  if (alignment == Alignment.topRight ||
+      alignment == Alignment.centerRight ||
+      alignment == Alignment.bottomRight) {
+    return TextAlign.right;
+  }
+  return TextAlign.start;
+}
+
+Widget? _buildBodySection(
+  BuildContext context,
+  M3EExpandableData data,
+  double progress,
+  M3EExpandableStyle decoration,
+  List<Widget> existingChildren,
+) {
+  if ((data.body == null && data.bodyBuilder == null) || progress <= 0.0) {
+    return null;
+  }
+  return ClipRect(
+    child: Align(
+      alignment: decoration.bodyAlignment,
+      heightFactor: progress.clamp(0.0, 1.0),
+      child: Padding(
+        padding: EdgeInsets.only(top: existingChildren.isEmpty ? 0 : 12),
+        child: data.bodyBuilder?.call(context) ?? data.body!,
+      ),
+    ),
   );
 }
 

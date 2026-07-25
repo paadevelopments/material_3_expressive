@@ -28,7 +28,6 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
   }) {
     final theme = M3ETheme.of(context).navigationRailTheme;
     final isExpanded = _isExpanded;
-
     final children = <Widget>[
       const SizedBox(height: M3ENavigationRailLayout.topGap),
       _buildMenuButton(
@@ -40,78 +39,10 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
     if (fabWidget != null) {
       children.add(fabWidget);
     }
-
     if (isExpanded) {
-      for (final section in widget.sections) {
-        if (section.header != null) {
-          children.add(
-            Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: 16,
-                end: 16,
-                top: theme.sectionHeaderSpacingTop,
-                bottom: theme.sectionHeaderSpacingBottom,
-              ),
-              child: DefaultTextStyle(
-                style: M3ETheme.of(context).typeScale.titleSmall.copyWith(
-                  color: M3ETheme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                child: section.header!,
-              ),
-            ),
-          );
-        }
-        for (final dest in section.destinations) {
-          final index = _M3ENavigationRailState._destinationIndex(
-            widget.sections,
-            dest,
-          );
-          children.add(
-            Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: 16,
-                end: 16,
-                top: theme.itemVerticalGap,
-                bottom: theme.itemVerticalGap,
-              ),
-              child: M3ERailItem(
-                destination: dest,
-                selected: index == widget.selectedIndex,
-                onTap: () => widget.onDestinationSelected(index),
-                expanded: true,
-                labelBehavior: widget.labelBehavior,
-                suppressInk: _suppressInk,
-                useLocalIndicator: !_traveling,
-                indicatorKey: _destinationKeys[index],
-              ),
-            ),
-          );
-        }
-      }
+      children.addAll(_buildExpandedDestinations(context, theme));
     } else {
-      final all = widget.sections.expand((s) => s.destinations).toList();
-      for (var i = 0; i < all.length; i++) {
-        children.add(
-          Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: M3ENavigationRailLayout.horizontalInset,
-              end: M3ENavigationRailLayout.horizontalInset,
-              top: theme.itemVerticalGap,
-              bottom: theme.itemVerticalGap,
-            ),
-            child: M3ERailItem(
-              destination: all[i],
-              selected: i == widget.selectedIndex,
-              onTap: () => widget.onDestinationSelected(i),
-              expanded: false,
-              labelBehavior: widget.labelBehavior,
-              suppressInk: _suppressInk,
-              useLocalIndicator: !_traveling,
-              indicatorKey: _destinationKeys[i],
-            ),
-          ),
-        );
-      }
+      children.addAll(_buildCollapsedDestinations(theme));
     }
     if (widget.trailing != null && !widget.trailingAtBottom) {
       final trailingWidget = _buildTrailing(context);
@@ -120,5 +51,102 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
       }
     }
     return children;
+  }
+
+  List<Widget> _buildExpandedDestinations(
+    BuildContext context,
+    M3ENavigationRailTheme theme,
+  ) {
+    final children = <Widget>[];
+    for (final section in widget.sections) {
+      if (section.header != null) {
+        children.add(_sectionHeader(context, theme, section.header!));
+      }
+      for (final dest in section.destinations) {
+        final index = _M3ENavigationRailState._destinationIndex(
+          widget.sections,
+          dest,
+        );
+        children.add(
+          _destinationPadding(
+            theme: theme,
+            start: 16,
+            end: 16,
+            child: M3ERailItem(
+              destination: dest,
+              selected: index == widget.selectedIndex,
+              onTap: () => widget.onDestinationSelected(index),
+              expanded: true,
+              labelBehavior: widget.labelBehavior,
+              suppressInk: _suppressInk,
+              useLocalIndicator: !_traveling,
+              indicatorKey: _destinationKeys[index],
+            ),
+          ),
+        );
+      }
+    }
+    return children;
+  }
+
+  List<Widget> _buildCollapsedDestinations(M3ENavigationRailTheme theme) {
+    final all = widget.sections.expand((s) => s.destinations).toList();
+    return <Widget>[
+      for (var i = 0; i < all.length; i++)
+        _destinationPadding(
+          theme: theme,
+          start: M3ENavigationRailLayout.horizontalInset,
+          end: M3ENavigationRailLayout.horizontalInset,
+          child: M3ERailItem(
+            destination: all[i],
+            selected: i == widget.selectedIndex,
+            onTap: () => widget.onDestinationSelected(i),
+            expanded: false,
+            labelBehavior: widget.labelBehavior,
+            suppressInk: _suppressInk,
+            useLocalIndicator: !_traveling,
+            indicatorKey: _destinationKeys[i],
+          ),
+        ),
+    ];
+  }
+
+  Widget _sectionHeader(
+    BuildContext context,
+    M3ENavigationRailTheme theme,
+    Widget header,
+  ) {
+    final m3e = M3ETheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: 16,
+        end: 16,
+        top: theme.sectionHeaderSpacingTop,
+        bottom: theme.sectionHeaderSpacingBottom,
+      ),
+      child: DefaultTextStyle(
+        style: m3e.typeScale.titleSmall.copyWith(
+          color: m3e.colorScheme.onSurfaceVariant,
+        ),
+        child: header,
+      ),
+    );
+  }
+
+  Widget _destinationPadding({
+    required M3ENavigationRailTheme theme,
+    required double start,
+    required double end,
+    required Widget child,
+  }) {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: start,
+        end: end,
+        top: theme.itemVerticalGap,
+        bottom: theme.itemVerticalGap,
+      ),
+      child: child,
+    );
   }
 }

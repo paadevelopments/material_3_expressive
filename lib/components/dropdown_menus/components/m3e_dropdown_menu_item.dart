@@ -7,6 +7,7 @@ import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_item_style.dart';
+import '../styles/m3e_dropdown_menu_theme.dart';
 
 /// Internal widget for a single dropdown menu item.
 /// Handles hover/press interactions and snappy radius morphing.
@@ -101,39 +102,48 @@ class _M3EDropdownMenuItemWidgetState<T>
     return _calculateBaseRadius(targetR);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final m3eTheme = M3ETheme.of(context);
-    final scheme = m3eTheme.colorScheme;
-    final menuTheme = m3eTheme.dropdownMenuTheme;
+  Color _resolveBackgroundColor(
+    M3EColorScheme scheme,
+    M3EDropdownMenuTheme menuTheme,
+  ) {
     final id = widget.style;
     final item = widget.item;
-
-    Color bgColor;
     if (item.disabled) {
-      bgColor =
-          id.disabledBackgroundColor ??
+      return id.disabledBackgroundColor ??
           scheme.onSurface.withValues(alpha: 0.04);
-    } else if (item.selected) {
-      bgColor =
-          id.selectedBackgroundColor ??
+    }
+    if (item.selected) {
+      return id.selectedBackgroundColor ??
           menuTheme.itemSelectedBackgroundColor(scheme);
-    } else {
-      bgColor = id.backgroundColor ?? menuTheme.itemBackgroundColor(scheme);
     }
+    return id.backgroundColor ?? menuTheme.itemBackgroundColor(scheme);
+  }
 
-    Color textColor;
+  Color _resolveTextColor(
+    M3EColorScheme scheme,
+    M3EDropdownMenuTheme menuTheme,
+  ) {
+    final id = widget.style;
+    final item = widget.item;
     if (item.disabled) {
-      textColor =
-          id.disabledTextColor ?? scheme.onSurface.withValues(alpha: 0.38);
-    } else if (item.selected) {
-      textColor =
-          id.selectedTextColor ?? menuTheme.itemSelectedForegroundColor(scheme);
-    } else {
-      textColor = id.textColor ?? menuTheme.itemForegroundColor(scheme);
+      return id.disabledTextColor ?? scheme.onSurface.withValues(alpha: 0.38);
     }
+    if (item.selected) {
+      return id.selectedTextColor ??
+          menuTheme.itemSelectedForegroundColor(scheme);
+    }
+    return id.textColor ?? menuTheme.itemForegroundColor(scheme);
+  }
 
-    final content = Row(
+  Widget _buildItemContent(
+    M3EThemeData m3eTheme,
+    M3EColorScheme scheme,
+    M3EDropdownMenuTheme menuTheme,
+    Color textColor,
+  ) {
+    final id = widget.style;
+    final item = widget.item;
+    return Row(
       children: [
         Expanded(
           child: Text(
@@ -154,10 +164,22 @@ class _M3EDropdownMenuItemWidgetState<T>
               ),
       ],
     );
+  }
 
-    final selectionChanged = _lastSelected != widget.item.selected;
-    _lastSelected = widget.item.selected;
+  @override
+  Widget build(BuildContext context) {
+    final m3eTheme = M3ETheme.of(context);
+    final scheme = m3eTheme.colorScheme;
+    final menuTheme = m3eTheme.dropdownMenuTheme;
+    final id = widget.style;
+    final item = widget.item;
 
+    final bgColor = _resolveBackgroundColor(scheme, menuTheme);
+    final textColor = _resolveTextColor(scheme, menuTheme);
+    final content = _buildItemContent(m3eTheme, scheme, menuTheme, textColor);
+
+    final selectionChanged = _lastSelected != item.selected;
+    _lastSelected = item.selected;
     final duration = selectionChanged
         ? const Duration(milliseconds: 20)
         : const Duration(milliseconds: 40);

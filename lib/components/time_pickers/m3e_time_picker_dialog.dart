@@ -191,73 +191,19 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     final localizations = MaterialLocalizations.of(context);
     final Orientation orientation =
         widget.orientation ?? MediaQuery.orientationOf(context);
-
     final String titleText = M3ETimePickerUtils.formatTime(
       context,
       _selectedTime.value,
       alwaysUse24HourFormat: widget.alwaysUse24HourFormat,
     );
-
-    Widget? entryModeButton;
-    late Widget picker;
-    switch (_entryMode.value) {
-      case M3ETimePickerEntryMode.dial:
-        picker = M3EDialTimePicker(
-          value: _selectedTime.value,
-          onChanged: _handleTimeChanged,
-          use24HourFormat: widget.alwaysUse24HourFormat,
-          expandToFit: true,
-        );
-        entryModeButton = M3ETimePickerEntryModeButton(
-          icon: M3EIcons.edit_outlined,
-          tooltip: localizations.inputTimeModeButtonLabel,
-          onPressed: _handleEntryModeToggle,
-        );
-      case M3ETimePickerEntryMode.dialOnly:
-        picker = M3EDialTimePicker(
-          value: _selectedTime.value,
-          onChanged: _handleTimeChanged,
-          use24HourFormat: widget.alwaysUse24HourFormat,
-          expandToFit: true,
-        );
-      case M3ETimePickerEntryMode.input:
-      case M3ETimePickerEntryMode.inputOnly:
-        picker = Form(
-          key: _formKey,
-          autovalidateMode: _autovalidateMode.value,
-          child: Shortcuts(
-            shortcuts: const <ShortcutActivator, Intent>{
-              SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
-            },
-            child: M3EInputTimePickerFormField(
-              initialTime: _selectedTime.value,
-              onTimeSubmitted: _handleTimeChanged,
-              onTimeSaved: _handleTimeChanged,
-              errorInvalidText: widget.errorInvalidText,
-              hourLabelText: widget.hourLabelText,
-              minuteLabelText: widget.minuteLabelText,
-              use24HourFormat: widget.alwaysUse24HourFormat,
-              emptyInitialInput: widget.emptyInitialInput,
-              autofocus: true,
-            ),
-          ),
-        );
-        if (_entryMode.value == M3ETimePickerEntryMode.input) {
-          entryModeButton = M3ETimePickerEntryModeButton(
-            icon: M3EIcons.schedule,
-            tooltip: localizations.dialModeButtonLabel,
-            onPressed: _handleEntryModeToggle,
-          );
-        }
-    }
-
+    final ({Widget picker, Widget? entryModeButton}) resolved =
+        _resolvePickerAndEntryButton(localizations);
     final String helpText = switch (_entryMode.value) {
       M3ETimePickerEntryMode.input || M3ETimePickerEntryMode.inputOnly =>
         widget.helpText ?? localizations.timePickerInputHelpText,
       M3ETimePickerEntryMode.dial || M3ETimePickerEntryMode.dialOnly =>
         widget.helpText ?? localizations.timePickerDialHelpText,
     };
-
     final Widget header = M3ETimePickerHeader(
       helpText: helpText,
       titleText: titleText,
@@ -267,37 +213,32 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           orientation == Orientation.landscape &&
           (_entryMode.value == M3ETimePickerEntryMode.input ||
               _entryMode.value == M3ETimePickerEntryMode.inputOnly),
-      entryModeButton: entryModeButton,
+      entryModeButton: resolved.entryModeButton,
     );
-
     final Widget actions = M3ETimePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
     );
-
     final double textScaleFactor =
         MediaQuery.textScalerOf(context)
             .clamp(maxScaleFactor: M3ETimePickerConstants.maxTextScaleFactor)
             .scale(M3ETimePickerConstants.fontSizeToScale) /
         M3ETimePickerConstants.fontSizeToScale;
     final Size dialogSize = _dialogSize(context, orientation) * textScaleFactor;
-
     final bool isInputMode =
         _entryMode.value == M3ETimePickerEntryMode.input ||
         _entryMode.value == M3ETimePickerEntryMode.inputOnly;
     final EdgeInsets dialogPadding = theme.dialogTheme.padding;
-    final double? dialBodyHeight = isInputMode
-        ? null
-        : M3ETimePickerConstants.dialDialogBodyHeight + dialogPadding.vertical;
-
     final Widget pickerBody = _buildPickerBody(
-      picker: picker,
+      picker: resolved.picker,
       isInputMode: isInputMode,
-      dialHeight: dialBodyHeight,
+      dialHeight: isInputMode
+          ? null
+          : M3ETimePickerConstants.dialDialogBodyHeight +
+                dialogPadding.vertical,
     );
-
     return Padding(
       padding: widget.insetPadding,
       child: Material(
@@ -341,6 +282,64 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           },
         ),
       ),
+    );
+  }
+
+  ({Widget picker, Widget? entryModeButton}) _resolvePickerAndEntryButton(
+    MaterialLocalizations localizations,
+  ) {
+    switch (_entryMode.value) {
+      case M3ETimePickerEntryMode.dial:
+        return (
+          picker: _buildDialPicker(),
+          entryModeButton: M3ETimePickerEntryModeButton(
+            icon: M3EIcons.edit_outlined,
+            tooltip: localizations.inputTimeModeButtonLabel,
+            onPressed: _handleEntryModeToggle,
+          ),
+        );
+      case M3ETimePickerEntryMode.dialOnly:
+        return (picker: _buildDialPicker(), entryModeButton: null);
+      case M3ETimePickerEntryMode.input:
+      case M3ETimePickerEntryMode.inputOnly:
+        return (
+          picker: Form(
+            key: _formKey,
+            autovalidateMode: _autovalidateMode.value,
+            child: Shortcuts(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
+              },
+              child: M3EInputTimePickerFormField(
+                initialTime: _selectedTime.value,
+                onTimeSubmitted: _handleTimeChanged,
+                onTimeSaved: _handleTimeChanged,
+                errorInvalidText: widget.errorInvalidText,
+                hourLabelText: widget.hourLabelText,
+                minuteLabelText: widget.minuteLabelText,
+                use24HourFormat: widget.alwaysUse24HourFormat,
+                emptyInitialInput: widget.emptyInitialInput,
+                autofocus: true,
+              ),
+            ),
+          ),
+          entryModeButton: _entryMode.value == M3ETimePickerEntryMode.input
+              ? M3ETimePickerEntryModeButton(
+                  icon: M3EIcons.schedule,
+                  tooltip: localizations.dialModeButtonLabel,
+                  onPressed: _handleEntryModeToggle,
+                )
+              : null,
+        );
+    }
+  }
+
+  Widget _buildDialPicker() {
+    return M3EDialTimePicker(
+      value: _selectedTime.value,
+      onChanged: _handleTimeChanged,
+      use24HourFormat: widget.alwaysUse24HourFormat,
+      expandToFit: true,
     );
   }
 }

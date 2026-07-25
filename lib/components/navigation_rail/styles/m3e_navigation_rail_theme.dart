@@ -180,51 +180,31 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
       return this;
     }
     return M3ENavigationRailTheme(
-      collapsedWidth: _lerpDouble(collapsedWidth, other.collapsedWidth, t)!,
-      expandedMinWidth: _lerpDouble(
-        expandedMinWidth,
-        other.expandedMinWidth,
-        t,
-      )!,
-      expandedMaxWidth: _lerpDouble(
-        expandedMaxWidth,
-        other.expandedMaxWidth,
-        t,
-      )!,
-      itemExpandedHeight: _lerpDouble(
-        itemExpandedHeight,
-        other.itemExpandedHeight,
-        t,
-      )!,
-      itemCollapsedHeight: _lerpDouble(
+      collapsedWidth: _ld(collapsedWidth, other.collapsedWidth, t),
+      expandedMinWidth: _ld(expandedMinWidth, other.expandedMinWidth, t),
+      expandedMaxWidth: _ld(expandedMaxWidth, other.expandedMaxWidth, t),
+      itemExpandedHeight: _ld(itemExpandedHeight, other.itemExpandedHeight, t),
+      itemCollapsedHeight: _ld(
         itemCollapsedHeight,
         other.itemCollapsedHeight,
         t,
-      )!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      indicatorLeading: _lerpDouble(
-        indicatorLeading,
-        other.indicatorLeading,
-        t,
-      )!,
-      indicatorTrailing: _lerpDouble(
-        indicatorTrailing,
-        other.indicatorTrailing,
-        t,
-      )!,
-      iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
-      itemVerticalGap: _lerpDouble(itemVerticalGap, other.itemVerticalGap, t)!,
-      headerMinSpace: _lerpDouble(headerMinSpace, other.headerMinSpace, t)!,
-      sectionHeaderSpacingTop: _lerpDouble(
+      ),
+      iconSize: _ld(iconSize, other.iconSize, t),
+      indicatorLeading: _ld(indicatorLeading, other.indicatorLeading, t),
+      indicatorTrailing: _ld(indicatorTrailing, other.indicatorTrailing, t),
+      iconLabelGap: _ld(iconLabelGap, other.iconLabelGap, t),
+      itemVerticalGap: _ld(itemVerticalGap, other.itemVerticalGap, t),
+      headerMinSpace: _ld(headerMinSpace, other.headerMinSpace, t),
+      sectionHeaderSpacingTop: _ld(
         sectionHeaderSpacingTop,
         other.sectionHeaderSpacingTop,
         t,
-      )!,
-      sectionHeaderSpacingBottom: _lerpDouble(
+      ),
+      sectionHeaderSpacingBottom: _ld(
         sectionHeaderSpacingBottom,
         other.sectionHeaderSpacingBottom,
         t,
-      )!,
+      ),
       containerColor: Color.lerp(containerColor, other.containerColor, t),
       activeIndicatorColor: Color.lerp(
         activeIndicatorColor,
@@ -252,5 +232,5 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     );
   }
 
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
+  double _ld(double a, double b, double t) => a + (b - a) * t;
 }

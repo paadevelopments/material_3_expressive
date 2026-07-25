@@ -88,110 +88,40 @@ class M3ERailItemButton extends StatelessWidget {
     final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
     final scheme = m3e.colorScheme;
-
-    final double defaultHeight = expanded
-        ? theme.itemExpandedHeight
-        : theme.itemCollapsedHeight;
-    final double height = heightOverride ?? defaultHeight;
-
+    final double height =
+        heightOverride ??
+        (expanded ? theme.itemExpandedHeight : theme.itemCollapsedHeight);
     final bool selected = isSelected;
-
-    // Prefer theme overrides; otherwise match M3 rail tokens (same as nav bar).
-    final Color activeIconLabel = theme.activeIconAndLabelColor(scheme);
-    final Color inactiveIconLabel = theme.inactiveIconAndLabelColor(scheme);
-    final Color activeIndicator = theme.activeIndicatorColorResolved(scheme);
-    final ShapeBorder indicatorShape =
-        theme.indicatorShapeFull ??
-        RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs);
-
-    final fg = selected ? activeIconLabel : inactiveIconLabel;
+    final Color fg = selected
+        ? theme.activeIconAndLabelColor(scheme)
+        : theme.inactiveIconAndLabelColor(scheme);
     final Color bg = useLocalIndicator && expanded && selected
-        ? activeIndicator
+        ? theme.activeIndicatorColorResolved(scheme)
         : Colors.transparent;
     final ShapeBorder shape = expanded
-        ? indicatorShape
+        ? (theme.indicatorShapeFull ??
+              RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs))
         : const RoundedRectangleBorder();
-
-    // Content
-    final Widget effectiveIcon = selected && selectedIcon != null
-        ? selectedIcon!
-        : icon;
-
     final Widget scaledIcon = M3ENavIconScale(
       selected: selected,
       child: IconTheme.merge(
         data: IconThemeData(color: fg, size: theme.iconSize),
-        child: effectiveIcon,
+        child: selected && selectedIcon != null ? selectedIcon! : icon,
       ),
     );
-
-    Widget content;
-    if (expanded) {
-      final textExpanded = Flexible(
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          semanticsLabel: semanticLabel ?? label,
-          style: m3e.typeScale.labelLarge.copyWith(color: fg),
-        ),
-      );
-
-      content = Row(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                scaledIcon,
-                SizedBox(width: theme.iconLabelGap),
-                textExpanded,
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: theme.iconLabelGap),
-            child: M3ERailBadge(count: badgeCount),
-          ),
-        ],
-      );
-    } else {
-      final textCollapsed = Flexible(
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          semanticsLabel: semanticLabel ?? label,
-          style: m3e.typeScale.labelMedium.copyWith(color: fg),
-        ),
-      );
-
-      final Widget iconButton = KeyedSubtree(
-        key: indicatorKey,
-        child: M3EIconButton(
-          icon: scaledIcon,
-          width: M3EIconButtonWidth.wide,
-          badgeValue: badgeCount,
-          onPressed: onPressed,
-          suppressInk: true,
-          variant: useLocalIndicator && isSelected
-              ? M3EIconButtonVariant.tonal
-              : M3EIconButtonVariant.standard,
-        ),
-      );
-
-      content = Column(
-        children: [
-          iconButton,
-          if (labelBehavior == M3ENavigationRailLabelBehavior.alwaysShow ||
-              (isSelected &&
-                  labelBehavior != M3ENavigationRailLabelBehavior.alwaysHide))
-            textCollapsed,
-        ],
-      );
-    }
-
-    // No ink splash — the shared selection indicator is the selection feedback.
+    final Widget content = expanded
+        ? _buildExpandedContent(
+            m3e: m3e,
+            theme: theme,
+            fg: fg,
+            scaledIcon: scaledIcon,
+          )
+        : _buildCollapsedContent(
+            m3e: m3e,
+            theme: theme,
+            fg: fg,
+            scaledIcon: scaledIcon,
+          );
     final material = Material(
       key: expanded ? indicatorKey : null,
       color: bg,
@@ -204,7 +134,6 @@ class M3ERailItemButton extends StatelessWidget {
         highlightColor: Colors.transparent,
         overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
         child: Padding(
-          // Horizontal padding similar to ButtonM3E sm; for collapsed, none.
           padding: expanded
               ? EdgeInsetsDirectional.only(
                   start: theme.indicatorLeading,
@@ -221,13 +150,10 @@ class M3ERailItemButton extends StatelessWidget {
         ),
       ),
     );
-
     final Widget sized = ConstrainedBox(
       constraints: BoxConstraints(minHeight: height),
       child: material,
     );
-
-    // Tooltip semantics for collapsed state.
     final Widget withTooltip = expanded
         ? sized
         : Tooltip(
@@ -235,12 +161,84 @@ class M3ERailItemButton extends StatelessWidget {
             preferBelow: false,
             child: sized,
           );
-
     return Semantics(
       button: true,
       selected: selected,
       label: expanded ? null : (semanticLabel ?? label),
       child: withTooltip,
+    );
+  }
+
+  Widget _buildExpandedContent({
+    required M3EThemeData m3e,
+    required M3ENavigationRailTheme theme,
+    required Color fg,
+    required Widget scaledIcon,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              scaledIcon,
+              SizedBox(width: theme.iconLabelGap),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  semanticsLabel: semanticLabel ?? label,
+                  style: m3e.typeScale.labelLarge.copyWith(color: fg),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: theme.iconLabelGap),
+          child: M3ERailBadge(count: badgeCount),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCollapsedContent({
+    required M3EThemeData m3e,
+    required M3ENavigationRailTheme theme,
+    required Color fg,
+    required Widget scaledIcon,
+  }) {
+    final bool showLabel =
+        labelBehavior == M3ENavigationRailLabelBehavior.alwaysShow ||
+        (isSelected &&
+            labelBehavior != M3ENavigationRailLabelBehavior.alwaysHide);
+    return Column(
+      children: [
+        KeyedSubtree(
+          key: indicatorKey,
+          child: M3EIconButton(
+            icon: scaledIcon,
+            width: M3EIconButtonWidth.wide,
+            badgeValue: badgeCount,
+            onPressed: onPressed,
+            suppressInk: true,
+            variant: useLocalIndicator && isSelected
+                ? M3EIconButtonVariant.tonal
+                : M3EIconButtonVariant.standard,
+          ),
+        ),
+        if (showLabel)
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              semanticsLabel: semanticLabel ?? label,
+              style: m3e.typeScale.labelMedium.copyWith(color: fg),
+            ),
+          ),
+      ],
     );
   }
 }

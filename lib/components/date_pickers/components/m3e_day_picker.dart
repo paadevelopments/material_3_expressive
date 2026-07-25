@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
 import '../res/m3e_date_picker_constants.dart';
+import '../styles/m3e_date_picker_theme.dart';
 import '../utils/m3e_date_picker_utils.dart';
 import 'm3e_day_cell.dart';
 
@@ -83,25 +84,7 @@ class M3EDayPicker extends StatelessWidget {
 
         return Column(
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                for (int i = 0; i < dateTheme.daysPerWeek; i++)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        localizations.narrowWeekdays[(localizations
-                                    .firstDayOfWeekIndex +
-                                i) %
-                            7],
-                        style: dateTheme.weekdayStyle(
-                          theme.typeScale,
-                          theme.colorScheme,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            _buildWeekdayHeader(theme, dateTheme, localizations),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -112,51 +95,78 @@ class M3EDayPicker extends StatelessWidget {
               ),
               itemCount: cellCount,
               itemBuilder: (BuildContext context, int index) {
-                final int day = index - firstDayOffset + 1;
-                if (day < 1 || day > daysInMonth) {
-                  return const SizedBox.shrink();
-                }
-                final date = DateTime(year, month, day);
-                final bool enabled = M3EDatePickerUtils.isSelectable(
-                  date,
-                  firstDate,
-                  lastDate,
-                  predicate: selectableDayPredicate,
-                );
-                final bool selected = M3EDatePickerUtils.isSameDay(
-                  date,
-                  selectedDate,
-                );
-                final bool today = M3EDatePickerUtils.isSameDay(
-                  date,
-                  currentDate,
-                );
-                final DateTime? start = rangeStart;
-                final DateTime? end = rangeEnd;
-                final bool isRangeStart =
-                    start != null && M3EDatePickerUtils.isSameDay(date, start);
-                final bool isRangeEnd =
-                    end != null && M3EDatePickerUtils.isSameDay(date, end);
-                final bool inRange =
-                    start != null &&
-                    end != null &&
-                    M3EDatePickerUtils.isInRange(date, start, end);
-
-                return M3EDayCell(
-                  date: date,
-                  selected: selected,
-                  today: today,
-                  enabled: enabled,
-                  inRange: inRange,
-                  rangeStart: isRangeStart,
-                  rangeEnd: isRangeEnd,
-                  onTap: enabled ? () => onChanged(date) : null,
+                return _buildDayCell(
+                  index: index,
+                  firstDayOffset: firstDayOffset,
+                  daysInMonth: daysInMonth,
+                  year: year,
+                  month: month,
                 );
               },
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildWeekdayHeader(
+    M3EThemeData theme,
+    M3EDatePickerTheme dateTheme,
+    MaterialLocalizations localizations,
+  ) {
+    return Row(
+      children: <Widget>[
+        for (int i = 0; i < dateTheme.daysPerWeek; i++)
+          Expanded(
+            child: Center(
+              child: Text(
+                localizations
+                    .narrowWeekdays[(localizations.firstDayOfWeekIndex + i) %
+                    7],
+                style: dateTheme.weekdayStyle(
+                  theme.typeScale,
+                  theme.colorScheme,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDayCell({
+    required int index,
+    required int firstDayOffset,
+    required int daysInMonth,
+    required int year,
+    required int month,
+  }) {
+    final int day = index - firstDayOffset + 1;
+    if (day < 1 || day > daysInMonth) {
+      return const SizedBox.shrink();
+    }
+    final date = DateTime(year, month, day);
+    final bool enabled = M3EDatePickerUtils.isSelectable(
+      date,
+      firstDate,
+      lastDate,
+      predicate: selectableDayPredicate,
+    );
+    final DateTime? start = rangeStart;
+    final DateTime? end = rangeEnd;
+    return M3EDayCell(
+      date: date,
+      selected: M3EDatePickerUtils.isSameDay(date, selectedDate),
+      today: M3EDatePickerUtils.isSameDay(date, currentDate),
+      enabled: enabled,
+      inRange:
+          start != null &&
+          end != null &&
+          M3EDatePickerUtils.isInRange(date, start, end),
+      rangeStart: start != null && M3EDatePickerUtils.isSameDay(date, start),
+      rangeEnd: end != null && M3EDatePickerUtils.isSameDay(date, end),
+      onTap: enabled ? () => onChanged(date) : null,
     );
   }
 }

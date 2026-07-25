@@ -32,7 +32,12 @@ class M3EScrollOverflowStrategy extends M3EOverflowStrategy {
     required M3EToggleButtonDecoration? decoration,
     required bool connected,
     required bool isRtl,
-    required Widget Function(int index, bool isFirst, bool isLast) buildButton,
+    required Widget Function(
+      int index, {
+      required bool isFirst,
+      required bool isLast,
+    })
+    buildButton,
   }) {
     final children = M3EOverflowStrategy.buildVisibleButtons(
       count: actions.length,

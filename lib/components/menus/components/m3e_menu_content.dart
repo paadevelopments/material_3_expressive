@@ -4,7 +4,7 @@ import '../../../foundations/foundations.dart';
 import '../models/m3e_menu_node.dart';
 import '../styles/m3e_menu_theme.dart';
 import 'm3e_menu_divider.dart';
-import 'm3e_menu_item.dart';
+import 'm3e_menu_node_builders.dart';
 import 'm3e_menu_style_scope.dart';
 
 /// Callback when a menu node produces a selection result.
@@ -62,23 +62,7 @@ class M3EMenuContent extends StatelessWidget {
     var focused = false;
 
     if (sectionLabel != null) {
-      final style = M3EMenuStyleScope.styleOf(context);
-      children.add(
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: menuTheme.groupLabelHorizontalPadding,
-            vertical: menuTheme.groupLabelVerticalPadding,
-          ),
-          child: Text(
-            sectionLabel!,
-            style: menuTheme.groupLabelStyle(
-              theme.typeScale,
-              theme.colorScheme,
-              style,
-            ),
-          ),
-        ),
-      );
+      children.add(_sectionLabel(context, sectionLabel!, menuTheme));
     }
 
     for (var i = 0; i < nodes.length; i++) {
@@ -104,6 +88,29 @@ class M3EMenuContent extends StatelessWidget {
     );
   }
 
+  Widget _sectionLabel(
+    BuildContext context,
+    String label,
+    M3EMenuTheme menuTheme,
+  ) {
+    final theme = M3ETheme.of(context);
+    final style = M3EMenuStyleScope.styleOf(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: menuTheme.groupLabelHorizontalPadding,
+        vertical: menuTheme.groupLabelVerticalPadding,
+      ),
+      child: Text(
+        label,
+        style: menuTheme.groupLabelStyle(
+          theme.typeScale,
+          theme.colorScheme,
+          style,
+        ),
+      ),
+    );
+  }
+
   List<Widget> _buildNode(
     BuildContext context,
     M3EMenuNode node,
@@ -111,239 +118,156 @@ class M3EMenuContent extends StatelessWidget {
     required bool requestFocus,
     required VoidCallback onFocused,
   }) {
-    switch (node) {
-      case M3EMenuDivider():
-        return const <Widget>[M3EMenuDividerWidget()];
-      case M3EMenuGroup(:final label, :final children):
-        return _buildGroup(
-          context,
-          label,
-          children,
-          menuTheme,
-          requestFocus: requestFocus,
-          onFocused: onFocused,
-        );
-      case M3EMenuEntry entry:
-        final autofocus = requestFocus && entry.enabled;
-        if (autofocus) {
-          onFocused();
-        }
-        return <Widget>[
-          M3EMenuItem(
-            label: entry.label,
-            leading: entry.leading,
-            trailing: entry.trailing,
-            trailingText: entry.trailingText,
-            badge: entry.badge,
-            supportingText: entry.supportingText,
-            enabled: entry.enabled,
-            isDestructive: entry.isDestructive,
-            shape: entry.shape,
-            autofocus: autofocus,
-            onTap: entry.enabled
-                ? () {
-                    entry.onPressed?.call();
-                    if (closeOnSelect) {
-                      onSelect(entry.value);
-                    }
-                  }
-                : null,
-          ),
-        ];
-      case M3EMenuSelectable item:
-        final selected =
-            item.selected ||
-            (selectedValue != null && selectedValue == item.value);
-        final autofocus = requestFocus && item.enabled;
-        if (autofocus) {
-          onFocused();
-        }
-        return <Widget>[
-          M3EMenuItem(
-            label: item.label,
-            leading:
-                item.leading ??
-                (selected
-                    ? Icon(
-                        M3EIcons.check_rounded,
-                        size: menuTheme.iconSize * 0.9,
-                      )
-                    : null),
-            trailing: item.trailing,
-            trailingText: item.trailingText,
-            badge: item.badge,
-            supportingText: item.supportingText,
-            enabled: item.enabled,
-            selected: selected,
-            shape: item.shape,
-            autofocus: autofocus,
-            onTap: item.enabled
-                ? () {
-                    item.onPressed?.call();
-                    onSelect(item.value);
-                  }
-                : null,
-          ),
-        ];
-      case M3EMenuToggleable item:
-        final autofocus = requestFocus && item.enabled;
-        if (autofocus) {
-          onFocused();
-        }
-        return <Widget>[
-          M3EMenuItem(
-            label: item.label,
-            leading:
-                item.leading ??
-                Icon(
-                  item.checked
-                      ? M3EIcons.check_box_rounded
-                      : M3EIcons.check_box_outline_blank_rounded,
-                  size: menuTheme.iconSize,
-                ),
-            trailing: item.trailing,
-            trailingText: item.trailingText,
-            badge: item.badge,
-            supportingText: item.supportingText,
-            enabled: item.enabled,
-            selected: item.checked,
-            shape: item.shape,
-            autofocus: autofocus,
-            onTap: item.enabled
-                ? () {
-                    final next = !item.checked;
-                    item.onChanged?.call(next);
-                    if (closeOnSelect) {
-                      onSelect(next);
-                    }
-                  }
-                : null,
-          ),
-        ];
-      case M3EMenuSubmenu item:
-        final autofocus = requestFocus && item.enabled;
-        if (autofocus) {
-          onFocused();
-        }
-        return <Widget>[
-          Builder(
-            builder: (BuildContext itemContext) {
-              return M3EMenuItem(
-                label: item.label,
-                leading: item.leading,
-                badge: item.badge,
-                trailing: Icon(
-                  M3EIcons.arrow_right_rounded,
-                  size: menuTheme.iconSize,
-                ),
-                enabled: item.enabled,
-                shape: item.shape,
-                autofocus: autofocus,
-                onTap: item.enabled && onOpenSubmenu != null
-                    ? () {
-                        final box =
-                            itemContext.findRenderObject() as RenderBox?;
-                        if (box == null) {
-                          return;
-                        }
-                        final rect = box.localToGlobal(Offset.zero) & box.size;
-                        onOpenSubmenu!(rect, item.children);
-                      }
-                    : null,
-              );
-            },
-          ),
-        ];
-      case M3EMenuWidget item:
-        final autofocus = requestFocus && item.enabled;
-        if (autofocus) {
-          onFocused();
-        }
-        final scheme = M3ETheme.of(context).colorScheme;
-        final style = M3EMenuStyleScope.styleOf(context);
-        final palette =
-            M3EMenuStyleScope.colorsOf(context) ??
-            menuTheme.colors(scheme, style);
-        final radius = menuTheme.itemShape(item.shape);
-        final background = item.selected
-            ? palette.selectedContainer
-            : const Color(0x00000000);
-        return <Widget>[
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: menuTheme.itemGap / 2),
-            child: M3ETappable(
-              enabled: item.enabled,
-              autofocus: autofocus,
-              semanticLabel: item.semanticLabel,
-              onTap: item.enabled
-                  ? () {
-                      item.onPressed?.call();
-                      if (closeOnSelect || item.value != null) {
-                        onSelect(item.value);
-                      }
-                    }
-                  : null,
-              builder: (BuildContext context, M3EInteractionState state) {
-                return Container(
-                  constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: menuTheme.entryHorizontalPadding,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color.alphaBlend(
-                      palette.stateLayer.withValues(alpha: state.opacity),
-                      background,
-                    ),
-                    borderRadius: radius,
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: IconTheme.merge(
-                          data: IconThemeData(
-                            color: menuTheme.entryIconForegroundColor(
-                              scheme,
-                              enabled: item.enabled,
-                              selected: item.selected,
-                              style: style,
-                            ),
-                            size: menuTheme.iconSize,
-                          ),
-                          child: DefaultTextStyle.merge(
-                            style: menuTheme.entryLabelStyle(
-                              M3ETheme.of(context).typeScale,
-                              scheme,
-                              enabled: item.enabled,
-                              selected: item.selected,
-                              style: style,
-                            ),
-                            child: item.child,
-                          ),
-                        ),
-                      ),
-                      if (item.selected)
-                        Padding(
-                          padding: EdgeInsets.only(left: menuTheme.iconGap),
-                          child: Icon(
-                            M3EIcons.check_rounded,
-                            size: menuTheme.iconSize * 0.9,
-                            color: menuTheme.entryIconForegroundColor(
-                              scheme,
-                              enabled: item.enabled,
-                              selected: true,
-                              style: style,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ];
+    return switch (node) {
+      M3EMenuDivider() => const <Widget>[M3EMenuDividerWidget()],
+      M3EMenuGroup(:final label, :final children) => _buildGroup(
+        context,
+        label,
+        children,
+        menuTheme,
+        requestFocus: requestFocus,
+        onFocused: onFocused,
+      ),
+      M3EMenuEntry entry => _entryNode(entry, requestFocus, onFocused),
+      M3EMenuSelectable item => _selectableNode(
+        item,
+        menuTheme,
+        requestFocus,
+        onFocused,
+      ),
+      M3EMenuToggleable item => _toggleableNode(
+        item,
+        menuTheme,
+        requestFocus,
+        onFocused,
+      ),
+      M3EMenuSubmenu item => _submenuNode(
+        item,
+        menuTheme,
+        requestFocus,
+        onFocused,
+      ),
+      M3EMenuWidget item => _widgetNode(
+        context,
+        item,
+        menuTheme,
+        requestFocus,
+        onFocused,
+      ),
+    };
+  }
+
+  List<Widget> _entryNode(
+    M3EMenuEntry entry,
+    bool requestFocus,
+    VoidCallback onFocused,
+  ) {
+    return _leaf(
+      requestFocus: requestFocus,
+      enabled: entry.enabled,
+      onFocused: onFocused,
+      child: M3EMenuNodeBuilders.entry(
+        entry,
+        autofocus: requestFocus && entry.enabled,
+        closeOnSelect: closeOnSelect,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
+  List<Widget> _selectableNode(
+    M3EMenuSelectable item,
+    M3EMenuTheme menuTheme,
+    bool requestFocus,
+    VoidCallback onFocused,
+  ) {
+    final selected =
+        item.selected || (selectedValue != null && selectedValue == item.value);
+    return _leaf(
+      requestFocus: requestFocus,
+      enabled: item.enabled,
+      onFocused: onFocused,
+      child: M3EMenuNodeBuilders.selectable(
+        item,
+        selected: selected,
+        autofocus: requestFocus && item.enabled,
+        menuTheme: menuTheme,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
+  List<Widget> _toggleableNode(
+    M3EMenuToggleable item,
+    M3EMenuTheme menuTheme,
+    bool requestFocus,
+    VoidCallback onFocused,
+  ) {
+    return _leaf(
+      requestFocus: requestFocus,
+      enabled: item.enabled,
+      onFocused: onFocused,
+      child: M3EMenuNodeBuilders.toggleable(
+        item,
+        autofocus: requestFocus && item.enabled,
+        closeOnSelect: closeOnSelect,
+        menuTheme: menuTheme,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
+  List<Widget> _submenuNode(
+    M3EMenuSubmenu item,
+    M3EMenuTheme menuTheme,
+    bool requestFocus,
+    VoidCallback onFocused,
+  ) {
+    return _leaf(
+      requestFocus: requestFocus,
+      enabled: item.enabled,
+      onFocused: onFocused,
+      child: M3EMenuNodeBuilders.submenu(
+        item,
+        autofocus: requestFocus && item.enabled,
+        menuTheme: menuTheme,
+        onOpenSubmenu: onOpenSubmenu,
+      ),
+    );
+  }
+
+  List<Widget> _widgetNode(
+    BuildContext context,
+    M3EMenuWidget item,
+    M3EMenuTheme menuTheme,
+    bool requestFocus,
+    VoidCallback onFocused,
+  ) {
+    return _leaf(
+      requestFocus: requestFocus,
+      enabled: item.enabled,
+      onFocused: onFocused,
+      child: M3EMenuNodeBuilders.customWidget(
+        context,
+        item,
+        autofocus: requestFocus && item.enabled,
+        closeOnSelect: closeOnSelect,
+        menuTheme: menuTheme,
+        onSelect: onSelect,
+      ),
+    );
+  }
+
+  List<Widget> _leaf({
+    required bool requestFocus,
+    required bool enabled,
+    required VoidCallback onFocused,
+    required Widget child,
+  }) {
+    if (requestFocus && enabled) {
+      onFocused();
     }
+    return <Widget>[child];
   }
 
   List<Widget> _buildGroup(
@@ -354,26 +278,9 @@ class M3EMenuContent extends StatelessWidget {
     required bool requestFocus,
     required VoidCallback onFocused,
   }) {
-    final theme = M3ETheme.of(context);
     final out = <Widget>[];
     if (label != null) {
-      final style = M3EMenuStyleScope.styleOf(context);
-      out.add(
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: menuTheme.groupLabelHorizontalPadding,
-            vertical: menuTheme.groupLabelVerticalPadding,
-          ),
-          child: Text(
-            label,
-            style: menuTheme.groupLabelStyle(
-              theme.typeScale,
-              theme.colorScheme,
-              style,
-            ),
-          ),
-        ),
-      );
+      out.add(_sectionLabel(context, label, menuTheme));
     }
 
     final shaped = <M3EMenuNode>[];
@@ -383,23 +290,25 @@ class M3EMenuContent extends StatelessWidget {
         shaped.add(child);
         continue;
       }
-      final shape = menuTheme.shapeForIndex(i, children.length);
-      shaped.add(_withShape(child, shape));
+      shaped.add(
+        _withShape(child, menuTheme.shapeForIndex(i, children.length)),
+      );
     }
 
     var focus = requestFocus;
     for (final child in shaped) {
-      final widgets = _buildNode(
-        context,
-        child,
-        menuTheme,
-        requestFocus: focus,
-        onFocused: () {
-          focus = false;
-          onFocused();
-        },
+      out.addAll(
+        _buildNode(
+          context,
+          child,
+          menuTheme,
+          requestFocus: focus,
+          onFocused: () {
+            focus = false;
+            onFocused();
+          },
+        ),
       );
-      out.addAll(widgets);
     }
     return out;
   }

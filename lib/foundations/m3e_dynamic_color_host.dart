@@ -64,52 +64,59 @@ class _M3EDynamicColorHostState extends State<M3EDynamicColorHost>
     });
   }
 
-  Future<void> _fetchDynamicColors() async {
+  void _debugLog(String message) {
+    if (kDebugMode) {
+      debugPrint(message);
+    }
+  }
+
+  /// Returns true when fetching should stop (applied or unmounted).
+  Future<bool> _tryApplyCorePalette() async {
     try {
       final corePalette = await DynamicColorPlugin.getCorePalette();
-
       if (!mounted) {
-        return;
+        return true;
       }
-
-      if (corePalette != null) {
-        // Primary role from the OS palette, used as fromSeed input.
-        final Color seed = corePalette.toColorScheme().primary;
-        if (kDebugMode) {
-          debugPrint('dynamic_color: Core palette primary seed detected.');
-        }
-        _applySeed(seed);
-        return;
+      if (corePalette == null) {
+        return false;
       }
+      final Color seed = corePalette.toColorScheme().primary;
+      _debugLog('dynamic_color: Core palette primary seed detected.');
+      _applySeed(seed);
+      return true;
     } on PlatformException {
-      if (kDebugMode) {
-        debugPrint('dynamic_color: Failed to obtain core palette.');
-      }
+      _debugLog('dynamic_color: Failed to obtain core palette.');
+      return false;
     }
+  }
 
+  /// Returns true when fetching should stop (applied or unmounted).
+  Future<bool> _tryApplyAccentColor() async {
     try {
       final Color? accentColor = await DynamicColorPlugin.getAccentColor();
-
       if (!mounted) {
-        return;
+        return true;
       }
-
-      if (accentColor != null) {
-        if (kDebugMode) {
-          debugPrint('dynamic_color: Accent color detected.');
-        }
-        _applySeed(accentColor);
-        return;
+      if (accentColor == null) {
+        return false;
       }
+      _debugLog('dynamic_color: Accent color detected.');
+      _applySeed(accentColor);
+      return true;
     } on PlatformException {
-      if (kDebugMode) {
-        debugPrint('dynamic_color: Failed to obtain accent color.');
-      }
+      _debugLog('dynamic_color: Failed to obtain accent color.');
+      return false;
     }
+  }
 
-    if (kDebugMode) {
-      debugPrint('dynamic_color: Dynamic color not detected on this device.');
+  Future<void> _fetchDynamicColors() async {
+    if (await _tryApplyCorePalette()) {
+      return;
     }
+    if (await _tryApplyAccentColor()) {
+      return;
+    }
+    _debugLog('dynamic_color: Dynamic color not detected on this device.');
   }
 
   @override

@@ -175,6 +175,38 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       pressedRadius: pressedRadius,
     );
 
+    return _fromButtonDecoration(
+      base,
+      trailingBackgroundColor: trailingBackgroundColor,
+      trailingForegroundColor: trailingForegroundColor,
+      menuBackgroundColor: menuBackgroundColor,
+      menuForegroundColor: menuForegroundColor,
+      dividerColor: dividerColor,
+      leadingCustomSize: leadingCustomSize,
+      trailingCustomSize: trailingCustomSize,
+      trailingSelectedRadius: trailingSelectedRadius,
+      gap: gap,
+      menuStyle: menuStyle,
+      popupDecoration: popupDecoration,
+      bottomSheetDecoration: bottomSheetDecoration,
+    );
+  }
+
+  static M3ESplitButtonDecoration _fromButtonDecoration(
+    M3EButtonDecoration base, {
+    Color? trailingBackgroundColor,
+    Color? trailingForegroundColor,
+    Color? menuBackgroundColor,
+    Color? menuForegroundColor,
+    Color? dividerColor,
+    M3EButtonSize? leadingCustomSize,
+    M3EButtonSize? trailingCustomSize,
+    double? trailingSelectedRadius,
+    double? gap,
+    required M3ESplitButtonMenuStyle menuStyle,
+    M3ESplitButtonPopupDecoration? popupDecoration,
+    M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
+  }) {
     return M3ESplitButtonDecoration(
       backgroundColor: base.backgroundColor,
       foregroundColor: base.foregroundColor,

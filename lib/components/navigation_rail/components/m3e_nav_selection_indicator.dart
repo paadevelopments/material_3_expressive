@@ -376,61 +376,95 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   }
 
   void _sync({bool forceJump = false}) {
-    if (!mounted || !widget.enabled) {
-      if (_ready) {
-        setState(() => _ready = false);
-      }
+    if (_clearIfDisabled()) {
       return;
     }
     final geo = _geometryOf(widget.selectedIndex);
-    if (geo == null) {
-      // First layout can miss RenderBox sizes; retry on a real next frame.
-      if (_measureAttempts++ < 120) {
-        _scheduleMeasure(forceJump: forceJump);
-      }
+    if (!_ensureGeometry(geo, forceJump: forceJump)) {
       return;
     }
-    _measureAttempts = 0;
-
-    final bool geometryChanged =
-        !_ready ||
-        (_crossCenter - geo.cross).abs() > 0.5 ||
-        (_baseMain - geo.mainSize).abs() > 0.5 ||
-        (_crossSize - geo.crossSize).abs() > 0.5 ||
-        (!_animating && (_lead.value - geo.main).abs() > 0.5);
-
-    _crossCenter = geo.cross;
-    _baseMain = geo.mainSize;
-    _crossSize = geo.crossSize;
-
+    final resolved = geo!;
+    final bool geometryChanged = _didGeometryChange(resolved);
+    _crossCenter = resolved.cross;
+    _baseMain = resolved.mainSize;
+    _crossSize = resolved.crossSize;
     if (!_ready || forceJump) {
-      _lead.value = geo.main;
-      _trail.value = geo.main;
-      if (!_ready) {
-        setState(() => _ready = true);
-      } else if (geometryChanged) {
-        setState(() {});
-      }
-      _refreshCache();
+      _jumpToGeometry(resolved, geometryChanged: geometryChanged);
       return;
     }
-
-    if ((_lead.value - geo.main).abs() < 0.5 &&
-        (_trail.value - geo.main).abs() < 0.5) {
+    if (_isAtGeometry(resolved)) {
       if (geometryChanged) {
         setState(() {});
       }
       return;
     }
+    _animateToGeometry(resolved);
+  }
 
+  bool _clearIfDisabled() {
+    if (mounted && widget.enabled) {
+      return false;
+    }
+    if (_ready) {
+      setState(() => _ready = false);
+    }
+    return true;
+  }
+
+  bool _ensureGeometry(
+    ({double main, double cross, double mainSize, double crossSize})? geo, {
+    required bool forceJump,
+  }) {
+    if (geo != null) {
+      _measureAttempts = 0;
+      return true;
+    }
+    if (_measureAttempts++ < 120) {
+      _scheduleMeasure(forceJump: forceJump);
+    }
+    return false;
+  }
+
+  bool _didGeometryChange(
+    ({double main, double cross, double mainSize, double crossSize}) geo,
+  ) {
+    return !_ready ||
+        (_crossCenter - geo.cross).abs() > 0.5 ||
+        (_baseMain - geo.mainSize).abs() > 0.5 ||
+        (_crossSize - geo.crossSize).abs() > 0.5 ||
+        (!_animating && (_lead.value - geo.main).abs() > 0.5);
+  }
+
+  bool _isAtGeometry(
+    ({double main, double cross, double mainSize, double crossSize}) geo,
+  ) {
+    return (_lead.value - geo.main).abs() < 0.5 &&
+        (_trail.value - geo.main).abs() < 0.5;
+  }
+
+  void _jumpToGeometry(
+    ({double main, double cross, double mainSize, double crossSize}) geo, {
+    required bool geometryChanged,
+  }) {
+    _lead.value = geo.main;
+    _trail.value = geo.main;
+    if (!_ready) {
+      setState(() => _ready = true);
+    } else if (geometryChanged) {
+      setState(() {});
+    }
+    _refreshCache();
+  }
+
+  void _animateToGeometry(
+    ({double main, double cross, double mainSize, double crossSize}) geo,
+  ) {
     _lead
       ..motion = _leadMotion
       ..animateTo(geo.main);
     _trail
       ..motion = _trailMotion
       ..animateTo(geo.main);
-    // Ensure host hides resting pills for this travel even if the ticker
-    // reports inactive for a beat before the first spring tick.
     _setTraveling(true);
   }
 

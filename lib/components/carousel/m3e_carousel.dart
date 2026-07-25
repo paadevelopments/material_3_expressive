@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
@@ -8,6 +6,7 @@ import 'package:material_3_expressive/foundations/foundations.dart';
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
 import 'styles/m3e_carousel_theme.dart';
+import 'utils/m3e_carousel_scroll_helper.dart';
 
 export 'enums/m3e_carousel_type.dart';
 export 'styles/m3e_carousel_theme.dart';
@@ -118,74 +117,24 @@ class _M3ECarouselState extends State<M3ECarousel> {
   double get _mainExtent => _horizontal ? frameWidth : frameHeight;
 
   void scrollFrame(int direction) {
-    double prevScrollPosition = controller.position.pixels,
-        nextScrollPosition = 0;
-    if (widget.type == M3ECarouselType.hero) {
-      double shouldAddOrSubtract =
-          ((layoutWeight.reduce(
-                    widget.heroAlignment == M3ECarouselHeroAlignment.left
-                        ? max
-                        : min,
-                  ) *
-                  10) /
-              100) *
-          _mainExtent;
-      var limit = 0;
-      switch (widget.heroAlignment) {
-        case M3ECarouselHeroAlignment.center:
-          limit = direction == 0 ? 0 : 3;
-        case M3ECarouselHeroAlignment.left:
-          limit = direction == 0 ? 0 : 2;
-        case M3ECarouselHeroAlignment.right:
-          limit = direction == 0 ? 0 : 2;
-      }
-      if (direction == 0) {
-        if (itemScrolled <= limit) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition - shouldAddOrSubtract;
-        itemScrolled -= 1;
-      } else {
-        if (itemScrolled >= (widget.children.length - limit)) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition + shouldAddOrSubtract;
-        itemScrolled += 1;
-      }
-    } else if (widget.type == M3ECarouselType.contained) {
-      double shouldAddOrSubtract =
-          ((layoutWeight.reduce(max) * 10) / 100) * _mainExtent;
-      if (direction == 0) {
-        if (itemScrolled <= 0) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition - shouldAddOrSubtract;
-        itemScrolled -= 1;
-      } else {
-        if (itemScrolled >=
-            (widget.children.length - (widget.isExtended ? 4 : 3))) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition + shouldAddOrSubtract;
-        itemScrolled += 1;
-      }
-    } else {
-      if (direction == 0) {
-        if (itemScrolled <= 0) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition - widget.uncontainedItemExtent;
-        itemScrolled -= 1;
-      } else {
-        if (itemScrolled >= (widget.children.length - 1)) {
-          return;
-        }
-        nextScrollPosition = prevScrollPosition + widget.uncontainedItemExtent;
-        itemScrolled += 1;
-      }
+    final step = M3ECarouselScrollHelper.nextStep(
+      type: widget.type,
+      heroAlignment: widget.heroAlignment,
+      isExtended: widget.isExtended,
+      uncontainedItemExtent: widget.uncontainedItemExtent,
+      layoutWeight: layoutWeight,
+      mainExtent: _mainExtent,
+      childrenLength: widget.children.length,
+      itemScrolled: itemScrolled,
+      prevScrollPosition: controller.position.pixels,
+      direction: direction,
+    );
+    if (step == null) {
+      return;
     }
+    itemScrolled = step.itemScrolled;
     controller.animateTo(
-      nextScrollPosition,
+      step.nextScrollPosition,
       duration: Duration(milliseconds: widget.scrollAnimationDuration),
       curve: Curves.ease,
     );

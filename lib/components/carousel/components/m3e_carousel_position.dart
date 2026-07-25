@@ -139,29 +139,39 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
     List<int>? newFlexWeights, {
     required bool newConsumeMaxWeight,
   }) {
-    final double maxItem;
-    if (hasPixels && flexWeights != null) {
-      final double leadingItem = getItemFromPixels(pixels, viewportDimension);
-      maxItem = consumeMaxWeight
-          ? leadingItem
-          : leadingItem + flexWeights!.indexOf(flexWeights!.max);
-    } else {
-      if (!newConsumeMaxWeight) {
-        return _itemToShowOnStartup;
-      }
-      maxItem = _itemToShowOnStartup;
+    final double? maxItem = _maxItemForLeadingUpdate(newConsumeMaxWeight);
+    if (maxItem == null) {
+      return _itemToShowOnStartup;
     }
     if (newFlexWeights != null && !newConsumeMaxWeight) {
-      var smallerWeights = 0;
-      for (final int weight in newFlexWeights) {
-        if (weight == newFlexWeights.max) {
-          break;
-        }
-        smallerWeights += 1;
-      }
-      return maxItem - smallerWeights;
+      return maxItem - _leadingSmallerWeightCount(newFlexWeights);
     }
     return maxItem;
+  }
+
+  /// Null means the caller should return [_itemToShowOnStartup] immediately.
+  double? _maxItemForLeadingUpdate(bool newConsumeMaxWeight) {
+    if (hasPixels && flexWeights != null) {
+      final double leadingItem = getItemFromPixels(pixels, viewportDimension);
+      return consumeMaxWeight
+          ? leadingItem
+          : leadingItem + flexWeights!.indexOf(flexWeights!.max);
+    }
+    if (!newConsumeMaxWeight) {
+      return null;
+    }
+    return _itemToShowOnStartup;
+  }
+
+  int _leadingSmallerWeightCount(List<int> newFlexWeights) {
+    var smallerWeights = 0;
+    for (final weight in newFlexWeights) {
+      if (weight == newFlexWeights.max) {
+        break;
+      }
+      smallerWeights += 1;
+    }
+    return smallerWeights;
   }
 
   double getItemFromPixels(double pixels, double viewportDimension) {

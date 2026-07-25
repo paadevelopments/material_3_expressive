@@ -93,58 +93,122 @@ class M3EButtonGroupOverflowController {
     required List<double> itemExtents,
     required double triggerExtent,
     required double Function(int indexBefore) separatorBetweenItems,
-    required double Function(bool isFirst) separatorBeforeOverflow,
+    required double Function({required bool isFirst}) separatorBeforeOverflow,
   }) {
     final effectiveMaxMain = roundAvailable(maxMain);
-    int windowStart = windowStartIndex.value.clamp(0, itemExtents.length);
-    bool needsBack = windowStart > 0;
-    var needsForward = false;
+    final windowStart = windowStartIndex.value.clamp(0, itemExtents.length);
+    final needsBack = windowStart > 0;
 
     var currentWidth = 0.toDouble();
     if (needsBack) {
-      currentWidth += triggerExtent + separatorBeforeOverflow(true);
+      currentWidth += triggerExtent + separatorBeforeOverflow(isFirst: true);
     }
 
-    var windowEnd = windowStart;
-    for (var i = windowStart; i < itemExtents.length; i++) {
-      final itemExtent = itemExtents[i];
-      final gap = separatorBeforeOverflow(i == windowStart && !needsBack);
-      if (currentWidth + gap + itemExtent < effectiveMaxMain) {
-        currentWidth += gap + itemExtent;
-        windowEnd = i;
-      } else {
-        needsForward = true;
-        break;
-      }
-    }
-
-    if (needsForward) {
-      while (windowEnd >= windowStart) {
-        final gapBeforeForward = separatorBeforeOverflow(false);
-        if (currentWidth + gapBeforeForward + triggerExtent <
-            effectiveMaxMain) {
-          break;
-        }
-        final gapBeforeItem = separatorBeforeOverflow(
-          windowEnd == windowStart && !needsBack,
-        );
-        currentWidth -= gapBeforeItem + itemExtents[windowEnd];
-        windowEnd--;
-      }
-    }
+    final fitted = _fitPagingForward(
+      itemExtents: itemExtents,
+      windowStart: windowStart,
+      needsBack: needsBack,
+      currentWidth: currentWidth,
+      effectiveMaxMain: effectiveMaxMain,
+      triggerExtent: triggerExtent,
+      separatorBeforeOverflow: separatorBeforeOverflow,
+    );
 
     final window = M3EButtonGroupOverflowPagingWindow(
       start: windowStart,
-      end: windowEnd,
+      end: fitted.windowEnd,
       needsBack: needsBack,
-      needsForward: needsForward,
+      needsForward: fitted.needsForward,
     );
 
-    // Sync: Ensure the reactive state matches the computed window start.
     if (window.start != windowStartIndex.value) {
       windowStartIndex.value = window.start;
     }
 
     return window;
+  }
+
+  ({int windowEnd, bool needsForward}) _fitPagingForward({
+    required List<double> itemExtents,
+    required int windowStart,
+    required bool needsBack,
+    required double currentWidth,
+    required double effectiveMaxMain,
+    required double triggerExtent,
+    required double Function({required bool isFirst}) separatorBeforeOverflow,
+  }) {
+    final grown = _growPagingWindow(
+      itemExtents: itemExtents,
+      windowStart: windowStart,
+      needsBack: needsBack,
+      currentWidth: currentWidth,
+      effectiveMaxMain: effectiveMaxMain,
+      separatorBeforeOverflow: separatorBeforeOverflow,
+    );
+    if (!grown.needsForward) {
+      return (windowEnd: grown.windowEnd, needsForward: false);
+    }
+    return (
+      windowEnd: _shrinkPagingWindowForForwardTrigger(
+        itemExtents: itemExtents,
+        windowStart: windowStart,
+        windowEnd: grown.windowEnd,
+        needsBack: needsBack,
+        currentWidth: grown.width,
+        effectiveMaxMain: effectiveMaxMain,
+        triggerExtent: triggerExtent,
+        separatorBeforeOverflow: separatorBeforeOverflow,
+      ),
+      needsForward: true,
+    );
+  }
+
+  ({int windowEnd, bool needsForward, double width}) _growPagingWindow({
+    required List<double> itemExtents,
+    required int windowStart,
+    required bool needsBack,
+    required double currentWidth,
+    required double effectiveMaxMain,
+    required double Function({required bool isFirst}) separatorBeforeOverflow,
+  }) {
+    var width = currentWidth;
+    var windowEnd = windowStart;
+    for (var i = windowStart; i < itemExtents.length; i++) {
+      final gap = separatorBeforeOverflow(
+        isFirst: i == windowStart && !needsBack,
+      );
+      if (width + gap + itemExtents[i] >= effectiveMaxMain) {
+        return (windowEnd: windowEnd, needsForward: true, width: width);
+      }
+      width += gap + itemExtents[i];
+      windowEnd = i;
+    }
+    return (windowEnd: windowEnd, needsForward: false, width: width);
+  }
+
+  int _shrinkPagingWindowForForwardTrigger({
+    required List<double> itemExtents,
+    required int windowStart,
+    required int windowEnd,
+    required bool needsBack,
+    required double currentWidth,
+    required double effectiveMaxMain,
+    required double triggerExtent,
+    required double Function({required bool isFirst}) separatorBeforeOverflow,
+  }) {
+    var width = currentWidth;
+    var end = windowEnd;
+    while (end >= windowStart) {
+      final gapBeforeForward = separatorBeforeOverflow(isFirst: false);
+      if (width + gapBeforeForward + triggerExtent < effectiveMaxMain) {
+        break;
+      }
+      final gapBeforeItem = separatorBeforeOverflow(
+        isFirst: end == windowStart && !needsBack,
+      );
+      width -= gapBeforeItem + itemExtents[end];
+      end--;
+    }
+    return end;
   }
 }

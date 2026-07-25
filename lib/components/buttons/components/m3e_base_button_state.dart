@@ -59,23 +59,18 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
 
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
-        if (!isPointerDownNotifier.value) {
-          isPointerDownNotifier.value = true;
-        }
-      },
-      onPointerUp: (_) {
-        if (isPointerDownNotifier.value) {
-          isPointerDownNotifier.value = false;
-        }
-      },
-      onPointerCancel: (_) {
-        if (isPointerDownNotifier.value) {
-          isPointerDownNotifier.value = false;
-        }
-      },
+      onPointerDown: (_) => _setPointerDown(true),
+      onPointerUp: (_) => _setPointerDown(false),
+      onPointerCancel: (_) => _setPointerDown(false),
       child: child,
     );
+  }
+
+  void _setPointerDown(bool down) {
+    if (isPointerDownNotifier.value == down) {
+      return;
+    }
+    isPointerDownNotifier.value = down;
   }
 
   /// buildAnimatedContent.
@@ -83,11 +78,11 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   @protected
   Widget buildAnimatedContent({
     required Widget Function(
-      BuildContext context,
-      bool isPressed,
-      bool isHovered,
-      bool isFocused,
-    )
+      BuildContext context, {
+      required bool isPressed,
+      required bool isHovered,
+      required bool isFocused,
+    })
     builder,
   }) {
     return ValueListenableBuilder<bool>(
@@ -105,9 +100,9 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
                     final effectivePressed = isPressed || isPointerDown;
                     return builder(
                       context,
-                      effectivePressed,
-                      isHovered,
-                      isFocused,
+                      isPressed: effectivePressed,
+                      isHovered: isHovered,
+                      isFocused: isFocused,
                     );
                   },
                 );
