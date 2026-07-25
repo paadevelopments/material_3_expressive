@@ -72,41 +72,68 @@ class M3EDayPicker extends StatelessWidget {
     final int rowCount =
         ((daysInMonth + firstDayOffset) / dateTheme.daysPerWeek).ceil();
 
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double rowHeight = fitHeight && constraints.hasBoundedHeight
-            ? ((constraints.maxHeight -
-                          dateTheme.gridPadding.vertical -
-                          M3EDatePickerConstants.weekdayRowHeight) /
-                      rowCount)
-                  .clamp(40.0, M3EDatePickerConstants.dayPickerRowHeight)
-            : M3EDatePickerConstants.dayPickerRowHeight;
-
-        return Column(
-          children: <Widget>[
-            _buildWeekdayHeader(theme, dateTheme, localizations),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: dateTheme.gridPadding,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                mainAxisExtent: rowHeight,
-              ),
-              itemCount: cellCount,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildDayCell(
-                  index: index,
-                  firstDayOffset: firstDayOffset,
-                  daysInMonth: daysInMonth,
-                  year: year,
-                  month: month,
+    if (fitHeight) {
+      return Column(
+        children: <Widget>[
+          _buildWeekdayHeader(theme, dateTheme, localizations),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double rowHeight =
+                    (constraints.maxHeight - dateTheme.gridPadding.vertical) /
+                    rowCount;
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: dateTheme.gridPadding,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisExtent: rowHeight.clamp(
+                      0.0,
+                      M3EDatePickerConstants.dayPickerRowHeight,
+                    ),
+                  ),
+                  itemCount: cellCount,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _buildDayCell(
+                      index: index,
+                      firstDayOffset: firstDayOffset,
+                      daysInMonth: daysInMonth,
+                      year: year,
+                      month: month,
+                    );
+                  },
                 );
               },
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _buildWeekdayHeader(theme, dateTheme, localizations),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: dateTheme.gridPadding,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            mainAxisExtent: M3EDatePickerConstants.dayPickerRowHeight,
+          ),
+          itemCount: cellCount,
+          itemBuilder: (BuildContext context, int index) {
+            return _buildDayCell(
+              index: index,
+              firstDayOffset: firstDayOffset,
+              daysInMonth: daysInMonth,
+              year: year,
+              month: month,
+            );
+          },
+        ),
+      ],
     );
   }
 

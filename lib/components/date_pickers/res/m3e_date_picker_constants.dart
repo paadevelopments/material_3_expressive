@@ -9,16 +9,16 @@ abstract final class M3EDatePickerConstants {
   static const Size calendarPortraitDialogSize = Size(360, 568);
 
   /// calendarLandscapeDialogSize.
-  static const Size calendarLandscapeDialogSize = Size(496, 346);
+  static const Size calendarLandscapeDialogSize = Size(544, 346);
 
   /// inputPortraitDialogSize.
   static const Size inputPortraitDialogSize = Size(328, 270);
 
   /// inputLandscapeDialogSize.
-  static const Size inputLandscapeDialogSize = Size(496, 160);
+  static const Size inputLandscapeDialogSize = Size(544, 248);
 
   /// inputRangeLandscapeDialogSize.
-  static const Size inputRangeLandscapeDialogSize = Size(496, 164);
+  static const Size inputRangeLandscapeDialogSize = Size(544, 248);
 
   /// dialogSizeAnimationDuration.
 
@@ -100,7 +100,7 @@ abstract final class M3EDatePickerConstants {
   static const double headerPortraitHeight = 120;
 
   /// headerLandscapeWidth.
-  static const double headerLandscapeWidth = 152;
+  static const double headerLandscapeWidth = 176;
 
   /// headerPaddingLandscape.
   static const double headerPaddingLandscape = 16;

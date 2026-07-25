@@ -75,7 +75,7 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
     );
 
     if (widget.expandToFit) {
-      return content;
+      return SizedBox.expand(child: content);
     }
 
     return M3EComponentTheme(

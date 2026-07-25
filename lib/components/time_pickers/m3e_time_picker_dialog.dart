@@ -234,7 +234,7 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     final Widget pickerBody = _buildPickerBody(
       picker: resolved.picker,
       isInputMode: isInputMode,
-      dialHeight: isInputMode
+      dialHeight: isInputMode || orientation == Orientation.landscape
           ? null
           : M3ETimePickerConstants.dialDialogBodyHeight +
                 dialogPadding.vertical,
@@ -248,6 +248,9 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: AnimatedContainer(
           width: dialogSize.width,
+          height: orientation == Orientation.landscape
+              ? dialogSize.height
+              : null,
           duration: M3ETimePickerConstants.dialogSizeAnimationDuration,
           curve: Curves.easeIn,
           child: switch (orientation) {
@@ -262,7 +265,7 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
               ],
             ),
             Orientation.landscape => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 header,
@@ -272,9 +275,15 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
                 ),
                 Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[pickerBody, actions],
+                    children: <Widget>[
+                      Expanded(
+                        child: isInputMode
+                            ? SingleChildScrollView(child: pickerBody)
+                            : pickerBody,
+                      ),
+                      actions,
+                    ],
                   ),
                 ),
               ],

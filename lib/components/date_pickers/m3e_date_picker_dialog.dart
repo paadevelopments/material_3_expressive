@@ -291,7 +291,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     final Widget pickerBody = _buildPickerBody(
       picker: resolved.picker,
       isInputMode: isInputMode,
-      calendarHeight: isInputMode ? null : _calendarBodyHeight(context),
+      calendarHeight: isInputMode || orientation == Orientation.landscape
+          ? null
+          : _calendarBodyHeight(context),
     );
     return Padding(
       padding: widget.insetPadding,
@@ -302,6 +304,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: AnimatedContainer(
           width: dialogSize.width,
+          height: orientation == Orientation.landscape
+              ? dialogSize.height
+              : null,
           duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
           curve: Curves.easeIn,
           child: switch (orientation) {
@@ -316,7 +321,7 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
               ],
             ),
             Orientation.landscape => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 header,
@@ -326,9 +331,15 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
                 ),
                 Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[pickerBody, actions],
+                    children: <Widget>[
+                      Expanded(
+                        child: isInputMode
+                            ? SingleChildScrollView(child: pickerBody)
+                            : pickerBody,
+                      ),
+                      actions,
+                    ],
                   ),
                 ),
               ],

@@ -9,13 +9,13 @@ abstract final class M3ETimePickerConstants {
   static const Size dialPortraitDialogSize = Size(328, 520);
 
   /// dialLandscapeDialogSize.
-  static const Size dialLandscapeDialogSize = Size(496, 346);
+  static const Size dialLandscapeDialogSize = Size(544, 346);
 
   /// inputPortraitDialogSize.
   static const Size inputPortraitDialogSize = Size(328, 270);
 
   /// inputLandscapeDialogSize.
-  static const Size inputLandscapeDialogSize = Size(496, 160);
+  static const Size inputLandscapeDialogSize = Size(544, 248);
 
   /// dialogSizeAnimationDuration.
 

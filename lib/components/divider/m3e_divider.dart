@@ -52,7 +52,6 @@ class M3EDivider extends StatelessWidget {
         padding: EdgeInsets.only(top: indent, bottom: endIndent),
         child: SizedBox(
           width: lineThickness,
-          height: double.infinity,
           child: ColoredBox(color: line),
         ),
       );

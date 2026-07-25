@@ -202,8 +202,20 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
           lastDate: lastDate,
           currentDate: currentDate,
         );
+    final bool isInputMode =
+        _entryMode.value == M3EDatePickerEntryMode.input ||
+        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
     final Size dialogSize =
-        M3EDatePickerConstants.calendarPortraitDialogSize *
+        (switch ((isInputMode, orientation)) {
+          (false, Orientation.portrait) =>
+            M3EDatePickerConstants.calendarPortraitDialogSize,
+          (true, Orientation.portrait) =>
+            M3EDatePickerConstants.inputPortraitDialogSize,
+          (false, Orientation.landscape) =>
+            M3EDatePickerConstants.calendarLandscapeDialogSize,
+          (true, Orientation.landscape) =>
+            M3EDatePickerConstants.inputRangeLandscapeDialogSize,
+        }) *
         (MediaQuery.textScalerOf(context)
                 .clamp(
                   maxScaleFactor:
@@ -211,22 +223,36 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 )
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
-    final bool isInputMode =
-        _entryMode.value == M3EDatePickerEntryMode.input ||
-        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
     final Widget pickerBody = AnimatedSize(
       duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
       curve: Curves.easeIn,
       alignment: Alignment.topCenter,
-      child: isInputMode
+      child: isInputMode || orientation == Orientation.landscape
           ? M3EDatePickerDialogContent(
-              isInputMode: true,
+              isInputMode: isInputMode,
               child: resolved.picker,
             )
           : SizedBox(
               height: M3EDatePickerConstants.dialogPickerBodyHeight,
               child: resolved.picker,
             ),
+    );
+    final Widget header = M3EDatePickerHeader(
+      helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
+      titleText: _headerTitle(localizations),
+      showTitle: _startDate.value != null,
+      orientation: orientation,
+      isShort:
+          orientation == Orientation.landscape &&
+          (_entryMode.value == M3EDatePickerEntryMode.input ||
+              _entryMode.value == M3EDatePickerEntryMode.inputOnly),
+      entryModeButton: resolved.entryModeButton,
+    );
+    final Widget actions = M3EDatePickerActions(
+      cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
+      confirmText: widget.confirmText ?? localizations.okButtonLabel,
+      onCancel: _handleCancel,
+      onConfirm: _handleOk,
     );
     return Padding(
       padding: widget.insetPadding,
@@ -237,29 +263,45 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: dialogSize.width,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              M3EDatePickerHeader(
-                helpText:
-                    widget.helpText ?? localizations.dateRangePickerHelpText,
-                titleText: _headerTitle(localizations),
-                showTitle: _startDate.value != null,
-                orientation: orientation,
-                entryModeButton: resolved.entryModeButton,
-              ),
-              M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
-              pickerBody,
-              M3EDatePickerActions(
-                cancelText:
-                    widget.cancelText ?? localizations.cancelButtonLabel,
-                confirmText: widget.confirmText ?? localizations.okButtonLabel,
-                onCancel: _handleCancel,
-                onConfirm: _handleOk,
-              ),
-            ],
-          ),
+          height: orientation == Orientation.landscape
+              ? dialogSize.height
+              : null,
+          child: switch (orientation) {
+            Orientation.portrait => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
+                pickerBody,
+                actions,
+              ],
+            ),
+            Orientation.landscape => Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                header,
+                M3EDivider(
+                  axis: M3EDividerAxis.vertical,
+                  color: dateTheme.dividerColor(theme.colorScheme),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Expanded(
+                        child: isInputMode
+                            ? SingleChildScrollView(child: pickerBody)
+                            : pickerBody,
+                      ),
+                      actions,
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          },
         ),
       ),
     );

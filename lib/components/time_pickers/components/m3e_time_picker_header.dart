@@ -76,10 +76,9 @@ class M3ETimePickerHeader extends StatelessWidget {
             padding: dialogTheme.padding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 helpRow,
-                Visibility(visible: showTitle, child: title),
+                if (showTitle) Expanded(child: title),
               ],
             ),
           ),
