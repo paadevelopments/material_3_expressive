@@ -43,28 +43,30 @@ class _GalleryShell extends StatefulWidget {
 class _GalleryShellState extends State<_GalleryShell> {
   int _index = 0;
 
-  late final List<GlobalKey> _pageKeys =
-      List<GlobalKey>.generate(5, (_) => GlobalKey());
+  late final List<GlobalKey> _pageKeys = List<GlobalKey>.generate(
+    5,
+    (_) => GlobalKey(),
+  );
 
   List<Widget> get _pages => <Widget>[
-        ActionsPage(key: _pageKeys[0]),
-        SelectionPage(key: _pageKeys[1]),
-        ContainmentPage(key: _pageKeys[2]),
-        NavigationPage(key: _pageKeys[3]),
-        FeedbackPage(key: _pageKeys[4]),
-      ];
+    ActionsPage(key: _pageKeys[0]),
+    SelectionPage(key: _pageKeys[1]),
+    ContainmentPage(key: _pageKeys[2]),
+    NavigationPage(key: _pageKeys[3]),
+    FeedbackPage(key: _pageKeys[4]),
+  ];
 
   static const List<M3ENavigationBarDestination> _destinations =
       <M3ENavigationBarDestination>[
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.add), label: 'Do'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.check), label: 'Pick'),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.calendar_today),
-      label: 'View',
-    ),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Nav'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Find'),
-  ];
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.add), label: 'Do'),
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.check), label: 'Pick'),
+        M3ENavigationBarDestination(
+          icon: Icon(M3EIcons.calendar_today),
+          label: 'View',
+        ),
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Nav'),
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Find'),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -84,19 +86,15 @@ class _GalleryShellState extends State<_GalleryShell> {
                         : M3EIcons.dark_mode,
                   ),
                   tooltip: 'Toggle theme',
-                  onPressed: () => M3ETheme.controllerOf(context)?.toggleBrightness(
-                    fallback: theme.brightness,
-                    autoTheming: true,
-                  ),
+                  onPressed: () =>
+                      M3ETheme.controllerOf(context)?.toggleBrightness(
+                        fallback: theme.brightness,
+                        autoTheming: true,
+                      ),
                 ),
               ],
             ),
-            Expanded(
-              child: TickerMode(
-                enabled: true,
-                child: _pages[_index],
-              ),
-            ),
+            Expanded(child: TickerMode(enabled: true, child: _pages[_index])),
             M3ENavigationBar(
               destinations: _destinations,
               selectedIndex: _index,

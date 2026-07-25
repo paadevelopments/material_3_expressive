@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -15,6 +14,7 @@ import 'm3e_overflow_strategy.dart';
 
 /// Overflow strategy that renders every action inline without a trigger.
 class M3ENoOverflowStrategy extends M3EOverflowStrategy {
+  /// M3ENoOverflowStrategy.
   const M3ENoOverflowStrategy();
 
   @override

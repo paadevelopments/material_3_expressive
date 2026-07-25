@@ -6,6 +6,7 @@ import '../../../foundations/foundations.dart';
 
 /// Animates a snackbar in from the bottom, holds it, then removes [entry].
 class M3ESnackbarHost extends StatefulWidget {
+  /// M3ESnackbarHost.
   const M3ESnackbarHost({
     required this.child,
     required this.duration,
@@ -13,13 +14,21 @@ class M3ESnackbarHost extends StatefulWidget {
     super.key,
   });
 
+  /// child.
+
   final Widget child;
+
+  /// duration.
   final Duration duration;
+
+  /// entry.
   final OverlayEntry entry;
 
   @override
   State<M3ESnackbarHost> createState() => M3ESnackbarHostState();
 }
+
+/// M3ESnackbarHostState.
 
 class M3ESnackbarHostState extends State<M3ESnackbarHost>
     with SingleTickerProviderStateMixin {
@@ -35,12 +44,10 @@ class M3ESnackbarHostState extends State<M3ESnackbarHost>
       duration: M3EMotion.medium2,
       reverseDuration: M3EMotion.short4,
     );
-    _offset = Tween<Offset>(
-      begin: const Offset(0, 1.5),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: M3EMotion.emphasized),
-    );
+    _offset = Tween<Offset>(begin: const Offset(0, 1.5), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _controller, curve: M3EMotion.emphasized),
+        );
     _controller.forward();
     _timer = Timer(widget.duration, _dismiss);
   }
@@ -67,7 +74,8 @@ class M3ESnackbarHostState extends State<M3ESnackbarHost>
     return Positioned(
       left: snackTheme.overlayHorizontalInset + media.viewPadding.left,
       right: snackTheme.overlayHorizontalInset + media.viewPadding.right,
-      bottom: snackTheme.overlayBottomInset +
+      bottom:
+          snackTheme.overlayBottomInset +
           media.viewPadding.bottom +
           media.viewInsets.bottom,
       child: Align(

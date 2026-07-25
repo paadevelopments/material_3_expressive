@@ -4,6 +4,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ESlider;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ESlider;
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_range_slider_track.dart';
@@ -25,6 +29,7 @@ enum _M3ERangeThumb { start, end }
 ///
 /// Horizontal only — Compose has no vertical range slider.
 class M3ERangeSlider extends StatefulWidget {
+  /// M3ERangeSlider.
   const M3ERangeSlider({
     required this.values,
     required this.onChanged,
@@ -41,12 +46,12 @@ class M3ERangeSlider extends StatefulWidget {
     this.dotSpacing,
     this.dotBuilder,
     super.key,
-  })  : wavy = false,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null,
-        assert(max > min, 'max must be greater than min.');
+  }) : wavy = false,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null,
+       assert(max > min, 'max must be greater than min.');
 
   /// Range slider whose active span is a traveling sine wave.
   ///
@@ -72,8 +77,8 @@ class M3ERangeSlider extends StatefulWidget {
     this.wavelength,
     this.waveSpeed,
     super.key,
-  })  : wavy = true,
-        assert(max > min, 'max must be greater than min.');
+  }) : wavy = true,
+       assert(max > min, 'max must be greater than min.');
 
   /// Current start/end values within [min]..[max].
   final M3ESliderRange values;
@@ -81,13 +86,23 @@ class M3ERangeSlider extends StatefulWidget {
   /// Called when either thumb moves. Null disables the slider.
   final ValueChanged<M3ESliderRange>? onChanged;
 
+  /// min.
+
   final double min;
+
+  /// max.
   final double max;
+
+  /// divisions.
   final int? divisions;
+
+  /// onChangeEnd.
   final ValueChanged<M3ESliderRange>? onChangeEnd;
 
   /// Optional start/end value-indicator labels.
   final M3ESliderRangeLabels? labels;
+
+  /// Function.
 
   final String Function(M3ESliderRange values)? semanticFormatterCallback;
 
@@ -200,10 +215,12 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3ESliderTheme sliderTheme = theme.sliderTheme;
-    final M3ESliderColors colors =
-        sliderTheme.colors(theme.colorScheme, enabled: _enabled);
+    final M3ESliderColors colors = sliderTheme.colors(
+      theme.colorScheme,
+      enabled: _enabled,
+    );
     final TextDirection direction = Directionality.of(context);
-    final bool rtl = direction == TextDirection.rtl;
+    final rtl = direction == TextDirection.rtl;
 
     final double handleThickness = _pressed
         ? sliderTheme.pressedHandleWidth
@@ -214,25 +231,23 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     final double amplitudeFactor = _amplitudeFactor(sliderTheme);
     final double trackThickness =
         widget.trackThickness ?? sliderTheme.trackHeight;
-    final double thumbLength =
-        widget.thumbLength ?? sliderTheme.handleHeight;
-    final double dotSize =
-        widget.dotSize ?? sliderTheme.stopIndicatorSize;
+    final double thumbLength = widget.thumbLength ?? sliderTheme.handleHeight;
+    final double dotSize = widget.dotSize ?? sliderTheme.stopIndicatorSize;
     final double dotSpacing =
         widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
-    final bool useCustomDots = widget.dotBuilder != null;
+    final useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
           enabled: _enabled,
-          value: widget.semanticFormatterCallback?.call(widget.values) ??
+          value:
+              widget.semanticFormatterCallback?.call(widget.values) ??
               '${widget.values.start} – ${widget.values.end}',
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double width = constraints.maxWidth;
-              final double height =
-                  math.max(sliderTheme.height, thumbLength);
+              final double height = math.max(sliderTheme.height, thumbLength);
 
               Widget buildTrack({required double phase}) {
                 return M3ERangeSliderTrack(
@@ -261,9 +276,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                   ? AnimatedBuilder(
                       animation: _waveController,
                       builder: (BuildContext context, Widget? child) {
-                        return buildTrack(
-                          phase: _phase(wavelength, waveSpeed),
-                        );
+                        return buildTrack(phase: _phase(wavelength, waveSpeed));
                       },
                     )
                   : buildTrack(phase: 0);
@@ -303,12 +316,12 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
               final double endX = thumbX(_endFraction);
 
               Widget buildThumb({required bool pressed}) => M3ESliderThumb(
-                    color: colors.thumb,
-                    pressed: pressed,
-                    width: sliderTheme.handleWidth,
-                    height: thumbLength,
-                    pressedThickness: sliderTheme.pressedHandleWidth,
-                  );
+                color: colors.thumb,
+                pressed: pressed,
+                width: sliderTheme.handleWidth,
+                height: thumbLength,
+                pressedThickness: sliderTheme.pressedHandleWidth,
+              );
 
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -327,9 +340,10 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                 onHorizontalDragUpdate: !_enabled
                     ? null
                     : (DragUpdateDetails d) =>
-                        _update(d.localPosition.dx, width, rtl),
-                onHorizontalDragEnd:
-                    !_enabled ? null : (_) => _endInteraction(),
+                          _update(d.localPosition.dx, width, rtl),
+                onHorizontalDragEnd: !_enabled
+                    ? null
+                    : (_) => _endInteraction(),
                 onHorizontalDragCancel: !_enabled ? null : _endInteraction,
                 onTapDown: !_enabled
                     ? null
@@ -376,7 +390,8 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
                       ),
                       if (_pressed)
                         Positioned(
-                          left: (_activeThumb == _M3ERangeThumb.start
+                          left:
+                              (_activeThumb == _M3ERangeThumb.start
                                   ? startX
                                   : endX) -
                               24,
@@ -424,7 +439,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
       reverse: rtl,
     );
 
-    final M3ESliderRange updated = _activeThumb == _M3ERangeThumb.start
+    final updated = _activeThumb == _M3ERangeThumb.start
         ? M3ESliderRange(
             next.clamp(widget.min, widget.values.end),
             widget.values.end,

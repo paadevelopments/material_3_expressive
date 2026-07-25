@@ -13,6 +13,7 @@ export 'styles/m3e_chip_theme.dart';
 /// triggering actions. Filter and input chips can be selected; input chips can
 /// expose a trailing delete affordance.
 class M3EChip extends StatelessWidget {
+  /// M3EChip.
   const M3EChip({
     required this.label,
     this.type = M3EChipType.assist,
@@ -24,12 +25,26 @@ class M3EChip extends StatelessWidget {
     super.key,
   });
 
+  /// label.
+
   final String label;
+
+  /// type.
   final M3EChipType type;
+
+  /// leading.
   final Widget? leading;
+
+  /// selected.
   final bool selected;
+
+  /// elevated.
   final bool elevated;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// onDeleted.
   final VoidCallback? onDeleted;
 
   bool get _enabled => onPressed != null || onDeleted != null;
@@ -41,7 +56,8 @@ class M3EChip extends StatelessWidget {
     final borderRadius = chipTheme.borderRadius;
     final border = chipTheme.shape as RoundedRectangleBorder;
 
-    return M3EComponentTheme(builder: (context) => M3ETappable(
+    return M3EComponentTheme(
+      builder: (context) => M3ETappable(
         onTap: onPressed,
         enabled: onPressed != null,
         semanticLabel: label,
@@ -82,7 +98,10 @@ class M3EChip extends StatelessWidget {
         borderRadius: borderRadius,
         border: outlined ? Border.all(color: scheme.outlineVariant) : null,
         boxShadow: elevated
-            ? M3EElevation.shadows(M3EElevation.level1, shadowColor: scheme.shadow)
+            ? M3EElevation.shadows(
+                M3EElevation.level1,
+                shadowColor: scheme.shadow,
+              )
             : null,
       ),
       child: M3EStateLayerOverlay(

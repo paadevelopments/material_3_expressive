@@ -10,6 +10,7 @@ import 'm3e_theme_data.dart';
 
 /// Hosts adaptive theme listeners and resolves [M3EThemeData] for components.
 class M3EThemeScope extends StatefulWidget {
+  /// Creates an adaptive theme scope for [child].
   const M3EThemeScope({
     required this.baseData,
     required this.controller,
@@ -20,11 +21,22 @@ class M3EThemeScope extends StatefulWidget {
     super.key,
   });
 
+  /// Light-oriented template used to derive light/dark resolved themes.
   final M3EThemeData baseData;
+
+  /// Manual brightness / invert controller for this scope.
   final M3EThemeController controller;
+
+  /// The subtree under this adaptive scope.
   final Widget child;
+
+  /// Initial brightness when not following the system.
   final Brightness? initialTheme;
+
+  /// When true, follows platform brightness (with optional invert).
   final bool? autoTheming;
+
+  /// When true, applies device dynamic color to the active scheme.
   final bool? dynamicColoring;
 
   /// Returns the nearest scope, if any.
@@ -52,28 +64,44 @@ class M3EThemeScope extends StatefulWidget {
   }
 
   @override
+  /// Creates the mutable state for this widget.
   State<M3EThemeScope> createState() => M3EThemeScopeState();
 }
 
+/// State for [M3EThemeScope] that resolves brightness and dynamic color.
 class M3EThemeScopeState extends State<M3EThemeScope> {
   late M3EThemeData _cachedDarkTemplate;
 
+  /// Light-oriented template from the widget.
   M3EThemeData get baseData => widget.baseData;
+
+  /// Adaptive theme controller for this scope.
   M3EThemeController get controller => widget.controller;
+
+  /// Initial brightness from the widget.
   Brightness? get initialTheme => widget.initialTheme;
+
+  /// Whether platform brightness is followed.
   bool get autoTheming => widget.autoTheming ?? false;
+
+  /// Whether device dynamic color is applied.
   bool get dynamicColoring => widget.dynamicColoring ?? false;
 
+  /// Light template (same as [baseData]).
   M3EThemeData get lightTemplate => widget.baseData;
+
+  /// Cached dark template derived from [baseData].
   M3EThemeData get darkTemplate => _cachedDarkTemplate;
 
   @override
+  /// Caches the dark template derived from [baseData].
   void initState() {
     super.initState();
     _cachedDarkTemplate = widget.baseData.deriveDarkTemplate();
   }
 
   @override
+  /// Refreshes the dark template when [baseData] changes.
   void didUpdateWidget(M3EThemeScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.baseData != widget.baseData) {
@@ -81,6 +109,7 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
     }
   }
 
+  /// Resolves effective brightness for the current adaptive rules.
   Brightness resolveBrightness(BuildContext context) {
     return widget.controller.resolveBrightness(
       MediaQuery.platformBrightnessOf(context),
@@ -89,28 +118,32 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
     );
   }
 
+  /// Resolves [M3EThemeData] for the current brightness and optional dynamics.
   M3EThemeData resolve(
     BuildContext context, {
     ColorScheme? lightDynamic,
     ColorScheme? darkDynamic,
   }) {
     final Brightness brightness = resolveBrightness(context);
-    final M3EThemeData template =
-        brightness == Brightness.dark ? darkTemplate : lightTemplate;
+    final M3EThemeData template = brightness == Brightness.dark
+        ? darkTemplate
+        : lightTemplate;
 
     if (!dynamicColoring) {
       return template;
     }
 
-    final dynamicScheme =
-        brightness == Brightness.dark ? darkDynamic : lightDynamic;
+    final dynamicScheme = brightness == Brightness.dark
+        ? darkDynamic
+        : lightDynamic;
     if (dynamicScheme == null) {
       return template;
     }
 
     final ColorScheme harmonizedDynamic = dynamicScheme.harmonized();
-    final M3EColorScheme m3eScheme =
-        M3EColorScheme.fromColorScheme(harmonizedDynamic).harmonized();
+    final M3EColorScheme m3eScheme = M3EColorScheme.fromColorScheme(
+      harmonizedDynamic,
+    ).harmonized();
 
     return template.withColorScheme(m3eScheme);
   }
@@ -121,8 +154,9 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
     ColorScheme? darkDynamic,
   }) {
     final Brightness? manualBrightness = widget.controller.brightnessOverride;
-    final Brightness? platformBrightness =
-        autoTheming ? MediaQuery.platformBrightnessOf(context) : null;
+    final Brightness? platformBrightness = autoTheming
+        ? MediaQuery.platformBrightnessOf(context)
+        : null;
     final M3EThemeData resolved = resolve(
       context,
       lightDynamic: lightDynamic,
@@ -136,14 +170,12 @@ class M3EThemeScopeState extends State<M3EThemeScope> {
       invertPlatformBrightness: widget.controller.invertPlatformBrightness,
       lightDynamic: lightDynamic,
       darkDynamic: darkDynamic,
-      child: M3EResolvedTheme(
-        data: resolved,
-        child: widget.child,
-      ),
+      child: M3EResolvedTheme(data: resolved, child: widget.child),
     );
   }
 
   @override
+  /// Builds the adaptive inherited scope, optionally with dynamic color.
   Widget build(BuildContext context) {
     if (dynamicColoring) {
       return M3EDynamicColorHost(

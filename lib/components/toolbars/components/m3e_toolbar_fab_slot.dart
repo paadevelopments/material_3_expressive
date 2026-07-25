@@ -8,6 +8,7 @@ import '../../floating_action_buttons/m3e_floating_action_buttons.dart';
 
 /// Hosts an adjacent [M3EFab]. Unaffected by the toolbar pill's expand state.
 class M3EToolbarFabSlot extends StatelessWidget {
+  /// M3EToolbarFabSlot.
   const M3EToolbarFabSlot({
     this.fab,
     this.icon,
@@ -18,8 +19,14 @@ class M3EToolbarFabSlot extends StatelessWidget {
 
   /// Custom FAB widget. When null, builds a default [M3EFab] from [icon].
   final Widget? fab;
+
+  /// icon.
   final Widget? icon;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// color.
   final M3EFabColor color;
 
   @override
@@ -28,7 +35,6 @@ class M3EToolbarFabSlot extends StatelessWidget {
         M3EFab(
           icon: icon ?? const SizedBox.shrink(),
           onPressed: onPressed,
-          size: M3EFabSize.medium,
           color: color,
         );
   }

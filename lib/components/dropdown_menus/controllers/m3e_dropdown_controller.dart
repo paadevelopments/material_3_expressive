@@ -2,8 +2,10 @@
 // Adapted for material_3_expressive: import paths, foundations wiring, M3E naming.
 
 import 'package:flutter/foundation.dart';
-import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
+    show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EDropdownMenu;
 
 import '../models/m3e_dropdown_item.dart';
 
@@ -46,8 +48,12 @@ class M3EDropdownController<T> extends ChangeNotifier {
   bool _isOpen = false;
   bool _isDisposed = false;
 
+  /// onSelectionChange.
+
   // Callbacks wired by the widget
   ValueChanged<List<M3EDropdownItem<T>>>? onSelectionChange;
+
+  /// onSearchChange.
   ValueChanged<String>? onSearchChange;
 
   // ── Public getters ──

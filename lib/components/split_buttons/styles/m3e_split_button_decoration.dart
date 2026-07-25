@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 
 import '../../buttons/enums/m3e_button_enums.dart';
@@ -10,20 +9,47 @@ import '../enums/m3e_split_button_menu_style.dart';
 import 'm3e_split_button_bottom_sheet_decoration.dart';
 import 'm3e_split_button_popup_decoration.dart';
 
+/// M3ESplitButtonDecoration.
+
 @immutable
 class M3ESplitButtonDecoration extends M3EButtonDecoration {
+  /// trailingBackgroundColor.
   final Color? trailingBackgroundColor;
+
+  /// trailingForegroundColor.
   final Color? trailingForegroundColor;
+
+  /// menuBackgroundColor.
   final Color? menuBackgroundColor;
+
+  /// menuForegroundColor.
   final Color? menuForegroundColor;
+
+  /// dividerColor.
   final Color? dividerColor;
+
+  /// leadingCustomSize.
   final M3EButtonSize? leadingCustomSize;
+
+  /// trailingCustomSize.
   final M3EButtonSize? trailingCustomSize;
+
+  /// trailingSelectedRadius.
   final double? trailingSelectedRadius;
+
+  /// gap.
   final double? gap;
+
+  /// menuStyle.
   final M3ESplitButtonMenuStyle menuStyle;
+
+  /// popupDecoration.
   final M3ESplitButtonPopupDecoration? popupDecoration;
+
+  /// bottomSheetDecoration.
   final M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration;
+
+  /// M3ESplitButtonDecoration.
 
   const M3ESplitButtonDecoration({
     super.backgroundColor,
@@ -67,6 +93,8 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     this.popupDecoration,
     this.bottomSheetDecoration,
   });
+
+  /// styleFrom.
 
   static M3ESplitButtonDecoration styleFrom({
     Color? foregroundColor,

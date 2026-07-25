@@ -1,10 +1,17 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/search/m3e_search.dart'
+    show M3ESearchAnchor;
+import 'package:material_3_expressive/components/search/m3e_search_anchor.dart'
+    show M3ESearchAnchor;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ESearchAnchor;
 
 import '../../../foundations/foundations.dart';
 
 /// Theme values for [M3ESearchAnchor] search views.
 @immutable
 class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
+  /// M3ESearchViewTheme.
   const M3ESearchViewTheme({
     this.elevation = 6,
     this.cornerRadius = 28,
@@ -15,37 +22,73 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
     this.shrinkWrap = false,
   });
 
+  /// defaults.
+
   static const M3ESearchViewTheme defaults = M3ESearchViewTheme();
 
+  /// elevation.
+
   final double elevation;
+
+  /// cornerRadius.
   final double cornerRadius;
+
+  /// headerHeight.
   final double headerHeight;
+
+  /// minWidth.
   final double minWidth;
+
+  /// minHeight.
   final double minHeight;
+
+  /// barHorizontalPadding.
   final double barHorizontalPadding;
+
+  /// shrinkWrap.
   final bool shrinkWrap;
+
+  /// backgroundColor.
 
   Color backgroundColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
 
+  /// fullScreenBackgroundColor.
+
   Color fullScreenBackgroundColor(M3EColorScheme scheme) => scheme.surface;
 
+  /// surfaceTintColor.
+
   Color surfaceTintColor(M3EColorScheme scheme) => const Color(0x00000000);
+
+  /// fullScreenHeaderPadding.
 
   EdgeInsetsGeometry fullScreenHeaderPadding() =>
       const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
+  /// dividerColor.
+
   Color dividerColor(M3EColorScheme scheme) => scheme.outline;
+
+  /// headerTextStyle.
 
   TextStyle headerTextStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurface);
 
+  /// headerHintStyle.
+
   TextStyle headerHintStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurfaceVariant);
+
+  /// dockedShape.
 
   ShapeBorder dockedShape(double radius) =>
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
 
+  /// fullScreenShape.
+
   ShapeBorder fullScreenShape() => const RoundedRectangleBorder();
+
+  /// constraints.
 
   BoxConstraints constraints({double? maxWidth, double? maxHeight}) {
     return BoxConstraints(
@@ -55,6 +98,8 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
       maxHeight: maxHeight ?? double.infinity,
     );
   }
+
+  /// barPadding.
 
   EdgeInsetsGeometry barPadding() =>
       EdgeInsets.symmetric(horizontal: barHorizontalPadding);
@@ -75,8 +120,7 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
       headerHeight: headerHeight ?? this.headerHeight,
       minWidth: minWidth ?? this.minWidth,
       minHeight: minHeight ?? this.minHeight,
-      barHorizontalPadding:
-          barHorizontalPadding ?? this.barHorizontalPadding,
+      barHorizontalPadding: barHorizontalPadding ?? this.barHorizontalPadding,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
     );
   }
@@ -92,8 +136,11 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
       headerHeight: _lerpDouble(headerHeight, other.headerHeight, t)!,
       minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
       minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
-      barHorizontalPadding:
-          _lerpDouble(barHorizontalPadding, other.barHorizontalPadding, t)!,
+      barHorizontalPadding: _lerpDouble(
+        barHorizontalPadding,
+        other.barHorizontalPadding,
+        t,
+      )!,
       shrinkWrap: t < 0.5 ? shrinkWrap : other.shrinkWrap,
     );
   }

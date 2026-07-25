@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../foundations/foundations.dart';
 import '../divider/m3e_divider.dart';
@@ -15,6 +14,7 @@ import 'utils/m3e_date_picker_utils.dart';
 
 /// Dialog for picking a date range.
 class M3EDateRangePickerDialog extends StatefulWidget {
+  /// M3EDateRangePickerDialog.
   const M3EDateRangePickerDialog({
     required this.firstDate,
     required this.lastDate,
@@ -38,24 +38,62 @@ class M3EDateRangePickerDialog extends StatefulWidget {
     super.key,
   });
 
+  /// firstDate.
+
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// initialStartDate.
   final DateTime? initialStartDate;
+
+  /// initialEndDate.
   final DateTime? initialEndDate;
+
+  /// currentDate.
   final DateTime? currentDate;
+
+  /// initialEntryMode.
   final M3EDatePickerEntryMode initialEntryMode;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayForRangePredicate? selectableDayPredicate;
+
+  /// helpText.
   final String? helpText;
+
+  /// cancelText.
   final String? cancelText;
+
+  /// confirmText.
   final String? confirmText;
+
+  /// errorFormatText.
   final String? errorFormatText;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// fieldStartHintText.
   final String? fieldStartHintText;
+
+  /// fieldEndHintText.
   final String? fieldEndHintText;
+
+  /// fieldStartLabelText.
   final String? fieldStartLabelText;
+
+  /// fieldEndLabelText.
   final String? fieldEndLabelText;
+
+  /// restorationId.
   final String? restorationId;
+
+  /// onDatePickerModeChange.
   final ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange;
+
+  /// insetPadding.
   final EdgeInsets insetPadding;
 
   @override
@@ -65,10 +103,12 @@ class M3EDateRangePickerDialog extends StatefulWidget {
 
 class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
     with RestorationMixin {
-  late final RestorableDateTimeN _startDate =
-      RestorableDateTimeN(widget.initialStartDate);
-  late final RestorableDateTimeN _endDate =
-      RestorableDateTimeN(widget.initialEndDate);
+  late final RestorableDateTimeN _startDate = RestorableDateTimeN(
+    widget.initialStartDate,
+  );
+  late final RestorableDateTimeN _endDate = RestorableDateTimeN(
+    widget.initialEndDate,
+  );
   late final _RestorableM3EDatePickerEntryMode _entryMode =
       _RestorableM3EDatePickerEntryMode(widget.initialEntryMode);
   final _RestorableAutovalidateMode _autovalidateMode =
@@ -108,9 +148,9 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
     if (_startDate.value == null) {
       return;
     }
-    Navigator.of(context).pop(
-      M3EDateRange(start: _startDate.value!, end: _endDate.value),
-    );
+    Navigator.of(
+      context,
+    ).pop(M3EDateRange(start: _startDate.value!, end: _endDate.value));
   }
 
   void _handleCancel() {
@@ -200,24 +240,24 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
           key: _formKey,
           autovalidateMode: _autovalidateMode.value,
           child: M3EInputDateRangePickerFormField(
-              firstDate: firstDate,
-              lastDate: lastDate,
-              initialStartDate: _startDate.value,
-              initialEndDate: _endDate.value,
-              onStartDateSaved: (DateTime value) {
-                setState(() => _startDate.value = value);
-              },
-              onEndDateSaved: (DateTime value) {
-                setState(() => _endDate.value = value);
-              },
-              selectableDayPredicate: widget.selectableDayPredicate,
-              errorFormatText: widget.errorFormatText,
-              errorInvalidText: widget.errorInvalidText,
-              fieldStartHintText: widget.fieldStartHintText,
-              fieldEndHintText: widget.fieldEndHintText,
-              fieldStartLabelText: widget.fieldStartLabelText,
-              fieldEndLabelText: widget.fieldEndLabelText,
-            ),
+            firstDate: firstDate,
+            lastDate: lastDate,
+            initialStartDate: _startDate.value,
+            initialEndDate: _endDate.value,
+            onStartDateSaved: (DateTime value) {
+              setState(() => _startDate.value = value);
+            },
+            onEndDateSaved: (DateTime value) {
+              setState(() => _endDate.value = value);
+            },
+            selectableDayPredicate: widget.selectableDayPredicate,
+            errorFormatText: widget.errorFormatText,
+            errorInvalidText: widget.errorInvalidText,
+            fieldStartHintText: widget.fieldStartHintText,
+            fieldEndHintText: widget.fieldEndHintText,
+            fieldStartLabelText: widget.fieldStartLabelText,
+            fieldEndLabelText: widget.fieldEndLabelText,
+          ),
         );
         if (_entryMode.value == M3EDatePickerEntryMode.input) {
           entryModeButton = M3EDatePickerEntryModeButton(
@@ -231,7 +271,10 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
     final Size dialogSize =
         M3EDatePickerConstants.calendarPortraitDialogSize *
         (MediaQuery.textScalerOf(context)
-                .clamp(maxScaleFactor: M3EDatePickerConstants.maxRangeTextScaleFactor)
+                .clamp(
+                  maxScaleFactor:
+                      M3EDatePickerConstants.maxRangeTextScaleFactor,
+                )
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
 
@@ -244,10 +287,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
       curve: Curves.easeIn,
       alignment: Alignment.topCenter,
       child: isInputMode
-          ? M3EDatePickerDialogContent(
-              isInputMode: true,
-              child: picker,
-            )
+          ? M3EDatePickerDialogContent(isInputMode: true, child: picker)
           : SizedBox(
               height: M3EDatePickerConstants.dialogPickerBodyHeight,
               child: picker,
@@ -275,13 +315,11 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 orientation: orientation,
                 entryModeButton: entryModeButton,
               ),
-              M3EDivider(
-                thickness: 1,
-                color: dateTheme.dividerColor(theme.colorScheme),
-              ),
+              M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
               pickerBody,
               M3EDatePickerActions(
-                cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
+                cancelText:
+                    widget.cancelText ?? localizations.cancelButtonLabel,
                 confirmText: widget.confirmText ?? localizations.okButtonLabel,
                 onCancel: _handleCancel,
                 onConfirm: _handleOk,

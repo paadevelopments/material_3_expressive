@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart'
-    show EditableTextContextMenuBuilder, WidgetStateProperty;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,6 +10,7 @@ import 'res/m3e_search_constants.dart';
 
 /// Manages a search view route opened from a search bar or custom anchor.
 class M3ESearchAnchor extends StatefulWidget {
+  /// M3ESearchAnchor.
   const M3ESearchAnchor({
     required this.builder,
     required this.suggestionsBuilder,
@@ -159,36 +158,98 @@ class M3ESearchAnchor extends StatefulWidget {
     );
   }
 
+  /// isFullScreen.
+
   final bool? isFullScreen;
+
+  /// searchController.
   final M3ESearchController? searchController;
+
+  /// builder.
   final M3ESearchAnchorChildBuilder builder;
+
+  /// suggestionsBuilder.
   final M3ESearchSuggestionsBuilder suggestionsBuilder;
+
+  /// viewBuilder.
   final M3ESearchViewBuilder? viewBuilder;
+
+  /// viewLeading.
   final Widget? viewLeading;
+
+  /// viewTrailing.
   final Iterable<Widget>? viewTrailing;
+
+  /// viewHintText.
   final String? viewHintText;
+
+  /// viewBackgroundColor.
   final Color? viewBackgroundColor;
+
+  /// viewElevation.
   final double? viewElevation;
+
+  /// viewSurfaceTintColor.
   final Color? viewSurfaceTintColor;
+
+  /// viewSide.
   final BorderSide? viewSide;
+
+  /// viewShape.
   final OutlinedBorder? viewShape;
+
+  /// viewBarPadding.
   final EdgeInsetsGeometry? viewBarPadding;
+
+  /// headerHeight.
   final double? headerHeight;
+
+  /// headerTextStyle.
   final TextStyle? headerTextStyle;
+
+  /// headerHintStyle.
   final TextStyle? headerHintStyle;
+
+  /// dividerColor.
   final Color? dividerColor;
+
+  /// viewConstraints.
   final BoxConstraints? viewConstraints;
+
+  /// viewPadding.
   final EdgeInsetsGeometry? viewPadding;
+
+  /// shrinkWrap.
   final bool? shrinkWrap;
+
+  /// textCapitalization.
   final TextCapitalization? textCapitalization;
+
+  /// viewOnChanged.
   final ValueChanged<String>? viewOnChanged;
+
+  /// viewOnSubmitted.
   final ValueChanged<String>? viewOnSubmitted;
+
+  /// viewOnClose.
   final VoidCallback? viewOnClose;
+
+  /// viewOnOpen.
   final VoidCallback? viewOnOpen;
+
+  /// textInputAction.
   final TextInputAction? textInputAction;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// enabled.
   final bool enabled;
+
+  /// smartDashesType.
   final SmartDashesType? smartDashesType;
+
+  /// smartQuotesType.
   final SmartQuotesType? smartQuotesType;
 
   @override
@@ -349,7 +410,8 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
   M3ESearchController? _internalSearchController;
   M3ESearchViewRoute? _route;
 
-  M3ESearchController get _searchController => widget.searchController ??
+  M3ESearchController get _searchController =>
+      widget.searchController ??
       (_internalSearchController ??= M3ESearchController());
 
   @override
@@ -361,7 +423,7 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
   @override
   void initState() {
     super.initState();
-    _searchController.attach(this);
+    _searchController.anchor = this;
   }
 
   @override
@@ -383,7 +445,7 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.searchController != widget.searchController) {
       oldWidget.searchController?.detach(this);
-      _searchController.attach(this);
+      _searchController.anchor = this;
     }
   }
 
@@ -391,7 +453,7 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
   void dispose() {
     widget.searchController?.detach(this);
     _internalSearchController?.detach(this);
-    final bool usingExternalController = widget.searchController != null;
+    final usingExternalController = widget.searchController != null;
     if (_route?.navigator != null) {
       if (_route!.isActive) {
         _route!.navigator?.removeRoute(_route!);
@@ -413,12 +475,10 @@ class _M3ESearchAnchorState extends State<M3ESearchAnchor>
     return switch (platform) {
       TargetPlatform.iOS ||
       TargetPlatform.android ||
-      TargetPlatform.fuchsia =>
-        true,
+      TargetPlatform.fuchsia => true,
       TargetPlatform.macOS ||
       TargetPlatform.linux ||
-      TargetPlatform.windows =>
-        false,
+      TargetPlatform.windows => false,
     };
   }
 

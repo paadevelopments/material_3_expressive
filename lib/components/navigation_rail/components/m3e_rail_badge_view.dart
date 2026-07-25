@@ -5,9 +5,6 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
 
@@ -44,7 +41,7 @@ class M3ERailBadge extends StatelessWidget {
     final Color background = theme.badgeBackground ?? scheme.primary;
     final Color foreground = theme.badgeLargeLabel ?? scheme.onPrimary;
 
-    final String text = count! > (10 * (pow10(maxDigits) - 1))
+    final text = count! > (10 * (pow10(maxDigits) - 1))
         ? '${pow10(maxDigits) - 1}+'
         : '$count';
     final double pad = dense ? 2 : 4;

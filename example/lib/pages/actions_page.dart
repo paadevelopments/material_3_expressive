@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
-import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
 import 'package:material_3_expressive/components/toggle_button_group/models/m3e_button_group_action.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -57,10 +56,7 @@ class _ActionsPageState extends State<ActionsPage>
               onPressed: () {},
               child: const Text('Elevated'),
             ),
-            M3EButton(
-              onPressed: () {},
-              child: const Text('Filled'),
-            ),
+            M3EButton(onPressed: () {}, child: const Text('Filled')),
             M3EButton(
               style: M3EButtonStyle.tonal,
               onPressed: () {},
@@ -98,10 +94,7 @@ class _ActionsPageState extends State<ActionsPage>
               size: M3EButtonSize.lg,
               onPressed: () {},
             ),
-            const M3EButton(
-              onPressed: null,
-              child: Text('Disabled'),
-            ),
+            const M3EButton(onPressed: null, child: Text('Disabled')),
           ],
         ),
       ],
@@ -115,10 +108,7 @@ class _ActionsPageState extends State<ActionsPage>
         DemoRow(
           label: 'Variants',
           children: <Widget>[
-            M3EIconButton(
-              icon: const Icon(M3EIcons.edit),
-              onPressed: () {},
-            ),
+            M3EIconButton(icon: const Icon(M3EIcons.edit), onPressed: () {}),
             M3EIconButton(
               icon: const Icon(M3EIcons.edit),
               variant: M3EIconButtonVariant.filled,
@@ -164,10 +154,7 @@ class _ActionsPageState extends State<ActionsPage>
               size: M3EFabSize.small,
               onPressed: () {},
             ),
-            M3EFab(
-              icon: const Icon(M3EIcons.add),
-              onPressed: () {},
-            ),
+            M3EFab(icon: const Icon(M3EIcons.add), onPressed: () {}),
             M3EFab(
               icon: const Icon(M3EIcons.add),
               size: M3EFabSize.large,
@@ -233,8 +220,9 @@ class _ActionsPageState extends State<ActionsPage>
             M3EButtonGroup(
               type: M3EButtonGroupType.connected,
               selectedIndex: _connectedGroupIndex,
-              onSelectedIndexChanged: (int? index) =>
-                  setState(() => _connectedGroupIndex = index ?? _connectedGroupIndex),
+              onSelectedIndexChanged: (int? index) => setState(
+                () => _connectedGroupIndex = index ?? _connectedGroupIndex,
+              ),
               actions: const <M3EButtonGroupAction>[
                 M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_left)),
                 M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),

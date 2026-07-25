@@ -6,6 +6,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// M3EDropdownItemStyle.
+
 @immutable
 class M3EDropdownItemStyle with Diagnosticable {
   /// Item background color.
@@ -269,9 +271,7 @@ class M3EDropdownItemStyle with Diagnosticable {
     super.debugFillProperties(properties);
     properties
       ..add(ColorProperty('backgroundColor', backgroundColor))
-      ..add(
-        ColorProperty('selectedBackgroundColor', selectedBackgroundColor),
-      )
+      ..add(ColorProperty('selectedBackgroundColor', selectedBackgroundColor))
       ..add(DoubleProperty('outerRadius', outerRadius))
       ..add(DoubleProperty('innerRadius', innerRadius))
       ..add(

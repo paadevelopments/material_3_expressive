@@ -14,12 +14,19 @@ import '../styles/m3e_expandable_style.dart';
 import '../utils/m3e_expandable_spring_motion.dart';
 import '../utils/m3e_measure_size.dart';
 
-typedef M3EExpandableHeaderBuilder = Widget Function(
-    BuildContext context, int index, double progress);
-typedef M3EExpandableBodyBuilder = Widget Function(
-    BuildContext context, int index, double progress);
+/// M3EExpandableHeaderBuilder.
+
+typedef M3EExpandableHeaderBuilder =
+    Widget Function(BuildContext context, int index, double progress);
+
+/// M3EExpandableBodyBuilder.
+typedef M3EExpandableBodyBuilder =
+    Widget Function(BuildContext context, int index, double progress);
+
+/// M3EExpandableItem.
 
 class M3EExpandableItem extends StatefulWidget {
+  /// M3EExpandableItem.
   const M3EExpandableItem({
     super.key,
     required this.index,
@@ -33,14 +40,32 @@ class M3EExpandableItem extends StatefulWidget {
     required this.onToggle,
   });
 
+  /// index.
+
   final int index;
+
+  /// totalCount.
   final int totalCount;
+
+  /// isExpanded.
   final bool isExpanded;
+
+  /// headerBuilder.
   final M3EExpandableHeaderBuilder headerBuilder;
+
+  /// bodyBuilder.
   final M3EExpandableBodyBuilder bodyBuilder;
+
+  /// decoration.
   final M3EExpandableStyle decoration;
+
+  /// expandMotion.
   final M3ESpring expandMotion;
+
+  /// collapseMotion.
   final M3ESpring collapseMotion;
+
+  /// onToggle.
   final VoidCallback onToggle;
 
   @override
@@ -135,15 +160,16 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     final isLast = widget.index == widget.totalCount - 1;
 
     final canTapHeader = d.tapHeaderToToggle;
-    final canTapBody = (widget.isExpanded && d.tapBodyToCollapse) ||
+    final canTapBody =
+        (widget.isExpanded && d.tapBodyToCollapse) ||
         (!widget.isExpanded && d.tapBodyToExpand);
     final entireCardTappable = !d.tapIconToToggle && canTapHeader && canTapBody;
 
     final outerTap = entireCardTappable ? widget.onToggle : null;
     final headerTap =
         (!entireCardTappable && canTapHeader && !d.tapIconToToggle)
-            ? widget.onToggle
-            : null;
+        ? widget.onToggle
+        : null;
 
     final String? outerTooltip = entireCardTappable
         ? (widget.isExpanded ? d.collapseTooltip : d.expandTooltip)
@@ -327,19 +353,27 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   }) {
     final expandableTheme = M3ETheme.of(context).listTheme.expandable;
     final effectivePadding = d.bodyPadding ?? expandableTheme.bodyPadding;
-    final resolvedPadding = effectivePadding.resolve(Directionality.of(context));
-    final contentShift = math.min<double>(12, resolvedPadding.bottom * 0.6 + 4.0);
+    final resolvedPadding = effectivePadding.resolve(
+      Directionality.of(context),
+    );
+    final contentShift = math.min<double>(
+      12,
+      resolvedPadding.bottom * 0.6 + 4.0,
+    );
 
-    final needsMeasurement = _collapsedHeight == null || _expandedHeight == null;
+    final needsMeasurement =
+        _collapsedHeight == null || _expandedHeight == null;
     final clampedProgress = progress.clamp(0.0, 1.0);
     final contentCollapsed = _collapsedHeight ?? 0.0;
     final contentExpanded = _expandedHeight ?? 200.0;
 
     final paddingVertical = effectivePadding.vertical;
-    final totalCollapsed =
-        contentCollapsed > 0 ? contentCollapsed + paddingVertical : 0.0;
-    final totalExpanded =
-        contentExpanded > 0 ? contentExpanded + paddingVertical : 0.0;
+    final totalCollapsed = contentCollapsed > 0
+        ? contentCollapsed + paddingVertical
+        : 0.0;
+    final totalExpanded = contentExpanded > 0
+        ? contentExpanded + paddingVertical
+        : 0.0;
 
     final bodyHeight = math.max<double>(
       0,
@@ -389,14 +423,15 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
                 child: Builder(
                   builder: (context) {
                     final isExpanded = progress > 0.5;
-                    final canTapBody = (isExpanded && d.tapBodyToCollapse) ||
+                    final canTapBody =
+                        (isExpanded && d.tapBodyToCollapse) ||
                         (!isExpanded && d.tapBodyToExpand);
                     final tapCallback =
                         (!isEntirelyTappable &&
-                                canTapBody &&
-                                !d.tapIconToToggle)
-                            ? widget.onToggle
-                            : null;
+                            canTapBody &&
+                            !d.tapIconToToggle)
+                        ? widget.onToggle
+                        : null;
 
                     final String? bodyTooltip = (tapCallback != null)
                         ? (isExpanded ? d.collapseTooltip : d.expandTooltip)

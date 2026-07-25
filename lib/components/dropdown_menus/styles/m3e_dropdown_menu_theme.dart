@@ -1,12 +1,15 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
+    show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EDropdownMenu;
 
 import '../../../foundations/foundations.dart';
 
 /// Theme values for [M3EDropdownMenu].
 @immutable
 class M3EDropdownMenuTheme extends M3EThemeExtension<M3EDropdownMenuTheme> {
+  /// M3EDropdownMenuTheme.
   const M3EDropdownMenuTheme({
     this.containerRadius = 28,
     this.panelElevation = M3EElevation.level2,
@@ -19,51 +22,97 @@ class M3EDropdownMenuTheme extends M3EThemeExtension<M3EDropdownMenuTheme> {
     this.disabledOpacity = 0.38,
   });
 
+  /// defaults.
+
   static const M3EDropdownMenuTheme defaults = M3EDropdownMenuTheme();
 
+  /// containerRadius.
+
   final double containerRadius;
+
+  /// panelElevation.
   final double panelElevation;
+
+  /// panelMaxHeight.
   final double panelMaxHeight;
+
+  /// panelMarginTop.
   final double panelMarginTop;
+
+  /// itemOuterRadius.
   final double itemOuterRadius;
+
+  /// itemInnerRadius.
   final double itemInnerRadius;
+
+  /// openSpring.
   final M3ESpring openSpring;
+
+  /// closeSpring.
   final M3ESpring closeSpring;
+
+  /// disabledOpacity.
   final double disabledOpacity;
+
+  /// fieldBackgroundColor.
 
   Color fieldBackgroundColor(M3EColorScheme scheme) =>
       scheme.surfaceContainerHighest;
 
+  /// fieldForegroundColor.
+
   Color fieldForegroundColor(M3EColorScheme scheme) => scheme.onSurface;
+
+  /// panelBackgroundColor.
 
   Color panelBackgroundColor(M3EColorScheme scheme) =>
       scheme.surfaceContainerHighest;
 
+  /// chipBackgroundColor.
+
   Color chipBackgroundColor(M3EColorScheme scheme) => scheme.secondaryContainer;
+
+  /// chipForegroundColor.
 
   Color chipForegroundColor(M3EColorScheme scheme) =>
       scheme.onSecondaryContainer;
 
-  Color itemBackgroundColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
+  /// itemBackgroundColor.
+
+  Color itemBackgroundColor(M3EColorScheme scheme) =>
+      scheme.surfaceContainerHigh;
+
+  /// itemSelectedBackgroundColor.
 
   Color itemSelectedBackgroundColor(M3EColorScheme scheme) =>
       scheme.secondaryContainer;
 
+  /// itemForegroundColor.
+
   Color itemForegroundColor(M3EColorScheme scheme) => scheme.onSurface;
+
+  /// itemSelectedForegroundColor.
 
   Color itemSelectedForegroundColor(M3EColorScheme scheme) =>
       scheme.onSecondaryContainer;
 
-  TextStyle hintTextStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.bodyLarge.copyWith(
-        color: M3EColorUtils.withOpacity(scheme.onSurface, 0.6),
-      );
+  /// hintTextStyle.
+
+  TextStyle hintTextStyle(M3ETypeScale type, M3EColorScheme scheme) => type
+      .bodyLarge
+      .copyWith(color: M3EColorUtils.withOpacity(scheme.onSurface, 0.6));
+
+  /// selectedTextStyle.
 
   TextStyle selectedTextStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurface);
 
+  /// chipLabelStyle.
+
   TextStyle chipLabelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.labelMedium.copyWith(color: scheme.onSecondaryContainer);
+
+  /// itemTextStyle.
 
   TextStyle itemTextStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurface);

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 /// A destination shown in a navigation drawer.
 @immutable
 class M3ENavigationDestination {
+  /// M3ENavigationDestination.
   const M3ENavigationDestination({
     required this.icon,
     required this.label,
@@ -16,6 +17,8 @@ class M3ENavigationDestination {
 
   /// Optional icon shown when the destination is selected.
   final Widget? selectedIcon;
+
+  /// label.
 
   final String label;
 

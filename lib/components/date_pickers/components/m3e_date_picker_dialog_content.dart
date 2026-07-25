@@ -4,13 +4,18 @@ import '../../../foundations/foundations.dart';
 
 /// Wraps date picker dialog body content with padding in input mode only.
 class M3EDatePickerDialogContent extends StatelessWidget {
+  /// M3EDatePickerDialogContent.
   const M3EDatePickerDialogContent({
     required this.isInputMode,
     required this.child,
     super.key,
   });
 
+  /// isInputMode.
+
   final bool isInputMode;
+
+  /// child.
   final Widget child;
 
   @override

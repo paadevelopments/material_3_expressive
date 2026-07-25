@@ -1,4 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/navigation_drawer/m3e_navigation_drawer.dart'
+    show M3ENavigationDrawer;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ENavigationDrawer;
 
 import '../../../foundations/foundations.dart';
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
@@ -10,6 +14,7 @@ import '../styles/m3e_navigation_drawer_theme.dart';
 /// Resting selection fill is local; the shared liquid overlay paints while
 /// traveling between destinations.
 class M3EDrawerDestinationButton extends StatelessWidget {
+  /// M3EDrawerDestinationButton.
   const M3EDrawerDestinationButton({
     required this.destination,
     required this.selected,
@@ -19,9 +24,17 @@ class M3EDrawerDestinationButton extends StatelessWidget {
     super.key,
   });
 
+  /// destination.
+
   final M3ENavigationDestination destination;
+
+  /// selected.
   final bool selected;
+
+  /// onTap.
   final VoidCallback onTap;
+
+  /// indicatorKey.
   final GlobalKey indicatorKey;
 
   /// When false, the shared liquid overlay owns the pill (during travel).
@@ -59,10 +72,7 @@ class M3EDrawerDestinationButton extends StatelessWidget {
               height: drawerTheme.destinationHeight,
               width: double.infinity,
               child: DecoratedBox(
-                decoration: ShapeDecoration(
-                  shape: border,
-                  color: fill,
-                ),
+                decoration: ShapeDecoration(shape: border, color: fill),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: drawerTheme.destinationInnerHorizontalPadding,
@@ -85,8 +95,9 @@ class M3EDrawerDestinationButton extends StatelessWidget {
                       Expanded(
                         child: Text(
                           destination.label,
-                          style: theme.typeScale.labelLarge
-                              .copyWith(color: foreground),
+                          style: theme.typeScale.labelLarge.copyWith(
+                            color: foreground,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -94,8 +105,9 @@ class M3EDrawerDestinationButton extends StatelessWidget {
                       if (destination.badgeLabel != null)
                         Text(
                           destination.badgeLabel!,
-                          style: theme.typeScale.labelLarge
-                              .copyWith(color: foreground),
+                          style: theme.typeScale.labelLarge.copyWith(
+                            color: foreground,
+                          ),
                         ),
                     ],
                   ),

@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -11,7 +10,11 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
+/// kAnimationDeltaThreshold.
+
 const double kAnimationDeltaThreshold = 0.005;
+
+/// kSpringRetargetTolerance.
 const double kSpringRetargetTolerance = 0.1;
 
 class _CachedLerpResult {
@@ -106,22 +109,45 @@ class _RadiusAndPaddingMotionKeys {
 /// Animates shape and padding changes using a single spring progress value (0→1)
 /// that drives ALL corners and padding edges simultaneously.
 class M3ERadiusAndPaddingMotion extends StatefulWidget {
+  /// motion.
   final SpringMotion motion;
+
+  /// internalLeft.
   final double internalLeft;
+
+  /// internalRight.
   final double internalRight;
+
+  /// internalTop.
   final double internalTop;
+
+  /// internalBottom.
   final double internalBottom;
+
+  /// targetRadius.
   final BorderRadius targetRadius;
 
+  /// freezeTopLeft.
+
   final bool freezeTopLeft;
+
+  /// freezeTopRight.
   final bool freezeTopRight;
+
+  /// freezeBottomLeft.
   final bool freezeBottomLeft;
+
+  /// freezeBottomRight.
   final bool freezeBottomRight;
 
   /// When true, target changes apply instantly instead of springing in.
   final bool snapToTarget;
 
+  /// Function.
+
   final Widget Function(EdgeInsets padding, BorderRadius radius) builder;
+
+  /// M3ERadiusAndPaddingMotion.
 
   const M3ERadiusAndPaddingMotion({
     super.key,
@@ -151,7 +177,7 @@ class _M3ERadiusAndPaddingMotionState extends State<M3ERadiusAndPaddingMotion> {
   late double _curTopLeft, _curTopRight, _curBottomLeft, _curBottomRight;
   late double _curLeft, _curRight, _curTop, _curBottom;
 
-  double _progressTarget = 1.0;
+  double _progressTarget = 1;
 
   final _CachedLerpResult _lastFrame = _CachedLerpResult();
   _RadiusAndPaddingMotionKeys? _lastKeys;

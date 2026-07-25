@@ -9,6 +9,7 @@ import 'enums/m3e_fab.dart';
 /// [M3EFabColor]s. It sits at elevation level 3 and lifts to level 4 on hover,
 /// and plays a spatial spring press scale (380 / 0.55).
 class M3EFab extends StatelessWidget {
+  /// M3EFab.
   const M3EFab({
     required this.icon,
     this.onPressed,
@@ -21,15 +22,29 @@ class M3EFab extends StatelessWidget {
     super.key,
   });
 
+  /// icon.
+
   final Widget icon;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// size.
   final M3EFabSize size;
+
+  /// color.
   final M3EFabColor color;
 
   /// When set, overrides the themed corner radius (e.g. for open/close morph).
   final double? cornerRadius;
+
+  /// tooltip.
   final String? tooltip;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// autofocus.
   final bool autofocus;
 
   bool get _enabled => onPressed != null;
@@ -46,8 +61,9 @@ class M3EFab extends StatelessWidget {
     final borderRadius = M3EShapes.resolve(cornerRadius ?? metrics.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
     // External radius is driven frame-by-frame; skip AnimatedContainer lerp.
-    final radiusDuration =
-        cornerRadius != null ? Duration.zero : M3EMotion.short4;
+    final radiusDuration = cornerRadius != null
+        ? Duration.zero
+        : M3EMotion.short4;
 
     return M3EComponentTheme(
       builder: (context) => M3ETappable(
@@ -59,8 +75,9 @@ class M3EFab extends StatelessWidget {
         pressedScale: fabTheme.pressedScale,
         materialInk: true,
         builder: (context, state) {
-          final elevation =
-              state.hovered ? M3EElevation.level4 : M3EElevation.level3;
+          final elevation = state.hovered
+              ? M3EElevation.level4
+              : M3EElevation.level3;
           return AnimatedContainer(
             duration: radiusDuration,
             curve: M3EMotion.standard,

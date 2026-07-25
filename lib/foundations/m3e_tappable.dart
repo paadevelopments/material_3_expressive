@@ -7,10 +7,8 @@ import 'm3e_state_layer.dart';
 import 'm3e_tappable_ink_scope.dart';
 
 /// Builds the visual for a tappable surface given its interaction [state].
-typedef M3EStateWidgetBuilder = Widget Function(
-  BuildContext context,
-  M3EInteractionState state,
-);
+typedef M3EStateWidgetBuilder =
+    Widget Function(BuildContext context, M3EInteractionState state);
 
 /// A reusable interaction primitive powering expressive components.
 ///
@@ -18,6 +16,7 @@ typedef M3EStateWidgetBuilder = Widget Function(
 /// an optional spring based press scale, and wires up keyboard activation and
 /// semantics so components stay focused on their own visuals.
 class M3ETappable extends StatefulWidget {
+  /// Creates a tappable interaction surface.
   const M3ETappable({
     required this.builder,
     this.onTap,
@@ -36,15 +35,34 @@ class M3ETappable extends StatefulWidget {
     super.key,
   });
 
+  /// Builds the visual for the current interaction [M3EInteractionState].
   final M3EStateWidgetBuilder builder;
+
+  /// Called when the surface is tapped.
   final VoidCallback? onTap;
+
+  /// Called when the surface is long-pressed.
   final VoidCallback? onLongPress;
+
+  /// Whether the surface accepts interaction.
   final bool enabled;
+
+  /// Optional focus node; one is created internally when null.
   final FocusNode? focusNode;
+
+  /// Whether this surface should request focus when first shown.
   final bool autofocus;
+
+  /// Cursor shown while interactive.
   final MouseCursor? mouseCursor;
+
+  /// Accessibility label for the surface.
   final String? semanticLabel;
+
+  /// Whether semantics treat this as a button.
   final bool semanticButton;
+
+  /// Whether to exclude child semantics.
   final bool excludeSemantics;
 
   /// Scale applied while pressed. `1.0` disables the press scale animation.
@@ -59,10 +77,10 @@ class M3ETappable extends StatefulWidget {
   /// When true, gestures are handled by the overlay ink well.
   final bool materialInk;
 
-  bool get _isInteractive =>
-      enabled && (onTap != null || onLongPress != null);
+  bool get _isInteractive => enabled && (onTap != null || onLongPress != null);
 
   @override
+  /// Creates the mutable state for this widget.
   State<M3ETappable> createState() => _M3ETappableState();
 }
 
@@ -111,8 +129,9 @@ class _M3ETappableState extends State<M3ETappable>
     if (_activePointer == null) {
       return;
     }
-    GestureBinding.instance.pointerRouter
-        .removeGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     _activePointer = null;
   }
 
@@ -129,8 +148,9 @@ class _M3ETappableState extends State<M3ETappable>
   void _handlePointerDown(PointerDownEvent event) {
     _clearPointerRoute();
     _activePointer = event.pointer;
-    GestureBinding.instance.pointerRouter
-        .addGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     _update(_state.copyWith(pressed: true));
     _animateScale(widget.pressedScale);
   }

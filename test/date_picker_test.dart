@@ -13,14 +13,26 @@ Widget _host(Widget child) {
 
 void main() {
   testWidgets('M3ECalendarDatePicker selects a day', _calendarSelectsDay);
-  testWidgets('M3ECalendarDatePicker respects firstDate and lastDate', _dateBounds);
-  testWidgets('M3ECalendarDatePicker respects selectableDayPredicate', _predicate);
+  testWidgets(
+    'M3ECalendarDatePicker respects firstDate and lastDate',
+    _dateBounds,
+  );
+  testWidgets(
+    'M3ECalendarDatePicker respects selectableDayPredicate',
+    _predicate,
+  );
   testWidgets('M3EDatePicker.show returns null on cancel', _dialogCancel);
   testWidgets('M3EDatePicker.show returns date on confirm', _dialogConfirm);
   testWidgets('M3ECalendarDatePicker year mode renders', _yearMode);
   testWidgets('M3EDatePicker.showRange selects a range', _rangeSelection);
-  testWidgets('M3EDatePickerTheme overrides layout without ThemeData', _themeOverride);
-  testWidgets('M3EDatePickerDialog portrait layout has no overflow', _dialogLayout);
+  testWidgets(
+    'M3EDatePickerTheme overrides layout without ThemeData',
+    _themeOverride,
+  );
+  testWidgets(
+    'M3EDatePickerDialog portrait layout has no overflow',
+    _dialogLayout,
+  );
 }
 
 Future<void> _calendarSelectsDay(WidgetTester tester) async {
@@ -28,7 +40,7 @@ Future<void> _calendarSelectsDay(WidgetTester tester) async {
   await tester.pumpWidget(
     _host(
       M3ECalendarDatePicker(
-        firstDate: DateTime(2026, 1, 1),
+        firstDate: DateTime(2026),
         lastDate: DateTime(2026, 12, 31),
         currentDate: DateTime(2026, 3, 15),
         onDateChanged: (DateTime value) => selected = value,
@@ -68,7 +80,7 @@ Future<void> _predicate(WidgetTester tester) async {
   await tester.pumpWidget(
     _host(
       M3ECalendarDatePicker(
-        firstDate: DateTime(2026, 3, 1),
+        firstDate: DateTime(2026, 3),
         lastDate: DateTime(2026, 3, 31),
         currentDate: DateTime(2026, 3, 15),
         selectableDayPredicate: (DateTime day) => day.day.isEven,
@@ -182,7 +194,7 @@ Future<void> _rangeSelection(WidgetTester tester) async {
               onPressed: () async {
                 result = await M3EDatePicker.showRange(
                   context,
-                  firstDate: DateTime(2026, 3, 1),
+                  firstDate: DateTime(2026, 3),
                   lastDate: DateTime(2026, 3, 31),
                   currentDate: DateTime(2026, 3, 15),
                 );

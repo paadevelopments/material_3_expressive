@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ETooltip`.
 @immutable
 class M3ETooltipTheme extends M3EThemeExtension<M3ETooltipTheme> {
+  /// M3ETooltipTheme.
   const M3ETooltipTheme({
     this.anchorOffset = 4,
     this.plainMaxWidth = 200,
@@ -16,32 +17,66 @@ class M3ETooltipTheme extends M3EThemeExtension<M3ETooltipTheme> {
     this.richElevation = M3EElevation.level2,
   });
 
+  /// defaults.
+
   static const M3ETooltipTheme defaults = M3ETooltipTheme();
 
+  /// anchorOffset.
+
   final double anchorOffset;
+
+  /// plainMaxWidth.
   final double plainMaxWidth;
+
+  /// plainPadding.
   final EdgeInsets plainPadding;
+
+  /// richMaxWidth.
   final double richMaxWidth;
+
+  /// richPadding.
   final EdgeInsets richPadding;
+
+  /// richTitleGap.
   final double richTitleGap;
+
+  /// richActionsGap.
   final double richActionsGap;
+
+  /// richElevation.
   final double richElevation;
+
+  /// The plainDismissDelay.
 
   Duration get plainDismissDelay => M3EMotion.extraLong4;
 
+  /// The plainBorderRadius.
+
   BorderRadius get plainBorderRadius => M3EShapes.radiusExtraSmall;
+
+  /// The richBorderRadius.
 
   BorderRadius get richBorderRadius => M3EShapes.radiusMedium;
 
+  /// plainContainerColor.
+
   Color plainContainerColor(M3EColorScheme scheme) => scheme.inverseSurface;
+
+  /// plainMessageStyle.
 
   TextStyle plainMessageStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodySmall.copyWith(color: scheme.onInverseSurface);
 
+  /// richContainerColor.
+
   Color richContainerColor(M3EColorScheme scheme) => scheme.surfaceContainer;
+
+  /// richTitleStyle.
 
   TextStyle richTitleStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.titleSmall.copyWith(color: scheme.onSurface);
+
+  /// richBodyStyle.
 
   TextStyle richBodyStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyMedium.copyWith(color: scheme.onSurfaceVariant);

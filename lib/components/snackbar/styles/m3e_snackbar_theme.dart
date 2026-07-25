@@ -5,10 +5,14 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ESnackbar`.
 @immutable
 class M3ESnackbarTheme extends M3EThemeExtension<M3ESnackbarTheme> {
+  /// M3ESnackbarTheme.
   const M3ESnackbarTheme({
     this.minHeight = 48,
     this.maxWidth = 600,
-    this.contentPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
     this.elevation = M3EElevation.level3,
     this.defaultDuration = const Duration(seconds: 4),
     this.overlayHorizontalInset = 16,
@@ -17,24 +21,52 @@ class M3ESnackbarTheme extends M3EThemeExtension<M3ESnackbarTheme> {
     this.actionGap = 8,
   });
 
+  /// defaults.
+
   static const M3ESnackbarTheme defaults = M3ESnackbarTheme();
 
+  /// minHeight.
+
   final double minHeight;
+
+  /// maxWidth.
   final double maxWidth;
+
+  /// contentPadding.
   final EdgeInsets contentPadding;
+
+  /// elevation.
   final double elevation;
+
+  /// defaultDuration.
   final Duration defaultDuration;
+
+  /// overlayHorizontalInset.
   final double overlayHorizontalInset;
+
+  /// overlayBottomInset.
   final double overlayBottomInset;
+
+  /// actionPadding.
   final EdgeInsets actionPadding;
+
+  /// actionGap.
   final double actionGap;
+
+  /// The borderRadius.
 
   BorderRadius get borderRadius => M3EShapes.radiusExtraSmall;
 
+  /// containerColor.
+
   Color containerColor(M3EColorScheme scheme) => scheme.inverseSurface;
+
+  /// messageStyle.
 
   TextStyle messageStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyMedium.copyWith(color: scheme.onInverseSurface);
+
+  /// actionStyle.
 
   TextStyle actionStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.labelLarge.copyWith(color: scheme.inversePrimary);
@@ -81,8 +113,11 @@ class M3ESnackbarTheme extends M3EThemeExtension<M3ESnackbarTheme> {
         other.overlayHorizontalInset,
         t,
       )!,
-      overlayBottomInset:
-          _lerpDouble(overlayBottomInset, other.overlayBottomInset, t)!,
+      overlayBottomInset: _lerpDouble(
+        overlayBottomInset,
+        other.overlayBottomInset,
+        t,
+      )!,
       actionPadding: EdgeInsets.lerp(actionPadding, other.actionPadding, t)!,
       actionGap: _lerpDouble(actionGap, other.actionGap, t)!,
     );

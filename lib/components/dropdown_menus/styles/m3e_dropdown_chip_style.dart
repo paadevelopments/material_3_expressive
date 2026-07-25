@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../../../foundations/m3e_motion.dart';
 
+/// M3EDropdownChipStyle.
+
 @immutable
 class M3EDropdownChipStyle with Diagnosticable {
   /// Chip background color.
@@ -104,7 +106,11 @@ class M3EDropdownChipStyle with Diagnosticable {
   }
 
   /// Linearly interpolate between two chip styles.
-  static M3EDropdownChipStyle lerp(M3EDropdownChipStyle? a, M3EDropdownChipStyle? b, double t) {
+  static M3EDropdownChipStyle lerp(
+    M3EDropdownChipStyle? a,
+    M3EDropdownChipStyle? b,
+    double t,
+  ) {
     if (a == null && b == null) {
       return const M3EDropdownChipStyle();
     }
@@ -179,9 +185,7 @@ class M3EDropdownChipStyle with Diagnosticable {
       ..add(ColorProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle))
       ..add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding))
-      ..add(
-        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-      )
+      ..add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius))
       ..add(DoubleProperty('spacing', spacing))
       ..add(IntProperty('maxDisplayCount', maxDisplayCount));
   }

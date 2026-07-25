@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -43,9 +42,15 @@ class M3EButtonGroupOverflowController {
     stableAllOverflowMeasured.dispose();
   }
 
+  /// roundConsumed.
+
   static double roundConsumed(double extent) => extent.ceilToDouble();
 
+  /// roundAvailable.
+
   static double roundAvailable(double extent) => extent.floorToDouble();
+
+  /// hasMainExtentChanged.
 
   static bool hasMainExtentChanged(double? last, double current) {
     return last == null || (last - current).abs() > 0.5;
@@ -60,10 +65,10 @@ class M3EButtonGroupOverflowController {
     required double Function() separatorExtent,
   }) {
     final availableMain = roundAvailable(maxMain);
-    double currentExtent = 0.0;
-    int visibleCount = 0;
+    var currentExtent = 0.toDouble();
+    var visibleCount = 0;
 
-    for (int i = 0; i < itemExtents.length; i++) {
+    for (var i = 0; i < itemExtents.length; i++) {
       final gapBefore = i == 0 ? 0.0 : separatorExtent();
       final remainingAfter = itemExtents.length - i - 1;
       final reservedForTrigger = remainingAfter > 0
@@ -93,15 +98,15 @@ class M3EButtonGroupOverflowController {
     final effectiveMaxMain = roundAvailable(maxMain);
     int windowStart = windowStartIndex.value.clamp(0, itemExtents.length);
     bool needsBack = windowStart > 0;
-    bool needsForward = false;
+    var needsForward = false;
 
-    double currentWidth = 0.0;
+    var currentWidth = 0.toDouble();
     if (needsBack) {
       currentWidth += triggerExtent + separatorBeforeOverflow(true);
     }
 
-    int windowEnd = windowStart;
-    for (int i = windowStart; i < itemExtents.length; i++) {
+    var windowEnd = windowStart;
+    for (var i = windowStart; i < itemExtents.length; i++) {
       final itemExtent = itemExtents[i];
       final gap = separatorBeforeOverflow(i == windowStart && !needsBack);
       if (currentWidth + gap + itemExtent < effectiveMaxMain) {

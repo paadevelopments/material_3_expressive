@@ -1,0 +1,18 @@
+# Tooling / IDE (not needed on pub.dev)
+.cursor/
+.fvm/
+.idea/
+.vscode/
+*.iml
+custom_lint.log
+
+# Local / generated
+build/
+.dart_tool/
+.packages
+pubspec.lock
+**/doc/api/
+
+# Agent / misc
+agent-transcripts/
+*.ips

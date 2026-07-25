@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 
 import '../../buttons/styles/m3e_button_motion.dart';
@@ -10,6 +9,7 @@ import 'm3e_split_button_checkbox_style.dart';
 /// Styling options for split-button bottom-sheet menus.
 @immutable
 class M3ESplitButtonBottomSheetDecoration {
+  /// M3ESplitButtonBottomSheetDecoration.
   const M3ESplitButtonBottomSheetDecoration({
     this.title,
     this.titlePadding,
@@ -22,15 +22,35 @@ class M3ESplitButtonBottomSheetDecoration {
     this.checkboxStyle,
   });
 
+  /// title.
+
   final Widget? title;
+
+  /// titlePadding.
   final EdgeInsetsGeometry? titlePadding;
+
+  /// showDragHandle.
   final bool showDragHandle;
+
+  /// backgroundColor.
   final Color? backgroundColor;
+
+  /// elevation.
   final double? elevation;
+
+  /// shape.
   final ShapeBorder? shape;
+
+  /// motion.
   final M3EButtonMotion motion;
+
+  /// selectionMode.
   final M3ESplitButtonSelectionMode selectionMode;
+
+  /// checkboxStyle.
   final M3ESplitButtonCheckboxStyle? checkboxStyle;
+
+  /// copyWith.
 
   M3ESplitButtonBottomSheetDecoration copyWith({
     Widget? title,

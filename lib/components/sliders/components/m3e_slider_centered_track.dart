@@ -9,6 +9,7 @@ import 'm3e_slider_track.dart';
 
 /// Centered active-track variant — active fill grows from the midpoint.
 class M3ESliderCenteredTrack extends StatelessWidget {
+  /// M3ESliderCenteredTrack.
   const M3ESliderCenteredTrack({
     required this.fraction,
     required this.tickFractions,
@@ -30,22 +31,56 @@ class M3ESliderCenteredTrack extends StatelessWidget {
     super.key,
   });
 
+  /// fraction.
+
   final double fraction;
+
+  /// tickFractions.
   final List<double> tickFractions;
+
+  /// colors.
   final M3ESliderColors colors;
+
+  /// theme.
   final M3ESliderTheme theme;
+
+  /// axis.
   final Axis axis;
+
+  /// textDirection.
   final TextDirection textDirection;
+
+  /// handleThickness.
   final double handleThickness;
+
+  /// trackHeight.
   final double? trackHeight;
+
+  /// stopIndicatorSize.
   final double? stopIndicatorSize;
+
+  /// tickSize.
   final double? tickSize;
+
+  /// edgeInset.
   final double? edgeInset;
+
+  /// drawDots.
   final bool drawDots;
+
+  /// isWavy.
   final bool isWavy;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
 
   @override

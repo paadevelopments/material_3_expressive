@@ -2,7 +2,6 @@
 // (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e/lib).
 // The logic is kept identical to the reference implementation; only the public
 // identifiers carry the `M3E` prefix to match this package's conventions.
-// ignore_for_file: type=lint
 
 import 'package:flutter/material.dart';
 
@@ -12,6 +11,8 @@ import 'm3e_icon_button_theme.dart';
 /// Shape resolution helpers: resting/pressed radii and toggle behavior.
 class M3EIconButtonShapes {
   const M3EIconButtonShapes._();
+
+  /// restVariant.
 
   static M3EIconButtonShapeVariant restVariant({
     required bool isToggle,
@@ -25,6 +26,8 @@ class M3EIconButtonShapes {
     }
     return baseVariant;
   }
+
+  /// restingRadius.
 
   static double restingRadius({
     required M3EIconButtonTheme theme,

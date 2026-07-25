@@ -1,4 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
+    show M3EToolbar;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EToolbar;
 
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../models/m3e_toolbar_item.dart';
@@ -11,6 +15,7 @@ import 'm3e_toolbar_overflow_menu.dart';
 /// Used for docked bars and non-expanding floating layouts. Expand-trigger
 /// styling is ignored here — all actions render as standard icon buttons.
 class M3EToolbarActionsRow extends StatelessWidget {
+  /// M3EToolbarActionsRow.
   const M3EToolbarActionsRow({
     required this.actions,
     required this.maxInline,
@@ -27,11 +32,23 @@ class M3EToolbarActionsRow extends StatelessWidget {
     super.key,
   });
 
+  /// actions.
+
   final List<M3EToolbarItem> actions;
+
+  /// maxInline.
   final int maxInline;
+
+  /// overflowIcon.
   final Widget overflowIcon;
+
+  /// iconButtonSize.
   final M3EIconButtonSize iconButtonSize;
+
+  /// overflowTextStyle.
   final TextStyle overflowTextStyle;
+
+  /// destructiveColor.
   final Color destructiveColor;
 
   /// Remaining cross-axis size after bar content padding.
@@ -42,10 +59,14 @@ class M3EToolbarActionsRow extends StatelessWidget {
 
   /// Icon-button target overhang; applied to widget slots for optical parity.
   final double opticalInset;
+
+  /// axis.
   final Axis axis;
 
   /// When true, the row fills the cross-axis parent's main-axis extent.
   final bool expand;
+
+  /// mainAxisAlignment.
   final MainAxisAlignment mainAxisAlignment;
 
   @override
@@ -61,7 +82,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     final List<M3EToolbarItem> inline = partitioned.inline;
     final List<M3EToolbarAction> overflow = partitioned.overflow;
 
-    final List<Widget> slots = <Widget>[
+    final slots = <Widget>[
       for (final M3EToolbarItem item in inline)
         M3EToolbarItemLayout.buildItem(
           item: item,
@@ -92,8 +113,9 @@ class M3EToolbarActionsRow extends StatelessWidget {
         ? M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis)
         : slots;
 
-    final MainAxisSize mainAxisSize =
-        expand ? MainAxisSize.max : MainAxisSize.min;
+    final MainAxisSize mainAxisSize = expand
+        ? MainAxisSize.max
+        : MainAxisSize.min;
 
     if (axis == Axis.vertical) {
       return Column(

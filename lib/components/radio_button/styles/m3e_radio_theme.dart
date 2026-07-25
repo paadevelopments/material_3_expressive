@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ERadio`.
 @immutable
 class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
+  /// M3ERadioTheme.
   const M3ERadioTheme({
     this.ringSize = 20,
     this.hitSize = 40,
@@ -14,19 +15,35 @@ class M3ERadioTheme extends M3EThemeExtension<M3ERadioTheme> {
     this.disabledOpacity = 0.38,
   });
 
+  /// defaults.
+
   static const M3ERadioTheme defaults = M3ERadioTheme();
 
+  /// ringSize.
+
   final double ringSize;
+
+  /// hitSize.
   final double hitSize;
+
+  /// dotSize.
   final double dotSize;
+
+  /// borderWidth.
   final double borderWidth;
 
   /// Space between the control and an optional label.
   final double labelGap;
+
+  /// disabledOpacity.
   final double disabledOpacity;
+
+  /// stateLayerColor.
 
   Color stateLayerColor(M3EColorScheme scheme, {required bool selected}) =>
       selected ? scheme.primary : scheme.onSurface;
+
+  /// color.
 
   Color color(
     M3EColorScheme scheme, {

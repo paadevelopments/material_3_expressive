@@ -6,11 +6,22 @@ import '../../../foundations/foundations.dart';
 @immutable
 class M3ERefreshIndicatorTheme
     extends M3EThemeExtension<M3ERefreshIndicatorTheme> {
+  /// kDefaultDisplacement.
   static const double kDefaultDisplacement = 40;
+
+  /// kDefaultEdgeOffset.
   static const double kDefaultEdgeOffset = 0;
+
+  /// kDefaultElevation.
   static const double kDefaultElevation = 2;
+
+  /// kDragContainerExtentPercentage.
   static const double kDragContainerExtentPercentage = 0.25;
+
+  /// kDragSizeFactorLimit.
   static const double kDragSizeFactorLimit = 1.5;
+
+  /// M3ERefreshIndicatorTheme.
 
   const M3ERefreshIndicatorTheme({
     this.defaultDisplacement = kDefaultDisplacement,
@@ -22,22 +33,46 @@ class M3ERefreshIndicatorTheme
     this.indicatorScaleDuration = const Duration(milliseconds: 200),
   });
 
+  /// defaults.
+
   static const M3ERefreshIndicatorTheme defaults = M3ERefreshIndicatorTheme();
 
+  /// defaultDisplacement.
+
   final double defaultDisplacement;
+
+  /// defaultEdgeOffset.
   final double defaultEdgeOffset;
+
+  /// defaultElevation.
   final double defaultElevation;
+
+  /// dragContainerExtentPercentage.
   final double dragContainerExtentPercentage;
+
+  /// dragSizeFactorLimit.
   final double dragSizeFactorLimit;
+
+  /// indicatorSnapDuration.
   final Duration indicatorSnapDuration;
+
+  /// indicatorScaleDuration.
   final Duration indicatorScaleDuration;
+
+  /// activeColor.
 
   Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
+  /// containerColorDefault.
+
   Color containerColorDefault() => const Color(0x00000000);
+
+  /// containedContainerColor.
 
   Color containedContainerColor(M3EColorScheme scheme) =>
       scheme.primaryContainer;
+
+  /// containedActiveColor.
 
   Color containedActiveColor(M3EColorScheme scheme) =>
       scheme.onPrimaryContainer;
@@ -56,8 +91,8 @@ class M3ERefreshIndicatorTheme
       defaultDisplacement: defaultDisplacement ?? this.defaultDisplacement,
       defaultEdgeOffset: defaultEdgeOffset ?? this.defaultEdgeOffset,
       defaultElevation: defaultElevation ?? this.defaultElevation,
-      dragContainerExtentPercentage: dragContainerExtentPercentage ??
-          this.dragContainerExtentPercentage,
+      dragContainerExtentPercentage:
+          dragContainerExtentPercentage ?? this.dragContainerExtentPercentage,
       dragSizeFactorLimit: dragSizeFactorLimit ?? this.dragSizeFactorLimit,
       indicatorSnapDuration:
           indicatorSnapDuration ?? this.indicatorSnapDuration,
@@ -77,10 +112,16 @@ class M3ERefreshIndicatorTheme
         other.defaultDisplacement,
         t,
       )!,
-      defaultEdgeOffset:
-          _lerpDouble(defaultEdgeOffset, other.defaultEdgeOffset, t)!,
-      defaultElevation:
-          _lerpDouble(defaultElevation, other.defaultElevation, t)!,
+      defaultEdgeOffset: _lerpDouble(
+        defaultEdgeOffset,
+        other.defaultEdgeOffset,
+        t,
+      )!,
+      defaultElevation: _lerpDouble(
+        defaultElevation,
+        other.defaultElevation,
+        t,
+      )!,
       dragContainerExtentPercentage: _lerpDouble(
         dragContainerExtentPercentage,
         other.dragContainerExtentPercentage,
@@ -91,10 +132,12 @@ class M3ERefreshIndicatorTheme
         other.dragSizeFactorLimit,
         t,
       )!,
-      indicatorSnapDuration:
-          t < 0.5 ? indicatorSnapDuration : other.indicatorSnapDuration,
-      indicatorScaleDuration:
-          t < 0.5 ? indicatorScaleDuration : other.indicatorScaleDuration,
+      indicatorSnapDuration: t < 0.5
+          ? indicatorSnapDuration
+          : other.indicatorSnapDuration,
+      indicatorScaleDuration: t < 0.5
+          ? indicatorScaleDuration
+          : other.indicatorScaleDuration,
     );
   }
 

@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -18,10 +17,19 @@ abstract class _ConstProperties {
 
 /// A decorator that draws the Material 3 Expressive focus ring around its child.
 class M3EFocusRing extends StatelessWidget {
+  /// radius.
   final BorderRadius radius;
+
+  /// child.
   final Widget child;
+
+  /// focused.
   final bool focused;
+
+  /// animationDuration.
   final Duration animationDuration;
+
+  /// M3EFocusRing.
 
   const M3EFocusRing({
     super.key,
@@ -33,7 +41,9 @@ class M3EFocusRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!focused) return RepaintBoundary(child: child);
+    if (!focused) {
+      return RepaintBoundary(child: child);
+    }
 
     final color = M3ETheme.of(context).colorScheme.primary;
 

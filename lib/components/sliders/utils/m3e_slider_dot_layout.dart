@@ -9,6 +9,7 @@ import '../utils/m3e_slider_math.dart';
 /// One stop/tick marker along the slider track.
 @immutable
 class M3ESliderDotPlacement {
+  /// M3ESliderDotPlacement.
   const M3ESliderDotPlacement({
     required this.primary,
     required this.color,
@@ -18,14 +19,22 @@ class M3ESliderDotPlacement {
 
   /// Position along the primary track axis (x for horizontal, y for vertical).
   final double primary;
+
+  /// color.
   final Color color;
+
+  /// size.
   final double size;
+
+  /// active.
   final bool active;
 }
 
-/// Shared stop/tick placement for canvas paint and custom [dotBuilder] overlays.
+/// Shared stop/tick placement for canvas paint and custom `dotBuilder` overlays.
 abstract final class M3ESliderDotLayout {
   const M3ESliderDotLayout._();
+
+  /// resolve.
 
   static List<M3ESliderDotPlacement> resolve({
     required Size size,
@@ -44,22 +53,23 @@ abstract final class M3ESliderDotLayout {
     required Axis axis,
     required TextDirection textDirection,
   }) {
-    final bool vertical = axis == Axis.vertical;
-    final bool centered = mode == M3ESliderPaintMode.single &&
+    final vertical = axis == Axis.vertical;
+    final bool centered =
+        mode == M3ESliderPaintMode.single &&
         trackKind == M3ESliderTrackKind.centered;
-    final bool range = mode == M3ESliderPaintMode.range;
+    final range = mode == M3ESliderPaintMode.range;
 
     final Rect trackBounds = _trackBounds(size, trackHeight, vertical);
     final double sliderStart = vertical ? trackBounds.top : trackBounds.left;
-    final double sliderEnd =
-        vertical ? trackBounds.bottom : trackBounds.right;
+    final double sliderEnd = vertical ? trackBounds.bottom : trackBounds.right;
     final double span = sliderEnd - sliderStart;
     if (span <= 0) {
       return const <M3ESliderDotPlacement>[];
     }
 
-    final double startGap =
-        (centered || range) ? handleThickness / 2 + handleGap : 0;
+    final double startGap = (centered || range)
+        ? handleThickness / 2 + handleGap
+        : 0;
     final double endGap = handleThickness / 2 + handleGap;
 
     final double valueStart =
@@ -68,21 +78,23 @@ abstract final class M3ESliderDotLayout {
         sliderStart + span * activeEndFraction.clamp(0.0, 1.0);
     final double centerAxis = (sliderStart + sliderEnd) / 2;
 
-    final double adjustedValueEnd =
-        centered ? math.min(valueEnd, centerAxis) : valueStart;
-    final double adjustedValueStart =
-        centered ? math.max(valueEnd, centerAxis) : valueEnd;
+    final double adjustedValueEnd = centered
+        ? math.min(valueEnd, centerAxis)
+        : valueStart;
+    final double adjustedValueStart = centered
+        ? math.max(valueEnd, centerAxis)
+        : valueEnd;
 
     final double activeStart = centered
         ? adjustedValueEnd + (adjustedValueEnd < centerAxis ? startGap : 0)
         : range
-            ? valueStart + startGap
-            : sliderStart;
+        ? valueStart + startGap
+        : sliderStart;
     final double activeEnd = centered
         ? adjustedValueStart - (adjustedValueStart > centerAxis ? endGap : 0)
         : valueEnd - endGap;
 
-    final List<M3ESliderDotPlacement> out = <M3ESliderDotPlacement>[];
+    final out = <M3ESliderDotPlacement>[];
 
     // [edgeInset] is clear space between the track edge and the marker's outer
     // edge; centers are therefore inset by spacing + half the marker size.
@@ -137,8 +149,8 @@ abstract final class M3ESliderDotLayout {
     }
 
     // Discrete ticks share the same padded span as the end stops.
-    final double tickStart = stopStart;
-    final double tickEnd = stopEnd;
+    final tickStart = stopStart;
+    final tickEnd = stopEnd;
     final double tickCenterGapStart = centered ? centerAxis - endGap : 0;
     final double tickCenterGapEnd = centered ? centerAxis + endGap : 0;
     final double tickStartGapLo = valueStart - startGap;
@@ -146,13 +158,16 @@ abstract final class M3ESliderDotLayout {
     final double tickEndGapLo = valueEnd - endGap;
     final double tickEndGapHi = valueEnd + endGap;
 
-    for (int i = 0; i < tickFractions.length; i++) {
+    for (var i = 0; i < tickFractions.length; i++) {
       // Ends are owned by stop indicators.
       if (i == 0 || i == tickFractions.length - 1) {
         continue;
       }
-      final double centerTick =
-          M3ESliderMath.lerp(tickStart, tickEnd, tickFractions[i]);
+      final double centerTick = M3ESliderMath.lerp(
+        tickStart,
+        tickEnd,
+        tickFractions[i],
+      );
       if (centered &&
           centerTick >= tickCenterGapStart &&
           centerTick <= tickCenterGapEnd) {

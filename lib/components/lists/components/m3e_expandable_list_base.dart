@@ -6,16 +6,38 @@ import '../../buttons/res/m3e_button_constants.dart';
 import '../styles/m3e_expandable_style.dart';
 import 'm3e_expandable_item.dart';
 
+/// M3EExpandableListBase.
+
 abstract class M3EExpandableListBase extends StatefulWidget {
+  /// itemCount.
   final int itemCount;
+
+  /// headerBuilder.
   final M3EExpandableHeaderBuilder headerBuilder;
+
+  /// bodyBuilder.
   final M3EExpandableBodyBuilder bodyBuilder;
+
+  /// allowMultipleExpanded.
   final bool? allowMultipleExpanded;
+
+  /// initiallyExpanded.
   final Set<int> initiallyExpanded;
+
+  /// style.
   final M3EExpandableStyle? style;
+
+  /// expandMotion.
   final M3ESpring? expandMotion;
+
+  /// collapseMotion.
   final M3ESpring? collapseMotion;
-  final void Function(int index, {required bool isExpanded})? onExpansionChanged;
+
+  /// Called when an item expands or collapses.
+  final void Function(int index, {required bool isExpanded})?
+  onExpansionChanged;
+
+  /// M3EExpandableListBase.
 
   const M3EExpandableListBase({
     super.key,
@@ -31,8 +53,12 @@ abstract class M3EExpandableListBase extends StatefulWidget {
   });
 }
 
+/// M3EExpandableStateMixin.
+
 mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
   late Set<int> _expandedIndices;
+
+  /// The expandedIndices.
   Set<int> get expandedIndices => _expandedIndices;
 
   @override
@@ -40,6 +66,8 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
     super.initState();
     _expandedIndices = Set<int>.from(widget.initiallyExpanded);
   }
+
+  /// handleToggle.
 
   void handleToggle(
     int index, {
@@ -62,13 +90,18 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
     onExpansionChanged?.call(index, isExpanded: isExpanding);
   }
 
+  /// isExpanded.
+
   bool isExpanded(int index) => _expandedIndices.contains(index);
+
+  /// buildItem.
 
   Widget buildItem(BuildContext context, int index) {
     final expandable = M3ETheme.of(context).listTheme.expandable;
     final effectiveStyle =
         widget.style ?? M3EExpandableStyle.fromTheme(expandable);
-    final effectiveExpandMotion = widget.expandMotion ?? expandable.expandMotion;
+    final effectiveExpandMotion =
+        widget.expandMotion ?? expandable.expandMotion;
     final effectiveCollapseMotion =
         widget.collapseMotion ?? expandable.collapseMotion;
     final effectiveAllowMultiple =

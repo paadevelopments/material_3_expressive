@@ -7,6 +7,7 @@ import '../utils/m3e_date_picker_utils.dart';
 
 /// Scrollable year grid for calendar date pickers.
 class M3EYearPicker extends StatefulWidget {
+  /// M3EYearPicker.
   const M3EYearPicker({
     required this.selectedDate,
     required this.firstDate,
@@ -19,13 +20,29 @@ class M3EYearPicker extends StatefulWidget {
     super.key,
   });
 
+  /// selectedDate.
+
   final DateTime? selectedDate;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// onChanged.
   final ValueChanged<DateTime> onChanged;
+
+  /// Function.
   final bool Function(DateTime day)? selectableDayPredicate;
+
+  /// mode.
   final M3EDatePickerMode? mode;
+
+  /// onModeChanged.
   final ValueChanged<M3EDatePickerMode>? onModeChanged;
+
+  /// displayedMonth.
   final DateTime? displayedMonth;
 
   @override
@@ -40,10 +57,7 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
     super.initState();
     final int selectedYear = widget.selectedDate?.year ?? widget.firstDate.year;
     _controller = ScrollController(
-      initialScrollOffset: _initialOffset(
-        selectedYear,
-        widget.firstDate.year,
-      ),
+      initialScrollOffset: _initialOffset(selectedYear, widget.firstDate.year),
     );
   }
 
@@ -57,15 +71,18 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dateTheme = theme.datePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final int firstYear = widget.firstDate.year;
     final int lastYear = widget.lastDate.year;
     final int yearCount = lastYear - firstYear + 1;
     final int selectedYear = widget.selectedDate?.year ?? firstYear;
     final DateTime monthDate =
         widget.displayedMonth ?? widget.selectedDate ?? widget.firstDate;
-    final double gridHeight = M3EDatePickerUtils.yearPickerGridHeight(yearCount);
+    final double gridHeight = M3EDatePickerUtils.yearPickerGridHeight(
+      yearCount,
+    );
     final bool scrollable =
         M3EDatePickerUtils.yearPickerGridNaturalHeight(yearCount) > gridHeight;
 
@@ -107,9 +124,7 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
           height: gridHeight,
           child: GridView.builder(
             controller: _controller,
-            physics: scrollable
-                ? null
-                : const NeverScrollableScrollPhysics(),
+            physics: scrollable ? null : const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(
               M3EDatePickerConstants.yearPickerPadding,
             ),
@@ -124,21 +139,24 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
               final int year = firstYear + index;
               final DateTime normalized = M3EDatePickerUtils.clampDate(
                 M3EDatePickerUtils.normalizeSelectedDay(
-                  widget.selectedDate ?? DateTime(year, 1, 1),
+                  widget.selectedDate ?? DateTime(year),
                   DateTime(year, widget.selectedDate?.month ?? 1),
                 ),
                 widget.firstDate,
                 widget.lastDate,
               );
-              final DateTime candidate =
-                  DateTime(year, normalized.month, normalized.day);
+              final candidate = DateTime(
+                year,
+                normalized.month,
+                normalized.day,
+              );
               final bool enabled = M3EDatePickerUtils.isSelectable(
                 candidate,
                 widget.firstDate,
                 widget.lastDate,
                 predicate: widget.selectableDayPredicate,
               );
-              final bool selected = year == selectedYear;
+              final selected = year == selectedYear;
               final Color foreground = dateTheme.yearForegroundColor(
                 theme.colorScheme,
                 selected: selected,
@@ -162,12 +180,14 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
                     ),
                     child: Text(
                       localizations.formatYear(DateTime(year)),
-                      style: (selected
-                              ? dateTheme.selectedYearStyle
-                              : dateTheme.yearStyle)(
-                            theme.typeScale,
-                            theme.colorScheme,
-                          ).copyWith(color: foreground),
+                      style:
+                          (selected
+                                  ? dateTheme.selectedYearStyle
+                                  : dateTheme.yearStyle)(
+                                theme.typeScale,
+                                theme.colorScheme,
+                              )
+                              .copyWith(color: foreground),
                     ),
                   );
                 },

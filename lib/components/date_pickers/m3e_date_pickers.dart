@@ -43,10 +43,11 @@ abstract final class M3EDatePicker {
     ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
     EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
   }) {
-    initialDate =
-        initialDate == null ? null : M3EDatePickerUtils.dateOnly(initialDate);
-    firstDate = M3EDatePickerUtils.dateOnly(firstDate);
-    lastDate = M3EDatePickerUtils.dateOnly(lastDate);
+    final DateTime? resolvedInitialDate = initialDate == null
+        ? null
+        : M3EDatePickerUtils.dateOnly(initialDate);
+    final DateTime resolvedFirstDate = M3EDatePickerUtils.dateOnly(firstDate);
+    final DateTime resolvedLastDate = M3EDatePickerUtils.dateOnly(lastDate);
 
     final M3EThemeData theme =
         M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
@@ -63,9 +64,9 @@ abstract final class M3EDatePicker {
           M3EComponentTheme(
             builder: (BuildContext context) => Center(
               child: M3EDatePickerDialog(
-                initialDate: initialDate,
-                firstDate: firstDate,
-                lastDate: lastDate,
+                initialDate: resolvedInitialDate,
+                firstDate: resolvedFirstDate,
+                lastDate: resolvedLastDate,
                 currentDate: currentDate,
                 initialEntryMode: initialEntryMode,
                 initialCalendarMode: initialCalendarMode,
@@ -129,14 +130,14 @@ abstract final class M3EDatePicker {
     ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
     EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
   }) {
-    initialStartDate = initialStartDate == null
+    final DateTime? resolvedInitialStartDate = initialStartDate == null
         ? null
         : M3EDatePickerUtils.dateOnly(initialStartDate);
-    initialEndDate = initialEndDate == null
+    final DateTime? resolvedInitialEndDate = initialEndDate == null
         ? null
         : M3EDatePickerUtils.dateOnly(initialEndDate);
-    firstDate = M3EDatePickerUtils.dateOnly(firstDate);
-    lastDate = M3EDatePickerUtils.dateOnly(lastDate);
+    final DateTime resolvedFirstDate = M3EDatePickerUtils.dateOnly(firstDate);
+    final DateTime resolvedLastDate = M3EDatePickerUtils.dateOnly(lastDate);
 
     final M3EThemeData theme =
         M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
@@ -153,10 +154,10 @@ abstract final class M3EDatePicker {
           M3EComponentTheme(
             builder: (BuildContext context) => Center(
               child: M3EDateRangePickerDialog(
-                initialStartDate: initialStartDate,
-                initialEndDate: initialEndDate,
-                firstDate: firstDate,
-                lastDate: lastDate,
+                initialStartDate: resolvedInitialStartDate,
+                initialEndDate: resolvedInitialEndDate,
+                firstDate: resolvedFirstDate,
+                lastDate: resolvedLastDate,
                 currentDate: currentDate,
                 initialEntryMode: initialEntryMode,
                 selectableDayPredicate: selectableDayPredicate,

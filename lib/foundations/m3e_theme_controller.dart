@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart' show Brightness, ChangeNotifier, ThemeMode;
+import 'package:flutter/material.dart'
+    show Brightness, ChangeNotifier, ThemeMode;
 
 /// Manual brightness control for an adaptive `M3ETheme` root.
 ///

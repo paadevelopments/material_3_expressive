@@ -5,6 +5,7 @@ import 'm3e_input_date_picker_form_field.dart';
 
 /// Text fields for entering a date range in a picker dialog.
 class M3EInputDateRangePickerFormField extends StatelessWidget {
+  /// M3EInputDateRangePickerFormField.
   const M3EInputDateRangePickerFormField({
     required this.firstDate,
     required this.lastDate,
@@ -22,24 +23,51 @@ class M3EInputDateRangePickerFormField extends StatelessWidget {
     super.key,
   });
 
+  /// firstDate.
+
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// initialStartDate.
   final DateTime? initialStartDate;
+
+  /// initialEndDate.
   final DateTime? initialEndDate;
+
+  /// onStartDateSaved.
   final ValueChanged<DateTime>? onStartDateSaved;
+
+  /// onEndDateSaved.
   final ValueChanged<DateTime>? onEndDateSaved;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayForRangePredicate? selectableDayPredicate;
+
+  /// errorFormatText.
   final String? errorFormatText;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// fieldStartHintText.
   final String? fieldStartHintText;
+
+  /// fieldEndHintText.
   final String? fieldEndHintText;
+
+  /// fieldStartLabelText.
   final String? fieldStartLabelText;
+
+  /// fieldEndLabelText.
   final String? fieldEndLabelText;
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[

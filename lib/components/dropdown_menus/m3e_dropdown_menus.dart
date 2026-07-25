@@ -37,11 +37,12 @@ typedef M3EDropdownFutureRequest<T> =
     Future<List<M3EDropdownItem<T>>> Function();
 
 /// Signature for a custom item builder inside the dropdown list.
-typedef M3EDropdownItemBuilder<T> = Widget Function(
-  M3EDropdownItem<T> item, {
-  required bool selected,
-  required VoidCallback onTap,
-});
+typedef M3EDropdownItemBuilder<T> =
+    Widget Function(
+      M3EDropdownItem<T> item, {
+      required bool selected,
+      required VoidCallback onTap,
+    });
 
 /// A Material 3 Expressive dropdown menu.
 ///
@@ -665,69 +666,69 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
   Widget build(BuildContext context) {
     return M3EComponentTheme(
       builder: (context) => FormField<List<M3EDropdownItem<T>>?>(
-      key: _formFieldKey,
-      validator: widget.validator ?? (_) => null,
-      autovalidateMode: widget.autovalidateMode,
-      initialValue: _controller.selectedItems,
-      enabled: widget.enabled,
-      builder: (formState) {
-        return OverlayPortal(
-          controller: _portalController,
-          overlayChildBuilder: (_) => _buildOverlay(formState),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                alignment: Alignment.topCenter,
-                child: CompositedTransformTarget(
-                  link: _layerLink,
-                  child: ListenableBuilder(
-                    listenable: _listenable,
-                    builder: (_, _) {
-                      return Semantics(
-                        label: widget.fieldStyle.hintText ?? 'Dropdown field',
-                        button: true,
-                        enabled: widget.enabled,
-                        child: Focus(
-                          focusNode: _focusNode,
-                          canRequestFocus: widget.enabled,
-                          child: _buildField(context, formState),
-                        ),
-                      );
-                    },
+        key: _formFieldKey,
+        validator: widget.validator ?? (_) => null,
+        autovalidateMode: widget.autovalidateMode,
+        initialValue: _controller.selectedItems,
+        enabled: widget.enabled,
+        builder: (formState) {
+          return OverlayPortal(
+            controller: _portalController,
+            overlayChildBuilder: (_) => _buildOverlay(formState),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: CompositedTransformTarget(
+                    link: _layerLink,
+                    child: ListenableBuilder(
+                      listenable: _listenable,
+                      builder: (_, _) {
+                        return Semantics(
+                          label: widget.fieldStyle.hintText ?? 'Dropdown field',
+                          button: true,
+                          enabled: widget.enabled,
+                          child: Focus(
+                            focusNode: _focusNode,
+                            canRequestFocus: widget.enabled,
+                            child: _buildField(context, formState),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              if (formState.hasError) ...[
-                const SizedBox(height: 6),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Builder(
-                    builder: (context) {
-                      final m3eTheme = M3ETheme.of(context);
-                      return Text(
-                        formState.errorText!,
-                        style:
-                            (widget.fieldStyle.errorStyle ??
-                                    m3eTheme.typeScale.bodySmall)
-                                .copyWith(
-                                  color:
-                                      widget.fieldStyle.errorStyle?.color ??
-                                      m3eTheme.colorScheme.error,
-                                ),
-                      );
-                    },
+                if (formState.hasError) ...[
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Builder(
+                      builder: (context) {
+                        final m3eTheme = M3ETheme.of(context);
+                        return Text(
+                          formState.errorText!,
+                          style:
+                              (widget.fieldStyle.errorStyle ??
+                                      m3eTheme.typeScale.bodySmall)
+                                  .copyWith(
+                                    color:
+                                        widget.fieldStyle.errorStyle?.color ??
+                                        m3eTheme.colorScheme.error,
+                                  ),
+                        );
+                      },
+                    ),
                   ),
-                ),
+                ],
               ],
-            ],
-          ),
-        );
-      },
-    ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -857,7 +858,8 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
               _controller.clearAll();
               _formFieldKey.currentState?.didChange(_controller.selectedItems);
             },
-            child: fd.clearIcon ??
+            child:
+                fd.clearIcon ??
                 Icon(
                   Icons.clear,
                   color: fgColor,
@@ -931,8 +933,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
       content = Text(
         selected.first.label,
         style:
-            fd.selectedTextStyle ??
-            menuTheme.selectedTextStyle(type, scheme),
+            fd.selectedTextStyle ?? menuTheme.selectedTextStyle(type, scheme),
         overflow: TextOverflow.ellipsis,
       );
     } else {
@@ -1029,8 +1030,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
     final scheme = m3eTheme.colorScheme;
 
     final labelStyle =
-        cd.labelStyle ??
-        menuTheme.chipLabelStyle(m3eTheme.typeScale, scheme);
+        cd.labelStyle ?? menuTheme.chipLabelStyle(m3eTheme.typeScale, scheme);
     final chipColor =
         cd.backgroundColor ?? menuTheme.chipBackgroundColor(scheme);
 
@@ -1297,9 +1297,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
         final clampedScale = progress.clamp(0.0, 1.2);
 
         if (progress <= 0.01) {
-
           return const SizedBox.shrink();
-
         }
 
         return Opacity(
@@ -1337,9 +1335,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     _errorMessage!,
-                    style: type.bodyMedium.copyWith(
-                      color: scheme.error,
-                    ),
+                    style: type.bodyMedium.copyWith(color: scheme.error),
                   ),
                 )
               else if (filtered.isEmpty)
@@ -1425,11 +1421,9 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
           ),
           suffixIcon: sd.showClearIcon && _searchTextController.text.isNotEmpty
               ? IconButton(
-                  icon: sd.clearIcon ??
-                      Icon(
-                        Icons.clear,
-                        size: m3eTheme.resolvedIconTheme.size,
-                      ),
+                  icon:
+                      sd.clearIcon ??
+                      Icon(Icons.clear, size: m3eTheme.resolvedIconTheme.size),
                   onPressed: () {
                     _searchTextController.clear();
                     _searchDebounce?.cancel();

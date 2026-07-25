@@ -1,6 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/navigation_bar/m3e_navigation_bar.dart'
+    show M3ENavigationBar;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ENavigationBar;
 
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
 import '../enums/m3e_nav_bar_enums.dart';
@@ -11,6 +15,7 @@ import '../models/m3e_navigation_bar_destination.dart';
 /// No ink splash — selection feedback is the pill (local resting fill plus the
 /// shared liquid morph overlay while traveling).
 class M3ENavBarDestinationButton extends StatelessWidget {
+  /// M3ENavBarDestinationButton.
   const M3ENavBarDestinationButton({
     required this.destination,
     required this.selected,
@@ -31,20 +36,50 @@ class M3ENavBarDestinationButton extends StatelessWidget {
     super.key,
   });
 
+  /// destination.
+
   final M3ENavigationBarDestination destination;
+
+  /// selected.
   final bool selected;
+
+  /// selectedColor.
   final Color selectedColor;
+
+  /// unselectedColor.
   final Color unselectedColor;
+
+  /// labelStyle.
   final TextStyle labelStyle;
+
+  /// iconSize.
   final double iconSize;
+
+  /// labelBehavior.
   final M3ENavBarLabelBehavior labelBehavior;
+
+  /// indicatorStyle.
   final M3ENavBarIndicatorStyle indicatorStyle;
+
+  /// indicatorKey.
   final GlobalKey indicatorKey;
+
+  /// indicatorWidth.
   final double indicatorWidth;
+
+  /// indicatorHeight.
   final double indicatorHeight;
+
+  /// underlineThickness.
   final double underlineThickness;
+
+  /// underlineColor.
   final Color underlineColor;
+
+  /// indicatorColor.
   final Color indicatorColor;
+
+  /// onTap.
   final VoidCallback onTap;
 
   /// When false, the shared liquid overlay owns the pill (during travel).
@@ -68,11 +103,12 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       selected: selected,
       child: IconTheme.merge(
         data: IconThemeData(color: fg, size: iconSize),
-        child: destination.buildIcon(selected),
+        child: destination.buildIcon(selected: selected),
       ),
     );
 
-    final bool paintRestingPill = selected &&
+    final bool paintRestingPill =
+        selected &&
         showRestingPill &&
         indicatorStyle == M3ENavBarIndicatorStyle.pill;
 

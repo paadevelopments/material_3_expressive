@@ -8,62 +8,126 @@ import 'package:flutter/widgets.dart';
 abstract final class M3EMotion {
   const M3EMotion._();
 
-  // Duration tokens.
+  /// 50ms duration token.
   static const Duration short1 = Duration(milliseconds: 50);
+
+  /// 100ms duration token.
   static const Duration short2 = Duration(milliseconds: 100);
+
+  /// 150ms duration token.
   static const Duration short3 = Duration(milliseconds: 150);
+
+  /// 200ms duration token.
   static const Duration short4 = Duration(milliseconds: 200);
+
+  /// 250ms duration token.
   static const Duration medium1 = Duration(milliseconds: 250);
+
+  /// 300ms duration token.
   static const Duration medium2 = Duration(milliseconds: 300);
+
+  /// 350ms duration token.
   static const Duration medium3 = Duration(milliseconds: 350);
+
+  /// 400ms duration token.
   static const Duration medium4 = Duration(milliseconds: 400);
+
+  /// 450ms duration token.
   static const Duration long1 = Duration(milliseconds: 450);
+
+  /// 500ms duration token.
   static const Duration long2 = Duration(milliseconds: 500);
+
+  /// 550ms duration token.
   static const Duration long3 = Duration(milliseconds: 550);
+
+  /// 600ms duration token.
   static const Duration long4 = Duration(milliseconds: 600);
+
+  /// 700ms duration token.
   static const Duration extraLong1 = Duration(milliseconds: 700);
+
+  /// 800ms duration token.
   static const Duration extraLong2 = Duration(milliseconds: 800);
+
+  /// 900ms duration token.
   static const Duration extraLong3 = Duration(milliseconds: 900);
+
+  /// 1000ms duration token.
   static const Duration extraLong4 = Duration(milliseconds: 1000);
 
-  // Easing tokens.
+  /// Standard easing curve.
   static const Curve standard = Cubic(0.2, 0, 0, 1);
+
+  /// Standard accelerate easing curve.
   static const Curve standardAccelerate = Cubic(0.3, 0, 1, 1);
+
+  /// Standard decelerate easing curve.
   static const Curve standardDecelerate = Cubic(0, 0, 0, 1);
+
+  /// Emphasized easing curve.
   static const Curve emphasized = Cubic(0.2, 0, 0, 1);
+
+  /// Emphasized accelerate easing curve.
   static const Curve emphasizedAccelerate = Cubic(0.3, 0, 0.8, 0.15);
+
+  /// Emphasized decelerate easing curve.
   static const Curve emphasizedDecelerate = Cubic(0.05, 0.7, 0.1, 1);
+
+  /// Linear easing curve.
   static const Curve linear = Cubic(0, 0, 1, 1);
 
-  // Spatial springs drive size, position and shape morph transitions.
+  /// Fast spatial spring for size, position, and shape morphs.
   static const M3ESpring spatialFast = M3ESpring(stiffness: 1400, damping: 0.9);
-  static const M3ESpring spatialDefault =
-      M3ESpring(stiffness: 700, damping: 0.9);
+
+  /// Default spatial spring for size, position, and shape morphs.
+  static const M3ESpring spatialDefault = M3ESpring(
+    stiffness: 700,
+    damping: 0.9,
+  );
+
+  /// Slow spatial spring for size, position, and shape morphs.
   static const M3ESpring spatialSlow = M3ESpring(stiffness: 300, damping: 0.9);
 
   /// AOSP spatial spring (stiffness: 380, damping: 1.0).
   ///
   /// Matches AOSP notification-list expansion — no overshoot.
-  static const M3ESpring aospSpatial =
-      M3ESpring(stiffness: 380, damping: 1);
+  static const M3ESpring aospSpatial = M3ESpring(stiffness: 380, damping: 1);
 
-  // Expressive spatial springs add a small overshoot for a lively feel.
-  static const M3ESpring expressiveSpatialFast =
-      M3ESpring(stiffness: 800, damping: 0.6);
-  static const M3ESpring expressiveSpatialDefault =
-      M3ESpring(stiffness: 380, damping: 0.8);
+  /// Fast expressive spatial spring with slight overshoot.
+  static const M3ESpring expressiveSpatialFast = M3ESpring(
+    stiffness: 800,
+    damping: 0.6,
+  );
+
+  /// Default expressive spatial spring with slight overshoot.
+  static const M3ESpring expressiveSpatialDefault = M3ESpring(
+    stiffness: 380,
+    damping: 0.8,
+  );
 
   /// Interactive press scale — same recipe as floating toolbar / button morph.
-  static const M3ESpring expressiveSpatialPress =
-      M3ESpring(stiffness: 380, damping: 0.55);
+  static const M3ESpring expressiveSpatialPress = M3ESpring(
+    stiffness: 380,
+    damping: 0.55,
+  );
 
-  static const M3ESpring expressiveSpatialSlow =
-      M3ESpring(stiffness: 200, damping: 0.8);
+  /// Slow expressive spatial spring with slight overshoot.
+  static const M3ESpring expressiveSpatialSlow = M3ESpring(
+    stiffness: 200,
+    damping: 0.8,
+  );
 
-  // Effect springs drive color and opacity and never overshoot.
+  /// Fast effects spring for color and opacity (no overshoot).
   static const M3ESpring effectsFast = M3ESpring(stiffness: 3800, damping: 1);
-  static const M3ESpring effectsDefault =
-      M3ESpring(stiffness: 1600, damping: 1);
+
+  /// Default effects spring for color and opacity (no overshoot).
+  static const M3ESpring effectsDefault = M3ESpring(
+    stiffness: 1600,
+    damping: 1,
+  );
+
+  /// Slow effects spring for color and opacity (no overshoot).
   static const M3ESpring effectsSlow = M3ESpring(stiffness: 800, damping: 1);
 }
 
@@ -73,6 +137,7 @@ abstract final class M3EMotion {
 /// (no overshoot) and values below `1.0` produce an expressive overshoot.
 @immutable
 class M3ESpring {
+  /// Creates a spring with [stiffness] and [damping] ratio.
   const M3ESpring({required this.stiffness, required this.damping});
 
   /// Spring stiffness. Higher values settle faster.
@@ -91,6 +156,7 @@ class M3ESpring {
   }
 
   @override
+  /// Equality based on public fields.
   bool operator ==(Object other) {
     return other is M3ESpring &&
         other.stiffness == stiffness &&
@@ -98,5 +164,6 @@ class M3ESpring {
   }
 
   @override
+  /// Hash code for this spring.
   int get hashCode => Object.hash(stiffness, damping);
 }

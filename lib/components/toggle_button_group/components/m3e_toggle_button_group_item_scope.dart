@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -18,15 +17,15 @@ import 'package:flutter/widgets.dart';
 ///   neighbor-squish animation
 @immutable
 class M3EButtonGroupItemScope extends InheritedWidget {
+  /// M3EButtonGroupItemScope.
   const M3EButtonGroupItemScope({
     super.key,
     required super.child,
     required this.index,
     required this.count,
-    bool? visualIsFirst,
-    bool? visualIsLast,
-  }) : _visualIsFirst = visualIsFirst,
-       _visualIsLast = visualIsLast;
+    this._visualIsFirst,
+    this._visualIsLast,
+  });
 
   final bool? _visualIsFirst;
   final bool? _visualIsLast;
@@ -37,12 +36,22 @@ class M3EButtonGroupItemScope extends InheritedWidget {
   /// Total number of visible buttons (excludes the overflow trigger).
   final int count;
 
+  /// isFirst.
+
   bool get isFirst => _visualIsFirst ?? index == 0;
+
+  /// isLast.
   bool get isLast => _visualIsLast ?? index == count - 1;
+
+  /// isOnly.
   bool get isOnly => count == 1;
+
+  /// maybeOf.
 
   static M3EButtonGroupItemScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<M3EButtonGroupItemScope>();
+
+  /// of.
 
   static M3EButtonGroupItemScope of(BuildContext context) {
     final scope = maybeOf(context);

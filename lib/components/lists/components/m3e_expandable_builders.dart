@@ -4,6 +4,8 @@ import '../styles/m3e_expandable_style.dart';
 import 'm3e_expandable_data.dart';
 import 'm3e_expandable_item.dart';
 
+/// buildM3ESimpleHeader.
+
 Widget buildM3ESimpleHeader(
   BuildContext context,
   M3EExpandableData data,
@@ -43,6 +45,8 @@ Widget buildM3ESimpleHeader(
     ],
   );
 }
+
+/// buildM3ESimpleBody.
 
 Widget buildM3ESimpleBody(
   BuildContext context,
@@ -152,12 +156,16 @@ Widget buildM3ESimpleBody(
   );
 }
 
+/// m3eSimpleHeaderBuilder.
+
 M3EExpandableHeaderBuilder m3eSimpleHeaderBuilder(
   List<M3EExpandableData> items,
 ) {
   return (context, index, progress) =>
       buildM3ESimpleHeader(context, items[index], progress);
 }
+
+/// m3eSimpleBodyBuilder.
 
 M3EExpandableBodyBuilder m3eSimpleBodyBuilder(
   List<M3EExpandableData> items,

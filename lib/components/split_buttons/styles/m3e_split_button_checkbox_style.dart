@@ -1,12 +1,12 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 
 /// Styling options for the checkbox shown in multi-select bottom sheets.
 @immutable
 class M3ESplitButtonCheckboxStyle {
+  /// M3ESplitButtonCheckboxStyle.
   const M3ESplitButtonCheckboxStyle({
     this.activeColor,
     this.iconColor,
@@ -17,12 +17,26 @@ class M3ESplitButtonCheckboxStyle {
     this.icon = const Icon(M3EIcons.check_rounded),
   });
 
+  /// activeColor.
+
   final Color? activeColor;
+
+  /// iconColor.
   final Color? iconColor;
+
+  /// nonActiveColor.
   final Color? nonActiveColor;
+
+  /// borderColor.
   final Color? borderColor;
+
+  /// activeBorderRadius.
   final BorderRadius? activeBorderRadius;
+
+  /// nonActiveBorderRadius.
   final BorderRadius? nonActiveBorderRadius;
+
+  /// icon.
   final Widget? icon;
 
   @override

@@ -6,6 +6,7 @@ import '../../../foundations/foundations.dart';
 @immutable
 class M3ENavigationDrawerTheme
     extends M3EThemeExtension<M3ENavigationDrawerTheme> {
+  /// M3ENavigationDrawerTheme.
   const M3ENavigationDrawerTheme({
     this.width = 360,
     this.destinationHeight = 56,
@@ -18,31 +19,57 @@ class M3ENavigationDrawerTheme
     this.iconLabelGap = 12,
   });
 
+  /// defaults.
+
   static const M3ENavigationDrawerTheme defaults = M3ENavigationDrawerTheme();
 
+  /// width.
+
   final double width;
+
+  /// destinationHeight.
   final double destinationHeight;
+
+  /// headlineHorizontalPadding.
   final double headlineHorizontalPadding;
+
+  /// headlineVerticalPadding.
   final double headlineVerticalPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// destinationHorizontalPadding.
   final double destinationHorizontalPadding;
+
+  /// destinationVerticalPadding.
   final double destinationVerticalPadding;
+
+  /// destinationInnerHorizontalPadding.
   final double destinationInnerHorizontalPadding;
+
+  /// iconLabelGap.
   final double iconLabelGap;
 
+  /// containerColor.
+
   Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainerLow;
+
+  /// destinationForegroundColor.
 
   Color destinationForegroundColor(
     M3EColorScheme scheme, {
     required bool selected,
-  }) =>
-      selected ? scheme.onSecondaryContainer : scheme.onSurfaceVariant;
+  }) => selected ? scheme.onSecondaryContainer : scheme.onSurfaceVariant;
+
+  /// destinationBackgroundColor.
 
   Color destinationBackgroundColor(
     M3EColorScheme scheme, {
     required bool selected,
-  }) =>
-      selected ? scheme.secondaryContainer : const Color(0x00000000);
+  }) => selected ? scheme.secondaryContainer : const Color(0x00000000);
+
+  /// destinationShape.
 
   ShapeBorder destinationShape() {
     return RoundedRectangleBorder(borderRadius: M3EShapes.resolve(28));
@@ -72,7 +99,8 @@ class M3ENavigationDrawerTheme
           destinationHorizontalPadding ?? this.destinationHorizontalPadding,
       destinationVerticalPadding:
           destinationVerticalPadding ?? this.destinationVerticalPadding,
-      destinationInnerHorizontalPadding: destinationInnerHorizontalPadding ??
+      destinationInnerHorizontalPadding:
+          destinationInnerHorizontalPadding ??
           this.destinationInnerHorizontalPadding,
       iconLabelGap: iconLabelGap ?? this.iconLabelGap,
     );
@@ -85,7 +113,11 @@ class M3ENavigationDrawerTheme
     }
     return M3ENavigationDrawerTheme(
       width: _lerpDouble(width, other.width, t)!,
-      destinationHeight: _lerpDouble(destinationHeight, other.destinationHeight, t)!,
+      destinationHeight: _lerpDouble(
+        destinationHeight,
+        other.destinationHeight,
+        t,
+      )!,
       headlineHorizontalPadding: _lerpDouble(
         headlineHorizontalPadding,
         other.headlineHorizontalPadding,

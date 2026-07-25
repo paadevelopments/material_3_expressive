@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/menus/m3e_menus.dart'
+    show M3EMenu;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EMenu;
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
@@ -66,6 +69,7 @@ Future<T?> showM3EMenu<T>({
 
 /// Overlay surface for [showM3EMenu] / [M3EMenu] (Compose `DropdownMenuPopup`).
 class M3EMenuPopup<T> extends StatefulWidget {
+  /// M3EMenuPopup.
   const M3EMenuPopup({
     required this.anchor,
     required this.children,
@@ -82,17 +86,41 @@ class M3EMenuPopup<T> extends StatefulWidget {
     super.key,
   });
 
+  /// anchor.
+
   final Rect anchor;
+
+  /// children.
   final List<M3EMenuNode> children;
+
+  /// position.
   final M3EMenuAnchorPosition position;
+
+  /// colorStyle.
   final M3EMenuColorStyle colorStyle;
+
+  /// selectedValue.
   final T? selectedValue;
+
+  /// closeOnSelect.
   final bool closeOnSelect;
+
+  /// preferredWidth.
   final double? preferredWidth;
+
+  /// callerFocusNode.
   final FocusNode? callerFocusNode;
+
+  /// themeOverride.
   final M3EMenuTheme? themeOverride;
+
+  /// onSelected.
   final ValueChanged<Object?> onSelected;
+
+  /// onDismiss.
   final VoidCallback onDismiss;
+
+  /// onRemove.
   final VoidCallback onRemove;
 
   @override
@@ -111,7 +139,6 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
 
   final FocusScopeNode _focusScopeNode = FocusScopeNode(
     debugLabel: 'M3EMenuPopup',
-    traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
   );
 
   M3EMenuTheme get _menuTheme =>
@@ -123,13 +150,14 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     _keyboardActivated = widget.callerFocusNode?.hasFocus ?? false;
 
     // Same controller setup as [M3EDropdownMenu].
-    _expandCtrl = SingleMotionController(
-      motion: M3EMotion.expressiveSpatialDefault.toMotion(),
-      vsync: this,
-    );
-    _expandCtrl.addListener(_onExpandTick);
-    // Expand immediately after insert (dropdown calls animateTo right after show).
-    _expandCtrl.animateTo(1);
+    _expandCtrl =
+        SingleMotionController(
+            motion: M3EMotion.expressiveSpatialDefault.toMotion(),
+            vsync: this,
+          )
+          ..addListener(_onExpandTick)
+          // Expand immediately after insert (dropdown calls animateTo right after show).
+          ..animateTo(1);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -158,10 +186,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
   }
 
   void _onExpandTick() {
-    if (_isDismissing &&
-        !_removed &&
-        _expandCtrl.value <= 0.01 &&
-        mounted) {
+    if (_isDismissing && !_removed && _expandCtrl.value <= 0.01 && mounted) {
       _removed = true;
       widget.onRemove();
     }
@@ -242,14 +267,14 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       theme: menuTheme,
       position: widget.position,
       textDirection: textDirection,
-      approximateItemCount:
-          M3EMenuPlacer.approximateItemCount(widget.children),
+      approximateItemCount: M3EMenuPlacer.approximateItemCount(widget.children),
       preferredWidth: widget.preferredWidth,
     );
 
     // Same vertical scale origin as [M3EDropdownMenu] panel.
-    final scaleAlignment =
-        placement.opensAbove ? Alignment.bottomCenter : Alignment.topCenter;
+    final scaleAlignment = placement.opensAbove
+        ? Alignment.bottomCenter
+        : Alignment.topCenter;
 
     // No system-bar overlay override — menus use a transparent dismiss layer,
     // not a dark scrim that needs light status/nav icons.
@@ -273,9 +298,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: _dismiss,
-                child: ColoredBox(
-                  color: menuTheme.scrimColor(scheme),
-                ),
+                child: ColoredBox(color: menuTheme.scrimColor(scheme)),
               ),
             ),
             Positioned(
@@ -309,10 +332,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
                     maxWidth: placement.width,
                     maxHeight: placement.maxHeight,
                   ),
-                  child: _buildSurfaces(
-                    menuTheme: menuTheme,
-                    scheme: scheme,
-                  ),
+                  child: _buildSurfaces(menuTheme: menuTheme, scheme: scheme),
                 ),
               ),
             ),

@@ -8,6 +8,7 @@ import 'm3e_day_picker.dart';
 
 /// Calendar for selecting a date range.
 class M3ECalendarDateRangePicker extends StatefulWidget {
+  /// M3ECalendarDateRangePicker.
   const M3ECalendarDateRangePicker({
     required this.firstDate,
     required this.lastDate,
@@ -20,13 +21,29 @@ class M3ECalendarDateRangePicker extends StatefulWidget {
     super.key,
   });
 
+  /// firstDate.
+
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// initialStartDate.
   final DateTime? initialStartDate;
+
+  /// initialEndDate.
   final DateTime? initialEndDate;
+
+  /// currentDate.
   final DateTime? currentDate;
+
+  /// onStartDateChanged.
   final ValueChanged<DateTime> onStartDateChanged;
+
+  /// onEndDateChanged.
   final ValueChanged<DateTime>? onEndDateChanged;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayForRangePredicate? selectableDayPredicate;
 
   @override
@@ -49,8 +66,9 @@ class _M3ECalendarDateRangePickerState
     _controller = ScrollController();
     _firstDate = M3EDatePickerUtils.dateOnly(widget.firstDate);
     _lastDate = M3EDatePickerUtils.dateOnly(widget.lastDate);
-    _currentDate =
-        M3EDatePickerUtils.dateOnly(widget.currentDate ?? DateTime.now());
+    _currentDate = M3EDatePickerUtils.dateOnly(
+      widget.currentDate ?? DateTime.now(),
+    );
     _startDate = widget.initialStartDate == null
         ? null
         : M3EDatePickerUtils.dateOnly(widget.initialStartDate!);
@@ -102,8 +120,9 @@ class _M3ECalendarDateRangePickerState
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
 
     return ListView.builder(
       controller: _controller,

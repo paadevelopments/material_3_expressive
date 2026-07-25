@@ -6,15 +6,22 @@ import '../enums/m3e_card_variant.dart';
 /// Theme values for `M3ECard`.
 @immutable
 class M3ECardTheme extends M3EThemeExtension<M3ECardTheme> {
-  const M3ECardTheme({
-    this.contentPadding = const EdgeInsets.all(16),
-  });
+  /// M3ECardTheme.
+  const M3ECardTheme({this.contentPadding = const EdgeInsets.all(16)});
+
+  /// defaults.
 
   static const M3ECardTheme defaults = M3ECardTheme();
 
+  /// contentPadding.
+
   final EdgeInsets contentPadding;
 
+  /// The borderRadius.
+
   BorderRadius get borderRadius => M3EShapes.radiusMedium;
+
+  /// backgroundColor.
 
   Color backgroundColor(M3EColorScheme scheme, M3ECardVariant variant) {
     switch (variant) {
@@ -27,7 +34,11 @@ class M3ECardTheme extends M3EThemeExtension<M3ECardTheme> {
     }
   }
 
+  /// outlineColor.
+
   Color outlineColor(M3EColorScheme scheme) => scheme.outlineVariant;
+
+  /// elevation.
 
   double elevation(M3ECardVariant variant, {required bool hovered}) {
     if (variant != M3ECardVariant.elevated) {
@@ -38,9 +49,7 @@ class M3ECardTheme extends M3EThemeExtension<M3ECardTheme> {
 
   @override
   M3ECardTheme copyWith({EdgeInsets? contentPadding}) {
-    return M3ECardTheme(
-      contentPadding: contentPadding ?? this.contentPadding,
-    );
+    return M3ECardTheme(contentPadding: contentPadding ?? this.contentPadding);
   }
 
   @override

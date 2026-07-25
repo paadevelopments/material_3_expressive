@@ -6,6 +6,7 @@ import '../styles/m3e_time_picker_theme.dart';
 
 /// Paints the clock dial: hour or minute labels, the selection hand and knob.
 class M3ETimeDialPainter extends CustomPainter {
+  /// M3ETimeDialPainter.
   const M3ETimeDialPainter({
     required this.labels,
     required this.selectedIndex,
@@ -24,12 +25,26 @@ class M3ETimeDialPainter extends CustomPainter {
   /// Index into [labels] of the currently selected slot.
   final int selectedIndex;
 
+  /// dialColor.
+
   final Color dialColor;
+
+  /// accentColor.
   final Color accentColor;
+
+  /// onAccentColor.
   final Color onAccentColor;
+
+  /// labelColor.
   final Color labelColor;
+
+  /// labelStyle.
   final TextStyle labelStyle;
+
+  /// textDirection.
   final TextDirection textDirection;
+
+  /// timeTheme.
   final M3ETimePickerTheme timeTheme;
 
   @override
@@ -60,12 +75,7 @@ class M3ETimeDialPainter extends CustomPainter {
     }
   }
 
-  void _paintLabel(
-    Canvas canvas,
-    Offset center,
-    double ringRadius,
-    int i,
-  ) {
+  void _paintLabel(Canvas canvas, Offset center, double ringRadius, int i) {
     final angle = _angleFor(i);
     final Offset position = center + Offset.fromDirection(angle, ringRadius);
     final selected = i == selectedIndex;

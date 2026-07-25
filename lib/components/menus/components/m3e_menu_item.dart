@@ -1,4 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/menus/m3e_menus.dart'
+    show M3EMenu;
+import 'package:material_3_expressive/material_3_expressive.dart' show M3EMenu;
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_item_shape.dart';
@@ -6,6 +9,7 @@ import 'm3e_menu_style_scope.dart';
 
 /// A single interactive row inside an [M3EMenu] popup.
 class M3EMenuItem extends StatelessWidget {
+  /// M3EMenuItem.
   const M3EMenuItem({
     required this.label,
     required this.onTap,
@@ -22,17 +26,41 @@ class M3EMenuItem extends StatelessWidget {
     super.key,
   });
 
+  /// label.
+
   final String label;
+
+  /// onTap.
   final VoidCallback? onTap;
+
+  /// leading.
   final Widget? leading;
+
+  /// trailing.
   final Widget? trailing;
+
+  /// trailingText.
   final String? trailingText;
+
+  /// badge.
   final Widget? badge;
+
+  /// supportingText.
   final String? supportingText;
+
+  /// enabled.
   final bool enabled;
+
+  /// isDestructive.
   final bool isDestructive;
+
+  /// selected.
   final bool selected;
+
+  /// shape.
   final M3EMenuItemShape shape;
+
+  /// autofocus.
   final bool autofocus;
 
   @override
@@ -51,8 +79,9 @@ class M3EMenuItem extends StatelessWidget {
       style: style,
     );
     final radius = menuTheme.itemShape(shape);
-    final background =
-        selected ? palette.selectedContainer : const Color(0x00000000);
+    final background = selected
+        ? palette.selectedContainer
+        : const Color(0x00000000);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: menuTheme.itemGap / 2),

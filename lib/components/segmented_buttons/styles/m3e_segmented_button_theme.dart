@@ -4,7 +4,9 @@ import '../../../foundations/foundations.dart';
 
 /// Theme values for `M3ESegmentedButton`.
 @immutable
-class M3ESegmentedButtonTheme extends M3EThemeExtension<M3ESegmentedButtonTheme> {
+class M3ESegmentedButtonTheme
+    extends M3EThemeExtension<M3ESegmentedButtonTheme> {
+  /// M3ESegmentedButtonTheme.
   const M3ESegmentedButtonTheme({
     this.height = 40,
     this.iconSize = 18,
@@ -13,27 +15,39 @@ class M3ESegmentedButtonTheme extends M3EThemeExtension<M3ESegmentedButtonTheme>
     this.borderWidth = 1,
   });
 
+  /// defaults.
+
   static const M3ESegmentedButtonTheme defaults = M3ESegmentedButtonTheme();
 
+  /// height.
+
   final double height;
+
+  /// iconSize.
   final double iconSize;
+
+  /// segmentHorizontalPadding.
   final double segmentHorizontalPadding;
+
+  /// iconLabelGap.
   final double iconLabelGap;
+
+  /// borderWidth.
   final double borderWidth;
+
+  /// The borderRadius.
 
   BorderRadius get borderRadius => M3EShapes.resolve(height / 2);
 
-  Color foregroundColor(
-    M3EColorScheme scheme, {
-    required bool selected,
-  }) {
+  /// foregroundColor.
+
+  Color foregroundColor(M3EColorScheme scheme, {required bool selected}) {
     return selected ? scheme.onSecondaryContainer : scheme.onSurface;
   }
 
-  Color? backgroundColor(
-    M3EColorScheme scheme, {
-    required bool selected,
-  }) {
+  /// backgroundColor.
+
+  Color? backgroundColor(M3EColorScheme scheme, {required bool selected}) {
     return selected ? scheme.secondaryContainer : null;
   }
 
@@ -63,8 +77,11 @@ class M3ESegmentedButtonTheme extends M3EThemeExtension<M3ESegmentedButtonTheme>
     return M3ESegmentedButtonTheme(
       height: _lerpDouble(height, other.height, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      segmentHorizontalPadding:
-          _lerpDouble(segmentHorizontalPadding, other.segmentHorizontalPadding, t)!,
+      segmentHorizontalPadding: _lerpDouble(
+        segmentHorizontalPadding,
+        other.segmentHorizontalPadding,
+        t,
+      )!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
     );

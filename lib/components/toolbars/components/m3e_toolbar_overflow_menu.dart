@@ -7,6 +7,7 @@ import '../models/m3e_toolbar_item.dart';
 
 /// Overflow menu for toolbar actions beyond the inline limit.
 class M3EToolbarOverflowMenu extends StatelessWidget {
+  /// M3EToolbarOverflowMenu.
   const M3EToolbarOverflowMenu({
     required this.actions,
     required this.icon,
@@ -16,10 +17,20 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
     super.key,
   });
 
+  /// actions.
+
   final List<M3EToolbarAction> actions;
+
+  /// icon.
   final Widget icon;
+
+  /// iconButtonSize.
   final M3EIconButtonSize iconButtonSize;
+
+  /// textStyle.
   final TextStyle? textStyle;
+
+  /// destructiveColor.
   final Color? destructiveColor;
 
   @override
@@ -32,7 +43,8 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
       children: <M3EMenuNode>[
         for (var i = 0; i < actions.length; i++)
           M3EMenuEntry(
-            label: actions[i].label ??
+            label:
+                actions[i].label ??
                 actions[i].tooltip ??
                 actions[i].semanticLabel ??
                 'Action ${i + 1}',
@@ -52,7 +64,7 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
     );
 
     if (textStyle != null) {
-      menu = DefaultTextStyle.merge(style: textStyle!, child: menu);
+      menu = DefaultTextStyle.merge(style: textStyle, child: menu);
     }
 
     // Tint destructive labels when a custom error color is supplied.

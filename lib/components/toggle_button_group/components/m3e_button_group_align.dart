@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 part of '../m3e_toggle_button_group.dart';
 
 /// A widget that controls how a child of a [M3EButtonGroup] aligns itself
@@ -18,10 +17,12 @@ class M3EButtonGroupAlign extends ParentDataWidget<M3EButtonGroupParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is M3EButtonGroupParentData);
-    final M3EButtonGroupParentData parentData =
-        renderObject.parentData! as M3EButtonGroupParentData;
-    bool needsLayout = false;
+    assert(
+      renderObject.parentData is M3EButtonGroupParentData,
+      'parentData must be M3EButtonGroupParentData',
+    );
+    final parentData = renderObject.parentData! as M3EButtonGroupParentData;
+    var needsLayout = false;
 
     if (parentData.alignment != alignment) {
       parentData.alignment = alignment;

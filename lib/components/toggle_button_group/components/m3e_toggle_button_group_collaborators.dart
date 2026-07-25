@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 part of '../m3e_toggle_button_group.dart';
 
 class _SpringMenuWrapper extends StatefulWidget {
@@ -31,7 +30,7 @@ class _SpringMenuWrapperState extends State<_SpringMenuWrapper>
       motion: widget.motion.toMotion(),
       vsync: this,
     );
-    _ctrl.animateTo(1.0);
+    _ctrl.animateTo(1);
   }
 
   @override
@@ -83,6 +82,8 @@ class _MoveFocusAction extends Action<_MoveFocusIntent> {
 }
 
 class _ToggleGroupFocusManager {
+  _ToggleGroupFocusManager._();
+
   static List<FocusNode?> buildInternalFocusNodes(
     List<M3EButtonGroupAction> actions,
   ) {
@@ -102,10 +103,8 @@ class _ToggleGroupFocusManager {
     nodes.clear();
   }
 
-  static int computeFocusNodeSignature(
-    List<M3EButtonGroupAction> actions,
-  ) {
-    int hash = 0;
+  static int computeFocusNodeSignature(List<M3EButtonGroupAction> actions) {
+    var hash = 0;
     for (final action in actions) {
       hash = Object.hash(hash, action.focusNode);
     }
@@ -117,9 +116,11 @@ class _ToggleGroupFocusManager {
     required int currentIndex,
     required int direction,
   }) {
-    if (actions.isEmpty) return null;
+    if (actions.isEmpty) {
+      return null;
+    }
     int nextIndex = currentIndex + direction;
-    final int start = nextIndex;
+    final start = nextIndex;
 
     while (true) {
       if (nextIndex < 0) {
@@ -141,8 +142,7 @@ class _ToggleGroupFocusManager {
 }
 
 class _ToggleGroupPressCoordinator {
-  _ToggleGroupPressCoordinator({required bool Function() isMounted})
-    : _isMounted = isMounted;
+  _ToggleGroupPressCoordinator({required this._isMounted});
 
   final bool Function() _isMounted;
 
@@ -151,7 +151,7 @@ class _ToggleGroupPressCoordinator {
 
   final ValueNotifier<int?> pressedIndexNotifier = ValueNotifier<int?>(null);
 
-  double _pressProgress = 0.0;
+  double _pressProgress = 0;
   bool _isWaitingForRelease = false;
   Duration? _releaseDeadline;
 
@@ -193,11 +193,14 @@ class _ToggleGroupPressCoordinator {
   }
 
   void _checkRelease() {
-    if (!_isWaitingForRelease || !_isMounted()) return;
+    if (!_isWaitingForRelease || !_isMounted()) {
+      return;
+    }
     final timedOut =
         _releaseDeadline != null &&
         SchedulerBinding.instance.currentFrameTimeStamp >= _releaseDeadline!;
-    if (_pressProgress >= M3EButtonConstants.kPressReleaseThreshold || timedOut) {
+    if (_pressProgress >= M3EButtonConstants.kPressReleaseThreshold ||
+        timedOut) {
       _isWaitingForRelease = false;
       _releaseDeadline = null;
       _pressProgress = 0.0;
@@ -283,11 +286,13 @@ class _ToggleGroupMeasurementOrchestrator {
 }
 
 class _ToggleGroupKeyboardConfig {
+  _ToggleGroupKeyboardConfig._();
+
   static Map<ShortcutActivator, Intent> arrowKeyShortcuts({
     required Axis direction,
     required bool isRtl,
   }) {
-    final int rtlFlip = isRtl ? -1 : 1;
+    final rtlFlip = isRtl ? -1 : 1;
     if (direction == Axis.horizontal) {
       return {
         const SingleActivator(LogicalKeyboardKey.arrowRight): _MoveFocusIntent(
@@ -309,6 +314,8 @@ class _ToggleGroupKeyboardConfig {
 }
 
 class _FocusRingGapRenderer {
+  _FocusRingGapRenderer._();
+
   static double resolveGap({
     required bool connected,
     required int? focusedIndex,
@@ -316,12 +323,14 @@ class _FocusRingGapRenderer {
     required double spacing,
     required double connectedGap,
   }) {
-    double gap = connected ? connectedGap : spacing;
+    var gap = connected ? connectedGap : spacing;
     if (connected) {
-      final bool isFocusedLeft = focusedIndex == beforeIndex;
-      final bool isFocusedRight = focusedIndex == beforeIndex + 1;
+      final isFocusedLeft = focusedIndex == beforeIndex;
+      final isFocusedRight = focusedIndex == beforeIndex + 1;
       if (isFocusedLeft || isFocusedRight) {
-        gap += M3EButtonConstants.kFocusRingGap + M3EButtonConstants.kFocusRingWidth;
+        gap +=
+            M3EButtonConstants.kFocusRingGap +
+            M3EButtonConstants.kFocusRingWidth;
       }
     }
     return gap;

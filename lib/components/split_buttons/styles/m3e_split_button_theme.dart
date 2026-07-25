@@ -8,6 +8,7 @@ import '../../buttons/styles/m3e_button_motion.dart';
 /// Theme values for `M3ESplitButton`.
 @immutable
 class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
+  /// M3ESplitButtonTheme.
   const M3ESplitButtonTheme({
     this.minTapTarget = 48,
     this.innerGap = 2,
@@ -25,21 +26,51 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     this.popupMotion = M3EButtonMotion.standardPopup,
   });
 
+  /// defaults.
+
   static const M3ESplitButtonTheme defaults = M3ESplitButtonTheme();
 
+  /// minTapTarget.
+
   final double minTapTarget;
+
+  /// innerGap.
   final double innerGap;
+
+  /// elevatedInnerGap.
   final double elevatedInnerGap;
+
+  /// chevronOpenTurns.
   final double chevronOpenTurns;
+
+  /// trailingInnerSelectedCornerPercent.
   final double trailingInnerSelectedCornerPercent;
+
+  /// popupElevation.
   final double popupElevation;
+
+  /// popupBorderRadius.
   final double popupBorderRadius;
+
+  /// popupPadding.
   final EdgeInsetsGeometry popupPadding;
+
+  /// popupOffset.
   final Offset popupOffset;
+
+  /// popupMinWidth.
   final double popupMinWidth;
+
+  /// popupMaxWidth.
   final double popupMaxWidth;
+
+  /// popupMaxHeight.
   final double popupMaxHeight;
+
+  /// popupScrimAlpha.
   final double popupScrimAlpha;
+
+  /// popupMotion.
   final M3EButtonMotion popupMotion;
 
   static final Map<M3EButtonSize, double> _splitHeight = {
@@ -178,7 +209,11 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     M3EButtonSize.xl: 43,
   };
 
+  /// splitHeight.
+
   double splitHeight(M3EButtonSize size) => _splitHeight[size] ?? 56;
+
+  /// splitTrailingWidth.
 
   double splitTrailingWidth(M3EButtonSize size) {
     for (final variant in _splitTrailingWidth.keys) {
@@ -189,28 +224,45 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     return 26;
   }
 
+  /// splitInnerCornerRadius.
+
   double splitInnerCornerRadius(M3EButtonSize size) =>
       _splitInnerCornerRadius[size] ?? 4;
+
+  /// splitHoveredInnerCornerRadius.
 
   double splitHoveredInnerCornerRadius(M3EButtonSize size) =>
       _splitHoveredInnerCornerRadius[size] ?? 12;
 
-  double splitInnerPadding(M3EButtonSize size) =>
-      _splitInnerPadding[size] ?? 4;
+  /// splitInnerPadding.
+
+  double splitInnerPadding(M3EButtonSize size) => _splitInnerPadding[size] ?? 4;
+
+  /// splitMenuIconOffset.
 
   double splitMenuIconOffset(M3EButtonSize size) =>
       _splitMenuIconOffset[size] ?? -2;
 
+  /// splitIcon.
+
   double splitIcon(M3EButtonSize size) => _splitIcon[size] ?? 24;
+
+  /// splitOuterRadiusRound.
 
   double splitOuterRadiusRound(M3EButtonSize size) =>
       _splitOuterRadiusRound[size] ?? 28;
 
+  /// splitOuterRadiusSquare.
+
   double splitOuterRadiusSquare(M3EButtonSize size) =>
       _splitOuterRadiusSquare[size] ?? 14;
 
+  /// splitPressedRadius.
+
   double splitPressedRadius(M3EButtonSize size) =>
       _splitPressedRadius[size] ?? 2;
+
+  /// splitLeadingIconBlockWidth.
 
   double splitLeadingIconBlockWidth(M3EButtonSize size) {
     for (final variant in _splitLeadingIconBlockWidth.keys) {
@@ -221,8 +273,12 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     return 24;
   }
 
+  /// splitLeftOuterPadding.
+
   double splitLeftOuterPadding(M3EButtonSize size) =>
       _splitLeftOuterPadding[size] ?? 24;
+
+  /// splitGapIconToLabel.
 
   double splitGapIconToLabel(M3EButtonSize size) {
     for (final variant in _splitGapIconToLabel.keys) {
@@ -233,14 +289,22 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     return 8;
   }
 
+  /// splitLabelRightPadding.
+
   double splitLabelRightPadding(M3EButtonSize size) =>
       _splitLabelRightPadding[size] ?? 24;
+
+  /// splitTrailingLeftInnerPadding.
 
   double splitTrailingLeftInnerPadding(M3EButtonSize size) =>
       _splitTrailingLeftInnerPadding[size] ?? 13;
 
+  /// splitRightOuterPadding.
+
   double splitRightOuterPadding(M3EButtonSize size) =>
       _splitRightOuterPadding[size] ?? 17;
+
+  /// splitSidePaddingSelected.
 
   double splitSidePaddingSelected(M3EButtonSize size) {
     for (final variant in _splitSidePaddingSelected.keys) {
@@ -251,22 +315,36 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     return 15;
   }
 
+  /// splitLeadingButtonLeadingSpace.
+
   double splitLeadingButtonLeadingSpace(M3EButtonSize size) =>
       splitLeftOuterPadding(size);
+
+  /// splitLeadingButtonTrailingSpace.
 
   double splitLeadingButtonTrailingSpace(M3EButtonSize size) =>
       splitLabelRightPadding(size);
 
+  /// splitTrailingIconSize.
+
   double splitTrailingIconSize(M3EButtonSize size) =>
       _splitTrailingWidth[size] ?? 26;
+
+  /// splitTrailingButtonLeadingSpace.
 
   double splitTrailingButtonLeadingSpace(M3EButtonSize size) =>
       splitTrailingLeftInnerPadding(size);
 
+  /// splitTrailingButtonTrailingSpace.
+
   double splitTrailingButtonTrailingSpace(M3EButtonSize size) =>
       splitRightOuterPadding(size);
 
+  /// popupBackgroundColor.
+
   Color popupBackgroundColor(M3EColorScheme scheme) => scheme.surfaceContainer;
+
+  /// menuBackgroundColor.
 
   Color menuBackgroundColor(
     M3EColorScheme scheme, {
@@ -278,6 +356,8 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     }
     return containerColor;
   }
+
+  /// menuForegroundColor.
 
   Color menuForegroundColor(
     M3EColorScheme scheme, {
@@ -312,7 +392,8 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
       innerGap: innerGap ?? this.innerGap,
       elevatedInnerGap: elevatedInnerGap ?? this.elevatedInnerGap,
       chevronOpenTurns: chevronOpenTurns ?? this.chevronOpenTurns,
-      trailingInnerSelectedCornerPercent: trailingInnerSelectedCornerPercent ??
+      trailingInnerSelectedCornerPercent:
+          trailingInnerSelectedCornerPercent ??
           this.trailingInnerSelectedCornerPercent,
       popupElevation: popupElevation ?? this.popupElevation,
       popupBorderRadius: popupBorderRadius ?? this.popupBorderRadius,
@@ -334,18 +415,27 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     return M3ESplitButtonTheme(
       minTapTarget: _lerpDouble(minTapTarget, other.minTapTarget, t)!,
       innerGap: _lerpDouble(innerGap, other.innerGap, t)!,
-      elevatedInnerGap:
-          _lerpDouble(elevatedInnerGap, other.elevatedInnerGap, t)!,
-      chevronOpenTurns:
-          _lerpDouble(chevronOpenTurns, other.chevronOpenTurns, t)!,
+      elevatedInnerGap: _lerpDouble(
+        elevatedInnerGap,
+        other.elevatedInnerGap,
+        t,
+      )!,
+      chevronOpenTurns: _lerpDouble(
+        chevronOpenTurns,
+        other.chevronOpenTurns,
+        t,
+      )!,
       trailingInnerSelectedCornerPercent: _lerpDouble(
         trailingInnerSelectedCornerPercent,
         other.trailingInnerSelectedCornerPercent,
         t,
       )!,
       popupElevation: _lerpDouble(popupElevation, other.popupElevation, t)!,
-      popupBorderRadius:
-          _lerpDouble(popupBorderRadius, other.popupBorderRadius, t)!,
+      popupBorderRadius: _lerpDouble(
+        popupBorderRadius,
+        other.popupBorderRadius,
+        t,
+      )!,
       popupPadding: EdgeInsets.lerp(
         popupPadding as EdgeInsets?,
         other.popupPadding as EdgeInsets?,

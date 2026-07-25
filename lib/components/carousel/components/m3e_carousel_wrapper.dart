@@ -5,7 +5,10 @@ import 'package:flutter/rendering.dart';
 
 import 'm3e_carousel_view.dart';
 
+/// M3ECarouselWrapper.
+
 class M3ECarouselWrapper extends StatefulWidget {
+  /// M3ECarouselWrapper.
   const M3ECarouselWrapper({
     super.key,
     this.freeScroll = false,
@@ -40,25 +43,65 @@ class M3ECarouselWrapper extends StatefulWidget {
          'Provide either itemExtent for standard layouts OR flexWeights for weighted layouts.',
        );
 
+  /// freeScroll.
+
   final bool freeScroll;
+
+  /// padding.
   final EdgeInsets? padding;
+
+  /// backgroundColor.
   final Color? backgroundColor;
+
+  /// elevation.
   final double? elevation;
+
+  /// shape.
   final ShapeBorder? shape;
+
+  /// itemClipBehavior.
   final Clip itemClipBehavior;
+
+  /// overlayColor.
   final WidgetStateProperty<Color?>? overlayColor;
+
+  /// itemSnapping.
   final bool itemSnapping;
+
+  /// consumeMaxWeight.
   final bool consumeMaxWeight;
+
+  /// shrinkExtent.
   final double shrinkExtent;
+
+  /// controller.
   final M3ECarouselController? controller;
+
+  /// scrollDirection.
   final Axis scrollDirection;
+
+  /// reverse.
   final bool reverse;
+
+  /// Function.
   final void Function(int)? onTap;
+
+  /// enableSplash.
   final bool enableSplash;
+
+  /// infinite.
   final bool infinite;
+
+  /// itemExtent.
   final double? itemExtent;
+
+  /// flexWeights.
   final List<int>? flexWeights;
+
+  /// children.
   final List<Widget> children;
+
+  /// Function.
   final void Function(int)? onIndexChanged;
 
   /// Fixed logical pixels added or removed per animating edge at peak pulse.
@@ -106,9 +149,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   void didUpdateWidget(M3ECarouselWrapper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.children.length != oldWidget.children.length) {
-      _itemBoxes.removeWhere(
-        (int index, _) => index >= widget.children.length,
-      );
+      _itemBoxes.removeWhere((int index, _) => index >= widget.children.length);
     }
     if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
@@ -135,10 +176,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     if (_itemBoxes[index] == box) {
       _itemBoxes.remove(index);
     }
-  }
-
-  void _registerViewportBox(RenderBox box) {
-    _viewportBox = box;
   }
 
   void _unregisterViewportBox(RenderBox box) {
@@ -270,8 +307,9 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     }
 
     _leftVisibleNeighborIndex = index > 0 ? index - 1 : null;
-    _rightVisibleNeighborIndex =
-        index < widget.children.length - 1 ? index + 1 : null;
+    _rightVisibleNeighborIndex = index < widget.children.length - 1
+        ? index + 1
+        : null;
   }
 
   Future<void> _handleTap(int index) async {
@@ -331,7 +369,8 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
                   : _fallbackExtent();
               final (expandLeading, expandTrailing) =
                   _expandSidesForActiveIndex(index);
-              final growTotal = (expandLeading ? edgeDelta : 0) +
+              final growTotal =
+                  (expandLeading ? edgeDelta : 0) +
                   (expandTrailing ? edgeDelta : 0);
               scaleMain = (extent + growTotal) / extent;
             } else if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
@@ -436,7 +475,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
               );
 
         return _CarouselViewportAnchor(
-          onRegister: _registerViewportBox,
+          onRegister: (RenderBox box) => _viewportBox = box,
           onUnregister: _unregisterViewportBox,
           child: view,
         );

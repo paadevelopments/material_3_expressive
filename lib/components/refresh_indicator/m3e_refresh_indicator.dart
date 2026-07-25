@@ -19,6 +19,7 @@ enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 ///
 /// Expressive and contained variants use [M3ELoadingIndicator] for the spinner.
 class M3ERefreshIndicator extends StatefulWidget {
+  /// const.
   const M3ERefreshIndicator({
     super.key,
     required this.child,
@@ -35,10 +36,12 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
-  })  : _indicatorType = _IndicatorType.expressive,
-        strokeWidth = 0.0,
-        assert(elevation >= 0.0),
-        assert(polygons != null ? polygons.length > 1 : true);
+  }) : _indicatorType = _IndicatorType.expressive,
+       strokeWidth = 0.0,
+       assert(elevation >= 0.0, 'assertion failed'),
+       assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
+
+  /// const.
 
   const M3ERefreshIndicator.contained({
     super.key,
@@ -56,10 +59,12 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
-  })  : _indicatorType = _IndicatorType.contained,
-        strokeWidth = 0.0,
-        assert(elevation >= 0.0),
-        assert(polygons != null ? polygons.length > 1 : true);
+  }) : _indicatorType = _IndicatorType.contained,
+       strokeWidth = 0.0,
+       assert(elevation >= 0.0, 'assertion failed'),
+       assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
+
+  /// const.
 
   const M3ERefreshIndicator.material({
     super.key,
@@ -76,10 +81,12 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.onStatusChange,
-  })  : _indicatorType = _IndicatorType.material,
-        polygons = null,
-        indicatorConstraints = null,
-        assert(elevation >= 0.0);
+  }) : _indicatorType = _IndicatorType.material,
+       polygons = null,
+       indicatorConstraints = null,
+       assert(elevation >= 0.0, 'assertion failed');
+
+  /// const.
 
   const M3ERefreshIndicator.adaptive({
     super.key,
@@ -96,10 +103,12 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
     this.onStatusChange,
-  })  : _indicatorType = _IndicatorType.adaptive,
-        polygons = null,
-        indicatorConstraints = null,
-        assert(elevation >= 0.0);
+  }) : _indicatorType = _IndicatorType.adaptive,
+       polygons = null,
+       indicatorConstraints = null,
+       assert(elevation >= 0.0, 'assertion failed');
+
+  /// const.
 
   const M3ERefreshIndicator.noSpinner({
     super.key,
@@ -111,36 +120,68 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
-  })  : _indicatorType = _IndicatorType.noSpinner,
-        displacement = 0.0,
-        edgeOffset = 0.0,
-        color = null,
-        backgroundColor = null,
-        strokeWidth = 0.0,
-        polygons = null,
-        indicatorConstraints = null,
-        assert(elevation >= 0.0);
+  }) : _indicatorType = _IndicatorType.noSpinner,
+       displacement = 0.0,
+       edgeOffset = 0.0,
+       color = null,
+       backgroundColor = null,
+       strokeWidth = 0.0,
+       polygons = null,
+       indicatorConstraints = null,
+       assert(elevation >= 0.0, 'assertion failed');
+
+  /// final.
 
   final Widget child;
+
+  /// final.
   final double displacement;
+
+  /// final.
   final double edgeOffset;
+
+  /// final.
   final M3ERefreshCallback onRefresh;
+
+  /// final.
   final ValueChanged<M3ERefreshStatus?>? onStatusChange;
+
+  /// final.
   final Color? color;
+
+  /// final.
   final Color? backgroundColor;
+
+  /// final.
   final ScrollNotificationPredicate notificationPredicate;
+
+  /// final.
   final String? semanticsLabel;
+
+  /// final.
   final String? semanticsValue;
+
+  /// final.
   final double strokeWidth;
+
+  /// final.
   final M3ERefreshTriggerMode triggerMode;
+
+  /// final.
   final double elevation;
   final _IndicatorType _indicatorType;
+
+  /// final.
   final List<RoundedPolygon>? polygons;
+
+  /// final.
   final BoxConstraints? indicatorConstraints;
 
   @override
   M3ERefreshIndicatorState createState() => M3ERefreshIndicatorState();
 }
+
+/// class.
 
 class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     with TickerProviderStateMixin<M3ERefreshIndicator> {
@@ -158,14 +199,18 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late Color _effectiveValueColor;
   late Color _effectiveContainerColor;
 
-  static final Animatable<double> _threeQuarterTween =
-      Tween<double>(begin: 0.0, end: 0.75);
+  static final Animatable<double> _threeQuarterTween = Tween<double>(
+    begin: 0,
+    end: 0.75,
+  );
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
-    begin: 0.0,
+    begin: 0,
     end: M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
   );
-  static final Animatable<double> _oneToZeroTween =
-      Tween<double>(begin: 1.0, end: 0.0);
+  static final Animatable<double> _oneToZeroTween = Tween<double>(
+    begin: 1,
+    end: 0,
+  );
 
   @override
   void initState() {
@@ -200,13 +245,15 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   void _setupColorTween() {
     final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
-    final M3ERefreshIndicatorTheme refreshTheme =
-        M3ETheme.of(context).refreshIndicatorTheme;
+    final M3ERefreshIndicatorTheme refreshTheme = M3ETheme.of(
+      context,
+    ).refreshIndicatorTheme;
 
     if (widget._indicatorType == _IndicatorType.contained) {
       _effectiveValueColor =
           widget.color ?? refreshTheme.containedActiveColor(scheme);
-      _effectiveContainerColor = widget.backgroundColor ??
+      _effectiveContainerColor =
+          widget.backgroundColor ??
           refreshTheme.containedContainerColor(scheme);
     } else {
       _effectiveValueColor = widget.color ?? refreshTheme.activeColor(scheme);
@@ -220,12 +267,12 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     } else {
       _valueColor = _positionController.drive(
         ColorTween(
-          begin: color.withValues(alpha: 0.0),
+          begin: color.withValues(alpha: 0),
           end: color.withValues(alpha: color.a),
         ).chain(
           CurveTween(
             curve: const Interval(
-              0.0,
+              0,
               1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
             ),
           ),
@@ -261,15 +308,16 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
     final bool startedFromEdgeDrag =
         notification is ScrollStartNotification &&
-            notification.dragDetails != null &&
-            widget.triggerMode == M3ERefreshTriggerMode.onEdge;
+        notification.dragDetails != null &&
+        widget.triggerMode == M3ERefreshTriggerMode.onEdge;
     final bool startedFromAnywhereDrag =
         notification is ScrollUpdateNotification &&
-            notification.dragDetails != null &&
-            widget.triggerMode == M3ERefreshTriggerMode.anywhere;
+        notification.dragDetails != null &&
+        widget.triggerMode == M3ERefreshTriggerMode.anywhere;
     // Also start on a real leading-edge overscroll so a drag-down at the top
     // still works when ScrollStart was consumed by a parent scrollable.
-    final bool startedFromOverscroll = notification is OverscrollNotification &&
+    final bool startedFromOverscroll =
+        notification is OverscrollNotification &&
         notification.dragDetails != null &&
         _isPullingPastLeadingEdge(notification);
 
@@ -313,10 +361,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       return false;
     }
 
-    final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
-      AxisDirection.down || AxisDirection.up => true,
-      AxisDirection.left || AxisDirection.right => null,
-    };
+    final bool? indicatorAtTopNow =
+        switch (notification.metrics.axisDirection) {
+          AxisDirection.down || AxisDirection.up => true,
+          AxisDirection.left || AxisDirection.right => null,
+        };
 
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_status == M3ERefreshStatus.drag ||
@@ -383,9 +432,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   bool _start(AxisDirection direction) {
-    assert(_status == null);
-    assert(_isIndicatorAtTop == null);
-    assert(_dragOffset == null);
+    assert(_status == null, 'assertion failed');
+    assert(_isIndicatorAtTop == null, 'assertion failed');
+    assert(_dragOffset == null, 'assertion failed');
     switch (direction) {
       case AxisDirection.down:
       case AxisDirection.up:
@@ -404,8 +453,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   void _checkDragOffset(double containerExtent) {
     assert(
       _status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed,
+      'assertion failed',
     );
-    double newValue = _dragOffset! /
+    double newValue =
+        _dragOffset! /
         (containerExtent *
             M3ERefreshIndicatorTheme.kDragContainerExtentPercentage);
     if (_status == M3ERefreshStatus.armed) {
@@ -414,7 +465,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
       );
     }
-    final double clamped = clampDouble(newValue, 0.0, 1.0);
+    final double clamped = clampDouble(newValue, 0, 1);
     // Rebuild even when the controller is saturated so the indicator can still
     // settle at its snap cap while the finger keeps moving.
     if (clamped == _positionController.value) {
@@ -436,16 +487,22 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     await Future<void>.value();
     assert(
       newMode == M3ERefreshStatus.canceled || newMode == M3ERefreshStatus.done,
+      'assertion failed',
     );
 
     if (newMode == M3ERefreshStatus.canceled && _dragOffset != null) {
       // Continuity: start the retract animation from the current visual pull.
+      if (!mounted) {
+        return;
+      }
       final double height = _indicatorHeight(context);
       final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
       final double currentPull = _visualPull(context);
       _positionController.value =
-          (currentPull / (limit * (widget.displacement + height)))
-              .clamp(0.0, 1.0);
+          (currentPull / (limit * (widget.displacement + height))).clamp(
+            0.0,
+            1.0,
+          );
     }
 
     setState(() {
@@ -455,21 +512,19 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     switch (_status!) {
       case M3ERefreshStatus.done:
         await _scaleController.animateTo(
-          1.0,
-          duration:
-              M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
+          1,
+          duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
         );
       case M3ERefreshStatus.canceled:
         await _positionController.animateTo(
-          0.0,
-          duration:
-              M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
+          0,
+          duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
         );
       case M3ERefreshStatus.armed:
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.refresh:
       case M3ERefreshStatus.snap:
-        assert(false);
+        assert(false, 'assertion failed');
     }
     if (mounted && _status == newMode) {
       _dragOffset = null;
@@ -481,9 +536,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   }
 
   void _show() {
-    assert(_status != M3ERefreshStatus.refresh);
-    assert(_status != M3ERefreshStatus.snap);
-    final Completer<void> completer = Completer<void>();
+    assert(_status != M3ERefreshStatus.refresh, 'assertion failed');
+    assert(_status != M3ERefreshStatus.snap, 'assertion failed');
+    final completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
 
     // Keep the indicator where it visually is, then animate to the resting
@@ -492,7 +547,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     final double currentPull = _visualPull(context);
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
     _positionController.value =
-        (currentPull / (limit * (widget.displacement + height))).clamp(0.0, 1.0);
+        (currentPull / (limit * (widget.displacement + height))).clamp(
+          0.0,
+          1.0,
+        );
 
     _status = M3ERefreshStatus.snap;
     widget.onStatusChange?.call(_status);
@@ -503,22 +561,24 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
           duration: M3ERefreshIndicatorTheme.defaults.indicatorSnapDuration,
         )
         .then<void>((void value) {
-      if (mounted && _status == M3ERefreshStatus.snap) {
-        setState(() {
-          _status = M3ERefreshStatus.refresh;
-          widget.onStatusChange?.call(_status);
-        });
+          if (mounted && _status == M3ERefreshStatus.snap) {
+            setState(() {
+              _status = M3ERefreshStatus.refresh;
+              widget.onStatusChange?.call(_status);
+            });
 
-        final Future<void> refreshResult = widget.onRefresh();
-        refreshResult.whenComplete(() {
-          if (mounted && _status == M3ERefreshStatus.refresh) {
-            completer.complete();
-            _dismiss(M3ERefreshStatus.done);
+            final Future<void> refreshResult = widget.onRefresh();
+            refreshResult.whenComplete(() {
+              if (mounted && _status == M3ERefreshStatus.refresh) {
+                completer.complete();
+                _dismiss(M3ERefreshStatus.done);
+              }
+            });
           }
         });
-      }
-    });
   }
+
+  /// Future.
 
   Future<void> show({bool atTop = true}) {
     if (_status != M3ERefreshStatus.refresh &&
@@ -543,14 +603,14 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
     return M3EComponentTheme(
       builder: (BuildContext context) => Stack(
-        clipBehavior: Clip.hardEdge,
         children: <Widget>[
           child,
           if (_status != null)
             AnimatedBuilder(
-              animation: Listenable.merge(
-                <Listenable>[_positionController, _scaleController],
-              ),
+              animation: Listenable.merge(<Listenable>[
+                _positionController,
+                _scaleController,
+              ]),
               builder: (BuildContext context, Widget? _) {
                 return _buildPositionedIndicator(context);
               },
@@ -575,10 +635,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   /// Finger pull clamped to the snap cap.
   double _visualPull(BuildContext context) {
-    return math.min(
-      math.max(0.0, _dragOffset ?? 0.0),
-      _maxVisualPull(context),
-    );
+    return math.min(math.max(0, _dragOffset ?? 0.0), _maxVisualPull(context));
   }
 
   /// Pull distance in pixels used for positioning.
@@ -599,14 +656,14 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
         // positionFactor 1.0 → pull = displacement + height → top = displacement.
         return _positionFactor.value * (widget.displacement + height);
       case null:
-        return 0.0;
+        return 0;
     }
   }
 
   Widget _buildPositionedIndicator(BuildContext context) {
     final bool atTop = _isIndicatorAtTop!;
-    final bool showIndeterminate = _status == M3ERefreshStatus.refresh ||
-        _status == M3ERefreshStatus.done;
+    final bool showIndeterminate =
+        _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
     final double height = _indicatorHeight(context);
     final double pull = _pullDistance(context);
     // pull 0 → fully above the clip; as the user drags, the indicator slides
@@ -616,8 +673,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     return Positioned(
       top: atTop ? widget.edgeOffset + inset : null,
       bottom: atTop ? null : widget.edgeOffset + inset,
-      left: 0.0,
-      right: 0.0,
+      left: 0,
+      right: 0,
       child: IgnorePointer(
         child: Align(
           alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
@@ -650,9 +707,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     }
   }
 
-  Widget _buildLoadingIndicator({
-    required M3ELoadingIndicatorVariant variant,
-  }) {
+  Widget _buildLoadingIndicator({required M3ELoadingIndicatorVariant variant}) {
     // Keep loading indicators fully opaque; reveal is the edge slide-in.
     return M3ELoadingIndicator(
       variant: variant,
@@ -665,12 +720,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     );
   }
 
-  Widget _buildMaterialIndicator(
-    BuildContext context,
-    bool showIndeterminate,
-  ) {
+  Widget _buildMaterialIndicator(BuildContext context, bool showIndeterminate) {
     return RefreshProgressIndicator(
-      semanticsLabel: widget.semanticsLabel ??
+      semanticsLabel:
+          widget.semanticsLabel ??
           MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
       semanticsValue: widget.semanticsValue,
       value: showIndeterminate ? null : _value.value,
@@ -681,10 +734,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     );
   }
 
-  Widget _buildAdaptiveIndicator(
-    BuildContext context,
-    bool showIndeterminate,
-  ) {
+  Widget _buildAdaptiveIndicator(BuildContext context, bool showIndeterminate) {
     switch (M3ETheme.platformOf(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

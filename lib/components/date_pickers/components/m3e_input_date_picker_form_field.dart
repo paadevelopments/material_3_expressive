@@ -6,6 +6,7 @@ import '../utils/m3e_date_picker_utils.dart';
 
 /// Text field for entering a single date in a picker dialog.
 class M3EInputDatePickerFormField extends StatefulWidget {
+  /// M3EInputDatePickerFormField.
   const M3EInputDatePickerFormField({
     required this.firstDate,
     required this.lastDate,
@@ -24,19 +25,47 @@ class M3EInputDatePickerFormField extends StatefulWidget {
     super.key,
   });
 
+  /// initialDate.
+
   final DateTime? initialDate;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// onDateSubmitted.
   final ValueChanged<DateTime>? onDateSubmitted;
+
+  /// onDateSaved.
   final ValueChanged<DateTime>? onDateSaved;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayPredicate? selectableDayPredicate;
+
+  /// errorFormatText.
   final String? errorFormatText;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// fieldHintText.
   final String? fieldHintText;
+
+  /// fieldLabelText.
   final String? fieldLabelText;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// autofocus.
   final bool autofocus;
+
+  /// acceptEmptyDate.
   final bool acceptEmptyDate;
+
+  /// focusNode.
   final FocusNode? focusNode;
 
   @override
@@ -95,21 +124,19 @@ class _M3EInputDatePickerFormFieldState
 
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
-      final String text =
-          MaterialLocalizations.of(context).formatCompactDate(_selectedDate!);
+      final String text = MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(_selectedDate!);
       var value = TextEditingValue(text: text);
       if (widget.autofocus && !_autoSelected) {
         value = value.copyWith(
-          selection: TextSelection(
-            baseOffset: 0,
-            extentOffset: text.length,
-          ),
+          selection: TextSelection(baseOffset: 0, extentOffset: text.length),
         );
         _autoSelected = true;
       }
       _controller.value = value;
     } else {
-      _controller.value = const TextEditingValue(text: '');
+      _controller.value = TextEditingValue.empty;
     }
   }
 
@@ -162,8 +189,9 @@ class _M3EInputDatePickerFormFieldState
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     return FormField<String>(
       initialValue: _controller.text,
       validator: _validate,

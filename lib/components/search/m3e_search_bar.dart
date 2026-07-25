@@ -12,220 +12,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../icon_buttons/m3e_icon_buttons.dart';
 import 'res/m3e_search_constants.dart';
 import 'styles/m3e_search_bar_theme.dart';
 
-double _resolveActionIconSize({
-  required M3EIconButtonTheme iconButtonTheme,
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
-  if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.iconSize(button.size);
-  }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    if (icon.size != null) {
-      return icon.size!;
-    }
-  }
-  return iconButtonTheme.iconSize(M3EIconButtonSize.sm);
-}
+part 'components/m3e_search_bar_input.dart';
 
-Widget? _resolveReferenceAction({
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  if (trailing != null && trailing.isNotEmpty) {
-    return trailing.last;
-  }
-  return leading;
-}
+/// M3ESearchBar.
 
-double _resolveActionSlotWidth({
-  required M3EIconButtonTheme iconButtonTheme,
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
-  if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.target(button.size, button.width).width;
-  }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    return icon.size ??
-        iconButtonTheme
-            .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-            .width;
-  }
-  return iconButtonTheme
-      .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-      .width;
-}
-
-Widget _wrapActionSlot({
-  required double width,
-  required Widget child,
-}) {
-  return SizedBox(
-    width: width,
-    child: Center(child: child),
-  );
-}
-
-Widget m3eDefaultSearchContextMenuBuilder(
-  BuildContext context,
-  EditableTextState editableTextState,
-) {
-  return AdaptiveTextSelectionToolbar.editableText(
-    editableTextState: editableTextState,
-  );
-}
-
-/// Shared editable search field used by [M3ESearchBar] and the search view header.
-class M3ESearchBarInput extends StatefulWidget {
-  const M3ESearchBarInput({
-    required this.controller,
-    required this.focusNode,
-    required this.hintText,
-    required this.enabled,
-    required this.readOnly,
-    required this.autoFocus,
-    required this.textStyle,
-    required this.hintStyle,
-    required this.cursorColor,
-    required this.selectionColor,
-    this.onTap,
-    this.onTapOutside,
-    this.onChanged,
-    this.onSubmitted,
-    this.textCapitalization = TextCapitalization.none,
-    this.textInputAction,
-    this.keyboardType,
-    this.scrollPadding = const EdgeInsets.all(20),
-    this.contextMenuBuilder = m3eDefaultSearchContextMenuBuilder,
-    this.smartDashesType,
-    this.smartQuotesType,
-    this.contentPadding = EdgeInsets.zero,
-    super.key,
-  });
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String? hintText;
-  final bool enabled;
-  final bool readOnly;
-  final bool autoFocus;
-  final TextStyle textStyle;
-  final TextStyle hintStyle;
-  final Color cursorColor;
-  final Color selectionColor;
-  final GestureTapCallback? onTap;
-  final TapRegionCallback? onTapOutside;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
-  final TextCapitalization textCapitalization;
-  final TextInputAction? textInputAction;
-  final TextInputType? keyboardType;
-  final EdgeInsets scrollPadding;
-  final EditableTextContextMenuBuilder contextMenuBuilder;
-  final SmartDashesType? smartDashesType;
-  final SmartQuotesType? smartQuotesType;
-  final EdgeInsetsGeometry contentPadding;
-
-  @override
-  State<M3ESearchBarInput> createState() => _M3ESearchBarInputState();
-}
-
-class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_handleTextChange);
-  }
-
-  @override
-  void didUpdateWidget(M3ESearchBarInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_handleTextChange);
-      widget.controller.addListener(_handleTextChange);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_handleTextChange);
-    super.dispose();
-  }
-
-  void _handleTextChange() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: widget.hintText,
-      textField: true,
-      child: Padding(
-        padding: widget.contentPadding,
-        child: Stack(
-          alignment: AlignmentDirectional.centerStart,
-          children: <Widget>[
-            if (widget.controller.text.isEmpty && widget.hintText != null)
-              IgnorePointer(
-                child: Text(
-                  widget.hintText!,
-                  style: widget.hintStyle,
-                  maxLines: 1,
-                ),
-              ),
-            Listener(
-              behavior: HitTestBehavior.translucent,
-              onPointerDown: (_) => widget.onTap?.call(),
-              child: EditableText(
-                controller: widget.controller,
-                focusNode: widget.focusNode,
-                readOnly: widget.readOnly || !widget.enabled,
-                autofocus: widget.autoFocus,
-                onTapOutside: widget.onTapOutside ??
-                    M3EFocus.tapOutsideHandler(widget.focusNode),
-                onChanged: widget.onChanged,
-                onSubmitted: widget.onSubmitted,
-                style: widget.textStyle,
-                cursorColor: widget.cursorColor,
-                backgroundCursorColor:
-                    widget.cursorColor.withValues(alpha: 0.4),
-                selectionColor: widget.selectionColor,
-                textCapitalization: widget.textCapitalization,
-                textInputAction: widget.textInputAction,
-                keyboardType: widget.keyboardType,
-                scrollPadding: widget.scrollPadding,
-                contextMenuBuilder: widget.contextMenuBuilder,
-                smartDashesType: widget.smartDashesType,
-                smartQuotesType: widget.smartQuotesType,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A Material 3 Expressive search bar.
 class M3ESearchBar extends StatefulWidget {
+  /// M3ESearchBar.
   const M3ESearchBar({
     this.controller,
     this.focusNode,
@@ -262,37 +58,101 @@ class M3ESearchBar extends StatefulWidget {
     super.key,
   });
 
+  /// controller.
+
   final TextEditingController? controller;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// hintText.
   final String? hintText;
+
+  /// leading.
   final Widget? leading;
+
+  /// trailing.
   final Iterable<Widget>? trailing;
+
+  /// onTap.
   final GestureTapCallback? onTap;
+
+  /// onTapOutside.
   final TapRegionCallback? onTapOutside;
+
+  /// onChanged.
   final ValueChanged<String>? onChanged;
+
+  /// onSubmitted.
   final ValueChanged<String>? onSubmitted;
+
+  /// constraints.
   final BoxConstraints? constraints;
+
+  /// elevation.
   final WidgetStateProperty<double?>? elevation;
+
+  /// backgroundColor.
   final WidgetStateProperty<Color?>? backgroundColor;
+
+  /// shadowColor.
   final WidgetStateProperty<Color?>? shadowColor;
+
+  /// surfaceTintColor.
   final WidgetStateProperty<Color?>? surfaceTintColor;
+
+  /// overlayColor.
   final WidgetStateProperty<Color?>? overlayColor;
+
+  /// side.
   final WidgetStateProperty<BorderSide?>? side;
+
+  /// shape.
   final WidgetStateProperty<OutlinedBorder?>? shape;
+
+  /// padding.
   final WidgetStateProperty<EdgeInsetsGeometry?>? padding;
+
+  /// textStyle.
   final WidgetStateProperty<TextStyle?>? textStyle;
+
+  /// hintStyle.
   final WidgetStateProperty<TextStyle?>? hintStyle;
+
+  /// textCapitalization.
   final TextCapitalization? textCapitalization;
+
+  /// enabled.
   final bool enabled;
+
+  /// autoFocus.
   final bool autoFocus;
+
+  /// textInputAction.
   final TextInputAction? textInputAction;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// scrollPadding.
   final EdgeInsets scrollPadding;
+
+  /// contextMenuBuilder.
   final EditableTextContextMenuBuilder contextMenuBuilder;
+
+  /// readOnly.
   final bool readOnly;
+
+  /// expandOnFocus.
   final bool expandOnFocus;
+
+  /// expandRestPadding.
   final double? expandRestPadding;
+
+  /// smartDashesType.
   final SmartDashesType? smartDashesType;
+
+  /// smartQuotesType.
   final SmartQuotesType? smartQuotesType;
 
   @override
@@ -323,9 +183,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
       if (!mounted) {
         return;
       }
-      _syncExpandPaddingController(
-        M3ETheme.of(context).searchBarTheme,
-      );
+      _syncExpandPaddingController(M3ETheme.of(context).searchBarTheme);
     });
   }
 
@@ -385,9 +243,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   bool _shouldAnimateExpandPadding(M3ESearchBarTheme barTheme) {
     // Read-only bars can still use the resting (unexpanded) inset; they just
     // never animate to the focused width because they do not take focus.
-    if (!widget.expandOnFocus ||
-        !barTheme.expandOnFocus ||
-        !widget.enabled) {
+    if (!widget.expandOnFocus || !barTheme.expandOnFocus || !widget.enabled) {
       return false;
     }
     return _restingExpandPadding(barTheme) > 0.5;
@@ -517,9 +373,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
       leading: widget.leading,
     );
     final EdgeInsetsDirectional inputPadding = widget.leading == null
-        ? EdgeInsetsDirectional.only(
-            start: barTheme.noLeadingHintExtraPadding,
-          )
+        ? EdgeInsetsDirectional.only(start: barTheme.noLeadingHintExtraPadding)
         : EdgeInsetsDirectional.zero;
 
     final Widget? leading = widget.leading == null
@@ -579,7 +433,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
                 child: Row(
                   textDirection: textDirection,
                   children: <Widget>[
-                    if (leading != null) leading,
+                    ?leading,
                     Expanded(
                       child: M3ESearchBarInput(
                         controller: _controller,
@@ -589,7 +443,8 @@ class _M3ESearchBarState extends State<M3ESearchBar>
                         readOnly: widget.readOnly,
                         autoFocus: widget.autoFocus,
                         onTap: _handleTap,
-                        onTapOutside: widget.onTapOutside ??
+                        onTapOutside:
+                            widget.onTapOutside ??
                             M3EFocus.tapOutsideHandler(_focusNode),
                         onChanged: widget.onChanged,
                         onSubmitted: widget.onSubmitted,
@@ -642,14 +497,12 @@ class _M3ESearchBarState extends State<M3ESearchBar>
           textDirection: textDirection,
         );
 
-        final BoxConstraints barConstraints =
-            barTheme.constraints(override: widget.constraints);
+        final BoxConstraints barConstraints = barTheme.constraints(
+          override: widget.constraints,
+        );
 
         if (!_shouldAnimateExpandPadding(barTheme)) {
-          return ConstrainedBox(
-            constraints: barConstraints,
-            child: bar,
-          );
+          return ConstrainedBox(constraints: barConstraints, child: bar);
         }
 
         return AnimatedBuilder(
@@ -660,10 +513,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
             final horizontal = pad.isFinite && pad > 0 ? pad : 0.0;
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontal),
-              child: ConstrainedBox(
-                constraints: barConstraints,
-                child: bar,
-              ),
+              child: ConstrainedBox(constraints: barConstraints, child: bar),
             );
           },
         );

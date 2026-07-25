@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/foundations/foundations.dart' show M3EInkSplashTheme;
-import 'package:material_3_expressive/foundations/m3e_ink_splash_theme.dart' show M3EInkSplashTheme;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EInkSplashTheme;
+
+import 'm3e_ink_splash_theme.dart' show M3EInkSplashTheme;
 
 /// Material 3 state layer opacity tokens.
 ///
@@ -10,9 +9,16 @@ import 'package:material_3_expressive/material_3_expressive.dart' show M3EInkSpl
 abstract final class M3EStateOpacity {
   const M3EStateOpacity._();
 
+  /// Hover state-layer opacity (8%).
   static const double hover = 0.08;
+
+  /// Focus state-layer opacity (10%).
   static const double focus = 0.1;
+
+  /// Pressed state-layer opacity (10%).
   static const double pressed = 0.1;
+
+  /// Dragged state-layer opacity (16%).
   static const double dragged = 0.16;
 
   /// Opacity applied to content (icon/label) of a disabled component.
@@ -28,6 +34,7 @@ abstract final class M3EStateOpacity {
 /// matching the Material specification (pressed over focus over hover).
 @immutable
 class M3EInteractionState {
+  /// Creates an interaction state snapshot.
   const M3EInteractionState({
     this.hovered = false,
     this.focused = false,
@@ -35,9 +42,16 @@ class M3EInteractionState {
     this.dragged = false,
   });
 
+  /// Whether the pointer is hovering the component.
   final bool hovered;
+
+  /// Whether the component is keyboard-focused.
   final bool focused;
+
+  /// Whether the component is pressed.
   final bool pressed;
+
+  /// Whether the component is being dragged.
   final bool dragged;
 
   /// Resolves the effective state layer opacity for the active state.
@@ -57,6 +71,7 @@ class M3EInteractionState {
     return 0;
   }
 
+  /// Returns a copy with the given fields replaced.
   M3EInteractionState copyWith({
     bool? hovered,
     bool? focused,
@@ -72,6 +87,7 @@ class M3EInteractionState {
   }
 
   @override
+  /// Equality based on public fields.
   bool operator ==(Object other) {
     return other is M3EInteractionState &&
         other.hovered == hovered &&
@@ -81,6 +97,7 @@ class M3EInteractionState {
   }
 
   @override
+  /// Hash code for this interaction state.
   int get hashCode => Object.hash(hovered, focused, pressed, dragged);
 }
 
@@ -88,6 +105,7 @@ class M3EInteractionState {
 abstract final class M3EStateLayer {
   const M3EStateLayer._();
 
+  /// Resolves an overlay color for the highest-priority active [states].
   static Color? resolveOverlayColor(Color color, Set<WidgetState> states) {
     if (states.contains(WidgetState.pressed)) {
       return color.withValues(alpha: M3EStateOpacity.pressed);
@@ -116,6 +134,7 @@ abstract final class M3EStateLayer {
     });
   }
 
+  /// Alias for [overlayColorHoverFocus].
   static WidgetStateProperty<Color?> overlayColor(Color color) {
     return overlayColorHoverFocus(color);
   }

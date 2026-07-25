@@ -15,6 +15,7 @@ const String _zeroPad = '0';
 
 /// Embeddable clock dial for choosing an hour and minute.
 class M3EDialTimePicker extends StatefulWidget {
+  /// M3EDialTimePicker.
   const M3EDialTimePicker({
     required this.value,
     required this.onChanged,
@@ -23,9 +24,17 @@ class M3EDialTimePicker extends StatefulWidget {
     super.key,
   });
 
+  /// value.
+
   final M3ETime value;
+
+  /// onChanged.
   final ValueChanged<M3ETime> onChanged;
+
+  /// use24HourFormat.
   final bool? use24HourFormat;
+
+  /// expandToFit.
   final bool expandToFit;
 
   @override
@@ -47,8 +56,9 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final bool use24Hour = _use24HourFormat(context);
 
     final Widget content = FittedBox(
@@ -99,15 +109,12 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
           excludeSemantics: true,
           child: Text(
             _timeSeparator,
-            style: theme.typeScale.displayMedium
-                .copyWith(color: theme.colorScheme.onSurface),
+            style: theme.typeScale.displayMedium.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ),
-        _buildField(
-          theme,
-          widget.value.minuteLabel,
-          M3ETimePickerMode.minute,
-        ),
+        _buildField(theme, widget.value.minuteLabel, M3ETimePickerMode.minute),
         if (!use24Hour) ...<Widget>[
           SizedBox(width: timeTheme.fieldPeriodGap),
           _buildPeriodToggle(theme, localizations),
@@ -174,9 +181,10 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
   Widget _buildPeriodOption(M3EThemeData theme, String label, bool selected) {
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
-    final bool isPm = label == localizations.postMeridiemAbbreviation;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+    final isPm = label == localizations.postMeridiemAbbreviation;
     return Semantics(
       selected: selected,
       button: true,
@@ -242,13 +250,10 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
     if (_mode == M3ETimePickerMode.hour) {
       if (use24Hour) {
         return <String>[
-          for (int i = 0; i < 12; i++) '${(i * 2).toString().padLeft(2, '0')}',
+          for (int i = 0; i < 12; i++) (i * 2).toString().padLeft(2, '0'),
         ];
       }
-      return <String>[
-        '12',
-        for (int i = 1; i <= 11; i++) '$i',
-      ];
+      return <String>['12', for (int i = 1; i <= 11; i++) '$i'];
     }
     return <String>[
       for (int i = 0; i < 12; i++) (i * 5).toString().padLeft(2, '0'),
@@ -290,7 +295,7 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
 
   void _setHour(int slot) {
     final hour12 = slot == 0 ? 12 : slot;
-    final hour24 = M3ETimePickerUtils.to24Hour(hour12, widget.value.isPm);
+    final hour24 = M3ETimePickerUtils.to24Hour(hour12, pm: widget.value.isPm);
     widget.onChanged(widget.value.copyWith(hour: hour24));
   }
 
@@ -299,8 +304,7 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
   }
 
   void _setPeriod(bool pm) {
-    final hour24 =
-        M3ETimePickerUtils.to24Hour(widget.value.hourOf12, pm);
+    final hour24 = M3ETimePickerUtils.to24Hour(widget.value.hourOf12, pm: pm);
     widget.onChanged(widget.value.copyWith(hour: hour24));
   }
 }

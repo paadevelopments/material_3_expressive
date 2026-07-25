@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 /// used across the baseline scale.
 @immutable
 class M3ETypeScale {
+  /// Creates a complete Material 3 type scale.
   const M3ETypeScale({
     required this.displayLarge,
     required this.displayMedium,
@@ -65,20 +66,49 @@ class M3ETypeScale {
     );
   }
 
+  /// Largest display role.
   final TextStyle displayLarge;
+
+  /// Medium display role.
   final TextStyle displayMedium;
+
+  /// Smallest display role.
   final TextStyle displaySmall;
+
+  /// Largest headline role.
   final TextStyle headlineLarge;
+
+  /// Medium headline role.
   final TextStyle headlineMedium;
+
+  /// Smallest headline role.
   final TextStyle headlineSmall;
+
+  /// Largest title role.
   final TextStyle titleLarge;
+
+  /// Medium title role.
   final TextStyle titleMedium;
+
+  /// Smallest title role.
   final TextStyle titleSmall;
+
+  /// Largest body role.
   final TextStyle bodyLarge;
+
+  /// Medium body role.
   final TextStyle bodyMedium;
+
+  /// Smallest body role.
   final TextStyle bodySmall;
+
+  /// Largest label role.
   final TextStyle labelLarge;
+
+  /// Medium label role.
   final TextStyle labelMedium;
+
+  /// Smallest label role.
   final TextStyle labelSmall;
 
   /// Adapts a framework [TextTheme] into an [M3ETypeScale].
@@ -169,6 +199,7 @@ class M3ETypeScale {
 /// Mirrors the `ButtonFontSize` token from the `m3e_design` package.
 @immutable
 class M3EButtonFontSize {
+  /// Creates button label sizes for each expressive size step.
   const M3EButtonFontSize({
     this.xs = 14,
     this.sm = 14,
@@ -177,10 +208,19 @@ class M3EButtonFontSize {
     this.xl = 24,
   });
 
+  /// Extra-small button label size.
   final double xs;
+
+  /// Small button label size.
   final double sm;
+
+  /// Medium button label size.
   final double md;
+
+  /// Large button label size.
   final double lg;
+
+  /// Extra-large button label size.
   final double xl;
 }
 

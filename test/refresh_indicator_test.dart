@@ -2,24 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_3_expressive/components/refresh_indicator/enums/m3e_refresh_status.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 Widget _host(Widget child) {
   return MaterialApp(
-    home: Scaffold(
-      body: SizedBox(width: 300, height: 400, child: child),
-    ),
+    home: Scaffold(body: SizedBox(width: 300, height: 400, child: child)),
   );
 }
 
 Widget _list() {
   return ListView.builder(
     itemCount: 20,
-    itemBuilder: (BuildContext context, int index) => SizedBox(
-      height: 40,
-      child: Text('row$index'),
-    ),
+    itemBuilder: (BuildContext context, int index) =>
+        SizedBox(height: 40, child: Text('row$index')),
   );
 }
 

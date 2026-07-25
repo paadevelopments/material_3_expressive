@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart'
-    show
-        Brightness,
-        Color,
-        TargetPlatform,
-        TextTheme,
-        ThemeData,
-        VisualDensity;
+    show Brightness, Color, TargetPlatform, TextTheme, ThemeData, VisualDensity;
 import 'package:flutter/widgets.dart';
 
 import '../components/app_bars/styles/m3e_app_bar_theme.dart';
@@ -54,6 +48,7 @@ import 'm3e_typography.dart';
 /// Immutable bundle of expressive design tokens and per-component themes.
 @immutable
 class M3EThemeData {
+  /// Creates an expressive theme from tokens and component themes.
   M3EThemeData({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
@@ -103,10 +98,11 @@ class M3EThemeData {
     this.toggleButtonGroupTheme = M3EToggleButtonGroupTheme.defaults,
     this.toolbarTheme = M3EToolbarTheme.defaults,
     this.tooltipTheme = M3ETooltipTheme.defaults,
-  })  : colorScheme = colorScheme ?? M3EColorScheme.light(),
-        typeScale = typeScale ?? M3ETypeScale.baseline(),
-        brightness = (colorScheme ?? M3EColorScheme.light()).brightness;
+  }) : colorScheme = colorScheme ?? M3EColorScheme.light(),
+       typeScale = typeScale ?? M3ETypeScale.baseline(),
+       brightness = (colorScheme ?? M3EColorScheme.light()).brightness;
 
+  /// Light theme, optionally seeded from [seedColor].
   factory M3EThemeData.light({Color? seedColor}) {
     return M3EThemeData(
       colorScheme: seedColor == null
@@ -115,6 +111,7 @@ class M3EThemeData {
     );
   }
 
+  /// Dark theme, optionally seeded from [seedColor].
   factory M3EThemeData.dark({Color? seedColor}) {
     return M3EThemeData(
       colorScheme: seedColor == null
@@ -123,6 +120,7 @@ class M3EThemeData {
     );
   }
 
+  /// Adapts a Material [ThemeData] into an [M3EThemeData].
   factory M3EThemeData.fromMaterial(ThemeData theme) {
     final M3EThemeData? cached = _materialCache[theme];
     if (cached != null) {
@@ -142,19 +140,35 @@ class M3EThemeData {
     return data;
   }
 
+  /// Color roles for this theme.
   final M3EColorScheme colorScheme;
+
+  /// Type scale for this theme.
   final M3ETypeScale typeScale;
 
   /// Default icon size/opacity/etc. When color is null, icons use
   /// [M3EColorScheme.onSurface] (including after dynamic color updates).
   final IconThemeData iconTheme;
 
+  /// Spacing scale for this theme.
   final M3ESpacing spacing;
+
+  /// Visual density offset applied to Material [VisualDensity].
   final double visualDensity;
+
+  /// Target platform overrides, if any.
   final TargetPlatform? platform;
+
+  /// Whether Material 3 behavior is enabled in [toThemeData].
   final bool useMaterial3;
+
+  /// Optional splash color override for ink.
   final Color? splashColor;
+
+  /// Optional highlight color override for ink.
   final Color? highlightColor;
+
+  /// Brightness derived from [colorScheme].
   final Brightness brightness;
 
   /// [typeScale] as a Material [TextTheme], colored with
@@ -163,48 +177,124 @@ class M3EThemeData {
       typeScale.withColor(colorScheme.onSurface).toTextTheme();
 
   /// [iconTheme] with [M3EColorScheme.onSurface] when no explicit color is set.
-  IconThemeData get resolvedIconTheme => iconTheme.copyWith(
-        color: iconTheme.color ?? colorScheme.onSurface,
-      );
+  IconThemeData get resolvedIconTheme =>
+      iconTheme.copyWith(color: iconTheme.color ?? colorScheme.onSurface);
 
+  /// App bar component theme.
   final M3EAppBarTheme appBarTheme;
+
+  /// Badge component theme.
   final M3EBadgeTheme badgeTheme;
+
+  /// Bottom sheet component theme.
   final M3EBottomSheetTheme bottomSheetTheme;
+
+  /// Button component theme.
   final M3EButtonTheme buttonTheme;
+
+  /// Card component theme.
   final M3ECardTheme cardTheme;
+
+  /// Carousel component theme.
   final M3ECarouselTheme carouselTheme;
+
+  /// Checkbox component theme.
   final M3ECheckboxTheme checkboxTheme;
+
+  /// Chip component theme.
   final M3EChipTheme chipTheme;
+
+  /// Date picker component theme.
   final M3EDatePickerTheme datePickerTheme;
+
+  /// Dialog component theme.
   final M3EDialogTheme dialogTheme;
+
+  /// Divider component theme.
   final M3EDividerTheme dividerTheme;
+
+  /// Dropdown menu component theme.
   final M3EDropdownMenuTheme dropdownMenuTheme;
+
+  /// FAB component theme.
   final M3EFabTheme fabTheme;
+
+  /// FAB menu component theme.
   final M3EFabMenuTheme fabMenuTheme;
+
+  /// Icon button component theme.
   final M3EIconButtonTheme iconButtonTheme;
+
+  /// List component theme.
   final M3EListTheme listTheme;
+
+  /// Loading indicator component theme.
   final M3ELoadingIndicatorTheme loadingIndicatorTheme;
+
+  /// Menu component theme.
   final M3EMenuTheme menuTheme;
+
+  /// Navigation bar component theme.
   final M3ENavigationBarTheme navigationBarTheme;
+
+  /// Navigation drawer component theme.
   final M3ENavigationDrawerTheme navigationDrawerTheme;
+
+  /// Navigation rail component theme.
   final M3ENavigationRailTheme navigationRailTheme;
+
+  /// Progress indicator component theme.
   final M3EProgressIndicatorTheme progressIndicatorTheme;
+
+  /// Radio button component theme.
   final M3ERadioTheme radioTheme;
+
+  /// Refresh indicator component theme.
   final M3ERefreshIndicatorTheme refreshIndicatorTheme;
+
+  /// Search bar component theme.
   final M3ESearchBarTheme searchBarTheme;
+
+  /// Search view component theme.
   final M3ESearchViewTheme searchViewTheme;
+
+  /// Segmented button component theme.
   final M3ESegmentedButtonTheme segmentedButtonTheme;
+
+  /// Side sheet component theme.
   final M3ESideSheetTheme sideSheetTheme;
+
+  /// Slider component theme.
   final M3ESliderTheme sliderTheme;
+
+  /// Snackbar component theme.
   final M3ESnackbarTheme snackBarTheme;
+
+  /// Split button component theme.
   final M3ESplitButtonTheme splitButtonTheme;
+
+  /// Switch component theme.
   final M3ESwitchTheme switchTheme;
+
+  /// Tab component theme.
   final M3ETabTheme tabTheme;
+
+  /// Text field component theme.
   final M3ETextFieldTheme textFieldTheme;
+
+  /// Time picker component theme.
   final M3ETimePickerTheme timePickerTheme;
+
+  /// Toggle button component theme.
   final M3EToggleButtonTheme toggleButtonTheme;
+
+  /// Toggle button group component theme.
   final M3EToggleButtonGroupTheme toggleButtonGroupTheme;
+
+  /// Toolbar component theme.
   final M3EToolbarTheme toolbarTheme;
+
+  /// Tooltip component theme.
   final M3ETooltipTheme tooltipTheme;
 
   /// Returns a copy with [colorScheme] swapped and all component themes kept.
@@ -217,9 +307,7 @@ class M3EThemeData {
   /// Preserves non-color tokens (type scale, spacing, component themes) while
   /// swapping in a dark `M3EColorScheme` seeded from `colorScheme.primary`.
   M3EThemeData deriveDarkTemplate() {
-    return M3EThemeData.dark(
-      seedColor: colorScheme.primary,
-    ).copyWith(
+    return M3EThemeData.dark(seedColor: colorScheme.primary).copyWith(
       typeScale: typeScale,
       iconTheme: iconTheme,
       spacing: spacing,
@@ -270,6 +358,7 @@ class M3EThemeData {
     );
   }
 
+  /// Returns a copy with the given fields replaced.
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
@@ -346,14 +435,18 @@ class M3EThemeData {
       fabMenuTheme: fabMenuTheme ?? this.fabMenuTheme,
       iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
       listTheme: listTheme ?? this.listTheme,
-      loadingIndicatorTheme: loadingIndicatorTheme ?? this.loadingIndicatorTheme,
+      loadingIndicatorTheme:
+          loadingIndicatorTheme ?? this.loadingIndicatorTheme,
       menuTheme: menuTheme ?? this.menuTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
-      navigationDrawerTheme: navigationDrawerTheme ?? this.navigationDrawerTheme,
+      navigationDrawerTheme:
+          navigationDrawerTheme ?? this.navigationDrawerTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
-      progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
+      progressIndicatorTheme:
+          progressIndicatorTheme ?? this.progressIndicatorTheme,
       radioTheme: radioTheme ?? this.radioTheme,
-      refreshIndicatorTheme: refreshIndicatorTheme ?? this.refreshIndicatorTheme,
+      refreshIndicatorTheme:
+          refreshIndicatorTheme ?? this.refreshIndicatorTheme,
       searchBarTheme: searchBarTheme ?? this.searchBarTheme,
       searchViewTheme: searchViewTheme ?? this.searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
@@ -366,12 +459,14 @@ class M3EThemeData {
       textFieldTheme: textFieldTheme ?? this.textFieldTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonTheme: toggleButtonTheme ?? this.toggleButtonTheme,
-      toggleButtonGroupTheme: toggleButtonGroupTheme ?? this.toggleButtonGroupTheme,
+      toggleButtonGroupTheme:
+          toggleButtonGroupTheme ?? this.toggleButtonGroupTheme,
       toolbarTheme: toolbarTheme ?? this.toolbarTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
     );
   }
 
+  /// Projects this theme onto a Material [ThemeData].
   ThemeData toThemeData() {
     final IconThemeData icons = resolvedIconTheme;
     return ThemeData(

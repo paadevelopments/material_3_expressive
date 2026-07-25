@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -9,7 +8,7 @@
 /// How buttons in the group are visually connected.
 enum M3EButtonGroupType {
   /// Independent buttons with gaps between them. Spacing is controlled by
-  /// [density] parameter.
+  /// the density parameter.
   standard,
 
   /// Buttons share edges with no gap. Inner corners animate on press;
@@ -43,4 +42,10 @@ enum M3EButtonGroupOverflow {
 }
 
 /// Style for the overflow menu.
-enum M3EButtonGroupOverflowMenuStyle { popup, bottomSheet }
+enum M3EButtonGroupOverflowMenuStyle {
+  /// Show overflow actions in a popup menu.
+  popup,
+
+  /// Show overflow actions in a modal bottom sheet.
+  bottomSheet,
+}

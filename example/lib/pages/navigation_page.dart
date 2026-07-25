@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
 import 'package:material_3_expressive/components/navigation_bar/models/m3e_navigation_bar_destination.dart';
-import 'package:material_3_expressive/components/navigation_drawer/models/m3e_navigation_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_fab_slot.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
@@ -51,54 +50,60 @@ class _NavigationPageState extends State<NavigationPage>
 
   static const List<M3ENavigationBarDestination> _barDestinations =
       <M3ENavigationBarDestination>[
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.search),
-      label: 'Search',
-      badgeDot: true,
-    ),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.calendar_today),
-      label: 'Agenda',
-      badgeCount: 3,
-    ),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
-  ];
-
-  static const List<M3ENavigationRailSection> _railSections =
-      <M3ENavigationRailSection>[
-    M3ENavigationRailSection(
-      destinations: <M3ENavigationRailDestination>[
-        M3ENavigationRailDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
-        M3ENavigationRailDestination(
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
+        M3ENavigationBarDestination(
           icon: Icon(M3EIcons.search),
           label: 'Search',
+          badgeDot: true,
         ),
-        M3ENavigationRailDestination(
+        M3ENavigationBarDestination(
           icon: Icon(M3EIcons.calendar_today),
           label: 'Agenda',
           badgeCount: 3,
         ),
-        M3ENavigationRailDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
-      ],
-    ),
-  ];
+        M3ENavigationBarDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+      ];
+
+  static const List<M3ENavigationRailSection> _railSections =
+      <M3ENavigationRailSection>[
+        M3ENavigationRailSection(
+          destinations: <M3ENavigationRailDestination>[
+            M3ENavigationRailDestination(
+              icon: Icon(M3EIcons.menu),
+              label: 'Home',
+            ),
+            M3ENavigationRailDestination(
+              icon: Icon(M3EIcons.search),
+              label: 'Search',
+            ),
+            M3ENavigationRailDestination(
+              icon: Icon(M3EIcons.calendar_today),
+              label: 'Agenda',
+              badgeCount: 3,
+            ),
+            M3ENavigationRailDestination(
+              icon: Icon(M3EIcons.edit),
+              label: 'Drafts',
+            ),
+          ],
+        ),
+      ];
 
   static const List<M3ENavigationDestination> _drawerDestinations =
       <M3ENavigationDestination>[
-    M3ENavigationDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
-    M3ENavigationDestination(
-      icon: Icon(M3EIcons.search),
-      label: 'Search',
-      showBadge: true,
-    ),
-    M3ENavigationDestination(
-      icon: Icon(M3EIcons.calendar_today),
-      label: 'Agenda',
-      badgeLabel: '3',
-    ),
-    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
-  ];
+        M3ENavigationDestination(icon: Icon(M3EIcons.menu), label: 'Home'),
+        M3ENavigationDestination(
+          icon: Icon(M3EIcons.search),
+          label: 'Search',
+          showBadge: true,
+        ),
+        M3ENavigationDestination(
+          icon: Icon(M3EIcons.calendar_today),
+          label: 'Agenda',
+          badgeLabel: '3',
+        ),
+        M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -121,10 +126,7 @@ class _NavigationPageState extends State<NavigationPage>
         borderRadius: M3EShapes.radiusLarge,
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
-      child: ClipRRect(
-        borderRadius: M3EShapes.radiusLarge,
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: M3EShapes.radiusLarge, child: child),
     );
   }
 
@@ -194,9 +196,9 @@ class _NavigationPageState extends State<NavigationPage>
           theme,
           // Default safeArea: true + viewPadding shows the top system inset.
           MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              viewPadding: const EdgeInsets.only(top: 44),
-            ),
+            data: MediaQuery.of(
+              context,
+            ).copyWith(viewPadding: const EdgeInsets.only(top: 44)),
             child: M3EAppBar.search(
               searchController: _appBarSafeAreaSearchController,
               barHintText: 'Search • safe area',
@@ -356,10 +358,7 @@ class _NavigationPageState extends State<NavigationPage>
       M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
     ];
 
-    Widget insetFrame({
-      required EdgeInsets padding,
-      required Widget child,
-    }) {
+    Widget insetFrame({required EdgeInsets padding, required Widget child}) {
       return child;
     }
 
@@ -369,9 +368,7 @@ class _NavigationPageState extends State<NavigationPage>
         DemoRow(
           label: 'Floating (tap filled trigger to expand / collapse)',
           children: <Widget>[
-            M3EToolbar(
-              actions: sampleActions,
-            ),
+            M3EToolbar(actions: sampleActions),
             M3EToolbar(
               colorStyle: M3EToolbarColorStyle.vibrant,
               actions: sampleActions,
@@ -393,7 +390,8 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label: 'Floating + FAB (pill expands independently; FAB always shown)',
+          label:
+              'Floating + FAB (pill expands independently; FAB always shown)',
           children: <Widget>[
             M3EToolbar(
               actions: sampleActions,
@@ -415,10 +413,7 @@ class _NavigationPageState extends State<NavigationPage>
             Row(
               spacing: 16,
               children: [
-                M3EToolbar(
-                  axis: Axis.vertical,
-                  actions: sampleActions,
-                ),
+                M3EToolbar(axis: Axis.vertical, actions: sampleActions),
                 M3EToolbar(
                   axis: Axis.vertical,
                   colorStyle: M3EToolbarColorStyle.vibrant,
@@ -426,7 +421,7 @@ class _NavigationPageState extends State<NavigationPage>
                   fabIcon: const Icon(M3EIcons.add),
                   onFabPressed: () {},
                   fabPosition: M3EToolbarFabPosition.bottom,
-                )
+                ),
               ],
             ),
           ],
@@ -443,10 +438,7 @@ class _NavigationPageState extends State<NavigationPage>
                 actions: sampleActions,
               ),
             ),
-            M3EToolbar(
-              safeArea: false,
-              actions: sampleActions,
-            ),
+            M3EToolbar(safeArea: false, actions: sampleActions),
           ],
         ),
         DemoRow(
@@ -607,10 +599,7 @@ class _NavigationPageState extends State<NavigationPage>
 }
 
 class _SpecMenuDemo extends StatelessWidget {
-  const _SpecMenuDemo({
-    required this.label,
-    required this.colorStyle,
-  });
+  const _SpecMenuDemo({required this.label, required this.colorStyle});
 
   final String label;
   final M3EMenuColorStyle colorStyle;

@@ -5,7 +5,10 @@ import 'package:flutter/widgets.dart';
 /// List items read this scope to skip their own card wrapper when the parent
 /// list already owns the outermost card surface.
 class M3EListItemScope extends InheritedWidget {
+  /// M3EListItemScope.
   const M3EListItemScope({required super.child, super.key});
+
+  /// isEmbedded.
 
   static bool isEmbedded(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<M3EListItemScope>() != null;

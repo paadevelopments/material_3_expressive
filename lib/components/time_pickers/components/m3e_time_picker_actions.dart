@@ -6,6 +6,7 @@ import '../../buttons/m3e_buttons.dart';
 
 /// Cancel and confirm actions for time picker dialogs.
 class M3ETimePickerActions extends StatelessWidget {
+  /// M3ETimePickerActions.
   const M3ETimePickerActions({
     required this.onCancel,
     required this.onConfirm,
@@ -14,9 +15,17 @@ class M3ETimePickerActions extends StatelessWidget {
     super.key,
   });
 
+  /// onCancel.
+
   final VoidCallback onCancel;
+
+  /// onConfirm.
   final VoidCallback onConfirm;
+
+  /// cancelText.
   final String cancelText;
+
+  /// confirmText.
   final String confirmText;
 
   @override
@@ -42,10 +51,7 @@ class M3ETimePickerActions extends StatelessWidget {
               child: Text(cancelText),
             ),
             SizedBox(width: dialogTheme.actionGap),
-            M3EButton(
-              onPressed: onConfirm,
-              child: Text(confirmText),
-            ),
+            M3EButton(onPressed: onConfirm, child: Text(confirmText)),
           ],
         ),
       ),

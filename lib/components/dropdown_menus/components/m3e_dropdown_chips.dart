@@ -11,18 +11,34 @@ import '../utils/m3e_dropdown_spring_motion.dart';
 
 /// Internal widget for a bouncy spring chip.
 class M3ESpringChip<T> extends StatefulWidget {
+  /// item.
   final M3EDropdownItem<T> item;
+
+  /// cd.
   final M3EDropdownChipStyle cd;
+
+  /// chipColor.
   final Color chipColor;
+
+  /// labelStyle.
   final TextStyle? labelStyle;
+
+  /// scheme.
   final M3EColorScheme scheme;
+
+  /// enabled.
   final bool enabled;
+
+  /// onRemove.
   final VoidCallback onRemove;
-  final double
-  slideOffset; // how much to slide left when a previous chip is removed
+
+  /// How much to slide left when a previous chip is removed.
+  final double slideOffset;
 
   /// When non-null, replaces the default chip body with this widget.
   final Widget? customChild;
+
+  /// M3ESpringChip.
 
   const M3ESpringChip({
     required super.key,
@@ -40,6 +56,8 @@ class M3ESpringChip<T> extends StatefulWidget {
   @override
   State<M3ESpringChip<T>> createState() => M3ESpringChipState<T>();
 }
+
+/// M3ESpringChipState.
 
 class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
     with TickerProviderStateMixin {
@@ -73,6 +91,8 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
     }
   }
 
+  /// triggerSquish.
+
   void triggerSquish(double intensity) {
     // We animate from 1.0 -> intensity -> 1.0 (handled by the spring)
     _squishCtrl.animateTo(1, from: intensity);
@@ -85,6 +105,8 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
     _squishCtrl.dispose();
     super.dispose();
   }
+
+  /// animateOut.
 
   void animateOut(VoidCallback onDone) {
     _scaleCtrl.motion = widget.cd.closeMotion.toMotion();
@@ -139,15 +161,10 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
       widget.scheme.onSurface,
       disabledOpacity,
     );
-    final disabledBg = M3EColorUtils.withOpacity(
-      widget.scheme.onSurface,
-      0.12,
-    );
-    final labelStyle = widget.labelStyle ??
-        theme.dropdownMenuTheme.chipLabelStyle(
-          theme.typeScale,
-          widget.scheme,
-        );
+    final disabledBg = M3EColorUtils.withOpacity(widget.scheme.onSurface, 0.12);
+    final labelStyle =
+        widget.labelStyle ??
+        theme.dropdownMenuTheme.chipLabelStyle(theme.typeScale, widget.scheme);
     return MouseRegion(
       cursor: cd.mouseCursor ?? SystemMouseCursors.click,
       child: Container(
@@ -196,8 +213,13 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
 
 /// Layout delegate for the chips in non-wrap mode.
 class M3EChipFlowDelegate extends FlowDelegate {
+  /// slideAnimations.
   final List<Animation<double>> slideAnimations;
+
+  /// spacing.
   final double spacing;
+
+  /// M3EChipFlowDelegate.
 
   M3EChipFlowDelegate({required this.slideAnimations, required this.spacing})
     : super(repaint: Listenable.merge(slideAnimations));
@@ -231,10 +253,19 @@ class M3EChipFlowDelegate extends FlowDelegate {
 
 /// Internal indicator shown when more chips exist than the max display count.
 class M3EMoreChipsIndicator extends StatefulWidget {
+  /// count.
   final int count;
+
+  /// cd.
   final M3EDropdownChipStyle cd;
+
+  /// chipColor.
   final Color chipColor;
+
+  /// labelStyle.
   final TextStyle? labelStyle;
+
+  /// M3EMoreChipsIndicator.
 
   const M3EMoreChipsIndicator({
     super.key,
@@ -247,6 +278,8 @@ class M3EMoreChipsIndicator extends StatefulWidget {
   @override
   State<M3EMoreChipsIndicator> createState() => M3EMoreChipsIndicatorState();
 }
+
+/// M3EMoreChipsIndicatorState.
 
 class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
     with TickerProviderStateMixin {
@@ -274,9 +307,13 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
     )..value = 1.0;
   }
 
+  /// triggerSquish.
+
   void triggerSquish(double intensity) {
     _squishCtrl.animateTo(1, from: intensity);
   }
+
+  /// animateOut.
 
   void animateOut(VoidCallback onDone) {
     _scaleCtrl.motion = widget.cd.closeMotion.toMotion();
@@ -290,6 +327,8 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
 
     _scaleCtrl.addListener(listener);
   }
+
+  /// animateIn.
 
   void animateIn() {
     _scaleCtrl.motion = widget.cd.openMotion.toMotion();
@@ -348,7 +387,8 @@ class M3EMoreChipsIndicatorState extends State<M3EMoreChipsIndicator>
             padding: widget.cd.padding,
             child: Text(
               '+${widget.count}',
-              style: widget.labelStyle ??
+              style:
+                  widget.labelStyle ??
                   theme.dropdownMenuTheme.chipLabelStyle(
                     theme.typeScale,
                     theme.colorScheme,

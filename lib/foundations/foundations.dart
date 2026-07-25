@@ -1,3 +1,7 @@
+/// Design tokens, theming hosts, and shared interaction primitives for
+/// Material 3 Expressive components.
+library;
+
 export 'components/m3e_component_theme.dart';
 export 'm3e_color_scheme.dart';
 export 'm3e_color_utils.dart';

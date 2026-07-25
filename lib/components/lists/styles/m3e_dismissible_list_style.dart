@@ -50,8 +50,14 @@ class M3EDismissibleListStyle {
   /// Collapse speed. Higher = faster.
   final double collapseSpeed;
 
+  /// splashColor.
+
   final Color? splashColor;
+
+  /// highlightColor.
   final Color? highlightColor;
+
+  /// splashFactory.
   final InteractiveInkFeatureFactory? splashFactory;
 
   /// Whether detected gestures provide feedback.
@@ -74,6 +80,8 @@ class M3EDismissibleListStyle {
 
   /// How many cards are affected.
   final int neighbourReach;
+
+  /// M3EDismissibleListStyle.
 
   const M3EDismissibleListStyle({
     this.outerRadius = M3EListDismissibleTheme.defaultOuterRadius,

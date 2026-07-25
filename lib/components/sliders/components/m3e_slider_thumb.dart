@@ -4,6 +4,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ERangeSlider, M3ESlider;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ERangeSlider, M3ESlider;
 
 import '../res/m3e_slider_tokens.dart';
 
@@ -11,6 +15,7 @@ import '../res/m3e_slider_tokens.dart';
 ///
 /// Shrinks along its thickness axis while [pressed] (Compose press/focus/drag).
 class M3ESliderThumb extends StatelessWidget {
+  /// M3ESliderThumb.
   const M3ESliderThumb({
     required this.color,
     required this.pressed,
@@ -21,8 +26,14 @@ class M3ESliderThumb extends StatelessWidget {
     super.key,
   });
 
+  /// color.
+
   final Color color;
+
+  /// pressed.
   final bool pressed;
+
+  /// axis.
   final Axis axis;
 
   /// Resting thumb width (cross-axis for vertical). Defaults to token sizes.
@@ -36,20 +47,22 @@ class M3ESliderThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool vertical = axis == Axis.vertical;
-    final double restingW = width ??
+    final vertical = axis == Axis.vertical;
+    final double restingW =
+        width ??
         (vertical
             ? M3ESliderTokens.verticalHandleWidth
             : M3ESliderTokens.handleWidth);
-    final double restingH = height ??
+    final double restingH =
+        height ??
         (vertical
             ? M3ESliderTokens.verticalHandleHeight
             : M3ESliderTokens.handleHeight);
     final double pressedT =
         pressedThickness ?? M3ESliderTokens.pressedHandleWidth;
 
-    final double w = vertical ? restingW : (pressed ? pressedT : restingW);
-    final double h = vertical ? (pressed ? pressedT : restingH) : restingH;
+    final w = vertical ? restingW : (pressed ? pressedT : restingW);
+    final h = vertical ? (pressed ? pressedT : restingH) : restingH;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),

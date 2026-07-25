@@ -11,6 +11,7 @@ import 'enums/m3e_text_field_variant.dart';
 /// focus or when the field holds text, and the active indicator/outline and
 /// label recolor to reflect focus and error states.
 class M3ETextField extends StatefulWidget {
+  /// M3ETextField.
   const M3ETextField({
     this.controller,
     this.focusNode,
@@ -31,22 +32,56 @@ class M3ETextField extends StatefulWidget {
     super.key,
   });
 
+  /// controller.
+
   final TextEditingController? controller;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// label.
   final String? label;
+
+  /// supportingText.
   final String? supportingText;
+
+  /// errorText.
   final String? errorText;
+
+  /// leading.
   final Widget? leading;
+
+  /// trailing.
   final Widget? trailing;
+
+  /// variant.
   final M3ETextFieldVariant variant;
+
+  /// obscureText.
   final bool obscureText;
+
+  /// enabled.
   final bool enabled;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// textInputAction.
   final TextInputAction? textInputAction;
+
+  /// onChanged.
   final ValueChanged<String>? onChanged;
+
+  /// onSubmitted.
   final ValueChanged<String>? onSubmitted;
+
+  /// onTapOutside.
   final TapRegionCallback? onTapOutside;
+
+  /// maxLines.
   final int maxLines;
+
+  /// The hasError.
 
   bool get hasError => errorText != null;
 
@@ -92,13 +127,11 @@ class _M3ETextFieldState extends State<M3ETextField> {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
-    return M3EComponentTheme(builder: (context) => Column(
+    return M3EComponentTheme(
+      builder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _buildContainer(theme),
-          _buildSupporting(theme),
-        ],
+        children: <Widget>[_buildContainer(theme), _buildSupporting(theme)],
       ),
     );
   }
@@ -128,18 +161,16 @@ class _M3ETextFieldState extends State<M3ETextField> {
           focused: _focused,
           hasError: widget.hasError,
         ),
-        child: Row(
-          children: _buildRowChildren(theme, scheme, accent),
-        ),
+        child: Row(children: _buildRowChildren(theme, scheme, accent)),
       ),
     );
   }
 
   List<Widget> _buildRowChildren(
-      M3EThemeData theme,
-      M3EColorScheme scheme,
-      Color accent,
-      ) {
+    M3EThemeData theme,
+    M3EColorScheme scheme,
+    Color accent,
+  ) {
     final textFieldTheme = theme.textFieldTheme;
     return <Widget>[
       if (widget.leading != null) ...<Widget>[
@@ -166,14 +197,11 @@ class _M3ETextFieldState extends State<M3ETextField> {
     ];
   }
 
-  Widget _buildField(
-      M3EThemeData theme,
-      M3EColorScheme scheme,
-      Color accent,
-      ) {
+  Widget _buildField(M3EThemeData theme, M3EColorScheme scheme, Color accent) {
     final textFieldTheme = theme.textFieldTheme;
-    final TextStyle inputStyle =
-        theme.typeScale.bodyLarge.copyWith(color: scheme.onSurface);
+    final TextStyle inputStyle = theme.typeScale.bodyLarge.copyWith(
+      color: scheme.onSurface,
+    );
 
     if (widget.label == null) {
       return SizedBox(
@@ -194,8 +222,9 @@ class _M3ETextFieldState extends State<M3ETextField> {
             style: inputStyle,
             cursorColor: accent,
             backgroundCursorColor: scheme.outlineVariant,
-            selectionColor: scheme.primary
-                .withValues(alpha: theme.textFieldTheme.selectionOpacity),
+            selectionColor: scheme.primary.withValues(
+              alpha: theme.textFieldTheme.selectionOpacity,
+            ),
           ),
         ),
       );
@@ -241,8 +270,9 @@ class _M3ETextFieldState extends State<M3ETextField> {
               style: inputStyle,
               cursorColor: accent,
               backgroundCursorColor: scheme.outlineVariant,
-              selectionColor: scheme.primary
-                  .withValues(alpha: theme.textFieldTheme.selectionOpacity),
+              selectionColor: scheme.primary.withValues(
+                alpha: theme.textFieldTheme.selectionOpacity,
+              ),
             ),
           ),
         ],

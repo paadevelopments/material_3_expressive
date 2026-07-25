@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3EBottomSheet`.
 @immutable
 class M3EBottomSheetTheme extends M3EThemeExtension<M3EBottomSheetTheme> {
+  /// M3EBottomSheetTheme.
   const M3EBottomSheetTheme({
     this.maxWidth = 640,
     this.topCornerRadius = 28,
@@ -17,22 +18,48 @@ class M3EBottomSheetTheme extends M3EThemeExtension<M3EBottomSheetTheme> {
     this.dismissVelocity = 200,
   });
 
+  /// defaults.
+
   static const M3EBottomSheetTheme defaults = M3EBottomSheetTheme();
 
+  /// maxWidth.
+
   final double maxWidth;
+
+  /// topCornerRadius.
   final double topCornerRadius;
+
+  /// handleWidth.
   final double handleWidth;
+
+  /// handleHeight.
   final double handleHeight;
+
+  /// handleCornerRadius.
   final double handleCornerRadius;
+
+  /// handleVerticalPadding.
   final double handleVerticalPadding;
+
+  /// handleOpacity.
   final double handleOpacity;
+
+  /// scrimOpacity.
   final double scrimOpacity;
+
+  /// dismissVelocity.
   final double dismissVelocity;
+
+  /// containerColor.
 
   Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainerLow;
 
+  /// handleColor.
+
   Color handleColor(M3EColorScheme scheme) =>
       M3EColorUtils.withOpacity(scheme.onSurfaceVariant, handleOpacity);
+
+  /// scrimColor.
 
   Color scrimColor(M3EColorScheme scheme) =>
       scheme.scrim.withValues(alpha: scrimOpacity);
@@ -73,10 +100,16 @@ class M3EBottomSheetTheme extends M3EThemeExtension<M3EBottomSheetTheme> {
       topCornerRadius: _lerpDouble(topCornerRadius, other.topCornerRadius, t)!,
       handleWidth: _lerpDouble(handleWidth, other.handleWidth, t)!,
       handleHeight: _lerpDouble(handleHeight, other.handleHeight, t)!,
-      handleCornerRadius:
-          _lerpDouble(handleCornerRadius, other.handleCornerRadius, t)!,
-      handleVerticalPadding:
-          _lerpDouble(handleVerticalPadding, other.handleVerticalPadding, t)!,
+      handleCornerRadius: _lerpDouble(
+        handleCornerRadius,
+        other.handleCornerRadius,
+        t,
+      )!,
+      handleVerticalPadding: _lerpDouble(
+        handleVerticalPadding,
+        other.handleVerticalPadding,
+        t,
+      )!,
       handleOpacity: _lerpDouble(handleOpacity, other.handleOpacity, t)!,
       scrimOpacity: _lerpDouble(scrimOpacity, other.scrimOpacity, t)!,
       dismissVelocity: _lerpDouble(dismissVelocity, other.dismissVelocity, t)!,

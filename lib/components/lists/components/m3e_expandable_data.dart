@@ -45,7 +45,7 @@ class M3EExpandableData {
     this.leading,
     this.trailing,
   }) : assert(
-          subtitle != null || body != null || bodyBuilder != null,
-          'Provide either a subtitle (text), a body (widget), or a bodyBuilder to display content.',
-        );
+         subtitle != null || body != null || bodyBuilder != null,
+         'Provide either a subtitle (text), a body (widget), or a bodyBuilder to display content.',
+       );
 }

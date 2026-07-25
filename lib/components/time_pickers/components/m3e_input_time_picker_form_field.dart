@@ -8,6 +8,7 @@ import '../utils/m3e_time_picker_utils.dart';
 
 /// Text fields for entering a time in a picker dialog.
 class M3EInputTimePickerFormField extends StatefulWidget {
+  /// M3EInputTimePickerFormField.
   const M3EInputTimePickerFormField({
     this.initialTime,
     this.onTimeSubmitted,
@@ -21,14 +22,32 @@ class M3EInputTimePickerFormField extends StatefulWidget {
     super.key,
   });
 
+  /// initialTime.
+
   final M3ETime? initialTime;
+
+  /// onTimeSubmitted.
   final ValueChanged<M3ETime>? onTimeSubmitted;
+
+  /// onTimeSaved.
   final ValueChanged<M3ETime>? onTimeSaved;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// hourLabelText.
   final String? hourLabelText;
+
+  /// minuteLabelText.
   final String? minuteLabelText;
+
+  /// use24HourFormat.
   final bool? use24HourFormat;
+
+  /// emptyInitialInput.
   final bool emptyInitialInput;
+
+  /// autofocus.
   final bool autofocus;
 
   @override
@@ -45,9 +64,9 @@ class _M3EInputTimePickerFormFieldState
   bool _isPm = false;
 
   bool get _use24HourFormat => M3ETimePickerUtils.use24HourFormat(
-        context,
-        alwaysUse24HourFormat: widget.use24HourFormat,
-      );
+    context,
+    alwaysUse24HourFormat: widget.use24HourFormat,
+  );
 
   @override
   void initState() {
@@ -150,8 +169,9 @@ class _M3EInputTimePickerFormFieldState
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     return FormField<void>(
       builder: (FormFieldState<void> field) {
         return Column(
@@ -164,7 +184,8 @@ class _M3EInputTimePickerFormFieldState
                   child: M3ETextField(
                     controller: _hourController,
                     focusNode: _hourFocus,
-                    label: widget.hourLabelText ??
+                    label:
+                        widget.hourLabelText ??
                         localizations.timePickerHourLabel,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
@@ -178,7 +199,8 @@ class _M3EInputTimePickerFormFieldState
                   child: M3ETextField(
                     controller: _minuteController,
                     focusNode: _minuteFocus,
-                    label: widget.minuteLabelText ??
+                    label:
+                        widget.minuteLabelText ??
                         localizations.timePickerMinuteLabel,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,

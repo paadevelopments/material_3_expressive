@@ -17,6 +17,7 @@ export 'styles/m3e_tab_theme.dart';
 /// Primary indicators match each tab's label/content width; secondary
 /// indicators span the full tab slot.
 class M3ETabs extends StatefulWidget {
+  /// M3ETabs.
   const M3ETabs({
     required this.tabs,
     required this.selectedIndex,
@@ -25,9 +26,17 @@ class M3ETabs extends StatefulWidget {
     super.key,
   }) : assert(tabs.length >= 2, 'A tab bar needs 2+ tabs.');
 
+  /// tabs.
+
   final List<M3ETab> tabs;
+
+  /// selectedIndex.
   final int selectedIndex;
+
+  /// onTabSelected.
   final ValueChanged<int> onTabSelected;
+
+  /// variant.
   final M3ETabsVariant variant;
 
   @override
@@ -78,8 +87,7 @@ class _M3ETabsState extends State<M3ETabs> {
   }
 
   void _measureIndicator() {
-    final RenderBox? barBox =
-        _barKey.currentContext?.findRenderObject() as RenderBox?;
+    final barBox = _barKey.currentContext?.findRenderObject() as RenderBox?;
     if (barBox == null || !barBox.hasSize) {
       return;
     }
@@ -95,13 +103,15 @@ class _M3ETabsState extends State<M3ETabs> {
       width = barBox.size.width / widget.tabs.length;
       left = width * index;
     } else {
-      final RenderBox? contentBox =
+      final contentBox =
           _contentKeys[index].currentContext?.findRenderObject() as RenderBox?;
       if (contentBox == null || !contentBox.hasSize) {
         return;
       }
-      final Offset contentOrigin =
-          contentBox.localToGlobal(Offset.zero, ancestor: barBox);
+      final Offset contentOrigin = contentBox.localToGlobal(
+        Offset.zero,
+        ancestor: barBox,
+      );
       width = contentBox.size.width;
       left = contentOrigin.dx;
     }
@@ -122,50 +132,51 @@ class _M3ETabsState extends State<M3ETabs> {
     final scheme = theme.colorScheme;
 
     return M3EComponentTheme(
-      builder: (BuildContext context) => NotificationListener<SizeChangedLayoutNotification>(
-        onNotification: (SizeChangedLayoutNotification notification) {
-          _scheduleMeasure();
-          return false;
-        },
-        child: SizeChangedLayoutNotifier(
-          child: DecoratedBox(
-            key: _barKey,
-            decoration: BoxDecoration(
-              color: tabTheme.backgroundColor(scheme),
-              border: Border(
-                bottom: BorderSide(color: tabTheme.dividerColor(scheme)),
-              ),
-            ),
-            child: SizedBox(
-              height: tabTheme.height,
-              child: Stack(
-                children: <Widget>[
-                  Row(children: _buildTabs(theme, tabTheme)),
-                  if (_indicatorLeft != null && _indicatorWidth != null)
-                    AnimatedPositioned(
-                      duration: M3EMotion.medium2,
-                      curve: M3EMotion.emphasized,
-                      left: _indicatorLeft,
-                      width: _indicatorWidth,
-                      bottom: 0,
-                      height: tabTheme.indicatorHeight,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: tabTheme.indicatorColor(scheme),
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(
-                              tabTheme.indicatorCornerRadius,
+      builder: (BuildContext context) =>
+          NotificationListener<SizeChangedLayoutNotification>(
+            onNotification: (SizeChangedLayoutNotification notification) {
+              _scheduleMeasure();
+              return false;
+            },
+            child: SizeChangedLayoutNotifier(
+              child: DecoratedBox(
+                key: _barKey,
+                decoration: BoxDecoration(
+                  color: tabTheme.backgroundColor(scheme),
+                  border: Border(
+                    bottom: BorderSide(color: tabTheme.dividerColor(scheme)),
+                  ),
+                ),
+                child: SizedBox(
+                  height: tabTheme.height,
+                  child: Stack(
+                    children: <Widget>[
+                      Row(children: _buildTabs(theme, tabTheme)),
+                      if (_indicatorLeft != null && _indicatorWidth != null)
+                        AnimatedPositioned(
+                          duration: M3EMotion.medium2,
+                          curve: M3EMotion.emphasized,
+                          left: _indicatorLeft,
+                          width: _indicatorWidth,
+                          bottom: 0,
+                          height: tabTheme.indicatorHeight,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: tabTheme.indicatorColor(scheme),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(
+                                  tabTheme.indicatorCornerRadius,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 

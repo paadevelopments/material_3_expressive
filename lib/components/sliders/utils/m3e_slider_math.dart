@@ -3,6 +3,12 @@
 
 import 'dart:math' as math;
 
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ERangeSlider, M3ESlider;
+
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ERangeSlider, M3ESlider;
+
 /// Shared fraction / snap helpers for [M3ESlider] and [M3ERangeSlider].
 abstract final class M3ESliderMath {
   const M3ESliderMath._();
@@ -29,10 +35,7 @@ abstract final class M3ESliderMath {
     if (divisions == null || divisions <= 0) {
       return const <double>[];
     }
-    return List<double>.generate(
-      divisions + 1,
-      (int i) => i / divisions,
-    );
+    return List<double>.generate(divisions + 1, (int i) => i / divisions);
   }
 
   /// Snaps [value] to the nearest division step.
@@ -45,7 +48,7 @@ abstract final class M3ESliderMath {
     return min + ((clamped - min) / step).round() * step;
   }
 
-  /// Local pointer position → value along [axis].
+  /// Local pointer position → value along the track axis.
   static double valueFromOffset({
     required double localPrimary,
     required double extent,
@@ -81,10 +84,16 @@ abstract final class M3ESliderMath {
     return best;
   }
 
+  /// lerp.
+
   static double lerp(double a, double b, double t) => a + (b - a) * t;
+
+  /// clampRangeStart.
 
   static double clampRangeStart(double start, double end, double min) =>
       math.max(min, math.min(start, end));
+
+  /// clampRangeEnd.
 
   static double clampRangeEnd(double start, double end, double max) =>
       math.min(max, math.max(end, start));

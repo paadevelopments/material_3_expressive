@@ -15,6 +15,7 @@ import 'm3e_theme.dart';
 /// Use `appBuilder` to wrap the themed subtree when extra integration layers
 /// are needed.
 class M3EMaterialApp extends StatefulWidget {
+  /// Creates a Material app wired to adaptive [M3ETheme].
   const M3EMaterialApp({
     required this.data,
     required this.home,
@@ -61,11 +62,22 @@ class M3EMaterialApp extends StatefulWidget {
     super.key,
   });
 
+  /// Expressive theme tokens for the app.
   final M3EThemeData data;
+
+  /// The default route widget.
   final Widget home;
+
+  /// When true, follows platform brightness.
   final bool? autoTheming;
+
+  /// When true, applies device dynamic color.
   final bool? dynamicColoring;
+
+  /// Initial brightness when not following the system.
   final Brightness? initialTheme;
+
+  /// Optional controller for manual brightness overrides.
   final M3EThemeController? controller;
 
   /// When true, enables edge-to-edge layout so app content draws under
@@ -73,22 +85,44 @@ class M3EMaterialApp extends StatefulWidget {
   /// default layout insets apply.
   final bool drawUnderSystemBars;
 
+  /// Key for the root navigator.
   final GlobalKey<NavigatorState>? navigatorKey;
+
+  /// Key for the root scaffold messenger.
   final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
+
+  /// Named routes table.
   final Map<String, WidgetBuilder> routes;
+
+  /// Name of the first route to show.
   final String? initialRoute;
+
+  /// Called to generate a route for a given [RouteSettings].
   final RouteFactory? onGenerateRoute;
+
+  /// Called to generate initial routes.
   final InitialRouteListFactory? onGenerateInitialRoutes;
+
+  /// Called when [onGenerateRoute] fails to generate a route.
   final RouteFactory? onUnknownRoute;
+
+  /// Called when a navigation notification is received.
   final NotificationListenerCallback<NavigationNotification>?
-      onNavigationNotification;
+  onNavigationNotification;
+
+  /// Observers for the root navigator.
   final List<NavigatorObserver> navigatorObservers;
 
   /// Optional wrapper applied after `M3ETheme` in the internal `MaterialApp.builder`.
   final TransitionBuilder? appBuilder;
 
+  /// A one-line description used by the device for this app.
   final String title;
+
+  /// Callback to generate the app title.
   final GenerateAppTitle? onGenerateTitle;
+
+  /// Primary color used for operating system UI.
   final Color? color;
 
   /// Optional Material light theme override. Defaults to `data.toThemeData`.
@@ -98,25 +132,64 @@ class M3EMaterialApp extends StatefulWidget {
   /// `data.deriveDarkTemplate().toThemeData`.
   final ThemeData? darkTheme;
 
+  /// Optional high-contrast light Material theme.
   final ThemeData? highContrastTheme;
+
+  /// Optional high-contrast dark Material theme.
   final ThemeData? highContrastDarkTheme;
+
+  /// Duration of theme change animations.
   final Duration themeAnimationDuration;
+
+  /// Curve of theme change animations.
   final Curve themeAnimationCurve;
+
+  /// Initial locale for the app.
   final Locale? locale;
+
+  /// Delegates for localizing the app.
   final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
+
+  /// Resolves the locale from the device locale list.
   final LocaleListResolutionCallback? localeListResolutionCallback;
+
+  /// Resolves the locale from the device locale.
   final LocaleResolutionCallback? localeResolutionCallback;
+
+  /// Locales this app supports.
   final Iterable<Locale> supportedLocales;
+
+  /// Turns on a grid overlay for debugging.
   final bool debugShowMaterialGrid;
+
+  /// Turns on the performance overlay.
   final bool showPerformanceOverlay;
+
+  /// Checkerboards images to diagnose raster cache.
   final bool checkerboardRasterCacheImages;
+
+  /// Checkerboards layers rendered to offscreen bitmaps.
   final bool checkerboardOffscreenLayers;
+
+  /// Turns on an overlay showing accessibility info.
   final bool showSemanticsDebugger;
+
+  /// Shows the debug banner in checked mode.
   final bool debugShowCheckedModeBanner;
+
+  /// Default map of shortcuts to intents.
   final Map<ShortcutActivator, Intent>? shortcuts;
+
+  /// Default map of intent types to actions.
   final Map<Type, Action<Intent>>? actions;
+
+  /// Restoration ID for state restoration.
   final String? restorationScopeId;
+
+  /// Scroll behavior for the app.
   final ScrollBehavior? scrollBehavior;
+
+  /// Animation style for theme changes.
   final AnimationStyle? themeAnimationStyle;
 
   bool get _usesAdaptiveLifecycle =>
@@ -125,6 +198,7 @@ class M3EMaterialApp extends StatefulWidget {
       controller != null;
 
   @override
+  /// Creates the mutable state for this widget.
   State<M3EMaterialApp> createState() => _M3EMaterialAppState();
 }
 
@@ -153,8 +227,9 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     }
     if (oldWidget.controller != widget.controller) {
       if (oldWidget._usesAdaptiveLifecycle) {
-        (oldWidget.controller ?? _internalController)
-            ?.removeListener(_onThemeControllerChanged);
+        (oldWidget.controller ?? _internalController)?.removeListener(
+          _onThemeControllerChanged,
+        );
       }
       if (widget._usesAdaptiveLifecycle) {
         _effectiveController.addListener(_onThemeControllerChanged);
@@ -198,7 +273,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   Brightness _effectiveBrightness(BuildContext context) {
     final Brightness platformBrightness =
         MediaQuery.maybePlatformBrightnessOf(context) ??
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
 
     return _effectiveController.resolveBrightness(
       platformBrightness,
@@ -208,8 +283,9 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   }
 
   SystemUiOverlayStyle _overlayStyleFor(Brightness brightness) {
-    final Brightness iconBrightness =
-        brightness == Brightness.dark ? Brightness.light : Brightness.dark;
+    final Brightness iconBrightness = brightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
 
     return const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -229,9 +305,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     }
     final MediaQueryData media = MediaQuery.of(context);
     return MediaQuery(
-      data: media.copyWith(
-        padding: media.padding.copyWith(bottom: 0),
-      ),
+      data: media.copyWith(padding: media.padding.copyWith(bottom: 0)),
       child: themed,
     );
   }
@@ -240,14 +314,15 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
   Widget build(BuildContext context) {
     final Brightness platformBrightness =
         MediaQuery.maybePlatformBrightnessOf(context) ??
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
     final ThemeMode themeMode = _effectiveController.effectiveThemeMode(
       platformBrightness: platformBrightness,
       autoTheming: widget.autoTheming ?? false,
       initialTheme: widget.initialTheme,
     );
-    final SystemUiOverlayStyle overlayStyle =
-        _overlayStyleFor(_effectiveBrightness(context));
+    final SystemUiOverlayStyle overlayStyle = _overlayStyleFor(
+      _effectiveBrightness(context),
+    );
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

@@ -1,5 +1,4 @@
 // File exceeds length guideline due to combined toggle button states and motion.
-// ignore: file_length
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:motor/motor.dart';
@@ -26,6 +25,7 @@ const bool _kDefaultEnableFeedback = true;
 ///
 /// Morphs between round (unchecked) and square (checked) shapes.
 class M3EToggleButton extends StatefulWidget {
+  /// const.
   const M3EToggleButton({
     super.key,
     this.onCheckedChange,
@@ -236,25 +236,49 @@ class M3EToggleButton extends StatefulWidget {
   /// Optional mouse cursor to show when hovering over the button.
   final MouseCursor? mouseCursor;
 
+  /// WidgetStateProperty.
+
   // ── Decoration property helpers ───────────────────────────────────────────
 
   WidgetStateProperty<Color?>? get decorationBackgroundColor =>
       decoration?.backgroundColor;
+
+  /// WidgetStateProperty.
   WidgetStateProperty<Color?>? get decorationForegroundColor =>
       decoration?.foregroundColor;
+
+  /// WidgetStateProperty.
   WidgetStateProperty<BorderSide?>? get decorationBorderSide =>
       decoration?.side;
+
+  /// M3EButtonMotion.
   M3EButtonMotion? get decorationMotion => decoration?.motion;
+
+  /// M3EHapticFeedback.
   M3EHapticFeedback get decorationHaptic =>
       decoration?.haptic ?? M3EHapticFeedback.none;
+
+  /// double.
   double? get decorationBorderRadius => decoration?.borderRadius;
+
+  /// double.
   double? get decorationCheckedRadius => decoration?.checkedRadius;
+
+  /// double.
   double? get decorationUncheckedRadius => decoration?.uncheckedRadius;
+
+  /// double.
   double? get decorationPressedRadius => decoration?.pressedRadius;
+
+  /// double.
   double? get decorationConnectedInnerRadius =>
       decoration?.connectedInnerRadius;
+
+  /// WidgetStateProperty.
   WidgetStateProperty<Color?>? get decorationOverlayColor =>
       decoration?.overlayColor;
+
+  /// WidgetStateProperty.
   WidgetStateProperty<Color?>? get decorationSurfaceTintColor =>
       decoration?.surfaceTintColor;
 
@@ -335,9 +359,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     }
     return _cachedLabel = () {
       _cachedLabelChecked = checked;
-      return checked
-          ? (widget.checkedLabel ?? widget.label)
-          : widget.label;
+      return checked ? (widget.checkedLabel ?? widget.label) : widget.label;
     }();
   }
 
@@ -423,9 +445,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildWidget,
-    );
+    return M3EComponentTheme(builder: _buildWidget);
   }
 
   Widget _buildWidget(BuildContext context) {
@@ -442,12 +462,12 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final double outerRad = explicitBorderRadius ?? halfHeight;
     final double innerRad =
         explicitBorderRadius ??
-            widget.decorationConnectedInnerRadius ??
-            _groupTheme.connectedInnerRadius;
+        widget.decorationConnectedInnerRadius ??
+        _groupTheme.connectedInnerRadius;
     final double pressInnerRad =
         widget.decorationPressedRadius ??
-            explicitBorderRadius ??
-            _groupTheme.connectedPressedInnerRadius;
+        explicitBorderRadius ??
+        _groupTheme.connectedPressedInnerRadius;
 
     final bool freezeStart = widget.isFirstInGroup;
     final bool freezeEnd = widget.isLastInGroup;
@@ -474,100 +494,110 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     return wrapWithPointerPressTracking(
       enabled: widget.enabled,
       child: buildAnimatedContent(
-      builder: (context, pressed, hovered, focused) {
-        final BorderRadius targetRadius;
-        final effectivelyEnabled = widget.enabled;
-        if (widget.isGroupConnected) {
-          final BorderRadius restingRadius = BorderRadiusDirectional.horizontal(
-            start: Radius.circular(widget.isFirstInGroup ? outerRad : innerRad),
-            end: Radius.circular(widget.isLastInGroup ? outerRad : innerRad),
-          ).resolve(Directionality.of(context));
+        builder: (context, pressed, hovered, focused) {
+          final BorderRadius targetRadius;
+          final effectivelyEnabled = widget.enabled;
+          if (widget.isGroupConnected) {
+            final BorderRadius restingRadius =
+                BorderRadiusDirectional.horizontal(
+                  start: Radius.circular(
+                    widget.isFirstInGroup ? outerRad : innerRad,
+                  ),
+                  end: Radius.circular(
+                    widget.isLastInGroup ? outerRad : innerRad,
+                  ),
+                ).resolve(Directionality.of(context));
 
-          final BorderRadius pressRadius = BorderRadiusDirectional.horizontal(
-            start: Radius.circular(
-              widget.isFirstInGroup ? outerRad : pressInnerRad,
+            final BorderRadius pressRadius = BorderRadiusDirectional.horizontal(
+              start: Radius.circular(
+                widget.isFirstInGroup ? outerRad : pressInnerRad,
+              ),
+              end: Radius.circular(
+                widget.isLastInGroup ? outerRad : pressInnerRad,
+              ),
+            ).resolve(Directionality.of(context));
+
+            final double hoverInnerRad =
+                widget.decoration?.hoveredRadius ??
+                explicitBorderRadius ??
+                _buttonTheme.hoveredRadius(widget.size);
+            final BorderRadius hoverRadius = BorderRadiusDirectional.horizontal(
+              start: Radius.circular(
+                widget.isFirstInGroup ? outerRad : hoverInnerRad,
+              ),
+              end: Radius.circular(
+                widget.isLastInGroup ? outerRad : hoverInnerRad,
+              ),
+            ).resolve(Directionality.of(context));
+
+            targetRadius = (effectivelyEnabled && pressed)
+                ? pressRadius
+                : (effectivelyEnabled && hovered)
+                ? hoverRadius
+                : checked
+                ? checkedConnectedShape
+                : restingRadius;
+          } else {
+            final hoverShape = widget.decoration?.hoveredRadius != null
+                ? BorderRadius.circular(widget.decoration!.hoveredRadius!)
+                : explicitBorderRadius != null
+                ? BorderRadius.circular(explicitBorderRadius)
+                : BorderRadius.circular(
+                    _buttonTheme.hoveredRadius(widget.size),
+                  );
+
+            targetRadius = (effectivelyEnabled && pressed)
+                ? pressSquish
+                : (effectivelyEnabled && hovered)
+                ? hoverShape
+                : checked
+                ? squareShape
+                : restingShape;
+          }
+
+          Widget core = RepaintBoundary(
+            child: M3ERadiusAndPaddingMotion(
+              motion: springMotion,
+              internalLeft: hPad,
+              internalRight: hPad,
+              internalTop: 0,
+              internalBottom: 0,
+              targetRadius: targetRadius,
+              freezeTopLeft: widget.isGroupConnected && freezeLeft,
+              freezeBottomLeft: widget.isGroupConnected && freezeLeft,
+              freezeTopRight: widget.isGroupConnected && freezeRight,
+              freezeBottomRight: widget.isGroupConnected && freezeRight,
+              builder: (animatedPadding, animatedRadius) {
+                final buttonCore = _buildCore(
+                  m,
+                  animatedPadding,
+                  animatedRadius,
+                );
+                return M3EFocusRing(
+                  focused: focused,
+                  radius: animatedRadius,
+                  child: buttonCore,
+                );
+              },
             ),
-            end: Radius.circular(
-              widget.isLastInGroup ? outerRad : pressInnerRad,
-            ),
-          ).resolve(Directionality.of(context));
+          );
 
-          final double hoverInnerRad =
-              widget.decoration?.hoveredRadius ??
-                  explicitBorderRadius ??
-                  _buttonTheme.hoveredRadius(widget.size);
-          final BorderRadius hoverRadius = BorderRadiusDirectional.horizontal(
-            start: Radius.circular(
-              widget.isFirstInGroup ? outerRad : hoverInnerRad,
-            ),
-            end: Radius.circular(
-              widget.isLastInGroup ? outerRad : hoverInnerRad,
-            ),
-          ).resolve(Directionality.of(context));
+          final fixedWidth = widget.size.width;
+          if (fixedWidth != null) {
+            core = SizedBox(width: fixedWidth, child: core);
+          }
 
-          targetRadius = (effectivelyEnabled && pressed)
-              ? pressRadius
-              : (effectivelyEnabled && hovered)
-              ? hoverRadius
-              : checked
-              ? checkedConnectedShape
-              : restingRadius;
-        } else {
-          final hoverShape =
-          widget.decoration?.hoveredRadius != null
-              ? BorderRadius.circular(widget.decoration!.hoveredRadius!)
-              : explicitBorderRadius != null
-              ? BorderRadius.circular(explicitBorderRadius)
-              : BorderRadius.circular(_buttonTheme.hoveredRadius(widget.size));
-
-          targetRadius = (effectivelyEnabled && pressed)
-              ? pressSquish
-              : (effectivelyEnabled && hovered)
-              ? hoverShape
-              : checked
-              ? squareShape
-              : restingShape;
-        }
-
-        Widget core = RepaintBoundary(
-          child: M3ERadiusAndPaddingMotion(
-            motion: springMotion,
-            internalLeft: hPad,
-            internalRight: hPad,
-            internalTop: 0,
-            internalBottom: 0,
-            targetRadius: targetRadius,
-            freezeTopLeft: widget.isGroupConnected && freezeLeft,
-            freezeBottomLeft: widget.isGroupConnected && freezeLeft,
-            freezeTopRight: widget.isGroupConnected && freezeRight,
-            freezeBottomRight: widget.isGroupConnected && freezeRight,
-            builder: (animatedPadding, animatedRadius) {
-              final buttonCore = _buildCore(m, animatedPadding, animatedRadius);
-              return M3EFocusRing(
-                focused: focused,
-                radius: animatedRadius,
-                child: buttonCore,
-              );
-            },
-          ),
-        );
-
-        final fixedWidth = widget.size.width;
-        if (fixedWidth != null) {
-          core = SizedBox(width: fixedWidth, child: core);
-        }
-
-        return core;
-      },
-    ),
+          return core;
+        },
+      ),
     );
   }
 
   Widget _buildCore(
-      M3EButtonMeasurements m,
-      EdgeInsets internalPadding,
-      BorderRadius animatedRadius,
-      ) {
+    M3EButtonMeasurements m,
+    EdgeInsets internalPadding,
+    BorderRadius animatedRadius,
+  ) {
     final checked = _isChecked;
 
     final buttonShape = WidgetStateProperty.all<OutlinedBorder>(
@@ -679,10 +709,10 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
   }
 
   ButtonStyle _buildButtonStyle(
-      bool checked,
-      WidgetStateProperty<OutlinedBorder> buttonShape,
-      WidgetStateProperty<EdgeInsetsGeometry> padding,
-      ) {
+    bool checked,
+    WidgetStateProperty<OutlinedBorder> buttonShape,
+    WidgetStateProperty<EdgeInsetsGeometry> padding,
+  ) {
     final cs = _scheme;
 
     final Color bgColor;
@@ -707,7 +737,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
     final bool transparent =
         widget.style == M3EButtonStyle.outlined ||
-            widget.style == M3EButtonStyle.text;
+        widget.style == M3EButtonStyle.text;
 
     return ButtonStyle(
       alignment: _kAlignmentCenter,
@@ -753,8 +783,8 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
           return transparent
               ? Colors.transparent
               : cs.onSurface.withValues(
-            alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
-          );
+                  alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
+                );
         }
         return transparent ? Colors.transparent : bgColor;
       }),
@@ -801,7 +831,8 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
       animationDuration: _kDurationZero,
       visualDensity: _kVisualDensityStandard,
       splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
-      overlayColor: widget.decorationOverlayColor ??
+      overlayColor:
+          widget.decorationOverlayColor ??
           WidgetStateProperty.resolveWith((Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
               return null;
@@ -814,8 +845,9 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
                 : states;
             Color? foreground;
             if (widget.decoration?.foregroundColor != null) {
-              foreground =
-                  widget.decoration!.foregroundColor!.resolve(activeStates);
+              foreground = widget.decoration!.foregroundColor!.resolve(
+                activeStates,
+              );
             }
             foreground ??= fgColor;
             return M3EStateLayer.resolveOverlayColor(foreground, states);
@@ -831,14 +863,14 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final Widget? checkedLabel = widget.checkedLabel ?? widget.label;
     final bool animateIconToCheckedLabel =
         widget.icon != null &&
-            widget.checkedLabel != null &&
-            widget.label == null &&
-            widget.checkedIcon == null;
+        widget.checkedLabel != null &&
+        widget.label == null &&
+        widget.checkedIcon == null;
     final bool animateLabelToCheckedIcon =
         widget.checkedIcon != null &&
-            widget.label != null &&
-            widget.icon == null &&
-            widget.checkedLabel == null;
+        widget.label != null &&
+        widget.icon == null &&
+        widget.checkedLabel == null;
 
     if (effectiveIcon == null &&
         uncheckedLabel == null &&
@@ -907,10 +939,10 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
 
     final Widget naturalRow = hasDistinctLabelStates
         ? SingleMotionBuilder(
-      motion: motion,
-      value: checked ? 1.0 : 0.0,
-      builder: (context, progress, _) => buildRow(progress),
-    )
+            motion: motion,
+            value: checked ? 1.0 : 0.0,
+            builder: (context, progress, _) => buildRow(progress),
+          )
         : buildRow(checked ? 1.0 : 0.0);
 
     return LayoutBuilder(
@@ -953,17 +985,18 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     final hasBothLabels = unchecked != null && checked != null;
     final shouldSlideOneSidedCheckedAppear =
         widget.icon != null &&
-            widget.checkedLabel != null &&
-            widget.label == null &&
-            widget.checkedIcon == null;
+        widget.checkedLabel != null &&
+        widget.label == null &&
+        widget.checkedIcon == null;
 
-    final outgoingSlide =
-        hasBothLabels ? _toggleTheme.labelSlideDistance * p : 0.0;
+    final outgoingSlide = hasBothLabels
+        ? _toggleTheme.labelSlideDistance * p
+        : 0.0;
     final incomingSlide =
-    (hasBothLabels ||
-        (shouldSlideOneSidedCheckedAppear &&
-            unchecked == null &&
-            checked != null))
+        (hasBothLabels ||
+            (shouldSlideOneSidedCheckedAppear &&
+                unchecked == null &&
+                checked != null))
         ? _toggleTheme.labelSlideDistance * (1.0 - p)
         : 0.0;
 

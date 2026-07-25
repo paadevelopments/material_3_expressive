@@ -10,6 +10,7 @@ import 'package:motor/motor.dart';
 /// [targetKeys] must match destination order (one key per selectable item).
 /// Place each key on the widget the pill should cover (icon chip / row).
 class M3ENavSelectionIndicator extends StatefulWidget {
+  /// M3ENavSelectionIndicator.
   const M3ENavSelectionIndicator({
     required this.selectedIndex,
     required this.targetKeys,
@@ -23,11 +24,23 @@ class M3ENavSelectionIndicator extends StatefulWidget {
     super.key,
   });
 
+  /// selectedIndex.
+
   final int selectedIndex;
+
+  /// targetKeys.
   final List<GlobalKey> targetKeys;
+
+  /// axis.
   final Axis axis;
+
+  /// color.
   final Color color;
+
+  /// child.
   final Widget child;
+
+  /// enabled.
   final bool enabled;
 
   /// When this value changes (e.g. rail expanded ↔ collapsed), the pill
@@ -71,18 +84,23 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   EdgeInsets? _viewPadding;
 
   /// Cached geometries so selection changes can animate without waiting a frame.
-  final Map<int, ({double main, double cross, double mainSize, double crossSize})>
-      _geoCache =
+  final Map<
+    int,
+    ({double main, double cross, double mainSize, double crossSize})
+  >
+  _geoCache =
       <int, ({double main, double cross, double mainSize, double crossSize})>{};
 
   /// Lead moves with snappier shape spring; trail follows with position spring.
   SpringMotion get _leadMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.45);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.45,
+      );
 
   SpringMotion get _trailMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.55);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.55,
+      );
 
   bool get _animating => _lead.isAnimating || _trail.isAnimating;
 
@@ -104,9 +122,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     _setTraveling(_animating);
   }
 
-  /// Updates traveling without calling [setState] during build.
+  /// Updates traveling without calling `setState` during build.
   ///
-  /// [animateTo] from [didUpdateWidget] can fire status listeners while the
+  /// `animateTo` from [didUpdateWidget] can fire status listeners while the
   /// tree is still building; hosts must not be notified until after the frame.
   void _setTraveling(bool traveling) {
     if (traveling == _traveling) {
@@ -153,7 +171,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     // (keyboard viewInsets from fullscreen search) must not force-jump the
     // pill — that snaps to transitional / bogus geometry.
     final EdgeInsets padding = MediaQuery.viewPaddingOf(context);
-    final bool first = _viewPadding == null;
+    final first = _viewPadding == null;
     final bool paddingChanged = !first && _viewPadding != padding;
     _viewPadding = padding;
     if (!_ready || first || paddingChanged) {
@@ -197,13 +215,13 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       return;
     }
     final int frames = (settle.inMilliseconds / 16).ceil().clamp(1, 60);
-    for (int i = 1; i <= frames; i++) {
+    for (var i = 1; i <= frames; i++) {
       Future<void>.delayed(Duration(milliseconds: 16 * i), tick);
     }
     Future<void>.delayed(Duration(milliseconds: 16 * frames), finish);
   }
 
-  /// Post-frame measure, and [scheduleFrame] so release builds retry when idle.
+  /// Post-frame measure, and `scheduleFrame` so release builds retry when idle.
   void _scheduleMeasure({required bool forceJump}) {
     _pendingForceJump = _pendingForceJump || forceJump;
     if (_measureScheduled) {
@@ -241,15 +259,17 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       return null;
     }
     final RenderObject? renderObject = ctx.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize || !renderObject.attached) {
+    if (renderObject is! RenderBox ||
+        !renderObject.hasSize ||
+        !renderObject.attached) {
       return null;
     }
     return renderObject;
   }
 
   RenderBox? get _stackBox {
-    final RenderObject? renderObject =
-        _stackKey.currentContext?.findRenderObject();
+    final RenderObject? renderObject = _stackKey.currentContext
+        ?.findRenderObject();
     if (renderObject is! RenderBox ||
         !renderObject.hasSize ||
         !renderObject.attached) {
@@ -270,9 +290,8 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     return false;
   }
 
-  ({double main, double cross, double mainSize, double crossSize})? _readGeometry(
-    int index,
-  ) {
+  ({double main, double cross, double mainSize, double crossSize})?
+  _readGeometry(int index) {
     if (index < 0 || index >= widget.targetKeys.length) {
       return null;
     }
@@ -316,7 +335,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   }
 
   void _refreshCache() {
-    for (int i = 0; i < widget.targetKeys.length; i++) {
+    for (var i = 0; i < widget.targetKeys.length; i++) {
       final geo = _readGeometry(i);
       if (geo != null) {
         _geoCache[i] = geo;
@@ -326,9 +345,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
 
   bool _isSuspiciousJump({
     required ({double main, double cross, double mainSize, double crossSize})
-        live,
+    live,
     required ({double main, double cross, double mainSize, double crossSize})
-        cached,
+    cached,
   }) {
     if (_layoutTracking) {
       return false;
@@ -373,7 +392,8 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     }
     _measureAttempts = 0;
 
-    final bool geometryChanged = !_ready ||
+    final bool geometryChanged =
+        !_ready ||
         (_crossCenter - geo.cross).abs() > 0.5 ||
         (_baseMain - geo.mainSize).abs() > 0.5 ||
         (_crossSize - geo.crossSize).abs() > 0.5 ||

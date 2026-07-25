@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ETextField`.
 @immutable
 class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
+  /// M3ETextFieldTheme.
   const M3ETextFieldTheme({
     this.minHeight = 56,
     this.contentHeight = 48,
@@ -16,23 +17,52 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     this.labelRestingTopPadding = 16,
     this.labelBottomPadding = 2,
     this.selectionOpacity = 0.4,
-    this.supportingTextPadding =
-        const EdgeInsets.only(left: 16, top: 4, right: 16),
+    this.supportingTextPadding = const EdgeInsets.only(
+      left: 16,
+      top: 4,
+      right: 16,
+    ),
   });
+
+  /// defaults.
 
   static const M3ETextFieldTheme defaults = M3ETextFieldTheme();
 
+  /// minHeight.
+
   final double minHeight;
+
+  /// contentHeight.
   final double contentHeight;
+
+  /// labelRestingOffset.
   final double labelRestingOffset;
+
+  /// horizontalPadding.
   final EdgeInsets horizontalPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// iconGap.
   final double iconGap;
+
+  /// labelFloatingTopPadding.
   final double labelFloatingTopPadding;
+
+  /// labelRestingTopPadding.
   final double labelRestingTopPadding;
+
+  /// labelBottomPadding.
   final double labelBottomPadding;
+
+  /// selectionOpacity.
   final double selectionOpacity;
+
+  /// supportingTextPadding.
   final EdgeInsets supportingTextPadding;
+
+  /// accentColor.
 
   Color accentColor(
     M3EColorScheme scheme, {
@@ -44,6 +74,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     }
     return hasError ? scheme.error : scheme.primary;
   }
+
+  /// decoration.
 
   BoxDecoration decoration(
     M3EColorScheme scheme, {
@@ -113,10 +145,16 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     return M3ETextFieldTheme(
       minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
       contentHeight: _lerpDouble(contentHeight, other.contentHeight, t)!,
-      labelRestingOffset:
-          _lerpDouble(labelRestingOffset, other.labelRestingOffset, t)!,
-      horizontalPadding:
-          EdgeInsets.lerp(horizontalPadding, other.horizontalPadding, t)!,
+      labelRestingOffset: _lerpDouble(
+        labelRestingOffset,
+        other.labelRestingOffset,
+        t,
+      )!,
+      horizontalPadding: EdgeInsets.lerp(
+        horizontalPadding,
+        other.horizontalPadding,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
       labelFloatingTopPadding: _lerpDouble(
@@ -129,10 +167,16 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
         other.labelRestingTopPadding,
         t,
       )!,
-      labelBottomPadding:
-          _lerpDouble(labelBottomPadding, other.labelBottomPadding, t)!,
-      selectionOpacity:
-          _lerpDouble(selectionOpacity, other.selectionOpacity, t)!,
+      labelBottomPadding: _lerpDouble(
+        labelBottomPadding,
+        other.labelBottomPadding,
+        t,
+      )!,
+      selectionOpacity: _lerpDouble(
+        selectionOpacity,
+        other.selectionOpacity,
+        t,
+      )!,
       supportingTextPadding: EdgeInsets.lerp(
         supportingTextPadding,
         other.supportingTextPadding,

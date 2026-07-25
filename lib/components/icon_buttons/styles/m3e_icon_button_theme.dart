@@ -7,16 +7,25 @@ import '../enums/m3e_icon_button_enums.dart';
 /// Theme values for `M3EIconButton`.
 @immutable
 class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
+  /// M3EIconButtonTheme.
   const M3EIconButtonTheme({
     this.outlineWidth = 1,
     this.morphDuration = const Duration(milliseconds: 120),
     this.morphCurve = Curves.easeOut,
   });
 
+  /// defaults.
+
   static const M3EIconButtonTheme defaults = M3EIconButtonTheme();
 
+  /// outlineWidth.
+
   final double outlineWidth;
+
+  /// morphDuration.
   final Duration morphDuration;
+
+  /// morphCurve.
   final Curve morphCurve;
 
   static const Map<M3EIconButtonSize, double> _icon = {
@@ -107,17 +116,29 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
     M3EIconButtonSize.xl: 27,
   };
 
+  /// iconSize.
+
   double iconSize(M3EIconButtonSize size) => _icon[size]!;
+
+  /// visual.
 
   Size visual(M3EIconButtonSize size, M3EIconButtonWidth width) =>
       _visual[size]![width]!;
 
+  /// target.
+
   Size target(M3EIconButtonSize size, M3EIconButtonWidth width) =>
       _target[size]![width]!;
 
+  /// radiusRestRound.
+
   double radiusRestRound(M3EIconButtonSize size) => _radiusRestRound[size]!;
 
+  /// radiusRestSquare.
+
   double radiusRestSquare(M3EIconButtonSize size) => _radiusRestSquare[size]!;
+
+  /// radiusPressed.
 
   double radiusPressed(M3EIconButtonSize size) => _radiusPressed[size]!;
 

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 /// Leading / content / trailing layout for floating or docked toolbars.
 class M3EToolbarBody extends StatelessWidget {
+  /// M3EToolbarBody.
   const M3EToolbarBody({
     required this.axis,
     required this.gap,
@@ -17,12 +18,26 @@ class M3EToolbarBody extends StatelessWidget {
     super.key,
   });
 
+  /// axis.
+
   final Axis axis;
+
+  /// gap.
   final double gap;
+
+  /// leading.
   final Widget? leading;
+
+  /// trailing.
   final Widget? trailing;
+
+  /// content.
   final Widget? content;
+
+  /// mainAxisSize.
   final MainAxisSize mainAxisSize;
+
+  /// mainAxisAlignment.
   final MainAxisAlignment mainAxisAlignment;
 
   /// When true, [content] is wrapped in [Expanded] so title rows with flex
@@ -36,7 +51,7 @@ class M3EToolbarBody extends StatelessWidget {
       resolvedContent = Expanded(child: resolvedContent);
     }
 
-    final List<Widget> children = <Widget>[
+    final children = <Widget>[
       if (leading != null) ...<Widget>[
         leading!,
         SizedBox(
@@ -44,7 +59,7 @@ class M3EToolbarBody extends StatelessWidget {
           height: axis == Axis.vertical ? gap : 0,
         ),
       ],
-      if (resolvedContent != null) resolvedContent,
+      ?resolvedContent,
       if (trailing != null) ...<Widget>[
         SizedBox(
           width: axis == Axis.horizontal ? gap : 0,

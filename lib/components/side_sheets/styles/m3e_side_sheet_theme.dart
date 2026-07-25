@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ESideSheet`.
 @immutable
 class M3ESideSheetTheme extends M3EThemeExtension<M3ESideSheetTheme> {
+  /// M3ESideSheetTheme.
   const M3ESideSheetTheme({
     this.width = 320,
     this.cornerRadius = 28,
@@ -15,23 +16,47 @@ class M3ESideSheetTheme extends M3EThemeExtension<M3ESideSheetTheme> {
     this.actionsPadding = const EdgeInsets.all(16),
   });
 
+  /// defaults.
+
   static const M3ESideSheetTheme defaults = M3ESideSheetTheme();
 
+  /// width.
+
   final double width;
+
+  /// cornerRadius.
   final double cornerRadius;
+
+  /// scrimOpacity.
   final double scrimOpacity;
+
+  /// headerPadding.
   final EdgeInsets headerPadding;
+
+  /// closeButtonPadding.
   final EdgeInsets closeButtonPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// actionsPadding.
   final EdgeInsets actionsPadding;
 
+  /// containerColor.
+
   Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainerLow;
+
+  /// scrimColor.
 
   Color scrimColor(M3EColorScheme scheme) =>
       scheme.scrim.withValues(alpha: scrimOpacity);
 
+  /// titleStyle.
+
   TextStyle titleStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.titleLarge.copyWith(color: scheme.onSurface);
+
+  /// dividerColor.
 
   Color dividerColor(M3EColorScheme scheme) => scheme.outlineVariant;
 
@@ -66,8 +91,11 @@ class M3ESideSheetTheme extends M3EThemeExtension<M3ESideSheetTheme> {
       cornerRadius: _lerpDouble(cornerRadius, other.cornerRadius, t)!,
       scrimOpacity: _lerpDouble(scrimOpacity, other.scrimOpacity, t)!,
       headerPadding: EdgeInsets.lerp(headerPadding, other.headerPadding, t)!,
-      closeButtonPadding:
-          EdgeInsets.lerp(closeButtonPadding, other.closeButtonPadding, t)!,
+      closeButtonPadding: EdgeInsets.lerp(
+        closeButtonPadding,
+        other.closeButtonPadding,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       actionsPadding: EdgeInsets.lerp(actionsPadding, other.actionsPadding, t)!,
     );

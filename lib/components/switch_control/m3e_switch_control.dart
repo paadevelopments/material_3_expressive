@@ -12,6 +12,7 @@ export 'styles/m3e_switch_theme.dart';
 /// [M3EMotion.expressiveSpatialDefault] (position with lower damping for a
 /// visible overshoot snap). Track color crossfades linearly (~150ms).
 class M3ESwitch extends StatefulWidget {
+  /// M3ESwitch.
   const M3ESwitch({
     required this.value,
     required this.onChanged,
@@ -23,12 +24,26 @@ class M3ESwitch extends StatefulWidget {
     super.key,
   });
 
+  /// value.
+
   final bool value;
+
+  /// onChanged.
   final ValueChanged<bool>? onChanged;
+
+  /// selectedIcon.
   final Widget? selectedIcon;
+
+  /// unselectedIcon.
   final Widget? unselectedIcon;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// autofocus.
   final bool autofocus;
+
+  /// semanticLabel.
   final String? semanticLabel;
 
   @override
@@ -44,13 +59,15 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
   /// Position spring: expressiveSpatialDefault stiffness, lower damping so the
   /// thumb visibly overshoots the resting side (spec-like snap).
   SpringMotion get _positionMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.55);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.55,
+      );
 
   /// Size spring: same token, slightly more damped so size follows the slide.
   SpringMotion get _sizeMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.7);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.7,
+      );
 
   @override
   void initState() {
@@ -104,7 +121,6 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
             // Track color: linear ~150ms crossfade (spec), not a spring.
             return AnimatedContainer(
               duration: M3EMotion.short3,
-              curve: Curves.linear,
               width: switchTheme.trackWidth,
               height: switchTheme.trackHeight,
               padding: EdgeInsets.all(switchTheme.trackPadding),
@@ -126,9 +142,10 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
                       ),
               ),
               child: AnimatedBuilder(
-                animation: Listenable.merge(
-                  <Listenable>[_positionCtrl, _sizeCtrl],
-                ),
+                animation: Listenable.merge(<Listenable>[
+                  _positionCtrl,
+                  _sizeCtrl,
+                ]),
                 builder: (BuildContext context, Widget? child) {
                   return _buildThumb(switchTheme, scheme, state);
                 },
@@ -148,15 +165,18 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
     final double size = state.pressed
         ? switchTheme.thumbSizePressed
         : (switchTheme.thumbSizeUnselected +
-            (_sizeCtrl.value *
-                (switchTheme.thumbSizeSelected -
-                    switchTheme.thumbSizeUnselected)));
+              (_sizeCtrl.value *
+                  (switchTheme.thumbSizeSelected -
+                      switchTheme.thumbSizeUnselected)));
 
     // Layout by pixels so overshoot past 0/1 can leave the resting inset
     // (Align alone clips the snap against the padded track edge).
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final travel = (constraints.maxWidth - size).clamp(0.0, double.infinity);
+        final travel = (constraints.maxWidth - size).clamp(
+          0.0,
+          double.infinity,
+        );
         final left = travel * _positionCtrl.value;
         final top = (constraints.maxHeight - size) / 2;
         return Stack(
@@ -186,8 +206,9 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
   }
 
   Widget _buildThumbIcon(M3ESwitchTheme switchTheme, M3EColorScheme scheme) {
-    final Widget? icon =
-        widget.value ? widget.selectedIcon : widget.unselectedIcon;
+    final Widget? icon = widget.value
+        ? widget.selectedIcon
+        : widget.unselectedIcon;
     if (icon == null) {
       return const SizedBox.shrink();
     }

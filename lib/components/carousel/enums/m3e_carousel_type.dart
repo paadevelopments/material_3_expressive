@@ -1,3 +1,9 @@
+import 'package:flutter/cupertino.dart' show Axis;
+import 'package:flutter/material.dart' show Axis;
+import 'package:flutter/painting.dart' show Axis;
+import 'package:flutter/rendering.dart' show Axis;
+import 'package:flutter/widgets.dart' show Axis;
+
 /// Defines the visual presentation and layout style of an `M3ECarousel`.
 enum M3ECarouselType {
   /// A large, prominent carousel that spotlights one big item with small

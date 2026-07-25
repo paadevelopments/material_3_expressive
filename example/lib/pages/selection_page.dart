@@ -48,8 +48,7 @@ class _SelectionPageState extends State<SelectionPage>
                 M3ECheckbox(
                   value: _tristate,
                   tristate: true,
-                  onChanged: (bool? value) =>
-                      setState(() => _tristate = value),
+                  onChanged: (bool? value) => setState(() => _tristate = value),
                 ),
                 M3ECheckbox(
                   value: true,
@@ -70,8 +69,7 @@ class _SelectionPageState extends State<SelectionPage>
                   value: plan,
                   groupValue: _plan,
                   label: Text(plan),
-                  onChanged: (String value) =>
-                      setState(() => _plan = value),
+                  onChanged: (String value) => setState(() => _plan = value),
                 ),
               ),
           ],
@@ -164,8 +162,9 @@ class _SelectionPageState extends State<SelectionPage>
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   'Selected: $_framework',
-                  style: theme.typeScale.bodyMedium
-                      .copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  style: theme.typeScale.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             const SizedBox(height: 16),
@@ -191,7 +190,9 @@ class _SelectionPageState extends State<SelectionPage>
                       setState(() {
                         _skills
                           ..clear()
-                          ..addAll(items.map((M3EDropdownItem<String> i) => i.value));
+                          ..addAll(
+                            items.map((M3EDropdownItem<String> i) => i.value),
+                          );
                       });
                     },
                   ),
@@ -212,8 +213,9 @@ class _SelectionPageState extends State<SelectionPage>
                     ),
                     onSelectionChanged: (List<M3EDropdownItem<String>> items) {
                       setState(() {
-                        _asyncCountry =
-                            items.isEmpty ? null : items.first.value;
+                        _asyncCountry = items.isEmpty
+                            ? null
+                            : items.first.value;
                       });
                     },
                   ),
@@ -225,8 +227,9 @@ class _SelectionPageState extends State<SelectionPage>
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   'Country: $_asyncCountry',
-                  style: theme.typeScale.bodyMedium
-                      .copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  style: theme.typeScale.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
           ],
@@ -242,8 +245,7 @@ class _SelectionPageState extends State<SelectionPage>
               initialDate: _date,
               firstDate: DateTime(2020),
               lastDate: DateTime(2030),
-              onDateChanged: (DateTime value) =>
-                  setState(() => _date = value),
+              onDateChanged: (DateTime value) => setState(() => _date = value),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -409,23 +411,23 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 thumbLength: 50,
                 dotSize: 12,
                 dotSpacing: 10,
-                onChanged: (double value) =>
-                    setState(() => _shapeDots = value),
-                dotBuilder: ({
-                  required BuildContext context,
-                  required Color color,
-                  required double size,
-                  required bool active,
-                }) {
-                  return CustomPaint(
-                    painter: _M3EShapeDotPainter(
-                      polygon: active
-                          ? M3EMaterialNewShapes.cookie4Sided
-                          : M3EMaterialNewShapes.softBurst,
-                      color: color,
-                    ),
-                  );
-                },
+                onChanged: (double value) => setState(() => _shapeDots = value),
+                dotBuilder:
+                    ({
+                      required BuildContext context,
+                      required Color color,
+                      required double size,
+                      required bool active,
+                    }) {
+                      return CustomPaint(
+                        painter: _M3EShapeDotPainter(
+                          polygon: active
+                              ? M3EMaterialNewShapes.cookie4Sided
+                              : M3EMaterialNewShapes.softBurst,
+                          color: color,
+                        ),
+                      );
+                    },
               ),
             ),
           ],
@@ -490,10 +492,7 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
 
 /// Fills a [M3EMaterialNewShapes] polygon into the available paint size.
 class _M3EShapeDotPainter extends CustomPainter {
-  const _M3EShapeDotPainter({
-    required this.polygon,
-    required this.color,
-  });
+  const _M3EShapeDotPainter({required this.polygon, required this.color});
 
   final RoundedPolygon polygon;
   final Color color;
@@ -504,8 +503,9 @@ class _M3EShapeDotPainter extends CustomPainter {
     final Matrix4 scale = Matrix4.diagonal3Values(size.width, size.height, 1);
     final Path scaled = path.transform(scale.storage);
     final Rect bounds = scaled.getBounds();
-    final Path centered =
-        scaled.shift(Offset(size.width / 2, size.height / 2) - bounds.center);
+    final Path centered = scaled.shift(
+      Offset(size.width / 2, size.height / 2) - bounds.center,
+    );
     canvas.drawPath(
       centered,
       Paint()

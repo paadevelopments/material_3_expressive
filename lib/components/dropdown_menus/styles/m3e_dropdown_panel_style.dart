@@ -5,10 +5,14 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownMenu;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownMenu;
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
+    show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EDropdownMenu;
 
 import '../enums/m3e_dropdown_expand_direction.dart';
+
+/// M3EDropdownPanelStyle.
 
 @immutable
 class M3EDropdownPanelStyle with Diagnosticable {
@@ -157,7 +161,10 @@ class M3EDropdownPanelStyle with Diagnosticable {
       ..add(DoubleProperty('maxHeight', maxHeight))
       ..add(DoubleProperty('marginTop', marginTop))
       ..add(
-        DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding),
+        DiagnosticsProperty<EdgeInsetsGeometry>(
+          'contentPadding',
+          contentPadding,
+        ),
       )
       ..add(
         EnumProperty<M3EDropdownExpandDirection>(

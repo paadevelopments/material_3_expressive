@@ -15,6 +15,7 @@ export 'styles/m3e_card_theme.dart';
 /// provided the card becomes interactive with hover/press state layers and, for
 /// the elevated variant, a hover elevation lift.
 class M3ECard extends StatelessWidget {
+  /// M3ECard.
   const M3ECard({
     required this.child,
     this.variant = M3ECardVariant.elevated,
@@ -37,32 +38,66 @@ class M3ECard extends StatelessWidget {
     super.key,
   });
 
+  /// child.
+
   final Widget child;
+
+  /// variant.
   final M3ECardVariant variant;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// onLongPress.
   final VoidCallback? onLongPress;
+
+  /// padding.
   final EdgeInsetsGeometry padding;
+
+  /// clipBehavior.
   final Clip clipBehavior;
+
+  /// borderRadius.
   final BorderRadius? borderRadius;
+
+  /// color.
   final Color? color;
+
+  /// elevation.
   final double? elevation;
+
+  /// border.
   final BorderSide? border;
+
+  /// animationDuration.
   final Duration? animationDuration;
+
+  /// animationCurve.
   final Curve? animationCurve;
+
+  /// width.
   final double? width;
+
+  /// surfaceKey.
   final Key? surfaceKey;
+
+  /// mouseCursor.
   final MouseCursor? mouseCursor;
+
+  /// semanticLabel.
   final String? semanticLabel;
+
+  /// haptic.
   final M3EHapticFeedback haptic;
+
+  /// onStateChanged.
   final ValueChanged<M3EInteractionState>? onStateChanged;
 
   bool get _isInteractive => onPressed != null || onLongPress != null;
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildCard,
-    );
+    return M3EComponentTheme(builder: _buildCard);
   }
 
   Widget _buildCard(BuildContext context) {
@@ -116,18 +151,15 @@ class M3ECard extends StatelessWidget {
     M3EInteractionState state,
   ) {
     final scheme = M3ETheme.of(context).colorScheme;
-    final double resolvedElevation = elevation ??
-        cardTheme.elevation(variant, hovered: state.hovered);
+    final double resolvedElevation =
+        elevation ?? cardTheme.elevation(variant, hovered: state.hovered);
     final BoxBorder? resolvedBorder = border != null
         ? Border.all(color: border!.color, width: border!.width)
         : (variant == M3ECardVariant.outlined
-            ? Border.all(color: cardTheme.outlineColor(scheme))
-            : null);
+              ? Border.all(color: cardTheme.outlineColor(scheme))
+              : null);
 
-    Widget decoratedChild = Padding(
-      padding: padding,
-      child: child,
-    );
+    Widget decoratedChild = Padding(padding: padding, child: child);
 
     Widget surface = AnimatedContainer(
       key: surfaceKey,

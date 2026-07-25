@@ -16,6 +16,7 @@ export 'styles/m3e_loading_indicator_theme.dart';
 ///  * [M3ELoadingIndicatorVariant.contained] draws the shape inside a filled
 ///    container, using the on-container color for the shape.
 class M3ELoadingIndicator extends StatelessWidget {
+  /// M3ELoadingIndicator.
   const M3ELoadingIndicator({
     super.key,
     this.variant = M3ELoadingIndicatorVariant.defaultStyle,
@@ -28,13 +29,29 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.semanticValue,
   });
 
+  /// variant.
+
   final M3ELoadingIndicatorVariant variant;
+
+  /// color.
   final Color? color;
+
+  /// containerColor.
   final Color? containerColor;
+
+  /// polygons.
   final List<RoundedPolygon>? polygons;
+
+  /// constraints.
   final BoxConstraints? constraints;
+
+  /// padding.
   final EdgeInsetsGeometry? padding;
+
+  /// semanticLabel.
   final String? semanticLabel;
+
+  /// semanticValue.
   final String? semanticValue;
 
   @override
@@ -42,15 +59,18 @@ class M3ELoadingIndicator extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final loadingTheme = theme.loadingIndicatorTheme;
-    final size = Size(loadingTheme.containerWidth, loadingTheme.containerHeight);
+    final size = Size(
+      loadingTheme.containerWidth,
+      loadingTheme.containerHeight,
+    );
 
     final cons = constraints ?? BoxConstraints.tight(size);
 
-    final activeColor = color ??
-        loadingTheme.resolveActiveColor(scheme, variant);
+    final activeColor =
+        color ?? loadingTheme.resolveActiveColor(scheme, variant);
 
-    final containerBg = containerColor ??
-        loadingTheme.resolveContainerColor(scheme, variant);
+    final containerBg =
+        containerColor ?? loadingTheme.resolveContainerColor(scheme, variant);
 
     final indicator = M3EExpressiveLoadingIndicator(
       color: activeColor,
@@ -60,15 +80,13 @@ class M3ELoadingIndicator extends StatelessWidget {
       constraints: cons,
     );
 
-    return M3EComponentTheme(builder: (context) => DecoratedBox(
+    return M3EComponentTheme(
+      builder: (context) => DecoratedBox(
         decoration: BoxDecoration(
           color: containerBg,
           borderRadius: loadingTheme.containerRadius,
         ),
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: indicator,
-        ),
+        child: Padding(padding: padding ?? EdgeInsets.zero, child: indicator),
       ),
     );
   }

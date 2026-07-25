@@ -6,6 +6,7 @@ import '../enums/m3e_tabs_variant.dart';
 /// Theme values for `M3ETabs`.
 @immutable
 class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
+  /// M3ETabTheme.
   const M3ETabTheme({
     this.height = 48,
     this.iconSize = 24,
@@ -14,34 +15,52 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
     this.indicatorCornerRadius = 3,
   });
 
+  /// defaults.
+
   static const M3ETabTheme defaults = M3ETabTheme();
 
+  /// height.
+
   final double height;
+
+  /// iconSize.
   final double iconSize;
+
+  /// indicatorHeight.
   final double indicatorHeight;
+
+  /// primaryIndicatorWidth.
   final double primaryIndicatorWidth;
+
+  /// indicatorCornerRadius.
   final double indicatorCornerRadius;
+
+  /// backgroundColor.
 
   Color backgroundColor(M3EColorScheme scheme) => scheme.surface;
 
+  /// dividerColor.
+
   Color dividerColor(M3EColorScheme scheme) => scheme.surfaceContainerHighest;
 
-  Color tabColor(
-    M3EColorScheme scheme, {
-    required bool selected,
-  }) =>
+  /// tabColor.
+
+  Color tabColor(M3EColorScheme scheme, {required bool selected}) =>
       selected ? scheme.primary : scheme.onSurfaceVariant;
+
+  /// labelStyle.
 
   TextStyle labelStyle(
     M3ETypeScale type,
     M3EColorScheme scheme, {
     required bool selected,
-  }) =>
-      type.titleSmall.copyWith(
-        color: tabColor(scheme, selected: selected),
-      );
+  }) => type.titleSmall.copyWith(color: tabColor(scheme, selected: selected));
+
+  /// indicatorColor.
 
   Color indicatorColor(M3EColorScheme scheme) => scheme.primary;
+
+  /// indicatorFullWidth.
 
   bool indicatorFullWidth(M3ETabsVariant variant) =>
       variant == M3ETabsVariant.secondary;
@@ -74,10 +93,16 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
       height: _lerpDouble(height, other.height, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       indicatorHeight: _lerpDouble(indicatorHeight, other.indicatorHeight, t)!,
-      primaryIndicatorWidth:
-          _lerpDouble(primaryIndicatorWidth, other.primaryIndicatorWidth, t)!,
-      indicatorCornerRadius:
-          _lerpDouble(indicatorCornerRadius, other.indicatorCornerRadius, t)!,
+      primaryIndicatorWidth: _lerpDouble(
+        primaryIndicatorWidth,
+        other.primaryIndicatorWidth,
+        t,
+      )!,
+      indicatorCornerRadius: _lerpDouble(
+        indicatorCornerRadius,
+        other.indicatorCornerRadius,
+        t,
+      )!,
     );
   }
 

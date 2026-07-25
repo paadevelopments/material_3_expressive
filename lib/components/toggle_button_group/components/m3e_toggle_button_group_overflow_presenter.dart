@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 part of '../m3e_toggle_button_group.dart';
 
 mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
@@ -11,7 +10,9 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     BuildContext context,
     int firstHiddenIndex,
   ) async {
-    if (firstHiddenIndex >= widget.actions.length) return;
+    if (firstHiddenIndex >= widget.actions.length) {
+      return;
+    }
     final selectedIndex = switch (widget.overflowMenuStyle) {
       M3EButtonGroupOverflowMenuStyle.popup => _showOverflowPopup(
         context,
@@ -23,7 +24,9 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
       ),
     };
     final result = await selectedIndex;
-    if (!mounted || result == null) return;
+    if (!mounted || result == null) {
+      return;
+    }
     _handleOverflowActionSelection(result);
   }
 
@@ -32,15 +35,17 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     int firstHiddenIndex,
   ) async {
     final triggerBox = context.findRenderObject() as RenderBox?;
-    if (triggerBox == null) return null;
+    if (triggerBox == null) {
+      return null;
+    }
 
     final dec = widget.overflowPopupDecoration;
     final menuTheme = M3ETheme.of(context).menuTheme.copyWith(
-          minWidth: dec.minWidth,
-          maxWidth: dec.maxWidth,
-          maxHeight: dec.maxHeight,
-          elevation: dec.elevation,
-        );
+      minWidth: dec.minWidth,
+      maxWidth: dec.maxWidth,
+      maxHeight: dec.maxHeight,
+      elevation: dec.elevation,
+    );
 
     final itemNodes = <M3EMenuNode>[
       for (var i = firstHiddenIndex; i < widget.actions.length; i++)
@@ -78,7 +83,6 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
       context: context,
       anchor: triggerBox.localToGlobal(Offset.zero) & triggerBox.size,
       children: nodes,
-      position: M3EMenuAnchorPosition.bottomEnd,
       preferredWidth: (triggerBox.size.width + 176.0).clamp(
         dec.minWidth,
         dec.maxWidth,
@@ -109,42 +113,44 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
             alignment: Alignment.bottomCenter,
             isBottomSheet: true,
             child: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (dec.title != null)
-                    Padding(
-                      padding: dec.titlePadding,
-                      child: DefaultTextStyle.merge(
-                        style: M3ETheme.of(sheetContext).textTheme.titleMedium!,
-                        child: dec.title!,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (dec.title != null)
+                      Padding(
+                        padding: dec.titlePadding,
+                        child: DefaultTextStyle.merge(
+                          style: M3ETheme.of(
+                            sheetContext,
+                          ).textTheme.titleMedium,
+                          child: dec.title!,
+                        ),
                       ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: dec.useCardList
+                          ? _buildBottomSheetCardList(
+                              sheetContext,
+                              firstHiddenIndex,
+                              itemCount,
+                              dec,
+                              cs,
+                            )
+                          : _buildBottomSheetStandardList(
+                              sheetContext,
+                              firstHiddenIndex,
+                              itemCount,
+                              dec,
+                              cs,
+                            ),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: dec.useCardList
-                        ? _buildBottomSheetCardList(
-                            sheetContext,
-                            firstHiddenIndex,
-                            itemCount,
-                            dec,
-                            cs,
-                          )
-                        : _buildBottomSheetStandardList(
-                            sheetContext,
-                            firstHiddenIndex,
-                            itemCount,
-                            dec,
-                            cs,
-                          ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
         );
       },
     );
@@ -341,7 +347,8 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                       color: action.enabled
                           ? fgColor
                           : fgColor.withValues(
-                              alpha: M3EButtonConstants.kDisabledForegroundAlpha,
+                              alpha:
+                                  M3EButtonConstants.kDisabledForegroundAlpha,
                             ),
                     ),
                     child: _overflowMenuTitle(actionIndex),
@@ -349,7 +356,11 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                 ),
                 if (selected)
                   dec.trailing ??
-                      Icon(M3EIcons.check_rounded, color: fgColor, size: M3ETheme.of(context).resolvedIconTheme.size),
+                      Icon(
+                        M3EIcons.check_rounded,
+                        color: fgColor,
+                        size: M3ETheme.of(context).resolvedIconTheme.size,
+                      ),
               ],
             ),
           ),

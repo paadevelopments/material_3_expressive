@@ -6,6 +6,7 @@ import '../enums/m3e_chip_type.dart';
 /// Theme values for `M3EChip`.
 @immutable
 class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
+  /// M3EChipTheme.
   const M3EChipTheme({
     this.height = 32,
     this.iconSize = 18,
@@ -15,18 +16,38 @@ class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
     this.iconLabelGap = 8,
   });
 
+  /// defaults.
+
   static const M3EChipTheme defaults = M3EChipTheme();
 
+  /// height.
+
   final double height;
+
+  /// iconSize.
   final double iconSize;
+
+  /// labelStartPadding.
   final double labelStartPadding;
+
+  /// iconStartPadding.
   final double iconStartPadding;
+
+  /// endPadding.
   final double endPadding;
+
+  /// iconLabelGap.
   final double iconLabelGap;
+
+  /// The borderRadius.
 
   BorderRadius get borderRadius => M3EShapes.radiusSmall;
 
+  /// The shape.
+
   ShapeBorder get shape => RoundedRectangleBorder(borderRadius: borderRadius);
+
+  /// containerColor.
 
   Color containerColor(
     M3EColorScheme scheme, {
@@ -48,6 +69,8 @@ class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
     }
     return const Color(0x00000000);
   }
+
+  /// foregroundColor.
 
   Color foregroundColor(
     M3EColorScheme scheme, {
@@ -87,10 +110,16 @@ class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
     return M3EChipTheme(
       height: _lerpDouble(height, other.height, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      labelStartPadding:
-          _lerpDouble(labelStartPadding, other.labelStartPadding, t)!,
-      iconStartPadding:
-          _lerpDouble(iconStartPadding, other.iconStartPadding, t)!,
+      labelStartPadding: _lerpDouble(
+        labelStartPadding,
+        other.labelStartPadding,
+        t,
+      )!,
+      iconStartPadding: _lerpDouble(
+        iconStartPadding,
+        other.iconStartPadding,
+        t,
+      )!,
       endPadding: _lerpDouble(endPadding, other.endPadding, t)!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
     );

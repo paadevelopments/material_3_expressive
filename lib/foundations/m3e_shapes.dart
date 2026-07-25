@@ -8,36 +8,80 @@ import 'package:flutter/widgets.dart';
 abstract final class M3EShapes {
   const M3EShapes._();
 
+  /// 0dp — sharp corners.
   static const double none = 0;
+
+  /// 4dp corner radius.
   static const double extraSmall = 4;
+
+  /// 8dp corner radius.
   static const double small = 8;
+
+  /// 12dp corner radius.
   static const double medium = 12;
+
+  /// 16dp corner radius.
   static const double large = 16;
+
+  /// 20dp corner radius (expressive large+).
   static const double largeIncreased = 20;
+
+  /// 28dp corner radius.
   static const double extraLarge = 28;
+
+  /// 32dp corner radius (expressive XL+).
   static const double extraLargeIncreased = 32;
+
+  /// 48dp corner radius.
   static const double extraExtraLarge = 48;
 
   /// Sentinel radius that resolves to a fully rounded (stadium) shape.
   static const double full = 9999;
 
+  /// [BorderRadius] for [none].
   static const BorderRadius radiusNone = BorderRadius.zero;
-  static const BorderRadius radiusExtraSmall =
-      BorderRadius.all(Radius.circular(extraSmall));
-  static const BorderRadius radiusSmall =
-      BorderRadius.all(Radius.circular(small));
-  static const BorderRadius radiusMedium =
-      BorderRadius.all(Radius.circular(medium));
-  static const BorderRadius radiusLarge =
-      BorderRadius.all(Radius.circular(large));
-  static const BorderRadius radiusLargeIncreased =
-      BorderRadius.all(Radius.circular(largeIncreased));
-  static const BorderRadius radiusExtraLarge =
-      BorderRadius.all(Radius.circular(extraLarge));
-  static const BorderRadius radiusExtraLargeIncreased =
-      BorderRadius.all(Radius.circular(extraLargeIncreased));
-  static const BorderRadius radiusExtraExtraLarge =
-      BorderRadius.all(Radius.circular(extraExtraLarge));
+
+  /// [BorderRadius] for [extraSmall].
+  static const BorderRadius radiusExtraSmall = BorderRadius.all(
+    Radius.circular(extraSmall),
+  );
+
+  /// [BorderRadius] for [small].
+  static const BorderRadius radiusSmall = BorderRadius.all(
+    Radius.circular(small),
+  );
+
+  /// [BorderRadius] for [medium].
+  static const BorderRadius radiusMedium = BorderRadius.all(
+    Radius.circular(medium),
+  );
+
+  /// [BorderRadius] for [large].
+  static const BorderRadius radiusLarge = BorderRadius.all(
+    Radius.circular(large),
+  );
+
+  /// [BorderRadius] for [largeIncreased].
+  static const BorderRadius radiusLargeIncreased = BorderRadius.all(
+    Radius.circular(largeIncreased),
+  );
+
+  /// [BorderRadius] for [extraLarge].
+  static const BorderRadius radiusExtraLarge = BorderRadius.all(
+    Radius.circular(extraLarge),
+  );
+
+  /// [BorderRadius] for [extraLargeIncreased].
+  static const BorderRadius radiusExtraLargeIncreased = BorderRadius.all(
+    Radius.circular(extraLargeIncreased),
+  );
+
+  /// [BorderRadius] for [extraExtraLarge].
+  static const BorderRadius radiusExtraExtraLarge = BorderRadius.all(
+    Radius.circular(extraExtraLarge),
+  );
+
+  /// Fully rounded stadium shape border.
   static const StadiumBorder stadium = StadiumBorder();
 
   /// Resolves a corner radius token to a [BorderRadius].
@@ -72,6 +116,7 @@ abstract final class M3EShapes {
 /// Mirrors the `M3EShapeSet` from the `m3e_design` package.
 @immutable
 class M3EShapeSet {
+  /// Creates a five-step shape set.
   const M3EShapeSet({
     required this.xs,
     required this.sm,
@@ -80,9 +125,18 @@ class M3EShapeSet {
     required this.xl,
   });
 
+  /// Extra-small corner radius in this family.
   final BorderRadius xs;
+
+  /// Small corner radius in this family.
   final BorderRadius sm;
+
+  /// Medium corner radius in this family.
   final BorderRadius md;
+
+  /// Large corner radius in this family.
   final BorderRadius lg;
+
+  /// Extra-large corner radius in this family.
   final BorderRadius xl;
 }

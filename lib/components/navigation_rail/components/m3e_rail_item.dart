@@ -5,9 +5,6 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
 
@@ -58,8 +55,9 @@ class M3ERailItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context).navigationRailTheme;
-    final height =
-        expanded ? theme.itemExpandedHeight : theme.itemCollapsedHeight;
+    final height = expanded
+        ? theme.itemExpandedHeight
+        : theme.itemCollapsedHeight;
 
     final Widget button = M3ERailItemButton(
       icon: destination.icon,
@@ -86,18 +84,10 @@ class M3ERailItem extends StatelessWidget {
     } else {
       core = ConstrainedBox(
         constraints: BoxConstraints(minHeight: height),
-        child: Row(
-          children: [
-            Expanded(child: button),
-          ],
-        ),
+        child: Row(children: [Expanded(child: button)]),
       );
     }
 
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: core,
-    );
+    return Semantics(selected: selected, button: true, child: core);
   }
 }

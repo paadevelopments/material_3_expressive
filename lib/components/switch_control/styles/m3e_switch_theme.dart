@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ESwitch`.
 @immutable
 class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
+  /// M3ESwitchTheme.
   const M3ESwitchTheme({
     this.trackWidth = 52,
     this.trackHeight = 32,
@@ -19,29 +20,54 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     this.disabledOutlineOpacity = 0.12,
   });
 
+  /// defaults.
+
   static const M3ESwitchTheme defaults = M3ESwitchTheme();
 
+  /// trackWidth.
+
   final double trackWidth;
+
+  /// trackHeight.
   final double trackHeight;
+
+  /// trackPadding.
   final double trackPadding;
+
+  /// thumbSizePressed.
   final double thumbSizePressed;
+
+  /// thumbSizeSelected.
   final double thumbSizeSelected;
+
+  /// thumbSizeUnselected.
   final double thumbSizeUnselected;
+
+  /// iconSize.
   final double iconSize;
+
+  /// borderWidth.
   final double borderWidth;
+
+  /// disabledTrackOpacity.
   final double disabledTrackOpacity;
+
+  /// disabledThumbOpacity.
   final double disabledThumbOpacity;
+
+  /// disabledOutlineOpacity.
   final double disabledOutlineOpacity;
 
-  double thumbSize({
-    required bool pressed,
-    required bool grown,
-  }) {
+  /// thumbSize.
+
+  double thumbSize({required bool pressed, required bool grown}) {
     if (pressed) {
       return thumbSizePressed;
     }
     return grown ? thumbSizeSelected : thumbSizeUnselected;
   }
+
+  /// trackColor.
 
   Color trackColor(
     M3EColorScheme scheme, {
@@ -57,6 +83,8 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     return value ? scheme.primary : scheme.surfaceContainerHighest;
   }
 
+  /// thumbColor.
+
   Color thumbColor(
     M3EColorScheme scheme, {
     required bool enabled,
@@ -68,12 +96,19 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     return value ? scheme.onPrimary : scheme.outline;
   }
 
+  /// outlineColor.
+
   Color outlineColor(M3EColorScheme scheme, {required bool enabled}) {
     if (!enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, disabledOutlineOpacity);
+      return M3EColorUtils.withOpacity(
+        scheme.onSurface,
+        disabledOutlineOpacity,
+      );
     }
     return scheme.outline;
   }
+
+  /// iconColor.
 
   Color iconColor(M3EColorScheme scheme, {required bool value}) =>
       value ? scheme.onPrimaryContainer : scheme.surfaceContainerHighest;
@@ -117,20 +152,38 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
       trackWidth: _lerpDouble(trackWidth, other.trackWidth, t)!,
       trackHeight: _lerpDouble(trackHeight, other.trackHeight, t)!,
       trackPadding: _lerpDouble(trackPadding, other.trackPadding, t)!,
-      thumbSizePressed:
-          _lerpDouble(thumbSizePressed, other.thumbSizePressed, t)!,
-      thumbSizeSelected:
-          _lerpDouble(thumbSizeSelected, other.thumbSizeSelected, t)!,
-      thumbSizeUnselected:
-          _lerpDouble(thumbSizeUnselected, other.thumbSizeUnselected, t)!,
+      thumbSizePressed: _lerpDouble(
+        thumbSizePressed,
+        other.thumbSizePressed,
+        t,
+      )!,
+      thumbSizeSelected: _lerpDouble(
+        thumbSizeSelected,
+        other.thumbSizeSelected,
+        t,
+      )!,
+      thumbSizeUnselected: _lerpDouble(
+        thumbSizeUnselected,
+        other.thumbSizeUnselected,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
-      disabledTrackOpacity:
-          _lerpDouble(disabledTrackOpacity, other.disabledTrackOpacity, t)!,
-      disabledThumbOpacity:
-          _lerpDouble(disabledThumbOpacity, other.disabledThumbOpacity, t)!,
-      disabledOutlineOpacity:
-          _lerpDouble(disabledOutlineOpacity, other.disabledOutlineOpacity, t)!,
+      disabledTrackOpacity: _lerpDouble(
+        disabledTrackOpacity,
+        other.disabledTrackOpacity,
+        t,
+      )!,
+      disabledThumbOpacity: _lerpDouble(
+        disabledThumbOpacity,
+        other.disabledThumbOpacity,
+        t,
+      )!,
+      disabledOutlineOpacity: _lerpDouble(
+        disabledOutlineOpacity,
+        other.disabledOutlineOpacity,
+        t,
+      )!,
     );
   }
 

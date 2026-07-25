@@ -3,22 +3,34 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Colors, Material, WidgetStatePropertyAll;
+import 'package:flutter/material.dart'
+    show Colors, Material, WidgetStatePropertyAll;
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/search/m3e_search.dart'
+    show M3ESearchAnchor;
+import 'package:material_3_expressive/components/search/m3e_search_anchor.dart'
+    show M3ESearchAnchor;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ESearchAnchor;
 
 import '../../../foundations/foundations.dart';
+import '../../divider/m3e_divider.dart';
+import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../controllers/m3e_search_controller.dart';
 import '../m3e_search_bar.dart';
 import '../res/m3e_search_constants.dart';
 import '../styles/m3e_search_view_theme.dart';
-import '../../divider/m3e_divider.dart';
-import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
-import '../../icon_buttons/m3e_icon_buttons.dart';
 
 /// Animated search view surface shown by [M3ESearchAnchor].
+
+part 'm3e_search_view_route.dart';
+
+/// M3ESearchViewContent.
+
 class M3ESearchViewContent extends StatefulWidget {
+  /// M3ESearchViewContent.
   const M3ESearchViewContent({
     required this.searchController,
     required this.suggestionsBuilder,
@@ -54,36 +66,98 @@ class M3ESearchViewContent extends StatefulWidget {
     super.key,
   });
 
+  /// searchController.
+
   final M3ESearchController searchController;
+
+  /// suggestionsBuilder.
   final M3ESearchSuggestionsBuilder suggestionsBuilder;
+
+  /// animation.
   final Animation<double> animation;
+
+  /// viewRect.
   final Rect viewRect;
+
+  /// viewMaxWidth.
   final double viewMaxWidth;
+
+  /// topPadding.
   final double topPadding;
+
+  /// showFullScreenView.
   final bool showFullScreenView;
+
+  /// viewBuilder.
   final M3ESearchViewBuilder? viewBuilder;
+
+  /// viewLeading.
   final Widget? viewLeading;
+
+  /// viewTrailing.
   final Iterable<Widget>? viewTrailing;
+
+  /// viewHintText.
   final String? viewHintText;
+
+  /// viewBackgroundColor.
   final Color? viewBackgroundColor;
+
+  /// viewElevation.
   final double? viewElevation;
+
+  /// viewSurfaceTintColor.
   final Color? viewSurfaceTintColor;
+
+  /// viewSide.
   final BorderSide? viewSide;
+
+  /// viewShape.
   final OutlinedBorder? viewShape;
+
+  /// viewBarPadding.
   final EdgeInsetsGeometry? viewBarPadding;
+
+  /// viewHeaderHeight.
   final double? viewHeaderHeight;
+
+  /// viewHeaderTextStyle.
   final TextStyle? viewHeaderTextStyle;
+
+  /// viewHeaderHintStyle.
   final TextStyle? viewHeaderHintStyle;
+
+  /// dividerColor.
   final Color? dividerColor;
+
+  /// viewConstraints.
   final BoxConstraints? viewConstraints;
+
+  /// viewPadding.
   final EdgeInsetsGeometry? viewPadding;
+
+  /// shrinkWrap.
   final bool? shrinkWrap;
+
+  /// textCapitalization.
   final TextCapitalization? textCapitalization;
+
+  /// viewOnChanged.
   final ValueChanged<String>? viewOnChanged;
+
+  /// viewOnSubmitted.
   final ValueChanged<String>? viewOnSubmitted;
+
+  /// textInputAction.
   final TextInputAction? textInputAction;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// smartDashesType.
   final SmartDashesType? smartDashesType;
+
+  /// smartQuotesType.
   final SmartQuotesType? smartQuotesType;
 
   @override
@@ -175,8 +249,10 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
     _timer?.cancel();
     _timer = Timer(Duration.zero, () async {
       _searchValue = widget.searchController.text;
-      final Iterable<Widget> suggestions =
-          await widget.suggestionsBuilder(context, widget.searchController);
+      final Iterable<Widget> suggestions = await widget.suggestionsBuilder(
+        context,
+        widget.searchController,
+      );
       if (mounted) {
         setState(() => _suggestions = suggestions);
       }
@@ -185,8 +261,10 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
 
   Future<void> _updateSuggestions() async {
     _searchValue = widget.searchController.text;
-    final Iterable<Widget> suggestions =
-        await widget.suggestionsBuilder(context, widget.searchController);
+    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(
+      context,
+      widget.searchController,
+    );
     if (mounted) {
       setState(() => _suggestions = suggestions);
     }
@@ -200,16 +278,14 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
 
     final Widget defaultLeading = M3EIconButton(
       icon: const Icon(M3EIcons.arrow_back),
-      variant: M3EIconButtonVariant.standard,
       tooltip: M3ESearchConstants.backButtonTooltip,
       onPressed: () => Navigator.of(context).pop(),
     );
 
-    final List<Widget> defaultTrailing = <Widget>[
+    final defaultTrailing = <Widget>[
       if (widget.searchController.text.isNotEmpty)
         M3EIconButton(
           icon: const Icon(M3EIcons.close),
-          variant: M3EIconButtonVariant.standard,
           tooltip: M3ESearchConstants.clearButtonTooltip,
           onPressed: widget.searchController.clear,
         ),
@@ -217,7 +293,7 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
 
     final Color effectiveBackground = widget.showFullScreenView
         ? (widget.viewBackgroundColor ??
-            viewTheme.fullScreenBackgroundColor(scheme))
+              viewTheme.fullScreenBackgroundColor(scheme))
         : (widget.viewBackgroundColor ?? viewTheme.backgroundColor(scheme));
     final Color effectiveSurfaceTint = widget.showFullScreenView
         ? (widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme))
@@ -226,7 +302,8 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
         ? (widget.viewElevation ?? 0)
         : (widget.viewElevation ?? viewTheme.elevation);
     final BorderSide? effectiveSide = widget.viewSide;
-    OutlinedBorder effectiveShape = widget.viewShape ??
+    OutlinedBorder effectiveShape =
+        widget.viewShape ??
         (widget.showFullScreenView
             ? viewTheme.fullScreenShape() as OutlinedBorder
             : viewTheme.dockedShape(viewTheme.cornerRadius) as OutlinedBorder);
@@ -235,30 +312,38 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
     }
     final Color effectiveDividerColor =
         widget.dividerColor ?? Colors.transparent;
-    final double? effectiveHeaderHeight = widget.viewHeaderHeight ??
+    final double? effectiveHeaderHeight =
+        widget.viewHeaderHeight ??
         (widget.showFullScreenView ? viewTheme.headerHeight : null);
     final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
         ? null
         : BoxConstraints.tightFor(height: effectiveHeaderHeight);
-    final TextStyle effectiveTextStyle = widget.viewHeaderTextStyle ??
+    final TextStyle effectiveTextStyle =
+        widget.viewHeaderTextStyle ??
         viewTheme.headerTextStyle(theme.typeScale, scheme);
-    final TextStyle effectiveHintStyle = widget.viewHeaderHintStyle ??
+    final TextStyle effectiveHintStyle =
+        widget.viewHeaderHintStyle ??
         widget.viewHeaderTextStyle ??
         viewTheme.headerHintStyle(theme.typeScale, scheme);
-    final EdgeInsetsGeometry effectivePadding = widget.viewPadding ?? EdgeInsets.zero;
+    final EdgeInsetsGeometry effectivePadding =
+        widget.viewPadding ?? EdgeInsets.zero;
     final EdgeInsetsGeometry effectiveBarPadding =
         widget.viewBarPadding ?? viewTheme.barPadding();
-    final EdgeInsetsGeometry fullScreenHeaderPadding =
-        viewTheme.fullScreenHeaderPadding();
+    final EdgeInsetsGeometry fullScreenHeaderPadding = viewTheme
+        .fullScreenHeaderPadding();
     final BoxConstraints effectiveConstraints =
         widget.viewConstraints ?? viewTheme.constraints();
-    final double minWidth =
-        math.min(effectiveConstraints.minWidth, _viewRect.width);
-    final double minHeight =
-        math.min(effectiveConstraints.minHeight, _viewRect.height);
-    final bool effectiveShrinkWrap =
-        widget.shrinkWrap ?? viewTheme.shrinkWrap;
-    final double headerBlockHeight = effectiveHeaderHeight ??
+    final double minWidth = math.min(
+      effectiveConstraints.minWidth,
+      _viewRect.width,
+    );
+    final double minHeight = math.min(
+      effectiveConstraints.minHeight,
+      _viewRect.height,
+    );
+    final bool effectiveShrinkWrap = widget.shrinkWrap ?? viewTheme.shrinkWrap;
+    final double headerBlockHeight =
+        effectiveHeaderHeight ??
         (widget.showFullScreenView
             ? M3ESearchConstants.fullScreenBarHeight
             : theme.searchBarTheme.minHeight);
@@ -300,12 +385,8 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
               Color(0x00000000),
             ),
             elevation: const WidgetStatePropertyAll<double>(0),
-            textStyle: WidgetStatePropertyAll<TextStyle>(
-              effectiveTextStyle,
-            ),
-            hintStyle: WidgetStatePropertyAll<TextStyle>(
-              effectiveHintStyle,
-            ),
+            textStyle: WidgetStatePropertyAll<TextStyle>(effectiveTextStyle),
+            hintStyle: WidgetStatePropertyAll<TextStyle>(effectiveHintStyle),
             controller: widget.searchController,
             onChanged: (String value) {
               widget.viewOnChanged?.call(value);
@@ -385,8 +466,9 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
                                     removeTop: true,
                                     child: ListView(
                                       padding: EdgeInsets.only(
-                                        bottom: MediaQuery.viewInsetsOf(context)
-                                            .bottom,
+                                        bottom: MediaQuery.viewInsetsOf(
+                                          context,
+                                        ).bottom,
                                       ),
                                       shrinkWrap: effectiveShrinkWrap,
                                       children: _suggestions.toList(),
@@ -409,268 +491,3 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent> {
 }
 
 /// Route that morphs from the anchor search bar into a search view.
-class M3ESearchViewRoute extends PopupRoute<void> {
-  M3ESearchViewRoute({
-    required this.anchorKey,
-    required this.searchController,
-    required this.suggestionsBuilder,
-    required this.showFullScreenView,
-    this.toggleVisibility,
-    this.viewBuilder,
-    this.viewLeading,
-    this.viewTrailing,
-    this.viewHintText,
-    this.viewBackgroundColor,
-    this.viewElevation,
-    this.viewSurfaceTintColor,
-    this.viewSide,
-    this.viewShape,
-    this.viewBarPadding,
-    this.viewHeaderHeight,
-    this.viewHeaderTextStyle,
-    this.viewHeaderHintStyle,
-    this.dividerColor,
-    this.viewConstraints,
-    this.viewPadding,
-    this.shrinkWrap,
-    this.textCapitalization,
-    this.viewOnChanged,
-    this.viewOnSubmitted,
-    this.viewOnOpen,
-    this.viewOnClose,
-    this.textInputAction,
-    this.keyboardType,
-    this.smartDashesType,
-    this.smartQuotesType,
-  });
-
-  final GlobalKey anchorKey;
-  final M3ESearchController searchController;
-  final M3ESearchSuggestionsBuilder suggestionsBuilder;
-  final bool showFullScreenView;
-  final ValueGetter<bool>? toggleVisibility;
-  final M3ESearchViewBuilder? viewBuilder;
-  final Widget? viewLeading;
-  final Iterable<Widget>? viewTrailing;
-  final String? viewHintText;
-  final Color? viewBackgroundColor;
-  final double? viewElevation;
-  final Color? viewSurfaceTintColor;
-  final BorderSide? viewSide;
-  final OutlinedBorder? viewShape;
-  final EdgeInsetsGeometry? viewBarPadding;
-  final double? viewHeaderHeight;
-  final TextStyle? viewHeaderTextStyle;
-  final TextStyle? viewHeaderHintStyle;
-  final Color? dividerColor;
-  final BoxConstraints? viewConstraints;
-  final EdgeInsetsGeometry? viewPadding;
-  final bool? shrinkWrap;
-  final TextCapitalization? textCapitalization;
-  final ValueChanged<String>? viewOnChanged;
-  final ValueChanged<String>? viewOnSubmitted;
-  final VoidCallback? viewOnOpen;
-  final VoidCallback? viewOnClose;
-  final TextInputAction? textInputAction;
-  final TextInputType? keyboardType;
-  final SmartDashesType? smartDashesType;
-  final SmartQuotesType? smartQuotesType;
-
-  final RectTween _rectTween = RectTween();
-  CurvedAnimation? _curvedAnimation;
-  CurvedAnimation? _viewFadeCurve;
-
-  Rect? _anchorRect(BuildContext context) {
-    final BuildContext? anchorContext = anchorKey.currentContext;
-    if (anchorContext == null) {
-      return null;
-    }
-    final RenderBox searchBarBox = anchorContext.findRenderObject()! as RenderBox;
-    final NavigatorState navigator = Navigator.of(context);
-    final Offset boxLocation = searchBarBox.localToGlobal(
-      Offset.zero,
-      ancestor: navigator.context.findRenderObject(),
-    );
-    return boxLocation & searchBarBox.size;
-  }
-
-  void _updateTweens(BuildContext context, M3ESearchViewTheme viewTheme) {
-    final RenderBox navigatorBox =
-        Navigator.of(context).context.findRenderObject()! as RenderBox;
-    final Size screenSize = navigatorBox.size;
-    final Rect anchorRect = _anchorRect(context) ?? Rect.zero;
-    final BoxConstraints effectiveConstraints =
-        viewConstraints ?? viewTheme.constraints();
-    _rectTween.begin = anchorRect;
-
-    final double viewWidth = clampDouble(
-      anchorRect.width,
-      effectiveConstraints.minWidth,
-      effectiveConstraints.maxWidth,
-    );
-    final double viewHeight = clampDouble(
-      screenSize.height * 2 / 3,
-      effectiveConstraints.minHeight,
-      effectiveConstraints.maxHeight,
-    );
-
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.ltr:
-        final double viewLeftToScreenRight = screenSize.width - anchorRect.left;
-        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
-        Offset topLeft = anchorRect.topLeft;
-        if (viewLeftToScreenRight < viewWidth) {
-          topLeft = Offset(
-            screenSize.width - math.min(viewWidth, screenSize.width),
-            topLeft.dy,
-          );
-        }
-        if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(
-            topLeft.dx,
-            screenSize.height - math.min(viewHeight, screenSize.height),
-          );
-        }
-        _rectTween.end = showFullScreenView
-            ? Offset.zero & screenSize
-            : (topLeft & Size(viewWidth, viewHeight));
-      case TextDirection.rtl:
-        final double viewRightToScreenLeft = anchorRect.right;
-        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
-        var topLeft = Offset(
-          math.max(anchorRect.right - viewWidth, 0),
-          anchorRect.top,
-        );
-        if (viewRightToScreenLeft < viewWidth) {
-          topLeft = Offset(0, topLeft.dy);
-        }
-        if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(
-            topLeft.dx,
-            screenSize.height - math.min(viewHeight, screenSize.height),
-          );
-        }
-        _rectTween.end = showFullScreenView
-            ? Offset.zero & screenSize
-            : (topLeft & Size(viewWidth, viewHeight));
-    }
-  }
-
-  @override
-  Color? get barrierColor => const Color(0x00000000);
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => M3ESearchConstants.dismissBarrierLabel;
-
-  @override
-  Duration get transitionDuration => M3ESearchConstants.openViewDuration;
-
-  @override
-  TickerFuture didPush() {
-    assert(anchorKey.currentContext != null);
-    final BuildContext anchorContext = anchorKey.currentContext!;
-    _updateTweens(anchorContext, M3ETheme.of(anchorContext).searchViewTheme);
-    toggleVisibility?.call();
-    viewOnOpen?.call();
-    return super.didPush();
-  }
-
-  @override
-  bool didPop(void result) {
-    assert(anchorKey.currentContext != null);
-    final BuildContext anchorContext = anchorKey.currentContext!;
-    _updateTweens(anchorContext, M3ETheme.of(anchorContext).searchViewTheme);
-    toggleVisibility?.call();
-    viewOnClose?.call();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (anchorKey.currentContext != null) {
-        FocusScope.of(anchorKey.currentContext!).unfocus();
-      }
-    });
-    return super.didPop(result);
-  }
-
-  @override
-  void dispose() {
-    _curvedAnimation?.dispose();
-    _viewFadeCurve?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        _curvedAnimation ??= CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubicEmphasized,
-          reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-        );
-        _viewFadeCurve ??= CurvedAnimation(
-          parent: animation,
-          curve: M3ESearchConstants.viewFadeOnInterval,
-          reverseCurve: M3ESearchConstants.viewFadeOnInterval.flipped,
-        );
-
-        final Rect viewRect = _rectTween.evaluate(_curvedAnimation!)!;
-        final double topPadding = showFullScreenView
-            ? lerpDouble(
-                0,
-                MediaQuery.paddingOf(context).top,
-                _curvedAnimation!.value,
-              )!
-            : 0;
-
-        return M3EComponentTheme(
-          builder: (BuildContext context) {
-            return FadeTransition(
-              opacity: _viewFadeCurve!,
-              child: M3ESearchViewContent(
-                searchController: searchController,
-                suggestionsBuilder: suggestionsBuilder,
-                animation: _curvedAnimation!,
-                viewRect: viewRect,
-                viewMaxWidth: _rectTween.end!.width,
-                topPadding: topPadding,
-                showFullScreenView: showFullScreenView,
-                viewBuilder: viewBuilder,
-                viewLeading: viewLeading,
-                viewTrailing: viewTrailing,
-                viewHintText: viewHintText,
-                viewBackgroundColor: viewBackgroundColor,
-                viewElevation: viewElevation,
-                viewSurfaceTintColor: viewSurfaceTintColor,
-                viewSide: viewSide,
-                viewShape: viewShape,
-                viewBarPadding: viewBarPadding,
-                viewHeaderHeight: viewHeaderHeight,
-                viewHeaderTextStyle: viewHeaderTextStyle,
-                viewHeaderHintStyle: viewHeaderHintStyle,
-                dividerColor: dividerColor,
-                viewConstraints: viewConstraints,
-                viewPadding: viewPadding,
-                shrinkWrap: shrinkWrap,
-                textCapitalization: textCapitalization,
-                viewOnChanged: viewOnChanged,
-                viewOnSubmitted: viewOnSubmitted,
-                textInputAction: textInputAction,
-                keyboardType: keyboardType,
-                smartDashesType: smartDashesType,
-                smartQuotesType: smartQuotesType,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}

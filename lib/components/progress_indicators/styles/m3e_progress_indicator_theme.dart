@@ -6,6 +6,7 @@ import '../enums/m3e_progress_enums.dart';
 /// Measured layout values for a flat linear progress indicator.
 @immutable
 class M3ELinearProgressLayout {
+  /// M3ELinearProgressLayout.
   const M3ELinearProgressLayout({
     required this.trackHeight,
     required this.gap,
@@ -14,16 +15,27 @@ class M3ELinearProgressLayout {
     required this.trailingMargin,
   });
 
+  /// trackHeight.
+
   final double trackHeight;
+
+  /// gap.
   final double gap;
+
+  /// dotDiameter.
   final double dotDiameter;
+
+  /// dotOffset.
   final double dotOffset;
+
+  /// trailingMargin.
   final double trailingMargin;
 }
 
 /// Theme values for linear progress indicators.
 @immutable
 class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
+  /// M3ELinearProgressTheme.
   const M3ELinearProgressTheme({
     this.strokeWidth = 4,
     this.trackStrokeWidth = 4,
@@ -35,33 +47,53 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
     this.wavyContainerHeight = 10,
   });
 
+  /// defaults.
+
   static const M3ELinearProgressTheme defaults = M3ELinearProgressTheme();
 
+  /// strokeWidth.
+
   final double strokeWidth;
+
+  /// trackStrokeWidth.
   final double trackStrokeWidth;
+
+  /// gapSize.
   final double gapSize;
+
+  /// stopSize.
   final double stopSize;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// determinateWavelength.
   final double determinateWavelength;
+
+  /// indeterminateWavelength.
   final double indeterminateWavelength;
+
+  /// wavyContainerHeight.
   final double wavyContainerHeight;
+
+  /// resolveFlat.
 
   M3ELinearProgressLayout resolveFlat(M3EProgressIndicatorSize size) =>
       switch (size) {
         M3EProgressIndicatorSize.s => const M3ELinearProgressLayout(
-            trackHeight: 4,
-            gap: 4,
-            dotDiameter: 4,
-            dotOffset: 4,
-            trailingMargin: 4,
-          ),
+          trackHeight: 4,
+          gap: 4,
+          dotDiameter: 4,
+          dotOffset: 4,
+          trailingMargin: 4,
+        ),
         M3EProgressIndicatorSize.m => const M3ELinearProgressLayout(
-            trackHeight: 8,
-            gap: 4,
-            dotDiameter: 4,
-            dotOffset: 2,
-            trailingMargin: 8,
-          ),
+          trackHeight: 8,
+          gap: 4,
+          dotDiameter: 4,
+          dotOffset: 2,
+          trailingMargin: 8,
+        ),
       };
 
   /// Compose wavy determinate amplitude: full mid-progress, zero near ends.
@@ -108,12 +140,21 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
       gapSize: _lerp(gapSize, other.gapSize, t),
       stopSize: _lerp(stopSize, other.stopSize, t),
       waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
-      determinateWavelength:
-          _lerp(determinateWavelength, other.determinateWavelength, t),
-      indeterminateWavelength:
-          _lerp(indeterminateWavelength, other.indeterminateWavelength, t),
-      wavyContainerHeight:
-          _lerp(wavyContainerHeight, other.wavyContainerHeight, t),
+      determinateWavelength: _lerp(
+        determinateWavelength,
+        other.determinateWavelength,
+        t,
+      ),
+      indeterminateWavelength: _lerp(
+        indeterminateWavelength,
+        other.indeterminateWavelength,
+        t,
+      ),
+      wavyContainerHeight: _lerp(
+        wavyContainerHeight,
+        other.wavyContainerHeight,
+        t,
+      ),
     );
   }
 
@@ -124,6 +165,7 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
 @immutable
 class M3ECircularProgressTheme
     extends M3EThemeExtension<M3ECircularProgressTheme> {
+  /// M3ECircularProgressTheme.
   const M3ECircularProgressTheme({
     this.defaultSize = 40,
     this.wavySize = 48,
@@ -134,17 +176,37 @@ class M3ECircularProgressTheme
     this.wavelength = 15,
   });
 
+  /// defaults.
+
   static const M3ECircularProgressTheme defaults = M3ECircularProgressTheme();
 
+  /// defaultSize.
+
   final double defaultSize;
+
+  /// wavySize.
   final double wavySize;
+
+  /// defaultStrokeWidth.
   final double defaultStrokeWidth;
+
+  /// trackStrokeWidth.
   final double trackStrokeWidth;
+
+  /// gapSize.
   final double gapSize;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
 
+  /// trackColor.
+
   Color trackColor(M3EColorScheme scheme) => scheme.secondaryContainer;
+
+  /// activeColor.
 
   Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
@@ -185,7 +247,11 @@ class M3ECircularProgressTheme
     return M3ECircularProgressTheme(
       defaultSize: _lerp(defaultSize, other.defaultSize, t),
       wavySize: _lerp(wavySize, other.wavySize, t),
-      defaultStrokeWidth: _lerp(defaultStrokeWidth, other.defaultStrokeWidth, t),
+      defaultStrokeWidth: _lerp(
+        defaultStrokeWidth,
+        other.defaultStrokeWidth,
+        t,
+      ),
       trackStrokeWidth: _lerp(trackStrokeWidth, other.trackStrokeWidth, t),
       gapSize: _lerp(gapSize, other.gapSize, t),
       waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
@@ -200,14 +266,21 @@ class M3ECircularProgressTheme
 @immutable
 class M3EProgressIndicatorTheme
     extends M3EThemeExtension<M3EProgressIndicatorTheme> {
+  /// M3EProgressIndicatorTheme.
   const M3EProgressIndicatorTheme({
     this.linear = M3ELinearProgressTheme.defaults,
     this.circular = M3ECircularProgressTheme.defaults,
   });
 
+  /// defaults.
+
   static const M3EProgressIndicatorTheme defaults = M3EProgressIndicatorTheme();
 
+  /// linear.
+
   final M3ELinearProgressTheme linear;
+
+  /// circular.
   final M3ECircularProgressTheme circular;
 
   @override

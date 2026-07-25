@@ -1,8 +1,15 @@
 /// The floating action button color variants.
 enum M3EFabColor {
+  /// Primary container colors.
   primary,
+
+  /// Secondary container colors.
   secondary,
+
+  /// Tertiary container colors.
   tertiary,
+
+  /// Surface container colors.
   surface,
 }
 

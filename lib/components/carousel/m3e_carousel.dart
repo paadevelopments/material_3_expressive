@@ -35,8 +35,7 @@ class M3ECarousel extends StatefulWidget {
     this.isExtended = false,
     this.freeScroll = false,
     this.heroAlignment = M3ECarouselHeroAlignment.center,
-    this.uncontainedItemExtent =
-        M3ECarouselTheme.defaultUncontainedItemExtent,
+    this.uncontainedItemExtent = M3ECarouselTheme.defaultUncontainedItemExtent,
     this.uncontainedShrinkExtent =
         M3ECarouselTheme.defaultUncontainedShrinkExtent,
     this.childElementBorderRadius = M3ECarouselTheme.defaultBorderRadiusValue,
@@ -266,7 +265,8 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(builder: (context) => LayoutBuilder(
+    return M3EComponentTheme(
+      builder: (context) => LayoutBuilder(
         builder: (ctx, dimens) {
           frameWidth = widget.width ?? dimens.maxWidth;
           frameHeight = widget.height ?? dimens.maxHeight;

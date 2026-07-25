@@ -1,12 +1,15 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/toggle_button_group/m3e_toggle_button_group.dart'
+    show M3EButtonGroup;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EButtonGroup;
 
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_toggle_button_group_enums.dart';
@@ -27,6 +30,7 @@ import '../enums/m3e_toggle_button_group_enums.dart';
 /// implicit ambient context rather than an explicit parameter cascade.
 @immutable
 class M3EButtonGroupScope extends InheritedWidget {
+  /// M3EButtonGroupScope.
   const M3EButtonGroupScope({
     super.key,
     required super.child,
@@ -37,9 +41,17 @@ class M3EButtonGroupScope extends InheritedWidget {
     required this.direction,
   });
 
+  /// type.
+
   final M3EButtonGroupType type;
+
+  /// shape.
   final M3EButtonShape shape;
+
+  /// size.
   final M3EButtonSize size;
+
+  /// density.
   final M3EButtonGroupDensity density;
 
   /// Primary layout axis of the group.

@@ -6,6 +6,7 @@ import '../styles/m3e_progress_indicator_theme.dart';
 
 /// Paints flat or wavy linear progress tracks.
 class M3ELinearProgressPainter extends CustomPainter {
+  /// M3ELinearProgressPainter.
   const M3ELinearProgressPainter({
     required this.value,
     required this.active,
@@ -23,19 +24,47 @@ class M3ELinearProgressPainter extends CustomPainter {
     this.flatLayout,
   });
 
+  /// value.
+
   final double? value;
+
+  /// active.
   final Color active;
+
+  /// track.
   final Color track;
+
+  /// strokeWidth.
   final double strokeWidth;
+
+  /// trackStrokeWidth.
   final double trackStrokeWidth;
+
+  /// gap.
   final double gap;
+
+  /// stopSize.
   final double stopSize;
+
+  /// isWavy.
   final bool isWavy;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
+
+  /// inset.
   final double inset;
+
+  /// flatLayout.
   final M3ELinearProgressLayout? flatLayout;
 
   /// Inflates [gap] so round stroke caps leave a visible empty space.
@@ -47,8 +76,8 @@ class M3ELinearProgressPainter extends CustomPainter {
     required double trackRight,
     required double trackStroke,
   }) {
-    final double pad = math.max(1.0, trackStroke / 4);
-    final double maxDiameter = math.max(1.0, trackStroke - 2 * pad);
+    final double pad = math.max(1, trackStroke / 4);
+    final double maxDiameter = math.max(1, trackStroke - 2 * pad);
     final double diameter = math.min(stopSize, maxDiameter);
     final double actualPad = (trackStroke - diameter) / 2;
     // Nestle in the round end-cap: equal pad from the visual tip.
@@ -73,19 +102,21 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double visualGap = _visualGap(stroke);
     final double left = inset;
     final double trackRight = size.width - spec.trailingMargin;
-    final ({double diameter, double centerX}) stop =
-        _stopPlacement(trackRight: trackRight, trackStroke: stroke);
-    final double width = math.max(0.0, trackRight - left);
+    final ({double diameter, double centerX}) stop = _stopPlacement(
+      trackRight: trackRight,
+      trackStroke: stroke,
+    );
+    final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = stroke
       ..isAntiAlias = true;
 
-    final bool indeterminate = value == null;
+    final indeterminate = value == null;
     final bool complete = !indeterminate && p >= 1.0;
 
     if (indeterminate) {
@@ -138,21 +169,22 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double left = inset;
     final double trailing = math.max(gap, 4);
     final double trackRight = size.width - trailing;
-    final ({double diameter, double centerX}) stop =
-        _stopPlacement(trackRight: trackRight, trackStroke: stroke);
-    final double width = math.max(0.0, trackRight - left);
+    final ({double diameter, double centerX}) stop = _stopPlacement(
+      trackRight: trackRight,
+      trackStroke: stroke,
+    );
+    final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
-    final double amplitude =
-        waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
+    final double amplitude = waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
 
-    final Paint paint = Paint()
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = stroke
       ..isAntiAlias = true;
 
-    final bool indeterminate = value == null;
+    final indeterminate = value == null;
     final bool complete = !indeterminate && p >= 1.0;
     final bool waveOnly = indeterminate || complete;
 
@@ -160,10 +192,10 @@ class M3ELinearProgressPainter extends CustomPainter {
       if (end <= start) {
         return;
       }
-      final Path path = Path();
-      const double step = 1.5;
+      final path = Path();
+      const step = 1.5;
       final double k = 2 * math.pi / wavelength;
-      double x = start;
+      var x = start;
       double y = cy + amp * math.sin(phase + (x - start) * k);
       path.moveTo(x, y);
       for (x = start + step; x <= end; x += step) {

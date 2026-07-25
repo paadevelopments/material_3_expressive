@@ -12,6 +12,7 @@ export 'styles/m3e_radio_theme.dart';
 ///
 /// When [label] is set, tapping the label also selects this value.
 class M3ERadio<T> extends StatelessWidget {
+  /// M3ERadio.
   const M3ERadio({
     required this.value,
     required this.groupValue,
@@ -24,16 +25,30 @@ class M3ERadio<T> extends StatelessWidget {
     super.key,
   });
 
+  /// value.
+
   final T value;
+
+  /// groupValue.
   final T? groupValue;
+
+  /// onChanged.
   final ValueChanged<T>? onChanged;
 
   /// Optional text or widget beside the control; included in the tap target.
   final Widget? label;
 
+  /// error.
+
   final bool error;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// autofocus.
   final bool autofocus;
+
+  /// semanticLabel.
   final String? semanticLabel;
 
   bool get _enabled => onChanged != null;
@@ -96,8 +111,7 @@ class M3ERadio<T> extends StatelessWidget {
     M3EColorScheme scheme,
     M3EInteractionState state,
   ) {
-    final Color base =
-        radioTheme.stateLayerColor(scheme, selected: _selected);
+    final Color base = radioTheme.stateLayerColor(scheme, selected: _selected);
     return Container(
       width: radioTheme.hitSize,
       height: radioTheme.hitSize,

@@ -37,8 +37,7 @@ abstract final class M3ETimePicker {
     ValueChanged<M3ETimePickerEntryMode>? onTimePickerModeChange,
     EdgeInsets insetPadding = M3ETimePickerConstants.defaultInsetPadding,
   }) {
-    final M3ETime normalized =
-        M3ETimePickerUtils.clampTime(initialTime);
+    final M3ETime normalized = M3ETimePickerUtils.clampTime(initialTime);
 
     final M3EThemeData theme =
         M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);

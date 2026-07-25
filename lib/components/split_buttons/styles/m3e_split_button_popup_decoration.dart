@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 
 import '../../buttons/styles/m3e_button_motion.dart';
@@ -8,6 +7,7 @@ import '../../buttons/styles/m3e_button_motion.dart';
 /// Styling options for split-button popup menus.
 @immutable
 class M3ESplitButtonPopupDecoration {
+  /// M3ESplitButtonPopupDecoration.
   const M3ESplitButtonPopupDecoration({
     this.backgroundColor,
     this.elevation,
@@ -23,18 +23,44 @@ class M3ESplitButtonPopupDecoration {
     this.selectedBorderRadius,
   });
 
+  /// backgroundColor.
+
   final Color? backgroundColor;
+
+  /// elevation.
   final double? elevation;
+
+  /// borderRadius.
   final BorderRadius? borderRadius;
+
+  /// border.
   final Border? border;
+
+  /// offset.
   final Offset offset;
+
+  /// minWidth.
   final double minWidth;
+
+  /// maxWidth.
   final double maxWidth;
+
+  /// maxHeight.
   final double maxHeight;
+
+  /// padding.
   final EdgeInsetsGeometry? padding;
+
+  /// motion.
   final M3EButtonMotion motion;
+
+  /// selectedColor.
   final Color? selectedColor;
+
+  /// selectedBorderRadius.
   final BorderRadius? selectedBorderRadius;
+
+  /// copyWith.
 
   M3ESplitButtonPopupDecoration copyWith({
     Color? backgroundColor,

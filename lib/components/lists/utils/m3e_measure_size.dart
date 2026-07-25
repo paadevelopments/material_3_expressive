@@ -2,8 +2,13 @@ import 'package:flutter/widgets.dart';
 
 /// Reports the rendered size of [child] to [onChange] after each layout.
 class M3EMeasureSize extends StatefulWidget {
+  /// child.
   final Widget child;
+
+  /// Function.
   final void Function(Size) onChange;
+
+  /// M3EMeasureSize.
 
   const M3EMeasureSize({
     super.key,

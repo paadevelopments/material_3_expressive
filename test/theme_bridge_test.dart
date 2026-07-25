@@ -15,206 +15,252 @@ Widget _capture(ThemeData theme, {M3EThemeData? tokens}) {
   const probe = SizedBox.shrink();
   return MaterialApp(
     theme: theme,
-    home: tokens == null
-        ? probe
-        : M3ETheme(data: tokens, child: probe),
+    home: tokens == null ? probe : M3ETheme(data: tokens, child: probe),
   );
 }
 
 void main() {
-  testWidgets('M3ETheme.of derives from the ambient Material theme',
-      (tester) async {
-    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF00695C));
-    final resolved = await _resolve(
-      tester,
-      _capture(ThemeData(colorScheme: scheme, useMaterial3: true)),
-    );
-    expect(resolved.colorScheme.primary, scheme.primary);
-    expect(resolved.colorScheme.surface, scheme.surface);
-  });
+  testWidgets(
+    'M3ETheme.of derives from the ambient Material theme',
+    _m3ethemeOfDerivesFromTheAmbientMaterialTheme,
+  );
+  testWidgets(
+    'an explicit M3ETheme overrides the ambient Material theme',
+    _anExplicitM3ethemeOverridesTheAmbientMaterialTheme,
+  );
+  test(
+    'toThemeData projects the expressive tokens onto Material',
+    _tothemedataProjectsTheExpressiveTokensOntoMaterial,
+  );
+  test(
+    'textTheme and iconTheme track colorScheme via withColorScheme',
+    _textthemeAndIconthemeTrackColorschemeViaWithcolorschem,
+  );
+  test(
+    'explicit iconTheme color is preserved across scheme changes',
+    _explicitIconthemeColorIsPreservedAcrossSchemeChanges,
+  );
+  testWidgets(
+    'M3EResolvedTheme projects text/icon/color onto Material Theme',
+    _m3eresolvedthemeProjectsTextIconColorOntoMaterialThem,
+  );
+  testWidgets(
+    'Material Theme tracks withColorScheme under M3ETheme',
+    _materialThemeTracksWithcolorschemeUnderM3etheme,
+  );
+  testWidgets(
+    'M3ETheme.of is stable across rebuilds under a Material theme',
+    _m3ethemeOfIsStableAcrossRebuildsUnderAMaterialTheme,
+  );
+  testWidgets(
+    'component theme override via copyWith',
+    _componentThemeOverrideViaCopywith,
+  );
+  testWidgets(
+    'M3ENavigationRail renders under M3ETheme without Material Theme',
+    _m3enavigationrailRendersUnderM3ethemeWithoutMaterialTh,
+  );
+}
 
-  testWidgets('an explicit M3ETheme overrides the ambient Material theme',
-      (tester) async {
-    final tokens = M3EThemeData.light(seedColor: const Color(0xFFB3261E));
-    final resolved = await _resolve(
-      tester,
-      _capture(
-        ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
-        ),
-        tokens: tokens,
+Future<void> _m3ethemeOfDerivesFromTheAmbientMaterialTheme(
+  WidgetTester tester,
+) async {
+  final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF00695C));
+  final resolved = await _resolve(
+    tester,
+    _capture(ThemeData(colorScheme: scheme, useMaterial3: true)),
+  );
+  expect(resolved.colorScheme.primary, scheme.primary);
+  expect(resolved.colorScheme.surface, scheme.surface);
+}
+
+Future<void> _anExplicitM3ethemeOverridesTheAmbientMaterialTheme(
+  WidgetTester tester,
+) async {
+  final tokens = M3EThemeData.light(seedColor: const Color(0xFFB3261E));
+  final resolved = await _resolve(
+    tester,
+    _capture(
+      ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
       ),
-    );
-    expect(resolved.colorScheme.primary, tokens.colorScheme.primary);
-  });
+      tokens: tokens,
+    ),
+  );
+  expect(resolved.colorScheme.primary, tokens.colorScheme.primary);
+}
 
-  test('toThemeData projects the expressive tokens onto Material', () {
-    final tokens = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
-    final material = tokens.toThemeData();
-    expect(material.useMaterial3, isTrue);
-    expect(material.colorScheme.primary, tokens.colorScheme.primary);
-    expect(
-      material.textTheme.labelLarge?.fontSize,
-      tokens.typeScale.labelLarge.fontSize,
-    );
-    expect(material.textTheme.bodyMedium?.color, tokens.colorScheme.onSurface);
-    expect(material.iconTheme.color, tokens.colorScheme.onSurface);
-    expect(material.iconTheme.size, 24);
-  });
+void _tothemedataProjectsTheExpressiveTokensOntoMaterial() {
+  final tokens = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+  final material = tokens.toThemeData();
+  expect(material.useMaterial3, isTrue);
+  expect(material.colorScheme.primary, tokens.colorScheme.primary);
+  expect(
+    material.textTheme.labelLarge?.fontSize,
+    tokens.typeScale.labelLarge.fontSize,
+  );
+  expect(material.textTheme.bodyMedium?.color, tokens.colorScheme.onSurface);
+  expect(material.iconTheme.color, tokens.colorScheme.onSurface);
+  expect(material.iconTheme.size, 24);
+}
 
-  test('textTheme and iconTheme track colorScheme via withColorScheme', () {
-    final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
-    final darkScheme = M3EColorScheme.fromSeed(
+void _textthemeAndIconthemeTrackColorschemeViaWithcolorschem() {
+  final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+  final darkScheme = M3EColorScheme.fromSeed(
+    const Color(0xFF6750A4),
+    brightness: Brightness.dark,
+  );
+  final updated = light.withColorScheme(darkScheme);
+
+  expect(updated.textTheme.bodyMedium?.color, darkScheme.onSurface);
+  expect(updated.resolvedIconTheme.color, darkScheme.onSurface);
+  expect(updated.resolvedIconTheme.size, light.iconTheme.size);
+}
+
+void _explicitIconthemeColorIsPreservedAcrossSchemeChanges() {
+  const override = Color(0xFF123456);
+  final tokens = M3EThemeData.light().copyWith(
+    iconTheme: const IconThemeData(size: 20, color: override),
+  );
+  final updated = tokens.withColorScheme(
+    M3EColorScheme.fromSeed(
+      const Color(0xFF00695C),
+      brightness: Brightness.dark,
+    ),
+  );
+  expect(updated.resolvedIconTheme.color, override);
+  expect(updated.resolvedIconTheme.size, 20);
+}
+
+Future<void> _m3eresolvedthemeProjectsTextIconColorOntoMaterialThem(
+  WidgetTester tester,
+) async {
+  final tokens = M3EThemeData.light(
+    seedColor: const Color(0xFFB3261E),
+  ).copyWith(iconTheme: const IconThemeData(size: 28));
+  final stale = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
+  );
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: stale,
+      home: M3ETheme(
+        data: tokens,
+        child: Builder(
+          builder: (context) {
+            final material = Theme.of(context);
+            expect(material.colorScheme.primary, tokens.colorScheme.primary);
+            expect(
+              material.textTheme.bodyMedium?.color,
+              tokens.colorScheme.onSurface,
+            );
+            expect(material.iconTheme.color, tokens.colorScheme.onSurface);
+            expect(material.iconTheme.size, 28);
+            expect(
+              DefaultTextStyle.of(context).style.color,
+              tokens.colorScheme.onSurface,
+            );
+            expect(IconTheme.of(context).size, 28);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> _materialThemeTracksWithcolorschemeUnderM3etheme(
+  WidgetTester tester,
+) async {
+  final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
+  final dark = light.withColorScheme(
+    M3EColorScheme.fromSeed(
       const Color(0xFF6750A4),
       brightness: Brightness.dark,
-    );
-    final updated = light.withColorScheme(darkScheme);
+    ),
+  );
 
-    expect(updated.textTheme.bodyMedium?.color, darkScheme.onSurface);
-    expect(updated.resolvedIconTheme.color, darkScheme.onSurface);
-    expect(updated.resolvedIconTheme.size, light.iconTheme.size);
-  });
-
-  test('explicit iconTheme color is preserved across scheme changes', () {
-    const override = Color(0xFF123456);
-    final tokens = M3EThemeData.light().copyWith(
-      iconTheme: const IconThemeData(size: 20, color: override),
-    );
-    final updated = tokens.withColorScheme(
-      M3EColorScheme.fromSeed(
-        const Color(0xFF00695C),
-        brightness: Brightness.dark,
-      ),
-    );
-    expect(updated.resolvedIconTheme.color, override);
-    expect(updated.resolvedIconTheme.size, 20);
-  });
-
-  testWidgets('M3EResolvedTheme projects text/icon/color onto Material Theme',
-      (tester) async {
-    final tokens = M3EThemeData.light(seedColor: const Color(0xFFB3261E))
-        .copyWith(iconTheme: const IconThemeData(size: 28));
-    final stale = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: stale,
-        home: M3ETheme(
-          data: tokens,
-          child: Builder(
-            builder: (context) {
-              final material = Theme.of(context);
-              expect(material.colorScheme.primary, tokens.colorScheme.primary);
-              expect(
-                material.textTheme.bodyMedium?.color,
-                tokens.colorScheme.onSurface,
-              );
-              expect(material.iconTheme.color, tokens.colorScheme.onSurface);
-              expect(material.iconTheme.size, 28);
-              expect(
-                DefaultTextStyle.of(context).style.color,
-                tokens.colorScheme.onSurface,
-              );
-              expect(IconTheme.of(context).size, 28);
-              return const SizedBox.shrink();
-            },
-          ),
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: light.toThemeData(),
+      home: M3ETheme(
+        data: dark,
+        child: Builder(
+          builder: (context) {
+            final material = Theme.of(context);
+            expect(material.brightness, Brightness.dark);
+            expect(
+              material.textTheme.bodyMedium?.color,
+              dark.colorScheme.onSurface,
+            );
+            expect(material.iconTheme.color, dark.colorScheme.onSurface);
+            return const SizedBox.shrink();
+          },
         ),
       ),
-    );
-  });
+    ),
+  );
+}
 
-  testWidgets('Material Theme tracks withColorScheme under M3ETheme',
-      (tester) async {
-    final light = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
-    final dark = light.withColorScheme(
-      M3EColorScheme.fromSeed(
-        const Color(0xFF6750A4),
-        brightness: Brightness.dark,
-      ),
-    );
+Future<void> _m3ethemeOfIsStableAcrossRebuildsUnderAMaterialTheme(
+  WidgetTester tester,
+) async {
+  final first = await _resolve(tester, _capture(ThemeData()));
+  tester.element(find.byType(SizedBox)).markNeedsBuild();
+  await tester.pump();
+  final second = M3ETheme.of(tester.element(find.byType(SizedBox)));
+  expect(identical(first, second), isTrue);
+}
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: light.toThemeData(),
-        home: M3ETheme(
-          data: dark,
-          child: Builder(
-            builder: (context) {
-              final material = Theme.of(context);
-              expect(material.brightness, Brightness.dark);
-              expect(
-                material.textTheme.bodyMedium?.color,
-                dark.colorScheme.onSurface,
-              );
-              expect(material.iconTheme.color, dark.colorScheme.onSurface);
-              return const SizedBox.shrink();
-            },
-          ),
+Future<void> _componentThemeOverrideViaCopywith(WidgetTester tester) async {
+  const customCheckbox = M3ECheckboxTheme(boxSize: 24);
+  final tokens = M3EThemeData.light().copyWith(checkboxTheme: customCheckbox);
+  final resolved = await _resolve(
+    tester,
+    _capture(ThemeData(), tokens: tokens),
+  );
+  expect(resolved.checkboxTheme.boxSize, 24);
+}
+
+Future<void> _m3enavigationrailRendersUnderM3ethemeWithoutMaterialTh(
+  WidgetTester tester,
+) async {
+  final tokens = M3EThemeData.light();
+  await tester.pumpWidget(
+    WidgetsApp(
+      color: tokens.colorScheme.surface,
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder: (context, _, _) => builder(context),
+        );
+      },
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      home: M3ETheme(
+        data: tokens,
+        child: M3ENavigationRail(
+          type: M3ENavigationRailType.alwaysExpand,
+          selectedIndex: 0,
+          onDestinationSelected: (_) {},
+          sections: const <M3ENavigationRailSection>[
+            M3ENavigationRailSection(
+              destinations: <M3ENavigationRailDestination>[
+                M3ENavigationRailDestination(
+                  icon: Icon(M3EIcons.inbox),
+                  label: 'Inbox',
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-    );
-  });
-
-  testWidgets('M3ETheme.of is stable across rebuilds under a Material theme',
-      (tester) async {
-    final first = await _resolve(tester, _capture(ThemeData()));
-    tester.element(find.byType(SizedBox)).markNeedsBuild();
-    await tester.pump();
-    final second = M3ETheme.of(tester.element(find.byType(SizedBox)));
-    expect(identical(first, second), isTrue);
-  });
-
-  testWidgets('component theme override via copyWith', (tester) async {
-    const customCheckbox = M3ECheckboxTheme(boxSize: 24);
-    final tokens = M3EThemeData.light().copyWith(checkboxTheme: customCheckbox);
-    final resolved = await _resolve(
-      tester,
-      _capture(ThemeData(), tokens: tokens),
-    );
-    expect(resolved.checkboxTheme.boxSize, 24);
-  });
-
-  testWidgets('M3ENavigationRail renders under M3ETheme without Material Theme',
-      (tester) async {
-    final tokens = M3EThemeData.light();
-    await tester.pumpWidget(
-      WidgetsApp(
-        color: tokens.colorScheme.surface,
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            settings: settings,
-            pageBuilder: (context, _, _) => builder(context),
-          );
-        },
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        home: M3ETheme(
-          data: tokens,
-          child: M3ENavigationRail(
-            type: M3ENavigationRailType.alwaysExpand,
-            selectedIndex: 0,
-            onDestinationSelected: (_) {},
-            sections: const <M3ENavigationRailSection>[
-              M3ENavigationRailSection(
-                destinations: <M3ENavigationRailDestination>[
-                  M3ENavigationRailDestination(
-                    icon: Icon(M3EIcons.inbox),
-                    label: 'Inbox',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    expect(find.text('Inbox'), findsOneWidget);
-  });
+    ),
+  );
+  await tester.pump();
+  expect(find.text('Inbox'), findsOneWidget);
 }

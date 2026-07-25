@@ -14,6 +14,7 @@ const String _closeSemanticLabel = 'Close';
 /// [M3ESideSheet.show] for a modal sheet that slides in from the side with a
 /// header, body and optional actions.
 class M3ESideSheet extends StatelessWidget {
+  /// M3ESideSheet.
   const M3ESideSheet({
     required this.title,
     required this.body,
@@ -21,8 +22,14 @@ class M3ESideSheet extends StatelessWidget {
     super.key,
   });
 
+  /// title.
+
   final String title;
+
+  /// body.
   final Widget body;
+
+  /// actions.
   final List<Widget> actions;
 
   /// Presents a modal side sheet and completes with the popped result.
@@ -42,28 +49,35 @@ class M3ESideSheet extends StatelessWidget {
       barrierColor: sheetTheme.scrimColor(theme.colorScheme),
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
-        return M3EComponentTheme(builder: (context) => Align(
-          alignment: Alignment.centerRight,
-          child: M3ESideSheet(title: title, body: body, actions: actions),
-        ));
-      },
-      transitionBuilder: (BuildContext context, Animation<double> a, _, Widget c) {
-        return SlideTransition(
-          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-              .animate(
-            CurvedAnimation(parent: a, curve: M3EMotion.emphasizedDecelerate),
+        return M3EComponentTheme(
+          builder: (context) => Align(
+            alignment: Alignment.centerRight,
+            child: M3ESideSheet(title: title, body: body, actions: actions),
           ),
-          child: c,
         );
       },
+      transitionBuilder:
+          (BuildContext context, Animation<double> a, _, Widget c) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: a,
+                      curve: M3EMotion.emphasizedDecelerate,
+                    ),
+                  ),
+              child: c,
+            );
+          },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildSheet,
-    );
+    return M3EComponentTheme(builder: _buildSheet);
   }
 
   Widget _buildSheet(BuildContext context) {

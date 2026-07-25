@@ -10,24 +10,35 @@ import '../components/m3e_list_item_scope.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 
+part 'm3e_dismissible_card_drag_mixin.dart';
+part 'm3e_dismissible_card_build_mixin.dart';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Spring presets (Material 3 Expressive via motor)
 // ─────────────────────────────────────────────────────────────────────────────
 
-final _kSpatialSpringBack = const MaterialSpringMotion.expressiveSpatialDefault()
-    .copyWith(stiffness: 200, damping: 0.8);
+final _kSpatialSpringBack =
+    const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+      stiffness: 200,
+      damping: 0.8,
+    );
 
 final _kReEngageSpring = const MaterialSpringMotion.standardSpatialFast();
 
-final _kDetachPush = const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-  stiffness: 800,
-  damping: 0.95,
-);
+final _kDetachPush = const MaterialSpringMotion.expressiveSpatialDefault()
+    .copyWith(stiffness: 800, damping: 0.95);
 
 final _kRoundnessSnap = const MaterialSpringMotion.expressiveSpatialDefault()
     .copyWith(stiffness: 1000, damping: 0.4);
 
 const _kCardSettleCurve = Cubic(0.34, 1.56, 0.64, 1);
+
+const int _kVibrationThresholdMs = 60;
+const double _kMaxPreDetachRoundness = 0.6;
+const double _kPreThresholdRoundnessScale = 0.4;
+const double _kDetachPushPixels = 30;
+
+/// M3EDismissibleCardMixin.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Mixin — all shared drag / animation / build logic
@@ -35,11 +46,20 @@ const _kCardSettleCurve = Cubic(0.34, 1.56, 0.64, 1);
 
 mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     on State<T>, TickerProviderStateMixin<T> {
+  /// The swipeItemCount.
   int get swipeItemCount;
+
+  /// swipeItemBuilder.
   Widget swipeItemBuilder(BuildContext context, int dataIndex);
+
+  /// The style.
   M3EDismissibleListStyle get style;
+
+  /// Callback invoked when a dismissible item is dismissed.
   Future<bool> Function(int index, DismissDirection direction)?
-      get onDismissCallback;
+  get onDismissCallback;
+
+  /// The Function.
   void Function(int index)? get onTapCallback;
 
   final List<M3EDismissibleSlot> _slots = [];
@@ -60,26 +80,33 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   SingleMotionController? _pushCtrl;
   SingleMotionController? _roundnessCtrl;
 
-  static const int _kVibrationThresholdMs = 60;
-  static const double _kMaxPreDetachRoundness = 0.6;
-  static const double _kPreThresholdRoundnessScale = 0.4;
-  static const double _kDetachPushPixels = 30;
+  /// computeVisibleIndices.
 
   List<int> computeVisibleIndices() => [
-        for (int i = 0; i < _slots.length; i++)
-          if (_slots[i].isVisible) i,
-      ];
+    for (int i = 0; i < _slots.length; i++)
+      if (_slots[i].isVisible) i,
+  ];
+
+  /// The slots.
 
   List<M3EDismissibleSlot> get slots => List.unmodifiable(_slots);
+
+  /// The isInteractionLocked.
   bool get isInteractionLocked => _dragSlotRef != null || _collapsingCount > 0;
 
+  /// initSlots.
+
   void initSlots() => _syncSlots();
+
+  /// syncSlotsIfNeeded.
 
   void syncSlotsIfNeeded(int oldItemCount) {
     if (swipeItemCount != oldItemCount) {
       _syncSlots();
     }
   }
+
+  /// disposeSlots.
 
   void disposeSlots() {
     _springCtrl?.dispose();
@@ -149,6 +176,8 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     return (_dragOffset.abs() / (w * style.dismissThreshold)).clamp(0.0, 1.0);
   }
 
+  /// computeRadius.
+
   BorderRadius computeRadius(
     int slotIndex,
     int slotPos,
@@ -169,9 +198,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     final ir = s.innerRadius;
 
     if (total == 1) {
-
       return BorderRadius.circular(or);
-
     }
 
     if (dragPos < 0 || (slotPos - dragPos).abs() > 1) {
@@ -184,8 +211,9 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     }
 
     final facingR = lerpDouble(ir, or, _roundnessFraction)!;
-    final subtleR =
-        _pastThreshold ? ir : lerpDouble(ir, or, _roundnessFraction * 0.3)!;
+    final subtleR = _pastThreshold
+        ? ir
+        : lerpDouble(ir, or, _roundnessFraction * 0.3)!;
 
     final isDragged = slotIndex == _dragSlotIndex;
     final isAbove = slotPos < dragPos;
@@ -219,637 +247,20 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     );
   }
 
-  double computeNeighbourOffset(int slotPos, int dragPos) {
-    if (dragPos < 0 || slotPos < 0) {
-      return 0;
-    }
-    final distance = (slotPos - dragPos).abs();
-    if (distance == 0 || distance > style.neighbourReach) {
-      return 0;
-    }
+  /// computeNeighbourOffset.
 
-    final reach = style.neighbourReach;
-    final falloff = reach > 1 ? (reach - distance) / (reach - 1) : 1.0;
+  // Implemented by M3EDismissibleCardDragMixin / M3EDismissibleCardBuildMixin
+  double computeNeighbourOffset(int slotPos, int dragPos);
 
-    return _neighbourFraction * style.neighbourPull * falloff * _dragOffset.sign;
-  }
+  /// handleDragStart.
+  void handleDragStart(M3EDismissibleSlot slot);
 
-  void handleDragStart(M3EDismissibleSlot slot) {
-    if (!slot.isVisible) {
-      return;
-    }
+  /// handleDragUpdate.
+  void handleDragUpdate(DragUpdateDetails d);
 
-    _springCtrl?.stop(canceled: true);
-    _nbrCtrl?.stop(canceled: true);
-    _pushCtrl?.stop(canceled: true);
-    _roundnessCtrl?.stop(canceled: true);
+  /// handleDragEnd.
+  void handleDragEnd(DragEndDetails d);
 
-    setState(() {
-      _dragSlotRef = slot;
-      _dragSlotIndex = _slots.indexOf(slot);
-      _dragOffset = 0.0;
-      _neighbourFraction = 0.0;
-      _pastThreshold = false;
-      _detachPush = 0.0;
-      _roundnessFraction = 0.0;
-    });
-  }
-
-  void handleDragUpdate(DragUpdateDetails d) {
-    if (_dragSlotRef == null) {
-      return;
-    }
-
-    final double swipeSpeed = d.delta.dx.abs();
-    final double multiplier = (1.0 + (swipeSpeed / 5.0)).clamp(1.0, 4.0);
-
-    double newOffset = _dragOffset + d.delta.dx;
-    double newNeighbour = _neighbourFraction;
-    double newRoundness = _roundnessFraction;
-
-    final savedOffset = _dragOffset;
-    _dragOffset = newOffset;
-    final newProgress = _dragProgress;
-    _dragOffset = savedOffset;
-
-    final crossedNow = newProgress >= 1.0;
-
-    if (crossedNow && !_pastThreshold) {
-      _pastThreshold = true;
-      M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
-
-      final pushDir = newOffset.sign;
-      _pushCtrl?.dispose();
-      _pushCtrl = SingleMotionController(
-        motion: _kDetachPush.copyWith(stiffness: 800 * multiplier),
-        vsync: this,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _detachPush = _pushCtrl!.value);
-          }
-        })
-        ..animateTo(
-          style.background == null || style.secondaryBackground == null
-              ? pushDir * _kDetachPushPixels
-              : 0,
-        );
-
-      _nbrCtrl?.dispose();
-      _nbrCtrl = SingleMotionController(
-        motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-          stiffness: 800 * multiplier,
-          damping: 0.7,
-        ),
-        vsync: this,
-        initialValue: _neighbourFraction,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _neighbourFraction = _nbrCtrl!.value);
-          }
-        })
-        ..animateTo(0);
-
-      _roundnessCtrl?.dispose();
-      _roundnessCtrl = SingleMotionController(
-        motion: _kRoundnessSnap.copyWith(stiffness: 1000 * multiplier),
-        vsync: this,
-        initialValue: _roundnessFraction,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _roundnessFraction = _roundnessCtrl!.value);
-          }
-        })
-        ..animateTo(1);
-    } else if (!crossedNow && _pastThreshold) {
-      _pastThreshold = false;
-      _reEngaging = true;
-      M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
-
-      _pushCtrl?.dispose();
-      _pushCtrl = SingleMotionController(
-        motion: _kDetachPush.copyWith(stiffness: 800 * multiplier),
-        vsync: this,
-        initialValue: _detachPush,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _detachPush = _pushCtrl!.value);
-          }
-        })
-        ..animateTo(0);
-
-      _dragOffset = newOffset;
-      final target = _dragProgress;
-      _dragOffset = savedOffset;
-
-      _nbrCtrl?.dispose();
-      _nbrCtrl = SingleMotionController(
-        motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-          stiffness: 800 * multiplier,
-          damping: 0.7,
-        ),
-        vsync: this,
-        initialValue: _neighbourFraction,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _neighbourFraction = _nbrCtrl!.value);
-          }
-        })
-        ..addStatusListener((s) {
-          if (s == AnimationStatus.completed || s == AnimationStatus.dismissed) {
-            _reEngaging = false;
-          }
-        })
-        ..animateTo(target);
-
-      _roundnessCtrl?.dispose();
-      _roundnessCtrl = SingleMotionController(
-        motion: _kReEngageSpring.copyWith(stiffness: 800 * multiplier),
-        vsync: this,
-        initialValue: _roundnessFraction,
-      )
-        ..addListener(() {
-          if (mounted) {
-            setState(() => _roundnessFraction = _roundnessCtrl!.value);
-          }
-        })
-        ..animateTo(target * _kPreThresholdRoundnessScale);
-    } else if (!_pastThreshold) {
-      if (_reEngaging) {
-        _reEngaging = false;
-        _nbrCtrl?.stop(canceled: true);
-        _roundnessCtrl?.stop(canceled: true);
-      }
-      newNeighbour = newProgress;
-      newRoundness = (newProgress * _kMaxPreDetachRoundness).clamp(
-        0.0,
-        _kMaxPreDetachRoundness,
-      );
-      if (style.dismissHapticStream) {
-        _playPullHaptics();
-      }
-    }
-
-    setState(() {
-      _dragOffset = newOffset;
-      _neighbourFraction = newNeighbour;
-      _roundnessFraction = newRoundness;
-    });
-  }
-
-  void handleDragEnd(DragEndDetails d) {
-    if (_dragSlotRef == null) {
-      return;
-    }
-    _reindexDragSlot();
-    if (_dragSlotIndex < 0) {
-      _resetDragState();
-      return;
-    }
-
-    final velocity = d.velocity.pixelsPerSecond.dx.abs();
-    final double speedMul = (1.0 + (velocity / 1000.0)).clamp(1.0, 4.0);
-
-    if (_dragProgress >= 1.0) {
-      final direction = _dragOffset > 0
-          ? DismissDirection.startToEnd
-          : DismissDirection.endToStart;
-      _dismiss(_dragSlotIndex, speedMul, direction);
-    } else {
-      _springBack(speedMul);
-    }
-  }
-
-  void _resetDragState() {
-    setState(() {
-      _dragSlotRef = null;
-      _dragSlotIndex = -1;
-      _dragOffset = 0.0;
-      _detachPush = 0.0;
-      _neighbourFraction = 0.0;
-      _pastThreshold = false;
-      _reEngaging = false;
-      _roundnessFraction = 0.0;
-    });
-  }
-
-  void _playPullHaptics() {
-    if (!style.enableFeedback) {
-      return;
-    }
-    if (_hapticStopwatch.elapsedMilliseconds < _kVibrationThresholdMs) {
-      return;
-    }
-    _hapticStopwatch.reset();
-    HapticFeedback.selectionClick();
-  }
-
-  void _springBack(double speedMul) {
-    _pushCtrl?.dispose();
-    _pushCtrl = null;
-    _detachPush = 0.0;
-    _roundnessCtrl?.dispose();
-    _roundnessCtrl = null;
-    _roundnessFraction = 0.0;
-
-    final ref = _dragSlotRef;
-    _springCtrl?.dispose();
-    _springCtrl = SingleMotionController(
-      motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-        stiffness: 380 * speedMul,
-        damping: 0.6,
-      ),
-      vsync: this,
-      initialValue: _dragOffset,
-    )
-      ..addListener(() {
-        if (mounted) {
-          setState(() => _dragOffset = _springCtrl!.value);
-        }
-      })
-      ..addStatusListener((s) {
-        if ((s == AnimationStatus.completed || s == AnimationStatus.dismissed) &&
-            mounted &&
-            _dragSlotRef == ref) {
-          _resetDragState();
-        }
-      })
-      ..animateTo(0);
-
-    _nbrCtrl?.dispose();
-    _nbrCtrl = SingleMotionController(
-      motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-        stiffness: 380 * speedMul,
-        damping: 0.6,
-      ),
-      vsync: this,
-      initialValue: _neighbourFraction,
-    )
-      ..addListener(() {
-        if (mounted) {
-          setState(() => _neighbourFraction = _nbrCtrl!.value);
-        }
-      })
-      ..animateTo(0);
-  }
-
-  Future<void> _dismiss(
-    int slotIndex,
-    double speedMul,
-    DismissDirection direction,
-  ) async {
-    if (slotIndex < 0 || slotIndex >= _slots.length) {
-      return;
-    }
-    final slot = _slots[slotIndex];
-    final visible = computeVisibleIndices();
-    final dataIndex = visible.indexOf(slotIndex);
-    if (dataIndex < 0) {
-      return;
-    }
-
-    final size = _cardSize(slot);
-    slot
-      ..capturedHeight = size.height
-      ..capturedWidth = size.width
-      ..frozenChild = swipeItemBuilder(context, dataIndex)
-      ..dismissedDirection = direction;
-
-    final flyInitial = _dragOffset + _detachPush;
-    slot.flyNotifier.value = flyInitial;
-
-    _pushCtrl?.dispose();
-    _pushCtrl = null;
-    _nbrCtrl?.dispose();
-    _nbrCtrl = null;
-    _roundnessCtrl?.dispose();
-    _roundnessCtrl = null;
-
-    setState(() {
-      slot.markCollapsing();
-      _collapsingCount++;
-      _dragSlotRef = null;
-      _dragSlotIndex = -1;
-      _dragOffset = 0.0;
-      _detachPush = 0.0;
-      _neighbourFraction = 0.0;
-      _pastThreshold = false;
-      _reEngaging = false;
-      _roundnessFraction = 0.0;
-    });
-
-    final colCtrl = SingleMotionController(
-      motion: _kSpatialSpringBack.copyWith(stiffness: style.collapseSpeed * speedMul),
-      vsync: this,
-    );
-    slot.collapseCtrl = colCtrl;
-
-    colCtrl.addStatusListener((s) {
-      if (s == AnimationStatus.completed || s == AnimationStatus.dismissed) {
-        if (mounted) {
-          final idx = _slots.indexOf(slot);
-          if (idx >= 0) {
-            setState(() {
-              _slots.removeAt(idx);
-              _collapsingCount--;
-              _reindexDragSlot();
-            });
-            _measureKeys.remove(slot);
-          }
-        }
-        slot
-          ..disposeFlyNotifier()
-          ..dispose();
-        colCtrl.dispose();
-      }
-    });
-
-    final flySign = flyInitial.sign;
-    final flyTarget = flySign == 0
-        ? slot.capturedWidth + 80.0
-        : flySign * (slot.capturedWidth + 80.0);
-
-    slot.flyCtrl?.dispose();
-    final flyCtrl = SingleMotionController(
-      motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-        stiffness: 400 * speedMul,
-        damping: 0.8,
-      ),
-      vsync: this,
-      initialValue: flyInitial,
-    );
-    slot.flyCtrl = flyCtrl;
-
-    var collapseStarted = false;
-    flyCtrl
-      ..addListener(() {
-        slot.flyNotifier.value = flyCtrl.value;
-        final totalDist = (flyTarget - flyInitial).abs();
-        if (totalDist > 0) {
-          final currentDist = (flyCtrl.value - flyInitial).abs();
-          if (currentDist / totalDist > 0.9 && !collapseStarted) {
-            collapseStarted = true;
-            colCtrl.animateTo(1);
-          }
-        }
-      })
-      ..addStatusListener((s) {
-        if (s == AnimationStatus.completed || s == AnimationStatus.dismissed) {
-          slot.flyCtrl = null;
-          flyCtrl.dispose();
-          if (!collapseStarted) {
-            collapseStarted = true;
-            colCtrl.animateTo(1);
-          }
-        }
-      })
-      ..animateTo(flyTarget);
-
-    onDismissCallback?.call(dataIndex, direction);
-  }
-
-  Widget buildSlot(BuildContext context, int slotIndex, [List<int>? visible]) {
-    final slot = _slots[slotIndex];
-    if (slot.isCollapsing) {
-      return _buildCollapsingCard(context, slotIndex);
-    }
-    return _buildActiveCard(context, slotIndex, visible ?? computeVisibleIndices());
-  }
-
-  Widget _buildCollapsingCard(BuildContext context, int slotIndex) {
-    final slot = _slots[slotIndex];
-    final ctrl = slot.collapseCtrl!;
-    final totalH = slot.capturedHeight + style.gap;
-    final s = style;
-
-    final swipingRight = slot.dismissedDirection == DismissDirection.startToEnd;
-    final bgRadius = swipingRight
-        ? s.backgroundBorderRadius
-        : (s.secondaryBackgroundBorderRadius ?? s.backgroundBorderRadius);
-    final cardRadius = s.selectedBorderRadius ?? s.outerRadius;
-
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: ctrl,
-        child: slot.frozenChild == null
-            ? null
-            : Stack(
-                children: [
-                  if (slot.dismissedDirection != null)
-                    ValueListenableBuilder<double>(
-                      valueListenable: slot.flyNotifier,
-                      builder: (_, flyOff, child) {
-                        final progress = flyOff.abs();
-                        final actionWidth =
-                            (progress - s.actionGap).clamp(0.0, progress);
-                        final swipingRight =
-                            slot.dismissedDirection == DismissDirection.startToEnd;
-                        if (actionWidth <= 0) {
-                          return const SizedBox.shrink();
-                        }
-                        return Positioned.fill(
-                          bottom: s.gap,
-                          child: Align(
-                            alignment: swipingRight ? Alignment.centerLeft : Alignment.centerRight,
-                            child: SizedBox(
-                              width: actionWidth,
-                              height: double.infinity,
-                              child: Padding(
-                                padding: s.margin ?? EdgeInsets.zero,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(bgRadius),
-                                  child: swipingRight
-                                      ? s.background
-                                      : (s.secondaryBackground ?? s.background),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: s.gap),
-                    child: OverflowBox(
-                      alignment: Alignment.topLeft,
-                      minWidth: slot.capturedWidth > 0 ? slot.capturedWidth : 0,
-                      maxWidth: slot.capturedWidth > 0
-                          ? slot.capturedWidth
-                          : MediaQuery.sizeOf(context).width,
-                      minHeight: 0,
-                      maxHeight: slot.capturedHeight,
-                      child: IgnorePointer(
-                        child: ValueListenableBuilder<double>(
-                          valueListenable: slot.flyNotifier,
-                          builder: (_, flyOff, child) => Transform.translate(
-                            offset: Offset(flyOff, 0),
-                            child: child,
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.zero,
-                            child: M3ECard(
-                              variant: M3ECardVariant.filled,
-                              borderRadius: BorderRadius.circular(cardRadius),
-                              color: s.color ??
-                                  M3ETheme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                              border: s.border,
-                              padding: s.padding ?? const EdgeInsets.all(16),
-                              width: double.infinity,
-                              child: M3EListItemScope(
-                                child: slot.frozenChild!,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-        builder: (ctx, child) {
-          final h = (totalH * (1.0 - ctrl.value)).clamp(0.0, totalH);
-          return SizedBox(height: h, width: double.infinity, child: child);
-        },
-      ),
-    );
-  }
-
-  Widget _buildActiveCard(BuildContext context, int slotIndex, List<int> visible) {
-    final slot = _slots[slotIndex];
-    final s = style;
-    final slotPos = visible.indexOf(slotIndex);
-    if (slotPos < 0 || slotPos >= swipeItemCount) {
-      return const SizedBox.shrink();
-    }
-
-    final total = visible.length;
-    final isLast = slotPos == total - 1;
-    final isDragged = slotIndex == _dragSlotIndex;
-    final dragPos = _dragSlotIndex >= 0 ? visible.indexOf(_dragSlotIndex) : -1;
-    final br = computeRadius(slotIndex, slotPos, dragPos, visible);
-    final nOff = computeNeighbourOffset(slotPos, dragPos);
-
-    final bool swipingRight = _dragOffset > 0;
-    final Widget? activeBg = swipingRight ? s.background : (s.secondaryBackground ?? s.background);
-    final bgRadius = swipingRight ? s.backgroundBorderRadius : (s.secondaryBackgroundBorderRadius ?? s.backgroundBorderRadius);
-    final double revealed = _dragOffset.abs();
-    final double actionWidth = (revealed - s.actionGap).clamp(0.0, revealed);
-
-    return RepaintBoundary(
-      child: Padding(
-        padding: s.margin ?? EdgeInsets.zero,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            if (isDragged && actionWidth > 0 && activeBg != null)
-              Positioned.fill(
-                bottom: isLast ? 0 : s.gap,
-                child: RepaintBoundary(
-                  child: Align(
-                    alignment: swipingRight ? Alignment.centerLeft : Alignment.centerRight,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(bgRadius),
-                      child: SizedBox(
-                        width: actionWidth,
-                        height: double.infinity,
-                        child: Opacity(
-                          opacity: (_dragProgress * 3.0).clamp(0.0, 1.0),
-                          child: _buildActiveBackground(activeBg, _dragProgress),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : s.gap),
-              child: Transform.translate(
-                offset: Offset(isDragged ? _dragOffset + _detachPush : nOff, 0),
-                child: GestureDetector(
-                  onHorizontalDragStart: (_) => handleDragStart(slot),
-                  onHorizontalDragUpdate: handleDragUpdate,
-                  onHorizontalDragEnd: handleDragEnd,
-                  child: M3ECard(
-                    variant: M3ECardVariant.filled,
-                    surfaceKey: _measureKey(slot),
-                    borderRadius: br,
-                    color: s.color ??
-                        M3ETheme.of(context).colorScheme.surfaceContainerHighest,
-                    border: s.border,
-                    animationDuration: _dragSlotRef != null
-                        ? Duration.zero
-                        : const Duration(milliseconds: 520),
-                    animationCurve: _kCardSettleCurve,
-                    width: double.infinity,
-                    padding: EdgeInsets.zero,
-                    onPressed: isInteractionLocked || onTapCallback == null
-                        ? null
-                        : () => onTapCallback!(slotPos),
-                    haptic: s.hapticOnTap,
-                    child: Padding(
-                      padding: s.padding ?? const EdgeInsets.all(16),
-                      child: M3EListItemScope(
-                        child: swipeItemBuilder(context, slotPos),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActiveBackground(Widget? bg, double progress) {
-    if (bg == null) {
-      return const SizedBox.shrink();
-    }
-    final iconOpacity = progress < 0.3 ? 0.0 : ((progress - 0.3) / 0.7).clamp(0.0, 1.0);
-    final iconScale = progress < 0.3 ? 0.8 : (0.8 + ((progress - 0.3) / 0.7) * 0.2).clamp(0.0, 1.0);
-
-    Widget wrapChild(Widget? child) {
-      if (child == null) {
-        return const SizedBox.shrink();
-      }
-      return Transform.scale(
-        scale: iconScale,
-        child: Opacity(opacity: iconOpacity, child: child),
-      );
-    }
-
-    if (bg is Container) {
-      return Container(
-        alignment: bg.alignment,
-        padding: bg.padding,
-        color: bg.color,
-        decoration: bg.decoration,
-        foregroundDecoration: bg.foregroundDecoration,
-        constraints: bg.constraints,
-        margin: bg.margin,
-        transform: bg.transform,
-        transformAlignment: bg.transformAlignment,
-        clipBehavior: bg.clipBehavior,
-        child: bg.child != null ? wrapChild(bg.child) : null,
-      );
-    }
-    if (bg is ColoredBox) {
-      return ColoredBox(color: bg.color, child: wrapChild(bg.child));
-    }
-    if (bg is DecoratedBox) {
-      return DecoratedBox(
-        decoration: bg.decoration,
-        position: bg.position,
-        child: wrapChild(bg.child),
-      );
-    }
-    return wrapChild(bg);
-  }
+  /// buildSlot.
+  Widget buildSlot(BuildContext context, int slotIndex, [List<int>? visible]);
 }

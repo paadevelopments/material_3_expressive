@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 
@@ -9,6 +8,8 @@ import '../enums/m3e_split_button_selection_mode.dart';
 import '../models/m3e_split_button_item.dart';
 import '../styles/m3e_split_button_bottom_sheet_decoration.dart';
 import '../styles/m3e_split_button_checkbox_style.dart';
+
+/// member.
 
 Future<Object?> showSplitButtonBottomSheet<T>({
   required BuildContext context,
@@ -63,36 +64,36 @@ Future<T?> _showSingleSelectBottomSheet<T>({
       return M3EScrimSystemUi.wrapBottomSheet(
         SafeArea(
           child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (decoration.title != null)
-                Padding(
-                  padding:
-                      decoration.titlePadding ??
-                      const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                  child: DefaultTextStyle.merge(
-                    style: m3eTheme.textTheme.titleMedium!,
-                    child: decoration.title!,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (decoration.title != null)
+                  Padding(
+                    padding:
+                        decoration.titlePadding ??
+                        const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                    child: DefaultTextStyle.merge(
+                      style: m3eTheme.textTheme.titleMedium,
+                      child: decoration.title!,
+                    ),
                   ),
-                ),
-              for (int i = 0; i < items.length; i++)
-                _buildBottomSheetItem(
-                  context: sheetContext,
-                  item: items[i],
-                  foregroundColor: foregroundColor,
-                  iconSize: iconSize,
-                  autofocus:
-                      keyboardActivated &&
-                      items[i].enabled &&
-                      i == items.indexWhere((e) => e.enabled),
-                ),
-              const SizedBox(height: 8),
-            ],
+                for (int i = 0; i < items.length; i++)
+                  _buildBottomSheetItem(
+                    context: sheetContext,
+                    item: items[i],
+                    foregroundColor: foregroundColor,
+                    iconSize: iconSize,
+                    autofocus:
+                        keyboardActivated &&
+                        items[i].enabled &&
+                        i == items.indexWhere((e) => e.enabled),
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         ),
-      ),
       );
     },
   );
@@ -160,8 +161,8 @@ class _MultiSelectBottomSheetState<T>
     extends State<_MultiSelectBottomSheet<T>> {
   late Set<T> _selectedValues;
 
-  static const double _kMinCheckboxSize = 20.0;
-  static const double _kMaxCheckboxSize = 32.0;
+  static const double _kMinCheckboxSize = 20;
+  static const double _kMaxCheckboxSize = 32;
 
   @override
   void initState() {
@@ -198,7 +199,7 @@ class _MultiSelectBottomSheetState<T>
                   widget.decoration.titlePadding ??
                   const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: DefaultTextStyle.merge(
-                style: m3eTheme.textTheme.titleMedium!,
+                style: m3eTheme.textTheme.titleMedium,
                 child: widget.decoration.title!,
               ),
             ),
@@ -280,7 +281,9 @@ class _MultiSelectBottomSheetState<T>
           Flexible(
             child: Text(
               item.child.toString(),
-              style: m3eTheme.typeScale.bodyLarge.copyWith(color: effectiveColor),
+              style: m3eTheme.typeScale.bodyLarge.copyWith(
+                color: effectiveColor,
+              ),
             ),
           ),
         ],
@@ -305,7 +308,8 @@ class _MultiSelectBottomSheetState<T>
     final nonActiveBorderRadius =
         checkboxStyle?.nonActiveBorderRadius ?? BorderRadius.circular(4);
     final checkboxSize = _resolveCheckboxSize(item, child, context);
-    final selectedIcon = checkboxStyle?.icon ?? const Icon(M3EIcons.check_rounded);
+    final selectedIcon =
+        checkboxStyle?.icon ?? const Icon(M3EIcons.check_rounded);
 
     return InkWell(
       autofocus: autofocus,
@@ -364,7 +368,7 @@ class _MultiSelectBottomSheetState<T>
         _kMaxCheckboxSize,
       );
     }
-    return 24.0;
+    return 24;
   }
 
   Widget _buildStyledCheckbox({

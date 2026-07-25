@@ -3,8 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 void main() {
-  testWidgets('M3ESnackbar positions above system navigation inset',
-      (WidgetTester tester) async {
+  testWidgets('M3ESnackbar positions above system navigation inset', (
+    WidgetTester tester,
+  ) async {
     const double navigationInset = 34;
     tester.view.viewPadding = const FakeViewPadding(bottom: navigationInset);
     addTearDown(tester.view.reset);
@@ -17,10 +18,8 @@ void main() {
           builder: (BuildContext context) {
             return Center(
               child: M3EButton(
-                onPressed: () => M3ESnackbar.show(
-                  context,
-                  message: 'Draft saved',
-                ),
+                onPressed: () =>
+                    M3ESnackbar.show(context, message: 'Draft saved'),
                 child: const Text('Show snackbar'),
               ),
             );
@@ -40,7 +39,9 @@ void main() {
       ),
     );
 
-    final BuildContext hostContext = tester.element(find.byType(M3ESnackbarHost));
+    final BuildContext hostContext = tester.element(
+      find.byType(M3ESnackbarHost),
+    );
     final MediaQueryData media = MediaQuery.of(hostContext);
     final M3ESnackbarTheme snackTheme = M3ETheme.of(hostContext).snackBarTheme;
 

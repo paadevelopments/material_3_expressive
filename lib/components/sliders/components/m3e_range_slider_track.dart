@@ -2,6 +2,12 @@
 // RangeSlider Track
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_range_slider.dart'
+    show M3ERangeSlider;
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ERangeSlider;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ERangeSlider;
 
 import '../enums/m3e_slider_enums.dart';
 import '../styles/m3e_slider_theme.dart';
@@ -9,6 +15,7 @@ import 'm3e_slider_track_painter.dart';
 
 /// Default expressive track for [M3ERangeSlider].
 class M3ERangeSliderTrack extends StatelessWidget {
+  /// M3ERangeSliderTrack.
   const M3ERangeSliderTrack({
     required this.startFraction,
     required this.endFraction,
@@ -31,23 +38,59 @@ class M3ERangeSliderTrack extends StatelessWidget {
     super.key,
   });
 
+  /// startFraction.
+
   final double startFraction;
+
+  /// endFraction.
   final double endFraction;
+
+  /// tickFractions.
   final List<double> tickFractions;
+
+  /// colors.
   final M3ESliderColors colors;
+
+  /// theme.
   final M3ESliderTheme theme;
+
+  /// axis.
   final Axis axis;
+
+  /// textDirection.
   final TextDirection textDirection;
+
+  /// handleThickness.
   final double handleThickness;
+
+  /// trackHeight.
   final double? trackHeight;
+
+  /// stopIndicatorSize.
   final double? stopIndicatorSize;
+
+  /// tickSize.
   final double? tickSize;
+
+  /// edgeInset.
   final double? edgeInset;
+
+  /// drawDots.
   final bool drawDots;
+
+  /// isWavy.
   final bool isWavy;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
 
   @override

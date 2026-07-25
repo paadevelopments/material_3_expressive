@@ -34,15 +34,15 @@ class M3EProgressIndicator extends StatefulWidget {
     this.strokeWidth,
     this.color,
     this.trackColor,
-  })  : _kind = _M3EProgressKind.circular,
-        linearSize = M3EProgressIndicatorSize.m,
-        trackStrokeWidth = null,
-        gapSize = null,
-        stopSize = null,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null;
+  }) : _kind = _M3EProgressKind.circular,
+       linearSize = M3EProgressIndicatorSize.m,
+       trackStrokeWidth = null,
+       gapSize = null,
+       stopSize = null,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null;
 
   /// Expressive circular wavy progress indicator.
   const M3EProgressIndicator.circularWavy({
@@ -58,9 +58,9 @@ class M3EProgressIndicator extends StatefulWidget {
     this.amplitudeForProgress,
     this.wavelength,
     this.waveSpeed,
-  })  : _kind = _M3EProgressKind.circularWavy,
-        linearSize = M3EProgressIndicatorSize.m,
-        stopSize = null;
+  }) : _kind = _M3EProgressKind.circularWavy,
+       linearSize = M3EProgressIndicatorSize.m,
+       stopSize = null;
 
   /// Classic flat linear progress indicator.
   const M3EProgressIndicator.linear({
@@ -69,16 +69,16 @@ class M3EProgressIndicator extends StatefulWidget {
     this.linearSize = M3EProgressIndicatorSize.m,
     this.color,
     this.trackColor,
-  })  : _kind = _M3EProgressKind.linear,
-        size = null,
-        strokeWidth = null,
-        trackStrokeWidth = null,
-        gapSize = null,
-        stopSize = null,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null;
+  }) : _kind = _M3EProgressKind.linear,
+       size = null,
+       strokeWidth = null,
+       trackStrokeWidth = null,
+       gapSize = null,
+       stopSize = null,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null;
 
   /// Expressive linear wavy progress indicator.
   const M3EProgressIndicator.linearWavy({
@@ -95,8 +95,8 @@ class M3EProgressIndicator extends StatefulWidget {
     this.amplitudeForProgress,
     this.wavelength,
     this.waveSpeed,
-  })  : _kind = _M3EProgressKind.linearWavy,
-        size = null;
+  }) : _kind = _M3EProgressKind.linearWavy,
+       size = null;
 
   final _M3EProgressKind _kind;
 
@@ -190,8 +190,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   }
 
   double _phase(double wavelength, double waveSpeed) {
-    final Duration elapsed =
-        _controller.lastElapsedDuration ?? Duration.zero;
+    final Duration elapsed = _controller.lastElapsedDuration ?? Duration.zero;
     final double seconds = elapsed.inMicroseconds / 1e6;
     if (wavelength <= 0) {
       return 0;
@@ -274,8 +273,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
         theme.progressIndicatorTheme.circular;
     final M3EColorScheme scheme = theme.colorScheme;
     final double resolvedSize = widget.size ?? circular.wavySize;
-    final double stroke =
-        widget.strokeWidth ?? circular.defaultStrokeWidth;
+    final double stroke = widget.strokeWidth ?? circular.defaultStrokeWidth;
     final double trackStroke =
         widget.trackStrokeWidth ?? circular.trackStrokeWidth;
     final double gap = widget.gapSize ?? circular.gapSize;
@@ -305,9 +303,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 amplitudeFactor: amplitudeFactor,
                 maxAmplitude: circular.waveAmplitude,
                 wavelength: wavelength,
-                phase: _needsAnimation
-                    ? _phase(wavelength, waveSpeed)
-                    : 0,
+                phase: _needsAnimation ? _phase(wavelength, waveSpeed) : 0,
               ),
             );
           },
@@ -323,8 +319,9 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final Color track = widget.trackColor ?? scheme.surfaceContainerHighest;
 
     if (!wavy) {
-      final M3ELinearProgressLayout layout =
-          linear.resolveFlat(widget.linearSize);
+      final M3ELinearProgressLayout layout = linear.resolveFlat(
+        widget.linearSize,
+      );
       return RepaintBoundary(
         child: SizedBox(
           height: layout.trackHeight,
@@ -356,7 +353,8 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final double gap = widget.gapSize ?? linear.gapSize;
     final double stop = widget.stopSize ?? linear.stopSize;
     final indeterminate = widget.value == null;
-    final double wavelength = widget.wavelength ??
+    final double wavelength =
+        widget.wavelength ??
         (indeterminate
             ? linear.indeterminateWavelength
             : linear.determinateWavelength);
@@ -388,9 +386,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 isWavy: true,
                 waveAmplitude: linear.waveAmplitude,
                 wavelength: wavelength,
-                phase: _needsAnimation
-                    ? _phase(wavelength, waveSpeed)
-                    : 0,
+                phase: _needsAnimation ? _phase(wavelength, waveSpeed) : 0,
                 amplitudeFactor: amplitudeFactor,
               ),
             );

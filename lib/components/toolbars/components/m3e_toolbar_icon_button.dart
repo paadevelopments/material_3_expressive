@@ -1,11 +1,15 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
+    show M3EToolbar;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EToolbar;
 
-import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../models/m3e_toolbar_item.dart';
 
 /// Inline icon action for [M3EToolbar] — thin adapter over [M3EIconButton].
 class M3EToolbarIconButton extends StatelessWidget {
+  /// M3EToolbarIconButton.
   const M3EToolbarIconButton({
     required this.action,
     required this.size,
@@ -14,7 +18,11 @@ class M3EToolbarIconButton extends StatelessWidget {
     super.key,
   });
 
+  /// action.
+
   final M3EToolbarAction action;
+
+  /// size.
   final M3EIconButtonSize size;
 
   /// Overrides [M3EToolbarAction.onPressed] when set (e.g. expand trigger).
@@ -25,12 +33,14 @@ class M3EToolbarIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final M3EIconButtonVariant resolvedVariant = variant ??
+    final M3EIconButtonVariant resolvedVariant =
+        variant ??
         (action.isExpandTrigger
             ? M3EIconButtonVariant.filled
             : M3EIconButtonVariant.standard);
-    final VoidCallback? resolvedOnPressed =
-        action.enabled ? (onPressed ?? action.onPressed) : null;
+    final VoidCallback? resolvedOnPressed = action.enabled
+        ? (onPressed ?? action.onPressed)
+        : null;
 
     return M3EIconButton(
       icon: Icon(action.icon),

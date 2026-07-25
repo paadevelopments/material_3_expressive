@@ -6,9 +6,6 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
 
 // Port of Android's LoadingIndicator
 // Source: androidx/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt
@@ -36,6 +33,8 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// If null, then the [ProgressIndicatorThemeData.constraints] will be used. Otherwise, defaults to a minimum width and height of 48 pixels.
   final BoxConstraints? constraints;
 
+  /// M3EExpressiveLoadingIndicator.
+
   const M3EExpressiveLoadingIndicator({
     super.key,
     super.color,
@@ -43,7 +42,10 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     this.constraints,
     super.semanticsLabel,
     super.semanticsValue,
-  }) : assert(polygons != null ? polygons.length > 1 : true);
+  }) : assert(
+         !(polygons != null) || polygons.length > 1,
+         'polygons must contain more than one shape when provided',
+       );
 
   @override
   State<M3EExpressiveLoadingIndicator> createState() =>
@@ -67,7 +69,7 @@ class _M3EExpressiveLoadingIndicatorState
 
   static const int _globalRotationDurationMs = 4666;
   static const int _morphIntervalMs = 650;
-  static const double _fullRotation = 360.0;
+  static const double _fullRotation = 360;
 
   static const double _quarterRotation = _fullRotation / 4;
   static const double _activeSize = 38; // based on source spec
@@ -82,10 +84,10 @@ class _M3EExpressiveLoadingIndicatorState
   Timer? _morphTimer;
 
   final _morphAnimationSpec = SpringSimulation(
-    SpringDescription.withDampingRatio(ratio: 0.6, stiffness: 200.0, mass: 1.0),
-    0.0,
-    1.0,
-    5.0,
+    SpringDescription.withDampingRatio(ratio: 0.6, stiffness: 200, mass: 1),
+    0,
+    1,
+    5,
     snapToEnd: true,
   );
 
@@ -98,7 +100,8 @@ class _M3EExpressiveLoadingIndicatorState
     _color =
         widget.color ??
         m3eTheme.loadingIndicatorTheme.activeColor(m3eTheme.colorScheme);
-    _constraints = widget.constraints ??
+    _constraints =
+        widget.constraints ??
         BoxConstraints.tightFor(
           width: m3eTheme.loadingIndicatorTheme.containerWidth,
           height: m3eTheme.loadingIndicatorTheme.containerHeight,
@@ -119,7 +122,7 @@ class _M3EExpressiveLoadingIndicatorState
         child: ConstrainedBox(
           constraints: _constraints,
           child: AspectRatio(
-            aspectRatio: 1.0,
+            aspectRatio: 1,
             child: AnimatedBuilder(
               animation: Listenable.merge([
                 _morphController,
@@ -196,7 +199,7 @@ class _M3EExpressiveLoadingIndicatorState
   }) {
     final morphs = <Morph>[];
 
-    for (int i = 0; i < polygons.length; i++) {
+    for (var i = 0; i < polygons.length; i++) {
       if (i + 1 < polygons.length) {
         morphs.add(Morph(polygons[i], polygons[i + 1]));
       } else if (circularSequence) {
@@ -208,16 +211,16 @@ class _M3EExpressiveLoadingIndicatorState
     return morphs;
   }
 
-  /// Calculates a scale factor that will be used when scaling the provided [RoundedPolygon]s into a
+  /// Calculates a scale factor that will be used when scaling the provided `RoundedPolygon`s into a
   /// specified sized container.
   ///
-  /// Since the polygons may rotate, a simple [RoundedPolygon.calculateBounds] is not enough to
+  /// Since the polygons may rotate, a simple `RoundedPolygon.calculateBounds` is not enough to
   /// determine the size the polygon will occupy as it rotates. Using the simple bounds calculation may
   /// result in a clipped shape.
   ///
   /// This function calculates and returns a scale factor by utilizing the
-  /// [RoundedPolygon.calculateMaxBounds] and comparing its result to the
-  /// [RoundedPolygon.calculateBounds]. The scale factor can later be used when calling [processPath].
+  /// `RoundedPolygon.calculateMaxBounds` and comparing its result to the
+  /// `RoundedPolygon.calculateBounds`. The scale factor can later be used when calling `processPath`.
   ///
   /// Port of Kotlin implementation.
   double _calculateScaleFactor(List<RoundedPolygon> polygons) {
@@ -258,7 +261,9 @@ class _M3EExpressiveLoadingIndicatorState
   }
 
   void _startMorphCycle() {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     // move to next morph in sequence
     _currentMorphIndex = (_currentMorphIndex + 1) % _morphSequence.length;
@@ -279,9 +284,9 @@ class _MorphPainter extends CustomPainter {
   final double progress;
   final Color color;
 
-  /// A scale factor that will be taken into account uniformly when the [path] is
-  /// scaled (i.e. the scaleX would be the [size] width x the scale factor, and the scaleY would be
-  /// the [size] height x the scale factor)
+  /// A scale factor that will be taken into account uniformly when the path is
+  /// scaled (i.e. the scaleX would be the size width x the scale factor, and the scaleY would be
+  /// the size height x the scale factor)
   final double scaleFactor;
 
   _MorphPainter({
@@ -319,7 +324,7 @@ class _MorphPainter extends CustomPainter {
   Path _processPath(Path path, Size size) {
     // a [Matrix] that would be used to apply the scaling. Note that any provided
     // matrix will be reset in this function.
-    final Matrix4 scaleMatrix = Matrix4.diagonal3Values(
+    final scaleMatrix = Matrix4.diagonal3Values(
       size.width * scaleFactor,
       size.height * scaleFactor,
       1,

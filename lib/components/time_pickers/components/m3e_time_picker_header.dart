@@ -5,6 +5,7 @@ import '../../icon_buttons/m3e_icon_buttons.dart';
 
 /// Header for time picker dialogs.
 class M3ETimePickerHeader extends StatelessWidget {
+  /// M3ETimePickerHeader.
   const M3ETimePickerHeader({
     required this.helpText,
     required this.titleText,
@@ -16,12 +17,26 @@ class M3ETimePickerHeader extends StatelessWidget {
     super.key,
   });
 
+  /// helpText.
+
   final String helpText;
+
+  /// titleText.
   final String titleText;
+
+  /// showTitle.
   final bool showTitle;
+
+  /// titleSemanticsLabel.
   final String? titleSemanticsLabel;
+
+  /// orientation.
   final Orientation orientation;
+
+  /// isShort.
   final bool isShort;
+
+  /// entryModeButton.
   final Widget? entryModeButton;
 
   @override
@@ -30,14 +45,13 @@ class M3ETimePickerHeader extends StatelessWidget {
     final timeTheme = theme.timePickerTheme;
     final dialogTheme = theme.dialogTheme;
     final scheme = theme.colorScheme;
-    final TextStyle helpStyle =
-        timeTheme.headerHelpStyle(theme.typeScale, scheme);
+    final TextStyle helpStyle = timeTheme.headerHelpStyle(
+      theme.typeScale,
+      scheme,
+    );
     final TextStyle titleStyle = (isShort
-            ? timeTheme.headerHeadlineShortStyle
-            : timeTheme.headerHeadlineStyle)(
-          theme.typeScale,
-          scheme,
-        );
+        ? timeTheme.headerHeadlineShortStyle
+        : timeTheme.headerHeadlineStyle)(theme.typeScale, scheme);
 
     final Widget title = Semantics(
       label: titleSemanticsLabel ?? titleText,
@@ -47,7 +61,6 @@ class M3ETimePickerHeader extends StatelessWidget {
     final Widget help = Text(helpText, style: helpStyle);
 
     final Widget helpRow = Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(child: help),
         ?entryModeButton,
@@ -93,6 +106,7 @@ class M3ETimePickerHeader extends StatelessWidget {
 
 /// Icon button that switches time picker entry mode.
 class M3ETimePickerEntryModeButton extends StatelessWidget {
+  /// M3ETimePickerEntryModeButton.
   const M3ETimePickerEntryModeButton({
     required this.icon,
     required this.tooltip,
@@ -100,8 +114,14 @@ class M3ETimePickerEntryModeButton extends StatelessWidget {
     super.key,
   });
 
+  /// icon.
+
   final IconData icon;
+
+  /// tooltip.
   final String tooltip;
+
+  /// onPressed.
   final VoidCallback onPressed;
 
   @override

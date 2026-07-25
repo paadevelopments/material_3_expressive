@@ -12,13 +12,14 @@ Widget _host({required Widget child}) {
         child: Navigator(
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return child;
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return child;
+                  },
             );
           },
         ),
@@ -28,81 +29,92 @@ Widget _host({required Widget child}) {
 }
 
 void main() {
-  testWidgets('showSelectionScreen confirms single selection',
-      (WidgetTester tester) async {
-    List<String>? result;
+  testWidgets(
+    'showSelectionScreen confirms single selection',
+    _showselectionscreenConfirmsSingleSelection,
+  );
+  testWidgets(
+    'showSelectionScreen multiSelect returns several values',
+    _showselectionscreenMultiselectReturnsSeveralValues,
+  );
+}
 
-    await tester.pumpWidget(
-      _host(
-        child: Builder(
-          builder: (BuildContext context) {
-            return M3EButton(
-              onPressed: () async {
-                result = await M3EDialog.showSelectionScreen(
-                  context,
-                  title: 'Plan',
-                  options: const <String>['A', 'B', 'C'],
-                );
-              },
-              child: const Text('Open'),
-            );
-          },
-        ),
+Future<void> _showselectionscreenConfirmsSingleSelection(
+  WidgetTester tester,
+) async {
+  List<String>? result;
+
+  await tester.pumpWidget(
+    _host(
+      child: Builder(
+        builder: (BuildContext context) {
+          return M3EButton(
+            onPressed: () async {
+              result = await M3EDialog.showSelectionScreen(
+                context,
+                title: 'Plan',
+                options: const <String>['A', 'B', 'C'],
+              );
+            },
+            child: const Text('Open'),
+          );
+        },
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+  await tester.tap(find.text('Open'));
+  await tester.pumpAndSettle();
 
-    expect(find.text('OK'), findsOneWidget);
-    // Confirm disabled until a selection exists.
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-    expect(find.text('Plan'), findsOneWidget);
-    expect(result, isNull);
+  expect(find.text('OK'), findsOneWidget);
+  // Confirm disabled until a selection exists.
+  await tester.tap(find.text('OK'));
+  await tester.pumpAndSettle();
+  expect(find.text('Plan'), findsOneWidget);
+  expect(result, isNull);
 
-    await tester.tap(find.bySemanticsLabel('B'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
+  await tester.tap(find.bySemanticsLabel('B'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('OK'));
+  await tester.pumpAndSettle();
 
-    expect(result, <String>['B']);
-  });
+  expect(result, <String>['B']);
+}
 
-  testWidgets('showSelectionScreen multiSelect returns several values',
-      (WidgetTester tester) async {
-    List<String>? result;
+Future<void> _showselectionscreenMultiselectReturnsSeveralValues(
+  WidgetTester tester,
+) async {
+  List<String>? result;
 
-    await tester.pumpWidget(
-      _host(
-        child: Builder(
-          builder: (BuildContext context) {
-            return M3EButton(
-              onPressed: () async {
-                result = await M3EDialog.showSelectionScreen(
-                  context,
-                  title: 'Topics',
-                  multiSelect: true,
-                  options: const <String>['Design', 'Eng'],
-                );
-              },
-              child: const Text('Open'),
-            );
-          },
-        ),
+  await tester.pumpWidget(
+    _host(
+      child: Builder(
+        builder: (BuildContext context) {
+          return M3EButton(
+            onPressed: () async {
+              result = await M3EDialog.showSelectionScreen(
+                context,
+                title: 'Topics',
+                multiSelect: true,
+                options: const <String>['Design', 'Eng'],
+              );
+            },
+            child: const Text('Open'),
+          );
+        },
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Design'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Eng'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
+  await tester.tap(find.text('Open'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.bySemanticsLabel('Design'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.bySemanticsLabel('Eng'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('OK'));
+  await tester.pumpAndSettle();
 
-    expect(result, containsAll(<String>['Design', 'Eng']));
-    expect(result, hasLength(2));
-  });
+  expect(result, containsAll(<String>['Design', 'Eng']));
+  expect(result, hasLength(2));
 }

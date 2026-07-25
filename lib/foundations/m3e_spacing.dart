@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 /// used for gaps, padding and run spacing across components.
 @immutable
 class M3ESpacing {
+  /// Creates a custom spacing scale.
   const M3ESpacing({
     required this.xs,
     required this.sm,
@@ -17,12 +18,12 @@ class M3ESpacing {
 
   /// The regular density spacing scale (4 / 8 / 12 / 16 / 24 / 32).
   const M3ESpacing.regular()
-      : xs = 4,
-        sm = 8,
-        md = 12,
-        lg = 16,
-        xl = 24,
-        xxl = 32;
+    : xs = 4,
+      sm = 8,
+      md = 12,
+      lg = 16,
+      xl = 24,
+      xxl = 32;
 
   /// 4dp.
   final double xs;
@@ -56,6 +57,7 @@ class M3ESpacing {
   }
 
   @override
+  /// Equality based on public fields.
   bool operator ==(Object other) {
     return other is M3ESpacing &&
         other.xs == xs &&
@@ -67,5 +69,6 @@ class M3ESpacing {
   }
 
   @override
+  /// Hash code for this spacing scale.
   int get hashCode => Object.hash(xs, sm, md, lg, xl, xxl);
 }

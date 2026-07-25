@@ -5,10 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Builds a subtree from device light and dark dynamic [ColorScheme]s.
-typedef M3EDynamicColorBuilder = Widget Function(
-  ColorScheme? lightDynamic,
-  ColorScheme? darkDynamic,
-);
+typedef M3EDynamicColorBuilder =
+    Widget Function(ColorScheme? lightDynamic, ColorScheme? darkDynamic);
 
 /// Fetches device dynamic colors and refreshes them when the app resumes.
 ///
@@ -20,11 +18,14 @@ typedef M3EDynamicColorBuilder = Widget Function(
 /// Re-fetches on [AppLifecycleState.resumed] so OS color changes apply without
 /// restarting the app.
 class M3EDynamicColorHost extends StatefulWidget {
+  /// Creates a host that supplies dynamic color schemes to [builder].
   const M3EDynamicColorHost({required this.builder, super.key});
 
+  /// Builds the subtree from the latest light/dark dynamic schemes.
   final M3EDynamicColorBuilder builder;
 
   @override
+  /// Creates the mutable state for this widget.
   State<M3EDynamicColorHost> createState() => _M3EDynamicColorHostState();
 }
 

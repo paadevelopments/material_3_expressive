@@ -3,13 +3,18 @@ import 'package:motor/motor.dart';
 
 /// Subtle scale pop on the newly selected icon (≈1.0 → 1.08 → 1.0).
 class M3ENavIconScale extends StatefulWidget {
+  /// M3ENavIconScale.
   const M3ENavIconScale({
     required this.selected,
     required this.child,
     super.key,
   });
 
+  /// selected.
+
   final bool selected;
+
+  /// child.
   final Widget child;
 
   @override
@@ -21,8 +26,9 @@ class _M3ENavIconScaleState extends State<M3ENavIconScale>
   late SingleMotionController _scale;
 
   SpringMotion get _motion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.5);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.5,
+      );
 
   @override
   void initState() {
@@ -57,10 +63,7 @@ class _M3ENavIconScaleState extends State<M3ENavIconScale>
     return AnimatedBuilder(
       animation: _scale,
       builder: (BuildContext context, Widget? child) {
-        return Transform.scale(
-          scale: _scale.value,
-          child: child,
-        );
+        return Transform.scale(scale: _scale.value, child: child);
       },
       child: widget.child,
     );

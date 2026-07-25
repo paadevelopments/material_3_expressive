@@ -1,3 +1,8 @@
+import 'package:material_3_expressive/components/date_pickers/m3e_date_pickers.dart'
+    show M3ECalendarDatePicker, M3EDatePickerDialog, M3EDateRangePickerDialog;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ECalendarDatePicker, M3EDatePickerDialog, M3EDateRangePickerDialog;
+
 /// Entry mode for [M3EDatePickerDialog] and [M3EDateRangePickerDialog].
 enum M3EDatePickerEntryMode {
   /// Calendar only, with an icon button to switch to input mode.

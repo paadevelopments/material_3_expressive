@@ -4,6 +4,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ESliderDotBuilder, M3ESliderThumb;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ESliderDotBuilder, M3ESliderThumb;
 
 import '../enums/m3e_slider_enums.dart';
 import '../res/m3e_slider_tokens.dart';
@@ -16,6 +20,7 @@ import '../utils/m3e_slider_dot_layout.dart';
 /// When [isWavy] is true, the active value segment is a traveling sine wave
 /// (same recipe as linear wavy progress); inactive segments stay flat.
 class M3ESliderTrackPainter extends CustomPainter {
+  /// M3ESliderTrackPainter.
   const M3ESliderTrackPainter({
     required this.mode,
     required this.trackKind,
@@ -40,19 +45,47 @@ class M3ESliderTrackPainter extends CustomPainter {
     this.amplitudeFactor = 1,
   });
 
+  /// mode.
+
   final M3ESliderPaintMode mode;
+
+  /// trackKind.
   final M3ESliderTrackKind trackKind;
+
+  /// activeStartFraction.
   final double activeStartFraction;
+
+  /// activeEndFraction.
   final double activeEndFraction;
+
+  /// tickFractions.
   final List<double> tickFractions;
+
+  /// colors.
   final M3ESliderColors colors;
+
+  /// trackHeight.
   final double trackHeight;
+
+  /// handleGap.
   final double handleGap;
+
+  /// handleThickness.
   final double handleThickness;
+
+  /// insideCornerSize.
   final double insideCornerSize;
+
+  /// stopIndicatorSize.
   final double stopIndicatorSize;
+
+  /// tickSize.
   final double tickSize;
+
+  /// axis.
   final Axis axis;
+
+  /// textDirection.
   final TextDirection textDirection;
 
   /// When false, skip stop indicators and discrete ticks (custom overlay owns
@@ -62,10 +95,20 @@ class M3ESliderTrackPainter extends CustomPainter {
   /// Inset of stop/tick markers from each track end. Defaults to
   /// [M3ESliderTokens.stopIndicatorTrailingSpace] when null.
   final double? edgeInset;
+
+  /// isWavy.
   final bool isWavy;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
 
   bool get _vertical => axis == Axis.vertical;
@@ -87,8 +130,9 @@ class M3ESliderTrackPainter extends CustomPainter {
     }
 
     final double corner = trackCross / 2;
-    final double startGap =
-        (_centered || _range) ? handleThickness / 2 + handleGap : 0;
+    final double startGap = (_centered || _range)
+        ? handleThickness / 2 + handleGap
+        : 0;
     final double endGap = handleThickness / 2 + handleGap;
 
     final double valueStart =
@@ -98,11 +142,12 @@ class M3ESliderTrackPainter extends CustomPainter {
     final double centerAxis = (sliderStart + sliderEnd) / 2;
 
     // Leading inactive (centered / range).
-    final double adjustedValueEnd =
-        _centered ? math.min(valueEnd, centerAxis) : valueStart;
+    final double adjustedValueEnd = _centered
+        ? math.min(valueEnd, centerAxis)
+        : valueStart;
     if ((_centered || _range) &&
         adjustedValueEnd > sliderStart + startGap + corner) {
-      final double start = sliderStart;
+      final start = sliderStart;
       final double end = adjustedValueEnd - startGap;
       if (end > start) {
         _drawSegment(
@@ -118,11 +163,12 @@ class M3ESliderTrackPainter extends CustomPainter {
     }
 
     // Trailing inactive.
-    final double adjustedValueStart =
-        _centered ? math.max(valueEnd, centerAxis) : valueEnd;
+    final double adjustedValueStart = _centered
+        ? math.max(valueEnd, centerAxis)
+        : valueEnd;
     if (adjustedValueStart < sliderEnd - endGap - corner) {
       final double start = adjustedValueStart + endGap;
-      final double end = sliderEnd;
+      final end = sliderEnd;
       if (end > start) {
         _drawSegment(
           canvas,
@@ -140,16 +186,18 @@ class M3ESliderTrackPainter extends CustomPainter {
     final double activeStart = _centered
         ? adjustedValueEnd + (adjustedValueEnd < centerAxis ? startGap : 0)
         : _range
-            ? valueStart + startGap
-            : sliderStart;
+        ? valueStart + startGap
+        : sliderStart;
     final double activeEnd = _centered
         ? adjustedValueStart - (adjustedValueStart > centerAxis ? endGap : 0)
         : valueEnd - endGap;
 
-    final double startCorner =
-        (_rtl || _centered || _range) ? insideCornerSize : corner;
-    final double endCorner =
-        (_rtl && !_centered && !_range) ? corner : insideCornerSize;
+    final double startCorner = (_rtl || _centered || _range)
+        ? insideCornerSize
+        : corner;
+    final double endCorner = (_rtl && !_centered && !_range)
+        ? corner
+        : insideCornerSize;
     final double activeWidth = activeEnd - activeStart;
     if (activeWidth > startCorner) {
       if (isWavy) {
@@ -194,7 +242,7 @@ class M3ESliderTrackPainter extends CustomPainter {
       axis: axis,
       textDirection: textDirection,
     );
-    for (final M3ESliderDotPlacement dot in dots) {
+    for (final dot in dots) {
       _drawStop(canvas, trackBounds, dot.primary, dot.color, size: dot.size);
     }
   }
@@ -274,19 +322,19 @@ class M3ESliderTrackPainter extends CustomPainter {
       return;
     }
 
-    final double amp =
-        waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
-    final double crossCenter =
-        _vertical ? trackBounds.center.dx : trackBounds.center.dy;
-    final Paint paint = Paint()
+    final double amp = waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
+    final double crossCenter = _vertical
+        ? trackBounds.center.dx
+        : trackBounds.center.dy;
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = trackHeight
       ..isAntiAlias = true
       ..color = color;
 
-    final Path path = Path();
-    const double step = 1.5;
+    final path = Path();
+    const step = 1.5;
     final double k = 2 * math.pi / wavelength;
 
     // Phase is anchored to [start] (pre-inset) so travel stays stable as the
@@ -296,14 +344,14 @@ class M3ESliderTrackPainter extends CustomPainter {
     }
 
     if (_vertical) {
-      double y = pathStart;
+      var y = pathStart;
       path.moveTo(crossAt(y), y);
       for (y = pathStart + step; y <= pathEnd; y += step) {
         path.lineTo(crossAt(y), y);
       }
       path.lineTo(crossAt(pathEnd), pathEnd);
     } else {
-      double x = pathStart;
+      var x = pathStart;
       path.moveTo(x, crossAt(x));
       for (x = pathStart + step; x <= pathEnd; x += step) {
         path.lineTo(x, crossAt(x));
@@ -321,7 +369,7 @@ class M3ESliderTrackPainter extends CustomPainter {
     double? size,
   }) {
     final double diameter = size ?? stopIndicatorSize;
-    final Offset center = _vertical
+    final center = _vertical
         ? Offset(trackBounds.center.dx, primary)
         : Offset(primary, trackBounds.center.dy);
     canvas.drawCircle(center, diameter / 2, Paint()..color = color);

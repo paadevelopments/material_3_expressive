@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -14,10 +13,17 @@ import '../styles/m3e_button_decoration.dart';
 
 /// Abstract base class for custom overflow implementations.
 abstract class M3EOverflowStrategy {
+  /// M3EOverflowStrategy.
   const M3EOverflowStrategy();
 
+  /// id.
+
   String get id;
+
+  /// triggerExtent.
   double? get triggerExtent => null;
+
+  /// buildLayout.
 
   Widget buildLayout({
     required BuildContext context,
@@ -33,6 +39,8 @@ abstract class M3EOverflowStrategy {
     required Widget Function(int index, bool isFirst, bool isLast) buildButton,
   });
 
+  /// buildOverflowTrigger.
+
   Widget? buildOverflowTrigger({
     required BuildContext context,
     required int hiddenCount,
@@ -46,12 +54,16 @@ abstract class M3EOverflowStrategy {
     required bool checked,
   });
 
+  /// showOverflowMenu.
+
   Future<int?> showOverflowMenu({
     required BuildContext context,
     required List<M3EButtonGroupAction> actions,
     required int firstHiddenIndex,
     required int? selectedIndex,
   });
+
+  /// onItemSelected.
 
   void onItemSelected(int index) {}
 
@@ -63,7 +75,7 @@ abstract class M3EOverflowStrategy {
     required Widget Function(int index, bool isFirst, bool isLast) buildButton,
   }) {
     final children = <Widget>[];
-    for (int i = 0; i < count; i++) {
+    for (var i = 0; i < count; i++) {
       final isFirst = isRtl ? (i == count - 1) : (i == 0);
       final isLast = isRtl ? (i == 0) : (i == count - 1);
       children.add(buildButton(i, isFirst, isLast));

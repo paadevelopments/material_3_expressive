@@ -19,6 +19,7 @@ const String _confirmLabel = 'OK';
 /// Use [M3EDialog.show] for a standard centred dialog and
 /// [M3EDialog.showFullScreen] for a full-screen dialog.
 class M3EDialog extends StatelessWidget {
+  /// M3EDialog.
   const M3EDialog({
     required this.title,
     this.icon,
@@ -30,10 +31,20 @@ class M3EDialog extends StatelessWidget {
     super.key,
   });
 
+  /// title.
+
   final String title;
+
+  /// icon.
   final Widget? icon;
+
+  /// content.
   final Widget? content;
+
+  /// contentPadding.
   final EdgeInsets? contentPadding;
+
+  /// actions.
   final List<Widget> actions;
 
   /// Full-bleed divider between the header and the section below it.
@@ -299,9 +310,7 @@ class _M3ESelectionDialogState extends State<_M3ESelectionDialog> {
   void initState() {
     super.initState();
     final Set<String> allowed = widget.options.toSet();
-    _selected = widget.initialSelection
-        .where(allowed.contains)
-        .toSet();
+    _selected = widget.initialSelection.where(allowed.contains).toSet();
     if (!widget.multiSelect && _selected.length > 1) {
       final String first = _selected.first;
       _selected
@@ -371,9 +380,9 @@ class _M3ESelectionDialogState extends State<_M3ESelectionDialog> {
         ),
         M3EButton(
           onPressed: _hasSelection
-              ? () => Navigator.of(context).pop(
-                    List<String>.unmodifiable(_selected.toList()),
-                  )
+              ? () => Navigator.of(
+                  context,
+                ).pop(List<String>.unmodifiable(_selected.toList()))
               : null,
           child: Text(widget.confirmLabel),
         ),
@@ -420,8 +429,9 @@ class _M3ESelectionDialogState extends State<_M3ESelectionDialog> {
                       : IgnorePointer(
                           child: M3ERadio<String>(
                             value: option,
-                            groupValue:
-                                _selected.isEmpty ? null : _selected.first,
+                            groupValue: _selected.isEmpty
+                                ? null
+                                : _selected.first,
                             label: Text(option),
                             onChanged: (_) {},
                           ),
@@ -440,10 +450,7 @@ class _M3ESelectionDialogState extends State<_M3ESelectionDialog> {
     return Row(
       children: <Widget>[
         IgnorePointer(
-          child: M3ECheckbox(
-            value: checked,
-            onChanged: (_) {},
-          ),
+          child: M3ECheckbox(value: checked, onChanged: (_) {}),
         ),
         SizedBox(width: theme.radioTheme.labelGap),
         Expanded(

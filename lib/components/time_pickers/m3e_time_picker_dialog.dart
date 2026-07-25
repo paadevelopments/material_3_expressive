@@ -15,6 +15,7 @@ import 'utils/m3e_time_picker_utils.dart';
 
 /// Dialog for picking a single time.
 class M3ETimePickerDialog extends StatefulWidget {
+  /// M3ETimePickerDialog.
   const M3ETimePickerDialog({
     required this.initialTime,
     this.initialEntryMode = M3ETimePickerEntryMode.dial,
@@ -33,19 +34,47 @@ class M3ETimePickerDialog extends StatefulWidget {
     super.key,
   });
 
+  /// initialTime.
+
   final M3ETime initialTime;
+
+  /// initialEntryMode.
   final M3ETimePickerEntryMode initialEntryMode;
+
+  /// helpText.
   final String? helpText;
+
+  /// cancelText.
   final String? cancelText;
+
+  /// confirmText.
   final String? confirmText;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// hourLabelText.
   final String? hourLabelText;
+
+  /// minuteLabelText.
   final String? minuteLabelText;
+
+  /// orientation.
   final Orientation? orientation;
+
+  /// alwaysUse24HourFormat.
   final bool? alwaysUse24HourFormat;
+
+  /// emptyInitialInput.
   final bool emptyInitialInput;
+
+  /// restorationId.
   final String? restorationId;
+
+  /// onTimePickerModeChange.
   final ValueChanged<M3ETimePickerEntryMode>? onTimePickerModeChange;
+
+  /// insetPadding.
   final EdgeInsets insetPadding;
 
   @override
@@ -54,8 +83,9 @@ class M3ETimePickerDialog extends StatefulWidget {
 
 class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     with RestorationMixin {
-  late final _RestorableM3ETime _selectedTime =
-      _RestorableM3ETime(widget.initialTime);
+  late final _RestorableM3ETime _selectedTime = _RestorableM3ETime(
+    widget.initialTime,
+  );
   late final _RestorableM3ETimePickerEntryMode _entryMode =
       _RestorableM3ETimePickerEntryMode(widget.initialEntryMode);
   final _RestorableAutovalidateMode _autovalidateMode =
@@ -222,11 +252,9 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     }
 
     final String helpText = switch (_entryMode.value) {
-      M3ETimePickerEntryMode.input ||
-      M3ETimePickerEntryMode.inputOnly =>
+      M3ETimePickerEntryMode.input || M3ETimePickerEntryMode.inputOnly =>
         widget.helpText ?? localizations.timePickerInputHelpText,
-      M3ETimePickerEntryMode.dial ||
-      M3ETimePickerEntryMode.dialOnly =>
+      M3ETimePickerEntryMode.dial || M3ETimePickerEntryMode.dialOnly =>
         widget.helpText ?? localizations.timePickerDialHelpText,
     };
 
@@ -235,7 +263,8 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
       titleText: titleText,
       showTitle: true,
       orientation: orientation,
-      isShort: orientation == Orientation.landscape &&
+      isShort:
+          orientation == Orientation.landscape &&
           (_entryMode.value == M3ETimePickerEntryMode.input ||
               _entryMode.value == M3ETimePickerEntryMode.inputOnly),
       entryModeButton: entryModeButton,
@@ -282,40 +311,33 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           curve: Curves.easeIn,
           child: switch (orientation) {
             Orientation.portrait => Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  header,
-                  M3EDivider(
-                    thickness: 1,
-                    color: timeTheme.dividerColor(theme.colorScheme),
-                  ),
-                  pickerBody,
-                  actions,
-                ],
-              ),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                M3EDivider(color: timeTheme.dividerColor(theme.colorScheme)),
+                pickerBody,
+                actions,
+              ],
+            ),
             Orientation.landscape => Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  header,
-                  M3EDivider(
-                    axis: M3EDividerAxis.vertical,
-                    thickness: 1,
-                    color: timeTheme.dividerColor(theme.colorScheme),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                header,
+                M3EDivider(
+                  axis: M3EDividerAxis.vertical,
+                  color: timeTheme.dividerColor(theme.colorScheme),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[pickerBody, actions],
                   ),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        pickerBody,
-                        actions,
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
           },
         ),
       ),
@@ -338,11 +360,8 @@ class _RestorableM3ETime extends RestorableValue<M3ETime> {
 
   @override
   M3ETime fromPrimitives(Object? data) {
-    final List<Object?> values = data! as List<Object?>;
-    return M3ETime(
-      hour: values[0]! as int,
-      minute: values[1]! as int,
-    );
+    final values = data! as List<Object?>;
+    return M3ETime(hour: values[0]! as int, minute: values[1]! as int);
   }
 
   @override

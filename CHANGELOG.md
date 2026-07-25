@@ -2,30 +2,29 @@
 
 Initial release.
 
-A faithful, dependency-light Flutter implementation of the Material 3
-Expressive component set, built on `package:flutter/widgets.dart` (no dependency
-on the framework's `material` library).
+A faithful Flutter implementation of the Material 3 Expressive component set,
+exposed as direct `M3E*` widgets with spring-driven motion and design tokens
+via `M3ETheme`.
 
 ### Added
 
-* **36 components** spanning the six official Material 3 groups:
+* **39 component modules** spanning the official Material 3 groups:
   * **Actions** — buttons, icon buttons, FAB, extended FAB, FAB menu, button
-    groups, segmented buttons, split buttons.
+    groups, segmented buttons, split buttons, toggle buttons.
   * **Communication** — badges, linear & circular progress indicators, loading
     indicator, snackbar, tooltips.
   * **Containment** — cards, carousel, dividers, lists, dialogs (standard &
     full-screen), bottom sheets, side sheets.
-  * **Navigation** — top & bottom app bars, tabs, navigation bar, navigation
-    rail, navigation drawer, toolbars, menus.
-  * **Selection** — checkbox, radio button, switch, chips, sliders, date
-    picker, time picker.
-  * **Text inputs** — text fields, search bar.
-* **Grouped facade API** — every component is reachable through a concise,
-  discoverable facade: `M3EActions`, `M3ECommunication`, `M3EContainment`,
-  `M3ENavigation`, `M3ESelection`, and `M3ETextInputs`.
+  * **Navigation** — top & bottom app bars (incl. search), tabs, navigation
+    bar, navigation rail, navigation drawer, toolbars, menus.
+  * **Selection** — checkbox, radio button, switch, chips, sliders (incl.
+    wavy), dropdown menus, date picker, time picker.
+  * **Text inputs** — text fields, search bar / search view.
+* **Direct component API** — construct each `M3E*` widget directly; enums and
+  models are exported from a single library import.
 * **Design token foundations** — a centralized `foundations` layer for color
   schemes, typography, motion/spring physics, shapes, elevation, and state
   layers, provided through the `M3ETheme` inherited widget.
-* **Expressive motion** — spring-driven press feedback, shape morphing, and
-  M3-accurate hover/focus/press state layers via the shared `M3ETappable`
-  interaction primitive.
+* **Expressive motion** — spring-driven press feedback, shape morphing, liquid
+  selection indicators, and M3-accurate hover/focus/press state layers via the
+  shared `M3ETappable` interaction primitive.

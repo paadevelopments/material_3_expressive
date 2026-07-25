@@ -1,10 +1,15 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
+
+import 'package:flutter/foundation.dart';
+import 'package:material_3_expressive/components/buttons/styles/m3e_button_decoration.dart'
+    show M3EButtonDecoration, M3EToggleButtonDecoration;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EButton, M3EButtonGroup, M3EToggleButton;
 
 /// Visual styles for [M3EButton] and [M3EToggleButton].
 ///
@@ -55,6 +60,7 @@ enum M3EButtonShape {
 /// - [M3EButton] for the standard button widget
 /// - [M3EToggleButton] for the toggle button widget
 /// - [M3EButtonGroup] for the connected toggle button group
+@immutable
 class M3EButtonSize {
   const M3EButtonSize._(
     this.name, {
@@ -157,6 +163,8 @@ enum M3EHapticFeedback {
 
   /// Heavy impact feedback.
   heavy(3);
+
+  /// value.
 
   final int value;
   const M3EHapticFeedback(this.value);

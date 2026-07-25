@@ -10,6 +10,7 @@ import '../floating_action_buttons/styles/m3e_fab_theme.dart';
 /// animates the label away, collapsing it toward an icon only FAB. Press uses
 /// spatial spring scale only (380 / 0.55).
 class M3EExtendedFab extends StatelessWidget {
+  /// M3EExtendedFab.
   const M3EExtendedFab({
     required this.label,
     required this.icon,
@@ -21,15 +22,27 @@ class M3EExtendedFab extends StatelessWidget {
     super.key,
   });
 
+  /// label.
+
   final String label;
+
+  /// icon.
   final Widget icon;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// color.
   final M3EFabColor color;
 
   /// Whether the label is shown. When false the button collapses to the icon.
   final bool extended;
 
+  /// focusNode.
+
   final FocusNode? focusNode;
+
+  /// autofocus.
   final bool autofocus;
 
   bool get _enabled => onPressed != null;
@@ -57,9 +70,7 @@ class M3EExtendedFab extends StatelessWidget {
         pressedScale: extendedTheme.pressedScale,
         materialInk: true,
         builder: (context, state) {
-          final elevation = extendedTheme.elevation(
-            hovered: state.hovered,
-          );
+          final elevation = extendedTheme.elevation(hovered: state.hovered);
           return AnimatedContainer(
             duration: M3EMotion.medium2,
             curve: M3EMotion.emphasized,

@@ -4,6 +4,7 @@ import '../../../foundations/foundations.dart';
 
 /// A single day cell in the calendar grid.
 class M3EDayCell extends StatelessWidget {
+  /// M3EDayCell.
   const M3EDayCell({
     required this.date,
     required this.selected,
@@ -16,13 +17,29 @@ class M3EDayCell extends StatelessWidget {
     super.key,
   });
 
+  /// date.
+
   final DateTime date;
+
+  /// selected.
   final bool selected;
+
+  /// today.
   final bool today;
+
+  /// enabled.
   final bool enabled;
+
+  /// onTap.
   final VoidCallback? onTap;
+
+  /// inRange.
   final bool inRange;
+
+  /// rangeStart.
   final bool rangeStart;
+
+  /// rangeEnd.
   final bool rangeEnd;
 
   @override
@@ -48,9 +65,7 @@ class M3EDayCell extends StatelessWidget {
           children: <Widget>[
             if (showRangeFill)
               Positioned.fill(
-                child: ColoredBox(
-                  color: dateTheme.rangeHighlightColor(scheme),
-                ),
+                child: ColoredBox(color: dateTheme.rangeHighlightColor(scheme)),
               ),
             if (rangeStart && inRange)
               Positioned(
@@ -83,7 +98,8 @@ class M3EDayCell extends StatelessWidget {
               ),
               child: Text(
                 '${date.day}',
-                style: dateTheme.dayStyle(theme.typeScale, scheme)
+                style: dateTheme
+                    .dayStyle(theme.typeScale, scheme)
                     .copyWith(color: foreground),
               ),
             ),

@@ -7,6 +7,7 @@ import '../styles/m3e_menu_theme.dart';
 /// Computed placement for an anchored menu popup.
 @immutable
 class M3EMenuPlacement {
+  /// M3EMenuPlacement.
   const M3EMenuPlacement({
     required this.left,
     required this.width,
@@ -16,9 +17,11 @@ class M3EMenuPlacement {
     this.top,
     this.bottom,
   }) : assert(
-          (top == null) != (bottom == null),
-          'Exactly one of top or bottom must be set.',
-        );
+         (top == null) != (bottom == null),
+         'Exactly one of top or bottom must be set.',
+       );
+
+  /// left.
 
   final double left;
 
@@ -31,15 +34,25 @@ class M3EMenuPlacement {
   /// regardless of content height (unlike subtracting [maxHeight] from [top]).
   final double? bottom;
 
+  /// width.
+
   final double width;
+
+  /// maxHeight.
   final double maxHeight;
+
+  /// scaleAlignment.
   final Alignment scaleAlignment;
+
+  /// opensAbove.
   final bool opensAbove;
 }
 
 /// Collision-aware menu placement (Compose popup position provider).
 abstract final class M3EMenuPlacer {
   const M3EMenuPlacer._();
+
+  /// compute.
 
   static M3EMenuPlacement compute({
     required Size screenSize,
@@ -51,25 +64,31 @@ abstract final class M3EMenuPlacer {
     double? preferredWidth,
   }) {
     final edge = theme.screenEdgePadding;
-    final width = (preferredWidth ??
-            (anchorRect.width + 176.0).clamp(theme.minWidth, theme.maxWidth))
-        .clamp(theme.minWidth, theme.maxWidth)
-        .toDouble();
+    final width =
+        (preferredWidth ??
+                (anchorRect.width + 176.0).clamp(
+                  theme.minWidth,
+                  theme.maxWidth,
+                ))
+            .clamp(theme.minWidth, theme.maxWidth);
 
-    final approxHeight = (approximateItemCount * theme.entryHeight)
-        .clamp(theme.entryHeight * 2, theme.maxHeight)
-        .toDouble();
+    final approxHeight = (approximateItemCount * theme.entryHeight).clamp(
+      theme.entryHeight * 2,
+      theme.maxHeight,
+    );
 
     final spaceBelow = screenSize.height - anchorRect.bottom - edge;
     final spaceAbove = anchorRect.top - edge;
     final isRtl = textDirection == TextDirection.rtl;
 
-    final isSide = position == M3EMenuAnchorPosition.end ||
+    final isSide =
+        position == M3EMenuAnchorPosition.end ||
         position == M3EMenuAnchorPosition.start;
 
     var opensAbove = false;
     if (!isSide) {
-      final preferAbove = position == M3EMenuAnchorPosition.topStart ||
+      final preferAbove =
+          position == M3EMenuAnchorPosition.topStart ||
           position == M3EMenuAnchorPosition.topEnd;
       if (preferAbove) {
         opensAbove = spaceAbove >= approxHeight || spaceAbove > spaceBelow;
@@ -81,12 +100,10 @@ abstract final class M3EMenuPlacer {
     final alignEnd = switch (position) {
       M3EMenuAnchorPosition.bottomEnd ||
       M3EMenuAnchorPosition.topEnd ||
-      M3EMenuAnchorPosition.end =>
-        !isRtl,
+      M3EMenuAnchorPosition.end => !isRtl,
       M3EMenuAnchorPosition.bottomStart ||
       M3EMenuAnchorPosition.topStart ||
-      M3EMenuAnchorPosition.start =>
-        isRtl,
+      M3EMenuAnchorPosition.start => isRtl,
     };
 
     late double left;
@@ -115,20 +132,23 @@ abstract final class M3EMenuPlacer {
       left = anchorRect.left;
     }
 
-    left = left.clamp(edge, screenSize.width - width - edge).toDouble();
+    left = left.clamp(edge, screenSize.width - width - edge);
 
-    final maxHeight = (isSide
-            ? (screenSize.height - edge - edge)
-            : (opensAbove ? spaceAbove : spaceBelow))
-        .clamp(0.0, theme.maxHeight)
-        .toDouble();
+    final maxHeight =
+        (isSide
+                ? (screenSize.height - edge - edge)
+                : (opensAbove ? spaceAbove : spaceBelow))
+            .clamp(0.0, theme.maxHeight);
 
     double? top;
     double? bottom;
     if (isSide) {
       top = anchorRect.top;
       if (top + maxHeight > screenSize.height - edge) {
-        top = (screenSize.height - edge - maxHeight).clamp(edge, double.infinity);
+        top = (screenSize.height - edge - maxHeight).clamp(
+          edge,
+          double.infinity,
+        );
       }
     } else if (opensAbove) {
       // Pin the menu's bottom edge just above the anchor so short menus sit
@@ -141,7 +161,7 @@ abstract final class M3EMenuPlacer {
     final isClampedToLeft = left <= edge + 0.5;
     final Alignment scaleAlignment;
     if (isSide) {
-      scaleAlignment = Alignment(opensTowardStart ? 1.0 : -1.0, -1.0);
+      scaleAlignment = Alignment(opensTowardStart ? 1.0 : -1.0, -1);
     } else {
       final h = isClampedToLeft ? -1.0 : (alignEnd ? 1.0 : -1.0);
       scaleAlignment = Alignment(h, opensAbove ? 1.0 : -1.0);
@@ -171,10 +191,10 @@ abstract final class M3EMenuPlacer {
         case M3EMenuDivider():
           count += 1;
         case M3EMenuEntry() ||
-              M3EMenuSelectable() ||
-              M3EMenuToggleable() ||
-              M3EMenuSubmenu() ||
-              M3EMenuWidget():
+            M3EMenuSelectable() ||
+            M3EMenuToggleable() ||
+            M3EMenuSubmenu() ||
+            M3EMenuWidget():
           count += 1;
       }
     }

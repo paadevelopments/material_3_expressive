@@ -8,6 +8,7 @@ import '../res/m3e_button_constants.dart';
 /// Theme values for `M3EButton`.
 @immutable
 class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
+  /// M3EButtonTheme.
   const M3EButtonTheme({
     this.focusRingWidth = 2,
     this.focusRingGap = M3EButtonConstants.kFocusRingGap,
@@ -17,13 +18,27 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     this.connectedPressedInnerRadius = 4,
   });
 
+  /// defaults.
+
   static const M3EButtonTheme defaults = M3EButtonTheme();
 
+  /// focusRingWidth.
+
   final double focusRingWidth;
+
+  /// focusRingGap.
   final double focusRingGap;
+
+  /// minWidthFloor.
   final double minWidthFloor;
+
+  /// dividerHeight.
   final double dividerHeight;
+
+  /// connectedInnerRadius.
   final double connectedInnerRadius;
+
+  /// connectedPressedInnerRadius.
   final double connectedPressedInnerRadius;
 
   static final Map<M3EButtonSize, double> _squareRadiusTable = {
@@ -91,6 +106,8 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     ),
   };
 
+  /// container.
+
   Color container(M3EColorScheme scheme, M3EButtonStyle style) {
     switch (style) {
       case M3EButtonStyle.filled:
@@ -105,6 +122,8 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     }
   }
 
+  /// foreground.
+
   Color foreground(M3EColorScheme scheme, M3EButtonStyle style) {
     switch (style) {
       case M3EButtonStyle.filled:
@@ -118,9 +137,15 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     }
   }
 
+  /// outline.
+
   Color outline(M3EColorScheme scheme) => scheme.outline;
 
+  /// focusRingColor.
+
   Color focusRingColor(M3EColorScheme scheme) => scheme.primary;
+
+  /// elevation.
 
   double elevation(M3EButtonStyle style, Set<WidgetState> states) {
     final hovered = states.contains(WidgetState.hovered);
@@ -131,24 +156,42 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     }
     switch (style) {
       case M3EButtonStyle.elevated:
-        return pressed ? 0 : hovered ? 3 : 1;
+        return pressed
+            ? 0
+            : hovered
+            ? 3
+            : 1;
       case M3EButtonStyle.filled:
       case M3EButtonStyle.tonal:
-        return pressed ? 0 : hovered ? 1 : 0;
+        return pressed
+            ? 0
+            : hovered
+            ? 1
+            : 0;
       case M3EButtonStyle.outlined:
       case M3EButtonStyle.text:
         return 0;
     }
   }
 
+  /// squareRadius.
+
   double squareRadius(M3EButtonSize size) => _squareRadiusTable[size] ?? 12;
+
+  /// pressedRadius.
 
   double pressedRadius(M3EButtonSize size) => _pressedRadiusTable[size] ?? 12;
 
+  /// hoveredRadius.
+
   double hoveredRadius(M3EButtonSize size) => _hoveredRadiusTable[size] ?? 16;
+
+  /// equalizedMinWidth.
 
   double equalizedMinWidth(M3EButtonSize size) =>
       _equalizedMinWidthTable[size] ?? 72;
+
+  /// measurements.
 
   M3EButtonMeasurements measurements(
     M3EButtonSize size, {
@@ -204,8 +247,11 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       focusRingGap: _lerpDouble(focusRingGap, other.focusRingGap, t)!,
       minWidthFloor: _lerpDouble(minWidthFloor, other.minWidthFloor, t)!,
       dividerHeight: _lerpDouble(dividerHeight, other.dividerHeight, t)!,
-      connectedInnerRadius:
-          _lerpDouble(connectedInnerRadius, other.connectedInnerRadius, t)!,
+      connectedInnerRadius: _lerpDouble(
+        connectedInnerRadius,
+        other.connectedInnerRadius,
+        t,
+      )!,
       connectedPressedInnerRadius: _lerpDouble(
         connectedPressedInnerRadius,
         other.connectedPressedInnerRadius,

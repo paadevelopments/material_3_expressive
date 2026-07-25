@@ -1,6 +1,5 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 part of '../m3e_toggle_button_group.dart';
 
 class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
@@ -44,58 +43,87 @@ class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   }
 }
 
+/// M3ERenderButtonGroup.
+
 class M3ERenderButtonGroup extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, M3EButtonGroupParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, M3EButtonGroupParentData> {
+  /// M3ERenderButtonGroup.
   M3ERenderButtonGroup({
-    required Axis direction,
-    required double spacing,
-    required int? pressedIndex,
-    required double animValue,
-    required double expandedRatio,
-  }) : _direction = direction,
-       _spacing = spacing,
-       _pressedIndex = pressedIndex,
-       _animValue = animValue,
-       _expandedRatio = expandedRatio;
+    required this._direction,
+    required this._spacing,
+    required this._pressedIndex,
+    required this._animValue,
+    required this._expandedRatio,
+  });
 
   Axis _direction;
+
+  /// direction.
   Axis get direction => _direction;
+
+  /// direction.
   set direction(Axis value) {
-    if (_direction == value) return;
+    if (_direction == value) {
+      return;
+    }
     _direction = value;
     markNeedsLayout();
   }
 
   double _spacing;
+
+  /// spacing.
   double get spacing => _spacing;
+
+  /// spacing.
   set spacing(double value) {
-    if (_spacing == value) return;
+    if (_spacing == value) {
+      return;
+    }
     _spacing = value;
     markNeedsLayout();
   }
 
   int? _pressedIndex;
+
+  /// pressedIndex.
   int? get pressedIndex => _pressedIndex;
+
+  /// pressedIndex.
   set pressedIndex(int? value) {
-    if (_pressedIndex == value) return;
+    if (_pressedIndex == value) {
+      return;
+    }
     _pressedIndex = value;
     markNeedsLayout();
   }
 
   double _animValue;
+
+  /// animValue.
   double get animValue => _animValue;
+
+  /// animValue.
   set animValue(double value) {
-    if (_animValue == value) return;
+    if (_animValue == value) {
+      return;
+    }
     _animValue = value;
     markNeedsLayout();
   }
 
   double _expandedRatio;
+
+  /// expandedRatio.
   double get expandedRatio => _expandedRatio;
+
+  /// expandedRatio.
   set expandedRatio(double value) {
-    if (_expandedRatio == value) return;
+    if (_expandedRatio == value) {
+      return;
+    }
     _expandedRatio = value;
     markNeedsLayout();
   }
@@ -114,7 +142,7 @@ class M3ERenderButtonGroup extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (direction == Axis.vertical) {
-      double max = 0.0;
+      var max = 0.toDouble();
       RenderBox? child = firstChild;
       while (child != null) {
         max = math.max(max, child.computeMaxIntrinsicWidth(height));
@@ -122,15 +150,17 @@ class M3ERenderButtonGroup extends RenderBox
       }
       return max;
     } else {
-      double total = 0.0;
-      int count = 0;
+      var total = 0.toDouble();
+      var count = 0;
       RenderBox? child = firstChild;
       while (child != null) {
         total += child.computeMaxIntrinsicWidth(height);
         count++;
         child = childAfter(child);
       }
-      if (count > 0) total += spacing * (count - 1);
+      if (count > 0) {
+        total += spacing * (count - 1);
+      }
       return total;
     }
   }
@@ -142,7 +172,7 @@ class M3ERenderButtonGroup extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (direction == Axis.horizontal) {
-      double max = 0.0;
+      var max = 0.toDouble();
       RenderBox? child = firstChild;
       while (child != null) {
         max = math.max(max, child.computeMaxIntrinsicHeight(width));
@@ -150,15 +180,17 @@ class M3ERenderButtonGroup extends RenderBox
       }
       return max;
     } else {
-      double total = 0.0;
-      int count = 0;
+      var total = 0.toDouble();
+      var count = 0;
       RenderBox? child = firstChild;
       while (child != null) {
         total += child.computeMaxIntrinsicHeight(width);
         count++;
         child = childAfter(child);
       }
-      if (count > 0) total += spacing * (count - 1);
+      if (count > 0) {
+        total += spacing * (count - 1);
+      }
       return total;
     }
   }
@@ -177,19 +209,9 @@ class M3ERenderButtonGroup extends RenderBox
     final List<double> naturalSizes = [];
     RenderBox? child = firstChild;
     while (child != null) {
-      final BoxConstraints dryConstraints = isHorizontal
-          ? BoxConstraints(
-              minWidth: 0.0,
-              maxWidth: double.infinity,
-              minHeight: 0.0,
-              maxHeight: constraints.maxHeight,
-            )
-          : BoxConstraints(
-              minWidth: 0.0,
-              maxWidth: constraints.maxWidth,
-              minHeight: 0.0,
-              maxHeight: double.infinity,
-            );
+      final dryConstraints = isHorizontal
+          ? BoxConstraints(maxHeight: constraints.maxHeight)
+          : BoxConstraints(maxWidth: constraints.maxWidth);
       // We cannot use getDryLayout or computeMaxIntrinsicWidth because children
       // may contain a LayoutBuilder which prohibits speculative sizing.
       // Instead, we perform a real layout pass with unconstrained main axis to
@@ -216,19 +238,19 @@ class M3ERenderButtonGroup extends RenderBox
 
       if (pIndex > 0 && pIndex < childCount - 1) {
         // Middle child
-        sizes[pIndex - 1] = math.max(0.0, sizes[pIndex - 1] - growth / 2);
-        sizes[pIndex + 1] = math.max(0.0, sizes[pIndex + 1] - growth / 2);
+        sizes[pIndex - 1] = math.max(0, sizes[pIndex - 1] - growth / 2);
+        sizes[pIndex + 1] = math.max(0, sizes[pIndex + 1] - growth / 2);
       } else if (pIndex == 0 && childCount > 1) {
         // First child
-        sizes[pIndex + 1] = math.max(0.0, sizes[pIndex + 1] - growth);
+        sizes[pIndex + 1] = math.max(0, sizes[pIndex + 1] - growth);
       } else if (pIndex == childCount - 1 && childCount > 1) {
         // Last child
-        sizes[pIndex - 1] = math.max(0.0, sizes[pIndex - 1] - growth);
+        sizes[pIndex - 1] = math.max(0, sizes[pIndex - 1] - growth);
       }
     }
 
     child = firstChild;
-    double maxCross = 0.0;
+    var maxCross = 0.toDouble();
 
     final List<RenderBox> children = [];
     while (child != null) {
@@ -236,7 +258,7 @@ class M3ERenderButtonGroup extends RenderBox
       child = childAfter(child);
     }
 
-    for (int i = 0; i < children.length; i++) {
+    for (var i = 0; i < children.length; i++) {
       final c = children[i];
       final double mainSize = sizes[i];
 
@@ -257,21 +279,20 @@ class M3ERenderButtonGroup extends RenderBox
       );
     }
 
-    double totalMain =
-        sizes.fold(0.0, (a, b) => a + b) +
-        (childCount > 0 ? spacing * (childCount - 1) : 0.0);
+    final totalMain =
+        sizes.fold<double>(0, (a, b) => a + b) +
+        (childCount > 0 ? spacing * (childCount - 1) : 0);
 
     size = constraints.constrain(
       isHorizontal ? Size(totalMain, maxCross) : Size(maxCross, totalMain),
     );
 
-    double currentMainOffset = 0.0;
-    for (int i = 0; i < children.length; i++) {
+    var currentMainOffset = 0.toDouble();
+    for (var i = 0; i < children.length; i++) {
       final c = children[i];
-      final M3EButtonGroupParentData childParentData =
-          c.parentData as M3EButtonGroupParentData;
+      final childParentData = c.parentData! as M3EButtonGroupParentData;
 
-      double crossOffset = 0.0;
+      var crossOffset = 0.toDouble();
       final CrossAxisAlignment alignment =
           childParentData.alignment ?? CrossAxisAlignment.center;
 
@@ -279,7 +300,7 @@ class M3ERenderButtonGroup extends RenderBox
       final double freeSpace = maxCross - childCross;
 
       if (alignment == CrossAxisAlignment.center) {
-        crossOffset = freeSpace / 2.0;
+        crossOffset = freeSpace / 2;
       } else if (alignment == CrossAxisAlignment.end) {
         crossOffset = freeSpace;
       }

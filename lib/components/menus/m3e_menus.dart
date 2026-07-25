@@ -19,10 +19,8 @@ export 'utils/m3e_menu_placer.dart';
 export 'utils/m3e_menu_spring_motion.dart';
 
 /// Builds the anchor for an [M3EMenu], given a callback to open the menu.
-typedef M3EMenuAnchorBuilder = Widget Function(
-  BuildContext context,
-  VoidCallback open,
-);
+typedef M3EMenuAnchorBuilder =
+    Widget Function(BuildContext context, VoidCallback open);
 
 /// A Material 3 Expressive menu (Compose `DropdownMenu` + `DropdownMenuPopup`).
 ///
@@ -30,6 +28,7 @@ typedef M3EMenuAnchorBuilder = Widget Function(
 /// [anchorBuilder]. The menu springs open from the anchor and closes when an
 /// entry is chosen or the scrim is tapped.
 class M3EMenu extends StatefulWidget {
+  /// M3EMenu.
   const M3EMenu({
     required this.anchorBuilder,
     this.children,
@@ -41,9 +40,9 @@ class M3EMenu extends StatefulWidget {
     this.selectedValue,
     super.key,
   }) : assert(
-          children != null || entries != null,
-          'Provide children or entries.',
-        );
+         children != null || entries != null,
+         'Provide children or entries.',
+       );
 
   /// Convenience constructor for a flat list of action [M3EMenuEntry]s.
   factory M3EMenu.entries({
@@ -68,6 +67,8 @@ class M3EMenu extends StatefulWidget {
     );
   }
 
+  /// anchorBuilder.
+
   final M3EMenuAnchorBuilder anchorBuilder;
 
   /// Full menu content tree (items, groups, dividers, submenus).
@@ -76,13 +77,21 @@ class M3EMenu extends StatefulWidget {
   /// Convenience alias for a flat list of [M3EMenuEntry] action rows.
   final List<M3EMenuEntry>? entries;
 
+  /// position.
+
   final M3EMenuAnchorPosition position;
 
   /// Standard (surface) vs vibrant (tertiary) color mapping.
   final M3EMenuColorStyle colorStyle;
 
+  /// closeOnSelect.
+
   final bool closeOnSelect;
+
+  /// onSelected.
   final ValueChanged<Object?>? onSelected;
+
+  /// selectedValue.
   final Object? selectedValue;
 
   List<M3EMenuNode> get _nodes => children ?? entries!;

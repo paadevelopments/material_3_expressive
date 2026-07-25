@@ -7,8 +7,9 @@ const String _save = 'Save';
 const String _one = 'One';
 const String _two = 'Two';
 
-Widget _host(Widget child) =>
-    MaterialApp(home: Scaffold(body: Center(child: child)));
+Widget _host(Widget child) => MaterialApp(
+  home: Scaffold(body: Center(child: child)),
+);
 
 void main() {
   testWidgets('M3EButton renders its child and fires onPressed', (
@@ -16,12 +17,7 @@ void main() {
   ) async {
     var taps = 0;
     await tester.pumpWidget(
-      _host(
-        M3EButton(
-          onPressed: () => taps++,
-          child: const Text(_save),
-        ),
-      ),
+      _host(M3EButton(onPressed: () => taps++, child: const Text(_save))),
     );
 
     expect(find.text(_save), findsOneWidget);

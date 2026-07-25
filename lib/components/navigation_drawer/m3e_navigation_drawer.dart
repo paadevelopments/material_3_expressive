@@ -12,6 +12,7 @@ export 'models/m3e_navigation_destination.dart';
 ///
 /// Destinations use a shared liquid selection indicator (spatial springs).
 class M3ENavigationDrawer extends StatefulWidget {
+  /// M3ENavigationDrawer.
   const M3ENavigationDrawer({
     required this.destinations,
     required this.selectedIndex,
@@ -20,9 +21,17 @@ class M3ENavigationDrawer extends StatefulWidget {
     super.key,
   }) : assert(destinations.length >= 1, 'A drawer needs 1+ destinations.');
 
+  /// destinations.
+
   final List<M3ENavigationDestination> destinations;
+
+  /// selectedIndex.
   final int selectedIndex;
+
+  /// onDestinationSelected.
   final ValueChanged<int> onDestinationSelected;
+
+  /// headline.
   final String? headline;
 
   @override
@@ -89,8 +98,9 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
             ),
             child: Text(
               widget.headline!,
-              style: theme.typeScale.titleSmall
-                  .copyWith(color: scheme.onSurfaceVariant),
+              style: theme.typeScale.titleSmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ),
         for (int i = 0; i < widget.destinations.length; i++)

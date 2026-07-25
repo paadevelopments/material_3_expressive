@@ -11,6 +11,7 @@ export 'styles/m3e_checkbox_theme.dart';
 /// state. A 40dp state layer surrounds the 18dp box, the container color and
 /// check mark animate on change, and an [error] flavour is available.
 class M3ECheckbox extends StatelessWidget {
+  /// M3ECheckbox.
   const M3ECheckbox({
     required this.value,
     required this.onChanged,
@@ -21,9 +22,9 @@ class M3ECheckbox extends StatelessWidget {
     this.semanticLabel,
     super.key,
   }) : assert(
-          tristate || value != null,
-          'value may only be null when tristate is true.',
-        );
+         tristate || value != null,
+         'value may only be null when tristate is true.',
+       );
 
   /// The current value. Null represents the indeterminate state.
   final bool? value;
@@ -31,10 +32,20 @@ class M3ECheckbox extends StatelessWidget {
   /// Called with the next value, or null to disable the checkbox.
   final ValueChanged<bool?>? onChanged;
 
+  /// tristate.
+
   final bool tristate;
+
+  /// error.
   final bool error;
+
+  /// focusNode.
   final FocusNode? focusNode;
+
+  /// autofocus.
   final bool autofocus;
+
+  /// semanticLabel.
   final String? semanticLabel;
 
   bool get _enabled => onChanged != null;
@@ -58,7 +69,8 @@ class M3ECheckbox extends StatelessWidget {
     final bool checked = value ?? false;
     final bool active = value == null || checked;
 
-    return M3EComponentTheme(builder: (context) => M3ETappable(
+    return M3EComponentTheme(
+      builder: (context) => M3ETappable(
         onTap: _enabled ? _handleTap : null,
         enabled: _enabled,
         focusNode: focusNode,
@@ -127,10 +139,7 @@ class M3ECheckbox extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         borderRadius: checkboxTheme.borderRadius,
-        border: Border.all(
-          color: border,
-          width: checkboxTheme.borderWidth,
-        ),
+        border: Border.all(color: border, width: checkboxTheme.borderWidth),
       ),
       child: _buildMark(checkboxTheme, scheme),
     );
@@ -148,11 +157,7 @@ class M3ECheckbox extends StatelessWidget {
       );
     }
     if (value ?? false) {
-      return Icon(
-        M3EIcons.check,
-        size: checkboxTheme.markSize,
-        color: color,
-      );
+      return Icon(M3EIcons.check, size: checkboxTheme.markSize, color: color);
     }
     return const SizedBox.shrink();
   }

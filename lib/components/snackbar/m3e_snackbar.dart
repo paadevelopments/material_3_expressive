@@ -12,6 +12,7 @@ export 'styles/m3e_snackbar_theme.dart';
 /// optional single action. Call [M3ESnackbar.show] to present one over the
 /// nearest [Overlay].
 class M3ESnackbar extends StatelessWidget {
+  /// M3ESnackbar.
   const M3ESnackbar({
     required this.message,
     this.actionLabel,
@@ -19,8 +20,14 @@ class M3ESnackbar extends StatelessWidget {
     super.key,
   });
 
+  /// message.
+
   final String message;
+
+  /// actionLabel.
   final String? actionLabel;
+
+  /// onAction.
   final VoidCallback? onAction;
 
   /// Presents a snackbar over the overlay found from [context].
@@ -38,7 +45,8 @@ class M3ESnackbar extends StatelessWidget {
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (BuildContext context) {
-        return M3EComponentTheme(builder: (context) => M3ESnackbarHost(
+        return M3EComponentTheme(
+          builder: (context) => M3ESnackbarHost(
             duration: resolvedDuration,
             entry: entry,
             child: M3ESnackbar(
@@ -55,9 +63,7 @@ class M3ESnackbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildBar,
-    );
+    return M3EComponentTheme(builder: _buildBar);
   }
 
   Widget _buildBar(BuildContext context) {
@@ -97,10 +103,7 @@ class M3ESnackbar extends StatelessWidget {
                     padding: snackTheme.actionPadding,
                     child: Text(
                       actionLabel!,
-                      style: snackTheme.actionStyle(
-                        theme.typeScale,
-                        scheme,
-                      ),
+                      style: snackTheme.actionStyle(theme.typeScale, scheme),
                     ),
                   );
                 },

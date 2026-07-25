@@ -12,6 +12,7 @@ import 'utils/m3e_date_picker_utils.dart';
 
 /// Embeddable calendar for selecting a single date.
 class M3ECalendarDatePicker extends StatefulWidget {
+  /// M3ECalendarDatePicker.
   const M3ECalendarDatePicker({
     required this.onDateChanged,
     required this.firstDate,
@@ -26,15 +27,35 @@ class M3ECalendarDatePicker extends StatefulWidget {
     super.key,
   });
 
+  /// initialDate.
+
   final DateTime? initialDate;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// currentDate.
   final DateTime? currentDate;
+
+  /// onDateChanged.
   final ValueChanged<DateTime> onDateChanged;
+
+  /// onDisplayedMonthChanged.
   final ValueChanged<DateTime>? onDisplayedMonthChanged;
+
+  /// onCalendarModeChanged.
   final ValueChanged<M3EDatePickerMode>? onCalendarModeChanged;
+
+  /// initialCalendarMode.
   final M3EDatePickerMode initialCalendarMode;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayPredicate? selectableDayPredicate;
+
+  /// expandToFit.
   final bool expandToFit;
 
   @override
@@ -54,15 +75,19 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
     super.initState();
     _firstDate = M3EDatePickerUtils.dateOnly(widget.firstDate);
     _lastDate = M3EDatePickerUtils.dateOnly(widget.lastDate);
-    _currentDate =
-        M3EDatePickerUtils.dateOnly(widget.currentDate ?? DateTime.now());
+    _currentDate = M3EDatePickerUtils.dateOnly(
+      widget.currentDate ?? DateTime.now(),
+    );
     _mode = widget.initialCalendarMode;
     _selectedDate = widget.initialDate == null
         ? null
         : M3EDatePickerUtils.dateOnly(widget.initialDate!);
     final DateTime base = _selectedDate ?? _currentDate;
     _displayedMonth = M3EDatePickerUtils.getMonth(base.year, base.month);
-    assert(!_lastDate.isBefore(_firstDate));
+    assert(
+      !_lastDate.isBefore(_firstDate),
+      'lastDate must be on or after firstDate',
+    );
   }
 
   void _handleModeChanged(M3EDatePickerMode mode) {
@@ -85,8 +110,10 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
     );
     setState(() {
       _mode = M3EDatePickerMode.day;
-      _displayedMonth =
-          M3EDatePickerUtils.getMonth(clamped.year, clamped.month);
+      _displayedMonth = M3EDatePickerUtils.getMonth(
+        clamped.year,
+        clamped.month,
+      );
       if (M3EDatePickerUtils.isSelectable(
         clamped,
         _firstDate,
@@ -110,18 +137,19 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   }
 
   double _inlinePickerBodyHeight(BuildContext context) {
-    final int firstDayOfWeekIndex =
-        MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    final int firstDayOfWeekIndex = MaterialLocalizations.of(
+      context,
+    ).firstDayOfWeekIndex;
     return switch (_mode) {
       M3EDatePickerMode.day => M3EDatePickerUtils.calendarDayViewHeight(
-          _displayedMonth,
-          firstDayOfWeekIndex,
-        ),
+        _displayedMonth,
+        firstDayOfWeekIndex,
+      ),
       M3EDatePickerMode.year => M3EDatePickerUtils.calendarYearViewHeight(
-          _firstDate,
-          _lastDate,
-          includeSubHeader: false,
-        ),
+        _firstDate,
+        _lastDate,
+        includeSubHeader: false,
+      ),
     };
   }
 
@@ -132,35 +160,36 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
         final theme = M3ETheme.of(context);
         final dateTheme = theme.datePickerTheme;
         final Widget content = Column(
-          mainAxisSize:
-              widget.expandToFit ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisSize: widget.expandToFit
+              ? MainAxisSize.max
+              : MainAxisSize.min,
           children: <Widget>[
             if (widget.expandToFit)
               Expanded(
                 child: switch (_mode) {
                   M3EDatePickerMode.day => M3EMonthPicker(
-                      initialMonth: _displayedMonth,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      selectedDate: _selectedDate,
-                      currentDate: _currentDate,
-                      onChanged: _handleDayChanged,
-                      onMonthChanged: _handleMonthChanged,
-                      selectableDayPredicate: widget.selectableDayPredicate,
-                      expandToFit: true,
-                      mode: _mode,
-                      onModeChanged: _handleModeChanged,
-                    ),
+                    initialMonth: _displayedMonth,
+                    firstDate: _firstDate,
+                    lastDate: _lastDate,
+                    selectedDate: _selectedDate,
+                    currentDate: _currentDate,
+                    onChanged: _handleDayChanged,
+                    onMonthChanged: _handleMonthChanged,
+                    selectableDayPredicate: widget.selectableDayPredicate,
+                    expandToFit: true,
+                    mode: _mode,
+                    onModeChanged: _handleModeChanged,
+                  ),
                   M3EDatePickerMode.year => M3EYearPicker(
-                      selectedDate: _selectedDate,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      onChanged: _handleYearChanged,
-                      selectableDayPredicate: widget.selectableDayPredicate,
-                      mode: _mode,
-                      onModeChanged: _handleModeChanged,
-                      displayedMonth: _displayedMonth,
-                    ),
+                    selectedDate: _selectedDate,
+                    firstDate: _firstDate,
+                    lastDate: _lastDate,
+                    onChanged: _handleYearChanged,
+                    selectableDayPredicate: widget.selectableDayPredicate,
+                    mode: _mode,
+                    onModeChanged: _handleModeChanged,
+                    displayedMonth: _displayedMonth,
+                  ),
                 },
               )
             else ...<Widget>[
@@ -177,23 +206,23 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
                   height: _inlinePickerBodyHeight(context),
                   child: switch (_mode) {
                     M3EDatePickerMode.day => M3EMonthPicker(
-                        initialMonth: _displayedMonth,
-                        firstDate: _firstDate,
-                        lastDate: _lastDate,
-                        selectedDate: _selectedDate,
-                        currentDate: _currentDate,
-                        onChanged: _handleDayChanged,
-                        onMonthChanged: _handleMonthChanged,
-                        selectableDayPredicate: widget.selectableDayPredicate,
-                      ),
+                      initialMonth: _displayedMonth,
+                      firstDate: _firstDate,
+                      lastDate: _lastDate,
+                      selectedDate: _selectedDate,
+                      currentDate: _currentDate,
+                      onChanged: _handleDayChanged,
+                      onMonthChanged: _handleMonthChanged,
+                      selectableDayPredicate: widget.selectableDayPredicate,
+                    ),
                     M3EDatePickerMode.year => M3EYearPicker(
-                        selectedDate: _selectedDate,
-                        firstDate: _firstDate,
-                        lastDate: _lastDate,
-                        onChanged: _handleYearChanged,
-                        selectableDayPredicate: widget.selectableDayPredicate,
-                        displayedMonth: _displayedMonth,
-                      ),
+                      selectedDate: _selectedDate,
+                      firstDate: _firstDate,
+                      lastDate: _lastDate,
+                      onChanged: _handleYearChanged,
+                      selectableDayPredicate: widget.selectableDayPredicate,
+                      displayedMonth: _displayedMonth,
+                    ),
                   },
                 ),
               ),

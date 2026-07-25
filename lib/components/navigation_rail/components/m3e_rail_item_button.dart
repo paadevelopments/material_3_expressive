@@ -6,14 +6,14 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart'
+    show M3ENavSelectionIndicator;
+import 'package:material_3_expressive/components/navigation_rail/styles/m3e_navigation_rail_theme.dart'
+    show M3ENavigationRailTheme;
 
 import '../../../foundations/foundations.dart';
-import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
 import 'm3e_nav_icon_scale.dart';
@@ -89,32 +89,33 @@ class M3ERailItemButton extends StatelessWidget {
     final m3e = M3ETheme.of(context);
     final scheme = m3e.colorScheme;
 
-    final double defaultHeight =
-        expanded ? theme.itemExpandedHeight : theme.itemCollapsedHeight;
+    final double defaultHeight = expanded
+        ? theme.itemExpandedHeight
+        : theme.itemCollapsedHeight;
     final double height = heightOverride ?? defaultHeight;
 
     final bool selected = isSelected;
 
     // Prefer theme overrides; otherwise match M3 rail tokens (same as nav bar).
-    final Color activeIconLabel =
-        theme.activeIconAndLabelColor(scheme);
-    final Color inactiveIconLabel =
-        theme.inactiveIconAndLabelColor(scheme);
-    final Color activeIndicator =
-        theme.activeIndicatorColorResolved(scheme);
-    final ShapeBorder indicatorShape = theme.indicatorShapeFull ??
+    final Color activeIconLabel = theme.activeIconAndLabelColor(scheme);
+    final Color inactiveIconLabel = theme.inactiveIconAndLabelColor(scheme);
+    final Color activeIndicator = theme.activeIndicatorColorResolved(scheme);
+    final ShapeBorder indicatorShape =
+        theme.indicatorShapeFull ??
         RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs);
 
-    final Color fg = selected ? activeIconLabel : inactiveIconLabel;
+    final fg = selected ? activeIconLabel : inactiveIconLabel;
     final Color bg = useLocalIndicator && expanded && selected
         ? activeIndicator
         : Colors.transparent;
-    final ShapeBorder shape =
-        expanded ? indicatorShape : const RoundedRectangleBorder();
+    final ShapeBorder shape = expanded
+        ? indicatorShape
+        : const RoundedRectangleBorder();
 
     // Content
-    final Widget effectiveIcon =
-        selected && selectedIcon != null ? selectedIcon! : icon;
+    final Widget effectiveIcon = selected && selectedIcon != null
+        ? selectedIcon!
+        : icon;
 
     final Widget scaledIcon = M3ENavIconScale(
       selected: selected,
@@ -176,7 +177,6 @@ class M3ERailItemButton extends StatelessWidget {
           variant: useLocalIndicator && isSelected
               ? M3EIconButtonVariant.tonal
               : M3EIconButtonVariant.standard,
-          shape: M3EIconButtonShapeVariant.round,
         ),
       );
 
@@ -184,7 +184,7 @@ class M3ERailItemButton extends StatelessWidget {
         children: [
           iconButton,
           if (labelBehavior == M3ENavigationRailLabelBehavior.alwaysShow ||
-              (isSelected == true &&
+              (isSelected &&
                   labelBehavior != M3ENavigationRailLabelBehavior.alwaysHide))
             textCollapsed,
         ],
@@ -192,7 +192,7 @@ class M3ERailItemButton extends StatelessWidget {
     }
 
     // No ink splash — the shared selection indicator is the selection feedback.
-    final Material material = Material(
+    final material = Material(
       key: expanded ? indicatorKey : null,
       color: bg,
       shape: shape,

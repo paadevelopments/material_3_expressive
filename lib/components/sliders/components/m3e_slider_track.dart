@@ -2,6 +2,10 @@
 // SliderDefaults.Track wrapper
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ESlider;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ESlider;
 
 import '../enums/m3e_slider_enums.dart';
 import '../styles/m3e_slider_theme.dart';
@@ -9,6 +13,7 @@ import 'm3e_slider_track_painter.dart';
 
 /// Default expressive track for a single-value [M3ESlider].
 class M3ESliderTrack extends StatelessWidget {
+  /// M3ESliderTrack.
   const M3ESliderTrack({
     required this.fraction,
     required this.tickFractions,
@@ -31,23 +36,59 @@ class M3ESliderTrack extends StatelessWidget {
     super.key,
   });
 
+  /// fraction.
+
   final double fraction;
+
+  /// tickFractions.
   final List<double> tickFractions;
+
+  /// colors.
   final M3ESliderColors colors;
+
+  /// theme.
   final M3ESliderTheme theme;
+
+  /// axis.
   final Axis axis;
+
+  /// textDirection.
   final TextDirection textDirection;
+
+  /// handleThickness.
   final double handleThickness;
+
+  /// trackKind.
   final M3ESliderTrackKind trackKind;
+
+  /// trackHeight.
   final double? trackHeight;
+
+  /// stopIndicatorSize.
   final double? stopIndicatorSize;
+
+  /// tickSize.
   final double? tickSize;
+
+  /// edgeInset.
   final double? edgeInset;
+
+  /// drawDots.
   final bool drawDots;
+
+  /// isWavy.
   final bool isWavy;
+
+  /// waveAmplitude.
   final double waveAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
 
   @override

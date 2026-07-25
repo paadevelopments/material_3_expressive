@@ -5,9 +5,14 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart' show M3EDropdownItemStyle;
-import 'package:material_3_expressive/components/dropdown_menus/styles/m3e_dropdown_item_style.dart' show M3EDropdownItemStyle;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3EDropdownItemStyle;
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
+    show M3EDropdownItemStyle;
+import 'package:material_3_expressive/components/dropdown_menus/styles/m3e_dropdown_item_style.dart'
+    show M3EDropdownItemStyle;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EDropdownItemStyle;
+
+/// M3EDropdownFieldStyle.
 
 @immutable
 class M3EDropdownFieldStyle with Diagnosticable {
@@ -334,11 +339,7 @@ class M3EDropdownFieldStyle with Diagnosticable {
       ..add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle))
       ..add(ColorProperty('backgroundColor', backgroundColor))
       ..add(ColorProperty('foregroundColor', foregroundColor))
-      ..add(
-        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-      )
-      ..add(
-        DoubleProperty('selectedBorderRadius', selectedBorderRadius),
-      );
+      ..add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius))
+      ..add(DoubleProperty('selectedBorderRadius', selectedBorderRadius));
   }
 }

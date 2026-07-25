@@ -11,6 +11,7 @@ export 'styles/m3e_badge_theme.dart';
 /// [child]. Set [showDot] for a dot badge, or provide [count] for a numeric
 /// badge.
 class M3EBadge extends StatelessWidget {
+  /// M3EBadge.
   const M3EBadge({
     super.key,
     required this.child,
@@ -23,13 +24,29 @@ class M3EBadge extends StatelessWidget {
     this.semanticLabel,
   }) : assert(count == null || count >= 0, 'count must be non-negative');
 
+  /// child.
+
   final Widget child;
+
+  /// count.
   final int? count;
+
+  /// showDot.
   final bool showDot;
+
+  /// maxCount.
   final int maxCount;
+
+  /// offset.
   final Offset? offset;
+
+  /// backgroundColor.
   final Color? backgroundColor;
+
+  /// foregroundColor.
   final Color? foregroundColor;
+
+  /// semanticLabel.
   final String? semanticLabel;
 
   @override
@@ -56,7 +73,8 @@ class M3EBadge extends StatelessWidget {
             _format(count!, maxCount),
           );
 
-    return M3EComponentTheme(builder: (context) => Stack(
+    return M3EComponentTheme(
+      builder: (context) => Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
           child,
@@ -64,7 +82,8 @@ class M3EBadge extends StatelessWidget {
             right: effectiveOffset.dx,
             top: effectiveOffset.dy,
             child: Semantics(
-              label: semanticLabel ??
+              label:
+                  semanticLabel ??
                   (count != null ? 'Notifications: $count' : 'Notifications'),
               child: badge,
             ),

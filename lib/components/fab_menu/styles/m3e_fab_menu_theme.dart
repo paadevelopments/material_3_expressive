@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3EFabMenu`.
 @immutable
 class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
+  /// M3EFabMenuTheme.
   const M3EFabMenuTheme({
     this.menuOffset = 16,
     this.scrimOpacity = 0.0,
@@ -16,23 +17,49 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
     this.itemElevation = M3EElevation.level3,
   });
 
+  /// defaults.
+
   static const M3EFabMenuTheme defaults = M3EFabMenuTheme();
 
+  /// menuOffset.
+
   final double menuOffset;
+
+  /// scrimOpacity.
   final double scrimOpacity;
+
+  /// itemGap.
   final double itemGap;
+
+  /// itemHeight.
   final double itemHeight;
+
+  /// itemHorizontalPadding.
   final double itemHorizontalPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// iconLabelGap.
   final double iconLabelGap;
+
+  /// itemElevation.
   final double itemElevation;
+
+  /// scrimColor.
 
   Color scrimColor(M3EColorScheme scheme) =>
       scheme.scrim.withValues(alpha: scrimOpacity);
 
+  /// itemContainerColor.
+
   Color itemContainerColor(M3EColorScheme scheme) => scheme.primaryContainer;
 
+  /// itemForegroundColor.
+
   Color itemForegroundColor(M3EColorScheme scheme) => scheme.onPrimaryContainer;
+
+  /// itemLabelStyle.
 
   TextStyle itemLabelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.titleMedium.copyWith(color: itemForegroundColor(scheme));
@@ -71,8 +98,11 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
       scrimOpacity: _lerpDouble(scrimOpacity, other.scrimOpacity, t)!,
       itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
       itemHeight: _lerpDouble(itemHeight, other.itemHeight, t)!,
-      itemHorizontalPadding:
-          _lerpDouble(itemHorizontalPadding, other.itemHorizontalPadding, t)!,
+      itemHorizontalPadding: _lerpDouble(
+        itemHorizontalPadding,
+        other.itemHorizontalPadding,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
       itemElevation: _lerpDouble(itemElevation, other.itemElevation, t)!,

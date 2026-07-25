@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' show ListTile;
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/icon_buttons/enums/m3e_icon_button_enums.dart';
 import 'package:material_3_expressive/components/text_fields/enums/m3e_text_field_variant.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -76,18 +75,12 @@ class _FeedbackPageState extends State<FeedbackPage>
         DemoRow(
           label: 'Dot and numeric',
           children: <Widget>[
-            const M3EBadge(
-              showDot: true,
-              child: Icon(M3EIcons.menu, size: 28),
-            ),
+            const M3EBadge(showDot: true, child: Icon(M3EIcons.menu, size: 28)),
             const M3EBadge(
               count: 8,
               child: Icon(M3EIcons.calendar_today, size: 28),
             ),
-            const M3EBadge(
-              count: 120,
-              child: Icon(M3EIcons.edit, size: 28),
-            ),
+            const M3EBadge(count: 120, child: Icon(M3EIcons.edit, size: 28)),
           ],
         ),
       ],
@@ -119,15 +112,11 @@ class _FeedbackPageState extends State<FeedbackPage>
             children: <Widget>[
               SizedBox(
                 width: 200,
-                child: M3EProgressIndicator.linear(
-                  value: _progress,
-                ),
+                child: M3EProgressIndicator.linear(value: _progress),
               ),
               SizedBox(
                 width: 200,
-                child: M3EProgressIndicator.linearWavy(
-                  value: _progress,
-                ),
+                child: M3EProgressIndicator.linearWavy(value: _progress),
               ),
               M3EProgressIndicator.circular(value: _progress),
               M3EProgressIndicator.circularWavy(value: _progress),
@@ -283,23 +272,24 @@ class _FeedbackPageState extends State<FeedbackPage>
                 shrinkWrap: true,
                 suggestionsBuilder:
                     (BuildContext context, M3ESearchController controller) {
-                  final String query = controller.text.trim().toLowerCase();
-                  final Iterable<String> matches = query.isEmpty
-                      ? _galleryComponentNames
-                      : _galleryComponentNames.where(
-                        (String name) => name.toLowerCase().contains(query),
-                  );
-                  return matches.map(
+                      final String query = controller.text.trim().toLowerCase();
+                      final Iterable<String> matches = query.isEmpty
+                          ? _galleryComponentNames
+                          : _galleryComponentNames.where(
+                              (String name) =>
+                                  name.toLowerCase().contains(query),
+                            );
+                      return matches.map(
                         (String name) => ListTile(
-                      title: Text(name),
-                      onTap: () => controller.closeView(name),
-                    ),
-                  );
-                },
+                          title: Text(name),
+                          onTap: () => controller.closeView(name),
+                        ),
+                      );
+                    },
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

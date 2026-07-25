@@ -12,14 +12,25 @@ Widget _host(Widget child) {
 }
 
 void main() {
-  testWidgets('M3EDialTimePicker scales down without overflow on narrow width',
-      _dialLayout);
+  testWidgets(
+    'M3EDialTimePicker scales down without overflow on narrow width',
+    _dialLayout,
+  );
   testWidgets('M3EDialTimePicker toggles AM and PM', _periodToggle);
   testWidgets('M3ETimePicker.show returns null on cancel', _dialogCancel);
   testWidgets('M3ETimePicker.show returns time on confirm', _dialogConfirm);
-  testWidgets('M3ETimePickerTheme overrides layout without ThemeData', _themeOverride);
-  testWidgets('M3ETimePickerDialog portrait layout has no overflow', _dialogLayout);
-  testWidgets('M3ETimePicker toggles to input mode without error', _inputModeToggle);
+  testWidgets(
+    'M3ETimePickerTheme overrides layout without ThemeData',
+    _themeOverride,
+  );
+  testWidgets(
+    'M3ETimePickerDialog portrait layout has no overflow',
+    _dialogLayout,
+  );
+  testWidgets(
+    'M3ETimePicker toggles to input mode without error',
+    _inputModeToggle,
+  );
   test('M3ETimePickerUtils clamps and parses input time', _utils);
 }
 
@@ -231,8 +242,5 @@ void _utils() {
     ),
     const M3ETime(hour: 9, minute: 30),
   );
-  expect(
-    M3ETimePickerUtils.to24Hour(12, true),
-    12,
-  );
+  expect(M3ETimePickerUtils.to24Hour(12, pm: true), 12);
 }

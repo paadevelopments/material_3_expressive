@@ -2,6 +2,10 @@
 // SliderTokens.kt / SliderColors
 
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
+    show M3ERangeSlider, M3ESlider;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ERangeSlider, M3ESlider;
 
 import '../../../foundations/foundations.dart';
 import '../res/m3e_slider_tokens.dart';
@@ -9,6 +13,7 @@ import '../res/m3e_slider_tokens.dart';
 /// Resolved colors for an [M3ESlider] / [M3ERangeSlider] paint pass.
 @immutable
 class M3ESliderColors {
+  /// M3ESliderColors.
   const M3ESliderColors({
     required this.thumb,
     required this.activeTrack,
@@ -20,19 +25,36 @@ class M3ESliderColors {
     required this.valueIndicatorLabel,
   });
 
+  /// thumb.
+
   final Color thumb;
+
+  /// activeTrack.
   final Color activeTrack;
+
+  /// inactiveTrack.
   final Color inactiveTrack;
+
+  /// activeTick.
   final Color activeTick;
+
+  /// inactiveTick.
   final Color inactiveTick;
+
+  /// stopIndicator.
   final Color stopIndicator;
+
+  /// valueIndicator.
   final Color valueIndicator;
+
+  /// valueIndicatorLabel.
   final Color valueIndicatorLabel;
 }
 
 /// Theme values for [M3ESlider] and [M3ERangeSlider].
 @immutable
 class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
+  /// M3ESliderTheme.
   const M3ESliderTheme({
     this.height = M3ESliderTokens.handleHeight,
     this.trackHeight = M3ESliderTokens.activeTrackHeight,
@@ -48,30 +70,53 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     this.valueIndicatorBottomSpace =
         M3ESliderTokens.valueIndicatorActiveBottomSpace,
     this.disabledActiveOpacity = M3ESliderTokens.disabledActiveTrackOpacity,
-    this.disabledInactiveOpacity =
-        M3ESliderTokens.disabledInactiveTrackOpacity,
+    this.disabledInactiveOpacity = M3ESliderTokens.disabledInactiveTrackOpacity,
     this.waveAmplitude = M3ESliderTokens.waveAmplitude,
     this.wavelength = M3ESliderTokens.wavelength,
   });
+
+  /// defaults.
 
   static const M3ESliderTheme defaults = M3ESliderTheme();
 
   /// Cross-axis extent of the interactive slider layout.
   final double height;
 
+  /// trackHeight.
+
   final double trackHeight;
+
+  /// handleGap.
   final double handleGap;
+
+  /// handleWidth.
   final double handleWidth;
+
+  /// handleHeight.
   final double handleHeight;
+
+  /// pressedHandleWidth.
   final double pressedHandleWidth;
+
+  /// trackInsideCornerSize.
   final double trackInsideCornerSize;
+
+  /// stopIndicatorSize.
   final double stopIndicatorSize;
+
+  /// tickSize.
   final double tickSize;
 
   /// Clear space between each track end and the outer edge of end markers.
   final double stopIndicatorTrailingSpace;
+
+  /// valueIndicatorBottomSpace.
   final double valueIndicatorBottomSpace;
+
+  /// disabledActiveOpacity.
   final double disabledActiveOpacity;
+
+  /// disabledInactiveOpacity.
   final double disabledInactiveOpacity;
 
   /// Peak offset of the wavy active track from the centerline.
@@ -178,9 +223,16 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
       handleGap: _lerp(handleGap, other.handleGap, t),
       handleWidth: _lerp(handleWidth, other.handleWidth, t),
       handleHeight: _lerp(handleHeight, other.handleHeight, t),
-      pressedHandleWidth: _lerp(pressedHandleWidth, other.pressedHandleWidth, t),
-      trackInsideCornerSize:
-          _lerp(trackInsideCornerSize, other.trackInsideCornerSize, t),
+      pressedHandleWidth: _lerp(
+        pressedHandleWidth,
+        other.pressedHandleWidth,
+        t,
+      ),
+      trackInsideCornerSize: _lerp(
+        trackInsideCornerSize,
+        other.trackInsideCornerSize,
+        t,
+      ),
       stopIndicatorSize: _lerp(stopIndicatorSize, other.stopIndicatorSize, t),
       tickSize: _lerp(tickSize, other.tickSize, t),
       stopIndicatorTrailingSpace: _lerp(
@@ -188,12 +240,21 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
         other.stopIndicatorTrailingSpace,
         t,
       ),
-      valueIndicatorBottomSpace:
-          _lerp(valueIndicatorBottomSpace, other.valueIndicatorBottomSpace, t),
-      disabledActiveOpacity:
-          _lerp(disabledActiveOpacity, other.disabledActiveOpacity, t),
-      disabledInactiveOpacity:
-          _lerp(disabledInactiveOpacity, other.disabledInactiveOpacity, t),
+      valueIndicatorBottomSpace: _lerp(
+        valueIndicatorBottomSpace,
+        other.valueIndicatorBottomSpace,
+        t,
+      ),
+      disabledActiveOpacity: _lerp(
+        disabledActiveOpacity,
+        other.disabledActiveOpacity,
+        t,
+      ),
+      disabledInactiveOpacity: _lerp(
+        disabledInactiveOpacity,
+        other.disabledInactiveOpacity,
+        t,
+      ),
       waveAmplitude: _lerp(waveAmplitude, other.waveAmplitude, t),
       wavelength: _lerp(wavelength, other.wavelength, t),
     );

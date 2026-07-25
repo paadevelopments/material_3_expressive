@@ -13,6 +13,7 @@ export 'styles/m3e_segmented_button_theme.dart';
 /// or sorting. Supports single or multiple selection and shows a check icon on
 /// selected segments.
 class M3ESegmentedButton<T> extends StatelessWidget {
+  /// M3ESegmentedButton.
   const M3ESegmentedButton({
     required this.segments,
     required this.selected,
@@ -22,10 +23,20 @@ class M3ESegmentedButton<T> extends StatelessWidget {
     super.key,
   }) : assert(segments.length >= 2, 'A segmented button needs 2+ segments.');
 
+  /// segments.
+
   final List<M3ESegment<T>> segments;
+
+  /// selected.
   final Set<T> selected;
+
+  /// onSelectionChanged.
   final ValueChanged<Set<T>> onSelectionChanged;
+
+  /// multiSelect.
   final bool multiSelect;
+
+  /// showSelectedIcon.
   final bool showSelectedIcon;
 
   @override

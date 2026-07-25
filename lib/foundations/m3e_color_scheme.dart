@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 /// an existing [ColorScheme] with [M3EColorScheme.fromColorScheme].
 @immutable
 class M3EColorScheme {
+  /// Creates a complete Material 3 expressive color scheme.
   const M3EColorScheme({
     required this.brightness,
     required this.primary,
@@ -73,8 +74,10 @@ class M3EColorScheme {
   /// the `m3e_design` package, derived from the base scheme.
   factory M3EColorScheme.fromColorScheme(ColorScheme scheme) {
     final isDark = scheme.brightness == Brightness.dark;
-    final surfaceStrong =
-        Color.alphaBlend(scheme.primary.withValues(alpha: 0.06), scheme.surface);
+    final surfaceStrong = Color.alphaBlend(
+      scheme.primary.withValues(alpha: 0.06),
+      scheme.surface,
+    );
     return M3EColorScheme(
       brightness: scheme.brightness,
       emphasis: scheme.primary,
@@ -140,44 +143,113 @@ class M3EColorScheme {
 
   /// The default dark expressive scheme seeded from Material baseline purple.
   factory M3EColorScheme.dark() => M3EColorScheme.fromSeed(
-        const Color(0xFF6750A4),
-        brightness: Brightness.dark,
-      );
+    const Color(0xFF6750A4),
+    brightness: Brightness.dark,
+  );
 
+  /// Overall scheme brightness.
   final Brightness brightness;
+
+  /// Primary brand color.
   final Color primary;
+
+  /// Content color on [primary].
   final Color onPrimary;
+
+  /// Container tone for [primary].
   final Color primaryContainer;
+
+  /// Content color on [primaryContainer].
   final Color onPrimaryContainer;
+
+  /// Secondary brand color.
   final Color secondary;
+
+  /// Content color on [secondary].
   final Color onSecondary;
+
+  /// Container tone for [secondary].
   final Color secondaryContainer;
+
+  /// Content color on [secondaryContainer].
   final Color onSecondaryContainer;
+
+  /// Tertiary accent color.
   final Color tertiary;
+
+  /// Content color on [tertiary].
   final Color onTertiary;
+
+  /// Container tone for [tertiary].
   final Color tertiaryContainer;
+
+  /// Content color on [tertiaryContainer].
   final Color onTertiaryContainer;
+
+  /// Error role color.
   final Color error;
+
+  /// Content color on [error].
   final Color onError;
+
+  /// Container tone for [error].
   final Color errorContainer;
+
+  /// Content color on [errorContainer].
   final Color onErrorContainer;
+
+  /// Default surface background.
   final Color surface;
+
+  /// Content color on [surface].
   final Color onSurface;
+
+  /// Variant content color on surfaces.
   final Color onSurfaceVariant;
+
+  /// Lowest surface container tone.
   final Color surfaceContainerLowest;
+
+  /// Low surface container tone.
   final Color surfaceContainerLow;
+
+  /// Default surface container tone.
   final Color surfaceContainer;
+
+  /// High surface container tone.
   final Color surfaceContainerHigh;
+
+  /// Highest surface container tone.
   final Color surfaceContainerHighest;
+
+  /// Dimmer surface tone.
   final Color surfaceDim;
+
+  /// Brighter surface tone.
   final Color surfaceBright;
+
+  /// Inverse surface for contrasting overlays.
   final Color inverseSurface;
+
+  /// Content color on [inverseSurface].
   final Color onInverseSurface;
+
+  /// Primary color used on [inverseSurface].
   final Color inversePrimary;
+
+  /// Outline / border color.
   final Color outline;
+
+  /// Softer outline variant.
   final Color outlineVariant;
+
+  /// Shadow color.
   final Color shadow;
+
+  /// Scrim / modal backdrop color.
   final Color scrim;
+
+  /// Tint applied for elevation overlays.
   final Color surfaceTint;
 
   /// High-emphasis accent (defaults to [primary]).
@@ -207,6 +279,7 @@ class M3EColorScheme {
   /// A stronger outline for high-contrast separators.
   final Color outlineStrong;
 
+  /// Returns a copy with the given fields replaced.
   M3EColorScheme copyWith({
     Brightness? brightness,
     Color? primary,
@@ -278,8 +351,7 @@ class M3EColorScheme {
           surfaceContainerLowest ?? this.surfaceContainerLowest,
       surfaceContainerLow: surfaceContainerLow ?? this.surfaceContainerLow,
       surfaceContainer: surfaceContainer ?? this.surfaceContainer,
-      surfaceContainerHigh:
-          surfaceContainerHigh ?? this.surfaceContainerHigh,
+      surfaceContainerHigh: surfaceContainerHigh ?? this.surfaceContainerHigh,
       surfaceContainerHighest:
           surfaceContainerHighest ?? this.surfaceContainerHighest,
       surfaceDim: surfaceDim ?? this.surfaceDim,

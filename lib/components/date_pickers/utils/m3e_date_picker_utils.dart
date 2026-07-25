@@ -6,9 +6,13 @@ import '../res/m3e_date_picker_constants.dart';
 abstract final class M3EDatePickerUtils {
   const M3EDatePickerUtils._();
 
+  /// dateOnly.
+
   static DateTime dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
+
+  /// isSameDay.
 
   static bool isSameDay(DateTime? a, DateTime? b) {
     if (a == null || b == null) {
@@ -17,6 +21,8 @@ abstract final class M3EDatePickerUtils {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  /// isInRange.
+
   static bool isInRange(DateTime day, DateTime start, DateTime end) {
     final DateTime normalized = dateOnly(day);
     final DateTime rangeStart = dateOnly(start);
@@ -24,7 +30,13 @@ abstract final class M3EDatePickerUtils {
     return !normalized.isBefore(rangeStart) && !normalized.isAfter(rangeEnd);
   }
 
-  static DateTime clampDate(DateTime date, DateTime firstDate, DateTime lastDate) {
+  /// clampDate.
+
+  static DateTime clampDate(
+    DateTime date,
+    DateTime firstDate,
+    DateTime lastDate,
+  ) {
     if (date.isBefore(firstDate)) {
       return firstDate;
     }
@@ -34,13 +46,19 @@ abstract final class M3EDatePickerUtils {
     return date;
   }
 
+  /// getMonth.
+
   static DateTime getMonth(int year, int month) {
     return DateTime(year, month);
   }
 
+  /// daysInMonth.
+
   static int daysInMonth(int year, int month) {
     return DateTime(year, month + 1, 0).day;
   }
+
+  /// monthDelta.
 
   static int monthDelta(DateTime startMonth, DateTime endMonth) {
     return (endMonth.year - startMonth.year) * 12 +
@@ -48,19 +66,27 @@ abstract final class M3EDatePickerUtils {
         startMonth.month;
   }
 
+  /// addMonthsToMonthDate.
+
   static DateTime addMonthsToMonthDate(DateTime monthDate, int delta) {
     return DateTime(monthDate.year, monthDate.month + delta);
   }
 
+  /// getDay.
+
   static DateTime getDay(int year, int month, int day) {
     return DateTime(year, month, day);
   }
+
+  /// normalizeSelectedDay.
 
   static DateTime normalizeSelectedDay(DateTime selected, DateTime monthDate) {
     final int days = daysInMonth(monthDate.year, monthDate.month);
     final int preferredDay = math.min(selected.day, days);
     return DateTime(monthDate.year, monthDate.month, preferredDay);
   }
+
+  /// isSelectable.
 
   static bool isSelectable(
     DateTime date,
@@ -85,10 +111,7 @@ abstract final class M3EDatePickerUtils {
   }
 
   /// Height of the day calendar view for [month].
-  static double calendarDayViewHeight(
-    DateTime month,
-    int firstDayOfWeekIndex,
-  ) {
+  static double calendarDayViewHeight(DateTime month, int firstDayOfWeekIndex) {
     final int rows = dayPickerRowCount(month, firstDayOfWeekIndex);
     return M3EDatePickerConstants.subHeaderHeight +
         M3EDatePickerConstants.weekdayRowHeight +

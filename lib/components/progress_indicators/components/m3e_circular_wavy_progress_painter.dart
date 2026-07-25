@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 /// Paints a Compose-style circular wavy progress ring with front and back gaps.
 class M3ECircularWavyProgressPainter extends CustomPainter {
+  /// M3ECircularWavyProgressPainter.
   const M3ECircularWavyProgressPainter({
     required this.progress,
     required this.activeColor,
@@ -19,14 +20,32 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
 
   /// Null means indeterminate (full ring wave).
   final double? progress;
+
+  /// activeColor.
   final Color activeColor;
+
+  /// trackColor.
   final Color trackColor;
+
+  /// strokeWidth.
   final double strokeWidth;
+
+  /// trackStrokeWidth.
   final double trackStrokeWidth;
+
+  /// gapSize.
   final double gapSize;
+
+  /// amplitudeFactor.
   final double amplitudeFactor;
+
+  /// maxAmplitude.
   final double maxAmplitude;
+
+  /// wavelength.
   final double wavelength;
+
+  /// phase.
   final double phase;
 
   @override
@@ -34,8 +53,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     final Offset center = size.center(Offset.zero);
     final double maxStroke = math.max(strokeWidth, trackStrokeWidth);
     final double amplitude = maxAmplitude * amplitudeFactor.clamp(0.0, 1.0);
-    final double radius =
-        (size.shortestSide - maxStroke) / 2 - amplitude;
+    final double radius = (size.shortestSide - maxStroke) / 2 - amplitude;
 
     if (radius <= 0) {
       return;
@@ -43,27 +61,25 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
 
     const double tau = 2 * math.pi;
     final double circumference = tau * radius;
-    final int waveCount =
-        math.max(1, (circumference / wavelength).round());
+    final int waveCount = math.max(1, (circumference / wavelength).round());
     final double waveK = waveCount * tau / circumference;
 
     // Match Compose: inflate gap for round stroke caps.
-    final double adjustedGap =
-        gapSize + (strokeWidth + trackStrokeWidth) / 2;
+    final double adjustedGap = gapSize + (strokeWidth + trackStrokeWidth) / 2;
     final double gapAngle = adjustedGap / radius;
-    final bool indeterminate = progress == null;
+    final indeterminate = progress == null;
     final double p = (progress ?? 1).clamp(0.0, 1.0);
     // Start at 12 o'clock.
     const double startAngle = -math.pi / 2;
 
-    final Paint trackPaint = Paint()
+    final trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = trackStrokeWidth
       ..strokeCap = StrokeCap.round
       ..color = trackColor
       ..isAntiAlias = true;
 
-    final Paint activePaint = Paint()
+    final activePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
@@ -150,15 +166,14 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     required double waveK,
     required double phase,
   }) {
-    final Path path = Path();
-    const int steps = 120;
-    for (int i = 0; i <= steps; i++) {
+    final path = Path();
+    const steps = 120;
+    for (var i = 0; i <= steps; i++) {
       final double t = i / steps;
       final double angle = startAngle + sweepAngle * t;
       final double arcLength = radius * (angle - startAngle).abs();
-      final double r =
-          radius + amplitude * math.sin(phase + arcLength * waveK);
-      final Offset point = Offset(
+      final double r = radius + amplitude * math.sin(phase + arcLength * waveK);
+      final point = Offset(
         center.dx + r * math.cos(angle),
         center.dy + r * math.sin(angle),
       );

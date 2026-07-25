@@ -11,13 +11,18 @@ export 'styles/m3e_bottom_sheet_theme.dart';
 /// [M3EBottomSheet.show] for a modal sheet with a scrim; a drag handle lets
 /// people flick it away.
 class M3EBottomSheet extends StatelessWidget {
+  /// M3EBottomSheet.
   const M3EBottomSheet({
     required this.child,
     this.showDragHandle = true,
     super.key,
   });
 
+  /// child.
+
   final Widget child;
+
+  /// showDragHandle.
   final bool showDragHandle;
 
   /// Presents a modal bottom sheet and completes with the popped result.
@@ -37,32 +42,39 @@ class M3EBottomSheet extends StatelessWidget {
       transitionDuration: M3EMotion.long1,
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrapBottomSheet(
-          M3EComponentTheme(builder: (context) => Align(
-            alignment: Alignment.bottomCenter,
-            child: M3EBottomSheet(
-              showDragHandle: showDragHandle,
-              child: Builder(builder: builder),
+          M3EComponentTheme(
+            builder: (context) => Align(
+              alignment: Alignment.bottomCenter,
+              child: M3EBottomSheet(
+                showDragHandle: showDragHandle,
+                child: Builder(builder: builder),
+              ),
             ),
-          )),
-        );
-      },
-      transitionBuilder: (BuildContext context, Animation<double> a, _, Widget c) {
-        return SlideTransition(
-          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-              .animate(
-            CurvedAnimation(parent: a, curve: M3EMotion.emphasizedDecelerate),
           ),
-          child: c,
         );
       },
+      transitionBuilder:
+          (BuildContext context, Animation<double> a, _, Widget c) {
+            return SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: a,
+                      curve: M3EMotion.emphasizedDecelerate,
+                    ),
+                  ),
+              child: c,
+            );
+          },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildSheet,
-    );
+    return M3EComponentTheme(builder: _buildSheet);
   }
 
   Widget _buildSheet(BuildContext context) {
@@ -103,9 +115,7 @@ class M3EBottomSheet extends StatelessWidget {
 
   Widget _buildHandle(M3EColorScheme scheme, M3EBottomSheetTheme sheetTheme) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: sheetTheme.handleVerticalPadding,
-      ),
+      padding: EdgeInsets.symmetric(vertical: sheetTheme.handleVerticalPadding),
       child: Container(
         width: sheetTheme.handleWidth,
         height: sheetTheme.handleHeight,

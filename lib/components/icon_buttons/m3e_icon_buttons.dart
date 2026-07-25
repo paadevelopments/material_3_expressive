@@ -5,9 +5,6 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-// ignore_for_file: type=lint
-// ignore_for_file: cognitive_complexity, function_length, file_length
-// ignore_for_file: class_length, number_of_parameters, long_method
 
 import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
@@ -19,11 +16,12 @@ import 'enums/m3e_icon_button_enums.dart';
 import 'styles/m3e_icon_button_shapes.dart';
 import 'styles/m3e_icon_button_theme.dart';
 
-export 'styles/m3e_icon_button_theme.dart';
 export 'enums/m3e_icon_button_enums.dart';
+export 'styles/m3e_icon_button_theme.dart';
 
-final SpringMotion _kIconButtonMorphMotion =
-    M3EButtonMotion.expressiveSpatialPress.toMotion();
+final SpringMotion _kIconButtonMorphMotion = M3EButtonMotion
+    .expressiveSpatialPress
+    .toMotion();
 
 /// Material 3 Expressive Icon Button
 ///
@@ -35,6 +33,7 @@ final SpringMotion _kIconButtonMorphMotion =
 /// - Toggle: [isSelected] + [selectedIcon]
 ///  - Badge: [String] or [num]
 class M3EIconButton extends StatefulWidget {
+  /// M3EIconButton.
   const M3EIconButton({
     super.key,
     required this.icon,
@@ -52,17 +51,41 @@ class M3EIconButton extends StatefulWidget {
     this.suppressInk = false,
   });
 
+  /// icon.
+
   final Widget icon;
+
+  /// onPressed.
   final VoidCallback? onPressed;
+
+  /// tooltip.
   final String? tooltip;
+
+  /// semanticLabel.
   final String? semanticLabel;
+
+  /// variant.
   final M3EIconButtonVariant variant;
+
+  /// size.
   final M3EIconButtonSize size;
+
+  /// shape.
   final M3EIconButtonShapeVariant shape;
+
+  /// width.
   final M3EIconButtonWidth width;
+
+  /// isSelected.
   final bool? isSelected;
+
+  /// selectedIcon.
   final Widget? selectedIcon;
+
+  /// enableFeedback.
   final bool? enableFeedback;
+
+  /// badgeValue.
   final Object? badgeValue;
 
   /// When true, suppresses splash/hover ink effects.
@@ -89,26 +112,30 @@ class _M3EIconButtonState extends State<M3EIconButton> {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    if (widget.onPressed == null || !mounted) return;
+    if (widget.onPressed == null || !mounted) {
+      return;
+    }
     setState(() => _isPointerDown = true);
     _statesController.update(WidgetState.pressed, true);
   }
 
   void _handlePointerUp() {
-    if (!_isPointerDown) return;
+    if (!_isPointerDown) {
+      return;
+    }
     _isPointerDown = false;
     // onPressed may rebuild/remove this button (e.g. toolbar expand trigger)
     // before pointer-up is delivered to the Listener.
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     setState(() {});
     _statesController.update(WidgetState.pressed, false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildContent,
-    );
+    return M3EComponentTheme(builder: _buildContent);
   }
 
   Widget _buildContent(BuildContext context) {
@@ -134,17 +161,14 @@ class _M3EIconButtonState extends State<M3EIconButton> {
         bg = Colors.transparent;
         fg = selected ? scheme.primary : scheme.onSurfaceVariant;
         side = null;
-        break;
       case M3EIconButtonVariant.filled:
         bg = scheme.primary;
         fg = scheme.onPrimary;
         side = null;
-        break;
       case M3EIconButtonVariant.tonal:
         bg = scheme.secondaryContainer;
         fg = scheme.onSecondaryContainer;
         side = null;
-        break;
       case M3EIconButtonVariant.outlined:
         bg = Colors.transparent;
         fg = scheme.primary;
@@ -152,10 +176,9 @@ class _M3EIconButtonState extends State<M3EIconButton> {
           color: scheme.outline,
           width: iconButtonTheme.outlineWidth,
         );
-        break;
     }
 
-    final Set<WidgetState> morphStates = <WidgetState>{
+    final morphStates = <WidgetState>{
       if (_isPointerDown && widget.onPressed != null) WidgetState.pressed,
     };
     final double targetRadius = M3EIconButtonShapes.effectiveRadius(
@@ -258,9 +281,9 @@ class _M3EIconButtonState extends State<M3EIconButton> {
         } else {
           assert(() {
             throw FlutterError(
-              'M3EIconButton.badgeValue must be a String or num, but got \'${v.runtimeType}\'.',
+              "M3EIconButton.badgeValue must be a String or num, but got '${v.runtimeType}'.",
             );
-          }());
+          }(), 'badgeValue must be String or num');
           badge = null;
         }
         return badge == null

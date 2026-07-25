@@ -21,6 +21,8 @@ export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_expandable_style.dart';
 export 'styles/m3e_list_theme.dart';
 
+part 'components/m3e_dismissible_list_widgets.dart';
+
 enum _M3EExpandableListLayout { column, scrollable, sliver }
 
 /// A Material 3 Expressive list item.
@@ -32,6 +34,7 @@ enum _M3EExpandableListLayout { column, scrollable, sliver }
 /// Inside card-backed lists, the parent list owns the outer card surface
 /// automatically.
 class M3EListItem extends StatelessWidget {
+  /// M3EListItem.
   const M3EListItem({
     required this.headline,
     this.supportingText,
@@ -43,19 +46,31 @@ class M3EListItem extends StatelessWidget {
     super.key,
   });
 
+  /// headline.
+
   final String headline;
+
+  /// supportingText.
   final String? supportingText;
+
+  /// overline.
   final String? overline;
+
+  /// leading.
   final Widget? leading;
+
+  /// trailing.
   final Widget? trailing;
+
+  /// onTap.
   final VoidCallback? onTap;
+
+  /// selected.
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildItem,
-    );
+    return M3EComponentTheme(builder: _buildItem);
   }
 
   Widget _buildItem(BuildContext context) {
@@ -93,8 +108,9 @@ class M3EListItem extends StatelessWidget {
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: listTheme.minHeight),
       child: Row(
-        crossAxisAlignment:
-            threeLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: threeLine
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: _buildChildren(theme),
       ),
     );
@@ -137,10 +153,7 @@ class M3EListItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (overline != null)
-          Text(
-            overline!,
-            style: listTheme.overlineStyle(type, scheme),
-          ),
+          Text(overline!, style: listTheme.overlineStyle(type, scheme)),
         Text(
           headline,
           style: listTheme.headlineStyle(type, scheme),
@@ -280,11 +293,11 @@ class M3ECardList extends StatelessWidget {
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
     this.emptyBuilder,
-  })  : _isBuilder = false,
-        controller = null,
-        physics = null,
-        shrinkWrap = false,
-        listPadding = null;
+  }) : _isBuilder = false,
+       controller = null,
+       physics = null,
+       shrinkWrap = false,
+       listPadding = null;
 
   /// Creates a [M3ECardList] that uses a [ListView.builder] internally.
   const M3ECardList.builder({
@@ -311,9 +324,7 @@ class M3ECardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildList,
-    );
+    return M3EComponentTheme(builder: _buildList);
   }
 
   Widget _buildList(BuildContext context) {
@@ -380,6 +391,7 @@ class M3ECardList extends StatelessWidget {
 /// - [M3EExpandableList.sliver] / [M3EExpandableList.sliverBuilder]:
 ///   [SliverList.builder] for [CustomScrollView]
 class M3EExpandableList extends M3EExpandableListBase {
+  /// M3EExpandableList.
   M3EExpandableList({
     super.key,
     required List<M3EExpandableData> data,
@@ -389,19 +401,21 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
-  })  : _layout = _M3EExpandableListLayout.column,
-        controller = null,
-        physics = null,
-        shrinkWrap = false,
-        padding = null,
-        super(
-          itemCount: data.length,
-          headerBuilder: m3eSimpleHeaderBuilder(data),
-          bodyBuilder: m3eSimpleBodyBuilder(
-            data,
-            style ?? const M3EExpandableStyle(),
-          ),
-        );
+  }) : _layout = _M3EExpandableListLayout.column,
+       controller = null,
+       physics = null,
+       shrinkWrap = false,
+       padding = null,
+       super(
+         itemCount: data.length,
+         headerBuilder: m3eSimpleHeaderBuilder(data),
+         bodyBuilder: m3eSimpleBodyBuilder(
+           data,
+           style ?? const M3EExpandableStyle(),
+         ),
+       );
+
+  /// builder.
 
   const M3EExpandableList.builder({
     super.key,
@@ -414,11 +428,13 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
-  })  : _layout = _M3EExpandableListLayout.column,
-        controller = null,
-        physics = null,
-        shrinkWrap = false,
-        padding = null;
+  }) : _layout = _M3EExpandableListLayout.column,
+       controller = null,
+       physics = null,
+       shrinkWrap = false,
+       padding = null;
+
+  /// scrollable.
 
   M3EExpandableList.scrollable({
     super.key,
@@ -433,15 +449,17 @@ class M3EExpandableList extends M3EExpandableListBase {
     this.physics,
     this.shrinkWrap = false,
     this.padding,
-  })  : _layout = _M3EExpandableListLayout.scrollable,
-        super(
-          itemCount: data.length,
-          headerBuilder: m3eSimpleHeaderBuilder(data),
-          bodyBuilder: m3eSimpleBodyBuilder(
-            data,
-            style ?? const M3EExpandableStyle(),
-          ),
-        );
+  }) : _layout = _M3EExpandableListLayout.scrollable,
+       super(
+         itemCount: data.length,
+         headerBuilder: m3eSimpleHeaderBuilder(data),
+         bodyBuilder: m3eSimpleBodyBuilder(
+           data,
+           style ?? const M3EExpandableStyle(),
+         ),
+       );
+
+  /// scrollableBuilder.
 
   const M3EExpandableList.scrollableBuilder({
     super.key,
@@ -460,6 +478,8 @@ class M3EExpandableList extends M3EExpandableListBase {
     this.padding,
   }) : _layout = _M3EExpandableListLayout.scrollable;
 
+  /// sliver.
+
   M3EExpandableList.sliver({
     super.key,
     required List<M3EExpandableData> data,
@@ -469,19 +489,21 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
-  })  : _layout = _M3EExpandableListLayout.sliver,
-        controller = null,
-        physics = null,
-        shrinkWrap = false,
-        padding = null,
-        super(
-          itemCount: data.length,
-          headerBuilder: m3eSimpleHeaderBuilder(data),
-          bodyBuilder: m3eSimpleBodyBuilder(
-            data,
-            style ?? const M3EExpandableStyle(),
-          ),
-        );
+  }) : _layout = _M3EExpandableListLayout.sliver,
+       controller = null,
+       physics = null,
+       shrinkWrap = false,
+       padding = null,
+       super(
+         itemCount: data.length,
+         headerBuilder: m3eSimpleHeaderBuilder(data),
+         bodyBuilder: m3eSimpleBodyBuilder(
+           data,
+           style ?? const M3EExpandableStyle(),
+         ),
+       );
+
+  /// sliverBuilder.
 
   const M3EExpandableList.sliverBuilder({
     super.key,
@@ -494,16 +516,24 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
-  })  : _layout = _M3EExpandableListLayout.sliver,
-        controller = null,
-        physics = null,
-        shrinkWrap = false,
-        padding = null;
+  }) : _layout = _M3EExpandableListLayout.sliver,
+       controller = null,
+       physics = null,
+       shrinkWrap = false,
+       padding = null;
 
   final _M3EExpandableListLayout _layout;
+
+  /// controller.
   final ScrollController? controller;
+
+  /// physics.
   final ScrollPhysics? physics;
+
+  /// shrinkWrap.
   final bool shrinkWrap;
+
+  /// padding.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -549,186 +579,3 @@ class _M3EExpandableListState extends State<M3EExpandableList>
 ///
 /// Suitable for large or lazily-loaded data sets. Only visible items are
 /// materialized.
-class M3EDismissibleList extends StatefulWidget {
-  const M3EDismissibleList({
-    required this.itemCount,
-    required this.itemBuilder,
-    this.onDismiss,
-    this.onTap,
-    this.style = const M3EDismissibleListStyle(),
-    this.physics,
-    this.scrollController,
-    this.listPadding,
-    this.shrinkWrap = false,
-    this.clipBehavior = Clip.hardEdge,
-    super.key,
-  });
-
-  final int itemCount;
-  final IndexedWidgetBuilder itemBuilder;
-  final Future<bool> Function(int index, DismissDirection direction)? onDismiss;
-  final void Function(int index)? onTap;
-  final M3EDismissibleListStyle style;
-  final ScrollPhysics? physics;
-  final ScrollController? scrollController;
-  final EdgeInsetsGeometry? listPadding;
-  final bool shrinkWrap;
-  final Clip clipBehavior;
-
-  @override
-  State<M3EDismissibleList> createState() => _M3EDismissibleListState();
-}
-
-class _M3EDismissibleListState extends State<M3EDismissibleList>
-    with TickerProviderStateMixin, M3EDismissibleCardMixin {
-  @override
-  int get swipeItemCount => widget.itemCount;
-
-  @override
-  Widget swipeItemBuilder(BuildContext context, int dataIndex) =>
-      widget.itemBuilder(context, dataIndex);
-
-  @override
-  M3EDismissibleListStyle get style => widget.style;
-
-  @override
-  Future<bool> Function(int, DismissDirection)? get onDismissCallback =>
-      widget.onDismiss;
-
-  @override
-  void Function(int)? get onTapCallback => widget.onTap;
-
-  @override
-  void initState() {
-    super.initState();
-    initSlots();
-  }
-
-  @override
-  void didUpdateWidget(M3EDismissibleList old) {
-    super.didUpdateWidget(old);
-    syncSlotsIfNeeded(old.itemCount);
-  }
-
-  @override
-  void dispose() {
-    disposeSlots();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildList,
-    );
-  }
-
-  Widget _buildList(BuildContext context) {
-    final visible = computeVisibleIndices();
-    return ListView.builder(
-      controller: widget.scrollController,
-      physics: widget.physics,
-      padding: widget.listPadding,
-      shrinkWrap: widget.shrinkWrap,
-      clipBehavior: widget.clipBehavior,
-      itemCount: slots.length,
-      itemBuilder: (ctx, i) => buildSlot(ctx, i, visible),
-    );
-  }
-}
-
-/// A dismissible Material 3 list backed by a [Column].
-///
-/// Ideal for small, fixed-size lists. All items are materialized up-front.
-class M3EDismissibleColumn extends StatefulWidget {
-  const M3EDismissibleColumn({
-    required this.itemCount,
-    required this.itemBuilder,
-    this.onDismiss,
-    this.onTap,
-    this.style = const M3EDismissibleListStyle(),
-    super.key,
-  });
-
-  final int itemCount;
-  final IndexedWidgetBuilder itemBuilder;
-  final Future<bool> Function(int index, DismissDirection direction)? onDismiss;
-  final void Function(int index)? onTap;
-  final M3EDismissibleListStyle style;
-
-  factory M3EDismissibleColumn.of({
-    required List<Widget> children,
-    Future<bool> Function(int index, DismissDirection direction)? onDismiss,
-    void Function(int index)? onTap,
-    M3EDismissibleListStyle style = const M3EDismissibleListStyle(),
-    Key? key,
-  }) {
-    return M3EDismissibleColumn(
-      key: key,
-      itemCount: children.length,
-      itemBuilder: (_, i) => children[i],
-      onDismiss: onDismiss,
-      onTap: onTap,
-      style: style,
-    );
-  }
-
-  @override
-  State<M3EDismissibleColumn> createState() => _M3EDismissibleColumnState();
-}
-
-class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
-    with TickerProviderStateMixin, M3EDismissibleCardMixin {
-  @override
-  int get swipeItemCount => widget.itemCount;
-
-  @override
-  Widget swipeItemBuilder(BuildContext context, int dataIndex) =>
-      widget.itemBuilder(context, dataIndex);
-
-  @override
-  M3EDismissibleListStyle get style => widget.style;
-
-  @override
-  Future<bool> Function(int, DismissDirection)? get onDismissCallback =>
-      widget.onDismiss;
-
-  @override
-  void Function(int)? get onTapCallback => widget.onTap;
-
-  @override
-  void initState() {
-    super.initState();
-    initSlots();
-  }
-
-  @override
-  void didUpdateWidget(M3EDismissibleColumn old) {
-    super.didUpdateWidget(old);
-    syncSlotsIfNeeded(old.itemCount);
-  }
-
-  @override
-  void dispose() {
-    disposeSlots();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildColumn,
-    );
-  }
-
-  Widget _buildColumn(BuildContext context) {
-    final visible = computeVisibleIndices();
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (int i = 0; i < slots.length; i++) buildSlot(context, i, visible),
-      ],
-    );
-  }
-}

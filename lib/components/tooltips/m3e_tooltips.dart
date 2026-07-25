@@ -13,6 +13,7 @@ export 'styles/m3e_tooltip_theme.dart';
 /// appears on hover or long-press and auto-dismisses; a rich tooltip (with
 /// [richTitle]/[actions]) stays until dismissed by tapping elsewhere.
 class M3ETooltip extends StatefulWidget {
+  /// M3ETooltip.
   const M3ETooltip({
     required this.child,
     this.message,
@@ -21,14 +22,24 @@ class M3ETooltip extends StatefulWidget {
     this.actions = const <Widget>[],
     super.key,
   }) : assert(
-          message != null || richMessage != null,
-          'Provide a plain message or a rich message.',
-        );
+         message != null || richMessage != null,
+         'Provide a plain message or a rich message.',
+       );
+
+  /// child.
 
   final Widget child;
+
+  /// message.
   final String? message;
+
+  /// richTitle.
   final String? richTitle;
+
+  /// richMessage.
   final String? richMessage;
+
+  /// actions.
   final List<Widget> actions;
 
   bool get _isRich => richMessage != null;
@@ -69,7 +80,8 @@ class _M3ETooltipState extends State<M3ETooltip> {
   @override
   Widget build(BuildContext context) {
     final tooltipTheme = M3ETheme.of(context).tooltipTheme;
-    return M3EComponentTheme(builder: (context) => OverlayPortal(
+    return M3EComponentTheme(
+      builder: (context) => OverlayPortal(
         controller: _portal,
         overlayChildBuilder: _buildOverlay,
         child: CompositedTransformTarget(

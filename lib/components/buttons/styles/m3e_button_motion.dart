@@ -1,34 +1,45 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EButton, M3EMotion, M3EToggleButton;
 import 'package:motor/motor.dart';
 
 /// Spring-based motion configuration for [M3EButton] and [M3EToggleButton].
 @immutable
 class M3EButtonMotion {
+  /// stiffness.
   final double stiffness;
+
+  /// damping.
   final double damping;
 
-  const M3EButtonMotion({
-    required this.stiffness,
-    required this.damping,
-  });
+  /// M3EButtonMotion.
+
+  const M3EButtonMotion({required this.stiffness, required this.damping});
+
+  /// standard.
 
   static const M3EButtonMotion standard = M3EButtonMotion(
     stiffness: 1200,
     damping: 0.8,
   );
 
+  /// standardOverflow.
+
   static const M3EButtonMotion standardOverflow = M3EButtonMotion(
     stiffness: 1600,
     damping: 0.85,
   );
 
+  /// standardPopup.
+
   static const M3EButtonMotion standardPopup = M3EButtonMotion(
     stiffness: 1600,
     damping: 0.85,
   );
+
+  /// expressiveEffectsFast.
 
   static const M3EButtonMotion expressiveEffectsFast = M3EButtonMotion(
     stiffness: 1600,
@@ -47,10 +58,14 @@ class M3EButtonMotion {
     damping: 0.55,
   );
 
+  /// standardSpatialFast.
+
   static const M3EButtonMotion standardSpatialFast = M3EButtonMotion(
     stiffness: 1400,
     damping: 0.8,
   );
+
+  /// custom.
 
   factory M3EButtonMotion.custom(double stiffness, double damping) {
     return M3EButtonMotion(stiffness: stiffness, damping: damping);
@@ -58,12 +73,12 @@ class M3EButtonMotion {
 
   /// Converts this configuration to a [SpringMotion].
   SpringMotion toMotion() => SpringMotion(
-        SpringDescription.withDampingRatio(
-          mass: 1,
-          stiffness: stiffness,
-          ratio: damping,
-        ),
-      );
+    SpringDescription.withDampingRatio(
+      mass: 1,
+      stiffness: stiffness,
+      ratio: damping,
+    ),
+  );
 
   @override
   bool operator ==(Object other) =>

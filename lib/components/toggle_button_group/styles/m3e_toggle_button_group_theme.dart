@@ -9,14 +9,21 @@ import '../enums/m3e_toggle_button_group_enums.dart';
 /// Resolved layout measurements for a button group.
 @immutable
 class M3EButtonGroupMetrics {
+  /// M3EButtonGroupMetrics.
   const M3EButtonGroupMetrics({
     required this.spacing,
     required this.runSpacing,
     required this.dividerThickness,
   });
 
+  /// spacing.
+
   final double spacing;
+
+  /// runSpacing.
   final double runSpacing;
+
+  /// dividerThickness.
   final double dividerThickness;
 }
 
@@ -24,6 +31,7 @@ class M3EButtonGroupMetrics {
 @immutable
 class M3EToggleButtonGroupTheme
     extends M3EThemeExtension<M3EToggleButtonGroupTheme> {
+  /// M3EToggleButtonGroupTheme.
   const M3EToggleButtonGroupTheme({
     this.standardSpacing = 8,
     this.connectedGap = 2,
@@ -34,18 +42,35 @@ class M3EToggleButtonGroupTheme
     this.fullRoundRadius = 9999,
   });
 
-  static const M3EToggleButtonGroupTheme defaults =
-      M3EToggleButtonGroupTheme();
+  /// defaults.
+
+  static const M3EToggleButtonGroupTheme defaults = M3EToggleButtonGroupTheme();
+
+  /// standardSpacing.
 
   final double standardSpacing;
+
+  /// connectedGap.
   final double connectedGap;
+
+  /// dividerThickness.
   final double dividerThickness;
+
+  /// connectedInnerRadius.
   final double connectedInnerRadius;
+
+  /// connectedPressedInnerRadius.
   final double connectedPressedInnerRadius;
+
+  /// expandedRatio.
   final double expandedRatio;
+
+  /// fullRoundRadius.
   final double fullRoundRadius;
 
   static final Map<int, BorderRadius> _connectedRadiusCache = {};
+
+  /// squareRadiusFor.
 
   double squareRadiusFor(M3EButtonSize size) => switch (size.name) {
     'xs' => 8.0,
@@ -55,6 +80,8 @@ class M3EToggleButtonGroupTheme
     'xl' => 32.0,
     _ => 16.0,
   };
+
+  /// metricsFor.
 
   M3EButtonGroupMetrics metricsFor(
     M3EButtonSize size,
@@ -73,10 +100,14 @@ class M3EToggleButtonGroupTheme
     );
   }
 
+  /// groupRadiusFor.
+
   BorderRadius groupRadiusFor(M3EButtonShape shape, M3EButtonSize size) =>
       shape == M3EButtonShape.round
       ? BorderRadius.circular(fullRoundRadius)
       : BorderRadius.circular(squareRadiusFor(size));
+
+  /// connectedRadiusFor.
 
   BorderRadius connectedRadiusFor({
     required M3EButtonShape shape,
@@ -152,10 +183,14 @@ class M3EToggleButtonGroupTheme
         (isSquare << 7);
   }
 
+  /// standardRadiusFor.
+
   BorderRadius standardRadiusFor(M3EButtonShape shape, M3EButtonSize size) =>
       shape == M3EButtonShape.round
       ? BorderRadius.circular(fullRoundRadius)
       : BorderRadius.circular(squareRadiusFor(size));
+
+  /// widthDeltas.
 
   List<double> widthDeltas({
     required List<double> naturalWidths,
@@ -188,8 +223,12 @@ class M3EToggleButtonGroupTheme
     return deltas;
   }
 
+  /// overflowTriggerExtent.
+
   double overflowTriggerExtent(M3EButtonSize size) =>
       clampDouble(containerHeightFor(size), 40, 56);
+
+  /// containerHeightFor.
 
   double containerHeightFor(M3EButtonSize size) => switch (size.name) {
     'xs' => 32.0,
@@ -199,6 +238,8 @@ class M3EToggleButtonGroupTheme
     'xl' => 136.0,
     _ => size.height ?? 56.0,
   };
+
+  /// fallbackChildWidth.
 
   double fallbackChildWidth(M3EButtonSize size) => switch (size.name) {
     'xs' => 56.0,
@@ -237,13 +278,18 @@ class M3EToggleButtonGroupTheme
       return this;
     }
     return M3EToggleButtonGroupTheme(
-      standardSpacing:
-          _lerpDouble(standardSpacing, other.standardSpacing, t)!,
+      standardSpacing: _lerpDouble(standardSpacing, other.standardSpacing, t)!,
       connectedGap: _lerpDouble(connectedGap, other.connectedGap, t)!,
-      dividerThickness:
-          _lerpDouble(dividerThickness, other.dividerThickness, t)!,
-      connectedInnerRadius:
-          _lerpDouble(connectedInnerRadius, other.connectedInnerRadius, t)!,
+      dividerThickness: _lerpDouble(
+        dividerThickness,
+        other.dividerThickness,
+        t,
+      )!,
+      connectedInnerRadius: _lerpDouble(
+        connectedInnerRadius,
+        other.connectedInnerRadius,
+        t,
+      )!,
       connectedPressedInnerRadius: _lerpDouble(
         connectedPressedInnerRadius,
         other.connectedPressedInnerRadius,

@@ -24,8 +24,9 @@ class _ContainmentPageState extends State<ContainmentPage>
   static List<Widget> _buildCarouselItems() {
     return List<Widget>.generate(10, (int index) {
       return ColoredBox(
-        color: Colors.primaries[index % Colors.primaries.length]
-            .withValues(alpha: 0.8),
+        color: Colors.primaries[index % Colors.primaries.length].withValues(
+          alpha: 0.8,
+        ),
         child: const SizedBox.expand(),
       );
     });
@@ -48,25 +49,25 @@ class _ContainmentPageState extends State<ContainmentPage>
 
   Widget _cards(M3EThemeData theme) {
     Widget body(String title) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              title,
-              style: theme.typeScale.titleMedium.copyWith(
-                color: theme.colorScheme.onSurface,
-                decoration: TextDecoration.none,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Supporting text for the card body.',
-              style: theme.typeScale.bodyMedium.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ],
-        );
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: theme.typeScale.titleMedium.copyWith(
+            color: theme.colorScheme.onSurface,
+            decoration: TextDecoration.none,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Supporting text for the card body.',
+          style: theme.typeScale.bodyMedium.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            decoration: TextDecoration.none,
+          ),
+        ),
+      ],
+    );
 
     return GallerySection(
       title: 'Cards',
@@ -75,10 +76,7 @@ class _ContainmentPageState extends State<ContainmentPage>
           spacing: 16,
           runSpacing: 16,
           children: <Widget>[
-            SizedBox(
-              width: 220,
-              child: M3ECard(child: body('Elevated')),
-            ),
+            SizedBox(width: 220, child: M3ECard(child: body('Elevated'))),
             SizedBox(
               width: 220,
               child: M3ECard(
@@ -162,7 +160,11 @@ class _ContainmentPageState extends State<ContainmentPage>
           onTap: (index) => log('Tapped card $index'),
           itemBuilder: (context, index) {
             final labels = ['Inbox', 'Drafts', 'Sent'];
-            final icons = [M3EIcons.schedule, M3EIcons.calendar_today, M3EIcons.check];
+            final icons = [
+              M3EIcons.schedule,
+              M3EIcons.calendar_today,
+              M3EIcons.check,
+            ];
             return M3EListItem(
               headline: labels[index],
               supportingText: 'Dynamic rounding based on position',
@@ -209,7 +211,11 @@ class _ContainmentPageState extends State<ContainmentPage>
             ),
           ),
           itemBuilder: (context, index) {
-            final labels = ['Swipe right to archive', 'Swipe left to delete', 'Expressive physics'];
+            final labels = [
+              'Swipe right to archive',
+              'Swipe left to delete',
+              'Expressive physics',
+            ];
             return M3EListItem(
               headline: labels[index],
               supportingText: 'Physics-based dismissible card',
@@ -265,16 +271,18 @@ class _ContainmentPageState extends State<ContainmentPage>
             children: <Widget>[
               Text(
                 'Left',
-                style: theme.typeScale.bodyMedium
-                    .copyWith(color: theme.colorScheme.onSurface),
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
               const SizedBox(width: 12),
               const M3EDivider(axis: M3EDividerAxis.vertical),
               const SizedBox(width: 12),
               Text(
                 'Right',
-                style: theme.typeScale.bodyMedium
-                    .copyWith(color: theme.colorScheme.onSurface),
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
             ],
           ),

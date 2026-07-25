@@ -7,29 +7,50 @@ import '../enums/m3e_loading_indicator_variant.dart';
 @immutable
 class M3ELoadingIndicatorTheme
     extends M3EThemeExtension<M3ELoadingIndicatorTheme> {
+  /// M3ELoadingIndicatorTheme.
   const M3ELoadingIndicatorTheme({
     this.containerWidth = 48,
     this.containerHeight = 48,
     this.activeIndicatorSize = 38,
   });
 
+  /// defaults.
+
   static const M3ELoadingIndicatorTheme defaults = M3ELoadingIndicatorTheme();
 
+  /// containerWidth.
+
   final double containerWidth;
+
+  /// containerHeight.
   final double containerHeight;
+
+  /// activeIndicatorSize.
   final double activeIndicatorSize;
+
+  /// The containerRadius.
 
   BorderRadius get containerRadius => BorderRadius.circular(999);
 
+  /// activeColor.
+
   Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
+  /// containerColorDefault.
+
   Color containerColorDefault() => const Color(0x00000000);
+
+  /// containedContainerColor.
 
   Color containedContainerColor(M3EColorScheme scheme) =>
       scheme.primaryContainer;
 
+  /// containedActiveColor.
+
   Color containedActiveColor(M3EColorScheme scheme) =>
       scheme.onPrimaryContainer;
+
+  /// resolveActiveColor.
 
   Color resolveActiveColor(
     M3EColorScheme scheme,
@@ -40,6 +61,8 @@ class M3ELoadingIndicatorTheme
       M3ELoadingIndicatorVariant.contained => containedActiveColor(scheme),
     };
   }
+
+  /// resolveContainerColor.
 
   Color resolveContainerColor(
     M3EColorScheme scheme,
@@ -72,8 +95,11 @@ class M3ELoadingIndicatorTheme
     return M3ELoadingIndicatorTheme(
       containerWidth: _lerpDouble(containerWidth, other.containerWidth, t)!,
       containerHeight: _lerpDouble(containerHeight, other.containerHeight, t)!,
-      activeIndicatorSize:
-          _lerpDouble(activeIndicatorSize, other.activeIndicatorSize, t)!,
+      activeIndicatorSize: _lerpDouble(
+        activeIndicatorSize,
+        other.activeIndicatorSize,
+        t,
+      )!,
     );
   }
 

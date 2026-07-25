@@ -11,11 +11,22 @@ import '../styles/m3e_dropdown_item_style.dart';
 /// Internal widget for a single dropdown menu item.
 /// Handles hover/press interactions and snappy radius morphing.
 class M3EDropdownMenuItemWidget<T> extends StatefulWidget {
+  /// item.
   final M3EDropdownItem<T> item;
+
+  /// index.
   final int index;
+
+  /// total.
   final int total;
+
+  /// style.
   final M3EDropdownItemStyle style;
+
+  /// onTap.
   final VoidCallback onTap;
+
+  /// M3EDropdownMenuItemWidget.
 
   const M3EDropdownMenuItemWidget({
     super.key,
@@ -108,19 +119,16 @@ class _M3EDropdownMenuItemWidgetState<T>
           id.selectedBackgroundColor ??
           menuTheme.itemSelectedBackgroundColor(scheme);
     } else {
-      bgColor =
-          id.backgroundColor ?? menuTheme.itemBackgroundColor(scheme);
+      bgColor = id.backgroundColor ?? menuTheme.itemBackgroundColor(scheme);
     }
 
     Color textColor;
     if (item.disabled) {
       textColor =
-          id.disabledTextColor ??
-          scheme.onSurface.withValues(alpha: 0.38);
+          id.disabledTextColor ?? scheme.onSurface.withValues(alpha: 0.38);
     } else if (item.selected) {
       textColor =
-          id.selectedTextColor ??
-          menuTheme.itemSelectedForegroundColor(scheme);
+          id.selectedTextColor ?? menuTheme.itemSelectedForegroundColor(scheme);
     } else {
       textColor = id.textColor ?? menuTheme.itemForegroundColor(scheme);
     }
@@ -132,9 +140,9 @@ class _M3EDropdownMenuItemWidgetState<T>
             item.label,
             style:
                 (item.selected ? id.selectedTextStyle : id.textStyle) ??
-                menuTheme.itemTextStyle(m3eTheme.typeScale, scheme).copyWith(
-                  color: textColor,
-                ),
+                menuTheme
+                    .itemTextStyle(m3eTheme.typeScale, scheme)
+                    .copyWith(color: textColor),
           ),
         ),
         if (item.selected)

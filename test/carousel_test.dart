@@ -7,9 +7,7 @@ Widget _host(Widget child) {
     textDirection: TextDirection.ltr,
     child: MediaQuery(
       data: const MediaQueryData(),
-      child: Center(
-        child: SizedBox(width: 400, height: 200, child: child),
-      ),
+      child: Center(child: SizedBox(width: 400, height: 200, child: child)),
     ),
   );
 }
@@ -64,9 +62,7 @@ Future<void> _heroAlignments(WidgetTester tester) async {
 
 Future<void> _contained(WidgetTester tester) async {
   await tester.pumpWidget(
-    _host(
-      M3ECarousel(type: M3ECarouselType.contained, children: _items(6)),
-    ),
+    _host(M3ECarousel(type: M3ECarouselType.contained, children: _items(6))),
   );
   await tester.pump();
 
@@ -258,9 +254,7 @@ Future<void> _heroTapPulsePixelBudget(WidgetTester tester) async {
   await tester.pumpWidget(
     M3EMaterialApp(
       data: base.copyWith(
-        carouselTheme: const M3ECarouselTheme(
-          itemPadding: EdgeInsets.all(8),
-        ),
+        carouselTheme: const M3ECarouselTheme(itemPadding: EdgeInsets.all(8)),
       ),
       home: Scaffold(
         body: Center(

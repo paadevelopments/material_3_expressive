@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ENavigationRail`.
 @immutable
 class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
+  /// M3ENavigationRailTheme.
   const M3ENavigationRailTheme({
     this.collapsedWidth = 96.0,
     this.expandedMinWidth = 220.0,
@@ -29,39 +30,91 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     this.indicatorShapeFull,
   });
 
+  /// defaults.
+
   static const M3ENavigationRailTheme defaults = M3ENavigationRailTheme();
 
+  /// collapsedWidth.
+
   final double collapsedWidth;
+
+  /// expandedMinWidth.
   final double expandedMinWidth;
+
+  /// expandedMaxWidth.
   final double expandedMaxWidth;
+
+  /// itemExpandedHeight.
   final double itemExpandedHeight;
+
+  /// itemCollapsedHeight.
   final double itemCollapsedHeight;
+
+  /// iconSize.
   final double iconSize;
+
+  /// indicatorLeading.
   final double indicatorLeading;
+
+  /// indicatorTrailing.
   final double indicatorTrailing;
+
+  /// iconLabelGap.
   final double iconLabelGap;
+
+  /// itemVerticalGap.
   final double itemVerticalGap;
+
+  /// headerMinSpace.
   final double headerMinSpace;
+
+  /// sectionHeaderSpacingTop.
   final double sectionHeaderSpacingTop;
+
+  /// sectionHeaderSpacingBottom.
   final double sectionHeaderSpacingBottom;
 
+  /// containerColor.
+
   final Color? containerColor;
+
+  /// activeIndicatorColor.
   final Color? activeIndicatorColor;
+
+  /// activeIconAndLabel.
   final Color? activeIconAndLabel;
+
+  /// inactiveIconAndLabel.
   final Color? inactiveIconAndLabel;
+
+  /// menuColor.
   final Color? menuColor;
+
+  /// badgeBackground.
   final Color? badgeBackground;
+
+  /// badgeLargeLabel.
   final Color? badgeLargeLabel;
+
+  /// indicatorShapeFull.
   final ShapeBorder? indicatorShapeFull;
+
+  /// activeIconAndLabelColor.
 
   Color activeIconAndLabelColor(M3EColorScheme scheme) =>
       activeIconAndLabel ?? scheme.onSecondaryContainer;
 
+  /// inactiveIconAndLabelColor.
+
   Color inactiveIconAndLabelColor(M3EColorScheme scheme) =>
       inactiveIconAndLabel ?? scheme.onSurfaceVariant;
 
+  /// activeIndicatorColorResolved.
+
   Color activeIndicatorColorResolved(M3EColorScheme scheme) =>
       activeIndicatorColor ?? scheme.secondaryContainer;
+
+  /// containerColorResolved.
 
   Color containerColorResolved(M3EColorScheme scheme) =>
       containerColor ?? scheme.surface;
@@ -96,7 +149,8 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
       collapsedWidth: collapsedWidth ?? this.collapsedWidth,
       expandedMinWidth: expandedMinWidth ?? this.expandedMinWidth,
       expandedMaxWidth: expandedMaxWidth ?? this.expandedMaxWidth,
-      itemExpandedHeight: itemHeight ?? itemExpandedHeight ?? this.itemExpandedHeight,
+      itemExpandedHeight:
+          itemHeight ?? itemExpandedHeight ?? this.itemExpandedHeight,
       itemCollapsedHeight:
           itemShortHeight ?? itemCollapsedHeight ?? this.itemCollapsedHeight,
       iconSize: iconSize ?? this.iconSize,
@@ -127,19 +181,37 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     }
     return M3ENavigationRailTheme(
       collapsedWidth: _lerpDouble(collapsedWidth, other.collapsedWidth, t)!,
-      expandedMinWidth:
-          _lerpDouble(expandedMinWidth, other.expandedMinWidth, t)!,
-      expandedMaxWidth:
-          _lerpDouble(expandedMaxWidth, other.expandedMaxWidth, t)!,
-      itemExpandedHeight:
-          _lerpDouble(itemExpandedHeight, other.itemExpandedHeight, t)!,
-      itemCollapsedHeight:
-          _lerpDouble(itemCollapsedHeight, other.itemCollapsedHeight, t)!,
+      expandedMinWidth: _lerpDouble(
+        expandedMinWidth,
+        other.expandedMinWidth,
+        t,
+      )!,
+      expandedMaxWidth: _lerpDouble(
+        expandedMaxWidth,
+        other.expandedMaxWidth,
+        t,
+      )!,
+      itemExpandedHeight: _lerpDouble(
+        itemExpandedHeight,
+        other.itemExpandedHeight,
+        t,
+      )!,
+      itemCollapsedHeight: _lerpDouble(
+        itemCollapsedHeight,
+        other.itemCollapsedHeight,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      indicatorLeading:
-          _lerpDouble(indicatorLeading, other.indicatorLeading, t)!,
-      indicatorTrailing:
-          _lerpDouble(indicatorTrailing, other.indicatorTrailing, t)!,
+      indicatorLeading: _lerpDouble(
+        indicatorLeading,
+        other.indicatorLeading,
+        t,
+      )!,
+      indicatorTrailing: _lerpDouble(
+        indicatorTrailing,
+        other.indicatorTrailing,
+        t,
+      )!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
       itemVerticalGap: _lerpDouble(itemVerticalGap, other.itemVerticalGap, t)!,
       headerMinSpace: _lerpDouble(headerMinSpace, other.headerMinSpace, t)!,
@@ -154,12 +226,21 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
         t,
       )!,
       containerColor: Color.lerp(containerColor, other.containerColor, t),
-      activeIndicatorColor:
-          Color.lerp(activeIndicatorColor, other.activeIndicatorColor, t),
-      activeIconAndLabel:
-          Color.lerp(activeIconAndLabel, other.activeIconAndLabel, t),
-      inactiveIconAndLabel:
-          Color.lerp(inactiveIconAndLabel, other.inactiveIconAndLabel, t),
+      activeIndicatorColor: Color.lerp(
+        activeIndicatorColor,
+        other.activeIndicatorColor,
+        t,
+      ),
+      activeIconAndLabel: Color.lerp(
+        activeIconAndLabel,
+        other.activeIconAndLabel,
+        t,
+      ),
+      inactiveIconAndLabel: Color.lerp(
+        inactiveIconAndLabel,
+        other.inactiveIconAndLabel,
+        t,
+      ),
       menuColor: Color.lerp(menuColor, other.menuColor, t),
       badgeBackground: Color.lerp(badgeBackground, other.badgeBackground, t),
       badgeLargeLabel: Color.lerp(badgeLargeLabel, other.badgeLargeLabel, t),

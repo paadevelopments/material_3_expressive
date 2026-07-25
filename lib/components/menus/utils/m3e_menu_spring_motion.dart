@@ -6,7 +6,10 @@ import '../../../foundations/m3e_motion.dart';
 ///
 /// Identical to the dropdown menu conversion so expand/collapse feel matches.
 extension M3EMenuSpringMotion on M3ESpring {
+  /// toMotion.
   SpringMotion toMotion() =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(stiffness: stiffness, damping: damping);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        stiffness: stiffness,
+        damping: damping,
+      );
 }

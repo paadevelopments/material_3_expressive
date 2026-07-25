@@ -1,9 +1,17 @@
 // Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
 // FloatingToolbar / FlexibleBottomAppBar variants
 
+import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
+    show M3EToolbar;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EToolbar;
+
 /// Whether the toolbar floats over content or docks to an edge.
 enum M3EToolbarPlacement {
+  /// Floating pill over content.
   floating,
+
+  /// Docked to a screen edge.
   docked,
 }
 
@@ -21,40 +29,66 @@ enum M3EToolbarColorStyle {
 /// Floating toolbars with [M3EToolbar.safeArea] apply this edge as an
 /// **external** inset only (outside the pill).
 enum M3EToolbarDockEdge {
+  /// Top edge.
   top,
+
+  /// Bottom edge.
   bottom,
 }
 
 /// Position of an adjacent FAB relative to a floating toolbar.
 enum M3EToolbarFabPosition {
+  /// FAB before the toolbar on the horizontal axis.
   start,
+
+  /// FAB after the toolbar on the horizontal axis.
   end,
+
+  /// FAB above the toolbar.
   top,
+
+  /// FAB below the toolbar.
   bottom,
 }
 
 /// Legacy size enum — maps to icon-button density, not container height.
 enum M3EToolbarSize {
+  /// Small icon-button density.
   small,
+
+  /// Medium icon-button density.
   medium,
+
+  /// Large icon-button density.
   large,
 }
 
 /// Legacy density enum.
 enum M3EToolbarDensity {
+  /// Default density.
   regular,
+
+  /// Compact density.
   compact,
 }
 
 /// Legacy shape family — floating forces pill; docked forces square.
 enum M3EToolbarShapeFamily {
+  /// Round / pill family.
   round,
+
+  /// Square family.
   square,
 }
 
 /// Legacy color emphasis — prefer [M3EToolbarColorStyle].
 enum M3EToolbarVariant {
+  /// Surface emphasis.
   surface,
+
+  /// Tonal emphasis.
   tonal,
+
+  /// Primary emphasis.
   primary,
 }

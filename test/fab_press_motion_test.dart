@@ -7,10 +7,7 @@ double _xyScale(Transform transform) => transform.transform.storage[0];
 
 double _fabXyScale(WidgetTester tester) {
   final transforms = tester.widgetList<Transform>(
-    find.descendant(
-      of: find.byType(M3EFab),
-      matching: find.byType(Transform),
-    ),
+    find.descendant(of: find.byType(M3EFab), matching: find.byType(Transform)),
   );
   // Prefer a non-identity XY scale if the spring has moved; else first matrix.
   for (final transform in transforms) {
@@ -30,10 +27,7 @@ void main() {
         data: M3EThemeData.light(),
         home: Scaffold(
           body: Center(
-            child: M3EFab(
-              icon: const Icon(Icons.add),
-              onPressed: () => taps++,
-            ),
+            child: M3EFab(icon: const Icon(Icons.add), onPressed: () => taps++),
           ),
         ),
       ),
@@ -60,10 +54,7 @@ void main() {
         data: M3EThemeData.light(),
         home: Scaffold(
           body: Center(
-            child: M3EFab(
-              icon: const Icon(Icons.add),
-              onPressed: () => taps++,
-            ),
+            child: M3EFab(icon: const Icon(Icons.add), onPressed: () => taps++),
           ),
         ),
       ),

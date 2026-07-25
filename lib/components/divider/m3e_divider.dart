@@ -11,6 +11,7 @@ export 'styles/m3e_divider_theme.dart';
 /// A thin line that groups content in lists and containers. Supports both
 /// orientations and leading/trailing insets.
 class M3EDivider extends StatelessWidget {
+  /// M3EDivider.
   const M3EDivider({
     this.axis = M3EDividerAxis.horizontal,
     this.thickness = 1,
@@ -20,17 +21,25 @@ class M3EDivider extends StatelessWidget {
     super.key,
   });
 
+  /// axis.
+
   final M3EDividerAxis axis;
+
+  /// thickness.
   final double thickness;
+
+  /// indent.
   final double indent;
+
+  /// endIndent.
   final double endIndent;
+
+  /// color.
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return M3EComponentTheme(
-      builder: _buildDivider,
-    );
+    return M3EComponentTheme(builder: _buildDivider);
   }
 
   Widget _buildDivider(BuildContext context) {

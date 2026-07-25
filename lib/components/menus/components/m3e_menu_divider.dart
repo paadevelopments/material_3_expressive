@@ -5,6 +5,7 @@ import 'm3e_menu_style_scope.dart';
 
 /// Horizontal divider between menu items inside one elevated surface.
 class M3EMenuDividerWidget extends StatelessWidget {
+  /// M3EMenuDividerWidget.
   const M3EMenuDividerWidget({super.key});
 
   @override

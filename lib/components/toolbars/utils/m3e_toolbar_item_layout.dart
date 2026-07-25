@@ -30,10 +30,7 @@ abstract final class M3EToolbarItemLayout {
   }) {
     Widget child = item.child;
     if (item.semanticLabel != null) {
-      child = Semantics(
-        label: item.semanticLabel,
-        child: child,
-      );
+      child = Semantics(label: item.semanticLabel, child: child);
     }
     child = ConstrainedBox(
       constraints: axis == Axis.horizontal
@@ -63,11 +60,11 @@ abstract final class M3EToolbarItemLayout {
     return switch (item) {
       M3EToolbarAction action => buildAction(action),
       M3EToolbarWidget widget => constrainWidget(
-          item: widget,
-          availableExtent: availableExtent,
-          axis: axis,
-          opticalInset: opticalInset,
-        ),
+        item: widget,
+        availableExtent: availableExtent,
+        axis: axis,
+        opticalInset: opticalInset,
+      ),
     };
   }
 
@@ -84,7 +81,7 @@ abstract final class M3EToolbarItemLayout {
       width: axis == Axis.horizontal ? gap : 0,
       height: axis == Axis.vertical ? gap : 0,
     );
-    final List<Widget> out = <Widget>[children.first];
+    final out = <Widget>[children.first];
     for (var i = 1; i < children.length; i++) {
       out
         ..add(spacer)
@@ -95,9 +92,9 @@ abstract final class M3EToolbarItemLayout {
 
   /// Keeps all widgets inline; only excess non-trigger actions overflow.
   ///
-  /// Returns `(inline, overflowActions)` preserving relative order in [inline].
+  /// Returns `(inline, overflowActions)` preserving relative order in `inline`.
   static ({List<M3EToolbarItem> inline, List<M3EToolbarAction> overflow})
-      partitionInline({
+  partitionInline({
     required List<M3EToolbarItem> items,
     required int maxInline,
     int? triggerIndex,
@@ -110,12 +107,11 @@ abstract final class M3EToolbarItemLayout {
     }
 
     // Count how many non-trigger icon actions may stay inline.
-    final int reservedTrigger = triggerIndex != null ? 1 : 0;
-    final int actionBudget =
-        (maxInline - reservedTrigger).clamp(0, maxInline);
+    final reservedTrigger = triggerIndex != null ? 1 : 0;
+    final int actionBudget = (maxInline - reservedTrigger).clamp(0, maxInline);
 
-    final List<M3EToolbarItem> inline = <M3EToolbarItem>[];
-    final List<M3EToolbarAction> overflow = <M3EToolbarAction>[];
+    final inline = <M3EToolbarItem>[];
+    final overflow = <M3EToolbarAction>[];
     var usedActionSlots = 0;
 
     for (var i = 0; i < items.length; i++) {
@@ -124,7 +120,7 @@ abstract final class M3EToolbarItemLayout {
         inline.add(item);
         continue;
       }
-      final M3EToolbarAction action = item as M3EToolbarAction;
+      final action = item as M3EToolbarAction;
       if (action.isExpandTrigger) {
         inline.add(action);
         continue;

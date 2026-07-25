@@ -2,6 +2,8 @@
 abstract final class M3ECalendarLabels {
   const M3ECalendarLabels._();
 
+  /// months.
+
   static const List<String> months = <String>[
     'January',
     'February',

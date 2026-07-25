@@ -6,6 +6,7 @@ import '../res/m3e_date_picker_constants.dart';
 
 /// Toggles between day and year calendar modes.
 class M3EDatePickerModeToggle extends StatelessWidget {
+  /// M3EDatePickerModeToggle.
   const M3EDatePickerModeToggle({
     required this.mode,
     required this.onChanged,
@@ -13,16 +14,23 @@ class M3EDatePickerModeToggle extends StatelessWidget {
     super.key,
   });
 
+  /// mode.
+
   final M3EDatePickerMode mode;
+
+  /// onChanged.
   final ValueChanged<M3EDatePickerMode> onChanged;
+
+  /// monthDate.
   final DateTime monthDate;
 
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dateTheme = theme.datePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final String label = mode == M3EDatePickerMode.day
         ? localizations.formatMonthYear(monthDate)
         : localizations.formatYear(DateTime(monthDate.year));

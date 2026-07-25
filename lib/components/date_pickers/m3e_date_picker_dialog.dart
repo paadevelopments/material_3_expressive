@@ -15,6 +15,7 @@ import 'utils/m3e_date_picker_utils.dart';
 
 /// Dialog for picking a single date.
 class M3EDatePickerDialog extends StatefulWidget {
+  /// M3EDatePickerDialog.
   const M3EDatePickerDialog({
     required this.firstDate,
     required this.lastDate,
@@ -37,23 +38,59 @@ class M3EDatePickerDialog extends StatefulWidget {
     super.key,
   });
 
+  /// initialDate.
+
   final DateTime? initialDate;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// currentDate.
   final DateTime? currentDate;
+
+  /// initialEntryMode.
   final M3EDatePickerEntryMode initialEntryMode;
+
+  /// initialCalendarMode.
   final M3EDatePickerMode initialCalendarMode;
+
+  /// selectableDayPredicate.
   final M3ESelectableDayPredicate? selectableDayPredicate;
+
+  /// helpText.
   final String? helpText;
+
+  /// cancelText.
   final String? cancelText;
+
+  /// confirmText.
   final String? confirmText;
+
+  /// errorFormatText.
   final String? errorFormatText;
+
+  /// errorInvalidText.
   final String? errorInvalidText;
+
+  /// fieldHintText.
   final String? fieldHintText;
+
+  /// fieldLabelText.
   final String? fieldLabelText;
+
+  /// keyboardType.
   final TextInputType? keyboardType;
+
+  /// restorationId.
   final String? restorationId;
+
+  /// onDatePickerModeChange.
   final ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange;
+
+  /// insetPadding.
   final EdgeInsets insetPadding;
 
   @override
@@ -62,8 +99,9 @@ class M3EDatePickerDialog extends StatefulWidget {
 
 class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     with RestorationMixin {
-  late final RestorableDateTimeN _selectedDate =
-      RestorableDateTimeN(widget.initialDate);
+  late final RestorableDateTimeN _selectedDate = RestorableDateTimeN(
+    widget.initialDate,
+  );
   late final _RestorableM3EDatePickerEntryMode _entryMode =
       _RestorableM3EDatePickerEntryMode(widget.initialEntryMode);
   final _RestorableAutovalidateMode _autovalidateMode =
@@ -150,8 +188,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
   }
 
   double _calendarBodyHeight(BuildContext context) {
-    final int firstDayOfWeekIndex =
-        MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    final int firstDayOfWeekIndex = MaterialLocalizations.of(
+      context,
+    ).firstDayOfWeekIndex;
     if (_calendarMode == M3EDatePickerMode.year) {
       return M3EDatePickerUtils.calendarYearViewHeight(
         widget.firstDate,
@@ -186,8 +225,7 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
   Size _dialogSize(BuildContext context) {
     final bool isCalendar = switch (_entryMode.value) {
       M3EDatePickerEntryMode.calendar ||
-      M3EDatePickerEntryMode.calendarOnly =>
-        true,
+      M3EDatePickerEntryMode.calendarOnly => true,
       M3EDatePickerEntryMode.input || M3EDatePickerEntryMode.inputOnly => false,
     };
     final Orientation orientation = MediaQuery.orientationOf(context);
@@ -294,7 +332,8 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
       titleText: titleText,
       showTitle: _selectedDate.value != null,
       orientation: orientation,
-      isShort: orientation == Orientation.landscape &&
+      isShort:
+          orientation == Orientation.landscape &&
           (_entryMode.value == M3EDatePickerEntryMode.input ||
               _entryMode.value == M3EDatePickerEntryMode.inputOnly),
       entryModeButton: entryModeButton,
@@ -317,8 +356,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     final bool isInputMode =
         _entryMode.value == M3EDatePickerEntryMode.input ||
         _entryMode.value == M3EDatePickerEntryMode.inputOnly;
-    final double? calendarBodyHeight =
-        isInputMode ? null : _calendarBodyHeight(context);
+    final double? calendarBodyHeight = isInputMode
+        ? null
+        : _calendarBodyHeight(context);
 
     final Widget pickerBody = _buildPickerBody(
       picker: picker,
@@ -339,40 +379,33 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           curve: Curves.easeIn,
           child: switch (orientation) {
             Orientation.portrait => Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  header,
-                  M3EDivider(
-                    thickness: 1,
-                    color: dateTheme.dividerColor(theme.colorScheme),
-                  ),
-                  pickerBody,
-                  actions,
-                ],
-              ),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
+                pickerBody,
+                actions,
+              ],
+            ),
             Orientation.landscape => Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  header,
-                  M3EDivider(
-                    axis: M3EDividerAxis.vertical,
-                    thickness: 1,
-                    color: dateTheme.dividerColor(theme.colorScheme),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                header,
+                M3EDivider(
+                  axis: M3EDividerAxis.vertical,
+                  color: dateTheme.dividerColor(theme.colorScheme),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[pickerBody, actions],
                   ),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        pickerBody,
-                        actions,
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
           },
         ),
       ),

@@ -1,4 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
+    show M3EToolbar;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EToolbar;
 
 /// A single slot in [M3EToolbar.actions] — icon action or custom widget.
 sealed class M3EToolbarItem {
@@ -7,6 +11,7 @@ sealed class M3EToolbarItem {
 
 /// An icon action hosted by [M3EToolbar].
 class M3EToolbarAction extends M3EToolbarItem {
+  /// M3EToolbarAction.
   const M3EToolbarAction({
     required this.icon,
     required this.onPressed,
@@ -18,10 +23,20 @@ class M3EToolbarAction extends M3EToolbarItem {
     this.isExpandTrigger = false,
   });
 
+  /// icon.
+
   final IconData icon;
+
+  /// onPressed.
   final VoidCallback onPressed;
+
+  /// tooltip.
   final String? tooltip;
+
+  /// semanticLabel.
   final String? semanticLabel;
+
+  /// enabled.
   final bool enabled;
 
   /// Label used in the overflow menu when inline slots are exceeded.
@@ -43,11 +58,13 @@ class M3EToolbarAction extends M3EToolbarItem {
 /// Always stays inline (never moves to the overflow menu). Laid out within the
 /// bar's available cross-axis extent after content padding.
 class M3EToolbarWidget extends M3EToolbarItem {
-  const M3EToolbarWidget({
-    required this.child,
-    this.semanticLabel,
-  });
+  /// M3EToolbarWidget.
+  const M3EToolbarWidget({required this.child, this.semanticLabel});
+
+  /// child.
 
   final Widget child;
+
+  /// semanticLabel.
   final String? semanticLabel;
 }

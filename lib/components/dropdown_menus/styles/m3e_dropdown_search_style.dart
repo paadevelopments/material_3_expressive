@@ -6,6 +6,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// M3EDropdownSearchStyle.
+
 @immutable
 class M3EDropdownSearchStyle with Diagnosticable {
   /// Hint text shown in the search field.
@@ -111,7 +113,11 @@ class M3EDropdownSearchStyle with Diagnosticable {
   }
 
   /// Linearly interpolate between two search styles.
-  static M3EDropdownSearchStyle lerp(M3EDropdownSearchStyle? a, M3EDropdownSearchStyle? b, double t) {
+  static M3EDropdownSearchStyle lerp(
+    M3EDropdownSearchStyle? a,
+    M3EDropdownSearchStyle? b,
+    double t,
+  ) {
     if (a == null && b == null) {
       return const M3EDropdownSearchStyle();
     }
@@ -187,8 +193,6 @@ class M3EDropdownSearchStyle with Diagnosticable {
     properties
       ..add(StringProperty('hintText', hintText))
       ..add(ColorProperty('fillColor', fillColor))
-      ..add(
-        DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius),
-      );
+      ..add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 /// Paints the track and active arc of a classic circular progress indicator.
 class M3ECircularProgressPainter extends CustomPainter {
+  /// M3ECircularProgressPainter.
   const M3ECircularProgressPainter({
     required this.trackColor,
     required this.activeColor,
@@ -15,12 +16,26 @@ class M3ECircularProgressPainter extends CustomPainter {
     this.progress,
   });
 
+  /// trackColor.
+
   final Color trackColor;
+
+  /// activeColor.
   final Color activeColor;
+
+  /// strokeWidth.
   final double strokeWidth;
+
+  /// trackStrokeWidth.
   final double trackStrokeWidth;
+
+  /// startAngle.
   final double startAngle;
+
+  /// sweepAngle.
   final double sweepAngle;
+
+  /// gapSize.
   final double gapSize;
 
   /// When non-null, paints determinate dual-gap track. Null = indeterminate.
@@ -31,15 +46,15 @@ class M3ECircularProgressPainter extends CustomPainter {
     final Offset center = size.center(Offset.zero);
     final double maxStroke = math.max(strokeWidth, trackStrokeWidth);
     final double radius = (size.shortestSide - maxStroke) / 2;
-    final Rect rect = Rect.fromCircle(center: center, radius: radius);
+    final rect = Rect.fromCircle(center: center, radius: radius);
 
-    final Paint trackPaint = Paint()
+    final trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = trackStrokeWidth
       ..strokeCap = StrokeCap.round
       ..color = trackColor;
 
-    final Paint activePaint = Paint()
+    final activePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
@@ -47,8 +62,7 @@ class M3ECircularProgressPainter extends CustomPainter {
 
     final double? p = progress;
     const double tau = 2 * math.pi;
-    final double adjustedGap =
-        gapSize + (strokeWidth + trackStrokeWidth) / 2;
+    final double adjustedGap = gapSize + (strokeWidth + trackStrokeWidth) / 2;
     final double gapAngle = adjustedGap / radius;
 
     if (p == null) {

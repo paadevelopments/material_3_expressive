@@ -1,4 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
+    show M3EDropdownMenu;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3EDropdownMenu;
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_color_style.dart';
@@ -7,6 +11,7 @@ import '../enums/m3e_menu_item_shape.dart';
 /// Resolved colors for one [M3EMenuColorStyle].
 @immutable
 class M3EMenuColors {
+  /// M3EMenuColors.
   const M3EMenuColors({
     required this.container,
     required this.content,
@@ -39,6 +44,8 @@ class M3EMenuColors {
   /// Hover / focus / pressed overlay ink (callout 3).
   final Color stateLayer;
 
+  /// divider.
+
   final Color divider;
 
   @override
@@ -56,20 +63,21 @@ class M3EMenuColors {
 
   @override
   int get hashCode => Object.hash(
-        container,
-        content,
-        iconContent,
-        supportingContent,
-        selectedContainer,
-        selectedContent,
-        stateLayer,
-        divider,
-      );
+    container,
+    content,
+    iconContent,
+    supportingContent,
+    selectedContainer,
+    selectedContent,
+    stateLayer,
+    divider,
+  );
 }
 
 /// Theme values for `M3EMenu` (Compose `MenuDefaults` expressive tokens).
 @immutable
 class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
+  /// M3EMenuTheme.
   const M3EMenuTheme({
     this.minWidth = 112,
     this.maxWidth = 280,
@@ -97,20 +105,40 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     this.itemGap = 4,
   });
 
+  /// defaults.
+
   static const M3EMenuTheme defaults = M3EMenuTheme();
 
+  /// minWidth.
+
   final double minWidth;
+
+  /// maxWidth.
   final double maxWidth;
+
+  /// maxHeight.
   final double maxHeight;
+
+  /// verticalPadding.
   final double verticalPadding;
 
   /// Inset of the item column from the left/right of each elevated surface.
   final double contentHorizontalPadding;
 
+  /// anchorOffset.
+
   final double anchorOffset;
+
+  /// entryHeight.
   final double entryHeight;
+
+  /// entryHorizontalPadding.
   final double entryHorizontalPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// iconGap.
   final double iconGap;
 
   /// Legacy alias for spacing near groups; prefer [sectionGap] between surfaces.
@@ -119,11 +147,23 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// Vertical gap between elevated menu surfaces.
   final double sectionGap;
 
+  /// groupLabelHorizontalPadding.
+
   final double groupLabelHorizontalPadding;
+
+  /// groupLabelVerticalPadding.
   final double groupLabelVerticalPadding;
+
+  /// elevation.
   final double elevation;
+
+  /// disabledOpacity.
   final double disabledOpacity;
+
+  /// scrimAlpha.
   final double scrimAlpha;
+
+  /// screenEdgePadding.
   final double screenEdgePadding;
 
   /// Corner radius of each elevated menu surface.
@@ -144,7 +184,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// Vertical space between items inside a surface.
   final double itemGap;
 
+  /// The borderRadius.
+
   BorderRadius get borderRadius => BorderRadius.circular(containerRadius);
+
+  /// The itemBorderRadius.
 
   BorderRadius get itemBorderRadius => BorderRadius.circular(itemRadius);
 
@@ -154,10 +198,14 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// Leading item in a group — full radius (gapped items are not connected).
   BorderRadius get leadingItemShape => itemBorderRadius;
 
+  /// The middleItemShape.
+
   BorderRadius get middleItemShape => itemBorderRadius;
 
   /// Trailing item in a group — full radius (gapped items are not connected).
   BorderRadius get trailingItemShape => itemBorderRadius;
+
+  /// itemShape.
 
   BorderRadius itemShape(M3EMenuItemShape shape) {
     return switch (shape) {
@@ -213,26 +261,33 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     }
   }
 
+  /// containerColor.
+
   Color containerColor(
     M3EColorScheme scheme, [
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  ]) =>
-      colors(scheme, style).container;
+  ]) => colors(scheme, style).container;
+
+  /// dividerColor.
 
   Color dividerColor(
     M3EColorScheme scheme, [
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  ]) =>
-      colors(scheme, style).divider;
+  ]) => colors(scheme, style).divider;
+
+  /// selectedContainerColor.
 
   Color selectedContainerColor(
     M3EColorScheme scheme, [
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  ]) =>
-      colors(scheme, style).selectedContainer;
+  ]) => colors(scheme, style).selectedContainer;
+
+  /// scrimColor.
 
   Color scrimColor(M3EColorScheme scheme) =>
       M3EColorUtils.withOpacity(scheme.scrim, scrimAlpha);
+
+  /// entryForegroundColor.
 
   Color entryForegroundColor(
     M3EColorScheme scheme, {
@@ -269,6 +324,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     return selected ? palette.selectedContent : palette.iconContent;
   }
 
+  /// entryLabelStyle.
+
   TextStyle entryLabelStyle(
     M3ETypeScale type,
     M3EColorScheme scheme, {
@@ -276,16 +333,17 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     bool isDestructive = false,
     bool selected = false,
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  }) =>
-      type.labelLarge.copyWith(
-        color: entryForegroundColor(
-          scheme,
-          enabled: enabled,
-          isDestructive: isDestructive,
-          selected: selected,
-          style: style,
-        ),
-      );
+  }) => type.labelLarge.copyWith(
+    color: entryForegroundColor(
+      scheme,
+      enabled: enabled,
+      isDestructive: isDestructive,
+      selected: selected,
+      style: style,
+    ),
+  );
+
+  /// supportingTextStyle.
 
   TextStyle supportingTextStyle(
     M3ETypeScale type,
@@ -295,8 +353,9 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) {
     final palette = colors(scheme, style);
-    final Color base =
-        selected ? palette.selectedContent : palette.supportingContent;
+    final Color base = selected
+        ? palette.selectedContent
+        : palette.supportingContent;
     return type.labelMedium.copyWith(
       color: enabled
           ? base
@@ -304,20 +363,23 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     );
   }
 
+  /// trailingTextStyle.
+
   TextStyle trailingTextStyle(
     M3ETypeScale type,
     M3EColorScheme scheme, {
     required bool enabled,
     bool selected = false,
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  }) =>
-      supportingTextStyle(
-        type,
-        scheme,
-        enabled: enabled,
-        selected: selected,
-        style: style,
-      );
+  }) => supportingTextStyle(
+    type,
+    scheme,
+    enabled: enabled,
+    selected: selected,
+    style: style,
+  );
+
+  /// groupLabelStyle.
 
   TextStyle groupLabelStyle(
     M3ETypeScale type,
@@ -402,8 +464,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       )!,
       anchorOffset: _lerpDouble(anchorOffset, other.anchorOffset, t)!,
       entryHeight: _lerpDouble(entryHeight, other.entryHeight, t)!,
-      entryHorizontalPadding:
-          _lerpDouble(entryHorizontalPadding, other.entryHorizontalPadding, t)!,
+      entryHorizontalPadding: _lerpDouble(
+        entryHorizontalPadding,
+        other.entryHorizontalPadding,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
       groupSpacing: _lerpDouble(groupSpacing, other.groupSpacing, t)!,
@@ -421,13 +486,14 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       elevation: _lerpDouble(elevation, other.elevation, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
       scrimAlpha: _lerpDouble(scrimAlpha, other.scrimAlpha, t)!,
-      screenEdgePadding:
-          _lerpDouble(screenEdgePadding, other.screenEdgePadding, t)!,
-      containerRadius:
-          _lerpDouble(containerRadius, other.containerRadius, t)!,
+      screenEdgePadding: _lerpDouble(
+        screenEdgePadding,
+        other.screenEdgePadding,
+        t,
+      )!,
+      containerRadius: _lerpDouble(containerRadius, other.containerRadius, t)!,
       itemRadius: _lerpDouble(itemRadius, other.itemRadius, t)!,
-      backgroundColor:
-          Color.lerp(backgroundColor, other.backgroundColor, t),
+      backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t),
       openMotion: t < 0.5 ? openMotion : other.openMotion,
       closeMotion: t < 0.5 ? closeMotion : other.closeMotion,
       itemGap: _lerpDouble(itemGap, other.itemGap, t)!,

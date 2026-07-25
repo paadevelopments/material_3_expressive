@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/lists/m3e_lists.dart' show M3ECardList;
-import 'package:material_3_expressive/material_3_expressive.dart' show M3ECardList;
+import 'package:material_3_expressive/components/lists/m3e_lists.dart'
+    show M3ECardList;
+import 'package:material_3_expressive/material_3_expressive.dart'
+    show M3ECardList;
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
@@ -12,10 +14,10 @@ import 'm3e_list_item_scope.dart';
 M3ECardPosition calculateCardPosition(int index, int total) => total == 1
     ? M3ECardPosition.single
     : index == 0
-        ? M3ECardPosition.first
-        : index == total - 1
-            ? M3ECardPosition.last
-            : M3ECardPosition.middle;
+    ? M3ECardPosition.first
+    : index == total - 1
+    ? M3ECardPosition.last
+    : M3ECardPosition.middle;
 
 /// Internal helper to calculate [BorderRadius] based on [M3ECardPosition].
 BorderRadius calculateCardRadius({
@@ -43,6 +45,7 @@ BorderRadius calculateCardRadius({
 
 /// A single card item within an [M3ECardList].
 class M3ECardListItem extends StatelessWidget {
+  /// M3ECardListItem.
   const M3ECardListItem({
     required this.index,
     required this.position,
@@ -60,18 +63,44 @@ class M3ECardListItem extends StatelessWidget {
     super.key,
   });
 
+  /// index.
+
   final int index;
+
+  /// position.
   final M3ECardPosition position;
+
+  /// child.
   final Widget child;
+
+  /// outerRadius.
   final double outerRadius;
+
+  /// innerRadius.
   final double innerRadius;
+
+  /// gap.
   final double gap;
+
+  /// color.
   final Color? color;
+
+  /// padding.
   final EdgeInsetsGeometry? padding;
+
+  /// Function.
   final void Function(int index)? onTap;
+
+  /// Function.
   final void Function(int index)? onLongPress;
+
+  /// semanticLabel.
   final String? semanticLabel;
+
+  /// mouseCursor.
   final MouseCursor? mouseCursor;
+
+  /// haptic.
   final M3EHapticFeedback haptic;
 
   @override
@@ -89,9 +118,12 @@ class M3ECardListItem extends StatelessWidget {
     final bool isLast =
         position == M3ECardPosition.last || position == M3ECardPosition.single;
 
-    final VoidCallback? wrappedOnTap = onTap != null ? () => onTap!(index) : null;
-    final VoidCallback? wrappedOnLongPress =
-        onLongPress != null ? () => onLongPress!(index) : null;
+    final VoidCallback? wrappedOnTap = onTap != null
+        ? () => onTap!(index)
+        : null;
+    final VoidCallback? wrappedOnLongPress = onLongPress != null
+        ? () => onLongPress!(index)
+        : null;
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),

@@ -9,6 +9,7 @@ import 'm3e_day_picker.dart';
 
 /// Month navigation with a [PageView] of day grids.
 class M3EMonthPicker extends StatefulWidget {
+  /// M3EMonthPicker.
   const M3EMonthPicker({
     required this.initialMonth,
     required this.firstDate,
@@ -26,18 +27,44 @@ class M3EMonthPicker extends StatefulWidget {
     super.key,
   });
 
+  /// initialMonth.
+
   final DateTime initialMonth;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// selectedDate.
   final DateTime? selectedDate;
+
+  /// currentDate.
   final DateTime currentDate;
+
+  /// onChanged.
   final ValueChanged<DateTime> onChanged;
+
+  /// onMonthChanged.
   final ValueChanged<DateTime> onMonthChanged;
+
+  /// Function.
   final bool Function(DateTime day)? selectableDayPredicate;
+
+  /// rangeStart.
   final DateTime? rangeStart;
+
+  /// rangeEnd.
   final DateTime? rangeEnd;
+
+  /// expandToFit.
   final bool expandToFit;
+
+  /// mode.
   final M3EDatePickerMode? mode;
+
+  /// onModeChanged.
   final ValueChanged<M3EDatePickerMode>? onModeChanged;
 
   @override
@@ -58,8 +85,10 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
     );
     _monthCount =
         M3EDatePickerUtils.monthDelta(widget.firstDate, widget.lastDate) + 1;
-    final int initialPage =
-        M3EDatePickerUtils.monthDelta(widget.firstDate, _currentMonth);
+    final int initialPage = M3EDatePickerUtils.monthDelta(
+      widget.firstDate,
+      _currentMonth,
+    );
     _pageController = PageController(initialPage: initialPage);
   }
 
@@ -188,8 +217,9 @@ class _MonthNavRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dateTheme = theme.datePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final String label = localizations.formatMonthYear(month);
 
     return SizedBox(
@@ -203,26 +233,24 @@ class _MonthNavRow extends StatelessWidget {
                   ? M3ETappable(
                       onTap: () => onModeChanged!(M3EDatePickerMode.year),
                       semanticLabel: localizations.selectYearSemanticsLabel,
-                      builder: (
-                        BuildContext context,
-                        M3EInteractionState state,
-                      ) {
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              label,
-                              style: theme.typeScale.titleSmall.copyWith(
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            Icon(
-                              M3EIcons.arrow_drop_down,
-                              size: dateTheme.arrowIconSize,
-                            ),
-                          ],
-                        );
-                      },
+                      builder:
+                          (BuildContext context, M3EInteractionState state) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  label,
+                                  style: theme.typeScale.titleSmall.copyWith(
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                                Icon(
+                                  M3EIcons.arrow_drop_down,
+                                  size: dateTheme.arrowIconSize,
+                                ),
+                              ],
+                            );
+                          },
                     )
                   : Text(
                       label,

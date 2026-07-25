@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 class M3EScrimSystemUi {
   M3EScrimSystemUi._();
 
+  /// Overlay style with light status and navigation bar icons.
   static const SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     systemNavigationBarColor: Colors.transparent,
@@ -21,13 +22,14 @@ class M3EScrimSystemUi {
     systemNavigationBarContrastEnforced: false,
   );
 
+  /// Overlay style with light status-bar icons only (for bottom sheets).
   static const SystemUiOverlayStyle bottomSheetOverlayStyle =
       SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.light,
-    systemStatusBarContrastEnforced: false,
-  );
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light,
+        systemStatusBarContrastEnforced: false,
+      );
 
   /// Wraps [child] so status and navigation bar icons use [overlayStyle].
   static Widget wrap(Widget child) {

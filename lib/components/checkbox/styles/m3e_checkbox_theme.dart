@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ECheckbox`.
 @immutable
 class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
+  /// M3ECheckboxTheme.
   const M3ECheckboxTheme({
     this.boxSize = 18,
     this.hitSize = 40,
@@ -15,19 +16,39 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     this.disabledOpacity = 0.38,
   });
 
+  /// defaults.
+
   static const M3ECheckboxTheme defaults = M3ECheckboxTheme();
 
+  /// boxSize.
+
   final double boxSize;
+
+  /// hitSize.
   final double hitSize;
+
+  /// markSize.
   final double markSize;
+
+  /// indeterminateWidth.
   final double indeterminateWidth;
+
+  /// indeterminateHeight.
   final double indeterminateHeight;
+
+  /// borderWidth.
   final double borderWidth;
+
+  /// disabledOpacity.
   final double disabledOpacity;
+
+  /// The borderRadius.
 
   BorderRadius get borderRadius => M3EShapes.radiusExtraSmall;
 
   static const Color _transparent = Color(0x00000000);
+
+  /// stateLayerColor.
 
   Color stateLayerColor(
     M3EColorScheme scheme, {
@@ -39,6 +60,8 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     }
     return active ? scheme.primary : scheme.onSurface;
   }
+
+  /// fillColor.
 
   Color fillColor(
     M3EColorScheme scheme, {
@@ -57,6 +80,8 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     return error ? scheme.error : scheme.primary;
   }
 
+  /// borderColor.
+
   Color borderColor(
     M3EColorScheme scheme, {
     required bool enabled,
@@ -71,6 +96,8 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     }
     return error ? scheme.error : scheme.onSurfaceVariant;
   }
+
+  /// markColor.
 
   Color markColor(M3EColorScheme scheme, {required bool error}) =>
       error ? scheme.onError : scheme.onPrimary;
@@ -105,10 +132,16 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
       boxSize: _lerpDouble(boxSize, other.boxSize, t)!,
       hitSize: _lerpDouble(hitSize, other.hitSize, t)!,
       markSize: _lerpDouble(markSize, other.markSize, t)!,
-      indeterminateWidth:
-          _lerpDouble(indeterminateWidth, other.indeterminateWidth, t)!,
-      indeterminateHeight:
-          _lerpDouble(indeterminateHeight, other.indeterminateHeight, t)!,
+      indeterminateWidth: _lerpDouble(
+        indeterminateWidth,
+        other.indeterminateWidth,
+        t,
+      )!,
+      indeterminateHeight: _lerpDouble(
+        indeterminateHeight,
+        other.indeterminateHeight,
+        t,
+      )!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
     );

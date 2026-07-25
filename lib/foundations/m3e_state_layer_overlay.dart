@@ -10,6 +10,7 @@ import 'm3e_tappable_ink_scope.dart';
 /// ripple and state overlays. Size [child] to the desired bounds at the call
 /// site so ink covers the surface.
 class M3EStateLayerOverlay extends StatelessWidget {
+  /// Creates a state-layer / ink overlay behind [child].
   const M3EStateLayerOverlay({
     required this.state,
     required this.color,
@@ -36,6 +37,7 @@ class M3EStateLayerOverlay extends StatelessWidget {
   final AlignmentGeometry alignment;
 
   @override
+  /// Builds the ink well or fallback state-layer overlay.
   Widget build(BuildContext context) {
     final M3ETappableInkScope? ink = M3ETappableInkScope.maybeOf(context);
     if (ink != null && ink.isInteractive) {

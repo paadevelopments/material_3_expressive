@@ -18,6 +18,7 @@ export 'models/m3e_fab_menu_item.dart';
 /// The FAB morphs rounded-square ↔ circle with the open state. On close, items
 /// hide immediately — no reverse width animation.
 class M3EFabMenu extends StatefulWidget {
+  /// M3EFabMenu.
   const M3EFabMenu({
     required this.items,
     this.icon = const Icon(M3EIcons.add),
@@ -27,18 +28,27 @@ class M3EFabMenu extends StatefulWidget {
     super.key,
   }) : assert(items.length > 0, 'A FAB menu needs at least one item.');
 
+  /// items.
+
   final List<M3EFabMenuItem> items;
+
+  /// icon.
   final Widget icon;
+
+  /// closeIcon.
   final Widget closeIcon;
+
+  /// color.
   final M3EFabColor color;
+
+  /// size.
   final M3EFabSize size;
 
   @override
   State<M3EFabMenu> createState() => _M3EFabMenuState();
 }
 
-class _M3EFabMenuState extends State<M3EFabMenu>
-    with TickerProviderStateMixin {
+class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
   final LayerLink _link = LayerLink();
   final OverlayPortalController _portal = OverlayPortalController();
 
@@ -51,13 +61,15 @@ class _M3EFabMenuState extends State<M3EFabMenu>
 
   /// Expand: expressiveSpatialDefault with lower damping for left-end overshoot.
   SpringMotion get _expandMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.55);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.55,
+      );
 
   /// FAB shape morph: same spatial spring, slightly more damped.
   SpringMotion get _fabShapeMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault()
-          .copyWith(damping: 0.7);
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        damping: 0.7,
+      );
 
   static const int _expandStaggerMs = 30;
 
@@ -81,10 +93,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     if (oldWidget.items.length != widget.items.length) {
       _disposeItemControllers();
       _itemCtrls = _createControllers(widget.items.length);
-      _itemVisible = List<bool>.filled(
-        widget.items.length,
-        _open,
-      );
+      _itemVisible = List<bool>.filled(widget.items.length, _open);
       if (_open) {
         for (final SingleMotionController c in _itemCtrls) {
           c.value = 1;
@@ -104,10 +113,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   List<SingleMotionController> _createControllers(int count) {
     return List<SingleMotionController>.generate(
       count,
-      (_) => SingleMotionController(
-        motion: _expandMotion,
-        vsync: this,
-      ),
+      (_) => SingleMotionController(motion: _expandMotion, vsync: this),
     );
   }
 
@@ -146,7 +152,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
 
     // Cascade from the FAB upward: bottom item (nearest FAB) first.
     final int count = _itemCtrls.length;
-    for (int i = 0; i < count; i++) {
+    for (var i = 0; i < count; i++) {
       final int fromFab = count - 1 - i;
       final int delayMs = fromFab * _expandStaggerMs;
       _staggerTimers.add(
@@ -204,8 +210,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
               animation: _fabShapeCtrl,
               builder: (BuildContext context, Widget? child) {
                 final double t = _fabShapeCtrl.value;
-                final double radius =
-                    lerpDouble(closedRadius, openRadius, t)!;
+                final double radius = lerpDouble(closedRadius, openRadius, t)!;
                 return M3EFab(
                   icon: _open ? widget.closeIcon : widget.icon,
                   color: widget.color,
@@ -244,9 +249,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _close,
-        child: ColoredBox(
-          color: fabMenuTheme.scrimColor(theme.colorScheme),
-        ),
+        child: ColoredBox(color: fabMenuTheme.scrimColor(theme.colorScheme)),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'm3e_day_cell.dart';
 
 /// Weekday headers and day grid for one month.
 class M3EDayPicker extends StatelessWidget {
+  /// M3EDayPicker.
   const M3EDayPicker({
     required this.displayedMonth,
     required this.selectedDate,
@@ -21,23 +22,44 @@ class M3EDayPicker extends StatelessWidget {
     super.key,
   });
 
+  /// displayedMonth.
+
   final DateTime displayedMonth;
+
+  /// selectedDate.
   final DateTime? selectedDate;
+
+  /// currentDate.
   final DateTime currentDate;
+
+  /// firstDate.
   final DateTime firstDate;
+
+  /// lastDate.
   final DateTime lastDate;
+
+  /// onChanged.
   final ValueChanged<DateTime> onChanged;
+
+  /// Function.
   final bool Function(DateTime day)? selectableDayPredicate;
+
+  /// rangeStart.
   final DateTime? rangeStart;
+
+  /// rangeEnd.
   final DateTime? rangeEnd;
+
+  /// fitHeight.
   final bool fitHeight;
 
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final dateTheme = theme.datePickerTheme;
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
     final int year = displayedMonth.year;
     final int month = displayedMonth.month;
     final int daysInMonth = M3EDatePickerUtils.daysInMonth(year, month);
@@ -46,7 +68,6 @@ class M3EDayPicker extends StatelessWidget {
     final int cellCount =
         ((daysInMonth + firstDayOffset) / dateTheme.daysPerWeek).ceil() *
         dateTheme.daysPerWeek;
-    const int maxDayPickerRowCount = 6;
     final int rowCount =
         ((daysInMonth + firstDayOffset) / dateTheme.daysPerWeek).ceil();
 
@@ -54,10 +75,10 @@ class M3EDayPicker extends StatelessWidget {
       builder: (BuildContext context, BoxConstraints constraints) {
         final double rowHeight = fitHeight && constraints.hasBoundedHeight
             ? ((constraints.maxHeight -
-                        dateTheme.gridPadding.vertical -
-                        M3EDatePickerConstants.weekdayRowHeight) /
-                    rowCount)
-                .clamp(40.0, M3EDatePickerConstants.dayPickerRowHeight)
+                          dateTheme.gridPadding.vertical -
+                          M3EDatePickerConstants.weekdayRowHeight) /
+                      rowCount)
+                  .clamp(40.0, M3EDatePickerConstants.dayPickerRowHeight)
             : M3EDatePickerConstants.dayPickerRowHeight;
 
         return Column(
@@ -68,8 +89,10 @@ class M3EDayPicker extends StatelessWidget {
                   Expanded(
                     child: Center(
                       child: Text(
-                        localizations.narrowWeekdays[
-                            (localizations.firstDayOfWeekIndex + i) % 7],
+                        localizations.narrowWeekdays[(localizations
+                                    .firstDayOfWeekIndex +
+                                i) %
+                            7],
                         style: dateTheme.weekdayStyle(
                           theme.typeScale,
                           theme.colorScheme,
@@ -93,24 +116,29 @@ class M3EDayPicker extends StatelessWidget {
                 if (day < 1 || day > daysInMonth) {
                   return const SizedBox.shrink();
                 }
-                final DateTime date = DateTime(year, month, day);
+                final date = DateTime(year, month, day);
                 final bool enabled = M3EDatePickerUtils.isSelectable(
                   date,
                   firstDate,
                   lastDate,
                   predicate: selectableDayPredicate,
                 );
-                final bool selected =
-                    M3EDatePickerUtils.isSameDay(date, selectedDate);
-                final bool today =
-                    M3EDatePickerUtils.isSameDay(date, currentDate);
+                final bool selected = M3EDatePickerUtils.isSameDay(
+                  date,
+                  selectedDate,
+                );
+                final bool today = M3EDatePickerUtils.isSameDay(
+                  date,
+                  currentDate,
+                );
                 final DateTime? start = rangeStart;
                 final DateTime? end = rangeEnd;
                 final bool isRangeStart =
                     start != null && M3EDatePickerUtils.isSameDay(date, start);
                 final bool isRangeEnd =
                     end != null && M3EDatePickerUtils.isSameDay(date, end);
-                final bool inRange = start != null &&
+                final bool inRange =
+                    start != null &&
                     end != null &&
                     M3EDatePickerUtils.isInRange(date, start, end);
 

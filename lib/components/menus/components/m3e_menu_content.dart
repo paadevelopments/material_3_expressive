@@ -11,13 +11,12 @@ import 'm3e_menu_style_scope.dart';
 typedef M3EMenuSelectCallback = void Function(Object? value);
 
 /// Callback to open a cascading submenu from an item rect.
-typedef M3EMenuOpenSubmenuCallback = void Function(
-  Rect anchorRect,
-  List<M3EMenuNode> children,
-);
+typedef M3EMenuOpenSubmenuCallback =
+    void Function(Rect anchorRect, List<M3EMenuNode> children);
 
 /// Renders a tree of [M3EMenuNode]s inside one elevated menu surface.
 class M3EMenuContent extends StatelessWidget {
+  /// M3EMenuContent.
   const M3EMenuContent({
     required this.nodes,
     required this.onSelect,
@@ -30,12 +29,26 @@ class M3EMenuContent extends StatelessWidget {
     super.key,
   });
 
+  /// nodes.
+
   final List<M3EMenuNode> nodes;
+
+  /// onSelect.
   final M3EMenuSelectCallback onSelect;
+
+  /// closeOnSelect.
   final bool closeOnSelect;
+
+  /// onOpenSubmenu.
   final M3EMenuOpenSubmenuCallback? onOpenSubmenu;
+
+  /// selectedValue.
   final Object? selectedValue;
+
+  /// applyGroupShapes.
   final bool applyGroupShapes;
+
+  /// autofocusFirst.
   final bool autofocusFirst;
 
   /// Optional section header drawn above [nodes] (callout 9).
@@ -138,7 +151,8 @@ class M3EMenuContent extends StatelessWidget {
           ),
         ];
       case M3EMenuSelectable item:
-        final selected = item.selected ||
+        final selected =
+            item.selected ||
             (selectedValue != null && selectedValue == item.value);
         final autofocus = requestFocus && item.enabled;
         if (autofocus) {
@@ -147,7 +161,8 @@ class M3EMenuContent extends StatelessWidget {
         return <Widget>[
           M3EMenuItem(
             label: item.label,
-            leading: item.leading ??
+            leading:
+                item.leading ??
                 (selected
                     ? Icon(
                         M3EIcons.check_rounded,
@@ -178,7 +193,8 @@ class M3EMenuContent extends StatelessWidget {
         return <Widget>[
           M3EMenuItem(
             label: item.label,
-            leading: item.leading ??
+            leading:
+                item.leading ??
                 Icon(
                   item.checked
                       ? M3EIcons.check_box_rounded
@@ -245,7 +261,8 @@ class M3EMenuContent extends StatelessWidget {
         }
         final scheme = M3ETheme.of(context).colorScheme;
         final style = M3EMenuStyleScope.styleOf(context);
-        final palette = M3EMenuStyleScope.colorsOf(context) ??
+        final palette =
+            M3EMenuStyleScope.colorsOf(context) ??
             menuTheme.colors(scheme, style);
         final radius = menuTheme.itemShape(item.shape);
         final background = item.selected
@@ -390,60 +407,60 @@ class M3EMenuContent extends StatelessWidget {
   M3EMenuNode _withShape(M3EMenuNode node, M3EMenuItemShape shape) {
     return switch (node) {
       M3EMenuEntry e => M3EMenuEntry(
-          label: e.label,
-          leading: e.leading,
-          trailing: e.trailing,
-          trailingText: e.trailingText,
-          badge: e.badge,
-          supportingText: e.supportingText,
-          onPressed: e.onPressed,
-          enabled: e.enabled,
-          isDestructive: e.isDestructive,
-          value: e.value,
-          shape: shape,
-        ),
+        label: e.label,
+        leading: e.leading,
+        trailing: e.trailing,
+        trailingText: e.trailingText,
+        badge: e.badge,
+        supportingText: e.supportingText,
+        onPressed: e.onPressed,
+        enabled: e.enabled,
+        isDestructive: e.isDestructive,
+        value: e.value,
+        shape: shape,
+      ),
       M3EMenuSelectable e => M3EMenuSelectable(
-          label: e.label,
-          value: e.value,
-          leading: e.leading,
-          trailing: e.trailing,
-          trailingText: e.trailingText,
-          badge: e.badge,
-          supportingText: e.supportingText,
-          selected: e.selected,
-          onPressed: e.onPressed,
-          enabled: e.enabled,
-          shape: shape,
-        ),
+        label: e.label,
+        value: e.value,
+        leading: e.leading,
+        trailing: e.trailing,
+        trailingText: e.trailingText,
+        badge: e.badge,
+        supportingText: e.supportingText,
+        selected: e.selected,
+        onPressed: e.onPressed,
+        enabled: e.enabled,
+        shape: shape,
+      ),
       M3EMenuToggleable e => M3EMenuToggleable(
-          label: e.label,
-          checked: e.checked,
-          leading: e.leading,
-          trailing: e.trailing,
-          trailingText: e.trailingText,
-          badge: e.badge,
-          supportingText: e.supportingText,
-          onChanged: e.onChanged,
-          enabled: e.enabled,
-          shape: shape,
-        ),
+        label: e.label,
+        checked: e.checked,
+        leading: e.leading,
+        trailing: e.trailing,
+        trailingText: e.trailingText,
+        badge: e.badge,
+        supportingText: e.supportingText,
+        onChanged: e.onChanged,
+        enabled: e.enabled,
+        shape: shape,
+      ),
       M3EMenuSubmenu e => M3EMenuSubmenu(
-          label: e.label,
-          children: e.children,
-          leading: e.leading,
-          badge: e.badge,
-          enabled: e.enabled,
-          shape: shape,
-        ),
+        label: e.label,
+        children: e.children,
+        leading: e.leading,
+        badge: e.badge,
+        enabled: e.enabled,
+        shape: shape,
+      ),
       M3EMenuWidget e => M3EMenuWidget(
-          child: e.child,
-          value: e.value,
-          onPressed: e.onPressed,
-          enabled: e.enabled,
-          selected: e.selected,
-          semanticLabel: e.semanticLabel,
-          shape: shape,
-        ),
+        child: e.child,
+        value: e.value,
+        onPressed: e.onPressed,
+        enabled: e.enabled,
+        selected: e.selected,
+        semanticLabel: e.semanticLabel,
+        shape: shape,
+      ),
       _ => node,
     };
   }

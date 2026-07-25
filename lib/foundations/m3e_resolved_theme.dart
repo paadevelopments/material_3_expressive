@@ -12,12 +12,17 @@ import 'm3e_theme.dart';
 /// rebuild this subtree every frame and can drop weighted-sliver children
 /// (e.g. the first hero carousel item).
 class M3EResolvedTheme extends StatelessWidget {
+  /// Creates a resolved theme projection for [child].
   const M3EResolvedTheme({required this.data, required this.child, super.key});
 
+  /// The expressive theme applied to [child].
   final M3EThemeData data;
+
+  /// The subtree under this resolved theme.
   final Widget child;
 
   @override
+  /// Projects [data] onto Material [Theme] and expressive inherited theme.
   Widget build(BuildContext context) {
     final IconThemeData icons = data.resolvedIconTheme;
     final TextStyle baseStyle = (data.textTheme.bodyMedium ?? const TextStyle())
@@ -25,8 +30,9 @@ class M3EResolvedTheme extends StatelessWidget {
 
     // Merge without depending on AnimatedTheme. Prefer ancestor Theme data
     // when present so non-token fields (e.g. extensions) are preserved.
-    final ThemeData? parentTheme =
-        context.findAncestorWidgetOfExactType<Theme>()?.data;
+    final ThemeData? parentTheme = context
+        .findAncestorWidgetOfExactType<Theme>()
+        ?.data;
     final ThemeData projected = (parentTheme ?? data.toThemeData()).copyWith(
       colorScheme: data.colorScheme.toColorScheme(),
       textTheme: data.textTheme,
@@ -42,10 +48,7 @@ class M3EResolvedTheme extends StatelessWidget {
         data: data,
         child: IconTheme(
           data: icons,
-          child: DefaultTextStyle(
-            style: baseStyle,
-            child: child,
-          ),
+          child: DefaultTextStyle(style: baseStyle, child: child),
         ),
       ),
     );
@@ -54,15 +57,24 @@ class M3EResolvedTheme extends StatelessWidget {
 
 /// Inherited theme handle used by [M3ETheme.of].
 class M3EInheritedTheme extends InheritedTheme {
-  const M3EInheritedTheme({super.key, required this.data, required super.child});
+  /// Creates an inherited expressive theme.
+  const M3EInheritedTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
+  /// The expressive theme for descendants.
   final M3EThemeData data;
 
   @override
+  /// Wraps [child] in a [M3EResolvedTheme] with this [data].
   Widget wrap(BuildContext context, Widget child) {
     return M3EResolvedTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(M3EInheritedTheme oldWidget) => data != oldWidget.data;
+  /// Whether descendants should rebuild when [data] changes.
+  bool updateShouldNotify(M3EInheritedTheme oldWidget) =>
+      data != oldWidget.data;
 }

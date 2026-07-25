@@ -29,18 +29,15 @@ Widget _host(Widget child) {
 
 void main() {
   testWidgets('M3EExpandableList renders item titles', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        M3EExpandableList(data: _items),
-      ),
-    );
+    await tester.pumpWidget(_host(M3EExpandableList(data: _items)));
 
     expect(find.text('Battery level low'), findsOneWidget);
     expect(find.text('System update available'), findsOneWidget);
   });
 
-  testWidgets('M3EExpandableList expands item and reports change',
-      (tester) async {
+  testWidgets('M3EExpandableList expands item and reports change', (
+    tester,
+  ) async {
     int? changedIndex;
     bool? changedExpanded;
 
@@ -65,8 +62,9 @@ void main() {
     expect(find.text('Your battery is at 10%.'), findsOneWidget);
   });
 
-  testWidgets('M3EExpandableList single-expand collapses prior item',
-      (tester) async {
+  testWidgets('M3EExpandableList single-expand collapses prior item', (
+    tester,
+  ) async {
     final expandedEvents = <int>[];
 
     await tester.pumpWidget(

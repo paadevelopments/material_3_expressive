@@ -21,127 +21,140 @@ Future<void> _settleSpring(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('M3EMenu opens and dismisses on scrim tap', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        M3EMenu(
-          anchorBuilder: (BuildContext context, VoidCallback open) {
-            return TextButton(onPressed: open, child: const Text('Open'));
-          },
-          children: const <M3EMenuNode>[
-            M3EMenuEntry(label: 'One'),
-            M3EMenuEntry(label: 'Two'),
-          ],
-        ),
+  testWidgets(
+    'M3EMenu opens and dismisses on scrim tap',
+    _m3emenuOpensAndDismissesOnScrimTap,
+  );
+  testWidgets(
+    'M3EMenu entry onPressed fires and closes',
+    _m3emenuEntryOnpressedFiresAndCloses,
+  );
+  testWidgets(
+    'showM3EMenu returns selectable value',
+    _showm3emenuReturnsSelectableValue,
+  );
+  testWidgets(
+    'disabled menu entry is not tappable',
+    _disabledMenuEntryIsNotTappable,
+  );
+}
+
+Future<void> _m3emenuOpensAndDismissesOnScrimTap(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(
+      M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: const <M3EMenuNode>[
+          M3EMenuEntry(label: 'One'),
+          M3EMenuEntry(label: 'Two'),
+        ],
       ),
-    );
+    ),
+  );
 
-    expect(find.text('One'), findsNothing);
+  expect(find.text('One'), findsNothing);
 
-    await tester.tap(find.text('Open'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
 
-    expect(find.text('One'), findsOneWidget);
-    expect(find.text('Two'), findsOneWidget);
+  expect(find.text('One'), findsOneWidget);
+  expect(find.text('Two'), findsOneWidget);
 
-    await tester.tapAt(const Offset(10, 10));
-    await _settleSpring(tester);
+  await tester.tapAt(const Offset(10, 10));
+  await _settleSpring(tester);
 
-    expect(find.text('One'), findsNothing);
-  });
+  expect(find.text('One'), findsNothing);
+}
 
-  testWidgets('M3EMenu entry onPressed fires and closes', (tester) async {
-    var pressed = false;
+Future<void> _m3emenuEntryOnpressedFiresAndCloses(WidgetTester tester) async {
+  var pressed = false;
 
-    await tester.pumpWidget(
-      _host(
-        M3EMenu(
-          anchorBuilder: (BuildContext context, VoidCallback open) {
-            return TextButton(onPressed: open, child: const Text('Open'));
-          },
-          children: <M3EMenuNode>[
-            M3EMenuEntry(
-              label: 'Action',
-              onPressed: () => pressed = true,
-            ),
-          ],
-        ),
+  await tester.pumpWidget(
+    _host(
+      M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: <M3EMenuNode>[
+          M3EMenuEntry(label: 'Action', onPressed: () => pressed = true),
+        ],
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Open'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
 
-    await tester.tap(find.text('Action'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Action'));
+  await _settleSpring(tester);
 
-    expect(pressed, isTrue);
-    expect(find.text('Action'), findsNothing);
-  });
+  expect(pressed, isTrue);
+  expect(find.text('Action'), findsNothing);
+}
 
-  testWidgets('showM3EMenu returns selectable value', (tester) async {
-    Object? selected;
+Future<void> _showm3emenuReturnsSelectableValue(WidgetTester tester) async {
+  Object? selected;
 
-    await tester.pumpWidget(
-      _host(
-        Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              onPressed: () async {
-                final buttonBox = context.findRenderObject()! as RenderBox;
-                selected = await showM3EMenu<String>(
-                  context: context,
-                  anchor:
-                      buttonBox.localToGlobal(Offset.zero) & buttonBox.size,
-                  children: const <M3EMenuNode>[
-                    M3EMenuSelectable(label: 'Alpha', value: 'a'),
-                    M3EMenuSelectable(label: 'Beta', value: 'b'),
-                  ],
-                );
-              },
-              child: const Text('Show'),
-            );
-          },
-        ),
+  await tester.pumpWidget(
+    _host(
+      Builder(
+        builder: (BuildContext context) {
+          return TextButton(
+            onPressed: () async {
+              final buttonBox = context.findRenderObject()! as RenderBox;
+              selected = await showM3EMenu<String>(
+                context: context,
+                anchor: buttonBox.localToGlobal(Offset.zero) & buttonBox.size,
+                children: const <M3EMenuNode>[
+                  M3EMenuSelectable(label: 'Alpha', value: 'a'),
+                  M3EMenuSelectable(label: 'Beta', value: 'b'),
+                ],
+              );
+            },
+            child: const Text('Show'),
+          );
+        },
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Show'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Show'));
+  await _settleSpring(tester);
 
-    await tester.tap(find.text('Beta'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Beta'));
+  await _settleSpring(tester);
 
-    expect(selected, 'b');
-  });
+  expect(selected, 'b');
+}
 
-  testWidgets('disabled menu entry is not tappable', (tester) async {
-    var pressed = false;
+Future<void> _disabledMenuEntryIsNotTappable(WidgetTester tester) async {
+  var pressed = false;
 
-    await tester.pumpWidget(
-      _host(
-        M3EMenu(
-          anchorBuilder: (BuildContext context, VoidCallback open) {
-            return TextButton(onPressed: open, child: const Text('Open'));
-          },
-          children: <M3EMenuNode>[
-            M3EMenuEntry(
-              label: 'Nope',
-              enabled: false,
-              onPressed: () => pressed = true,
-            ),
-          ],
-        ),
+  await tester.pumpWidget(
+    _host(
+      M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: <M3EMenuNode>[
+          M3EMenuEntry(
+            label: 'Nope',
+            enabled: false,
+            onPressed: () => pressed = true,
+          ),
+        ],
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Open'));
-    await _settleSpring(tester);
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
 
-    await tester.tap(find.text('Nope'));
-    await tester.pump();
+  await tester.tap(find.text('Nope'));
+  await tester.pump();
 
-    expect(pressed, isFalse);
-    expect(find.text('Nope'), findsOneWidget);
-  });
+  expect(pressed, isFalse);
+  expect(find.text('Nope'), findsOneWidget);
 }

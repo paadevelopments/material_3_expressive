@@ -6,6 +6,7 @@ import '../enums/m3e_fab.dart';
 /// Resolved size and color metrics for a floating action button.
 @immutable
 class M3EFabMetrics {
+  /// M3EFabMetrics.
   const M3EFabMetrics({
     required this.container,
     required this.iconSize,
@@ -14,16 +15,27 @@ class M3EFabMetrics {
     required this.foreground,
   });
 
+  /// container.
+
   final double container;
+
+  /// iconSize.
   final double iconSize;
+
+  /// radius.
   final double radius;
+
+  /// background.
   final Color background;
+
+  /// foreground.
   final Color foreground;
 }
 
 /// Theme values for the extended FAB variant.
 @immutable
 class M3EExtendedFabTheme {
+  /// M3EExtendedFabTheme.
   const M3EExtendedFabTheme({
     this.height = 56,
     this.cornerRadius = 16,
@@ -34,16 +46,34 @@ class M3EExtendedFabTheme {
     this.pressedScale = 0.97,
   });
 
+  /// height.
+
   final double height;
+
+  /// cornerRadius.
   final double cornerRadius;
+
+  /// extendedHorizontalPadding.
   final double extendedHorizontalPadding;
+
+  /// collapsedHorizontalPadding.
   final double collapsedHorizontalPadding;
+
+  /// iconSize.
   final double iconSize;
+
+  /// iconLabelGap.
   final double iconLabelGap;
+
+  /// pressedScale.
   final double pressedScale;
+
+  /// elevation.
 
   double elevation({required bool hovered}) =>
       hovered ? M3EElevation.level4 : M3EElevation.level3;
+
+  /// labelStyle.
 
   TextStyle labelStyle(M3ETypeScale type, Color foreground) =>
       type.labelLarge.copyWith(color: foreground);
@@ -52,6 +82,7 @@ class M3EExtendedFabTheme {
 /// Theme values for `M3EFab` and `M3EExtendedFab`.
 @immutable
 class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
+  /// M3EFabTheme.
   const M3EFabTheme({
     this.pressedScale = 0.95,
     this.smallContainer = 40,
@@ -66,19 +97,45 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     this.extended = const M3EExtendedFabTheme(),
   });
 
+  /// defaults.
+
   static const M3EFabTheme defaults = M3EFabTheme();
 
+  /// pressedScale.
+
   final double pressedScale;
+
+  /// smallContainer.
   final double smallContainer;
+
+  /// smallIconSize.
   final double smallIconSize;
+
+  /// smallRadius.
   final double smallRadius;
+
+  /// mediumContainer.
   final double mediumContainer;
+
+  /// mediumIconSize.
   final double mediumIconSize;
+
+  /// mediumRadius.
   final double mediumRadius;
+
+  /// largeContainer.
   final double largeContainer;
+
+  /// largeIconSize.
   final double largeIconSize;
+
+  /// largeRadius.
   final double largeRadius;
+
+  /// extended.
   final M3EExtendedFabTheme extended;
+
+  /// resolve.
 
   M3EFabMetrics resolve({
     required M3EFabSize size,
@@ -129,7 +186,10 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
           scheme.onSecondaryContainer,
         );
       case M3EFabColor.tertiary:
-        return _FabPalette(scheme.tertiaryContainer, scheme.onTertiaryContainer);
+        return _FabPalette(
+          scheme.tertiaryContainer,
+          scheme.onTertiaryContainer,
+        );
       case M3EFabColor.surface:
         return _FabPalette(scheme.surfaceContainerHigh, scheme.primary);
     }

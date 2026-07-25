@@ -21,86 +21,103 @@ Widget _host(Widget child) {
 }
 
 void main() {
-  testWidgets('M3EDropdownMenu renders field with hint text', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        const M3EDropdownMenu<String>(
-          items: _items,
-          fieldStyle: M3EDropdownFieldStyle(hintText: 'Choose framework'),
-        ),
+  testWidgets(
+    'M3EDropdownMenu renders field with hint text',
+    _m3edropdownmenuRendersFieldWithHintText,
+  );
+  testWidgets(
+    'M3EDropdownMenu opens overlay and reports selection',
+    _m3edropdownmenuOpensOverlayAndReportsSelection,
+  );
+  testWidgets(
+    'M3EDropdownMenu single select replaces prior selection',
+    _m3edropdownmenuSingleSelectReplacesPriorSelection,
+  );
+}
+
+Future<void> _m3edropdownmenuRendersFieldWithHintText(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _host(
+      const M3EDropdownMenu<String>(
+        items: _items,
+        fieldStyle: M3EDropdownFieldStyle(hintText: 'Choose framework'),
       ),
-    );
+    ),
+  );
 
-    expect(find.text('Choose framework'), findsOneWidget);
-  });
+  expect(find.text('Choose framework'), findsOneWidget);
+}
 
-  testWidgets('M3EDropdownMenu opens overlay and reports selection',
-      (tester) async {
-    var selected = <M3EDropdownItem<String>>[];
+Future<void> _m3edropdownmenuOpensOverlayAndReportsSelection(
+  WidgetTester tester,
+) async {
+  var selected = <M3EDropdownItem<String>>[];
 
-    await tester.pumpWidget(
-      _host(
-        M3EDropdownMenu<String>(
-          items: _items,
-          fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
-          onSelectionChanged: (List<M3EDropdownItem<String>> value) {
-            selected = value;
-          },
-        ),
+  await tester.pumpWidget(
+    _host(
+      M3EDropdownMenu<String>(
+        items: _items,
+        fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
+        onSelectionChanged: (List<M3EDropdownItem<String>> value) {
+          selected = value;
+        },
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Choose framework'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.text('Choose framework'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Dart'), findsOneWidget);
-    await tester.tap(find.text('Dart'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  expect(find.text('Dart'), findsOneWidget);
+  await tester.tap(find.text('Dart'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    expect(selected, hasLength(1));
-    expect(selected.first.value, 'dart');
-    expect(find.text('Dart'), findsWidgets);
-  });
+  expect(selected, hasLength(1));
+  expect(selected.first.value, 'dart');
+  expect(find.text('Dart'), findsWidgets);
+}
 
-  testWidgets('M3EDropdownMenu single select replaces prior selection',
-      (tester) async {
-    var selected = <M3EDropdownItem<String>>[];
+Future<void> _m3edropdownmenuSingleSelectReplacesPriorSelection(
+  WidgetTester tester,
+) async {
+  var selected = <M3EDropdownItem<String>>[];
 
-    await tester.pumpWidget(
-      _host(
-        M3EDropdownMenu<String>(
-          singleSelect: true,
-          items: _items,
-          fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
-          onSelectionChanged: (List<M3EDropdownItem<String>> value) {
-            selected = value;
-          },
-        ),
+  await tester.pumpWidget(
+    _host(
+      M3EDropdownMenu<String>(
+        singleSelect: true,
+        items: _items,
+        fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
+        onSelectionChanged: (List<M3EDropdownItem<String>> value) {
+          selected = value;
+        },
       ),
-    );
+    ),
+  );
 
-    await tester.tap(find.text('Choose framework'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.text('Choose framework'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Flutter'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.text('Flutter'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    expect(selected, hasLength(1));
-    expect(selected.first.value, 'flutter');
+  expect(selected, hasLength(1));
+  expect(selected.first.value, 'flutter');
 
-    await tester.tap(find.bySemanticsLabel('Choose framework'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.bySemanticsLabel('Choose framework'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Material 3').last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.text('Material 3').last);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 
-    expect(selected, hasLength(1));
-    expect(selected.first.value, 'm3');
-  });
+  expect(selected, hasLength(1));
+  expect(selected.first.value, 'm3');
 }

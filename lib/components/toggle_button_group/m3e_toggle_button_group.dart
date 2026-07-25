@@ -1,7 +1,7 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-// ignore_for_file: type=lint
 import 'dart:math' as math;
+
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
@@ -12,28 +12,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import '../../foundations/foundations.dart';
 import 'package:motor/motor.dart';
 
+import '../../foundations/foundations.dart';
+import '../buttons/components/m3e_overflow_strategy.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_overflow_bottom_sheet_decoration.dart';
 import '../buttons/styles/m3e_overflow_popup_decoration.dart';
-import '../buttons/components/m3e_overflow_strategy.dart';
 import '../menus/m3e_menus.dart';
 import '../toggle_button/m3e_toggle_button.dart';
+import 'components/m3e_toggle_button_group_item_scope.dart';
+import 'components/m3e_toggle_button_group_provider.dart';
+import 'components/m3e_toggle_button_group_scope.dart';
 import 'controllers/m3e_button_group_overflow_controller.dart';
 import 'enums/m3e_toggle_button_group_enums.dart';
 import 'models/m3e_button_group_action.dart';
 import 'models/m3e_button_group_overflow_paging_window.dart';
-import 'components/m3e_toggle_button_group_item_scope.dart';
-import 'components/m3e_toggle_button_group_provider.dart';
-import 'components/m3e_toggle_button_group_scope.dart';
+
+export 'components/m3e_toggle_button_group_scope.dart';
 export 'enums/m3e_toggle_button_group_enums.dart';
 export 'styles/m3e_toggle_button_group_theme.dart';
-export 'components/m3e_toggle_button_group_scope.dart';
 
 part 'components/m3e_button_group_align.dart';
 part 'components/m3e_button_group_parent_data.dart';
@@ -58,6 +59,7 @@ class _MoveFocusIntent extends Intent {
 /// A horizontal (or vertical) row of [M3EToggleButton]s with optional
 /// neighbor-squish animation and connected-group shape morphing.
 class M3EButtonGroup extends StatefulWidget {
+  /// const.
   const M3EButtonGroup({
     super.key,
     required this.actions,
@@ -83,35 +85,85 @@ class M3EButtonGroup extends StatefulWidget {
     this.overflowIcon,
     this.overflowPopupDecoration = const M3EOverflowPopupDecoration(),
     this.overflowBottomSheetDecoration =
-    const M3EOverflowBottomSheetDecoration(),
+        const M3EOverflowBottomSheetDecoration(),
     this.overflowMenuStyle = M3EButtonGroupOverflowMenuStyle.popup,
     this.overflowStrategy,
   });
 
+  /// final.
+
   final List<M3EButtonGroupAction> actions;
+
+  /// final.
   final M3EButtonGroupType type;
+
+  /// final.
   final M3EButtonShape shape;
+
+  /// final.
   final M3EButtonSize size;
+
+  /// final.
   final M3EButtonStyle style;
+
+  /// final.
   final M3EButtonGroupDensity density;
+
+  /// final.
   final double? spacing;
+
+  /// final.
   final Axis direction;
+
+  /// final.
   final int? selectedIndex;
+
+  /// final.
   final Set<int>? selectedIndices;
+
+  /// final.
   final ValueChanged<int?>? onSelectedIndexChanged;
+
+  /// final.
   final ValueChanged<Set<int>>? onSelectedIndicesChanged;
+
+  /// final.
   final bool neighborSquish;
+
+  /// final.
   final double expandedRatio;
+
+  /// final.
   final M3EHapticFeedback haptic;
+
+  /// final.
   final bool enableFeedback;
+
+  /// final.
   final M3EToggleButtonDecoration? decoration;
+
+  /// final.
   final String? semanticLabel;
+
+  /// final.
   final Clip clipBehavior;
+
+  /// final.
   final M3EButtonGroupOverflow overflow;
+
+  /// final.
   final Widget? overflowIcon;
+
+  /// final.
   final M3EOverflowPopupDecoration overflowPopupDecoration;
+
+  /// final.
   final M3EOverflowBottomSheetDecoration overflowBottomSheetDecoration;
+
+  /// final.
   final M3EButtonGroupOverflowMenuStyle overflowMenuStyle;
+
+  /// final.
   final M3EOverflowStrategy? overflowStrategy;
 
   bool get _connected => type == M3EButtonGroupType.connected;
@@ -155,15 +207,15 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   bool get _hasAnyLabel => _measurement.hasAnyLabel;
   set _hasAnyLabel(bool value) => _measurement.hasAnyLabel = value;
 
-  double _iconOnlyNaturalSizeCache = 40.0;
+  double _iconOnlyNaturalSizeCache = 40;
 
   bool get _supportsAnimatedSquish =>
       widget.direction == Axis.horizontal &&
-          !widget._connected &&
-          widget.neighborSquish;
+      !widget._connected &&
+      widget.neighborSquish;
 
   bool _computeHasAnyLabel() => widget.actions.any(
-        (action) => action.label != null || action.checkedLabel != null,
+    (action) => action.label != null || action.checkedLabel != null,
   );
 
   bool _needsDistinctCheckedMeasurement(M3EButtonGroupAction action) {
@@ -199,16 +251,16 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     assert(() {
       final hasControlledGroup =
           widget.onSelectedIndexChanged != null ||
-              widget.onSelectedIndicesChanged != null;
+          widget.onSelectedIndicesChanged != null;
       if (!hasControlledGroup) return true;
       for (final action in widget.actions) {
         if (action.checked != null) {
           throw FlutterError(
             'M3EButtonGroup: Do not set action.checked when the group uses '
-                'onSelectedIndexChanged or onSelectedIndicesChanged.\n'
-                'Use selectedIndex / selectedIndices on the group instead. '
-                'Mixing per-action checked state with group-controlled selection '
-                'produces undefined behavior.',
+            'onSelectedIndexChanged or onSelectedIndicesChanged.\n'
+            'Use selectedIndex / selectedIndices on the group instead. '
+            'Mixing per-action checked state with group-controlled selection '
+            'produces undefined behavior.',
           );
         }
       }
@@ -233,38 +285,38 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       final action = widget.actions[i];
       return M3EToggleButtonDecoration(
         backgroundColor:
-        action.decoration?.backgroundColor ??
+            action.decoration?.backgroundColor ??
             widget.decoration?.backgroundColor,
         foregroundColor:
-        action.decoration?.foregroundColor ??
+            action.decoration?.foregroundColor ??
             widget.decoration?.foregroundColor,
         side: action.decoration?.side ?? widget.decoration?.side,
         overlayColor:
-        action.decoration?.overlayColor ?? widget.decoration?.overlayColor,
+            action.decoration?.overlayColor ?? widget.decoration?.overlayColor,
         surfaceTintColor:
-        action.decoration?.surfaceTintColor ??
+            action.decoration?.surfaceTintColor ??
             widget.decoration?.surfaceTintColor,
         mouseCursor:
-        action.decoration?.mouseCursor ?? widget.decoration?.mouseCursor,
+            action.decoration?.mouseCursor ?? widget.decoration?.mouseCursor,
         motion: action.decoration?.motion ?? widget.decoration?.motion,
         haptic:
-        action.decoration?.haptic ??
+            action.decoration?.haptic ??
             widget.decoration?.haptic ??
             widget.haptic,
         checkedRadius:
-        action.decoration?.checkedRadius ??
+            action.decoration?.checkedRadius ??
             widget.decoration?.checkedRadius,
         uncheckedRadius:
-        action.decoration?.uncheckedRadius ??
+            action.decoration?.uncheckedRadius ??
             widget.decoration?.uncheckedRadius,
         pressedRadius:
-        action.decoration?.pressedRadius ??
+            action.decoration?.pressedRadius ??
             widget.decoration?.pressedRadius,
         hoveredRadius:
-        action.decoration?.hoveredRadius ??
+            action.decoration?.hoveredRadius ??
             widget.decoration?.hoveredRadius,
         connectedInnerRadius:
-        action.decoration?.connectedInnerRadius ??
+            action.decoration?.connectedInnerRadius ??
             widget.decoration?.connectedInnerRadius,
       );
     });
@@ -289,16 +341,16 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     assert(() {
       final hasControlledGroup =
           widget.onSelectedIndexChanged != null ||
-              widget.onSelectedIndicesChanged != null;
+          widget.onSelectedIndicesChanged != null;
       if (hasControlledGroup) {
         for (final action in widget.actions) {
           if (action.checked != null) {
             throw FlutterError(
               'M3EButtonGroup: Do not set action.checked when the group uses '
-                  'onSelectedIndexChanged or onSelectedIndicesChanged.\n'
-                  'Use selectedIndex / selectedIndices on the group instead. '
-                  'Mixing per-action checked state with group-controlled selection '
-                  'produces undefined behavior.',
+              'onSelectedIndexChanged or onSelectedIndicesChanged.\n'
+              'Use selectedIndex / selectedIndices on the group instead. '
+              'Mixing per-action checked state with group-controlled selection '
+              'produces undefined behavior.',
             );
           }
         }
@@ -312,16 +364,15 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     );
 
     final nextLayoutSignature =
-    (actionsIdentityChanged || maybeScalarLayoutChanged)
+        (actionsIdentityChanged || maybeScalarLayoutChanged)
         ? _computeLayoutSignature(widget)
         : _layoutSignature;
     final nextFocusNodeSignature = actionsIdentityChanged
         ? _computeFocusNodeSignature(widget.actions)
         : _focusNodeSignature;
-    final bool lengthChanged = old.actions.length != widget.actions.length;
-    final bool layoutChanged = nextLayoutSignature != _layoutSignature;
-    final bool focusNodesChanged =
-        nextFocusNodeSignature != _focusNodeSignature;
+    final lengthChanged = old.actions.length != widget.actions.length;
+    final layoutChanged = nextLayoutSignature != _layoutSignature;
+    final focusNodesChanged = nextFocusNodeSignature != _focusNodeSignature;
 
     if (lengthChanged) {
       _disposeControllers();
@@ -368,8 +419,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   void _measureButtonWidths(int generation) {
     if (!mounted || generation != _measurementGeneration) return;
-    bool anyChanged = false;
-    for (int i = 0; i < widget.actions.length; i++) {
+    var anyChanged = false;
+    for (var i = 0; i < widget.actions.length; i++) {
       final action = widget.actions[i];
       if (action.label == null && action.checkedLabel == null) {
         continue;
@@ -418,7 +469,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     if (_hasAnyLabel) {
       final gen = _measurementGeneration;
       WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _measureButtonWidths(gen),
+        (_) => _measureButtonWidths(gen),
       );
     }
   }
@@ -522,7 +573,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   int _computeLayoutSignature(M3EButtonGroup group) {
-    int actionsHash = 0;
+    var actionsHash = 0;
     for (final action in group.actions) {
       actionsHash = Object.hash(actionsHash, _actionLayoutSignature(action));
     }
@@ -565,10 +616,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     return w.hashCode;
   }
 
-  bool _didScalarLayoutFieldsChange(
-      M3EButtonGroup old,
-      M3EButtonGroup next,
-      ) {
+  bool _didScalarLayoutFieldsChange(M3EButtonGroup old, M3EButtonGroup next) {
     return old.type != next.type ||
         old.shape != next.shape ||
         old.size != next.size ||
@@ -794,8 +842,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
         if (maxMain.isFinite) {
           final hasMeasurements =
               _overflowController.stableAllOverflowMeasured.value ||
-                  !_hasAnyLabel ||
-                  _allOverflowExtentsMeasured();
+              !_hasAnyLabel ||
+              _allOverflowExtentsMeasured();
 
           if (hasMeasurements) {
             final itemExtents = [
@@ -803,10 +851,9 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
                 _itemMainExtentForOverflow(context, i),
             ];
 
-            triggerExtent =
-                M3EButtonGroupOverflowController.roundConsumed(
-                  strategy.triggerExtent ?? _defaultOverflowTriggerExtent(),
-                );
+            triggerExtent = M3EButtonGroupOverflowController.roundConsumed(
+              strategy.triggerExtent ?? _defaultOverflowTriggerExtent(),
+            );
 
             visibleCount = _overflowController.computeVisibleCountForMenu(
               maxMain: maxMain,
@@ -837,7 +884,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
                 child: M3EButtonGroupItemScope(
                   index: index,
                   count:
-                  visibleCount +
+                      visibleCount +
                       (visibleCount < widget.actions.length ? 1 : 0),
                   child: _buildButton(context, index, isFirst, isLast),
                 ),
@@ -878,10 +925,10 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
               }
             },
             checked:
-            _selectedToggleActionInRange(
-              visibleCount,
-              widget.actions.length - 1,
-            ) !=
+                _selectedToggleActionInRange(
+                  visibleCount,
+                  widget.actions.length - 1,
+                ) !=
                 null,
           );
 
@@ -913,10 +960,10 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   Widget _repaintButton(Widget child) => RepaintBoundary(child: child);
 
   Widget _buildAnimatedLinearLayout(
-      BuildContext context,
-      double spacing,
-      double maxMain,
-      ) {
+    BuildContext context,
+    double spacing,
+    double maxMain,
+  ) {
     final count = widget.actions.length;
     final squishEnabled = _supportsAnimatedSquish;
 
@@ -952,7 +999,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       builder: (context, pressedIndex, _) {
         return SingleMotionBuilder(
           motion:
-          widget.decoration?.motion?.toMotion() ??
+              widget.decoration?.motion?.toMotion() ??
               M3EButtonMotion.standard.toMotion(),
           value: pressedIndex != null ? 1.0 : 0.0,
           builder: (context, animValue, _) {
@@ -986,7 +1033,6 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
         return SingleChildScrollView(
           scrollDirection: widget.direction,
           primary: false,
-          clipBehavior: Clip.hardEdge,
           child: core,
         );
       },
@@ -1005,8 +1051,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
         final hasMeasurements =
             _overflowController.stableAllOverflowMeasured.value ||
-                !_hasAnyLabel ||
-                _allOverflowExtentsMeasured();
+            !_hasAnyLabel ||
+            _allOverflowExtentsMeasured();
 
         if (!hasMeasurements) {
           return _linearScrollable(context, spacing);
@@ -1032,7 +1078,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
         final visibleItems = <Widget>[];
         final visibleScopeCount = visibleCount + 1;
-        for (int i = 0; i < visibleCount; i++) {
+        for (var i = 0; i < visibleCount; i++) {
           if (visibleItems.isNotEmpty) {
             visibleItems.add(_buildGap(context, i - 1, spacing));
           }
@@ -1080,8 +1126,8 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
         final hasMeasurements =
             _overflowController.stableAllOverflowMeasured.value ||
-                (!_hasAnyLabel) ||
-                _allOverflowExtentsMeasured();
+            (!_hasAnyLabel) ||
+            _allOverflowExtentsMeasured();
 
         if (!hasMeasurements) {
           return _linearScrollable(context, spacing);
@@ -1098,17 +1144,16 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
             final pagingWindow = _overflowController.computePagingWindow(
               maxMain: maxMain,
               itemExtents: itemExtents,
-              triggerExtent:
-              M3EButtonGroupOverflowController.roundConsumed(
+              triggerExtent: M3EButtonGroupOverflowController.roundConsumed(
                 _defaultOverflowTriggerExtent(),
               ),
               separatorBetweenItems: (_) => _separatorMainExtent(spacing),
               separatorBeforeOverflow: (isFirst) =>
-              isFirst ? 0.0 : _separatorMainExtent(spacing),
+                  isFirst ? 0.0 : _separatorMainExtent(spacing),
             );
 
             final visibleItems = <Widget>[];
-            int localIndex = 0;
+            var localIndex = 0;
             if (pagingWindow.needsBack) {
               visibleItems.add(
                 _repaintButton(
@@ -1192,11 +1237,13 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
           focusedIndex: focusedIndex,
           beforeIndex: beforeIndex,
           spacing: spacing,
-          connectedGap:
-              M3ETheme.of(context).toggleButtonGroupTheme.connectedGap,
+          connectedGap: M3ETheme.of(
+            context,
+          ).toggleButtonGroupTheme.connectedGap,
         );
 
-        final double width = widget.direction == Axis.horizontal ? gap : 0;        final double height = widget.direction == Axis.vertical ? gap : 0;
+        final double width = widget.direction == Axis.horizontal ? gap : 0;
+        final double height = widget.direction == Axis.vertical ? gap : 0;
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 100),
@@ -1210,15 +1257,16 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   double _separatorMainExtent(double spacing) {
-    final connectedGap =
-        M3ETheme.of(context).toggleButtonGroupTheme.connectedGap;
+    final connectedGap = M3ETheme.of(
+      context,
+    ).toggleButtonGroupTheme.connectedGap;
     return M3EButtonGroupOverflowController.roundConsumed(
       widget._connected ? connectedGap : spacing,
     );
   }
 
   bool _allOverflowExtentsMeasured() {
-    for (int i = 0; i < widget.actions.length; i++) {
+    for (var i = 0; i < widget.actions.length; i++) {
       final action = widget.actions[i];
       if (action.label != null || action.checkedLabel != null) {
         if (!_isMeasured(i)) return false;
@@ -1237,9 +1285,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
     final measurements = buttonTheme.measurements(
       _mapSize(widget.size, actionWidth: widget.actions[index].width),
     );
-    return M3EButtonGroupOverflowController.roundConsumed(
-      measurements.height,
-    );
+    return M3EButtonGroupOverflowController.roundConsumed(measurements.height);
   }
 
   double _defaultOverflowTriggerExtent() {
@@ -1259,12 +1305,12 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   Widget _buildOverflowTrigger(
-      BuildContext context, {
-        required int targetIndex,
-        required bool isBack,
-        required bool isFirst,
-        required bool isLast,
-      }) {
+    BuildContext context, {
+    required int targetIndex,
+    required bool isBack,
+    required bool isFirst,
+    required bool isLast,
+  }) {
     return _buildOverflowIndicatorButton(
       context,
       start: isBack ? 0 : targetIndex,
@@ -1286,11 +1332,11 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   Widget _buildOverflowMenuTrigger(
-      BuildContext context, {
-        required int firstHiddenIndex,
-        required bool isFirst,
-        required bool isLast,
-      }) {
+    BuildContext context, {
+    required int firstHiddenIndex,
+    required bool isFirst,
+    required bool isLast,
+  }) {
     return _buildOverflowIndicatorButton(
       context,
       start: firstHiddenIndex,
@@ -1304,15 +1350,15 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   Widget _buildOverflowIndicatorButton(
-      BuildContext context, {
-        required int start,
-        required int end,
-        required Widget icon,
-        required String semanticLabel,
-        required bool isFirst,
-        required bool isLast,
-        required VoidCallback onPressed,
-      }) {
+    BuildContext context, {
+    required int start,
+    required int end,
+    required Widget icon,
+    required String semanticLabel,
+    required bool isFirst,
+    required bool isLast,
+    required VoidCallback onPressed,
+  }) {
     return KeyedSubtree(
       key: ValueKey('toggle-overflow-$start-$end-$isFirst-$isLast'),
       child: M3EButtonGroupItemScope(
@@ -1380,7 +1426,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   M3EButtonGroupAction? _selectedToggleActionInRange(int start, int end) {
     if (start < 0 || end >= widget.actions.length || start > end) return null;
-    for (int i = start; i <= end; i++) {
+    for (var i = start; i <= end; i++) {
       if (_isToggleActionSelected(i)) return widget.actions[i];
     }
     final selectedIndex = _lastOverflowSelectionIndex;
@@ -1390,11 +1436,11 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   Widget _buildButton(
-      BuildContext context,
-      int index,
-      bool isFirst,
-      bool isLast,
-      ) {
+    BuildContext context,
+    int index,
+    bool isFirst,
+    bool isLast,
+  ) {
     final action = widget.actions[index];
     final bool checked = _isToggleActionSelected(index);
     final isVisualFirst = _isRtl ? isLast : isFirst;
@@ -1451,10 +1497,10 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       final checkedWidth = _measuredCheckedWidths[index] ?? uncheckedWidth;
 
       final motion =
-      (action.decoration?.motion ??
-          widget.decoration?.motion ??
-          M3EButtonMotion.standard)
-          .toMotion();
+          (action.decoration?.motion ??
+                  widget.decoration?.motion ??
+                  M3EButtonMotion.standard)
+              .toMotion();
 
       return SingleMotionBuilder(
         motion: motion,

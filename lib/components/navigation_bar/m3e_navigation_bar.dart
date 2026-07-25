@@ -17,6 +17,7 @@ import 'styles/m3e_navigation_bar_theme.dart';
 /// Pill selection uses a lead/trail spring indicator that stretches between
 /// destinations (spatial springs motion spec).
 class M3ENavigationBar extends StatefulWidget {
+  /// M3ENavigationBar.
   const M3ENavigationBar({
     super.key,
     required this.destinations,
@@ -35,23 +36,51 @@ class M3ENavigationBar extends StatefulWidget {
     this.semanticLabel,
   });
 
+  /// destinations.
+
   final List<M3ENavigationBarDestination> destinations;
+
+  /// selectedIndex.
   final int selectedIndex;
+
+  /// onDestinationSelected.
   final ValueChanged<int>? onDestinationSelected;
 
+  /// labelBehavior.
+
   final M3ENavBarLabelBehavior labelBehavior;
+
+  /// size.
   final M3ENavBarSize size;
+
+  /// shapeFamily.
   final M3ENavBarShapeFamily shapeFamily;
+
+  /// density.
   final M3ENavBarDensity density;
 
+  /// backgroundColor.
+
   final Color? backgroundColor;
+
+  /// elevation.
   final double? elevation;
 
+  /// indicatorStyle.
+
   final M3ENavBarIndicatorStyle indicatorStyle;
+
+  /// indicatorColor.
   final Color? indicatorColor;
 
+  /// padding.
+
   final EdgeInsetsGeometry? padding;
+
+  /// safeArea.
   final bool safeArea;
+
+  /// semanticLabel.
 
   final String? semanticLabel;
 
@@ -119,16 +148,16 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
         : metrics.heightMedium;
     final Color bg = widget.backgroundColor ?? navTheme.containerColor(scheme);
     final ShapeBorder shape = navTheme.containerShape(widget.shapeFamily);
-    final double bottomInset =
-        widget.safeArea ? MediaQuery.viewPaddingOf(context).bottom : 0.0;
+    final double bottomInset = widget.safeArea
+        ? MediaQuery.viewPaddingOf(context).bottom
+        : 0.0;
 
     final Color selected = navTheme.selectedColor(scheme);
     final Color unselected = navTheme.unselectedColor(scheme);
     final TextStyle labelBase = navTheme.labelStyle(m3e.typeScale);
     final Color indicator =
         widget.indicatorColor ?? navTheme.indicatorColor(scheme);
-    final bool usePill =
-        widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
+    final usePill = widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
 
     final Widget destinationsRow = Row(
       children: <Widget>[
@@ -176,24 +205,14 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
       shape: shape,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
-        child: SizedBox(
-          height: height,
-          child: body,
-        ),
+        child: SizedBox(height: height, child: body),
       ),
     );
 
-    nav = Padding(
-      padding: widget.padding ?? EdgeInsets.zero,
-      child: nav,
-    );
+    nav = Padding(padding: widget.padding ?? EdgeInsets.zero, child: nav);
 
     if (widget.semanticLabel != null) {
-      nav = Semantics(
-        container: true,
-        label: widget.semanticLabel,
-        child: nav,
-      );
+      nav = Semantics(container: true, label: widget.semanticLabel, child: nav);
     }
     return nav;
   }

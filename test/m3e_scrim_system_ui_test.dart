@@ -28,12 +28,11 @@ void main() {
     expect(style.systemNavigationBarContrastEnforced, isNull);
   });
 
-  testWidgets('wrap applies AnnotatedRegion with overlayStyle',
-      (WidgetTester tester) async {
+  testWidgets('wrap applies AnnotatedRegion with overlayStyle', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: M3EScrimSystemUi.wrap(const SizedBox.shrink()),
-      ),
+      MaterialApp(home: M3EScrimSystemUi.wrap(const SizedBox.shrink())),
     );
 
     final AnnotatedRegion<SystemUiOverlayStyle> region = tester.widget(
@@ -43,18 +42,20 @@ void main() {
     expect(region.value, M3EScrimSystemUi.overlayStyle);
   });
 
-  testWidgets('wrapBottomSheet applies AnnotatedRegion with bottomSheetOverlayStyle',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: M3EScrimSystemUi.wrapBottomSheet(const SizedBox.shrink()),
-      ),
-    );
+  testWidgets(
+    'wrapBottomSheet applies AnnotatedRegion with bottomSheetOverlayStyle',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: M3EScrimSystemUi.wrapBottomSheet(const SizedBox.shrink()),
+        ),
+      );
 
-    final AnnotatedRegion<SystemUiOverlayStyle> region = tester.widget(
-      find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
-    );
+      final AnnotatedRegion<SystemUiOverlayStyle> region = tester.widget(
+        find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+      );
 
-    expect(region.value, M3EScrimSystemUi.bottomSheetOverlayStyle);
-  });
+      expect(region.value, M3EScrimSystemUi.bottomSheetOverlayStyle);
+    },
+  );
 }

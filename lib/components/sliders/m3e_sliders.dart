@@ -44,8 +44,13 @@ export 'styles/m3e_slider_theme.dart';
 /// - [M3ESlider.vertical] → `VerticalSlider`
 /// - [M3ESlider.verticalCentered] → `VerticalSlider` + `CenteredTrack`
 ///
-/// Selects a single value from a continuous or, when [divisions] is set,
-/// discrete range. Pass a null [onChanged] to disable.
+/// Selects a single value from a continuous or, when `divisions` is set,
+/// discrete range. Pass a null `onChanged` to disable.
+
+part 'components/m3e_slider_track_icons_overlay.dart';
+
+/// M3ESlider.
+
 class M3ESlider extends StatefulWidget {
   /// Standard horizontal slider (active track from start → thumb).
   const M3ESlider({
@@ -66,15 +71,15 @@ class M3ESlider extends StatefulWidget {
     this.dotSpacing,
     this.dotBuilder,
     super.key,
-  })  : axis = Axis.horizontal,
-        trackKind = M3ESliderTrackKind.standard,
-        topToBottom = true,
-        wavy = false,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.horizontal,
+       trackKind = M3ESliderTrackKind.standard,
+       topToBottom = true,
+       wavy = false,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null,
+       assert(max > min, 'max must be greater than min.');
 
   /// Horizontal slider with a centered active track.
   const M3ESlider.centered({
@@ -95,15 +100,15 @@ class M3ESlider extends StatefulWidget {
     this.dotSpacing,
     this.dotBuilder,
     super.key,
-  })  : axis = Axis.horizontal,
-        trackKind = M3ESliderTrackKind.centered,
-        topToBottom = true,
-        wavy = false,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.horizontal,
+       trackKind = M3ESliderTrackKind.centered,
+       topToBottom = true,
+       wavy = false,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null,
+       assert(max > min, 'max must be greater than min.');
 
   /// Horizontal slider whose active value is a traveling sine wave.
   ///
@@ -131,11 +136,11 @@ class M3ESlider extends StatefulWidget {
     this.wavelength,
     this.waveSpeed,
     super.key,
-  })  : axis = Axis.horizontal,
-        trackKind = M3ESliderTrackKind.standard,
-        topToBottom = true,
-        wavy = true,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.horizontal,
+       trackKind = M3ESliderTrackKind.standard,
+       topToBottom = true,
+       wavy = true,
+       assert(max > min, 'max must be greater than min.');
 
   /// Horizontal centered slider with a wavy active value segment.
   const M3ESlider.wavyCentered({
@@ -160,11 +165,11 @@ class M3ESlider extends StatefulWidget {
     this.wavelength,
     this.waveSpeed,
     super.key,
-  })  : axis = Axis.horizontal,
-        trackKind = M3ESliderTrackKind.centered,
-        topToBottom = true,
-        wavy = true,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.horizontal,
+       trackKind = M3ESliderTrackKind.centered,
+       topToBottom = true,
+       wavy = true,
+       assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider (Compose `VerticalSlider`).
   ///
@@ -189,14 +194,14 @@ class M3ESlider extends StatefulWidget {
     this.dotBuilder,
     this.topToBottom = false,
     super.key,
-  })  : axis = Axis.vertical,
-        trackKind = M3ESliderTrackKind.standard,
-        wavy = false,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.vertical,
+       trackKind = M3ESliderTrackKind.standard,
+       wavy = false,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null,
+       assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider with a centered active track.
   ///
@@ -221,14 +226,14 @@ class M3ESlider extends StatefulWidget {
     this.dotBuilder,
     this.topToBottom = false,
     super.key,
-  })  : axis = Axis.vertical,
-        trackKind = M3ESliderTrackKind.centered,
-        wavy = false,
-        amplitude = null,
-        amplitudeForProgress = null,
-        wavelength = null,
-        waveSpeed = null,
-        assert(max > min, 'max must be greater than min.');
+  }) : axis = Axis.vertical,
+       trackKind = M3ESliderTrackKind.centered,
+       wavy = false,
+       amplitude = null,
+       amplitudeForProgress = null,
+       wavelength = null,
+       waveSpeed = null,
+       assert(max > min, 'max must be greater than min.');
 
   /// Current value in [min]..[max].
   final double value;
@@ -236,7 +241,11 @@ class M3ESlider extends StatefulWidget {
   /// Called when the value changes. Null disables the slider.
   final ValueChanged<double>? onChanged;
 
+  /// min.
+
   final double min;
+
+  /// max.
   final double max;
 
   /// Discrete steps between [min] and [max] (Flutter Material [divisions]).
@@ -259,7 +268,8 @@ class M3ESlider extends StatefulWidget {
     required BuildContext context,
     required M3ESliderColors colors,
     required bool pressed,
-  })? thumbBuilder;
+  })?
+  thumbBuilder;
 
   /// Replaces the default track painter widget.
   final Widget Function({
@@ -269,9 +279,14 @@ class M3ESlider extends StatefulWidget {
     required double fraction,
     required List<double> tickFractions,
     required double handleThickness,
-  })? trackBuilder;
+  })?
+  trackBuilder;
+
+  /// axis.
 
   final Axis axis;
+
+  /// trackKind.
   final M3ESliderTrackKind trackKind;
 
   /// When [axis] is vertical, `true` maps the top edge to [min].
@@ -383,8 +398,10 @@ class _M3ESliderState extends State<M3ESlider>
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3ESliderTheme sliderTheme = theme.sliderTheme;
-    final M3ESliderColors colors =
-        sliderTheme.colors(theme.colorScheme, enabled: _enabled);
+    final M3ESliderColors colors = sliderTheme.colors(
+      theme.colorScheme,
+      enabled: _enabled,
+    );
     final TextDirection direction = Directionality.of(context);
     final bool rtl = !_vertical && direction == TextDirection.rtl;
     final bool reverse = _vertical ? !widget.topToBottom : rtl;
@@ -392,10 +409,11 @@ class _M3ESliderState extends State<M3ESlider>
     final double handleThickness = _pressed
         ? sliderTheme.pressedHandleWidth
         : (_vertical
-            ? M3ESliderTokens.verticalHandleHeight
-            : sliderTheme.handleWidth);
+              ? M3ESliderTokens.verticalHandleHeight
+              : sliderTheme.handleWidth);
 
-    final String indicatorLabel = widget.label ??
+    final String indicatorLabel =
+        widget.label ??
         (widget.divisions != null
             ? widget.value.round().toString()
             : widget.value.toStringAsFixed(2));
@@ -405,20 +423,19 @@ class _M3ESliderState extends State<M3ESlider>
     final double amplitudeFactor = _amplitudeFactor(sliderTheme);
     final double trackThickness =
         widget.trackThickness ?? sliderTheme.trackHeight;
-    final double thumbLength =
-        widget.thumbLength ?? sliderTheme.handleHeight;
-    final double dotSize =
-        widget.dotSize ?? sliderTheme.stopIndicatorSize;
+    final double thumbLength = widget.thumbLength ?? sliderTheme.handleHeight;
+    final double dotSize = widget.dotSize ?? sliderTheme.stopIndicatorSize;
     final double dotSpacing =
         widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace;
-    final bool useCustomDots = widget.dotBuilder != null;
+    final useCustomDots = widget.dotBuilder != null;
 
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
           slider: true,
           enabled: _enabled,
-          value: widget.semanticFormatterCallback?.call(widget.value) ??
+          value:
+              widget.semanticFormatterCallback?.call(widget.value) ??
               indicatorLabel,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -427,8 +444,8 @@ class _M3ESliderState extends State<M3ESlider>
                   : constraints.maxWidth;
               final double cross = _vertical
                   ? (constraints.maxWidth.isFinite
-                      ? constraints.maxWidth
-                      : math.max(sliderTheme.height, thumbLength))
+                        ? constraints.maxWidth
+                        : math.max(sliderTheme.height, thumbLength))
                   : math.max(sliderTheme.height, thumbLength);
 
               Widget buildTrack({required double phase}) {
@@ -485,9 +502,7 @@ class _M3ESliderState extends State<M3ESlider>
                   ? AnimatedBuilder(
                       animation: _waveController,
                       builder: (BuildContext context, Widget? child) {
-                        return buildTrack(
-                          phase: _phase(wavelength, waveSpeed),
-                        );
+                        return buildTrack(phase: _phase(wavelength, waveSpeed));
                       },
                     )
                   : buildTrack(phase: 0);
@@ -502,7 +517,7 @@ class _M3ESliderState extends State<M3ESlider>
                 );
               }
 
-              Widget trackLayer = track;
+              var trackLayer = track;
               if (useCustomDots) {
                 trackLayer = Stack(
                   fit: StackFit.expand,
@@ -534,7 +549,8 @@ class _M3ESliderState extends State<M3ESlider>
                 trackLayer = Transform.flip(flipY: true, child: trackLayer);
               }
 
-              final Widget thumb = widget.thumbBuilder?.call(
+              final Widget thumb =
+                  widget.thumbBuilder?.call(
                     context: context,
                     colors: colors,
                     pressed: _pressed,
@@ -562,7 +578,7 @@ class _M3ESliderState extends State<M3ESlider>
                 onHorizontalDragUpdate: !_enabled || _vertical
                     ? null
                     : (DragUpdateDetails d) =>
-                        _update(d.localPosition.dx, extent, reverse),
+                          _update(d.localPosition.dx, extent, reverse),
                 onHorizontalDragEnd: !_enabled || _vertical
                     ? null
                     : (_) => _endInteraction(),
@@ -575,18 +591,20 @@ class _M3ESliderState extends State<M3ESlider>
                 onVerticalDragUpdate: !_enabled || !_vertical
                     ? null
                     : (DragUpdateDetails d) =>
-                        _update(d.localPosition.dy, extent, reverse),
+                          _update(d.localPosition.dy, extent, reverse),
                 onVerticalDragEnd: !_enabled || !_vertical
                     ? null
                     : (_) => _endInteraction(),
-                onVerticalDragCancel:
-                    !_enabled || !_vertical ? null : _endInteraction,
+                onVerticalDragCancel: !_enabled || !_vertical
+                    ? null
+                    : _endInteraction,
                 onTapDown: !_enabled
                     ? null
                     : (TapDownDetails d) {
                         setState(() => _pressed = true);
-                        final double primary =
-                            _vertical ? d.localPosition.dy : d.localPosition.dx;
+                        final double primary = _vertical
+                            ? d.localPosition.dy
+                            : d.localPosition.dx;
                         _update(primary, extent, reverse);
                       },
                 onTapUp: !_enabled ? null : (_) => _endInteraction(),
@@ -651,89 +669,3 @@ class _M3ESliderState extends State<M3ESlider>
 }
 
 /// Overlays optional track icons when segment space allows.
-class _TrackIconsOverlay extends StatelessWidget {
-  const _TrackIconsOverlay({
-    required this.icons,
-    required this.fraction,
-    required this.trackKind,
-    required this.axis,
-    required this.child,
-  });
-
-  final M3ESliderTrackIcons icons;
-  final double fraction;
-  final M3ESliderTrackKind trackKind;
-  final Axis axis;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        child,
-        Positioned.fill(
-          child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints c) {
-              final bool vertical = axis == Axis.vertical;
-              final double extent = vertical ? c.maxHeight : c.maxWidth;
-              final double icon = icons.size;
-              final List<Widget> placed = <Widget>[];
-
-              void place(Widget? w, double primary, {required bool active}) {
-                if (w == null) {
-                  return;
-                }
-                // Hide when the segment cannot fit the icon.
-                final double activeLen = fraction * extent;
-                final double inactiveLen = (1 - fraction) * extent;
-                if (active && activeLen < icon + 8) {
-                  return;
-                }
-                if (!active && inactiveLen < icon + 8) {
-                  return;
-                }
-                placed.add(
-                  Positioned(
-                    left: vertical ? (c.maxWidth - icon) / 2 : primary,
-                    top: vertical ? primary : (c.maxHeight - icon) / 2,
-                    width: icon,
-                    height: icon,
-                    child: IconTheme.merge(
-                      data: IconThemeData(size: icon),
-                      child: w,
-                    ),
-                  ),
-                );
-              }
-
-              if (trackKind == M3ESliderTrackKind.centered) {
-                final double mid = extent / 2;
-                place(icons.activeStart, mid - icon - 4, active: true);
-                place(icons.activeEnd, fraction * extent + 4, active: true);
-              } else {
-                place(icons.activeStart, 4, active: true);
-                place(
-                  icons.activeEnd,
-                  fraction * extent - icon - 4,
-                  active: true,
-                );
-                place(
-                  icons.inactiveStart,
-                  fraction * extent + 4,
-                  active: false,
-                );
-                place(
-                  icons.inactiveEnd,
-                  extent - icon - 4,
-                  active: false,
-                );
-              }
-
-              return Stack(children: placed);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}

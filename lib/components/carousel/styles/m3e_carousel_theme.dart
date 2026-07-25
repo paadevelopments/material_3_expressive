@@ -5,11 +5,22 @@ import '../../../foundations/foundations.dart';
 /// Theme values for `M3ECarousel`.
 @immutable
 class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
+  /// defaultUncontainedItemExtent.
   static const double defaultUncontainedItemExtent = 270;
+
+  /// defaultUncontainedShrinkExtent.
   static const double defaultUncontainedShrinkExtent = 150;
+
+  /// defaultBorderRadiusValue.
   static const double defaultBorderRadiusValue = 28;
+
+  /// defaultScrollAnimationDuration.
   static const int defaultScrollAnimationDuration = 500;
+
+  /// defaultSingleSwipeGestureSensitivityRange.
   static const int defaultSingleSwipeGestureSensitivityRange = 300;
+
+  /// M3ECarouselTheme.
 
   const M3ECarouselTheme({
     this.uncontainedItemExtent = defaultUncontainedItemExtent,
@@ -23,23 +34,49 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
     this.itemClipBehavior = Clip.antiAlias,
   });
 
+  /// defaults.
+
   static const M3ECarouselTheme defaults = M3ECarouselTheme();
 
+  /// uncontainedItemExtent.
+
   final double uncontainedItemExtent;
+
+  /// uncontainedShrinkExtent.
   final double uncontainedShrinkExtent;
+
+  /// borderRadiusValue.
   final double borderRadiusValue;
+
+  /// scrollAnimationDuration.
   final int scrollAnimationDuration;
+
+  /// singleSwipeGestureSensitivityRange.
   final int singleSwipeGestureSensitivityRange;
+
+  /// itemPadding.
   final EdgeInsetsGeometry itemPadding;
+
+  /// elevation.
   final double elevation;
+
+  /// itemClipBehavior.
   final Clip itemClipBehavior;
+
+  /// The borderRadius.
 
   BorderRadius get borderRadius =>
       BorderRadius.all(Radius.circular(borderRadiusValue));
 
+  /// The shape.
+
   ShapeBorder get shape => RoundedRectangleBorder(borderRadius: borderRadius);
 
+  /// backgroundColor.
+
   Color backgroundColor(M3EColorScheme scheme) => scheme.surface;
+
+  /// overlayColor.
 
   WidgetStateProperty<Color?> overlayColor(M3EColorScheme scheme) {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -75,7 +112,8 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
       borderRadiusValue: borderRadiusValue ?? this.borderRadiusValue,
       scrollAnimationDuration:
           scrollAnimationDuration ?? this.scrollAnimationDuration,
-      singleSwipeGestureSensitivityRange: singleSwipeGestureSensitivityRange ??
+      singleSwipeGestureSensitivityRange:
+          singleSwipeGestureSensitivityRange ??
           this.singleSwipeGestureSensitivityRange,
       itemPadding: itemPadding ?? this.itemPadding,
       elevation: elevation ?? this.elevation,
@@ -89,15 +127,21 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
       return this;
     }
     return M3ECarouselTheme(
-      uncontainedItemExtent:
-          _lerpDouble(uncontainedItemExtent, other.uncontainedItemExtent, t)!,
+      uncontainedItemExtent: _lerpDouble(
+        uncontainedItemExtent,
+        other.uncontainedItemExtent,
+        t,
+      )!,
       uncontainedShrinkExtent: _lerpDouble(
         uncontainedShrinkExtent,
         other.uncontainedShrinkExtent,
         t,
       )!,
-      borderRadiusValue:
-          _lerpDouble(borderRadiusValue, other.borderRadiusValue, t)!,
+      borderRadiusValue: _lerpDouble(
+        borderRadiusValue,
+        other.borderRadiusValue,
+        t,
+      )!,
       scrollAnimationDuration: _lerpInt(
         scrollAnimationDuration,
         other.scrollAnimationDuration,
@@ -108,7 +152,8 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
         other.singleSwipeGestureSensitivityRange,
         t,
       ),
-      itemPadding: EdgeInsets.lerp(
+      itemPadding:
+          EdgeInsets.lerp(
             itemPadding as EdgeInsets?,
             other.itemPadding as EdgeInsets?,
             t,
