@@ -50,9 +50,17 @@ class M3EDivider extends StatelessWidget {
     if (axis == M3EDividerAxis.vertical) {
       return Padding(
         padding: EdgeInsets.only(top: indent, bottom: endIndent),
-        child: SizedBox(
-          width: lineThickness,
-          child: ColoredBox(color: line),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double? height = constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : null;
+            return SizedBox(
+              width: lineThickness,
+              height: height,
+              child: ColoredBox(color: line),
+            );
+          },
         ),
       );
     }

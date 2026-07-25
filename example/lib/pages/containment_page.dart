@@ -268,20 +268,27 @@ class _ContainmentPageState extends State<ContainmentPage>
         SizedBox(
           height: 40,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text(
-                'Left',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurface,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Left',
+                  style: theme.typeScale.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               const M3EDivider(axis: M3EDividerAxis.vertical),
               const SizedBox(width: 12),
-              Text(
-                'Right',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurface,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Right',
+                  style: theme.typeScale.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
             ],

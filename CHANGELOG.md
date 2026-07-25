@@ -1,3 +1,22 @@
+## 1.0.1
+
+### Fixed
+
+* **License detection** — `LICENSE` is now a clean OSI-recognized MIT text so
+  pub.dev awards the license points; third-party and vendored attributions
+  live in `NOTICE`.
+* **Date / range / time picker dialogs** — landscape layouts no longer stretch
+  to the screen edge; dialogs use bounded height and wrap content correctly.
+* **Landscape picker sizing** — slightly wider dialog and title panel defaults
+  for date, range, and time pickers.
+* **Vertical `M3EDivider`** — fills the parent’s bounded height again so it
+  renders in rows (for example the containment gallery demo).
+
+### Changed
+
+* Internal refactors for analyzer / `klin_dart` compliance (file and complexity
+  splits) with no intentional public API breaks.
+
 ## 1.0.0
 
 Initial release.

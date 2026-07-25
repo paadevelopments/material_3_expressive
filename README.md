@@ -76,7 +76,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.0
+  material_3_expressive: ^1.0.1
 ```
 
 Then fetch it:
@@ -1372,7 +1372,8 @@ implementations. Thanks to the original authors:
 | [pub.dev](https://pub.dev/) | Spring motion (`motor`), expressive morph polygons (`material_new_shapes`), dynamic color (`dynamic_color`) | See [Dependencies](#dependencies) |
 
 Copyright notices and licenses from those sources are retained in the
-corresponding source files where applicable.
+corresponding source files where applicable, and summarized in
+[`NOTICE`](NOTICE).
 
 ## License
 
