@@ -1,3 +1,10 @@
+## 1.0.2
+
+### Fixed
+
+* **Platform tags** — declare all six Flutter platforms in `pubspec.yaml` so
+  pub.dev lists iOS and Web (dynamic color still no-ops where unsupported).
+
 ## 1.0.1
 
 ### Fixed
