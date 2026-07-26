@@ -76,7 +76,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.2
+  material_3_expressive: ^1.0.3
 ```
 
 Then fetch it:

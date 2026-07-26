@@ -5,10 +5,13 @@ import 'package:flutter/rendering.dart';
 
 import 'm3e_carousel_view.dart';
 
-/// M3ECarouselWrapper.
-
+/// Wraps [M3ECarouselView] with tap handling and a neighbor pulse animation.
+///
+/// Item content is laid out at the largest slot size (plus pulse budget) and
+/// clipped to the current item bounds. Scrolling and tap pulse only move that
+/// clip "window"; the content layer stays still underneath.
 class M3ECarouselWrapper extends StatefulWidget {
-  /// M3ECarouselWrapper.
+  /// Creates a carousel wrapper with optional pulse animation on tap.
   const M3ECarouselWrapper({
     super.key,
     this.freeScroll = false,
@@ -43,65 +46,64 @@ class M3ECarouselWrapper extends StatefulWidget {
          'Provide either itemExtent for standard layouts OR flexWeights for weighted layouts.',
        );
 
-  /// freeScroll.
-
+  /// Whether free scrolling is enabled (passed through to scroll physics).
   final bool freeScroll;
 
-  /// padding.
+  /// Padding around each carousel item.
   final EdgeInsets? padding;
 
-  /// backgroundColor.
+  /// Background color for each item's [Material].
   final Color? backgroundColor;
 
-  /// elevation.
+  /// Elevation for each item's [Material].
   final double? elevation;
 
-  /// shape.
+  /// Shape for each item's [Material] and pulse clip radius.
   final ShapeBorder? shape;
 
-  /// itemClipBehavior.
+  /// Clip behavior for pulsed item content.
   final Clip itemClipBehavior;
 
-  /// overlayColor.
+  /// Ink overlay colors when splash is enabled on the wrapper layer.
   final WidgetStateProperty<Color?>? overlayColor;
 
-  /// itemSnapping.
+  /// Whether the underlying view snaps to items.
   final bool itemSnapping;
 
-  /// consumeMaxWeight.
+  /// Whether collapsed weighted items may expand to the max weight size.
   final bool consumeMaxWeight;
 
-  /// shrinkExtent.
+  /// Minimum item extent during scroll transitions.
   final double shrinkExtent;
 
-  /// controller.
+  /// Optional controller for the underlying [M3ECarouselView].
   final M3ECarouselController? controller;
 
-  /// scrollDirection.
+  /// Scroll axis for the carousel.
   final Axis scrollDirection;
 
-  /// reverse.
+  /// Whether the list scrolls in the reverse reading direction.
   final bool reverse;
 
-  /// Function.
+  /// Called when an item is tapped.
   final void Function(int)? onTap;
 
-  /// enableSplash.
+  /// Whether the wrapper ink layer reports splash feedback.
   final bool enableSplash;
 
-  /// infinite.
+  /// Whether the carousel loops infinitely.
   final bool infinite;
 
-  /// itemExtent.
+  /// Fixed main-axis extent for unweighted layouts.
   final double? itemExtent;
 
-  /// flexWeights.
+  /// Flex weights for weighted layouts.
   final List<int>? flexWeights;
 
-  /// children.
+  /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// Function.
+  /// Called when the leading item index changes.
   final void Function(int)? onIndexChanged;
 
   /// Fixed logical pixels added or removed per animating edge at peak pulse.
@@ -124,8 +126,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   /// Viewport box for neighbor visibility checks (no [GlobalKey] — those can
   /// reparent under [Theme] rebuilds and corrupt the weighted sliver).
   RenderBox? _viewportBox;
-
-  double _currentGrowBaseWidth = 0;
 
   late final AnimationController _pulseController = AnimationController(
     vsync: this,
@@ -188,16 +188,33 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
   bool get _vertical => widget.scrollDirection == Axis.vertical;
 
-  double _contentExtentFor(int index) {
-    final box = _itemBoxes[index];
-    if (box == null || !box.hasSize) {
-      return _fallbackExtent();
+  EdgeInsets get _resolvedPadding {
+    final EdgeInsetsGeometry padding =
+        widget.padding ?? const EdgeInsets.all(4);
+    return padding.resolve(Directionality.of(context));
+  }
+
+  double _mainAxisPadding(EdgeInsets padding) =>
+      _vertical ? padding.vertical : padding.horizontal;
+
+  /// Inner main-axis extent for the largest resting item slot.
+  ///
+  /// Content is laid out against this (plus pulse budget) so scroll size
+  /// changes only move the clip window, and expanded pulse edges stay filled.
+  double _stableInnerContentExtent(double viewportMain) {
+    final double paddingMain = _mainAxisPadding(_resolvedPadding);
+    if (widget.itemExtent != null) {
+      return math.max(widget.itemExtent! - paddingMain, 0);
     }
-    final double extent = _vertical ? box.size.height : box.size.width;
-    if (extent <= 0) {
-      return _fallbackExtent();
+    final List<int>? weights = widget.flexWeights;
+    if (weights != null && weights.isNotEmpty && viewportMain > 0) {
+      final int total = weights.fold<int>(0, (int a, int b) => a + b);
+      if (total > 0) {
+        final int maxWeight = weights.reduce(math.max);
+        return math.max(viewportMain * maxWeight / total - paddingMain, 0);
+      }
     }
-    return extent;
+    return _fallbackExtent();
   }
 
   (bool expandLeading, bool expandTrailing) _expandSidesForActiveIndex(
@@ -254,47 +271,77 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     return itemRight > (carouselLeft + 1.0) && itemLeft < (carouselRight - 1.0);
   }
 
-  Alignment _expandAlignmentForActiveIndex(int index) {
-    final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
+  /// Clip-window rect in resting-item coordinates for the current pulse.
+  ({double left, double top, double width, double height}) _pulseFrameRect({
+    required int index,
+    required bool isActive,
+    required bool isLeftNeighbor,
+    required bool isRightNeighbor,
+    required double edgeDelta,
+    required double restWidth,
+    required double restHeight,
+  }) {
+    if (_activeIndex == null || edgeDelta <= 0) {
+      return (left: 0, top: 0, width: restWidth, height: restHeight);
+    }
 
-    if (expandLeading && expandTrailing) {
-      return Alignment.center;
-    }
-    if (_vertical) {
-      if (expandLeading) {
-        return Alignment.bottomCenter;
+    if (isActive) {
+      final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
+      final double leading = expandLeading ? edgeDelta : 0;
+      final double trailing = expandTrailing ? edgeDelta : 0;
+      if (_vertical) {
+        return (
+          left: 0,
+          top: -leading,
+          width: restWidth,
+          height: restHeight + leading + trailing,
+        );
       }
-      if (expandTrailing) {
-        return Alignment.topCenter;
-      }
-      return Alignment.center;
+      return (
+        left: -leading,
+        top: 0,
+        width: restWidth + leading + trailing,
+        height: restHeight,
+      );
     }
-    if (expandLeading) {
-      return Alignment.centerRight;
-    }
-    if (expandTrailing) {
-      return Alignment.centerLeft;
-    }
-    return Alignment.center;
-  }
 
-  Alignment _squishAlignmentForNeighborIndex(int index) {
-    if (_vertical) {
-      if (index == _leftVisibleNeighborIndex) {
-        return Alignment.topCenter;
+    if (isLeftNeighbor) {
+      // Squish the trailing edge shared with the active item.
+      if (_vertical) {
+        return (
+          left: 0,
+          top: 0,
+          width: restWidth,
+          height: math.max(restHeight - edgeDelta, 1),
+        );
       }
-      if (index == _rightVisibleNeighborIndex) {
-        return Alignment.bottomCenter;
+      return (
+        left: 0,
+        top: 0,
+        width: math.max(restWidth - edgeDelta, 1),
+        height: restHeight,
+      );
+    }
+
+    if (isRightNeighbor) {
+      // Squish the leading edge shared with the active item.
+      if (_vertical) {
+        return (
+          left: 0,
+          top: edgeDelta,
+          width: restWidth,
+          height: math.max(restHeight - edgeDelta, 1),
+        );
       }
-      return Alignment.center;
+      return (
+        left: edgeDelta,
+        top: 0,
+        width: math.max(restWidth - edgeDelta, 1),
+        height: restHeight,
+      );
     }
-    if (index == _leftVisibleNeighborIndex) {
-      return Alignment.centerLeft;
-    }
-    if (index == _rightVisibleNeighborIndex) {
-      return Alignment.centerRight;
-    }
-    return Alignment.center;
+
+    return (left: 0, top: 0, width: restWidth, height: restHeight);
   }
 
   void _snapshotVisibleNeighbors(int index, RenderBox? parentBox) {
@@ -320,7 +367,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
     setState(() {
       _activeIndex = index;
-      _currentGrowBaseWidth = _contentExtentFor(index);
       _snapshotVisibleNeighbors(index, _viewportBox);
     });
 
@@ -338,25 +384,29 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _bump,
-      builder: (context, _) {
-        final int squishCount =
-            (_leftVisibleNeighborIndex != null ? 1 : 0) +
-            (_rightVisibleNeighborIndex != null ? 1 : 0);
-        final double edgeDelta = widget.fixedPulseDelta * _bump.value;
-        final carouselChildren = List<Widget>.generate(
-          widget.children.length,
-          (int index) => _buildPulsedChild(
-            index: index,
-            squishCount: squishCount,
-            edgeDelta: edgeDelta,
-          ),
-        );
-        return _CarouselViewportAnchor(
-          onRegister: (RenderBox box) => _viewportBox = box,
-          onUnregister: _unregisterViewportBox,
-          child: _buildCarouselView(carouselChildren),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        final double viewportMain = _vertical
+            ? viewportConstraints.maxHeight
+            : viewportConstraints.maxWidth;
+        return AnimatedBuilder(
+          animation: _bump,
+          builder: (context, _) {
+            final double edgeDelta = widget.fixedPulseDelta * _bump.value;
+            final carouselChildren = List<Widget>.generate(
+              widget.children.length,
+              (int index) => _buildPulsedChild(
+                index: index,
+                edgeDelta: edgeDelta,
+                viewportMain: viewportMain,
+              ),
+            );
+            return _CarouselViewportAnchor(
+              onRegister: (RenderBox box) => _viewportBox = box,
+              onUnregister: _unregisterViewportBox,
+              child: _buildCarouselView(carouselChildren),
+            );
+          },
         );
       },
     );
@@ -364,105 +414,99 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
   Widget _buildPulsedChild({
     required int index,
-    required int squishCount,
     required double edgeDelta,
+    required double viewportMain,
   }) {
     final isActive = _activeIndex == index;
     final isLeftNeighbor = _leftVisibleNeighborIndex == index;
     final isRightNeighbor = _rightVisibleNeighborIndex == index;
-    final scaleMain = _scaleForChild(
-      index: index,
-      isActive: isActive,
-      isLeftNeighbor: isLeftNeighbor,
-      isRightNeighbor: isRightNeighbor,
-      squishCount: squishCount,
-      edgeDelta: edgeDelta,
-    );
-    final Alignment individualAlignment = _alignmentForChild(
-      index: index,
-      isActive: isActive,
-      isNeighbor: isLeftNeighbor || isRightNeighbor,
-    );
     final BorderRadius finalRadius = widget.shape is RoundedRectangleBorder
         ? ((widget.shape! as RoundedRectangleBorder).borderRadius
               as BorderRadius)
         : BorderRadius.zero;
+    final Clip clipBehavior = widget.itemClipBehavior != Clip.none
+        ? widget.itemClipBehavior
+        : Clip.antiAlias;
+    final double stableInner = _stableInnerContentExtent(viewportMain);
+    final double pulseBudget = widget.fixedPulseDelta * 2;
 
     return _CarouselItemAnchor(
       index: index,
       onRegister: _registerItemBox,
       onUnregister: _unregisterItemBox,
       child: RepaintBoundary(
-        child: Transform(
-          transform: _vertical
-              ? (Matrix4.identity()..scaleByDouble(1, scaleMain, 1, 1))
-              : (Matrix4.identity()..scaleByDouble(scaleMain, 1, 1, 1)),
-          alignment: individualAlignment,
-          child: ClipRRect(
-            borderRadius: finalRadius,
-            clipBehavior: widget.itemClipBehavior != Clip.none
-                ? widget.itemClipBehavior
-                : Clip.antiAlias,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                IgnorePointer(child: widget.children[index]),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    enableFeedback: widget.enableSplash,
-                    onTap: () => _handleTap(index),
-                    overlayColor: widget.overlayColor,
+        // Content is laid out once at (max slot + pulse overflow) and stays
+        // pinned in resting coordinates. Only the clip rect animates.
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double restWidth = constraints.maxWidth;
+            final double restHeight = constraints.maxHeight;
+            final frame = _pulseFrameRect(
+              index: index,
+              isActive: isActive,
+              isLeftNeighbor: isLeftNeighbor,
+              isRightNeighbor: isRightNeighbor,
+              edgeDelta: edgeDelta,
+              restWidth: restWidth,
+              restHeight: restHeight,
+            );
+
+            // Enough overflow at rest that a full pulse expand never reveals
+            // content edges. Size is independent of the pulse animation so
+            // nothing snaps when a tap starts.
+            final double contentWidth = _vertical
+                ? restWidth
+                : math.max(stableInner, restWidth) + pulseBudget;
+            final double contentHeight = _vertical
+                ? math.max(stableInner, restHeight) + pulseBudget
+                : restHeight;
+            final double contentLeft = (restWidth - contentWidth) / 2;
+            final double contentTop = (restHeight - contentHeight) / 2;
+
+            return SizedBox(
+              width: restWidth,
+              height: restHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: <Widget>[
+                  Positioned(
+                    left: frame.left,
+                    top: frame.top,
+                    width: frame.width,
+                    height: frame.height,
+                    child: ClipRRect(
+                      borderRadius: finalRadius,
+                      clipBehavior: clipBehavior,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                            left: contentLeft - frame.left,
+                            top: contentTop - frame.top,
+                            width: contentWidth,
+                            height: contentHeight,
+                            child: IgnorePointer(child: widget.children[index]),
+                          ),
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                enableFeedback: widget.enableSplash,
+                                onTap: () => _handleTap(index),
+                                overlayColor: widget.overlayColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
-  }
-
-  double _scaleForChild({
-    required int index,
-    required bool isActive,
-    required bool isLeftNeighbor,
-    required bool isRightNeighbor,
-    required int squishCount,
-    required double edgeDelta,
-  }) {
-    if (_activeIndex == null) {
-      return 1;
-    }
-    if (isActive) {
-      final double extent = _currentGrowBaseWidth > 0
-          ? _currentGrowBaseWidth
-          : _fallbackExtent();
-      final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
-      final growTotal =
-          (expandLeading ? edgeDelta : 0) + (expandTrailing ? edgeDelta : 0);
-      return (extent + growTotal) / extent;
-    }
-    if ((isLeftNeighbor || isRightNeighbor) && squishCount > 0) {
-      final double neighborExtent = _contentExtentFor(index);
-      final double targetExtent = math.max(neighborExtent - edgeDelta, 1);
-      return targetExtent / neighborExtent;
-    }
-    return 1;
-  }
-
-  Alignment _alignmentForChild({
-    required int index,
-    required bool isActive,
-    required bool isNeighbor,
-  }) {
-    if (isActive) {
-      return _expandAlignmentForActiveIndex(index);
-    }
-    if (isNeighbor) {
-      return _squishAlignmentForNeighborIndex(index);
-    }
-    return Alignment.center;
   }
 
   Widget _buildCarouselView(List<Widget> carouselChildren) {
@@ -625,6 +669,7 @@ class _RenderCarouselItemAnchor extends RenderProxyBox {
   void Function(int index, RenderBox box) onUnregister;
 
   int get index => _index;
+
   set index(int value) {
     if (_index == value) {
       return;

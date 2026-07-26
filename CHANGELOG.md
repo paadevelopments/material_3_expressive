@@ -1,3 +1,17 @@
+## 1.0.3
+
+### Fixed
+
+* Re-implement `M3ECarouselWrapper` pulse logic to use a sliding clip window instead of `Transform`
+  scaling, ensuring content remains stable and does not snap during animations.
+* Introduce `_stableInnerContentExtent` to calculate fixed layout sizes for carousel items based on
+  viewport constraints and flex weights.
+* Update `ContainmentPage` in the example app to demonstrate image-based carousel items with
+  gradient overlays and labels.
+* Add sample image assets to the example project and update `pubspec.yaml` to include the assets
+  directory.
+* Enhance documentation for `M3ECarouselWrapper` parameters and internal state management.
+
 ## 1.0.2
 
 ### Fixed
@@ -35,17 +49,17 @@ via `M3ETheme`.
 ### Added
 
 * **39 component modules** spanning the official Material 3 groups:
-  * **Actions** — buttons, icon buttons, FAB, extended FAB, FAB menu, button
-    groups, segmented buttons, split buttons, toggle buttons.
-  * **Communication** — badges, linear & circular progress indicators, loading
-    indicator, snackbar, tooltips.
-  * **Containment** — cards, carousel, dividers, lists, dialogs (standard &
-    full-screen), bottom sheets, side sheets.
-  * **Navigation** — top & bottom app bars (incl. search), tabs, navigation
-    bar, navigation rail, navigation drawer, toolbars, menus.
-  * **Selection** — checkbox, radio button, switch, chips, sliders (incl.
-    wavy), dropdown menus, date picker, time picker.
-  * **Text inputs** — text fields, search bar / search view.
+    * **Actions** — buttons, icon buttons, FAB, extended FAB, FAB menu, button
+      groups, segmented buttons, split buttons, toggle buttons.
+    * **Communication** — badges, linear & circular progress indicators, loading
+      indicator, snackbar, tooltips.
+    * **Containment** — cards, carousel, dividers, lists, dialogs (standard &
+      full-screen), bottom sheets, side sheets.
+    * **Navigation** — top & bottom app bars (incl. search), tabs, navigation
+      bar, navigation rail, navigation drawer, toolbars, menus.
+    * **Selection** — checkbox, radio button, switch, chips, sliders (incl.
+      wavy), dropdown menus, date picker, time picker.
+    * **Text inputs** — text fields, search bar / search view.
 * **Direct component API** — construct each `M3E*` widget directly; enums and
   models are exported from a single library import.
 * **Design token foundations** — a centralized `foundations` layer for color

@@ -19,18 +19,14 @@ class _ContainmentPageState extends State<ContainmentPage>
   @override
   bool get wantKeepAlive => true;
 
-  late final List<Widget> _heroCarouselItems = _buildCarouselItems();
-
-  static List<Widget> _buildCarouselItems() {
-    return List<Widget>.generate(10, (int index) {
-      return ColoredBox(
-        color: Colors.primaries[index % Colors.primaries.length].withValues(
-          alpha: 0.8,
-        ),
-        child: const SizedBox.expand(),
-      );
-    });
-  }
+  final List<Map<String, String>> images = [
+    {"image": "assets/i1.png", "title": "Android"},
+    {"image": "assets/i2.png", "title": "IOS"},
+    {"image": "assets/i3.png", "title": "Windows"},
+    {"image": "assets/i4.png", "title": "Mac"},
+    {"image": "assets/i5.png", "title": "Linux"},
+    {"image": "assets/i6.png", "title": "Others"},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +105,11 @@ class _ContainmentPageState extends State<ContainmentPage>
               type: M3ECarouselType.hero,
               heroAlignment: M3ECarouselHeroAlignment.center,
               onTap: (int tapIndex) => log(tapIndex.toString()),
-              children: _heroCarouselItems,
+              children: images
+                  .asMap()
+                  .entries
+                  .map((listItem) => _ImageElement(listValue: listItem.value))
+                  .toList(),
             ),
           ),
         ),
@@ -125,7 +125,13 @@ class _ContainmentPageState extends State<ContainmentPage>
               type: M3ECarouselType.hero,
               heroAlignment: M3ECarouselHeroAlignment.center,
               onTap: (int tapIndex) => log(tapIndex.toString()),
-              children: _heroCarouselItems,
+              children: List<Widget>.generate(10, (int index) {
+                return ColoredBox(
+                  color: Colors.primaries[index % Colors.primaries.length]
+                      .withValues(alpha: 0.8),
+                  child: const SizedBox.expand(),
+                );
+              }),
             ),
           ),
         ),
@@ -462,6 +468,7 @@ class _ContainmentPageState extends State<ContainmentPage>
 
 class _ListLabel extends StatelessWidget {
   const _ListLabel(this.label);
+
   final String label;
 
   @override
@@ -476,6 +483,50 @@ class _ListLabel extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+}
+
+class _ImageElement extends StatelessWidget {
+  final Map listValue;
+
+  const _ImageElement({required this.listValue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(
+          listValue["image"],
+          fit: BoxFit.cover,
+          width: double.maxFinite,
+          height: double.maxFinite,
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              listValue["title"]!,
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
