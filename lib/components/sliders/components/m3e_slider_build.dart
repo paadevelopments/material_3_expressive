@@ -177,7 +177,8 @@ extension on _M3ESliderState {
       );
     }
 
-    if (!resolved.useCustomDots) {
+    // Relocating track icon replaces end stop markers.
+    if (!resolved.useCustomDots || widget.icon != null) {
       return track;
     }
     return Stack(
@@ -219,7 +220,7 @@ extension on _M3ESliderState {
         stopIndicatorSize: resolved.dotSize,
         tickSize: resolved.dotSize,
         edgeInset: resolved.dotSpacing,
-        drawDots: !resolved.useCustomDots,
+        drawDots: !resolved.useCustomDots && widget.icon == null,
         isWavy: widget.wavy,
         waveAmplitude: resolved.sliderTheme.waveAmplitude,
         wavelength: resolved.wavelength,
@@ -239,7 +240,7 @@ extension on _M3ESliderState {
       stopIndicatorSize: resolved.dotSize,
       tickSize: resolved.dotSize,
       edgeInset: resolved.dotSpacing,
-      drawDots: !resolved.useCustomDots,
+      drawDots: !resolved.useCustomDots && widget.icon == null,
       isWavy: widget.wavy,
       waveAmplitude: resolved.sliderTheme.waveAmplitude,
       wavelength: resolved.wavelength,
@@ -456,18 +457,16 @@ extension on _M3ESliderState {
     }
     final double iconSize = widget.iconSize ?? 24;
     final double iconHalf = iconSize / 2;
-    final double corner = resolved.trackThickness / 2;
-    final startPos = corner;
-    final double endPos = extent - corner;
+    final double edgeInset =
+        widget.iconEdgeInset ?? resolved.sliderTheme.iconEdgeInset;
     final double thumbHalf = resolved.handleThickness / 2;
     final bool reverse = resolved.reverse;
 
-    const double restingInset = 12;
     final nearEnd =
         (widget.iconPosition == M3ESliderIconPosition.end) != reverse;
     final double restingCenter = nearEnd
-        ? endPos - iconHalf - restingInset
-        : startPos + iconHalf + restingInset;
+        ? extent - edgeInset - iconHalf
+        : edgeInset + iconHalf;
 
     final double dockDistanceLimit = thumbHalf + iconHalf + 8;
     final bool isDocked =
@@ -479,11 +478,13 @@ extension on _M3ESliderState {
         ? thumbPrimary + dockOffset
         : thumbPrimary - dockOffset;
 
+    final minCenter = iconHalf;
+    final maxCenter = extent - iconHalf;
     final double iconCenter = lerpDouble(
       restingCenter,
       dockedTarget,
       _dockController.value,
-    )!.clamp(startPos, endPos);
+    )!.clamp(minCenter, maxCenter);
 
     final bool overActive = reverse
         ? iconCenter >= thumbPrimary

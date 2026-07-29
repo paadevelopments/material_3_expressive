@@ -495,9 +495,11 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
           children: <Widget>[
             SizedBox(
               height: 160,
-              width: 48,
+              width: 80,
               child: M3ESlider.vertical(
                 value: _vertical,
+                trackThickness: 40,
+                thumbLength: 80,
                 icon: const Icon(M3EIcons.volume_up),
                 iconPosition: M3ESliderIconPosition.end,
                 onChanged: (double value) => setState(() => _vertical = value),

@@ -82,6 +82,7 @@ class M3ESlider extends StatefulWidget {
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
+    this.iconEdgeInset,
     super.key,
   }) : axis = Axis.horizontal,
        trackKind = M3ESliderTrackKind.standard,
@@ -131,6 +132,7 @@ class M3ESlider extends StatefulWidget {
        icon = null,
        iconPosition = M3ESliderIconPosition.end,
        iconSize = null,
+       iconEdgeInset = null,
        assert(max > min, 'max must be greater than min.');
 
   /// Horizontal slider whose active value is a traveling sine wave.
@@ -165,6 +167,7 @@ class M3ESlider extends StatefulWidget {
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
+    this.iconEdgeInset,
     super.key,
   }) : axis = Axis.horizontal,
        trackKind = M3ESliderTrackKind.standard,
@@ -210,6 +213,7 @@ class M3ESlider extends StatefulWidget {
        icon = null,
        iconPosition = M3ESliderIconPosition.end,
        iconSize = null,
+       iconEdgeInset = null,
        assert(max > min, 'max must be greater than min.');
 
   /// Vertical slider (Compose `VerticalSlider`).
@@ -241,6 +245,7 @@ class M3ESlider extends StatefulWidget {
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
+    this.iconEdgeInset,
     super.key,
   }) : axis = Axis.vertical,
        trackKind = M3ESliderTrackKind.standard,
@@ -292,6 +297,7 @@ class M3ESlider extends StatefulWidget {
        icon = null,
        iconPosition = M3ESliderIconPosition.end,
        iconSize = null,
+       iconEdgeInset = null,
        assert(max > min, 'max must be greater than min.');
 
   /// Current value in [min]..[max].
@@ -402,7 +408,8 @@ class M3ESlider extends StatefulWidget {
 
   /// Optional icon rendered on the relocating track end.
   ///
-  /// Mutually exclusive with [divisions].
+  /// Mutually exclusive with [divisions]. When set, track end stop dots are
+  /// not drawn.
   final Widget? icon;
 
   /// Resting edge for [icon] along the track.
@@ -410,6 +417,12 @@ class M3ESlider extends StatefulWidget {
 
   /// Size of [icon]. Defaults to 24 logical pixels when null.
   final double? iconSize;
+
+  /// Clear space between the track edge and [icon]'s outer edge.
+  ///
+  /// Defaults to [M3ESliderTheme.iconEdgeInset] (8, matching m3e_core's
+  /// default track corner radius).
+  final double? iconEdgeInset;
 
   @override
   State<M3ESlider> createState() => _M3ESliderState();

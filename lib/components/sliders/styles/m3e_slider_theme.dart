@@ -67,6 +67,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     this.tickSize = M3ESliderTokens.tickSize,
     this.stopIndicatorTrailingSpace =
         M3ESliderTokens.stopIndicatorTrailingSpace,
+    this.iconEdgeInset = M3ESliderTokens.iconEdgeInset,
     this.valueIndicatorBottomSpace =
         M3ESliderTokens.valueIndicatorActiveBottomSpace,
     this.disabledActiveOpacity = M3ESliderTokens.disabledActiveTrackOpacity,
@@ -109,6 +110,9 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
 
   /// Clear space between each track end and the outer edge of end markers.
   final double stopIndicatorTrailingSpace;
+
+  /// Clear space between the track edge and the relocating [M3ESlider.icon].
+  final double iconEdgeInset;
 
   /// valueIndicatorBottomSpace.
   final double valueIndicatorBottomSpace;
@@ -182,6 +186,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     double? stopIndicatorSize,
     double? tickSize,
     double? stopIndicatorTrailingSpace,
+    double? iconEdgeInset,
     double? valueIndicatorBottomSpace,
     double? disabledActiveOpacity,
     double? disabledInactiveOpacity,
@@ -201,6 +206,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
       tickSize: tickSize ?? this.tickSize,
       stopIndicatorTrailingSpace:
           stopIndicatorTrailingSpace ?? this.stopIndicatorTrailingSpace,
+      iconEdgeInset: iconEdgeInset ?? this.iconEdgeInset,
       valueIndicatorBottomSpace:
           valueIndicatorBottomSpace ?? this.valueIndicatorBottomSpace,
       disabledActiveOpacity:
@@ -240,6 +246,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
         other.stopIndicatorTrailingSpace,
         t,
       ),
+      iconEdgeInset: _lerp(iconEdgeInset, other.iconEdgeInset, t),
       valueIndicatorBottomSpace: _lerp(
         valueIndicatorBottomSpace,
         other.valueIndicatorBottomSpace,

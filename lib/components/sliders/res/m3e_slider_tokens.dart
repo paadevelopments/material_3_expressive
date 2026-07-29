@@ -52,6 +52,12 @@ abstract final class M3ESliderTokens {
   /// stopIndicatorTrailingSpace.
   static const double stopIndicatorTrailingSpace = 6;
 
+  /// Clear space between the track edge and the relocating icon's outer edge.
+  ///
+  /// Matches m3e_core's default resting inset (`trackCornerRadius`, which
+  /// defaults to half of the 16px track height).
+  static const double iconEdgeInset = 8;
+
   /// valueIndicatorActiveBottomSpace.
 
   static const double valueIndicatorActiveBottomSpace = 12;
