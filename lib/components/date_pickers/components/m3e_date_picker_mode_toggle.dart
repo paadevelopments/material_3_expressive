@@ -47,6 +47,7 @@ class M3EDatePickerModeToggle extends StatelessWidget {
                   : M3EDatePickerMode.day,
             );
           },
+          haptic: M3EHapticFeedback.none,
           semanticLabel: mode == M3EDatePickerMode.day
               ? localizations.selectYearSemanticsLabel
               : localizations.formatMonthYear(monthDate),

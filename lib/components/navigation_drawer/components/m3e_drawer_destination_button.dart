@@ -65,7 +65,10 @@ class M3EDrawerDestinationButton extends StatelessWidget {
         label: destination.label,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: onTap,
+          onTap: () {
+            M3EHaptics.trigger(M3EHapticFeedback.light);
+            onTap();
+          },
           child: KeyedSubtree(
             key: indicatorKey,
             child: SizedBox(

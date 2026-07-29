@@ -248,6 +248,7 @@ class _MonthNavRow extends StatelessWidget {
               child: mode != null && onModeChanged != null
                   ? M3ETappable(
                       onTap: () => onModeChanged!(M3EDatePickerMode.year),
+                      haptic: M3EHapticFeedback.none,
                       semanticLabel: localizations.selectYearSemanticsLabel,
                       builder:
                           (BuildContext context, M3EInteractionState state) {

@@ -111,12 +111,19 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         return M3EInkSplashTheme(
           color: colors.fg,
           child: IconButton(
-            onPressed: widget.onPressed,
+            onPressed: widget.onPressed == null
+                ? null
+                : () {
+                    if (widget.enableFeedback ?? true) {
+                      M3EHaptics.trigger(M3EHapticFeedback.light);
+                    }
+                    widget.onPressed!();
+                  },
             isSelected: widget.isSelected,
             selectedIcon: widget.selectedIcon,
             icon: innerIcon,
             tooltip: widget.tooltip,
-            enableFeedback: widget.enableFeedback,
+            enableFeedback: false,
             statesController: _statesController,
             style: ButtonStyle(
               fixedSize: WidgetStateProperty.all(visual),

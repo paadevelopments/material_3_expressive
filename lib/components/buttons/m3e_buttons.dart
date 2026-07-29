@@ -308,7 +308,7 @@ class M3EButton extends StatefulWidget {
 
   /// decorationHaptic.
   M3EHapticFeedback get decorationHaptic =>
-      decoration?.haptic ?? M3EHapticFeedback.none;
+      decoration?.haptic ?? M3EHapticFeedback.light;
 
   /// decorationMouseCursor.
   WidgetStateProperty<MouseCursor?>? get decorationMouseCursor =>

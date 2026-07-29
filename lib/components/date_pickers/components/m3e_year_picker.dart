@@ -134,6 +134,7 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
         alignment: AlignmentDirectional.centerStart,
         child: M3ETappable(
           onTap: () => widget.onModeChanged!(M3EDatePickerMode.day),
+          haptic: M3EHapticFeedback.none,
           semanticLabel: localizations.formatMonthYear(monthDate),
           builder: (BuildContext context, M3EInteractionState state) {
             return Padding(
@@ -188,6 +189,7 @@ class _M3EYearPickerState extends State<M3EYearPicker> {
     return M3ETappable(
       enabled: enabled,
       onTap: enabled ? () => widget.onChanged(candidate) : null,
+      haptic: M3EHapticFeedback.none,
       semanticLabel: localizations.formatYear(DateTime(year)),
       builder: (BuildContext context, M3EInteractionState state) {
         return Container(

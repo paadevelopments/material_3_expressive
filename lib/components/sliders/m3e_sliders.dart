@@ -426,6 +426,9 @@ class _M3ESliderState extends State<M3ESlider>
       reverse: reverse,
     );
     if (next != widget.value) {
+      if (widget.divisions != null) {
+        M3EHaptics.selection();
+      }
       widget.onChanged!(next);
     }
   }

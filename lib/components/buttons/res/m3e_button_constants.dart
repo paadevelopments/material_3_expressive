@@ -1,7 +1,3 @@
-import 'package:flutter/services.dart';
-
-import '../enums/m3e_button_enums.dart';
-
 /// Shared numeric constants used throughout the button package.
 class M3EButtonConstants {
   const M3EButtonConstants._();
@@ -47,18 +43,4 @@ class M3EButtonConstants {
 
   /// Minimum delta threshold for triggering animation progress update.
   static const double kAnimationDeltaThreshold = 0.5;
-
-  /// Triggers haptic feedback for the selected [M3EHapticFeedback] level.
-  static void triggerHapticFeedback(M3EHapticFeedback haptic) {
-    switch (haptic) {
-      case M3EHapticFeedback.light:
-        HapticFeedback.lightImpact();
-      case M3EHapticFeedback.medium:
-        HapticFeedback.mediumImpact();
-      case M3EHapticFeedback.heavy:
-        HapticFeedback.heavyImpact();
-      case M3EHapticFeedback.none:
-        break;
-    }
-  }
 }

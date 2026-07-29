@@ -1,3 +1,14 @@
+## 1.0.4
+
+### Added
+
+* Shared foundations haptics API (`M3EHapticFeedback`, `M3EHaptics`) with `none` /
+  `light` / `medium` / `heavy` impact levels plus `selection()` for discrete snaps.
+* Default LIGHT tap/long-press feedback via `M3ETappable`, buttons, icon buttons,
+  navigation destinations, carousel item taps, and related interactive surfaces.
+* Selection haptics on stepped slider tick changes.
+* Dismissible list LIGHT feedback on tap and on swipe-action commit.
+
 ## 1.0.3
 
 ### Fixed

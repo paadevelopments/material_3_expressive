@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import '../buttons/enums/m3e_button_enums.dart';
-import '../buttons/res/m3e_button_constants.dart';
 import 'enums/m3e_card_variant.dart';
 import 'styles/m3e_card_theme.dart';
 
@@ -33,7 +31,7 @@ class M3ECard extends StatelessWidget {
     this.surfaceKey,
     this.mouseCursor,
     this.semanticLabel,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
     this.onStateChanged,
     super.key,
   });
@@ -115,22 +113,14 @@ class M3ECard extends StatelessWidget {
       );
     }
 
-    final VoidCallback? wrappedOnPressed = onPressed == null
-        ? null
-        : () {
-            onPressed!();
-            if (haptic != M3EHapticFeedback.none) {
-              M3EButtonConstants.triggerHapticFeedback(haptic);
-            }
-          };
-
     return M3ETappable(
-      onTap: wrappedOnPressed,
+      onTap: onPressed,
       onLongPress: onLongPress,
       mouseCursor: mouseCursor,
       semanticLabel: semanticLabel,
       onStateChanged: onStateChanged,
       materialInk: true,
+      haptic: haptic,
       builder: (BuildContext context, M3EInteractionState state) {
         return _buildSurface(
           context,

@@ -128,7 +128,10 @@ class M3ERailItemButton extends StatelessWidget {
       shape: shape,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onPressed,
+        onTap: () {
+          M3EHaptics.trigger(M3EHapticFeedback.light);
+          onPressed();
+        },
         splashFactory: NoSplash.splashFactory,
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,

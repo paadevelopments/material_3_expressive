@@ -48,7 +48,7 @@ extension _M3EButtonStyle on _M3EButtonState {
           WidgetStateProperty.resolveWith(_resolveOverlayColor),
       surfaceTintColor: dec?.surfaceTintColor,
       enableFeedback:
-          !(dec?.haptic != null && dec!.haptic != M3EHapticFeedback.none) &&
+          (dec?.haptic ?? M3EHapticFeedback.light) == M3EHapticFeedback.none &&
           (dec?.enableFeedback ?? widget.enableFeedback),
     );
   }

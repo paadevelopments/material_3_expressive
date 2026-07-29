@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../foundations/foundations.dart';
 import '../models/m3e_date_picker_models.dart';
@@ -102,7 +101,7 @@ class _M3ECalendarDateRangePickerState
   }
 
   void _updateSelection(DateTime date) {
-    HapticFeedback.selectionClick();
+    M3EHaptics.selection();
     setState(() {
       if (_startDate != null &&
           _endDate == null &&

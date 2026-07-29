@@ -6,6 +6,7 @@ import 'package:material_3_expressive/components/navigation_bar/m3e_navigation_b
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3ENavigationBar;
 
+import '../../../foundations/foundations.dart';
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
 import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_navigation_bar_destination.dart';
@@ -149,7 +150,10 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       label: destination.semanticLabel ?? destination.label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTap: () {
+          M3EHaptics.trigger(M3EHapticFeedback.light);
+          onTap();
+        },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

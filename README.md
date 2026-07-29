@@ -55,11 +55,11 @@ flutter run
 - **Direct component API** — construct each `M3E*` widget directly; enums and
   models are exported from a single library import.
 - **Expressive motion & interaction** — spring physics (via [`motor`](https://pub.dev/packages/motor)),
-  shape morphing, liquid selection indicators, and proper state layers on every
-  interactive surface.
+  shape morphing, liquid selection indicators, shared haptics (`M3EHaptics`), and
+  proper state layers on every interactive surface.
 - **Design token foundations** — color schemes, typography, motion, shapes
   (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
-  morph polygons), elevation, and state layers via the `M3ETheme` inherited widget.
+  morph polygons), elevation, haptics, and state layers via the `M3ETheme` inherited widget.
 - **Interactive example gallery** in [`example/`](example/) with live demos
   for every component.
 
@@ -76,7 +76,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.3
+  material_3_expressive: ^1.0.4
 ```
 
 Then fetch it:

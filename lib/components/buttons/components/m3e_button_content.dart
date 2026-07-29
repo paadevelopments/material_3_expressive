@@ -184,10 +184,7 @@ extension _M3EButtonContent on _M3EButtonState {
       return null;
     }
     return () {
-      if (widget.decoration?.haptic != null &&
-          widget.decoration!.haptic != M3EHapticFeedback.none) {
-        M3EButtonConstants.triggerHapticFeedback(widget.decoration!.haptic!);
-      }
+      M3EHaptics.trigger(widget.decoration?.haptic ?? M3EHapticFeedback.light);
       widget.onPressed?.call();
     };
   }

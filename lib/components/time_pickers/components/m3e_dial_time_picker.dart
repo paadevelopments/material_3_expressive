@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_time_picker_enums.dart';
@@ -223,7 +222,7 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
         height: timeTheme.dialSize,
         child: GestureDetector(
           onTapDown: (TapDownDetails d) {
-            HapticFeedback.selectionClick();
+            M3EHaptics.selection();
             _handleDial(d.localPosition, timeTheme, use24Hour);
           },
           onPanUpdate: (DragUpdateDetails d) =>

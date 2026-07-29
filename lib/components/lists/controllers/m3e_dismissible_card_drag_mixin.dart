@@ -86,7 +86,6 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
 
   void _onCrossThreshold(double newOffset, double multiplier) {
     _pastThreshold = true;
-    M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
 
     final pushDir = newOffset.sign;
     _startPushController(
@@ -106,7 +105,6 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
   ) {
     _pastThreshold = false;
     _reEngaging = true;
-    M3EButtonConstants.triggerHapticFeedback(style.hapticOnThreshold);
 
     _startPushController(
       multiplier: multiplier,
@@ -278,7 +276,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       return;
     }
     _hapticStopwatch.reset();
-    HapticFeedback.selectionClick();
+    M3EHaptics.selection();
   }
 
   void _springBack(double speedMul) {
@@ -347,6 +345,8 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     final flyInitial = _captureDismissSlot(slot, dataIndex, direction);
     _disposeDragControllers();
     _markSlotCollapsing(slot);
+
+    M3EHaptics.trigger(style.hapticOnThreshold);
 
     final colCtrl = _createCollapseController(slot, speedMul);
     _startFlyOut(slot, flyInitial, speedMul, colCtrl);

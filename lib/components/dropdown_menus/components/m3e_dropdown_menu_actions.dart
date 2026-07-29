@@ -76,7 +76,7 @@ extension _M3EDropdownMenuActions<T> on _M3EDropdownMenuState<T> {
   }
 
   void _applyHaptic() {
-    M3EButtonConstants.triggerHapticFeedback(widget.haptic);
+    M3EHaptics.trigger(widget.haptic);
   }
 
   void _onItemTap(M3EDropdownItem<T> item) {

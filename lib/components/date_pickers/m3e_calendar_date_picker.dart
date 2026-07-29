@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../foundations/foundations.dart';
 import 'components/m3e_date_picker_mode_toggle.dart';
@@ -91,7 +90,7 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   }
 
   void _handleModeChanged(M3EDatePickerMode mode) {
-    HapticFeedback.selectionClick();
+    M3EHaptics.selection();
     setState(() => _mode = mode);
     widget.onCalendarModeChanged?.call(mode);
   }
@@ -102,7 +101,7 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   }
 
   void _handleYearChanged(DateTime value) {
-    HapticFeedback.selectionClick();
+    M3EHaptics.selection();
     final DateTime clamped = M3EDatePickerUtils.clampDate(
       value,
       _firstDate,
@@ -129,7 +128,7 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   }
 
   void _handleDayChanged(DateTime value) {
-    HapticFeedback.selectionClick();
+    M3EHaptics.selection();
     setState(() {
       _selectedDate = value;
       widget.onDateChanged(value);

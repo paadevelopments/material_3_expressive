@@ -403,7 +403,12 @@ class _CarouselViewState extends State<M3ECarouselView> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => widget.onTap?.call(itemIndex),
+              onTap: widget.onTap == null
+                  ? null
+                  : () {
+                      M3EHaptics.trigger(M3EHapticFeedback.light);
+                      widget.onTap!(itemIndex);
+                    },
               overlayColor: effectiveOverlayColor,
             ),
           ),
@@ -411,7 +416,10 @@ class _CarouselViewState extends State<M3ECarouselView> {
       );
     } else if (widget.onTap != null) {
       contents = GestureDetector(
-        onTap: () => widget.onTap!(index),
+        onTap: () {
+          M3EHaptics.trigger(M3EHapticFeedback.light);
+          widget.onTap!(index);
+        },
         child: contents,
       );
     }

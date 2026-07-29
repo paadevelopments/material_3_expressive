@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
+import 'm3e_haptics.dart';
 import 'm3e_motion.dart';
 import 'm3e_state_layer.dart';
 import 'm3e_tappable_ink_scope.dart';
@@ -32,6 +33,7 @@ class M3ETappable extends StatefulWidget {
     this.spring = M3EMotion.expressiveSpatialPress,
     this.onStateChanged,
     this.materialInk = false,
+    this.haptic = M3EHapticFeedback.light,
     super.key,
   });
 
@@ -76,6 +78,9 @@ class M3ETappable extends StatefulWidget {
 
   /// When true, gestures are handled by the overlay ink well.
   final bool materialInk;
+
+  /// Haptic intensity for tap and long-press. [M3EHapticFeedback.none] disables.
+  final M3EHapticFeedback haptic;
 
   bool get _isInteractive => enabled && (onTap != null || onLongPress != null);
 
@@ -179,16 +184,35 @@ class _M3ETappableState extends State<M3ETappable>
     _animateScale(1);
   }
 
+  void _fireHaptic() {
+    M3EHaptics.trigger(widget.haptic);
+  }
+
+  VoidCallback? _wrapTap(VoidCallback? callback) {
+    if (callback == null) {
+      return null;
+    }
+    return () {
+      _fireHaptic();
+      callback();
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final interactive = widget._isInteractive;
+    final VoidCallback? onTap = interactive ? _wrapTap(widget.onTap) : null;
+    final VoidCallback? onLongPress = interactive
+        ? _wrapTap(widget.onLongPress)
+        : null;
+
     Widget content = widget.builder(context, _state);
     if (widget.materialInk) {
       // InkWell owns splash/tap; press scale is driven by [Listener] below so
       // setState rebuilds cannot cancel the press gesture mid-spring.
       content = M3ETappableInkScope(
-        onTap: interactive ? widget.onTap : null,
-        onLongPress: interactive ? widget.onLongPress : null,
+        onTap: onTap,
+        onLongPress: onLongPress,
         mouseCursor: _resolveCursor(interactive),
         onHover: interactive
             ? (bool hovered) => _update(_state.copyWith(hovered: hovered))
@@ -197,8 +221,13 @@ class _M3ETappableState extends State<M3ETappable>
       );
     }
     content = _wrapScale(content);
-    final Widget pointer = _wrapPointer(content, interactive);
-    return _wrapSemantics(_wrapFocus(pointer, interactive));
+    final Widget pointer = _wrapPointer(
+      content,
+      interactive,
+      onTap,
+      onLongPress,
+    );
+    return _wrapSemantics(_wrapFocus(pointer, interactive, onTap));
   }
 
   Widget _wrapScale(Widget child) {
@@ -214,7 +243,12 @@ class _M3ETappableState extends State<M3ETappable>
     );
   }
 
-  Widget _wrapPointer(Widget child, bool interactive) {
+  Widget _wrapPointer(
+    Widget child,
+    bool interactive,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+  ) {
     var wrapped = child;
 
     if (!widget.materialInk) {
@@ -224,8 +258,8 @@ class _M3ETappableState extends State<M3ETappable>
         onExit: (_) => _update(_state.copyWith(hovered: false)),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: interactive ? widget.onTap : null,
-          onLongPress: interactive ? widget.onLongPress : null,
+          onTap: onTap,
+          onLongPress: onLongPress,
           child: wrapped,
         ),
       );
@@ -246,7 +280,7 @@ class _M3ETappableState extends State<M3ETappable>
     );
   }
 
-  Widget _wrapFocus(Widget child, bool interactive) {
+  Widget _wrapFocus(Widget child, bool interactive, VoidCallback? onTap) {
     return FocusableActionDetector(
       enabled: interactive,
       focusNode: widget.focusNode,
@@ -256,7 +290,7 @@ class _M3ETappableState extends State<M3ETappable>
       actions: <Type, Action<Intent>>{
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
-            widget.onTap?.call();
+            onTap?.call();
             return null;
           },
         ),

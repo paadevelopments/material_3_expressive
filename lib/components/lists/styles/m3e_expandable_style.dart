@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_expandable_enums.dart';
 import 'm3e_list_theme.dart';
 
@@ -145,7 +144,7 @@ class M3EExpandableStyle {
     this.tapBodyToCollapse = false,
     this.headerAlignment = CrossAxisAlignment.start,
     this.bodyAlignment = Alignment.topLeft,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
     this.splashColor,
     this.highlightColor,
     this.splashFactory,

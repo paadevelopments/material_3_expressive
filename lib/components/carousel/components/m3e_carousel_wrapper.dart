@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../../foundations/foundations.dart';
 import 'm3e_carousel_view.dart';
 
 /// Wraps [M3ECarouselView] with tap handling and a neighbor pulse animation.
@@ -360,6 +361,9 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   }
 
   Future<void> _handleTap(int index) async {
+    if (widget.onTap != null) {
+      M3EHaptics.trigger(M3EHapticFeedback.light);
+    }
     widget.onTap?.call(index);
     if (_pulseController.isAnimating) {
       return;
@@ -490,7 +494,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                enableFeedback: widget.enableSplash,
+                                enableFeedback: false,
                                 onTap: () => _handleTap(index),
                                 overlayColor: widget.overlayColor,
                               ),

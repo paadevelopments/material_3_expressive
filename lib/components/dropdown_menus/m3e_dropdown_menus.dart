@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
-import '../buttons/enums/m3e_button_enums.dart';
-import '../buttons/res/m3e_button_constants.dart';
 import 'components/m3e_dropdown_chips.dart';
 import 'components/m3e_dropdown_menu_item.dart';
 import 'controllers/m3e_dropdown_controller.dart';
@@ -239,7 +237,7 @@ class M3EDropdownMenu<T> extends StatefulWidget {
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.splashFactory = NoSplash.splashFactory,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
   }) : future = null;
 
   /// Creates an [M3EDropdownMenu] that loads items asynchronously.
@@ -271,7 +269,7 @@ class M3EDropdownMenu<T> extends StatefulWidget {
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.splashFactory = NoSplash.splashFactory,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
   }) : items = const [];
 
   @override

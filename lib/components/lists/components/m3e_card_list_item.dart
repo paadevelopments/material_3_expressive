@@ -5,7 +5,6 @@ import 'package:material_3_expressive/material_3_expressive.dart'
     show M3ECardList;
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
 import '../../cards/m3e_cards.dart';
 import '../enums/m3e_list_enums.dart';
 import 'm3e_list_item_scope.dart';
@@ -59,7 +58,7 @@ class M3ECardListItem extends StatelessWidget {
     this.onLongPress,
     this.semanticLabel,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
     super.key,
   });
 

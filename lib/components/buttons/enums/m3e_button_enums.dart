@@ -6,10 +6,11 @@
 // LICENSE file in the root directory of this source tree.
 
 import 'package:flutter/foundation.dart';
-import 'package:material_3_expressive/components/buttons/styles/m3e_button_decoration.dart'
-    show M3EButtonDecoration, M3EToggleButtonDecoration;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EButton, M3EButtonGroup, M3EToggleButton;
+
+export 'package:material_3_expressive/foundations/m3e_haptics.dart'
+    show M3EHapticFeedback;
 
 /// Visual styles for [M3EButton] and [M3EToggleButton].
 ///
@@ -139,33 +140,4 @@ class M3EButtonSize {
 
   @override
   String toString() => 'M3EButtonSize.$name';
-}
-
-/// Haptic feedback intensity levels for button interactions.
-///
-/// Use with [M3EButtonDecoration.haptic] or [M3EToggleButtonDecoration.haptic]
-/// to provide tactile feedback when buttons are pressed.
-///
-/// ## Levels
-/// - [none] — No haptic feedback (default)
-/// - [light] — Light tap feedback for subtle interactions
-/// - [medium] — Medium impact for standard button presses
-/// - [heavy] — Heavy impact for significant actions
-enum M3EHapticFeedback {
-  /// No haptic feedback.
-  none(0),
-
-  /// Light tap feedback.
-  light(1),
-
-  /// Medium impact feedback.
-  medium(2),
-
-  /// Heavy impact feedback.
-  heavy(3);
-
-  /// value.
-
-  final int value;
-  const M3EHapticFeedback(this.value);
 }

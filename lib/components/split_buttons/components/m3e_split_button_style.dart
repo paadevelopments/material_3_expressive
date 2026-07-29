@@ -151,11 +151,7 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
   }
 
   void _triggerHaptic() {
-    final haptic = widget.decorationHaptic;
-    if (haptic == M3EHapticFeedback.none) {
-      return;
-    }
-    M3EButtonConstants.triggerHapticFeedback(haptic);
+    M3EHaptics.trigger(widget.decorationHaptic);
   }
 
   MouseCursor _segmentMouseCursor({

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
+
+import '../../../foundations/foundations.dart';
 import 'm3e_list_theme.dart';
 
 /// Immutable visual and interaction configuration for dismissible M3E lists.
@@ -105,7 +106,7 @@ class M3EDismissibleListStyle {
     this.highlightColor,
     this.splashFactory,
     this.enableFeedback = true,
-    this.hapticOnTap = M3EHapticFeedback.none,
+    this.hapticOnTap = M3EHapticFeedback.light,
     this.dismissThreshold = M3EListDismissibleTheme.defaultDismissThreshold,
     this.hapticOnThreshold = M3EHapticFeedback.light,
     this.dismissHapticStream = false,

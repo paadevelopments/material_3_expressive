@@ -117,9 +117,7 @@ class _M3EToggleButtonState extends State<M3EToggleButton>
     if (!widget.enabled) {
       return;
     }
-    if (widget.decorationHaptic != M3EHapticFeedback.none) {
-      M3EButtonConstants.triggerHapticFeedback(widget.decorationHaptic);
-    }
+    M3EHaptics.trigger(widget.decorationHaptic);
     final newChecked = !_isChecked;
     if (widget.checked == null) {
       setState(() => _localChecked = newChecked);

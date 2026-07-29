@@ -270,6 +270,9 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
             next.clamp(widget.values.start, widget.max),
           );
     if (updated != widget.values) {
+      if (widget.divisions != null) {
+        M3EHaptics.selection();
+      }
       widget.onChanged!(updated);
     }
   }

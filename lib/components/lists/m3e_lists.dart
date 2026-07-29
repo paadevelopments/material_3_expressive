@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
-import '../buttons/enums/m3e_button_enums.dart';
 import '../cards/m3e_cards.dart';
 import 'components/m3e_card_list_item.dart';
 import 'components/m3e_expandable_builders.dart';
@@ -237,7 +236,7 @@ class M3ECardList extends StatelessWidget {
 
   /// The haptic feedback to provide on tap.
   ///
-  /// Defaults to [M3EHapticFeedback.none].
+  /// Defaults to [M3EHapticFeedback.light].
   final M3EHapticFeedback haptic;
 
   /// Widget displayed when the list is empty (itemCount is 0).
@@ -291,7 +290,7 @@ class M3ECardList extends StatelessWidget {
     this.onLongPress,
     this.semanticLabelBuilder,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
     this.emptyBuilder,
   }) : _isBuilder = false,
        controller = null,
@@ -314,7 +313,7 @@ class M3ECardList extends StatelessWidget {
     this.onLongPress,
     this.semanticLabelBuilder,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.none,
+    this.haptic = M3EHapticFeedback.light,
     this.emptyBuilder,
     this.controller,
     this.physics,

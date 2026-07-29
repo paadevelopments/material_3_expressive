@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../buttons/enums/m3e_button_enums.dart';
-import '../../buttons/res/m3e_button_constants.dart';
 import '../styles/m3e_expandable_style.dart';
 import 'm3e_expandable_item.dart';
 
@@ -75,7 +73,7 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
     required M3EHapticFeedback haptic,
     void Function(int index, {required bool isExpanded})? onExpansionChanged,
   }) {
-    M3EButtonConstants.triggerHapticFeedback(haptic);
+    M3EHaptics.trigger(haptic);
     final isExpanding = !_expandedIndices.contains(index);
     setState(() {
       if (isExpanding) {
