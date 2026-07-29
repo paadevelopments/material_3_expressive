@@ -3,6 +3,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
     show M3ESlider;
@@ -47,6 +48,10 @@ class M3ERangeSlider extends StatefulWidget {
     this.dotSize,
     this.dotSpacing,
     this.dotBuilder,
+    this.enabled = true,
+    this.focusNode,
+    this.autofocus = false,
+    this.haptic = M3EHapticFeedback.none,
     super.key,
   }) : wavy = false,
        amplitude = null,
@@ -78,6 +83,10 @@ class M3ERangeSlider extends StatefulWidget {
     this.amplitudeForProgress,
     this.wavelength,
     this.waveSpeed,
+    this.enabled = true,
+    this.focusNode,
+    this.autofocus = false,
+    this.haptic = M3EHapticFeedback.none,
     super.key,
   }) : wavy = true,
        assert(max > min, 'max must be greater than min.');
@@ -143,17 +152,50 @@ class M3ERangeSlider extends StatefulWidget {
   /// Custom stop/tick markers. When null, default circular dots are painted.
   final M3ESliderDotBuilder? dotBuilder;
 
+  /// Whether the slider responds to user interaction.
+  ///
+  /// The slider is also disabled when [onChanged] is null.
+  final bool enabled;
+
+  /// Focus node for keyboard/traditional focus.
+  final FocusNode? focusNode;
+
+  /// Whether this slider should be focused initially.
+  final bool autofocus;
+
+  /// Haptic feedback intensity fired on discrete value changes.
+  final M3EHapticFeedback haptic;
+
   @override
   State<M3ERangeSlider> createState() => _M3ERangeSliderState();
 }
 
 class _M3ERangeSliderState extends State<M3ERangeSlider>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   _M3ERangeThumb? _activeThumb;
+  bool _dragging = false;
+  bool _isFocusedFromPointer = false;
+  bool _ownsFocusNode = false;
+  late FocusNode _focusNode;
   late final AnimationController _waveController;
+  final Stopwatch _hapticStopwatch = Stopwatch();
 
-  bool get _enabled => widget.onChanged != null;
+  bool get _enabled => widget.enabled && widget.onChanged != null;
   bool get _pressed => _activeThumb != null;
+
+  /// Thumb keyboard input targets: the last active thumb, or
+  /// [_M3ERangeThumb.end] by default.
+  _M3ERangeThumb get _keyboardThumb => _activeThumb ?? _M3ERangeThumb.end;
+
+  bool get _showFocusOutline {
+    if (!_focusNode.hasFocus) {
+      return false;
+    }
+    if (FocusManager.instance.highlightMode == FocusHighlightMode.traditional) {
+      return true;
+    }
+    return !_isFocusedFromPointer;
+  }
 
   double get _startFraction =>
       M3ESliderMath.fraction(widget.values.start, widget.min, widget.max);
@@ -165,6 +207,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
   @override
   void initState() {
     super.initState();
+    _attachFocusNode(widget.focusNode);
     _waveController = AnimationController(
       vsync: this,
       duration: M3EMotion.extraLong2,
@@ -174,9 +217,33 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     }
   }
 
+  void _attachFocusNode(FocusNode? external) {
+    _focusNode = external ?? FocusNode();
+    _ownsFocusNode = external == null;
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _detachFocusNode() {
+    _focusNode.removeListener(_handleFocusChange);
+    if (_ownsFocusNode) {
+      _focusNode.dispose();
+    }
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) {
+      _isFocusedFromPointer = false;
+    }
+    setState(() {});
+  }
+
   @override
   void didUpdateWidget(M3ERangeSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      _detachFocusNode();
+      _attachFocusNode(widget.focusNode);
+    }
     if (widget.wavy) {
       if (!_waveController.isAnimating) {
         _waveController.repeat();
@@ -188,6 +255,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
 
   @override
   void dispose() {
+    _detachFocusNode();
     _waveController.dispose();
     super.dispose();
   }
@@ -259,25 +327,103 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
       divisions: widget.divisions,
       reverse: rtl,
     );
+    _setThumbValue(_activeThumb!, next);
+  }
 
-    final updated = _activeThumb == _M3ERangeThumb.start
-        ? M3ESliderRange(
-            next.clamp(widget.min, widget.values.end),
-            widget.values.end,
+  void _setThumbValue(_M3ERangeThumb thumb, double raw) {
+    if (!_enabled) {
+      return;
+    }
+    final double clampedRaw = thumb == _M3ERangeThumb.start
+        ? raw.clamp(widget.min, widget.values.end)
+        : raw.clamp(widget.values.start, widget.max);
+    final double next = widget.divisions != null
+        ? M3ESliderMath.snap(
+            clampedRaw,
+            widget.min,
+            widget.max,
+            widget.divisions,
           )
-        : M3ESliderRange(
-            widget.values.start,
-            next.clamp(widget.values.start, widget.max),
-          );
-    if (updated != widget.values) {
-      if (widget.divisions != null) {
-        M3EHaptics.selection();
+        : clampedRaw;
+    final updated = thumb == _M3ERangeThumb.start
+        ? M3ESliderRange(next, widget.values.end)
+        : M3ESliderRange(widget.values.start, next);
+    if (updated == widget.values) {
+      return;
+    }
+    if (widget.divisions != null) {
+      if (widget.haptic != M3EHapticFeedback.none) {
+        M3EHaptics.trigger(widget.haptic);
       }
-      widget.onChanged!(updated);
+    } else if (widget.haptic != M3EHapticFeedback.none && _dragging) {
+      _maybeContinuousHaptic();
+    }
+    widget.onChanged!(updated);
+  }
+
+  void _maybeContinuousHaptic() {
+    if (!_hapticStopwatch.isRunning ||
+        _hapticStopwatch.elapsedMilliseconds >= 60) {
+      M3EHaptics.selection();
+      _hapticStopwatch
+        ..reset()
+        ..start();
+    }
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (!_enabled || !M3ESliderMath.isNavigationKey(event.logicalKey)) {
+      return KeyEventResult.ignored;
+    }
+    if (event is KeyUpEvent) {
+      widget.onChangeEnd?.call(widget.values);
+      return KeyEventResult.handled;
+    }
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      final _M3ERangeThumb thumb = _keyboardThumb;
+      if (_activeThumb == null) {
+        setState(() => _activeThumb = thumb);
+      }
+      final double step = M3ESliderMath.stepSize(
+        widget.min,
+        widget.max,
+        widget.divisions,
+      );
+      final double current = thumb == _M3ERangeThumb.start
+          ? widget.values.start
+          : widget.values.end;
+      final double? next = _keyboardDelta(event.logicalKey, current, step);
+      if (next != null) {
+        _setThumbValue(thumb, next);
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  double? _keyboardDelta(LogicalKeyboardKey key, double current, double step) {
+    switch (key) {
+      case LogicalKeyboardKey.arrowRight:
+      case LogicalKeyboardKey.arrowUp:
+        return current + step;
+      case LogicalKeyboardKey.arrowLeft:
+      case LogicalKeyboardKey.arrowDown:
+        return current - step;
+      case LogicalKeyboardKey.pageUp:
+        return current + M3ESliderMath.pageStep(step, widget.divisions);
+      case LogicalKeyboardKey.pageDown:
+        return current - M3ESliderMath.pageStep(step, widget.divisions);
+      case LogicalKeyboardKey.home:
+        return widget.min;
+      case LogicalKeyboardKey.end:
+        return widget.max;
+      default:
+        return null;
     }
   }
 
   void _endInteraction() {
+    _dragging = false;
     if (_activeThumb != null) {
       setState(() => _activeThumb = null);
     }

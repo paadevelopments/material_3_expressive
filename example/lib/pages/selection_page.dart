@@ -236,6 +236,9 @@ class _SelectionPageState extends State<SelectionPage>
         ),
         GallerySection(
           title: 'Sliders',
+          description:
+              'Tab to a slider and use the arrow keys (or Page Up/Down, '
+              'Home/End) to adjust its value with a visible focus ring.',
           children: const <Widget>[_SelectionSlidersSection()],
         ),
         GallerySection(
@@ -347,6 +350,7 @@ class _SelectionSlidersSection extends StatefulWidget {
 class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
   double _volume = 0.5;
   double _brightness = 3;
+  double _disabled = 0.6;
   double _shapeDots = 2;
   double _balance = 0;
   double _wavy = 0.55;
@@ -384,7 +388,7 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
           ],
         ),
         DemoRow(
-          label: 'Discrete (0-5)',
+          label: 'Discrete (0-5) • haptic',
           children: <Widget>[
             SizedBox(
               width: 260,
@@ -392,8 +396,22 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 value: _brightness,
                 max: 5,
                 divisions: 5,
+                haptic: M3EHapticFeedback.light,
                 onChanged: (double value) =>
                     setState(() => _brightness = value),
+              ),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Disabled',
+          children: <Widget>[
+            SizedBox(
+              width: 260,
+              child: M3ESlider(
+                value: _disabled,
+                enabled: false,
+                onChanged: (double value) => setState(() => _disabled = value),
               ),
             ),
           ],
@@ -473,13 +491,15 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
           ],
         ),
         DemoRow(
-          label: 'Vertical',
+          label: 'Vertical • relocating icon',
           children: <Widget>[
             SizedBox(
               height: 160,
               width: 48,
               child: M3ESlider.vertical(
                 value: _vertical,
+                icon: const Icon(M3EIcons.volume_up),
+                iconPosition: M3ESliderIconPosition.end,
                 onChanged: (double value) => setState(() => _vertical = value),
               ),
             ),

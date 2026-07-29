@@ -23,3 +23,12 @@ enum M3ESliderPaintMode {
   /// Dual thumbs; active between start and end.
   range,
 }
+
+/// Axis-relative resting edge for the relocating track [M3ESlider.icon].
+enum M3ESliderIconPosition {
+  /// Leading / bottom (depending on orientation and [M3ESlider.topToBottom]).
+  start,
+
+  /// Trailing / top (depending on orientation and [M3ESlider.topToBottom]).
+  end,
+}

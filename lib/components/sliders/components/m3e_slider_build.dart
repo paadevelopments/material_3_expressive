@@ -67,7 +67,10 @@ class _M3ESliderResolved {
 extension on _M3ESliderState {
   _M3ESliderResolved _resolve(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme sliderTheme = theme.sliderTheme;
+    final M3ESliderTheme baseSliderTheme = theme.sliderTheme;
+    final M3ESliderTheme sliderTheme = _showFocusOutline
+        ? baseSliderTheme.copyWith(handleGap: baseSliderTheme.handleGap + 4)
+        : baseSliderTheme;
     final M3ESliderColors colors = sliderTheme.colors(
       theme.colorScheme,
       enabled: _enabled,
@@ -130,6 +133,7 @@ extension on _M3ESliderState {
         : _fraction * extent;
 
     return _buildGestureStack(
+      context: context,
       extent: extent,
       cross: cross,
       trackLayer: trackLayer,
@@ -253,6 +257,7 @@ extension on _M3ESliderState {
         M3ESliderThumb(
           color: resolved.colors.thumb,
           pressed: _pressed,
+          focused: _showFocusOutline,
           axis: widget.axis,
           width: _vertical
               ? resolved.thumbLength
@@ -265,6 +270,7 @@ extension on _M3ESliderState {
   }
 
   Widget _buildGestureStack({
+    required BuildContext context,
     required double extent,
     required double cross,
     required Widget trackLayer,
@@ -273,7 +279,7 @@ extension on _M3ESliderState {
     required _M3ESliderResolved resolved,
   }) {
     final gestures = _gestureCallbacks(extent, resolved.reverse);
-    return GestureDetector(
+    final Widget gestureDetector = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragStart: gestures.onHorizontalDragStart,
       onHorizontalDragUpdate: gestures.onHorizontalDragUpdate,
@@ -287,12 +293,23 @@ extension on _M3ESliderState {
       onTapUp: gestures.onTapUp,
       onTapCancel: gestures.onTapCancel,
       child: _buildStackBody(
+        context: context,
         extent: extent,
         cross: cross,
         trackLayer: trackLayer,
         thumb: thumb,
         thumbPrimary: thumbPrimary,
         resolved: resolved,
+      ),
+    );
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      canRequestFocus: _enabled,
+      onKeyEvent: _handleKeyEvent,
+      child: MouseRegion(
+        cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        child: gestureDetector,
       ),
     );
   }
@@ -332,7 +349,14 @@ extension on _M3ESliderState {
   }
 
   void _pressStart(DragStartDetails details) {
+    _requestPointerFocus();
+    _dragging = true;
     setState(() => _pressed = true);
+  }
+
+  void _requestPointerFocus() {
+    _isFocusedFromPointer = true;
+    _focusNode.requestFocus();
   }
 
   void _dragEnd(DragEndDetails details) {
@@ -362,12 +386,15 @@ extension on _M3ESliderState {
   }
 
   void _onTapDown(TapDownDetails d, double extent, bool reverse) {
+    _requestPointerFocus();
+    _dragging = true;
     setState(() => _pressed = true);
     final double primary = _vertical ? d.localPosition.dy : d.localPosition.dx;
     _update(primary, extent, reverse);
   }
 
   Widget _buildStackBody({
+    required BuildContext context,
     required double extent,
     required double cross,
     required Widget trackLayer,
@@ -375,6 +402,13 @@ extension on _M3ESliderState {
     required double thumbPrimary,
     required _M3ESliderResolved resolved,
   }) {
+    final Widget? iconOverlay = _buildRelocatingIcon(
+      context: context,
+      extent: extent,
+      cross: cross,
+      thumbPrimary: thumbPrimary,
+      resolved: resolved,
+    );
     return SizedBox(
       width: _vertical ? cross : extent,
       height: _vertical ? extent : cross,
@@ -390,6 +424,7 @@ extension on _M3ESliderState {
             height: _vertical ? 24 : cross,
             child: Center(child: thumb),
           ),
+          ?iconOverlay,
           if (_pressed)
             Positioned(
               left: _vertical ? cross + 8 : thumbPrimary - 24,
@@ -404,5 +439,88 @@ extension on _M3ESliderState {
         ],
       ),
     );
+  }
+
+  /// Icon that rests at one track end and relocates beside the thumb once it
+  /// gets close, so it is never covered. Standard track only.
+  Widget? _buildRelocatingIcon({
+    required BuildContext context,
+    required double extent,
+    required double cross,
+    required double thumbPrimary,
+    required _M3ESliderResolved resolved,
+  }) {
+    if (widget.icon == null ||
+        widget.trackKind != M3ESliderTrackKind.standard) {
+      return null;
+    }
+    final double iconSize = widget.iconSize ?? 24;
+    final double iconHalf = iconSize / 2;
+    final double corner = resolved.trackThickness / 2;
+    final startPos = corner;
+    final double endPos = extent - corner;
+    final double thumbHalf = resolved.handleThickness / 2;
+    final bool reverse = resolved.reverse;
+
+    const double restingInset = 12;
+    final nearEnd =
+        (widget.iconPosition == M3ESliderIconPosition.end) != reverse;
+    final double restingCenter = nearEnd
+        ? endPos - iconHalf - restingInset
+        : startPos + iconHalf + restingInset;
+
+    final double dockDistanceLimit = thumbHalf + iconHalf + 8;
+    final bool isDocked =
+        (thumbPrimary - restingCenter).abs() <= dockDistanceLimit;
+    _updateIconDock(isDocked);
+
+    final double dockOffset = thumbHalf + iconHalf + 12;
+    final double dockedTarget = reverse
+        ? thumbPrimary + dockOffset
+        : thumbPrimary - dockOffset;
+
+    final double iconCenter = lerpDouble(
+      restingCenter,
+      dockedTarget,
+      _dockController.value,
+    )!.clamp(startPos, endPos);
+
+    final bool overActive = reverse
+        ? iconCenter >= thumbPrimary
+        : iconCenter <= thumbPrimary;
+
+    final M3EThemeData theme = M3ETheme.of(context);
+    final Color iconColor = !_enabled
+        ? M3EColorUtils.withOpacity(
+            theme.colorScheme.onSurface,
+            resolved.sliderTheme.disabledActiveOpacity,
+          )
+        : overActive
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onSurfaceVariant;
+
+    return Positioned(
+      left: _vertical ? (cross - iconSize) / 2 : iconCenter - iconHalf,
+      top: _vertical ? iconCenter - iconHalf : (cross - iconSize) / 2,
+      width: iconSize,
+      height: iconSize,
+      child: IconTheme.merge(
+        data: IconThemeData(size: iconSize, color: iconColor),
+        child: widget.icon!,
+      ),
+    );
+  }
+
+  void _updateIconDock(bool isDocked) {
+    if (isDocked == _iconDocked) {
+      return;
+    }
+    _iconDocked = isDocked;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || isDocked != _iconDocked) {
+        return;
+      }
+      _dockController.animateTo(isDocked ? 1.0 : 0.0);
+    });
   }
 }

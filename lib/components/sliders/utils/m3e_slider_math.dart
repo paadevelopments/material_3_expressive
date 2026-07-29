@@ -3,6 +3,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
     show M3ERangeSlider, M3ESlider;
 
@@ -97,4 +98,27 @@ abstract final class M3ESliderMath {
 
   static double clampRangeEnd(double start, double end, double max) =>
       math.min(max, math.max(end, start));
+
+  /// Whether [key] drives keyboard value changes (arrows, page, home/end).
+  static bool isNavigationKey(LogicalKeyboardKey key) {
+    return key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.arrowUp ||
+        key == LogicalKeyboardKey.arrowDown ||
+        key == LogicalKeyboardKey.pageUp ||
+        key == LogicalKeyboardKey.pageDown ||
+        key == LogicalKeyboardKey.home ||
+        key == LogicalKeyboardKey.end;
+  }
+
+  /// Single keyboard step: one division width, or 1% of the range when
+  /// continuous.
+  static double stepSize(double min, double max, int? divisions) {
+    return (max - min) / (divisions ?? 100);
+  }
+
+  /// Coarser PageUp/PageDown step — ten [stepSize]s per page.
+  static double pageStep(double step, int? divisions) {
+    return step * math.max(1, (divisions ?? 100) ~/ 10);
+  }
 }

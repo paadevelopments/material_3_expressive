@@ -36,7 +36,10 @@ class _M3ERangeSliderResolved {
 extension on _M3ERangeSliderState {
   _M3ERangeSliderResolved _resolve(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme sliderTheme = theme.sliderTheme;
+    final M3ESliderTheme baseSliderTheme = theme.sliderTheme;
+    final M3ESliderTheme sliderTheme = _showFocusOutline
+        ? baseSliderTheme.copyWith(handleGap: baseSliderTheme.handleGap + 4)
+        : baseSliderTheme;
     final M3ESliderColors colors = sliderTheme.colors(
       theme.colorScheme,
       enabled: _enabled,
@@ -76,7 +79,7 @@ extension on _M3ERangeSliderState {
     final double startX = _thumbX(_startFraction, width, resolved.rtl);
     final double endX = _thumbX(_endFraction, width, resolved.rtl);
 
-    return GestureDetector(
+    final Widget gestureDetector = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragStart: !_enabled
           ? null
@@ -105,9 +108,22 @@ extension on _M3ERangeSliderState {
         resolved: resolved,
       ),
     );
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      canRequestFocus: _enabled,
+      onKeyEvent: _handleKeyEvent,
+      child: MouseRegion(
+        cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        child: gestureDetector,
+      ),
+    );
   }
 
   void _selectThumb(double dx, double startX, double endX) {
+    _isFocusedFromPointer = true;
+    _focusNode.requestFocus();
+    _dragging = true;
     final double distStart = (dx - startX).abs();
     final double distEnd = (dx - endX).abs();
     setState(() {
@@ -187,11 +203,13 @@ extension on _M3ERangeSliderState {
 
   Widget _buildThumb({
     required bool pressed,
+    required bool focused,
     required _M3ERangeSliderResolved resolved,
   }) {
     return M3ESliderThumb(
       color: resolved.colors.thumb,
       pressed: pressed,
+      focused: focused,
       width: resolved.sliderTheme.handleWidth,
       height: resolved.thumbLength,
       pressedThickness: resolved.sliderTheme.pressedHandleWidth,
@@ -221,6 +239,8 @@ extension on _M3ERangeSliderState {
             child: Center(
               child: _buildThumb(
                 pressed: _activeThumb == _M3ERangeThumb.start,
+                focused:
+                    _showFocusOutline && _keyboardThumb == _M3ERangeThumb.start,
                 resolved: resolved,
               ),
             ),
@@ -232,6 +252,8 @@ extension on _M3ERangeSliderState {
             child: Center(
               child: _buildThumb(
                 pressed: _activeThumb == _M3ERangeThumb.end,
+                focused:
+                    _showFocusOutline && _keyboardThumb == _M3ERangeThumb.end,
                 resolved: resolved,
               ),
             ),
