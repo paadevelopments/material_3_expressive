@@ -33,7 +33,7 @@ class M3ETappable extends StatefulWidget {
     this.spring = M3EMotion.expressiveSpatialPress,
     this.onStateChanged,
     this.materialInk = false,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     super.key,
   });
 

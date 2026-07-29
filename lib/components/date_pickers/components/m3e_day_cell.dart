@@ -58,7 +58,6 @@ class M3EDayCell extends StatelessWidget {
     return M3ETappable(
       enabled: enabled,
       onTap: onTap,
-      haptic: M3EHapticFeedback.none,
       semanticLabel: '${date.day}',
       builder: (BuildContext context, M3EInteractionState state) {
         return Stack(

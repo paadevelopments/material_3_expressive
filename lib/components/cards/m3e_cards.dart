@@ -31,7 +31,7 @@ class M3ECard extends StatelessWidget {
     this.surfaceKey,
     this.mouseCursor,
     this.semanticLabel,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     this.onStateChanged,
     super.key,
   });

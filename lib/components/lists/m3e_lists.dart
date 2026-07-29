@@ -236,7 +236,7 @@ class M3ECardList extends StatelessWidget {
 
   /// The haptic feedback to provide on tap.
   ///
-  /// Defaults to [M3EHapticFeedback.light].
+  /// Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
 
   /// Widget displayed when the list is empty (itemCount is 0).
@@ -290,7 +290,7 @@ class M3ECardList extends StatelessWidget {
     this.onLongPress,
     this.semanticLabelBuilder,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     this.emptyBuilder,
   }) : _isBuilder = false,
        controller = null,
@@ -313,7 +313,7 @@ class M3ECardList extends StatelessWidget {
     this.onLongPress,
     this.semanticLabelBuilder,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     this.emptyBuilder,
     this.controller,
     this.physics,

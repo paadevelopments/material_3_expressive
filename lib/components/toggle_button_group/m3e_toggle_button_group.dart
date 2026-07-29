@@ -79,7 +79,7 @@ class M3EButtonGroup extends StatefulWidget {
     this.onSelectedIndicesChanged,
     this.neighborSquish = true,
     this.expandedRatio = 0.15,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     this.enableFeedback = true,
     this.decoration,
     this.semanticLabel,

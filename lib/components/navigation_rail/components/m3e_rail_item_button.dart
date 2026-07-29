@@ -40,6 +40,7 @@ class M3ERailItemButton extends StatelessWidget {
     this.heightOverride,
     this.useLocalIndicator = true,
     this.indicatorKey,
+    this.haptic = M3EHapticFeedback.none,
   });
 
   /// Icon to display.
@@ -80,8 +81,11 @@ class M3ERailItemButton extends StatelessWidget {
   /// When false, selection fill is drawn by [M3ENavSelectionIndicator] instead.
   final bool useLocalIndicator;
 
-  /// Key on the region the shared selection indicator should cover.
+  /// Key for the local indicator when [useLocalIndicator] is true.
   final GlobalKey? indicatorKey;
+
+  /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +133,7 @@ class M3ERailItemButton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          M3EHaptics.trigger(M3EHapticFeedback.light);
+          M3EHaptics.trigger(haptic);
           onPressed();
         },
         splashFactory: NoSplash.splashFactory,
@@ -226,6 +230,7 @@ class M3ERailItemButton extends StatelessWidget {
             badgeValue: badgeCount,
             onPressed: onPressed,
             suppressInk: true,
+            haptic: haptic,
             variant: useLocalIndicator && isSelected
                 ? M3EIconButtonVariant.tonal
                 : M3EIconButtonVariant.standard,

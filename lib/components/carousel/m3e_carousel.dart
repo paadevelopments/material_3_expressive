@@ -44,6 +44,7 @@ class M3ECarousel extends StatefulWidget {
     this.singleSwipeGestureSensitivityRange =
         M3ECarouselTheme.defaultSingleSwipeGestureSensitivityRange,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     required this.children,
   });
 
@@ -96,6 +97,9 @@ class M3ECarousel extends StatefulWidget {
 
   /// Click event notification pipe exposing the zero-based list tracking index of the interacted element.
   final void Function(int selectedIndex)? onTap;
+
+  /// Haptic intensity on item tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// The continuous structured sequence of elements rendered inside the carousel scroll track.
   final List<Widget> children;
@@ -235,6 +239,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
                   ),
                 ),
                 onTap: widget.onTap,
+                haptic: widget.haptic,
                 flexWeights: widget.type == M3ECarouselType.uncontained
                     ? null
                     : layoutWeight,

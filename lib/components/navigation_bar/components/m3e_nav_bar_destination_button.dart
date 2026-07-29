@@ -33,6 +33,7 @@ class M3ENavBarDestinationButton extends StatelessWidget {
     required this.underlineColor,
     required this.indicatorColor,
     required this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.showRestingPill = true,
     super.key,
   });
@@ -82,6 +83,9 @@ class M3ENavBarDestinationButton extends StatelessWidget {
 
   /// onTap.
   final VoidCallback onTap;
+
+  /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// When false, the shared liquid overlay owns the pill (during travel).
   final bool showRestingPill;
@@ -151,7 +155,7 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          M3EHaptics.trigger(M3EHapticFeedback.light);
+          M3EHaptics.trigger(haptic);
           onTap();
         },
         child: Column(

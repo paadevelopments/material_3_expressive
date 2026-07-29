@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 /// or the shared tappable interaction primitive.
 ///
 /// ## Levels
-/// - [none] — No haptic feedback
-/// - [light] — Light tap feedback (default for most interactions)
+/// - [none] — No haptic feedback (default)
+/// - [light] — Light tap feedback for subtle interactions
 /// - [medium] — Medium impact for standard presses
 /// - [heavy] — Heavy impact for significant actions
 enum M3EHapticFeedback {

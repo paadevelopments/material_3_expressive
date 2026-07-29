@@ -237,7 +237,7 @@ class M3EDropdownMenu<T> extends StatefulWidget {
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.splashFactory = NoSplash.splashFactory,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
   }) : future = null;
 
   /// Creates an [M3EDropdownMenu] that loads items asynchronously.
@@ -269,7 +269,7 @@ class M3EDropdownMenu<T> extends StatefulWidget {
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
     this.splashFactory = NoSplash.splashFactory,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
   }) : items = const [];
 
   @override

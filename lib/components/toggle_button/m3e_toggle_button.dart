@@ -260,7 +260,7 @@ class M3EToggleButton extends StatefulWidget {
 
   /// M3EHapticFeedback.
   M3EHapticFeedback get decorationHaptic =>
-      decoration?.haptic ?? M3EHapticFeedback.light;
+      decoration?.haptic ?? M3EHapticFeedback.none;
 
   /// double.
   double? get decorationBorderRadius => decoration?.borderRadius;

@@ -58,7 +58,7 @@ class M3ECardListItem extends StatelessWidget {
     this.onLongPress,
     this.semanticLabel,
     this.mouseCursor,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     super.key,
   });
 

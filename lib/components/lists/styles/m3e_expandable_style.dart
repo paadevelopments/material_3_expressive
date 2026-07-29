@@ -144,7 +144,7 @@ class M3EExpandableStyle {
     this.tapBodyToCollapse = false,
     this.headerAlignment = CrossAxisAlignment.start,
     this.bodyAlignment = Alignment.topLeft,
-    this.haptic = M3EHapticFeedback.light,
+    this.haptic = M3EHapticFeedback.none,
     this.splashColor,
     this.highlightColor,
     this.splashFactory,

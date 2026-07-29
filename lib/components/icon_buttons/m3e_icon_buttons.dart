@@ -49,6 +49,7 @@ class M3EIconButton extends StatefulWidget {
     this.isSelected,
     this.selectedIcon,
     this.enableFeedback,
+    this.haptic = M3EHapticFeedback.none,
     this.badgeValue,
     this.suppressInk = false,
   });
@@ -86,6 +87,9 @@ class M3EIconButton extends StatefulWidget {
 
   /// enableFeedback.
   final bool? enableFeedback;
+
+  /// Haptic intensity on press. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// badgeValue.
   final Object? badgeValue;

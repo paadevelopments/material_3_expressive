@@ -43,6 +43,7 @@ class M3ECarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.enableSplash = true,
     this.infinite = false,
     this.physics,
@@ -71,6 +72,7 @@ class M3ECarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.enableSplash = true,
     this.infinite = false,
     this.physics,
@@ -96,6 +98,7 @@ class M3ECarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.enableSplash = true,
     required double this.itemExtent,
     required this.itemBuilder,
@@ -123,6 +126,7 @@ class M3ECarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.itemBuilder,
@@ -219,6 +223,9 @@ class M3ECarouselView extends StatefulWidget {
 
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
+
+  /// Haptic intensity on item tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// Determines whether an [InkWell] will cover each Carousel item.
   ///
@@ -406,7 +413,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
               onTap: widget.onTap == null
                   ? null
                   : () {
-                      M3EHaptics.trigger(M3EHapticFeedback.light);
+                      M3EHaptics.trigger(widget.haptic);
                       widget.onTap!(itemIndex);
                     },
               overlayColor: effectiveOverlayColor,
@@ -417,7 +424,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
     } else if (widget.onTap != null) {
       contents = GestureDetector(
         onTap: () {
-          M3EHaptics.trigger(M3EHapticFeedback.light);
+          M3EHaptics.trigger(widget.haptic);
           widget.onTap!(index);
         },
         child: contents,

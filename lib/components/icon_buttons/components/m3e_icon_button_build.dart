@@ -114,16 +114,16 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             onPressed: widget.onPressed == null
                 ? null
                 : () {
-                    if (widget.enableFeedback ?? true) {
-                      M3EHaptics.trigger(M3EHapticFeedback.light);
-                    }
+                    M3EHaptics.trigger(widget.haptic);
                     widget.onPressed!();
                   },
             isSelected: widget.isSelected,
             selectedIcon: widget.selectedIcon,
             icon: innerIcon,
             tooltip: widget.tooltip,
-            enableFeedback: false,
+            enableFeedback: widget.haptic != M3EHapticFeedback.none
+                ? false
+                : widget.enableFeedback,
             statesController: _statesController,
             style: ButtonStyle(
               fixedSize: WidgetStateProperty.all(visual),

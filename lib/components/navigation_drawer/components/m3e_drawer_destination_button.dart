@@ -20,6 +20,7 @@ class M3EDrawerDestinationButton extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.indicatorKey,
+    this.haptic = M3EHapticFeedback.none,
     this.showRestingFill = true,
     super.key,
   });
@@ -36,6 +37,9 @@ class M3EDrawerDestinationButton extends StatelessWidget {
 
   /// indicatorKey.
   final GlobalKey indicatorKey;
+
+  /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// When false, the shared liquid overlay owns the pill (during travel).
   final bool showRestingFill;
@@ -66,7 +70,7 @@ class M3EDrawerDestinationButton extends StatelessWidget {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            M3EHaptics.trigger(M3EHapticFeedback.light);
+            M3EHaptics.trigger(haptic);
             onTap();
           },
           child: KeyedSubtree(

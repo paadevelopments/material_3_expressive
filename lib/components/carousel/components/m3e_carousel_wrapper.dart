@@ -29,6 +29,7 @@ class M3ECarouselWrapper extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
+    this.haptic = M3EHapticFeedback.none,
     this.enableSplash = true,
     this.infinite = false,
     this.itemExtent,
@@ -88,6 +89,9 @@ class M3ECarouselWrapper extends StatefulWidget {
 
   /// Called when an item is tapped.
   final void Function(int)? onTap;
+
+  /// Haptic intensity on item tap. Defaults to [M3EHapticFeedback.none].
+  final M3EHapticFeedback haptic;
 
   /// Whether the wrapper ink layer reports splash feedback.
   final bool enableSplash;
@@ -362,7 +366,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
 
   Future<void> _handleTap(int index) async {
     if (widget.onTap != null) {
-      M3EHaptics.trigger(M3EHapticFeedback.light);
+      M3EHaptics.trigger(widget.haptic);
     }
     widget.onTap?.call(index);
     if (_pulseController.isAnimating) {
