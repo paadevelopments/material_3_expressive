@@ -5,8 +5,13 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
-    final Size visual = iconButtonTheme.visual(widget.size, widget.width);
-    final Size target = iconButtonTheme.target(widget.size, widget.width);
+    final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
+    final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
+    final Size visual = widget.visualSize ?? themeVisual;
+    final Size target = Size(
+      math.max(themeTarget.width, visual.width),
+      math.max(themeTarget.height, visual.height),
+    );
     final double iconPx = iconButtonTheme.iconSize(widget.size);
     final bool selected = widget.isSelected ?? false;
     final bool isToggle =

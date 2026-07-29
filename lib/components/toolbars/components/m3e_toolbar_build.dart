@@ -19,7 +19,10 @@ extension _M3EToolbarBuild on _M3EToolbarState {
       Directionality.of(context),
     );
     final EdgeInsets resolvedPadding =
-        widget.padding?.resolve(Directionality.of(context)) ?? contentPadding;
+        widget.padding?.resolve(Directionality.of(context)) ??
+        (_floating
+            ? _axisAwareFloatingPadding(theme, toolbarTheme, contentPadding)
+            : contentPadding);
     final innerPadding = resolvedPadding;
     final double availableExtent = M3EToolbarItemLayout.availableCrossExtent(
       crossAxisSize: metrics.crossAxisSize,
@@ -30,9 +33,10 @@ extension _M3EToolbarBuild on _M3EToolbarState {
       widget.size,
     );
     final double opticalInset = _opticalInset(theme, iconButtonSize);
+    final List<M3EToolbarItem> actions = _resolvedActions;
     final ({Widget? title, Widget? subtitle, bool hasTitle}) titles =
         _resolveTitles(toolbarTheme, theme.typeScale, foreground);
-    final bool useExpanding = _floating && _hasTrigger && !titles.hasTitle;
+    final bool useExpanding = _usesTriggerExpand && !titles.hasTitle;
     final bool dockedIconsOnly =
         !_floating &&
         !titles.hasTitle &&
@@ -54,6 +58,7 @@ extension _M3EToolbarBuild on _M3EToolbarState {
         opticalInset: opticalInset,
         useExpanding: useExpanding,
         dockedIconsOnly: dockedIconsOnly,
+        actions: actions,
       ),
       useExpanding: useExpanding,
     );
@@ -99,6 +104,34 @@ extension _M3EToolbarBuild on _M3EToolbarState {
         ),
       ),
     );
+  }
+
+  /// Main-axis floating inset matches cross-axis spacing to the pill edge
+  /// (padding + half the icon-button target overhang).
+  EdgeInsets _axisAwareFloatingPadding(
+    M3EThemeData theme,
+    M3EToolbarTheme toolbarTheme,
+    EdgeInsets base,
+  ) {
+    final M3EIconButtonSize buttonSize = toolbarTheme.iconButtonSize(
+      widget.size,
+    );
+    final Size target = theme.iconButtonTheme.target(
+      buttonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final Size visual = theme.iconButtonTheme.visual(
+      buttonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    if (widget.axis == Axis.horizontal) {
+      final double crossOptical = (target.height - visual.height) / 2;
+      final double main = base.left + crossOptical;
+      return EdgeInsets.fromLTRB(main, base.top, main, base.bottom);
+    }
+    final double crossOptical = (target.width - visual.width) / 2;
+    final double main = base.top + crossOptical;
+    return EdgeInsets.fromLTRB(base.left, main, base.right, main);
   }
 
   double _opticalInset(M3EThemeData theme, M3EIconButtonSize iconButtonSize) {
@@ -158,13 +191,14 @@ extension _M3EToolbarBuild on _M3EToolbarState {
     required double opticalInset,
     required bool useExpanding,
     required bool dockedIconsOnly,
+    required List<M3EToolbarItem> actions,
   }) {
     if (useExpanding) {
       return AnimatedBuilder(
         animation: _expandCtrl,
         builder: (BuildContext context, Widget? child) {
           return M3EToolbarExpandingActions(
-            actions: widget.actions,
+            actions: actions,
             maxInline: widget.maxInlineActions,
             overflowIcon: widget.overflowIcon,
             iconButtonSize: iconButtonSize,
@@ -177,10 +211,13 @@ extension _M3EToolbarBuild on _M3EToolbarState {
             availableExtent: availableExtent,
             opticalInset: opticalInset,
             onTriggerPressed: () {
-              final M3EToolbarAction trigger = widget.actions
-                  .whereType<M3EToolbarAction>()
-                  .firstWhere((M3EToolbarAction a) => a.isExpandTrigger);
-              _onTriggerPressed(trigger);
+              final int triggerIndex = actions.indexWhere(
+                (M3EToolbarItem item) =>
+                    item is M3EToolbarAction && item.isExpandTrigger,
+              );
+              if (triggerIndex >= 0) {
+                (actions[triggerIndex] as M3EToolbarAction).onPressed();
+              }
             },
             leading: widget.leading,
             trailing: widget.trailing,
@@ -190,7 +227,7 @@ extension _M3EToolbarBuild on _M3EToolbarState {
       );
     }
     return M3EToolbarActionsRow(
-      actions: widget.actions,
+      actions: actions,
       maxInline: widget.maxInlineActions,
       overflowIcon: widget.overflowIcon,
       iconButtonSize: iconButtonSize,
@@ -293,6 +330,7 @@ extension _M3EToolbarBuild on _M3EToolbarState {
     if (_floating) {
       bar = Align(alignment: widget.alignment, child: bar);
     }
+    bar = _wrapVisibility(bar);
     if (widget.semanticLabel != null) {
       bar = Semantics(container: true, label: widget.semanticLabel, child: bar);
     }

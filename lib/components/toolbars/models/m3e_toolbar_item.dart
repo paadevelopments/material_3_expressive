@@ -20,6 +20,7 @@ class M3EToolbarAction extends M3EToolbarItem {
     this.enabled = true,
     this.label,
     this.isDestructive = false,
+    this.active = false,
     this.isExpandTrigger = false,
   });
 
@@ -39,17 +40,28 @@ class M3EToolbarAction extends M3EToolbarItem {
   /// enabled.
   final bool enabled;
 
-  /// Label used in the overflow menu when inline slots are exceeded.
+  /// Label shown **inside** the action button when [active] is true.
+  ///
+  /// Inactive actions with a label still render icon-only (min width = icon
+  /// button). Also used as the overflow menu title.
   final String? label;
 
   /// When true, the overflow menu entry uses the error color.
   final bool isDestructive;
 
+  /// When true, uses filled / trigger-like coloring.
+  ///
+  /// When [M3EToolbar.onActiveIndexChanged] is set, the toolbar owns selection
+  /// and overwrites this. Otherwise the flag is respected as provided.
+  final bool active;
+
   /// Marks this action as the floating-toolbar expand/collapse trigger.
   ///
-  /// At most one action may set this. Meaningful only on floating toolbars:
-  /// the trigger uses filled icon-button styling and toggles pill expansion
-  /// while still calling [onPressed]. Docked toolbars ignore this flag.
+  /// At most one action may set this. Meaningful only on floating toolbars
+  /// **without** an adjacent FAB: the trigger uses filled icon-button styling
+  /// and toggles neighbor reveal while still calling [onPressed].
+  ///
+  /// When a FAB is present, the FAB owns whole-pill expand/collapse instead.
   final bool isExpandTrigger;
 }
 

@@ -28,9 +28,17 @@ class _NavigationPageState extends State<NavigationPage>
   int _drawerIndex = 0;
   int _primaryTab = 0;
   int _secondaryTab = 0;
+  late final M3EToolbarVisibilityController _toolbarVisibility =
+      M3EToolbarVisibilityController();
+  late final M3EToolbarScrollBehavior _toolbarScrollBehavior =
+      M3EToolbarScrollBehavior.exitAlways(
+        exitDirection: M3EToolbarExitDirection.bottom,
+        controller: _toolbarVisibility,
+      );
   final M3ESearchController _appBarSearchController = M3ESearchController();
   final M3ESearchController _appBarSafeAreaSearchController =
       M3ESearchController();
+  final M3ESearchController _toolbarSearchController = M3ESearchController();
 
   static const List<String> _appBarSearchSuggestions = <String>[
     'Inbox',
@@ -45,6 +53,8 @@ class _NavigationPageState extends State<NavigationPage>
   void dispose() {
     _appBarSearchController.dispose();
     _appBarSafeAreaSearchController.dispose();
+    _toolbarSearchController.dispose();
+    _toolbarVisibility.dispose();
     super.dispose();
   }
 
@@ -390,20 +400,109 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
-          label:
-              'Floating + FAB (pill expands independently; FAB always shown)',
+          label: 'Floating + FAB (tap FAB to expand / collapse whole pill)',
           children: <Widget>[
             M3EToolbar(
-              actions: sampleActions,
-              fabIcon: const Icon(M3EIcons.add),
-              onFabPressed: () {},
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+              ],
+              fabExpandIcon: const Icon(M3EIcons.add),
+              fabCollapseIcon: const Icon(M3EIcons.close),
               expanded: true,
             ),
             M3EToolbar(
-              actions: sampleActions,
-              fabIcon: const Icon(M3EIcons.add),
-              onFabPressed: () {},
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+              ],
+              fabExpandIcon: const Icon(M3EIcons.add),
+              fabCollapseIcon: const Icon(M3EIcons.close),
               expanded: false,
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Floating actions with label + active (tap to select)',
+          children: <Widget>[
+            M3EToolbar(
+              colorStyle: M3EToolbarColorStyle.vibrant,
+              activeIndex: 0,
+              onActiveIndexChanged: (int index) {},
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(
+                  icon: M3EIcons.home,
+                  label: 'Home',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.search,
+                  label: 'Search',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.favorite,
+                  label: 'Favorites',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.person,
+                  label: 'Profile',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Scroll / manual hide (clip exits parent bounds)',
+          children: <Widget>[
+            SizedBox(
+              height: 220,
+              width: 320,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: M3EToolbarScrollWrapper(
+                      behavior: _toolbarScrollBehavior,
+                      child: ListView.builder(
+                        itemCount: 24,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Text('Scroll item $index'),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      M3EButton(
+                        child: const Text('Hide'),
+                        onPressed: _toolbarVisibility.hide,
+                      ),
+                      const SizedBox(width: 8),
+                      M3EButton(
+                        child: const Text('Show'),
+                        onPressed: _toolbarVisibility.show,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  M3EToolbar(
+                    actions: sampleActions,
+                    scrollBehavior: _toolbarScrollBehavior,
+                    visibilityController: _toolbarVisibility,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -417,9 +516,13 @@ class _NavigationPageState extends State<NavigationPage>
                 M3EToolbar(
                   axis: Axis.vertical,
                   colorStyle: M3EToolbarColorStyle.vibrant,
-                  actions: sampleActions,
-                  fabIcon: const Icon(M3EIcons.add),
-                  onFabPressed: () {},
+                  actions: <M3EToolbarItem>[
+                    M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                    M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+                    M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+                  ],
+                  fabExpandIcon: const Icon(M3EIcons.add),
+                  fabCollapseIcon: const Icon(M3EIcons.close),
                   fabPosition: M3EToolbarFabPosition.bottom,
                 ),
               ],
@@ -556,21 +659,11 @@ class _NavigationPageState extends State<NavigationPage>
                   M3EToolbarAction(icon: M3EIcons.menu, onPressed: () {}),
                   M3EToolbarWidget(
                     semanticLabel: 'Search',
-                    child: SizedBox(
-                      width: 160,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: const Color(0x33000000),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text('Search…'),
-                          ),
-                        ),
-                      ),
+                    child: M3ESearchAnchor.bar(
+                      searchController: _toolbarSearchController,
+                      barHintText: 'Search…',
+                      shrinkWrap: true,
+                      suggestionsBuilder: _appBarSuggestions,
                     ),
                   ),
                   M3EToolbarAction(icon: M3EIcons.mic, onPressed: () {}),

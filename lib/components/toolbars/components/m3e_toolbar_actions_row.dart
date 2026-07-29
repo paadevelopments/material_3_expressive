@@ -84,17 +84,12 @@ class M3EToolbarActionsRow extends StatelessWidget {
 
     final slots = <Widget>[
       for (final M3EToolbarItem item in inline)
-        M3EToolbarItemLayout.buildItem(
+        _buildSlot(
           item: item,
           availableExtent: availableExtent,
-          axis: axis,
           opticalInset: opticalInset,
-          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
-            action: action,
-            size: iconButtonSize,
-            // Docked / static rows never emphasize expand triggers.
-            variant: M3EIconButtonVariant.standard,
-          ),
+          iconButtonSize: iconButtonSize,
+          expandWidgets: expand,
         ),
       if (overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
@@ -129,5 +124,27 @@ class M3EToolbarActionsRow extends StatelessWidget {
       mainAxisAlignment: mainAxisAlignment,
       children: children,
     );
+  }
+
+  /// Builds one inline slot; flexes [M3EToolbarWidget]s when [expandWidgets].
+  Widget _buildSlot({
+    required M3EToolbarItem item,
+    required double availableExtent,
+    required double opticalInset,
+    required M3EIconButtonSize iconButtonSize,
+    required bool expandWidgets,
+  }) {
+    final Widget built = M3EToolbarItemLayout.buildItem(
+      item: item,
+      availableExtent: availableExtent,
+      axis: axis,
+      opticalInset: opticalInset,
+      buildAction: (M3EToolbarAction action) =>
+          M3EToolbarIconButton(action: action, size: iconButtonSize),
+    );
+    if (expandWidgets && item is M3EToolbarWidget) {
+      return Expanded(child: built);
+    }
+    return built;
   }
 }

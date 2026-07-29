@@ -172,6 +172,27 @@ class _ActionsPageState extends State<ActionsPage>
               onPressed: () {},
             ),
             M3EFabMenu(
+              position: M3EFabMenuPosition.right,
+              expandIcon: const Icon(M3EIcons.add),
+              collapseIcon: const Icon(M3EIcons.close),
+              items: <M3EFabMenuItem>[
+                M3EFabMenuItem(
+                  icon: const Icon(M3EIcons.edit),
+                  label: 'Note',
+                  onPressed: () {},
+                ),
+                M3EFabMenuItem(
+                  icon: const Icon(M3EIcons.schedule),
+                  label: 'Reminder',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            M3EFabMenu(
+              position: M3EFabMenuPosition.left,
+              expandIcon: const Icon(M3EIcons.add),
+              collapseIcon: const Icon(M3EIcons.close),
+              color: M3EFabColor.secondary,
               items: <M3EFabMenuItem>[
                 M3EFabMenuItem(
                   icon: const Icon(M3EIcons.edit),

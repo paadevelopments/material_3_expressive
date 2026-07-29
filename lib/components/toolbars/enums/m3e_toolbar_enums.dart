@@ -51,6 +51,21 @@ enum M3EToolbarFabPosition {
   bottom,
 }
 
+/// Direction a toolbar slides when exiting via scroll / visibility controller.
+enum M3EToolbarExitDirection {
+  /// Exit by moving upwards.
+  top,
+
+  /// Exit by moving downwards.
+  bottom,
+
+  /// Exit toward the start (left in LTR).
+  start,
+
+  /// Exit toward the end (right in LTR).
+  end,
+}
+
 /// Legacy size enum — maps to icon-button density, not container height.
 enum M3EToolbarSize {
   /// Small icon-button density.

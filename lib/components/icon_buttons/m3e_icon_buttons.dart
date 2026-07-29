@@ -6,6 +6,8 @@
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 
@@ -52,6 +54,7 @@ class M3EIconButton extends StatefulWidget {
     this.haptic = M3EHapticFeedback.none,
     this.badgeValue,
     this.suppressInk = false,
+    this.visualSize,
   });
 
   /// icon.
@@ -96,6 +99,13 @@ class M3EIconButton extends StatefulWidget {
 
   /// When true, suppresses splash/hover ink effects.
   final bool suppressInk;
+
+  /// Overrides theme visual size when non-null (e.g. sprung toolbar label width).
+  ///
+  /// Height should typically match [M3EIconButtonTheme.visual] height for
+  /// [size]/[width]. The outer tap target uses at least the theme target,
+  /// or this size when larger.
+  final Size? visualSize;
 
   @override
   State<M3EIconButton> createState() => _M3EIconButtonState();

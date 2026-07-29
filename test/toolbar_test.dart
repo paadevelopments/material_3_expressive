@@ -69,8 +69,12 @@ void main() {
     _fabSlotIsPresentWhenFabiconProvided,
   );
   testWidgets(
-    'collapsed with FAB keeps FAB beside trigger pill',
-    _collapsedWithFabKeepsFabBesideTriggerPill,
+    'collapsed with FAB shows FAB and hides pill actions',
+    _collapsedWithFabShowsFabAndHidesPillActions,
+  );
+  testWidgets(
+    'visibility controller hide moves offset to limit',
+    _visibilityControllerHideMovesOffsetToLimit,
   );
   testWidgets(
     'expand trigger tap does not throw on pointer up after rebuild',
@@ -294,8 +298,8 @@ Future<void> _floatingTitleGetsOpticalStartInset(WidgetTester tester) async {
 
   final double titleLeft = tester.getTopLeft(find.text('Inbox')).dx;
   final double toolbarLeft = tester.getTopLeft(find.byType(M3EToolbar)).dx;
-  // contentPadding 8 + (48 target - 24 icon) / 2 = 20
-  expect(titleLeft - toolbarLeft, closeTo(20, 0.5));
+  // Axis-aware start pad 12 (8 + cross optical 4) + (48 target - 24 icon) / 2 = 24
+  expect(titleLeft - toolbarLeft, closeTo(24, 0.5));
 }
 
 Future<void> _dockedBottomSafeareaPadsOnlyBottom(WidgetTester tester) async {
@@ -389,7 +393,7 @@ Future<void> _fabSlotIsPresentWhenFabiconProvided(WidgetTester tester) async {
   expect(find.byType(M3EFab), findsOneWidget);
 }
 
-Future<void> _collapsedWithFabKeepsFabBesideTriggerPill(
+Future<void> _collapsedWithFabShowsFabAndHidesPillActions(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
@@ -397,24 +401,38 @@ Future<void> _collapsedWithFabKeepsFabBesideTriggerPill(
       child: M3EToolbar(
         actions: const <M3EToolbarItem>[
           M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
-          M3EToolbarAction(
-            icon: M3EIcons.share,
-            onPressed: _noop,
-            isExpandTrigger: true,
-          ),
+          M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
           M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
         ],
         fabIcon: const Icon(M3EIcons.add),
-        onFabPressed: () {},
         expanded: false,
       ),
     ),
   );
   expect(find.byType(M3EFab), findsOneWidget);
-  // Trigger stays in the collapsed pill; side actions are hidden.
-  expect(find.byIcon(M3EIcons.share), findsOneWidget);
-  expect(find.byIcon(M3EIcons.edit), findsNothing);
-  expect(find.byIcon(M3EIcons.favorite), findsNothing);
+  // Whole pill is clipped when collapsed — actions are not hit-testable.
+  expect(find.byIcon(M3EIcons.edit).hitTestable(), findsNothing);
+  expect(find.byIcon(M3EIcons.share).hitTestable(), findsNothing);
+}
+
+Future<void> _visibilityControllerHideMovesOffsetToLimit(
+  WidgetTester tester,
+) async {
+  final M3EToolbarVisibilityController controller =
+      M3EToolbarVisibilityController(exitExtent: 80);
+  expect(controller.offsetLimit, -80);
+  await tester.pumpWidget(
+    _host(
+      child: M3EToolbar(actions: _actions(), visibilityController: controller),
+    ),
+  );
+  await tester.pumpAndSettle();
+  controller.hide();
+  await tester.pumpAndSettle();
+  expect(controller.offset, closeTo(controller.offsetLimit, 0.5));
+  controller.show();
+  await tester.pumpAndSettle();
+  expect(controller.offset, closeTo(0, 0.5));
 }
 
 Future<void> _expandTriggerTapDoesNotThrowOnPointerUpAfter(

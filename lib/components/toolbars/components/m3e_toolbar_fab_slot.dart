@@ -1,12 +1,13 @@
 // Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// Adjacent FAB slot — size is independent of toolbar expand state.
+// Adjacent FAB slot — size morphs with FAB-driven toolbar expand progress.
 
 import 'package:flutter/widgets.dart';
 
 import '../../floating_action_buttons/enums/m3e_fab.dart';
 import '../../floating_action_buttons/m3e_floating_action_buttons.dart';
+import '../res/m3e_toolbar_tokens.dart';
 
-/// Hosts an adjacent [M3EFab]. Unaffected by the toolbar pill's expand state.
+/// Hosts an adjacent [M3EFab], optionally sized for expand morph.
 class M3EToolbarFabSlot extends StatelessWidget {
   /// M3EToolbarFabSlot.
   const M3EToolbarFabSlot({
@@ -14,6 +15,7 @@ class M3EToolbarFabSlot extends StatelessWidget {
     this.icon,
     this.onPressed,
     this.color = M3EFabColor.primary,
+    this.containerSize,
     super.key,
   });
 
@@ -29,13 +31,36 @@ class M3EToolbarFabSlot extends StatelessWidget {
   /// color.
   final M3EFabColor color;
 
+  /// When set, scales the default FAB into this square (80 collapsed → 56
+  /// expanded). Ignored when [fab] is provided (parent tight-lays out child).
+  final double? containerSize;
+
   @override
   Widget build(BuildContext context) {
-    return fab ??
-        M3EFab(
-          icon: icon ?? const SizedBox.shrink(),
-          onPressed: onPressed,
-          color: color,
-        );
+    if (fab != null) {
+      final double? size = containerSize;
+      if (size == null) {
+        return fab!;
+      }
+      return SizedBox(
+        width: size,
+        height: size,
+        child: FittedBox(fit: BoxFit.contain, child: fab),
+      );
+    }
+
+    final Widget button = M3EFab(
+      icon: icon ?? const SizedBox.shrink(),
+      onPressed: onPressed,
+      color: color,
+      size: M3EFabSize.medium,
+    );
+
+    final double size = containerSize ?? M3EToolbarTokens.fabBaseline;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: FittedBox(fit: BoxFit.contain, child: button),
+    );
   }
 }

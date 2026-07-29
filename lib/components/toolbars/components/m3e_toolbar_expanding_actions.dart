@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:motor/motor.dart';
 
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../models/m3e_toolbar_item.dart';
@@ -274,9 +273,3 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     );
   }
 }
-
-/// Spring used for floating toolbar container expand/collapse.
-SpringMotion m3eToolbarExpandMotion() =>
-    const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-      damping: 0.55,
-    );

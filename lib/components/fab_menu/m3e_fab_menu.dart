@@ -7,24 +7,29 @@ import 'package:motor/motor.dart';
 import '../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
 import '../floating_action_buttons/m3e_floating_action_buttons.dart';
+import 'enums/m3e_fab_menu_position.dart';
 import 'models/m3e_fab_menu_item.dart';
 
+export 'enums/m3e_fab_menu_position.dart';
 export 'models/m3e_fab_menu_item.dart';
 
 /// A Material 3 Expressive FAB menu.
 ///
-/// Items stay hidden while closed. On open the pill appears at ~50% width
-/// (FAB edge) and springs leftward; icon and label stay unscaled and clipped.
-/// The FAB morphs rounded-square ↔ circle with the open state. On close, items
-/// hide immediately — no reverse width animation.
+/// Items stay hidden while closed. On open the FAB shrinks (80→56) and morphs
+/// rounded-square ↔ circle while menu pills appear at ~50% width and spring
+/// from the [position] edge. On close, items hide immediately and the FAB
+/// grows back to the large square.
 class M3EFabMenu extends StatefulWidget {
   /// M3EFabMenu.
   const M3EFabMenu({
     required this.items,
     this.icon = const Icon(M3EIcons.add),
     this.closeIcon = const Icon(M3EIcons.close),
+    this.expandIcon,
+    this.collapseIcon,
     this.color = M3EFabColor.primary,
     this.size = M3EFabSize.medium,
+    this.position = M3EFabMenuPosition.right,
     super.key,
   }) : assert(items.length > 0, 'A FAB menu needs at least one item.');
 
@@ -32,17 +37,27 @@ class M3EFabMenu extends StatefulWidget {
 
   final List<M3EFabMenuItem> items;
 
-  /// icon.
+  /// Closed-state FAB icon (alias for [expandIcon] when that is null).
   final Widget icon;
 
-  /// closeIcon.
+  /// Open-state FAB icon (alias for [collapseIcon] when that is null).
   final Widget closeIcon;
+
+  /// Icon when the menu is closed. Defaults to [icon] (add).
+  final Widget? expandIcon;
+
+  /// Icon when the menu is open. Defaults to [closeIcon] (close).
+  final Widget? collapseIcon;
 
   /// color.
   final M3EFabColor color;
 
   /// size.
   final M3EFabSize size;
+
+  /// Which horizontal corner the open FAB morphs toward, and from which edge
+  /// menu items grow. Defaults to [M3EFabMenuPosition.right].
+  final M3EFabMenuPosition position;
 
   @override
   State<M3EFabMenu> createState() => _M3EFabMenuState();
@@ -75,6 +90,18 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
 
   /// Width factor when an item first becomes visible (then springs to 1.0).
   static const double _openWidthStart = 0.5;
+
+  Widget get _resolvedExpandIcon => widget.expandIcon ?? widget.icon;
+
+  Widget get _resolvedCollapseIcon => widget.collapseIcon ?? widget.closeIcon;
+
+  bool get _isRight => widget.position == M3EFabMenuPosition.right;
+
+  Alignment get _fabAlign =>
+      _isRight ? Alignment.topRight : Alignment.topLeft;
+
+  Alignment get _menuItemAlign =>
+      _isRight ? Alignment.centerRight : Alignment.centerLeft;
 
   @override
   void initState() {
@@ -145,11 +172,15 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     }
     _itemVisible = List<bool>.filled(_itemCtrls.length, false);
     setState(() => _open = true);
-    _portal.show();
+    // FAB size/radius morph and menu item cascade run together.
     _fabShapeCtrl
       ..motion = _fabShapeMotion
       ..animateTo(1);
+    _revealMenuItems();
+  }
 
+  void _revealMenuItems() {
+    _portal.show();
     // Cascade from the FAB upward: bottom item (nearest FAB) first.
     final int count = _itemCtrls.length;
     for (var i = 0; i < count; i++) {
@@ -182,7 +213,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     _itemVisible = List<bool>.filled(_itemCtrls.length, false);
     _portal.hide();
     setState(() => _open = false);
-    // FAB morphs back to rounded square while items are already gone.
+    // FAB morphs back to large rounded square while items are already gone.
     _fabShapeCtrl
       ..motion = _fabShapeMotion
       ..animateTo(0);
@@ -193,6 +224,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     return M3EComponentTheme(
       builder: (BuildContext context) {
         final theme = M3ETheme.of(context);
+        final fabMenuTheme = theme.fabMenuTheme;
         final metrics = theme.fabTheme.resolve(
           size: widget.size,
           color: widget.color,
@@ -211,12 +243,32 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
               builder: (BuildContext context, Widget? child) {
                 final double t = _fabShapeCtrl.value;
                 final double radius = lerpDouble(closedRadius, openRadius, t)!;
-                return M3EFab(
-                  icon: _open ? widget.closeIcon : widget.icon,
-                  color: widget.color,
-                  size: widget.size,
-                  cornerRadius: radius,
-                  onPressed: _toggle,
+                final double fabSize = lerpDouble(
+                  fabMenuTheme.closedFabContainer,
+                  fabMenuTheme.openFabContainer,
+                  t,
+                )!;
+                return SizedBox(
+                  width: fabMenuTheme.closedFabContainer,
+                  height: fabMenuTheme.closedFabContainer,
+                  child: Align(
+                    alignment: _fabAlign,
+                    child: SizedBox(
+                      width: fabSize,
+                      height: fabSize,
+                      child: FittedBox(
+                        child: M3EFab(
+                          icon: _open
+                              ? _resolvedCollapseIcon
+                              : _resolvedExpandIcon,
+                          color: widget.color,
+                          size: widget.size,
+                          cornerRadius: radius,
+                          onPressed: _toggle,
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
@@ -227,14 +279,15 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
   }
 
   Widget _buildOverlay(BuildContext context) {
+    final bool right = _isRight;
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
         _buildDismissBarrier(context),
         CompositedTransformFollower(
           link: _link,
-          targetAnchor: Alignment.topRight,
-          followerAnchor: Alignment.bottomRight,
+          targetAnchor: right ? Alignment.topRight : Alignment.topLeft,
+          followerAnchor: right ? Alignment.bottomRight : Alignment.bottomLeft,
           offset: Offset(0, -M3ETheme.of(context).fabMenuTheme.menuOffset),
           child: _buildMenu(context),
         ),
@@ -259,7 +312,9 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     final fabMenuTheme = theme.fabMenuTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: _isRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: <Widget>[
         for (int i = 0; i < widget.items.length; i++)
           if (_itemVisible[i])
@@ -282,14 +337,15 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     final SingleMotionController ctrl = _itemCtrls[index];
 
     // Only the pill width springs (and may overshoot). Icon + label stay at
-    // their intrinsic size, end-aligned, and clipped by the stadium shape.
+    // their intrinsic size, edge-aligned, and clipped by the stadium shape.
     return AnimatedBuilder(
       animation: ctrl,
       builder: (BuildContext context, Widget? child) {
         final double widthFactor = _widthFactor(ctrl.value).clamp(0.001, 1.5);
+        final Alignment edge = _menuItemAlign;
 
         return Align(
-          alignment: AlignmentDirectional.centerEnd,
+          alignment: edge,
           child: Material(
             color: fabMenuTheme.itemContainerColor(scheme),
             elevation: fabMenuTheme.itemElevation,
@@ -298,7 +354,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
             shape: const StadiumBorder(),
             clipBehavior: Clip.antiAlias,
             child: Align(
-              alignment: AlignmentDirectional.centerEnd,
+              alignment: edge,
               widthFactor: widthFactor,
               child: child,
             ),

@@ -7,7 +7,7 @@ import '../../../foundations/foundations.dart';
 class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
   /// M3EFabMenuTheme.
   const M3EFabMenuTheme({
-    this.menuOffset = 16,
+    this.menuOffset = 12,
     this.scrimOpacity = 0.0,
     this.itemGap = 12,
     this.itemHeight = 56,
@@ -15,14 +15,17 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
     this.iconSize = 24,
     this.iconLabelGap = 12,
     this.itemElevation = M3EElevation.level3,
+    this.closedFabContainer = 80,
+    this.openFabContainer = 56,
   });
 
   /// defaults.
 
   static const M3EFabMenuTheme defaults = M3EFabMenuTheme();
 
-  /// menuOffset.
-
+  /// Vertical gap between the FAB and the nearest menu item.
+  ///
+  /// Defaults to the same value as [itemGap].
   final double menuOffset;
 
   /// scrimOpacity.
@@ -45,6 +48,12 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
 
   /// itemElevation.
   final double itemElevation;
+
+  /// FAB outer size when the menu is closed (matches toolbar FAB medium).
+  final double closedFabContainer;
+
+  /// FAB outer size when the menu is open (matches toolbar FAB baseline).
+  final double openFabContainer;
 
   /// scrimColor.
 
@@ -74,6 +83,8 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
     double? iconSize,
     double? iconLabelGap,
     double? itemElevation,
+    double? closedFabContainer,
+    double? openFabContainer,
   }) {
     return M3EFabMenuTheme(
       menuOffset: menuOffset ?? this.menuOffset,
@@ -85,6 +96,8 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
       iconSize: iconSize ?? this.iconSize,
       iconLabelGap: iconLabelGap ?? this.iconLabelGap,
       itemElevation: itemElevation ?? this.itemElevation,
+      closedFabContainer: closedFabContainer ?? this.closedFabContainer,
+      openFabContainer: openFabContainer ?? this.openFabContainer,
     );
   }
 
@@ -106,6 +119,16 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
       itemElevation: _lerpDouble(itemElevation, other.itemElevation, t)!,
+      closedFabContainer: _lerpDouble(
+        closedFabContainer,
+        other.closedFabContainer,
+        t,
+      )!,
+      openFabContainer: _lerpDouble(
+        openFabContainer,
+        other.openFabContainer,
+        t,
+      )!,
     );
   }
 
