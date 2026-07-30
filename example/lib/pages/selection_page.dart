@@ -87,6 +87,7 @@ class _SelectionPageState extends State<SelectionPage>
                 ),
                 M3ESwitch(
                   value: _bluetooth,
+                  stateLayerSize: 56,
                   onChanged: (bool value) => setState(() => _bluetooth = value),
                 ),
               ],
@@ -426,6 +427,7 @@ class _SelectionSlidersSectionState extends State<_SelectionSlidersSection> {
                 max: 4,
                 divisions: 4,
                 trackThickness: 30,
+                cornerRadius: 8,
                 thumbLength: 50,
                 dotSize: 12,
                 dotSpacing: 10,

@@ -54,8 +54,9 @@ class M3ESliderTrackPaintMetrics {
     required double handleGap,
     required double activeStartFraction,
     required double activeEndFraction,
+    required double cornerRadius,
   }) {
-    final double corner = trackCross / 2;
+    final double corner = math.min(cornerRadius, trackCross / 2);
     final double startGap = (centered || range)
         ? handleThickness / 2 + handleGap
         : 0;

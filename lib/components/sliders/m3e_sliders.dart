@@ -71,6 +71,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -112,6 +113,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -152,6 +154,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -193,6 +196,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -233,6 +237,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -277,6 +282,7 @@ class M3ESlider extends StatefulWidget {
     this.thumbBuilder,
     this.trackBuilder,
     this.trackThickness,
+    this.cornerRadius,
     this.thumbLength,
     this.dotSize,
     this.dotSpacing,
@@ -377,6 +383,11 @@ class M3ESlider extends StatefulWidget {
 
   /// Thickness of both active and inactive tracks. Defaults to theme track height.
   final double? trackThickness;
+
+  /// Outer corner radius for active and inactive track ends.
+  ///
+  /// Defaults to [M3ESliderTheme.trackCornerRadius] (fixed; not based on thickness).
+  final double? cornerRadius;
 
   /// Length of the thumb along its long axis. Defaults to theme handle height.
   final double? thumbLength;

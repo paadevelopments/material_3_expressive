@@ -63,6 +63,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     this.handleHeight = M3ESliderTokens.handleHeight,
     this.pressedHandleWidth = M3ESliderTokens.pressedHandleWidth,
     this.trackInsideCornerSize = M3ESliderTokens.trackInsideCornerSize,
+    this.trackCornerRadius = M3ESliderTokens.trackCornerRadius,
     this.stopIndicatorSize = M3ESliderTokens.stopIndicatorSize,
     this.tickSize = M3ESliderTokens.tickSize,
     this.stopIndicatorTrailingSpace =
@@ -101,6 +102,11 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
 
   /// trackInsideCornerSize.
   final double trackInsideCornerSize;
+
+  /// Outer corner radius for active and inactive track ends.
+  ///
+  /// Fixed default; not derived from [trackHeight].
+  final double trackCornerRadius;
 
   /// stopIndicatorSize.
   final double stopIndicatorSize;
@@ -183,6 +189,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     double? handleHeight,
     double? pressedHandleWidth,
     double? trackInsideCornerSize,
+    double? trackCornerRadius,
     double? stopIndicatorSize,
     double? tickSize,
     double? stopIndicatorTrailingSpace,
@@ -202,6 +209,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
       pressedHandleWidth: pressedHandleWidth ?? this.pressedHandleWidth,
       trackInsideCornerSize:
           trackInsideCornerSize ?? this.trackInsideCornerSize,
+      trackCornerRadius: trackCornerRadius ?? this.trackCornerRadius,
       stopIndicatorSize: stopIndicatorSize ?? this.stopIndicatorSize,
       tickSize: tickSize ?? this.tickSize,
       stopIndicatorTrailingSpace:
@@ -239,6 +247,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
         other.trackInsideCornerSize,
         t,
       ),
+      trackCornerRadius: _lerp(trackCornerRadius, other.trackCornerRadius, t),
       stopIndicatorSize: _lerp(stopIndicatorSize, other.stopIndicatorSize, t),
       tickSize: _lerp(tickSize, other.tickSize, t),
       stopIndicatorTrailingSpace: _lerp(

@@ -33,6 +33,7 @@ class M3ESliderTrackPainter extends CustomPainter {
     required this.handleGap,
     required this.handleThickness,
     required this.insideCornerSize,
+    required this.cornerRadius,
     required this.stopIndicatorSize,
     required this.tickSize,
     required this.axis,
@@ -76,6 +77,9 @@ class M3ESliderTrackPainter extends CustomPainter {
 
   /// insideCornerSize.
   final double insideCornerSize;
+
+  /// Outer corner radius for track ends (clamped to half track thickness).
+  final double cornerRadius;
 
   /// stopIndicatorSize.
   final double stopIndicatorSize;
@@ -141,6 +145,7 @@ class M3ESliderTrackPainter extends CustomPainter {
       handleGap: handleGap,
       activeStartFraction: activeStartFraction,
       activeEndFraction: activeEndFraction,
+      cornerRadius: cornerRadius,
     );
 
     _paintInactiveLeading(canvas, trackBounds, metrics);
@@ -402,6 +407,7 @@ class M3ESliderTrackPainter extends CustomPainter {
         oldDelegate.handleGap != handleGap ||
         oldDelegate.handleThickness != handleThickness ||
         oldDelegate.insideCornerSize != insideCornerSize ||
+        oldDelegate.cornerRadius != cornerRadius ||
         oldDelegate.stopIndicatorSize != stopIndicatorSize ||
         oldDelegate.tickSize != tickSize ||
         oldDelegate.axis != axis ||

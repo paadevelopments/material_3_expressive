@@ -42,6 +42,7 @@ class _M3ESliderResolved {
     required this.waveSpeed,
     required this.amplitudeFactor,
     required this.trackThickness,
+    required this.cornerRadius,
     required this.thumbLength,
     required this.dotSize,
     required this.dotSpacing,
@@ -58,6 +59,7 @@ class _M3ESliderResolved {
   final double waveSpeed;
   final double amplitudeFactor;
   final double trackThickness;
+  final double cornerRadius;
   final double thumbLength;
   final double dotSize;
   final double dotSpacing;
@@ -101,6 +103,7 @@ extension on _M3ESliderState {
       waveSpeed: waveSpeed,
       amplitudeFactor: _amplitudeFactor(sliderTheme),
       trackThickness: widget.trackThickness ?? sliderTheme.trackHeight,
+      cornerRadius: widget.cornerRadius ?? sliderTheme.trackCornerRadius,
       thumbLength: widget.thumbLength ?? sliderTheme.handleHeight,
       dotSize: widget.dotSize ?? sliderTheme.stopIndicatorSize,
       dotSpacing: widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace,
@@ -217,6 +220,7 @@ extension on _M3ESliderState {
         textDirection: resolved.direction,
         handleThickness: resolved.handleThickness,
         trackHeight: resolved.trackThickness,
+        cornerRadius: resolved.cornerRadius,
         stopIndicatorSize: resolved.dotSize,
         tickSize: resolved.dotSize,
         edgeInset: resolved.dotSpacing,
@@ -237,6 +241,7 @@ extension on _M3ESliderState {
       textDirection: resolved.direction,
       handleThickness: resolved.handleThickness,
       trackHeight: resolved.trackThickness,
+      cornerRadius: resolved.cornerRadius,
       stopIndicatorSize: resolved.dotSize,
       tickSize: resolved.dotSize,
       edgeInset: resolved.dotSpacing,

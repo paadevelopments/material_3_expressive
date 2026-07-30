@@ -18,6 +18,7 @@ class M3ESwitch extends StatefulWidget {
     required this.onChanged,
     this.selectedIcon,
     this.unselectedIcon,
+    this.stateLayerSize,
     this.focusNode,
     this.autofocus = false,
     this.semanticLabel,
@@ -36,6 +37,11 @@ class M3ESwitch extends StatefulWidget {
 
   /// unselectedIcon.
   final Widget? unselectedIcon;
+
+  /// Diameter of the thumb-centered state layer.
+  ///
+  /// Defaults to [M3ESwitchTheme.stateLayerSize].
+  final double? stateLayerSize;
 
   /// focusNode.
   final FocusNode? focusNode;
@@ -179,9 +185,28 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
         );
         final left = travel * _positionCtrl.value;
         final top = (constraints.maxHeight - size) / 2;
+        final double layer =
+            widget.stateLayerSize ?? switchTheme.stateLayerSize;
+        final double layerLeft = left + (size - layer) / 2;
+        final double layerTop = top + (size - layer) / 2;
         return Stack(
           clipBehavior: Clip.none,
           children: <Widget>[
+            if (_enabled && state.opacity > 0)
+              Positioned(
+                left: layerLeft,
+                top: layerTop,
+                width: layer,
+                height: layer,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: switchTheme
+                        .stateLayerColor(scheme, value: widget.value)
+                        .withValues(alpha: state.opacity),
+                  ),
+                ),
+              ),
             Positioned(
               left: left,
               top: top,

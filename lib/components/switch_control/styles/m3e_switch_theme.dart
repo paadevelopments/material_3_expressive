@@ -13,6 +13,7 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     this.thumbSizePressed = 28,
     this.thumbSizeSelected = 24,
     this.thumbSizeUnselected = 16,
+    this.stateLayerSize = 48,
     this.iconSize = 16,
     this.borderWidth = 2,
     this.disabledTrackOpacity = 0.12,
@@ -42,6 +43,9 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
 
   /// thumbSizeUnselected.
   final double thumbSizeUnselected;
+
+  /// Diameter of the thumb-centered hover/focus/press state layer.
+  final double stateLayerSize;
 
   /// iconSize.
   final double iconSize;
@@ -113,6 +117,11 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   Color iconColor(M3EColorScheme scheme, {required bool value}) =>
       value ? scheme.onPrimaryContainer : scheme.surfaceContainerHighest;
 
+  /// stateLayerColor.
+
+  Color stateLayerColor(M3EColorScheme scheme, {required bool value}) =>
+      value ? scheme.primary : scheme.onSurface;
+
   @override
   M3ESwitchTheme copyWith({
     double? trackWidth,
@@ -121,6 +130,7 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     double? thumbSizePressed,
     double? thumbSizeSelected,
     double? thumbSizeUnselected,
+    double? stateLayerSize,
     double? iconSize,
     double? borderWidth,
     double? disabledTrackOpacity,
@@ -134,6 +144,7 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
       thumbSizePressed: thumbSizePressed ?? this.thumbSizePressed,
       thumbSizeSelected: thumbSizeSelected ?? this.thumbSizeSelected,
       thumbSizeUnselected: thumbSizeUnselected ?? this.thumbSizeUnselected,
+      stateLayerSize: stateLayerSize ?? this.stateLayerSize,
       iconSize: iconSize ?? this.iconSize,
       borderWidth: borderWidth ?? this.borderWidth,
       disabledTrackOpacity: disabledTrackOpacity ?? this.disabledTrackOpacity,
@@ -167,6 +178,7 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
         other.thumbSizeUnselected,
         t,
       )!,
+      stateLayerSize: _lerpDouble(stateLayerSize, other.stateLayerSize, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
       disabledTrackOpacity: _lerpDouble(

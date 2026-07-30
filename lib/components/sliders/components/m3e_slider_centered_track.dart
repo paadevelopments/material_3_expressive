@@ -19,6 +19,7 @@ class M3ESliderCenteredTrack extends StatelessWidget {
     required this.textDirection,
     required this.handleThickness,
     this.trackHeight,
+    this.cornerRadius,
     this.stopIndicatorSize,
     this.tickSize,
     this.edgeInset,
@@ -55,6 +56,9 @@ class M3ESliderCenteredTrack extends StatelessWidget {
 
   /// trackHeight.
   final double? trackHeight;
+
+  /// Outer corner radius. Defaults to [M3ESliderTheme.trackCornerRadius].
+  final double? cornerRadius;
 
   /// stopIndicatorSize.
   final double? stopIndicatorSize;
@@ -95,6 +99,7 @@ class M3ESliderCenteredTrack extends StatelessWidget {
       handleThickness: handleThickness,
       trackKind: M3ESliderTrackKind.centered,
       trackHeight: trackHeight,
+      cornerRadius: cornerRadius,
       stopIndicatorSize: stopIndicatorSize,
       tickSize: tickSize,
       edgeInset: edgeInset,

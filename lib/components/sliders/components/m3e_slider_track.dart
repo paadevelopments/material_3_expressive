@@ -24,6 +24,7 @@ class M3ESliderTrack extends StatelessWidget {
     required this.handleThickness,
     this.trackKind = M3ESliderTrackKind.standard,
     this.trackHeight,
+    this.cornerRadius,
     this.stopIndicatorSize,
     this.tickSize,
     this.edgeInset,
@@ -63,6 +64,9 @@ class M3ESliderTrack extends StatelessWidget {
 
   /// trackHeight.
   final double? trackHeight;
+
+  /// Outer corner radius. Defaults to [M3ESliderTheme.trackCornerRadius].
+  final double? cornerRadius;
 
   /// stopIndicatorSize.
   final double? stopIndicatorSize;
@@ -105,6 +109,7 @@ class M3ESliderTrack extends StatelessWidget {
         handleGap: theme.handleGap,
         handleThickness: handleThickness,
         insideCornerSize: theme.trackInsideCornerSize,
+        cornerRadius: cornerRadius ?? theme.trackCornerRadius,
         stopIndicatorSize: stopIndicatorSize ?? theme.stopIndicatorSize,
         tickSize: tickSize ?? theme.tickSize,
         edgeInset: edgeInset ?? theme.stopIndicatorTrailingSpace,

@@ -42,6 +42,11 @@ abstract final class M3ESliderTokens {
   /// Corner radius on track ends facing the handle gap.
   static const double trackInsideCornerSize = 2;
 
+  /// Outer corner radius for active and inactive track segments.
+  ///
+  /// Fixed (not derived from track thickness). Half of the default 16px track.
+  static const double trackCornerRadius = 8;
+
   /// stopIndicatorSize.
 
   static const double stopIndicatorSize = 4;
