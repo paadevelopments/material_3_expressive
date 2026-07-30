@@ -1,7 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Reports child size changes for scroll-exit [offsetLimit] updates.
+/// Reports child size changes for scroll-exit offsetLimit updates.
 class M3EToolbarMeasureSize extends SingleChildRenderObjectWidget {
   /// M3EToolbarMeasureSize.
   const M3EToolbarMeasureSize({
@@ -27,9 +27,12 @@ class M3EToolbarMeasureSize extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Render object that notifies [onChange] when the child size changes.
 class RenderM3EToolbarMeasureSize extends RenderProxyBox {
+  /// Creates a measure-size render object.
   RenderM3EToolbarMeasureSize({required this.onChange});
 
+  /// Called when the laid-out child size changes.
   ValueChanged<Size> onChange;
   Size? _oldSize;
 

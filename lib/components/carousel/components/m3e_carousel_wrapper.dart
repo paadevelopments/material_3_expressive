@@ -6,6 +6,9 @@ import 'package:flutter/rendering.dart';
 import '../../../foundations/foundations.dart';
 import 'm3e_carousel_view.dart';
 
+part 'm3e_carousel_wrapper_anchors.dart';
+part 'm3e_carousel_wrapper_pulse.dart';
+
 /// Wraps [M3ECarouselView] with tap handling and a neighbor pulse animation.
 ///
 /// Item content is laid out at the largest slot size (plus pulse budget) and
@@ -276,79 +279,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     return itemRight > (carouselLeft + 1.0) && itemLeft < (carouselRight - 1.0);
   }
 
-  /// Clip-window rect in resting-item coordinates for the current pulse.
-  ({double left, double top, double width, double height}) _pulseFrameRect({
-    required int index,
-    required bool isActive,
-    required bool isLeftNeighbor,
-    required bool isRightNeighbor,
-    required double edgeDelta,
-    required double restWidth,
-    required double restHeight,
-  }) {
-    if (_activeIndex == null || edgeDelta <= 0) {
-      return (left: 0, top: 0, width: restWidth, height: restHeight);
-    }
-
-    if (isActive) {
-      final (expandLeading, expandTrailing) = _expandSidesForActiveIndex(index);
-      final double leading = expandLeading ? edgeDelta : 0;
-      final double trailing = expandTrailing ? edgeDelta : 0;
-      if (_vertical) {
-        return (
-          left: 0,
-          top: -leading,
-          width: restWidth,
-          height: restHeight + leading + trailing,
-        );
-      }
-      return (
-        left: -leading,
-        top: 0,
-        width: restWidth + leading + trailing,
-        height: restHeight,
-      );
-    }
-
-    if (isLeftNeighbor) {
-      // Squish the trailing edge shared with the active item.
-      if (_vertical) {
-        return (
-          left: 0,
-          top: 0,
-          width: restWidth,
-          height: math.max(restHeight - edgeDelta, 1),
-        );
-      }
-      return (
-        left: 0,
-        top: 0,
-        width: math.max(restWidth - edgeDelta, 1),
-        height: restHeight,
-      );
-    }
-
-    if (isRightNeighbor) {
-      // Squish the leading edge shared with the active item.
-      if (_vertical) {
-        return (
-          left: 0,
-          top: edgeDelta,
-          width: restWidth,
-          height: math.max(restHeight - edgeDelta, 1),
-        );
-      }
-      return (
-        left: edgeDelta,
-        top: 0,
-        width: math.max(restWidth - edgeDelta, 1),
-        height: restHeight,
-      );
-    }
-
-    return (left: 0, top: 0, width: restWidth, height: restHeight);
-  }
-
   void _snapshotVisibleNeighbors(int index, RenderBox? parentBox) {
     if (parentBox != null) {
       _leftVisibleNeighborIndex =
@@ -447,72 +377,98 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
         // pinned in resting coordinates. Only the clip rect animates.
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            final double restWidth = constraints.maxWidth;
-            final double restHeight = constraints.maxHeight;
-            final frame = _pulseFrameRect(
+            return _buildPulsedChildFrame(
               index: index,
               isActive: isActive,
               isLeftNeighbor: isLeftNeighbor,
               isRightNeighbor: isRightNeighbor,
               edgeDelta: edgeDelta,
-              restWidth: restWidth,
-              restHeight: restHeight,
+              restWidth: constraints.maxWidth,
+              restHeight: constraints.maxHeight,
+              stableInner: stableInner,
+              pulseBudget: pulseBudget,
+              finalRadius: finalRadius,
+              clipBehavior: clipBehavior,
             );
+          },
+        ),
+      ),
+    );
+  }
 
-            // Enough overflow at rest that a full pulse expand never reveals
-            // content edges. Size is independent of the pulse animation so
-            // nothing snaps when a tap starts.
-            final double contentWidth = _vertical
-                ? restWidth
-                : math.max(stableInner, restWidth) + pulseBudget;
-            final double contentHeight = _vertical
-                ? math.max(stableInner, restHeight) + pulseBudget
-                : restHeight;
-            final double contentLeft = (restWidth - contentWidth) / 2;
-            final double contentTop = (restHeight - contentHeight) / 2;
+  Widget _buildPulsedChildFrame({
+    required int index,
+    required bool isActive,
+    required bool isLeftNeighbor,
+    required bool isRightNeighbor,
+    required double edgeDelta,
+    required double restWidth,
+    required double restHeight,
+    required double stableInner,
+    required double pulseBudget,
+    required BorderRadius finalRadius,
+    required Clip clipBehavior,
+  }) {
+    final frame = _pulseFrameRect(
+      index: index,
+      isActive: isActive,
+      isLeftNeighbor: isLeftNeighbor,
+      isRightNeighbor: isRightNeighbor,
+      edgeDelta: edgeDelta,
+      restWidth: restWidth,
+      restHeight: restHeight,
+    );
 
-            return SizedBox(
-              width: restWidth,
-              height: restHeight,
+    // Enough overflow at rest that a full pulse expand never reveals
+    // content edges. Size is independent of the pulse animation so
+    // nothing snaps when a tap starts.
+    final double contentWidth = _vertical
+        ? restWidth
+        : math.max(stableInner, restWidth) + pulseBudget;
+    final double contentHeight = _vertical
+        ? math.max(stableInner, restHeight) + pulseBudget
+        : restHeight;
+    final double contentLeft = (restWidth - contentWidth) / 2;
+    final double contentTop = (restHeight - contentHeight) / 2;
+
+    return SizedBox(
+      width: restWidth,
+      height: restHeight,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Positioned(
+            left: frame.left,
+            top: frame.top,
+            width: frame.width,
+            height: frame.height,
+            child: ClipRRect(
+              borderRadius: finalRadius,
+              clipBehavior: clipBehavior,
               child: Stack(
-                clipBehavior: Clip.none,
                 children: <Widget>[
                   Positioned(
-                    left: frame.left,
-                    top: frame.top,
-                    width: frame.width,
-                    height: frame.height,
-                    child: ClipRRect(
-                      borderRadius: finalRadius,
-                      clipBehavior: clipBehavior,
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned(
-                            left: contentLeft - frame.left,
-                            top: contentTop - frame.top,
-                            width: contentWidth,
-                            height: contentHeight,
-                            child: IgnorePointer(child: widget.children[index]),
-                          ),
-                          Positioned.fill(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                enableFeedback: false,
-                                onTap: () => _handleTap(index),
-                                overlayColor: widget.overlayColor,
-                              ),
-                            ),
-                          ),
-                        ],
+                    left: contentLeft - frame.left,
+                    top: contentTop - frame.top,
+                    width: contentWidth,
+                    height: contentHeight,
+                    child: IgnorePointer(child: widget.children[index]),
+                  ),
+                  Positioned.fill(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        enableFeedback: false,
+                        onTap: () => _handleTap(index),
+                        overlayColor: widget.overlayColor,
                       ),
                     ),
                   ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -564,150 +520,5 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       onIndexChanged: widget.onIndexChanged,
       children: carouselChildren,
     );
-  }
-}
-
-/// Registers the carousel viewport [RenderBox] without a [GlobalKey].
-class _CarouselViewportAnchor extends SingleChildRenderObjectWidget {
-  const _CarouselViewportAnchor({
-    required this.onRegister,
-    required this.onUnregister,
-    required Widget child,
-  }) : super(child: child);
-
-  final void Function(RenderBox box) onRegister;
-  final void Function(RenderBox box) onUnregister;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderCarouselViewportAnchor(
-      onRegister: onRegister,
-      onUnregister: onUnregister,
-    );
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderCarouselViewportAnchor renderObject,
-  ) {
-    renderObject
-      ..onRegister = onRegister
-      ..onUnregister = onUnregister;
-  }
-}
-
-class _RenderCarouselViewportAnchor extends RenderProxyBox {
-  _RenderCarouselViewportAnchor({
-    required this.onRegister,
-    required this.onUnregister,
-  });
-
-  void Function(RenderBox box) onRegister;
-  void Function(RenderBox box) onUnregister;
-
-  void _registerIfReady() {
-    if (hasSize && attached) {
-      onRegister(this);
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _registerIfReady();
-  }
-
-  @override
-  void detach() {
-    onUnregister(this);
-    super.detach();
-  }
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    _registerIfReady();
-  }
-}
-
-/// Registers its [RenderBox] for pulse measuring without a [GlobalKey].
-class _CarouselItemAnchor extends SingleChildRenderObjectWidget {
-  const _CarouselItemAnchor({
-    required this.index,
-    required this.onRegister,
-    required this.onUnregister,
-    required Widget child,
-  }) : super(child: child);
-
-  final int index;
-  final void Function(int index, RenderBox box) onRegister;
-  final void Function(int index, RenderBox box) onUnregister;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderCarouselItemAnchor(
-      index: index,
-      onRegister: onRegister,
-      onUnregister: onUnregister,
-    );
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderCarouselItemAnchor renderObject,
-  ) {
-    renderObject
-      ..index = index
-      ..onRegister = onRegister
-      ..onUnregister = onUnregister;
-  }
-}
-
-class _RenderCarouselItemAnchor extends RenderProxyBox {
-  _RenderCarouselItemAnchor({
-    required this._index,
-    required this.onRegister,
-    required this.onUnregister,
-  });
-
-  int _index;
-  void Function(int index, RenderBox box) onRegister;
-  void Function(int index, RenderBox box) onUnregister;
-
-  int get index => _index;
-
-  set index(int value) {
-    if (_index == value) {
-      return;
-    }
-    onUnregister(_index, this);
-    _index = value;
-    _registerIfReady();
-  }
-
-  void _registerIfReady() {
-    if (hasSize && attached) {
-      onRegister(_index, this);
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _registerIfReady();
-  }
-
-  @override
-  void detach() {
-    onUnregister(_index, this);
-    super.detach();
-  }
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    _registerIfReady();
   }
 }

@@ -27,8 +27,9 @@ class M3EToolbarScrollBehavior {
   /// Direction the toolbar slides when hiding.
   final M3EToolbarExitDirection exitDirection;
 
-  /// Shared visibility state (manual [M3EToolbarVisibilityController.show] /
-  /// [hide] or scroll-driven).
+  /// Shared visibility state (manual
+  /// [M3EToolbarVisibilityController.show] /
+  /// [M3EToolbarVisibilityController.hide] or scroll-driven).
   final M3EToolbarVisibilityController controller;
 }
 
@@ -66,10 +67,9 @@ class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper>
   }
 
   void _updateOffset(double delta) {
-    final M3EToolbarVisibilityController controller =
-        widget.behavior.controller;
-    controller.contentOffset += delta;
-    controller.offset -= delta;
+    widget.behavior.controller
+      ..contentOffset += delta
+      ..offset -= delta;
   }
 
   void _settleTo(double velocity) {
@@ -103,28 +103,34 @@ class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper>
           ..animateTo(target);
   }
 
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification) {
+      _settle?.dispose();
+      _settle = null;
+      widget.behavior.controller.cancelAnimation();
+    } else if (notification is ScrollUpdateNotification) {
+      _handleScrollUpdate(notification);
+    } else if (notification is ScrollEndNotification) {
+      final double velocity = notification.dragDetails?.primaryVelocity ?? 0;
+      _settleTo(velocity);
+    }
+    return false;
+  }
+
+  void _handleScrollUpdate(ScrollUpdateNotification notification) {
+    if (_settle != null) {
+      return;
+    }
+    final double delta = notification.scrollDelta ?? 0;
+    if (delta != 0) {
+      _updateOffset(delta);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification is ScrollStartNotification) {
-          _settle?.dispose();
-          _settle = null;
-          widget.behavior.controller.cancelAnimation();
-        } else if (notification is ScrollUpdateNotification) {
-          if (_settle == null) {
-            final double delta = notification.scrollDelta ?? 0;
-            if (delta != 0) {
-              _updateOffset(delta);
-            }
-          }
-        } else if (notification is ScrollEndNotification) {
-          final double velocity =
-              notification.dragDetails?.primaryVelocity ?? 0;
-          _settleTo(velocity);
-        }
-        return false;
-      },
+      onNotification: _handleScrollNotification,
       child: widget.child,
     );
   }

@@ -45,7 +45,7 @@ class M3EToolbarFabSlot extends StatelessWidget {
       return SizedBox(
         width: size,
         height: size,
-        child: FittedBox(fit: BoxFit.contain, child: fab),
+        child: FittedBox(child: fab),
       );
     }
 
@@ -53,14 +53,13 @@ class M3EToolbarFabSlot extends StatelessWidget {
       icon: icon ?? const SizedBox.shrink(),
       onPressed: onPressed,
       color: color,
-      size: M3EFabSize.medium,
     );
 
     final double size = containerSize ?? M3EToolbarTokens.fabBaseline;
     return SizedBox(
       width: size,
       height: size,
-      child: FittedBox(fit: BoxFit.contain, child: button),
+      child: FittedBox(child: button),
     );
   }
 }

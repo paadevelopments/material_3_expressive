@@ -97,8 +97,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
 
   bool get _isRight => widget.position == M3EFabMenuPosition.right;
 
-  Alignment get _fabAlign =>
-      _isRight ? Alignment.topRight : Alignment.topLeft;
+  Alignment get _fabAlign => _isRight ? Alignment.topRight : Alignment.topLeft;
 
   Alignment get _menuItemAlign =>
       _isRight ? Alignment.centerRight : Alignment.centerLeft;

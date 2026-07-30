@@ -485,13 +485,13 @@ class _NavigationPageState extends State<NavigationPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       M3EButton(
-                        child: const Text('Hide'),
                         onPressed: _toolbarVisibility.hide,
+                        child: const Text('Hide'),
                       ),
                       const SizedBox(width: 8),
                       M3EButton(
-                        child: const Text('Show'),
                         onPressed: _toolbarVisibility.show,
+                        child: const Text('Show'),
                       ),
                     ],
                   ),

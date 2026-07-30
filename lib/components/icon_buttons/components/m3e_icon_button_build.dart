@@ -8,7 +8,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
     final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
     final Size visual = widget.visualSize ?? themeVisual;
-    final Size target = Size(
+    final target = Size(
       math.max(themeTarget.width, visual.width),
       math.max(themeTarget.height, visual.height),
     );

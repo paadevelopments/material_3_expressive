@@ -398,13 +398,13 @@ Future<void> _collapsedWithFabShowsFabAndHidesPillActions(
 ) async {
   await tester.pumpWidget(
     _host(
-      child: M3EToolbar(
-        actions: const <M3EToolbarItem>[
+      child: const M3EToolbar(
+        actions: <M3EToolbarItem>[
           M3EToolbarAction(icon: M3EIcons.edit, onPressed: _noop),
           M3EToolbarAction(icon: M3EIcons.share, onPressed: _noop),
           M3EToolbarAction(icon: M3EIcons.favorite, onPressed: _noop),
         ],
-        fabIcon: const Icon(M3EIcons.add),
+        fabIcon: Icon(M3EIcons.add),
         expanded: false,
       ),
     ),
@@ -418,8 +418,7 @@ Future<void> _collapsedWithFabShowsFabAndHidesPillActions(
 Future<void> _visibilityControllerHideMovesOffsetToLimit(
   WidgetTester tester,
 ) async {
-  final M3EToolbarVisibilityController controller =
-      M3EToolbarVisibilityController(exitExtent: 80);
+  final controller = M3EToolbarVisibilityController(exitExtent: 80);
   expect(controller.offsetLimit, -80);
   await tester.pumpWidget(
     _host(

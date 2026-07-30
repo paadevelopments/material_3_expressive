@@ -51,6 +51,7 @@ class M3EToolbarHorizontalFabLayout extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Lays out a horizontal toolbar pill alongside a morphing FAB.
 class RenderM3EToolbarHorizontalFabLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, M3EToolbarFabLayoutParentData>,
@@ -58,17 +59,19 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
           RenderBox,
           M3EToolbarFabLayoutParentData
         > {
+  /// Creates a horizontal FAB + toolbar layout render object.
   RenderM3EToolbarHorizontalFabLayout({
-    required double progress,
-    required M3EToolbarFabPosition fabPosition,
-    required bool isRtl,
-  }) : _progress = progress,
-       _fabPosition = fabPosition,
-       _isRtl = isRtl;
+    required this._progress,
+    required this._fabPosition,
+    required this._isRtl,
+  });
 
   double _progress;
   M3EToolbarFabPosition _fabPosition;
   bool _isRtl;
+
+  /// Expand progress (0 = FAB only, 1 = full pill).
+  double get progress => _progress;
 
   set progress(double value) {
     if (value == _progress) {
@@ -78,6 +81,9 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
     markNeedsLayout();
   }
 
+  /// FAB edge on the horizontal axis.
+  M3EToolbarFabPosition get fabPosition => _fabPosition;
+
   set fabPosition(M3EToolbarFabPosition value) {
     if (value == _fabPosition) {
       return;
@@ -85,6 +91,9 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
     _fabPosition = value;
     markNeedsLayout();
   }
+
+  /// Whether layout mirrors for RTL.
+  bool get isRtl => _isRtl;
 
   set isRtl(bool value) {
     if (value == _isRtl) {
@@ -116,11 +125,10 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
     const double gap = M3EToolbarTokens.toolbarToFabGap;
     const double fabBaseline = M3EToolbarTokens.fabBaseline;
     const double fabMedium = M3EToolbarTokens.fabMedium;
-    const double totalHeight = fabMedium;
+    const totalHeight = fabMedium;
 
     toolbarChild.layout(
       BoxConstraints(
-        minWidth: 0,
         maxWidth: constraints.hasBoundedWidth
             ? constraints.maxWidth - fabBaseline - gap
             : double.infinity,
@@ -141,7 +149,7 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
 
     size = constraints.constrain(Size(totalWidth, totalHeight));
 
-    final bool isEnd = _fabPosition == M3EToolbarFabPosition.end;
+    final isEnd = _fabPosition == M3EToolbarFabPosition.end;
     final bool isEndEffective = _isRtl ? !isEnd : isEnd;
 
     final double clampedProgress = _progress.clamp(0.0, 1.2);
@@ -169,10 +177,10 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? toolbarChild = firstChild;
     if (toolbarChild != null) {
-      final M3EToolbarFabLayoutParentData parentData =
+      final parentData =
           toolbarChild.parentData! as M3EToolbarFabLayoutParentData;
       final double clampedProgress = _progress.clamp(0.0, 1.0);
-      final bool isEnd = _fabPosition == M3EToolbarFabPosition.end;
+      final isEnd = _fabPosition == M3EToolbarFabPosition.end;
       final bool isEndEffective = _isRtl ? !isEnd : isEnd;
       final double naturalWidth = toolbarChild.size.width;
       final double opacityFactor = const Interval(
@@ -223,7 +231,7 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
         ? null
         : childAfter(firstChild!);
     if (fabChild != null) {
-      final M3EToolbarFabLayoutParentData fabParentData =
+      final fabParentData =
           fabChild.parentData! as M3EToolbarFabLayoutParentData;
       context.paintChild(fabChild, fabParentData.offset + offset);
     }
@@ -235,7 +243,7 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
         ? null
         : childAfter(firstChild!);
     if (fabChild != null) {
-      final M3EToolbarFabLayoutParentData fabParentData =
+      final fabParentData =
           fabChild.parentData! as M3EToolbarFabLayoutParentData;
       if (fabChild.hitTest(result, position: position - fabParentData.offset)) {
         return true;
@@ -244,7 +252,7 @@ class RenderM3EToolbarHorizontalFabLayout extends RenderBox
     if (_progress > 0) {
       final RenderBox? toolbarChild = firstChild;
       if (toolbarChild != null) {
-        final M3EToolbarFabLayoutParentData toolbarParentData =
+        final toolbarParentData =
             toolbarChild.parentData! as M3EToolbarFabLayoutParentData;
         if (toolbarChild.hitTest(
           result,
@@ -294,6 +302,7 @@ class M3EToolbarVerticalFabLayout extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Lays out a vertical toolbar pill alongside a morphing FAB.
 class RenderM3EToolbarVerticalFabLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, M3EToolbarFabLayoutParentData>,
@@ -301,14 +310,17 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
           RenderBox,
           M3EToolbarFabLayoutParentData
         > {
+  /// Creates a vertical FAB + toolbar layout render object.
   RenderM3EToolbarVerticalFabLayout({
-    required double progress,
-    required M3EToolbarFabPosition fabPosition,
-  }) : _progress = progress,
-       _fabPosition = fabPosition;
+    required this._progress,
+    required this._fabPosition,
+  });
 
   double _progress;
   M3EToolbarFabPosition _fabPosition;
+
+  /// Expand progress (0 = FAB only, 1 = full pill).
+  double get progress => _progress;
 
   set progress(double value) {
     if (value == _progress) {
@@ -317,6 +329,9 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
     _progress = value;
     markNeedsLayout();
   }
+
+  /// FAB edge on the vertical layout.
+  M3EToolbarFabPosition get fabPosition => _fabPosition;
 
   set fabPosition(M3EToolbarFabPosition value) {
     if (value == _fabPosition) {
@@ -348,13 +363,12 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
     const double gap = M3EToolbarTokens.toolbarToFabGap;
     const double fabBaseline = M3EToolbarTokens.fabBaseline;
     const double fabMedium = M3EToolbarTokens.fabMedium;
-    const double totalWidth = fabMedium;
+    const totalWidth = fabMedium;
 
     toolbarChild.layout(
       BoxConstraints(
         minWidth: containerSize,
         maxWidth: containerSize,
-        minHeight: 0,
         maxHeight: constraints.hasBoundedHeight
             ? constraints.maxHeight - fabBaseline - gap
             : double.infinity,
@@ -373,7 +387,7 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
 
     size = constraints.constrain(Size(totalWidth, totalHeight));
 
-    final bool isBottom = _fabPosition == M3EToolbarFabPosition.bottom;
+    final isBottom = _fabPosition == M3EToolbarFabPosition.bottom;
     final double clampedProgress = _progress.clamp(0.0, 1.2);
     final double toolbarHeight = naturalHeight * clampedProgress;
 
@@ -399,10 +413,10 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? toolbarChild = firstChild;
     if (toolbarChild != null) {
-      final M3EToolbarFabLayoutParentData parentData =
+      final parentData =
           toolbarChild.parentData! as M3EToolbarFabLayoutParentData;
       final double clampedProgress = _progress.clamp(0.0, 1.0);
-      final bool isBottom = _fabPosition == M3EToolbarFabPosition.bottom;
+      final isBottom = _fabPosition == M3EToolbarFabPosition.bottom;
       final double naturalHeight = toolbarChild.size.height;
       final double opacityFactor = const Interval(
         0.5,
@@ -452,7 +466,7 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
         ? null
         : childAfter(firstChild!);
     if (fabChild != null) {
-      final M3EToolbarFabLayoutParentData fabParentData =
+      final fabParentData =
           fabChild.parentData! as M3EToolbarFabLayoutParentData;
       context.paintChild(fabChild, fabParentData.offset + offset);
     }
@@ -464,7 +478,7 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
         ? null
         : childAfter(firstChild!);
     if (fabChild != null) {
-      final M3EToolbarFabLayoutParentData fabParentData =
+      final fabParentData =
           fabChild.parentData! as M3EToolbarFabLayoutParentData;
       if (fabChild.hitTest(result, position: position - fabParentData.offset)) {
         return true;
@@ -473,7 +487,7 @@ class RenderM3EToolbarVerticalFabLayout extends RenderBox
     if (_progress > 0) {
       final RenderBox? toolbarChild = firstChild;
       if (toolbarChild != null) {
-        final M3EToolbarFabLayoutParentData toolbarParentData =
+        final toolbarParentData =
             toolbarChild.parentData! as M3EToolbarFabLayoutParentData;
         if (toolbarChild.hitTest(
           result,

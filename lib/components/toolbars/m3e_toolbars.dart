@@ -289,7 +289,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Optional scroll-exit behavior. Default null = no scroll detection.
   ///
-  /// When set, uses [scrollBehavior.controller] unless [visibilityController]
+  /// When set, uses the behavior's controller unless [visibilityController]
   /// is also provided (then they should be the same instance).
   final M3EToolbarScrollBehavior? scrollBehavior;
 
@@ -427,6 +427,13 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(covariant M3EToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncVisibilityAttachment(oldWidget);
+    _applyExitExtent();
+    _syncActiveIndex(oldWidget);
+    _syncExpandFromWidget(oldWidget);
+  }
+
+  void _syncVisibilityAttachment(M3EToolbar oldWidget) {
     if (oldWidget.visibilityController != widget.visibilityController ||
         oldWidget.scrollBehavior?.controller !=
             widget.scrollBehavior?.controller) {
@@ -434,13 +441,16 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
       oldWidget.scrollBehavior?.controller.detach();
       _visibility?.attach(this);
     }
-    _applyExitExtent();
+  }
 
+  void _syncActiveIndex(M3EToolbar oldWidget) {
     if (widget.activeIndex != oldWidget.activeIndex &&
         widget.activeIndex != _activeIndex) {
       _activeIndex = widget.activeIndex;
     }
+  }
 
+  void _syncExpandFromWidget(M3EToolbar oldWidget) {
     if (!_floating || (!_usesTriggerExpand && !_usesFabExpand)) {
       if (_expandCtrl.value != 1) {
         _expandCtrl.value = 1;
@@ -552,8 +562,8 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
       containerSize: _fabSize,
     );
 
-    final bool horizontal = widget.axis == Axis.horizontal;
-    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    final horizontal = widget.axis == Axis.horizontal;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return AnimatedBuilder(
       animation: _expandCtrl,
@@ -636,10 +646,10 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
       case M3EToolbarExitDirection.bottom:
         return Offset(0, -offset);
       case M3EToolbarExitDirection.start:
-        final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
         return Offset(isRtl ? -offset : offset, 0);
       case M3EToolbarExitDirection.end:
-        final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
         return Offset(isRtl ? offset : -offset, 0);
     }
   }

@@ -208,21 +208,23 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   }
 
   void _syncControllers() {
-    // Classic circular spin
-    if (_isClassicCircularIndet) {
-      if (!_spinController.isAnimating) {
-        _spinController.repeat();
-      }
-    } else if (_isWavy) {
-      // Wave phase scroll for wavy (determinate + indeterminate).
+    _syncSpinController();
+    _syncLinearIndetController();
+    _syncCircularWavyControllers();
+  }
+
+  void _syncSpinController() {
+    final bool needsSpin = _isClassicCircularIndet || _isWavy;
+    if (needsSpin) {
       if (!_spinController.isAnimating) {
         _spinController.repeat();
       }
     } else if (_spinController.isAnimating) {
       _spinController.stop();
     }
+  }
 
-    // Linear indeterminate cycle
+  void _syncLinearIndetController() {
     if (_isLinearIndet) {
       if (!_linearIndetController.isAnimating) {
         _linearIndetController.repeat();
@@ -230,8 +232,9 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     } else if (_linearIndetController.isAnimating) {
       _linearIndetController.stop();
     }
+  }
 
-    // Circular wavy indeterminate
+  void _syncCircularWavyControllers() {
     if (_isCircularWavyIndet) {
       _startCircularWavyIndeterminate();
     } else {

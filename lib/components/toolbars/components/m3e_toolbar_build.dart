@@ -2,6 +2,77 @@ part of '../m3e_toolbars.dart';
 
 extension _M3EToolbarBuild on _M3EToolbarState {
   Widget _buildToolbar(BuildContext context) {
+    final chrome = _resolveToolbarChrome(context);
+    final ({Widget? title, Widget? subtitle, bool hasTitle}) titles =
+        _resolveTitles(
+          chrome.toolbarTheme,
+          chrome.theme.typeScale,
+          chrome.foreground,
+        );
+    final bool useExpanding = _usesTriggerExpand && !titles.hasTitle;
+    final Widget body = _buildBody(
+      toolbarTheme: chrome.toolbarTheme,
+      theme: chrome.theme,
+      metrics: chrome.metrics,
+      foreground: chrome.foreground,
+      titles: titles,
+      actionsContent: _buildActionsContent(
+        theme: chrome.theme,
+        scheme: chrome.scheme,
+        metrics: chrome.metrics,
+        iconButtonSize: chrome.iconButtonSize,
+        availableExtent: chrome.availableExtent,
+        opticalInset: chrome.opticalInset,
+        useExpanding: useExpanding,
+        dockedIconsOnly: _isDockedIconsOnly(titles.hasTitle),
+        actions: _resolvedActions,
+      ),
+      useExpanding: useExpanding,
+    );
+    return _composeBar(
+      background: chrome.background,
+      elev:
+          widget.elevation ??
+          (_hasFab
+              ? chrome.metrics.elevationWithFab
+              : chrome.metrics.elevation),
+      shape: chrome.shape,
+      contentBand: _buildContentBand(
+        metrics: chrome.metrics,
+        toolbarTheme: chrome.toolbarTheme,
+        theme: chrome.theme,
+        foreground: chrome.foreground,
+        innerPadding: chrome.innerPadding,
+        body: body,
+        hasTitle: titles.hasTitle,
+      ),
+      style: chrome.style,
+      hasTitle: titles.hasTitle,
+    );
+  }
+
+  bool _isDockedIconsOnly(bool hasTitle) =>
+      !_floating &&
+      !hasTitle &&
+      widget.leading == null &&
+      widget.trailing == null &&
+      widget.actions.isNotEmpty;
+
+  ({
+    M3EThemeData theme,
+    M3EToolbarTheme toolbarTheme,
+    M3EColorScheme scheme,
+    M3EToolbarMetrics metrics,
+    M3EToolbarColorStyle style,
+    Color background,
+    Color foreground,
+    ShapeBorder shape,
+    EdgeInsets innerPadding,
+    double availableExtent,
+    M3EIconButtonSize iconButtonSize,
+    double opticalInset,
+  })
+  _resolveToolbarChrome(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EToolbarTheme toolbarTheme = theme.toolbarTheme;
     final M3EColorScheme scheme = theme.colorScheme;
@@ -10,75 +81,36 @@ extension _M3EToolbarBuild on _M3EToolbarState {
         ? toolbarTheme.colorStyleFromVariant(widget.variant!)
         : widget.colorStyle;
     final M3EToolbarColors colors = toolbarTheme.colors(scheme, style);
-    final Color background = widget.backgroundColor ?? colors.container;
-    final Color foreground = widget.foregroundColor ?? colors.content;
-    final ShapeBorder shape = _floating
-        ? toolbarTheme.floatingShape()
-        : toolbarTheme.dockedShape();
     final EdgeInsets contentPadding = metrics.contentPadding.resolve(
       Directionality.of(context),
     );
-    final EdgeInsets resolvedPadding =
+    final EdgeInsets innerPadding =
         widget.padding?.resolve(Directionality.of(context)) ??
         (_floating
             ? _axisAwareFloatingPadding(theme, toolbarTheme, contentPadding)
             : contentPadding);
-    final innerPadding = resolvedPadding;
-    final double availableExtent = M3EToolbarItemLayout.availableCrossExtent(
-      crossAxisSize: metrics.crossAxisSize,
-      padding: innerPadding,
-      axis: widget.axis,
-    );
     final M3EIconButtonSize iconButtonSize = toolbarTheme.iconButtonSize(
       widget.size,
     );
-    final double opticalInset = _opticalInset(theme, iconButtonSize);
-    final List<M3EToolbarItem> actions = _resolvedActions;
-    final ({Widget? title, Widget? subtitle, bool hasTitle}) titles =
-        _resolveTitles(toolbarTheme, theme.typeScale, foreground);
-    final bool useExpanding = _usesTriggerExpand && !titles.hasTitle;
-    final bool dockedIconsOnly =
-        !_floating &&
-        !titles.hasTitle &&
-        widget.leading == null &&
-        widget.trailing == null &&
-        widget.actions.isNotEmpty;
-    final Widget body = _buildBody(
-      toolbarTheme: toolbarTheme,
+    return (
       theme: theme,
+      toolbarTheme: toolbarTheme,
+      scheme: scheme,
       metrics: metrics,
-      foreground: foreground,
-      titles: titles,
-      actionsContent: _buildActionsContent(
-        theme: theme,
-        scheme: scheme,
-        metrics: metrics,
-        iconButtonSize: iconButtonSize,
-        availableExtent: availableExtent,
-        opticalInset: opticalInset,
-        useExpanding: useExpanding,
-        dockedIconsOnly: dockedIconsOnly,
-        actions: actions,
-      ),
-      useExpanding: useExpanding,
-    );
-    return _composeBar(
-      background: background,
-      elev:
-          widget.elevation ??
-          (_hasFab ? metrics.elevationWithFab : metrics.elevation),
-      shape: shape,
-      contentBand: _buildContentBand(
-        metrics: metrics,
-        toolbarTheme: toolbarTheme,
-        theme: theme,
-        foreground: foreground,
-        innerPadding: innerPadding,
-        body: body,
-        hasTitle: titles.hasTitle,
-      ),
       style: style,
-      hasTitle: titles.hasTitle,
+      background: widget.backgroundColor ?? colors.container,
+      foreground: widget.foregroundColor ?? colors.content,
+      shape: _floating
+          ? toolbarTheme.floatingShape()
+          : toolbarTheme.dockedShape(),
+      innerPadding: innerPadding,
+      availableExtent: M3EToolbarItemLayout.availableCrossExtent(
+        crossAxisSize: metrics.crossAxisSize,
+        padding: innerPadding,
+        axis: widget.axis,
+      ),
+      iconButtonSize: iconButtonSize,
+      opticalInset: _opticalInset(theme, iconButtonSize),
     );
   }
 

@@ -5,9 +5,9 @@ import 'package:motor/motor.dart';
 import '../../../foundations/m3e_motion.dart';
 import '../utils/m3e_toolbar_spring_motion.dart';
 
-/// Tracks scroll / manual exit translation for [M3EToolbar].
+/// Tracks scroll / manual exit translation for a toolbar.
 ///
-/// [offset] is ≤ 0 and clamped to [[offsetLimit], 0]. Call [attach] from a
+/// [offset] is ≤ 0 and clamped between [offsetLimit] and 0. Call [attach] from a
 /// [TickerProvider] (usually the toolbar state) before [show] / [hide].
 class M3EToolbarVisibilityController extends ChangeNotifier {
   /// M3EToolbarVisibilityController.
@@ -91,6 +91,7 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   bool get isHidden => collapsedFraction >= 1;
 
   /// Binds a ticker for spring show/hide. Safe to call repeatedly.
+  // ignore: use_setters_to_change_properties -- attach/detach pair; not a field setter.
   void attach(TickerProvider vsync) {
     _vsync = vsync;
   }
