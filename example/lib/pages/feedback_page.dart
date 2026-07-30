@@ -95,6 +95,7 @@ class _FeedbackPageState extends State<FeedbackPage>
           DemoRow(
             label: 'Indeterminate',
             children: <Widget>[
+              const SizedBox(width: 200, child: M3EProgressIndicator.linear()),
               const SizedBox(
                 width: 200,
                 child: M3EProgressIndicator.linearWavy(),

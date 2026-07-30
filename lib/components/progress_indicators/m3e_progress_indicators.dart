@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/widgets.dart';
 
@@ -144,53 +145,141 @@ class M3EProgressIndicator extends StatefulWidget {
 }
 
 class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+    with TickerProviderStateMixin {
+  /// Classic circular spin / shared wave phase for wavy determinate scroll.
+  late final AnimationController _spinController;
 
-  bool get _needsAnimation {
-    switch (widget._kind) {
-      case _M3EProgressKind.circular:
-        return widget.value == null;
-      case _M3EProgressKind.circularWavy:
-      case _M3EProgressKind.linearWavy:
-        return true;
-      case _M3EProgressKind.linear:
-        return false;
-    }
-  }
+  /// Linear (flat + wavy) indeterminate cycle (1750ms).
+  late final AnimationController _linearIndetController;
+
+  /// Circular wavy indeterminate rotations / sweep.
+  late final AnimationController _globalRotController;
+  late final AnimationController _additionalRotController;
+  late final AnimationController _sweepController;
+  bool _sweepExpanding = true;
+
+  bool get _isWavy =>
+      widget._kind == _M3EProgressKind.circularWavy ||
+      widget._kind == _M3EProgressKind.linearWavy;
+
+  bool get _isLinearIndet =>
+      (widget._kind == _M3EProgressKind.linear ||
+          widget._kind == _M3EProgressKind.linearWavy) &&
+      widget.value == null;
+
+  bool get _isCircularWavyIndet =>
+      widget._kind == _M3EProgressKind.circularWavy && widget.value == null;
+
+  bool get _isClassicCircularIndet =>
+      widget._kind == _M3EProgressKind.circular && widget.value == null;
+
+  bool get _needsWavePhase => _isWavy;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _spinController = AnimationController(
       vsync: this,
       duration: M3EMotion.extraLong2,
     );
-    if (_needsAnimation) {
-      _controller.repeat();
-    }
+    _linearIndetController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1750),
+    );
+    _globalRotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 6000),
+    );
+    _additionalRotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4500),
+    );
+    _sweepController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    );
+    _syncControllers();
   }
 
   @override
   void didUpdateWidget(M3EProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_needsAnimation) {
-      if (!_controller.isAnimating) {
-        _controller.repeat();
+    _syncControllers();
+  }
+
+  void _syncControllers() {
+    // Classic circular spin
+    if (_isClassicCircularIndet) {
+      if (!_spinController.isAnimating) {
+        _spinController.repeat();
       }
-    } else if (_controller.isAnimating) {
-      _controller.stop();
+    } else if (_isWavy) {
+      // Wave phase scroll for wavy (determinate + indeterminate).
+      if (!_spinController.isAnimating) {
+        _spinController.repeat();
+      }
+    } else if (_spinController.isAnimating) {
+      _spinController.stop();
     }
+
+    // Linear indeterminate cycle
+    if (_isLinearIndet) {
+      if (!_linearIndetController.isAnimating) {
+        _linearIndetController.repeat();
+      }
+    } else if (_linearIndetController.isAnimating) {
+      _linearIndetController.stop();
+    }
+
+    // Circular wavy indeterminate
+    if (_isCircularWavyIndet) {
+      _startCircularWavyIndeterminate();
+    } else {
+      _stopCircularWavyIndeterminate();
+    }
+  }
+
+  void _startCircularWavyIndeterminate() {
+    if (!_globalRotController.isAnimating) {
+      _globalRotController.repeat();
+    }
+    if (!_additionalRotController.isAnimating) {
+      _additionalRotController.repeat();
+    }
+    if (!_sweepController.isAnimating) {
+      _sweepExpanding = true;
+      _sweepController.forward(from: 0).then((_) => _pingPongSweep());
+    }
+  }
+
+  void _pingPongSweep() {
+    if (!mounted || !_isCircularWavyIndet) {
+      return;
+    }
+    _sweepExpanding = !_sweepExpanding;
+    (_sweepExpanding ? _sweepController.forward() : _sweepController.reverse())
+        .then((_) => _pingPongSweep());
+  }
+
+  void _stopCircularWavyIndeterminate() {
+    _globalRotController.stop();
+    _additionalRotController.stop();
+    _sweepController.stop();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _spinController.dispose();
+    _linearIndetController.dispose();
+    _globalRotController.dispose();
+    _additionalRotController.dispose();
+    _sweepController.dispose();
     super.dispose();
   }
 
   double _phase(double wavelength, double waveSpeed) {
-    final Duration elapsed = _controller.lastElapsedDuration ?? Duration.zero;
+    final Duration elapsed =
+        _spinController.lastElapsedDuration ?? Duration.zero;
     final double seconds = elapsed.inMicroseconds / 1e6;
     if (wavelength <= 0) {
       return 0;
@@ -247,7 +336,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
         width: resolvedSize,
         height: resolvedSize,
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: _spinController,
           builder: (BuildContext context, Widget? child) {
             final _Arc arc = _resolveClassicArc();
             return CustomPaint(
@@ -285,13 +374,27 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
       themeAmplitude: circular.amplitudeForProgress,
     );
 
+    final Listenable listenable = _isCircularWavyIndet
+        ? Listenable.merge(<Listenable>[
+            _spinController,
+            _globalRotController,
+            _additionalRotController,
+            _sweepController,
+          ])
+        : _spinController;
+
     return RepaintBoundary(
       child: SizedBox(
         width: resolvedSize,
         height: resolvedSize,
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: listenable,
           builder: (BuildContext context, Widget? child) {
+            final double sweepFraction = lerpDouble(
+              M3ECircularWavyProgressPainter.minSweep,
+              M3ECircularWavyProgressPainter.maxSweep,
+              _sweepController.value,
+            )!;
             return CustomPaint(
               painter: M3ECircularWavyProgressPainter(
                 progress: widget.value,
@@ -303,7 +406,10 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 amplitudeFactor: amplitudeFactor,
                 maxAmplitude: circular.waveAmplitude,
                 wavelength: wavelength,
-                phase: _needsAnimation ? _phase(wavelength, waveSpeed) : 0,
+                phase: _needsWavePhase ? _phase(wavelength, waveSpeed) : 0,
+                globalRotation: _globalRotController.value,
+                additionalRotation: _additionalRotController.value,
+                sweepFraction: sweepFraction,
               ),
             );
           },
@@ -331,26 +437,33 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final M3ELinearProgressLayout layout = linear.resolveFlat(
       widget.linearSize,
     );
+    final indet = widget.value == null;
     return RepaintBoundary(
       child: SizedBox(
         height: layout.trackHeight,
         width: double.infinity,
-        child: CustomPaint(
-          painter: M3ELinearProgressPainter(
-            value: widget.value,
-            active: active,
-            track: track,
-            strokeWidth: layout.trackHeight,
-            trackStrokeWidth: layout.trackHeight,
-            gap: layout.gap,
-            stopSize: layout.dotDiameter,
-            isWavy: false,
-            waveAmplitude: 0,
-            wavelength: 40,
-            phase: 0,
-            amplitudeFactor: 0,
-            flatLayout: layout,
-          ),
+        child: AnimatedBuilder(
+          animation: _linearIndetController,
+          builder: (BuildContext context, Widget? child) {
+            return CustomPaint(
+              painter: M3ELinearProgressPainter(
+                value: widget.value,
+                animationValue: indet ? _linearIndetController.value : 0,
+                active: active,
+                track: track,
+                strokeWidth: layout.trackHeight,
+                trackStrokeWidth: layout.trackHeight,
+                gap: layout.gap,
+                stopSize: layout.dotDiameter,
+                isWavy: false,
+                waveAmplitude: 0,
+                wavelength: 40,
+                phase: 0,
+                amplitudeFactor: 0,
+                flatLayout: layout,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -381,16 +494,26 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
       stroke + 2 * linear.waveAmplitude * amplitudeFactor,
     );
 
+    final Listenable listenable = indeterminate
+        ? Listenable.merge(<Listenable>[
+            _spinController,
+            _linearIndetController,
+          ])
+        : _spinController;
+
     return RepaintBoundary(
       child: SizedBox(
         height: height,
         width: double.infinity,
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: listenable,
           builder: (BuildContext context, Widget? child) {
             return CustomPaint(
               painter: M3ELinearProgressPainter(
                 value: widget.value,
+                animationValue: indeterminate
+                    ? _linearIndetController.value
+                    : 0,
                 active: active,
                 track: track,
                 strokeWidth: stroke,
@@ -400,7 +523,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 isWavy: true,
                 waveAmplitude: linear.waveAmplitude,
                 wavelength: wavelength,
-                phase: _needsAnimation ? _phase(wavelength, waveSpeed) : 0,
+                phase: _needsWavePhase ? _phase(wavelength, waveSpeed) : 0,
                 amplitudeFactor: amplitudeFactor,
               ),
             );
@@ -416,7 +539,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     if (value != null) {
       return _Arc(-math.pi / 2, value.clamp(0, 1).toDouble() * tau);
     }
-    final double t = _controller.value;
+    final double t = _spinController.value;
     final double rotation = t * tau * 2;
     final double sweep = (math.sin(t * math.pi) * 0.75 + 0.15) * tau;
     return _Arc(rotation, sweep);

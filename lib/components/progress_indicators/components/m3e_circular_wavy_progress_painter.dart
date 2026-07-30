@@ -16,9 +16,12 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     required this.maxAmplitude,
     required this.wavelength,
     required this.phase,
+    this.globalRotation = 0,
+    this.additionalRotation = 0,
+    this.sweepFraction = 0.5,
   });
 
-  /// Null means indeterminate (full ring wave).
+  /// Null means indeterminate.
   final double? progress;
 
   /// activeColor.
@@ -48,6 +51,23 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
   /// phase.
   final double phase;
 
+  /// Indeterminate: 0→1 maps to 0→1080°.
+  final double globalRotation;
+
+  /// Indeterminate: 0→1 maps to 0→360°.
+  final double additionalRotation;
+
+  /// Indeterminate active sweep as a fraction of the full circle.
+  final double sweepFraction;
+
+  /// Minimum indeterminate sweep as a fraction of the full circle.
+  static const double minSweep = 0.10;
+
+  /// Maximum indeterminate sweep as a fraction of the full circle.
+  static const double maxSweep = 0.87;
+  static const double _globalRotDeg = 1080;
+  static const double _additionalRotDeg = 360;
+
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
@@ -67,16 +87,19 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     const double startAngle = -math.pi / 2;
     final Paint trackPaint = _strokePaint(trackColor, trackStrokeWidth);
     final Paint activePaint = _strokePaint(activeColor, strokeWidth);
+
     if (progress == null) {
-      _drawWavy(
+      _paintIndeterminate(
         canvas,
         center: center,
         radius: radius,
         startAngle: startAngle,
-        sweepAngle: tau - gapAngle,
+        tau: tau,
+        gapAngle: gapAngle,
         amplitude: amplitude,
         waveK: waveK,
-        paint: activePaint,
+        trackPaint: trackPaint,
+        activePaint: activePaint,
       );
       return;
     }
@@ -92,6 +115,56 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
       trackPaint: trackPaint,
       activePaint: activePaint,
     );
+  }
+
+  void _paintIndeterminate(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required double startAngle,
+    required double tau,
+    required double gapAngle,
+    required double amplitude,
+    required double waveK,
+    required Paint trackPaint,
+    required Paint activePaint,
+  }) {
+    final double totalDeg =
+        globalRotation * _globalRotDeg + additionalRotation * _additionalRotDeg;
+    final double totalRad = totalDeg * math.pi / 180;
+
+    canvas
+      ..save()
+      ..translate(center.dx, center.dy)
+      ..rotate(totalRad)
+      ..translate(-center.dx, -center.dy);
+
+    final double progressSweep = sweepFraction.clamp(minSweep, maxSweep) * tau;
+    final double appliedGap = math.min(progressSweep, gapAngle);
+    final double trackSweep = tau - progressSweep - appliedGap * 2;
+
+    if (trackSweep > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle + progressSweep + appliedGap,
+        trackSweep,
+        false,
+        trackPaint,
+      );
+    }
+    if (progressSweep > 0) {
+      _drawWavy(
+        canvas,
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        sweepAngle: progressSweep,
+        amplitude: amplitude,
+        waveK: waveK,
+        paint: activePaint,
+      );
+    }
+    canvas.restore();
   }
 
   void _paintDeterminate(
@@ -124,6 +197,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     final double appliedGap = math.min(activeSweep, gapAngle);
     final double trackSweep = tau - activeSweep - appliedGap * 2;
     if (trackSweep > 0) {
+      // Determinate track stays a flat arc (amplitude 0 via wavy helper).
       _drawWavy(
         canvas,
         center: center,
@@ -222,6 +296,9 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
         oldDelegate.amplitudeFactor != amplitudeFactor ||
         oldDelegate.maxAmplitude != maxAmplitude ||
         oldDelegate.wavelength != wavelength ||
-        oldDelegate.phase != phase;
+        oldDelegate.phase != phase ||
+        oldDelegate.globalRotation != globalRotation ||
+        oldDelegate.additionalRotation != additionalRotation ||
+        oldDelegate.sweepFraction != sweepFraction;
   }
 }
