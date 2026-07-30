@@ -238,7 +238,8 @@ M3EButton.icon(
 
 #### M3EIconButton
 
-Icon-only actions; supports toggle selection.
+Icon-only actions; supports toggle selection. Optional `visualSize` overrides
+the painted control size while hit target follows theme rules.
 
 ```dart
 M3EIconButton(
@@ -283,10 +284,15 @@ M3EExtendedFab(
 
 #### M3EFabMenu
 
-Speed-dial menu anchored to a FAB.
+Speed-dial menu anchored to a FAB. The FAB morphs size (80↔56) and circle when
+opening; use `position` for left/right anchor, and optional `expandIcon` /
+`collapseIcon` (fallbacks: `icon` / `closeIcon`).
 
 ```dart
 M3EFabMenu(
+  position: M3EFabMenuPosition.right,
+  expandIcon: const Icon(M3EIcons.add),
+  collapseIcon: const Icon(M3EIcons.close),
   items: [
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.edit),
@@ -433,7 +439,8 @@ M3ERadio<String>(
 
 #### M3ESwitch
 
-On/off toggle with optional selected icon.
+On/off toggle with optional selected icon. Hover/focus/press paints a
+thumb-centered translucent state layer (`stateLayerSize`, default 48 via theme).
 
 ```dart
 // in State
@@ -441,6 +448,12 @@ M3ESwitch(
   value: wifiEnabled,
   selectedIcon: const Icon(M3EIcons.check),
   onChanged: (v) => setState(() => wifiEnabled = v),
+);
+
+M3ESwitch(
+  value: bluetoothEnabled,
+  stateLayerSize: 56,
+  onChanged: (v) => setState(() => bluetoothEnabled = v),
 );
 ```
 
@@ -506,8 +519,10 @@ M3EDropdownMenu<String>.future(
 #### M3ESlider
 
 Compose Material 3 expressive slider — standard, centered, wavy, vertical, and
-range. Optional `trackThickness`, `thumbLength`, `dotSize`, `dotSpacing`, and
-`dotBuilder` customize track, thumb, and stop/tick markers.
+range. Optional `trackThickness`, `cornerRadius`, `thumbLength`, `dotSize`,
+`dotSpacing`, and `dotBuilder` customize track, thumb, and stop/tick markers.
+`cornerRadius` defaults to theme `trackCornerRadius` (8) and is not derived
+from track thickness.
 
 ```dart
 // in State
@@ -541,10 +556,11 @@ M3ESlider(
   value: level,
   max: 4,
   divisions: 4,
-  trackThickness: 20,
-  thumbLength: 36,
+  trackThickness: 30,
+  cornerRadius: 8,
+  thumbLength: 50,
   dotSize: 12,
-  dotSpacing: 8,
+  dotSpacing: 10,
   onChanged: (v) => setState(() => level = v),
   dotBuilder: ({
     required context,
@@ -1028,6 +1044,10 @@ M3ENavigationDrawer(
 Compose Material 3 expressive floating and docked toolbars. Floating toolbars
 own expand/collapse when one action sets `isExpandTrigger` (`expanded` is the
 initial state; the adjacent FAB stays visible and does not toggle expansion).
+Optional `visibilityController` / `scrollBehavior` enable scroll-exit or manual
+show/hide. Set `onActiveIndexChanged` for toolbar-managed action selection
+(labeled actions animate width). Use `fabExpandIcon` / `fabCollapseIcon` when a
+FAB morphs with the pill.
 
 ```dart
 // Floating (default) — pill, wrap-content
@@ -1052,7 +1072,33 @@ M3EToolbar(
     M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
   ],
   fabIcon: const Icon(M3EIcons.add),
+  fabExpandIcon: const Icon(M3EIcons.add),
+  fabCollapseIcon: const Icon(M3EIcons.close),
   onFabPressed: () {},
+);
+
+// Action selection (internal active index when onActiveIndexChanged is set)
+M3EToolbar(
+  onActiveIndexChanged: (i) {},
+  actions: <M3EToolbarItem>[
+    M3EToolbarAction(
+      icon: M3EIcons.edit,
+      label: 'Edit',
+      onPressed: () {},
+    ),
+    M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+  ],
+);
+
+// Scroll-exit / manual visibility
+final visibility = M3EToolbarVisibilityController();
+M3EToolbarScrollWrapper(
+  behavior: M3EToolbarScrollBehavior.exitAlways(controller: visibility),
+  child: ListView(...),
+);
+M3EToolbar(
+  visibilityController: visibility,
+  actions: <M3EToolbarItem>[...],
 );
 
 // Mixed icon actions + custom widgets (widgets stay inline; height-capped)
@@ -1161,7 +1207,9 @@ const M3EBadge(
 #### M3EProgressIndicator
 
 Material 3 Expressive progress indicators with circular and linear variants,
-including Compose-style wavy forms.
+including Compose-style wavy forms. Null `value` runs indeterminate animation
+(classic linear: dual traveling segments with gaps; wavy linear/circular: m3e
+style travel / spin+sweep; classic circular: spinning arc with gaps).
 
 ```dart
 // Classic
@@ -1178,6 +1226,10 @@ SizedBox(
 const M3EProgressIndicator.circularWavy();
 M3EProgressIndicator.circularWavy(value: 0.6);
 
+SizedBox(
+  width: 200,
+  child: M3EProgressIndicator.linearWavy(),
+);
 SizedBox(
   width: 200,
   child: M3EProgressIndicator.linearWavy(value: 0.6),

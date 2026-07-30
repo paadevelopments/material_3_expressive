@@ -9,6 +9,34 @@
   (defaults to `none`).
 * Selection haptics on stepped slider tick changes.
 * Dismissible list haptic hooks on tap and swipe-action commit (defaults to `none`).
+* `M3ESlider` / `M3ERangeSlider` `cornerRadius` (theme default
+  `trackCornerRadius` = 8) — fixed outer track radius, not derived from
+  thickness.
+* `M3ESwitch` thumb-centered state layer (`stateLayerSize` on widget/theme,
+  default 48) for hover/focus/press.
+* Toolbar scroll-exit / manual visibility via `M3EToolbarVisibilityController`
+  and `M3EToolbarScrollBehavior`.
+* Toolbar action selection via `activeIndex` / `onActiveIndexChanged`, labeled
+  action width springs, and FAB expand/collapse icons with pill↔FAB morph.
+* `M3EFabMenu` expand/collapse icons, size morph (80↔56), and
+  `M3EFabMenuPosition` (left/right).
+* `M3EIconButton.visualSize` for layout-driven visual size overrides.
+
+### Fixed
+
+* Classic linear and wavy linear/circular indeterminate progress indicators —
+  dual traveling segments with track gaps (linear) and spin + sweep (circular
+  wavy); classic circular indeterminate unchanged.
+* Switch thumb press feedback now shows the Material concentric translucent
+  state-layer circle.
+
+### Changed
+
+* Internal analyze / `klin_dart` compliance refactors (progress controller sync,
+  toolbar build/scroll helpers, carousel wrapper `part` splits) with no
+  intentional public API or behavior breaks.
+* Default slider outer track corners use fixed radius 8 (previously half of
+  track thickness).
 
 ## 1.0.3
 
