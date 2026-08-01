@@ -41,7 +41,9 @@ class M3EIconButtonShapes {
   }
 
   /// Effective corner radius for the given material states.
-  /// Hover does not change the radius; Pressed uses the shared pressed radius.
+  ///
+  /// Pressed uses [M3EIconButtonTheme.radiusPressed]; hovered uses
+  /// [M3EIconButtonTheme.radiusHovered]; otherwise resting.
   static double effectiveRadius({
     required M3EIconButtonTheme theme,
     required M3EIconButtonSize size,
@@ -58,6 +60,9 @@ class M3EIconButtonShapes {
 
     if (states.contains(WidgetState.pressed)) {
       return theme.radiusPressed(size);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return theme.radiusHovered(size);
     }
     return restingRadius(theme: theme, size: size, variant: variant);
   }

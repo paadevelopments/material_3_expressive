@@ -116,6 +116,15 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
     M3EIconButtonSize.xl: 27,
   };
 
+  /// Between resting and pressed — used for hover morph (matches button spirit).
+  static const Map<M3EIconButtonSize, double> _radiusHovered = {
+    M3EIconButtonSize.xs: 10,
+    M3EIconButtonSize.sm: 12,
+    M3EIconButtonSize.md: 16,
+    M3EIconButtonSize.lg: 28,
+    M3EIconButtonSize.xl: 40,
+  };
+
   /// iconSize.
 
   double iconSize(M3EIconButtonSize size) => _icon[size]!;
@@ -141,6 +150,10 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
   /// radiusPressed.
 
   double radiusPressed(M3EIconButtonSize size) => _radiusPressed[size]!;
+
+  /// radiusHovered.
+
+  double radiusHovered(M3EIconButtonSize size) => _radiusHovered[size]!;
 
   @override
   M3EIconButtonTheme copyWith({

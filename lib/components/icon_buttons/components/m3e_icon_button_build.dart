@@ -21,40 +21,56 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       selected,
       iconButtonTheme.outlineWidth,
     );
-    final morphStates = <WidgetState>{
-      if (_isPointerDown && widget.onPressed != null) WidgetState.pressed,
-    };
-    final double targetRadius = M3EIconButtonShapes.effectiveRadius(
-      theme: iconButtonTheme,
-      size: widget.size,
-      baseVariant: widget.shape,
-      isToggle: isToggle,
-      isSelected: selected,
-      states: morphStates,
-    );
     final Widget innerIcon = IconTheme.merge(
       data: IconThemeData(size: iconPx, color: colors.fg),
       child: (selected && widget.selectedIcon != null)
           ? widget.selectedIcon!
           : widget.icon,
     );
-    final Widget button = _buildMorphButton(
-      visual: visual,
-      colors: colors,
-      targetRadius: targetRadius,
-      innerIcon: innerIcon,
-    );
     Widget paintedButton = SizedBox(
       width: visual.width,
       height: visual.height,
-      child: _wrapWithBadge(theme, scheme, button),
+      child: _wrapWithBadge(
+        theme,
+        scheme,
+        ListenableBuilder(
+          listenable: Listenable.merge(<Listenable>[
+            _isPointerDownNotifier,
+            _isHoveredNotifier,
+            _isPressedNotifier,
+          ]),
+          builder: (BuildContext context, Widget? child) {
+            final bool pressed =
+                widget.onPressed != null &&
+                (_isPointerDownNotifier.value || _isPressedNotifier.value);
+            final morphStates = <WidgetState>{
+              if (pressed) WidgetState.pressed,
+              if (_isHoveredNotifier.value) WidgetState.hovered,
+            };
+            final double targetRadius = M3EIconButtonShapes.effectiveRadius(
+              theme: iconButtonTheme,
+              size: widget.size,
+              baseVariant: widget.shape,
+              isToggle: isToggle,
+              isSelected: selected,
+              states: morphStates,
+            );
+            return _buildMorphButton(
+              visual: visual,
+              colors: colors,
+              targetRadius: targetRadius,
+              innerIcon: innerIcon,
+            );
+          },
+        ),
+      ),
     );
     if (widget.onPressed != null) {
       paintedButton = Listener(
         behavior: HitTestBehavior.translucent,
-        onPointerDown: _handlePointerDown,
-        onPointerUp: (_) => _handlePointerUp(),
-        onPointerCancel: (_) => _handlePointerUp(),
+        onPointerDown: (_) => _setPointerDown(true),
+        onPointerUp: (_) => _setPointerDown(false),
+        onPointerCancel: (_) => _setPointerDown(false),
         child: paintedButton,
       );
     }

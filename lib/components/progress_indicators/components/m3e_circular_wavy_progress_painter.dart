@@ -65,8 +65,12 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
 
   /// Maximum indeterminate sweep as a fraction of the full circle.
   static const double maxSweep = 0.87;
-  static const double _globalRotDeg = 1080;
-  static const double _additionalRotDeg = 360;
+
+  /// Degrees of canvas rotation per full [globalRotation] cycle.
+  static const double globalRotDeg = 1080;
+
+  /// Degrees of canvas rotation per full [additionalRotation] cycle.
+  static const double additionalRotDeg = 360;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -130,7 +134,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     required Paint activePaint,
   }) {
     final double totalDeg =
-        globalRotation * _globalRotDeg + additionalRotation * _additionalRotDeg;
+        globalRotation * globalRotDeg + additionalRotation * additionalRotDeg;
     final double totalRad = totalDeg * math.pi / 180;
 
     canvas

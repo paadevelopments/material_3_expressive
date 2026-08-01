@@ -173,6 +173,9 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   bool get _isClassicCircularIndet =>
       widget._kind == _M3EProgressKind.circular && widget.value == null;
 
+  /// Classic or wavy circular with null value — shared rot/sweep drivers.
+  bool get _isCircularIndet => _isClassicCircularIndet || _isCircularWavyIndet;
+
   bool get _needsWavePhase => _isWavy;
 
   @override
@@ -210,12 +213,12 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   void _syncControllers() {
     _syncSpinController();
     _syncLinearIndetController();
-    _syncCircularWavyControllers();
+    _syncCircularIndetControllers();
   }
 
   void _syncSpinController() {
-    final bool needsSpin = _isClassicCircularIndet || _isWavy;
-    if (needsSpin) {
+    // Wave phase only — classic circular indet uses rot/sweep controllers.
+    if (_isWavy) {
       if (!_spinController.isAnimating) {
         _spinController.repeat();
       }
@@ -234,15 +237,15 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     }
   }
 
-  void _syncCircularWavyControllers() {
-    if (_isCircularWavyIndet) {
-      _startCircularWavyIndeterminate();
+  void _syncCircularIndetControllers() {
+    if (_isCircularIndet) {
+      _startCircularIndeterminate();
     } else {
-      _stopCircularWavyIndeterminate();
+      _stopCircularIndeterminate();
     }
   }
 
-  void _startCircularWavyIndeterminate() {
+  void _startCircularIndeterminate() {
     if (!_globalRotController.isAnimating) {
       _globalRotController.repeat();
     }
@@ -256,7 +259,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   }
 
   void _pingPongSweep() {
-    if (!mounted || !_isCircularWavyIndet) {
+    if (!mounted || !_isCircularIndet) {
       return;
     }
     _sweepExpanding = !_sweepExpanding;
@@ -264,7 +267,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
         .then((_) => _pingPongSweep());
   }
 
-  void _stopCircularWavyIndeterminate() {
+  void _stopCircularIndeterminate() {
     _globalRotController.stop();
     _additionalRotController.stop();
     _sweepController.stop();
@@ -339,7 +342,13 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
         width: resolvedSize,
         height: resolvedSize,
         child: AnimatedBuilder(
-          animation: _spinController,
+          animation: _isClassicCircularIndet
+              ? Listenable.merge(<Listenable>[
+                  _globalRotController,
+                  _additionalRotController,
+                  _sweepController,
+                ])
+              : const AlwaysStoppedAnimation<double>(0),
           builder: (BuildContext context, Widget? child) {
             final _Arc arc = _resolveClassicArc();
             return CustomPaint(
@@ -542,10 +551,19 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     if (value != null) {
       return _Arc(-math.pi / 2, value.clamp(0, 1).toDouble() * tau);
     }
-    final double t = _spinController.value;
-    final double rotation = t * tau * 2;
-    final double sweep = (math.sin(t * math.pi) * 0.75 + 0.15) * tau;
-    return _Arc(rotation, sweep);
+    // Match wavy circular indeterminate timing (flat arcs, not wavy path).
+    final double totalDeg =
+        _globalRotController.value *
+            M3ECircularWavyProgressPainter.globalRotDeg +
+        _additionalRotController.value *
+            M3ECircularWavyProgressPainter.additionalRotDeg;
+    final double totalRad = totalDeg * math.pi / 180;
+    final double sweepFraction = lerpDouble(
+      M3ECircularWavyProgressPainter.minSweep,
+      M3ECircularWavyProgressPainter.maxSweep,
+      _sweepController.value,
+    )!;
+    return _Arc(-math.pi / 2 + totalRad, sweepFraction * tau);
   }
 }
 

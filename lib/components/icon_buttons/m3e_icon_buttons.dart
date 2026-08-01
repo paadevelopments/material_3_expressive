@@ -113,40 +113,44 @@ class M3EIconButton extends StatefulWidget {
 
 class _M3EIconButtonState extends State<M3EIconButton> {
   late final WidgetStatesController _statesController;
-  bool _isPointerDown = false;
+  late final ValueNotifier<bool> _isPointerDownNotifier;
+  late final ValueNotifier<bool> _isHoveredNotifier;
+  late final ValueNotifier<bool> _isPressedNotifier;
 
   @override
   void initState() {
     super.initState();
-    _statesController = WidgetStatesController();
+    _statesController = WidgetStatesController()..addListener(_onStatesChanged);
+    _isPointerDownNotifier = ValueNotifier(false);
+    _isHoveredNotifier = ValueNotifier(false);
+    _isPressedNotifier = ValueNotifier(false);
   }
 
   @override
   void dispose() {
-    _statesController.dispose();
+    _statesController
+      ..removeListener(_onStatesChanged)
+      ..dispose();
+    _isPointerDownNotifier.dispose();
+    _isHoveredNotifier.dispose();
+    _isPressedNotifier.dispose();
     super.dispose();
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    if (widget.onPressed == null || !mounted) {
-      return;
-    }
-    setState(() => _isPointerDown = true);
-    _statesController.update(WidgetState.pressed, true);
-  }
-
-  void _handlePointerUp() {
-    if (!_isPointerDown) {
-      return;
-    }
-    _isPointerDown = false;
-    // onPressed may rebuild/remove this button (e.g. toolbar expand trigger)
-    // before pointer-up is delivered to the Listener.
+  void _onStatesChanged() {
     if (!mounted) {
       return;
     }
-    setState(() {});
-    _statesController.update(WidgetState.pressed, false);
+    final Set<WidgetState> states = _statesController.value;
+    _isHoveredNotifier.value = states.contains(WidgetState.hovered);
+    _isPressedNotifier.value = states.contains(WidgetState.pressed);
+  }
+
+  void _setPointerDown(bool down) {
+    if (_isPointerDownNotifier.value == down) {
+      return;
+    }
+    _isPointerDownNotifier.value = down;
   }
 
   @override
