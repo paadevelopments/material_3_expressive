@@ -10,7 +10,7 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     this.trackWidth = 52,
     this.trackHeight = 32,
     this.trackPadding = 4,
-    this.thumbSizePressed = 28,
+    this.thumbSizePressed = 32,
     this.thumbSizeSelected = 24,
     this.thumbSizeUnselected = 16,
     this.stateLayerSize = 48,

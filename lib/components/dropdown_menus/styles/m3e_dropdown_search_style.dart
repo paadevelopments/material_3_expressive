@@ -43,7 +43,7 @@ class M3EDropdownSearchStyle with Diagnosticable {
 
   /// Border radius of the search field.
   ///
-  /// When null, falls back to the item style's outer radius.
+  /// When null, falls back to the panel container radius.
   final BorderRadius? borderRadius;
 
   /// Content padding inside the search text field.

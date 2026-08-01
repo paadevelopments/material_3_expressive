@@ -84,7 +84,7 @@ class _M3EExpressiveLoadingIndicatorState
   Timer? _morphTimer;
 
   final _morphAnimationSpec = SpringSimulation(
-    SpringDescription.withDampingRatio(ratio: 0.6, stiffness: 200, mass: 1),
+    M3EMotion.expressiveSpatialDefault.toDescription(),
     0,
     1,
     5,

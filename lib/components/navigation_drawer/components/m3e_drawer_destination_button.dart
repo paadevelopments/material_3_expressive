@@ -67,56 +67,59 @@ class M3EDrawerDestinationButton extends StatelessWidget {
         button: true,
         selected: selected,
         label: destination.label,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            M3EHaptics.trigger(haptic);
-            onTap();
-          },
-          child: KeyedSubtree(
-            key: indicatorKey,
-            child: SizedBox(
-              height: drawerTheme.destinationHeight,
-              width: double.infinity,
-              child: DecoratedBox(
-                decoration: ShapeDecoration(shape: border, color: fill),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: drawerTheme.destinationInnerHorizontalPadding,
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      M3ENavIconScale(
-                        selected: selected,
-                        child: IconTheme.merge(
-                          data: IconThemeData(
-                            color: foreground,
-                            size: drawerTheme.iconSize,
-                          ),
-                          child: selected
-                              ? (destination.selectedIcon ?? destination.icon)
-                              : destination.icon,
-                        ),
-                      ),
-                      SizedBox(width: drawerTheme.iconLabelGap),
-                      Expanded(
-                        child: Text(
-                          destination.label,
-                          style: theme.typeScale.labelLarge.copyWith(
-                            color: foreground,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (destination.badgeLabel != null)
-                        Text(
-                          destination.badgeLabel!,
-                          style: theme.typeScale.labelLarge.copyWith(
-                            color: foreground,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              M3EHaptics.trigger(haptic);
+              onTap();
+            },
+            child: KeyedSubtree(
+              key: indicatorKey,
+              child: SizedBox(
+                height: drawerTheme.destinationHeight,
+                width: double.infinity,
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(shape: border, color: fill),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: drawerTheme.destinationInnerHorizontalPadding,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        M3ENavIconScale(
+                          selected: selected,
+                          child: IconTheme.merge(
+                            data: IconThemeData(
+                              color: foreground,
+                              size: drawerTheme.iconSize,
+                            ),
+                            child: selected
+                                ? (destination.selectedIcon ?? destination.icon)
+                                : destination.icon,
                           ),
                         ),
-                    ],
+                        SizedBox(width: drawerTheme.iconLabelGap),
+                        Expanded(
+                          child: Text(
+                            destination.label,
+                            style: theme.typeScale.labelLarge.copyWith(
+                              color: foreground,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (destination.badgeLabel != null)
+                          Text(
+                            destination.badgeLabel!,
+                            style: theme.typeScale.labelLarge.copyWith(
+                              color: foreground,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),

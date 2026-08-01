@@ -172,7 +172,7 @@ class M3ERailItemButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: expanded ? null : (semanticLabel ?? label),
-      child: withTooltip,
+      child: MouseRegion(cursor: SystemMouseCursors.click, child: withTooltip),
     );
   }
 

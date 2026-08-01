@@ -152,26 +152,29 @@ class M3ENavBarDestinationButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: destination.semanticLabel ?? destination.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          M3EHaptics.trigger(haptic);
-          onTap();
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            icon,
-            if (_showLabel) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(
-                destination.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: labelStyle.copyWith(color: fg),
-              ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            M3EHaptics.trigger(haptic);
+            onTap();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              icon,
+              if (_showLabel) ...<Widget>[
+                const SizedBox(height: 4),
+                Text(
+                  destination.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: labelStyle.copyWith(color: fg),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

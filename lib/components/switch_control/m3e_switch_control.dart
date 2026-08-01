@@ -179,12 +179,12 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
     // (Align alone clips the snap against the padded track edge).
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final travel = (constraints.maxWidth - size).clamp(
-          0.0,
-          double.infinity,
-        );
-        final left = travel * _positionCtrl.value;
-        final top = (constraints.maxHeight - size) / 2;
+        final maxW = constraints.maxWidth;
+        final maxH = constraints.maxHeight;
+        // Match vertical overflow into track padding so press reaches L/R edges.
+        final bleed = size > maxH ? (size - maxH) / 2 : 0.0;
+        final left = -bleed + (maxW - size + 2 * bleed) * _positionCtrl.value;
+        final top = (maxH - size) / 2;
         final double layer =
             widget.stateLayerSize ?? switchTheme.stateLayerSize;
         final double layerLeft = left + (size - layer) / 2;

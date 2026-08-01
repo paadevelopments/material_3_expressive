@@ -205,9 +205,10 @@ extension _M3EDropdownMenuPanel<T> on _M3EDropdownMenuState<T> {
     final m3eTheme = M3ETheme.of(context);
     final scheme = m3eTheme.colorScheme;
     final type = m3eTheme.typeScale;
+    final containerRadius =
+        widget.dropdownStyle.containerRadius ?? widget.containerRadius;
     final searchRadius =
-        sd.borderRadius ??
-        BorderRadius.circular(widget.itemStyle.outerRadius ?? 12.0);
+        sd.borderRadius ?? BorderRadius.circular(containerRadius);
 
     return Padding(
       padding: sd.margin,
@@ -231,11 +232,13 @@ extension _M3EDropdownMenuPanel<T> on _M3EDropdownMenuState<T> {
     M3EThemeData m3eTheme,
     BorderRadius searchRadius,
   ) {
+    final Color fillColor = sd.fillColor ?? scheme.surface;
+    final bool filled = sd.fillColor == null || sd.filled;
     return InputDecoration(
       hintText: sd.hintText,
       hintStyle: sd.hintStyle,
-      filled: sd.filled,
-      fillColor: sd.fillColor,
+      filled: filled,
+      fillColor: fillColor,
       prefixIcon: Icon(
         Icons.search,
         color: scheme.onSurface.withValues(alpha: 0.5),
