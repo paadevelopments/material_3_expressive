@@ -1,3 +1,28 @@
+## 1.0.5
+
+### Fixed
+
+* `M3ESwitch` — pressed thumb now bleeds into left/right track padding (matching
+  vertical edge contact); default `thumbSizePressed` is `trackHeight` (32).
+* `M3EExpressiveLoadingIndicator` — morph settle uses
+  `M3EMotion.expressiveSpatialDefault` (keeps droppy overshoot velocity).
+* Dropdown menu search field — defaults to `surface` fill and panel
+  `containerRadius` (was unfilled with item outer radius).
+* Navigation bar, drawer, and rail destinations — `SystemMouseCursors.click` on
+  desktop/web hover.
+* Classic circular indeterminate progress — shares wavy circular rotation and
+  sweep timing (flat arcs unchanged).
+* `M3ESlider` / `M3ERangeSlider` — tap outside clears focus via `TapRegion` and
+  `M3EFocus.tapOutsideHandler`.
+* `M3EMenu` — no longer autofocuses the first item on open; popup focus scope is
+  still focused so keyboard navigation works without a pre-highlight.
+
+### Changed
+
+* `M3EIconButton` — hover radius morph (with press), aligned with button-style
+  state listening; theme `radiusHovered` tokens.
+* `M3ESearchBarTheme.maxWidth` default is `double.infinity` (full-width layouts).
+
 ## 1.0.4
 
 ### Added

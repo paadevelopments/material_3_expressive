@@ -28,9 +28,12 @@ Runtime dependencies are intentionally small — see
 
 ## Example app
 
-An interactive gallery demonstrating **all 44 widgets** lives in the
-[`example/`](example/) directory. It groups components the same way as the
-official Material 3 catalog:
+Try the live gallery on the web:
+[paadevelopments.github.io/material_3_expressive](https://paadevelopments.github.io/material_3_expressive/).
+
+An interactive gallery demonstrating **all 44 widgets** also lives in the
+[`example/`](example/) directory (same build as the live demo). It groups
+components the same way as the official Material 3 catalog:
 
 | Tab | Page | Components |
 | --- | ---- | ---------- |
@@ -60,8 +63,8 @@ flutter run
 - **Design token foundations** — color schemes, typography, motion, shapes
   (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
   morph polygons), elevation, haptics, and state layers via the `M3ETheme` inherited widget.
-- **Interactive example gallery** in [`example/`](example/) with live demos
-  for every component.
+- **Interactive example gallery** — run locally from [`example/`](example/), or
+  open the [live web demo](https://paadevelopments.github.io/material_3_expressive/).
 
 ## Requirements
 
@@ -76,7 +79,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.4
+  material_3_expressive: ^1.0.5
 ```
 
 Then fetch it:
@@ -239,7 +242,8 @@ M3EButton.icon(
 #### M3EIconButton
 
 Icon-only actions; supports toggle selection. Optional `visualSize` overrides
-the painted control size while hit target follows theme rules.
+the painted control size while hit target follows theme rules. Hover and press
+morph container radius (theme `radiusHovered` / press tokens).
 
 ```dart
 M3EIconButton(
@@ -441,6 +445,8 @@ M3ERadio<String>(
 
 On/off toggle with optional selected icon. Hover/focus/press paints a
 thumb-centered translucent state layer (`stateLayerSize`, default 48 via theme).
+Pressed thumb expands to the track edges (`thumbSizePressed` defaults to
+`trackHeight`).
 
 ```dart
 // in State
@@ -479,7 +485,8 @@ M3EChip(
 
 #### M3EDropdownMenu
 
-Static list, multi-select, search, and async loading.
+Static list, multi-select, search, and async loading. When search is enabled,
+the in-panel field defaults to `surface` fill and the panel container radius.
 
 ```dart
 // Single select
@@ -522,7 +529,7 @@ Compose Material 3 expressive slider — standard, centered, wavy, vertical, and
 range. Optional `trackThickness`, `cornerRadius`, `thumbLength`, `dotSize`,
 `dotSpacing`, and `dotBuilder` customize track, thumb, and stop/tick markers.
 `cornerRadius` defaults to theme `trackCornerRadius` (8) and is not derived
-from track thickness.
+from track thickness. Tap outside the slider clears focus.
 
 ```dart
 // in State
@@ -969,7 +976,8 @@ M3ETabs(
 
 #### M3ENavigationBar
 
-Bottom navigation for compact layouts.
+Bottom navigation for compact layouts. Destinations use a click mouse cursor on
+desktop/web (same for rail and drawer).
 
 ```dart
 // in State
@@ -1147,7 +1155,8 @@ M3EToolbar.docked(
 #### M3EMenu
 
 Anchored dropdown menu. Top-level `M3EMenuGroup`s each render as an elevated
-surface with a gap between them; dividers stay inside a surface.
+surface with a gap between them; dividers stay inside a surface. Opening the
+menu focuses the popup without pre-highlighting the first item.
 
 ```dart
 M3EMenu(
@@ -1209,7 +1218,8 @@ const M3EBadge(
 Material 3 Expressive progress indicators with circular and linear variants,
 including Compose-style wavy forms. Null `value` runs indeterminate animation
 (classic linear: dual traveling segments with gaps; wavy linear/circular: m3e
-style travel / spin+sweep; classic circular: spinning arc with gaps).
+style travel / spin+sweep; classic circular: same rot/sweep timing as wavy,
+flat arcs with gaps).
 
 ```dart
 // Classic
@@ -1238,7 +1248,8 @@ SizedBox(
 
 #### M3ELoadingIndicator
 
-Expressive loading spinner.
+Expressive loading spinner. Shape morph settle uses
+`M3EMotion.expressiveSpatialDefault`.
 
 ```dart
 const M3ELoadingIndicator();
@@ -1367,6 +1378,9 @@ Several components present transient UI over the app. They all require a
 | `M3ESnackbar` | `M3ESnackbar.show` |
 
 ## Example app (detailed)
+
+Live web build:
+[paadevelopments.github.io/material_3_expressive](https://paadevelopments.github.io/material_3_expressive/).
 
 The [`example/`](example/) project is a full gallery app:
 
