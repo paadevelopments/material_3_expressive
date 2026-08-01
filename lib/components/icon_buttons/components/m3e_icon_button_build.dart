@@ -5,14 +5,9 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
-    final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
-    final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
-    final Size visual = widget.visualSize ?? themeVisual;
-    final target = Size(
-      math.max(themeTarget.width, visual.width),
-      math.max(themeTarget.height, visual.height),
+    final ({Size visual, Size target}) sizes = _resolveLayoutSizes(
+      iconButtonTheme,
     );
-    final double iconPx = iconButtonTheme.iconSize(widget.size);
     final bool selected = widget.isSelected ?? false;
     final bool isToggle =
         widget.isSelected != null || widget.selectedIcon != null;
@@ -22,67 +17,107 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       iconButtonTheme.outlineWidth,
     );
     final Widget innerIcon = IconTheme.merge(
-      data: IconThemeData(size: iconPx, color: colors.fg),
+      data: IconThemeData(
+        size: iconButtonTheme.iconSize(widget.size),
+        color: colors.fg,
+      ),
       child: (selected && widget.selectedIcon != null)
           ? widget.selectedIcon!
           : widget.icon,
     );
     Widget paintedButton = SizedBox(
-      width: visual.width,
-      height: visual.height,
+      width: sizes.visual.width,
+      height: sizes.visual.height,
       child: _wrapWithBadge(
         theme,
         scheme,
-        ListenableBuilder(
-          listenable: Listenable.merge(<Listenable>[
-            _isPointerDownNotifier,
-            _isHoveredNotifier,
-            _isPressedNotifier,
-          ]),
-          builder: (BuildContext context, Widget? child) {
-            final bool pressed =
-                widget.onPressed != null &&
-                (_isPointerDownNotifier.value || _isPressedNotifier.value);
-            final morphStates = <WidgetState>{
-              if (pressed) WidgetState.pressed,
-              if (_isHoveredNotifier.value) WidgetState.hovered,
-            };
-            final double targetRadius = M3EIconButtonShapes.effectiveRadius(
-              theme: iconButtonTheme,
-              size: widget.size,
-              baseVariant: widget.shape,
-              isToggle: isToggle,
-              isSelected: selected,
-              states: morphStates,
-            );
-            return _buildMorphButton(
-              visual: visual,
-              colors: colors,
-              targetRadius: targetRadius,
-              innerIcon: innerIcon,
-            );
-          },
+        _buildMorphingFace(
+          iconButtonTheme: iconButtonTheme,
+          visual: sizes.visual,
+          colors: colors,
+          isToggle: isToggle,
+          selected: selected,
+          innerIcon: innerIcon,
         ),
       ),
     );
-    if (widget.onPressed != null) {
-      paintedButton = Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: (_) => _setPointerDown(true),
-        onPointerUp: (_) => _setPointerDown(false),
-        onPointerCancel: (_) => _setPointerDown(false),
-        child: paintedButton,
-      );
-    }
+    paintedButton = _wrapPointerDown(paintedButton);
     return Semantics(
       button: true,
       selected: selected,
       label: widget.semanticLabel ?? widget.tooltip,
       child: SizedBox(
-        width: target.width,
-        height: target.height,
+        width: sizes.target.width,
+        height: sizes.target.height,
         child: Center(child: paintedButton),
       ),
+    );
+  }
+
+  ({Size visual, Size target}) _resolveLayoutSizes(
+    M3EIconButtonTheme iconButtonTheme,
+  ) {
+    final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
+    final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
+    final Size visual = widget.visualSize ?? themeVisual;
+    return (
+      visual: visual,
+      target: Size(
+        math.max(themeTarget.width, visual.width),
+        math.max(themeTarget.height, visual.height),
+      ),
+    );
+  }
+
+  Widget _buildMorphingFace({
+    required M3EIconButtonTheme iconButtonTheme,
+    required Size visual,
+    required ({Color bg, Color fg, BorderSide? side}) colors,
+    required bool isToggle,
+    required bool selected,
+    required Widget innerIcon,
+  }) {
+    return ListenableBuilder(
+      listenable: Listenable.merge(<Listenable>[
+        _isPointerDownNotifier,
+        _isHoveredNotifier,
+        _isPressedNotifier,
+      ]),
+      builder: (BuildContext context, Widget? child) {
+        final bool pressed =
+            widget.onPressed != null &&
+            (_isPointerDownNotifier.value || _isPressedNotifier.value);
+        final morphStates = <WidgetState>{
+          if (pressed) WidgetState.pressed,
+          if (_isHoveredNotifier.value) WidgetState.hovered,
+        };
+        return _buildMorphButton(
+          visual: visual,
+          colors: colors,
+          targetRadius: M3EIconButtonShapes.effectiveRadius(
+            theme: iconButtonTheme,
+            size: widget.size,
+            baseVariant: widget.shape,
+            isToggle: isToggle,
+            isSelected: selected,
+            states: morphStates,
+          ),
+          innerIcon: innerIcon,
+        );
+      },
+    );
+  }
+
+  Widget _wrapPointerDown(Widget child) {
+    if (widget.onPressed == null) {
+      return child;
+    }
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _setPointerDown(true),
+      onPointerUp: (_) => _setPointerDown(false),
+      onPointerCancel: (_) => _setPointerDown(false),
+      child: child,
     );
   }
 
