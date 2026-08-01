@@ -19,7 +19,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     this.selectionOpacity = 0.4,
     this.disabledOpacity = M3EStateOpacity.disabledContent,
     this.minWidth = 360,
-    this.maxWidth = 800,
+    this.maxWidth = double.infinity,
     this.minHeight = 56,
     this.restingExpandPadding = 8,
     this.expandOnFocus = true,

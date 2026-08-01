@@ -165,9 +165,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
       if (_expandCtrl.value < 1) {
         _expandCtrl.animateTo(1);
       }
-      if (_keyboardActivated) {
-        _focusScopeNode.requestFocus();
-      }
+      _focusScopeNode.requestFocus();
     });
   }
 
@@ -386,7 +384,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
                   closeOnSelect: widget.closeOnSelect,
                   onSelect: _handleSelect,
                   onOpenSubmenu: _openSubmenu,
-                  autofocusFirst: i == 0,
+                  autofocusFirst: false,
                   applyGroupShapes: false,
                 ),
               ),

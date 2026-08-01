@@ -111,14 +111,19 @@ extension on _M3ERangeSliderState {
         resolved: resolved,
       ),
     );
-    return Focus(
-      focusNode: _focusNode,
-      autofocus: widget.autofocus,
-      canRequestFocus: _enabled,
-      onKeyEvent: _handleKeyEvent,
-      child: MouseRegion(
-        cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-        child: gestureDetector,
+    return TapRegion(
+      onTapOutside: M3EFocus.tapOutsideHandler(_focusNode),
+      child: Focus(
+        focusNode: _focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: _enabled,
+        onKeyEvent: _handleKeyEvent,
+        child: MouseRegion(
+          cursor: _enabled
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+          child: gestureDetector,
+        ),
       ),
     );
   }

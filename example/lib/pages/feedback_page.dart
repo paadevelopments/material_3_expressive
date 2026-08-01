@@ -253,6 +253,7 @@ class _FeedbackPageState extends State<FeedbackPage>
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
               M3ESearchBar(
