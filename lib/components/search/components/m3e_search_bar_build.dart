@@ -69,6 +69,8 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               )
             : EdgeInsetsDirectional.zero,
       ),
+      idleHintStyle: styles.hintStyle,
+      noLeadingHintPadding: barTheme.noLeadingHintExtraPadding,
     );
   }
 
@@ -78,7 +80,24 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required Widget? leading,
     required List<Widget>? trailing,
     required Widget input,
+    required TextStyle idleHintStyle,
+    required double noLeadingHintPadding,
   }) {
+    final Widget content = _groupsIdleContent(textDirection)
+        ? _buildIdleGroupedContent(
+            textDirection: textDirection,
+            leading: leading,
+            trailing: trailing,
+            idleHintStyle: idleHintStyle,
+            noLeadingHintPadding: noLeadingHintPadding,
+          )
+        : _buildEditingRow(
+            textDirection: textDirection,
+            leading: leading,
+            trailing: trailing,
+            input: input,
+          );
+
     return Opacity(
       opacity: widget.enabled ? 1 : M3ESearchConstants.disabledOpacity,
       child: Material(
@@ -101,19 +120,75 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               statesController: _statesController,
               child: Padding(
                 padding: styles.padding,
-                child: Row(
-                  textDirection: textDirection,
-                  children: <Widget>[
-                    ?leading,
-                    Expanded(child: input),
-                    ...?trailing,
-                  ],
+                child: Semantics(
+                  textField: true,
+                  label: widget.hintText,
+                  child: content,
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildIdleGroupedContent({
+    required TextDirection textDirection,
+    required Widget? leading,
+    required List<Widget>? trailing,
+    required TextStyle idleHintStyle,
+    required double noLeadingHintPadding,
+  }) {
+    return Align(
+      alignment: widget.alignment,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: textDirection,
+              children: <Widget>[
+                ?leading,
+                if (widget.hintText != null)
+                  Flexible(
+                    child: Padding(
+                      padding: widget.leading == null
+                          ? EdgeInsetsDirectional.only(
+                              start: noLeadingHintPadding,
+                            )
+                          : EdgeInsets.zero,
+                      child: Text(
+                        widget.hintText!,
+                        style: idleHintStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ...?trailing,
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEditingRow({
+    required TextDirection textDirection,
+    required Widget? leading,
+    required List<Widget>? trailing,
+    required Widget input,
+  }) {
+    return Row(
+      textDirection: textDirection,
+      children: <Widget>[
+        ?leading,
+        Expanded(child: input),
+        ...?trailing,
+      ],
     );
   }
 

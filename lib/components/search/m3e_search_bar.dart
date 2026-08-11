@@ -56,6 +56,7 @@ class M3ESearchBar extends StatefulWidget {
     this.expandRestPadding,
     this.smartDashesType,
     this.smartQuotesType,
+    this.alignment = AlignmentDirectional.centerStart,
     super.key,
   });
 
@@ -156,6 +157,10 @@ class M3ESearchBar extends StatefulWidget {
   /// smartQuotesType.
   final SmartQuotesType? smartQuotesType;
 
+  /// Alignment of leading, hint, and trailing while the field is empty and
+  /// unfocused. Switches to start layout when focused or when text is present.
+  final AlignmentGeometry alignment;
+
   @override
   State<M3ESearchBar> createState() => _M3ESearchBarState();
 }
@@ -178,6 +183,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     super.initState();
     _expandPaddingController = AnimationController.unbounded(vsync: this);
     _statesController.addListener(() => setState(() {}));
+    _controller.addListener(_handleTextChange);
     _focusNode.addListener(_handleFocusChange);
     _syncFocusedState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -220,6 +226,7 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   @override
   void dispose() {
     _focusNode.removeListener(_handleFocusChange);
+    _controller.removeListener(_handleTextChange);
     _expandPaddingController.dispose();
     _statesController.dispose();
     if (widget.controller == null) {
@@ -231,6 +238,23 @@ class _M3ESearchBarState extends State<M3ESearchBar>
 
   void _syncFocusedState() {
     _statesController.update(WidgetState.focused, _focusNode.hasFocus);
+  }
+
+  void _handleTextChange() => setState(() {});
+
+  /// Empty and unfocused: may group leading + hint + trailing for alignment.
+  bool get _alignIdleContent =>
+      !_focusNode.hasFocus && _controller.text.isEmpty;
+
+  /// Whether idle content should shrink-wrap and honor [M3ESearchBar.alignment]
+  /// (horizontal center). Start-aligned idle keeps the expanded field layout so
+  /// trailing stays at the end of the pill.
+  bool _groupsIdleContent(TextDirection textDirection) {
+    if (!_alignIdleContent) {
+      return false;
+    }
+    final Alignment resolved = widget.alignment.resolve(textDirection);
+    return resolved.x.abs() < 0.001;
   }
 
   double _restingExpandPadding(M3ESearchBarTheme barTheme) {

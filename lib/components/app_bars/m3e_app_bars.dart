@@ -84,6 +84,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     VoidCallback? onClose,
     VoidCallback? onOpen,
     BoxConstraints? searchConstraints,
+    AlignmentGeometry barAlignment = Alignment.center,
   }) {
     return M3EAppBar.top(
       key: key,
@@ -107,6 +108,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
         barLeading: barLeading,
         barTrailing: barTrailing,
         barBackgroundColor: barBackgroundColor,
+        barAlignment: barAlignment,
         isFullScreen: isFullScreen,
         onSubmitted: onSubmitted,
         onChanged: onChanged,
@@ -535,6 +537,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
     this.barLeading,
     this.barTrailing,
     this.barBackgroundColor,
+    this.barAlignment = Alignment.center,
     this.isFullScreen = true,
     this.onSubmitted,
     this.onChanged,
@@ -549,6 +552,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
   final Widget? barLeading;
   final Iterable<Widget>? barTrailing;
   final WidgetStateProperty<Color?>? barBackgroundColor;
+  final AlignmentGeometry barAlignment;
   final bool isFullScreen;
   final ValueChanged<String>? onSubmitted;
   final ValueChanged<String>? onChanged;
@@ -565,6 +569,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
       barHintText: barHintText,
       barLeading: barLeading,
       barTrailing: barTrailing,
+      barAlignment: barAlignment,
       // Surface contrasts against the app bar's surfaceContainerHigh.
       barBackgroundColor:
           barBackgroundColor ?? WidgetStatePropertyAll<Color>(surface),

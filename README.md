@@ -927,7 +927,8 @@ M3EAppBar.top(
   actions: const [Icon(M3EIcons.search)],
 );
 
-// Anchored search title — tap opens fullscreen (or docked) search
+// Anchored search title — tap opens fullscreen (or docked) search.
+// Idle pill content (leading + hint + trailing) defaults to Alignment.center.
 M3EAppBar.search(
   searchController: searchController,
   barHintText: 'Search mail',
@@ -1356,7 +1357,9 @@ const M3ETextField(
 
 Inline search field, or a bar that opens a full search view with suggestions.
 When embedded in toolbars or app bars, `expandOnFocus` / `expandRestPadding`
-control the horizontal inset spring on focus.
+control the horizontal inset spring on focus. Use `alignment` /
+`barAlignment` to place leading + hint + trailing while empty and unfocused
+(defaults to start; `M3EAppBar.search` defaults to `Alignment.center`).
 
 ```dart
 // Inline bar
