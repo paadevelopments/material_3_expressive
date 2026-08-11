@@ -365,8 +365,11 @@ class _CarouselViewState extends State<M3ECarouselView> {
       return;
     }
 
-    final position = _controller.position;
-    final currentLeadingIndex = (position as _CarouselPosition).leadingItem;
+    final position = _controller.position as _CarouselPosition;
+    // Round continuous scroll item (not truncate) so forward and reverse
+    // swipes report the new leading/focal at the midpoint — truncation via
+    // [leadingItem] delays next-item updates until nearly fully scrolled.
+    final currentLeadingIndex = _reportedLeadingIndex(position);
     final currentFocalIndex = _focalIndexForLeading(currentLeadingIndex);
     final itemCount = widget.itemCount ?? widget.children.length;
 
@@ -389,6 +392,31 @@ class _CarouselViewState extends State<M3ECarouselView> {
         itemCount: itemCount,
       ),
     );
+  }
+
+  /// Leading index for change callbacks; mirrors [ _CarouselPosition.leadingItem]
+  /// but uses [num.round] so both swipe directions cross at the half-item mark.
+  int _reportedLeadingIndex(_CarouselPosition position) {
+    if (!position.hasPixels ||
+        !position.hasViewportDimension ||
+        position.viewportDimension <= 0) {
+      return _lastReportedLeadingItem;
+    }
+    var leading = position
+        .getItemFromPixels(position.pixels, position.viewportDimension)
+        .round();
+    if (position.consumeMaxWeight && position.flexWeights != null) {
+      leading = math.max(
+        leading - position.flexWeights!.indexOf(position.flexWeights!.max),
+        0,
+      );
+    }
+    if (position.infinite &&
+        position.itemCount != null &&
+        position.itemCount! > 0) {
+      leading = leading % position.itemCount!;
+    }
+    return leading;
   }
 
   int _focalIndexForLeading(int leadingIndex) {
