@@ -5,6 +5,7 @@ import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';
+import 'selection_demo_page.dart';
 
 /// Demonstrates every component in the Material 3 *Containment* group.
 class ContainmentPage extends StatefulWidget {
@@ -39,6 +40,7 @@ class _ContainmentPageState extends State<ContainmentPage>
         _cards(theme),
         _carousel(theme),
         _lists(theme),
+        _selection(theme),
         _dividers(theme),
         _overlays(context),
       ],
@@ -271,6 +273,33 @@ class _ContainmentPageState extends State<ContainmentPage>
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _selection(M3EThemeData theme) {
+    return GallerySection(
+      title: 'Selection',
+      children: <Widget>[
+        Text(
+          'Gmail-style multi-select with contextual app bar. Long-press a row '
+          'or tap an avatar to enter selection mode.',
+          style: theme.typeScale.bodyMedium.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        M3EButton(
+          style: M3EButtonStyle.filled,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const SelectionDemoPage(),
+              ),
+            );
+          },
+          child: const Text('Open selection demo'),
         ),
       ],
     );

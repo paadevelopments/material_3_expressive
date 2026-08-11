@@ -751,6 +751,50 @@ M3ECardList.builder(
 );
 ```
 
+#### M3ESelection
+
+Gmail-style multi-select host: optional [M3ESelectionController],
+[M3ESelectionAppBar] (idle bar → contextual bar + select-all), and
+[M3ESelectionList] (card radii, selected fill, leading flip). Long-press a row
+or tap the leading widget to enter selection; body taps toggle only while
+selecting. Wrap with [PopScope] so system back clears selection first.
+
+```dart
+final selection = M3ESelectionController();
+
+PopScope(
+  canPop: !selection.isSelectionMode,
+  onPopInvokedWithResult: (didPop, _) {
+    if (!didPop) selection.clear();
+  },
+  child: M3ESelection(
+    controller: selection,
+    appBar: M3ESelectionAppBar(
+      idle: M3EAppBar.search(
+        searchController: searchController,
+        suggestionsBuilder: (_, __) => const [],
+        barHintText: 'Search in mail',
+      ),
+      actions: [
+        M3EIconButton(icon: Icon(M3EIcons.archive), onPressed: () {}),
+        M3EIconButton(icon: Icon(M3EIcons.delete), onPressed: () {}),
+      ],
+    ),
+    list: M3ESelectionList(
+      itemCount: items.length,
+      leadingBuilder: (context, i) => CircleAvatar(child: Text('$i')),
+      selectedLeadingBuilder: (context, i) =>
+          CircleAvatar(child: Icon(M3EIcons.check)),
+      itemBuilder: (context, i) => M3EListItem(headline: items[i]),
+      onTap: (i) {},
+    ),
+  ),
+);
+```
+
+Advanced: wire `M3ESelectionAppBar` + `M3ESelectionList` yourself with a shared
+controller (omit `M3ESelection`).
+
 #### M3EDismissibleColumn
 
 Vertically swipeable card list with expressive physics.
