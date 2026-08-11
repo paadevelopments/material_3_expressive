@@ -67,7 +67,8 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
   }
 
   Widget _leading(BuildContext context, int index) {
-    final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EColorScheme scheme = theme.colorScheme;
     final bool selected = _selection.isSelected(index);
     return M3ESelectionLeading(
       selected: selected,
@@ -75,12 +76,15 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
       selectedChild: CircleAvatar(
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
-        child: const Icon(M3EIcons.check, size: 20),
+        child: Icon(M3EIcons.check, size: 20, color: scheme.onPrimary),
       ),
       child: CircleAvatar(
         backgroundColor: _avatarColor(index, scheme),
         foregroundColor: scheme.onPrimary,
-        child: Text(_items[index].title.substring(0, 1)),
+        child: Text(
+          _items[index].title.substring(0, 1),
+          style: theme.typeScale.titleMedium.copyWith(color: scheme.onPrimary),
+        ),
       ),
     );
   }
@@ -94,13 +98,15 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     );
   }
 
+  void _showMessage(String message) {
+    M3ESnackbar.show(context, message: message);
+  }
+
   void _onTap(int index) {
     if (_selection.isSelectionMode) {
       _selection.toggle(index);
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Open ${_items[index].title}')));
+      _showMessage('Open ${_items[index].title}');
     }
   }
 
@@ -152,9 +158,7 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
       onTap: _onTap,
       onLongPress: _onLongPress,
       onDismiss: (int index, DismissDirection direction) async {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Dismissed ${_items[index].title}')),
-        );
+        _showMessage('Dismissed ${_items[index].title}');
         return true;
       },
       style: M3EDismissibleListStyle(
@@ -187,6 +191,7 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
         }
       },
       child: M3ESelection(
+        backgroundColor: theme.colorScheme.surface,
         controller: _selection,
         itemCount: _items.length,
         appBar: M3ESelectionAppBar(
