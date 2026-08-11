@@ -4,7 +4,6 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
 
@@ -22,7 +21,7 @@ class _DatePickersPlaygroundState extends State<DatePickersPlayground> {
   M3EDateRange? _range;
   M3EDatePickerEntryMode _entryMode = M3EDatePickerEntryMode.calendar;
   M3EDatePickerMode _calendarMode = M3EDatePickerMode.day;
-  bool _expandToFit = false;
+  final bool _expandToFit = false;
 
   static final DateTime _first = DateTime(2020);
   static final DateTime _last = DateTime(2030);
@@ -141,11 +140,6 @@ class _DatePickersPlaygroundState extends State<DatePickersPlayground> {
               onChanged: (M3EDatePickerMode v) {
                 setState(() => _calendarMode = v);
               },
-            ),
-            PlaySwitch(
-              label: 'Expand to fit',
-              value: _expandToFit,
-              onChanged: (bool v) => setState(() => _expandToFit = v),
             ),
           ],
         ),

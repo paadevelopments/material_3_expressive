@@ -21,7 +21,7 @@ class _TimePickersPlaygroundState extends State<TimePickersPlayground> {
   M3ETime _time = const M3ETime(hour: 9, minute: 30);
   M3ETimePickerEntryMode _entryMode = M3ETimePickerEntryMode.dial;
   bool _use24Hour = false;
-  bool _expandToFit = false;
+  final bool _expandToFit = false;
 
   Future<void> _pickTime() async {
     final M3ETime? picked = await M3ETimePicker.show(
@@ -89,11 +89,6 @@ class _TimePickersPlaygroundState extends State<TimePickersPlayground> {
               label: '24-hour format',
               value: _use24Hour,
               onChanged: (bool v) => setState(() => _use24Hour = v),
-            ),
-            PlaySwitch(
-              label: 'Expand to fit',
-              value: _expandToFit,
-              onChanged: (bool v) => setState(() => _expandToFit = v),
             ),
           ],
         ),
