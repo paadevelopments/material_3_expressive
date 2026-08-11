@@ -86,6 +86,27 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
             size: _size,
           ),
         ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: M3EToggleButton(
+            checked: _toggleChecked,
+            onCheckedChange: (bool value) {
+              setState(() => _toggleChecked = value);
+            },
+            icon: const Icon(M3EIcons.favorite_border),
+            checkedIcon: const Icon(M3EIcons.favorite),
+            label: const Text('Favorite'),
+            style: M3EButtonStyle.filled,
+            size: _size,
+            decoration: M3EToggleButtonDecoration(
+              backgroundGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
       controls: <Widget>[
         PlayControlPanel(

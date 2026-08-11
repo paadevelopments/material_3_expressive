@@ -20,9 +20,29 @@ class _SegmentedButtonPlaygroundState extends State<SegmentedButtonPlayground> {
   bool _multiSelect = false;
   bool _showSelectedIcon = true;
   Set<int> _selected = <int>{0};
+  Set<int> _gradientSelected = <int>{0};
+
+  static const List<M3ESegment<int>> _segments = <M3ESegment<int>>[
+    M3ESegment<int>(
+      value: 0,
+      label: 'Day',
+      icon: Icon(M3EIcons.calendar_today),
+    ),
+    M3ESegment<int>(
+      value: 1,
+      label: 'Week',
+      icon: Icon(M3EIcons.calendar_view_week),
+    ),
+    M3ESegment<int>(
+      value: 2,
+      label: 'Month',
+      icon: Icon(M3EIcons.calendar_month),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
@@ -34,23 +54,28 @@ class _SegmentedButtonPlaygroundState extends State<SegmentedButtonPlayground> {
             onSelectionChanged: (Set<int> next) {
               setState(() => _selected = next);
             },
-            segments: const <M3ESegment<int>>[
-              M3ESegment<int>(
-                value: 0,
-                label: 'Day',
-                icon: Icon(M3EIcons.calendar_today),
+            segments: _segments,
+          ),
+        ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: M3ETheme(
+            data: theme.copyWith(
+              segmentedButtonTheme: theme.segmentedButtonTheme.copyWith(
+                selectedBackgroundGradient: const LinearGradient(
+                  colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                ),
               ),
-              M3ESegment<int>(
-                value: 1,
-                label: 'Week',
-                icon: Icon(M3EIcons.calendar_view_week),
-              ),
-              M3ESegment<int>(
-                value: 2,
-                label: 'Month',
-                icon: Icon(M3EIcons.calendar_month),
-              ),
-            ],
+            ),
+            child: M3ESegmentedButton<int>(
+              multiSelect: false,
+              showSelectedIcon: _showSelectedIcon,
+              selected: _gradientSelected,
+              onSelectionChanged: (Set<int> next) {
+                setState(() => _gradientSelected = next);
+              },
+              segments: _segments,
+            ),
           ),
         ),
       ],

@@ -120,14 +120,9 @@ class _WideDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Text(title, style: theme.typeScale.titleLarge),
-        ),
         Expanded(child: child),
       ],
     );

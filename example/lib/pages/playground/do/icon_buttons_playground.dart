@@ -45,6 +45,40 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
             tooltip: 'Favorite',
           ),
         ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              M3EIconButton(
+                icon: const Icon(M3EIcons.favorite),
+                variant: M3EIconButtonVariant.filled,
+                size: _size,
+                shape: _shape,
+                width: _width,
+                backgroundGradient: const LinearGradient(
+                  colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                ),
+                onPressed: _enabled ? () {} : null,
+                tooltip: 'Favorite',
+              ),
+              M3EIconButton(
+                icon: const Icon(M3EIcons.bookmark),
+                variant: M3EIconButtonVariant.tonal,
+                size: _size,
+                shape: _shape,
+                width: _width,
+                backgroundGradient: const LinearGradient(
+                  colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                ),
+                onPressed: _enabled ? () {} : null,
+                tooltip: 'Bookmark',
+              ),
+            ],
+          ),
+        ),
       ],
       controls: <Widget>[
         PlayControlPanel(

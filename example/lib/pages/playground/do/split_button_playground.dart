@@ -105,6 +105,39 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
                 : null,
           ),
         ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: M3ESplitButton<String>(
+            label: 'Save',
+            leadingIcon: M3EIcons.save,
+            style: M3EButtonStyle.filled,
+            size: _size,
+            shape: _shape,
+            enabled: _enabled,
+            decoration: M3ESplitButtonDecoration(
+              menuStyle: _menuStyle,
+              backgroundGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                ),
+              ),
+            ),
+            onPressed: _enabled ? () {} : null,
+            onSelected: _enabled
+                ? (String value) => setState(() => _selected = value)
+                : null,
+            items: const <M3ESplitButtonItem<String>>[
+              M3ESplitButtonItem<String>(
+                value: 'draft',
+                child: Text('Save draft'),
+              ),
+              M3ESplitButtonItem<String>(
+                value: 'copy',
+                child: Text('Save a copy'),
+              ),
+            ],
+          ),
+        ),
       ],
       controls: <Widget>[
         PlayControlPanel(

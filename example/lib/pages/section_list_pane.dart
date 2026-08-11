@@ -37,10 +37,6 @@ class SectionListPane extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Text(section.navLabel, style: theme.typeScale.headlineSmall),
-        ),
         M3ECardList(
           itemCount: entries.length,
           onTap: (int index) => onSelect(entries[index]),

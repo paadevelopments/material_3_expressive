@@ -48,6 +48,18 @@ class _FabsPlaygroundState extends State<FabsPlayground> {
             color: _color,
           ),
         ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: M3EFab(
+            onPressed: () {},
+            icon: const Icon(M3EIcons.add),
+            size: _size,
+            gradient: const LinearGradient(
+              colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],
+            ),
+            tooltip: 'Add',
+          ),
+        ),
       ],
       controls: <Widget>[
         PlayControlPanel(
