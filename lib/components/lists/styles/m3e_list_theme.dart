@@ -174,16 +174,22 @@ class M3EListCardListTheme {
 }
 
 /// Theme values for dismissible list widgets.
+///
+/// Stack geometry ([defaultOuterRadius], [defaultInnerRadius], [defaultGap],
+/// [defaultItemPadding]) matches [M3EListCardListTheme] so card and dismissible
+/// lists share the same item layout defaults.
 @immutable
 class M3EListDismissibleTheme {
   /// defaultOuterRadius.
-  static const double defaultOuterRadius = 18;
+  static const double defaultOuterRadius =
+      M3EListCardListTheme.defaultOuterRadius;
 
   /// defaultInnerRadius.
-  static const double defaultInnerRadius = 4;
+  static const double defaultInnerRadius =
+      M3EListCardListTheme.defaultInnerRadius;
 
   /// defaultGap.
-  static const double defaultGap = 3;
+  static const double defaultGap = M3EListCardListTheme.defaultGap;
 
   /// defaultActionGap.
   static const double defaultActionGap = 8;
@@ -204,7 +210,8 @@ class M3EListDismissibleTheme {
   static const double defaultCollapseSpeed = 50;
 
   /// defaultItemPadding.
-  static const EdgeInsets defaultItemPadding = EdgeInsets.all(16);
+  static const EdgeInsets defaultItemPadding =
+      M3EListCardListTheme.defaultItemPadding;
 
   /// M3EListDismissibleTheme.
 
@@ -292,13 +299,18 @@ class M3EListDismissibleTheme {
 }
 
 /// Theme values for expandable list widgets.
+///
+/// Stack geometry ([defaultOuterRadius], [defaultInnerRadius], [defaultGap])
+/// matches [M3EListCardListTheme].
 @immutable
 class M3EListExpandableTheme {
   /// defaultOuterRadius.
-  static const double defaultOuterRadius = 24;
+  static const double defaultOuterRadius =
+      M3EListCardListTheme.defaultOuterRadius;
 
   /// defaultInnerRadius.
-  static const double defaultInnerRadius = 6;
+  static const double defaultInnerRadius =
+      M3EListCardListTheme.defaultInnerRadius;
 
   /// defaultHoverRadius.
   static const double defaultHoverRadius = 10;
@@ -307,7 +319,7 @@ class M3EListExpandableTheme {
   static const double defaultPressedRadius = 4;
 
   /// defaultGap.
-  static const double defaultGap = 3;
+  static const double defaultGap = M3EListCardListTheme.defaultGap;
 
   /// defaultTitleSubtitleGap.
   static const double defaultTitleSubtitleGap = 4;

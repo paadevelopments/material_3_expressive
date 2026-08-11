@@ -55,8 +55,9 @@ class M3ESelection extends StatefulWidget {
   /// Optional external controller. When null, one is owned internally.
   final M3ESelectionController? controller;
 
-  /// When true (default), builds a [Scaffold] with [appBar] and [body].
-  /// Set false to embed under a host that already owns a [Scaffold].
+  /// When true (default), builds a scaffold whose body is header + list.
+  /// The selection header is not placed in the scaffold app-bar slot so idle
+  /// can be any intrinsic-height widget. Set false to embed under a host scaffold.
   final bool scaffold;
 
   /// Scaffold background color when [scaffold] is true.
@@ -120,22 +121,23 @@ class _M3ESelectionState extends State<M3ESelection> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (BuildContext context, Widget? _) {
+        final Widget content = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            wiredBar,
+            Expanded(child: widget.body),
+          ],
+        );
         return M3ESelectionScope(
           controller: _controller,
           itemCount: widget.itemCount,
           child: widget.scaffold
               ? Scaffold(
-                  appBar: wiredBar,
                   backgroundColor: widget.backgroundColor,
                   resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-                  body: widget.body,
+                  body: content,
                 )
-              : Column(
-                  children: <Widget>[
-                    wiredBar,
-                    Expanded(child: widget.body),
-                  ],
-                ),
+              : content,
         );
       },
     );

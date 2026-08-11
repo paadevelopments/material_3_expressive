@@ -754,11 +754,12 @@ M3ECardList.builder(
 #### M3ESelection
 
 Multi-select host: optional [M3ESelectionController], [M3ESelectionAppBar]
-(idle bar → contextual bar + select-all), and any list [body]
-([M3ECardList], [M3EDismissibleList], …). Wire selection chrome on the list via
-`colorBuilder` / `borderRadiusBuilder`, gestures (`onTap` / `onLongPress`), and
-[M3ESelectionLeading] on each item. Wrap with [PopScope] so system back clears
-selection first. Prefer `listPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)`.
+(idle header → contextual bar + select-all; `idle` is any [Widget]), and any
+list [body] ([M3ECardList], [M3EDismissibleList], …). Wire selection chrome on
+the list via `colorBuilder` / `borderRadiusBuilder`, gestures (`onTap` /
+`onLongPress`), and [M3ESelectionLeading] on each item. Wrap with [PopScope] so
+system back clears selection first. Prefer
+`listPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)`.
 
 ```dart
 final selection = M3ESelectionController();

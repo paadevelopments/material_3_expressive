@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
@@ -9,8 +7,12 @@ import '../controllers/m3e_selection_controller.dart';
 import '../styles/m3e_selection_theme.dart';
 import 'm3e_selection_scope.dart';
 
-/// Wraps an idle [PreferredSizeWidget] and swaps to a contextual selection bar.
-class M3ESelectionAppBar extends StatefulWidget implements PreferredSizeWidget {
+/// Wraps an idle header widget and swaps to a contextual selection bar.
+///
+/// [idle] may be any widget (e.g. an app bar, or a column of header content).
+/// Height is intrinsic — place this above the list body (see M3ESelection),
+/// not in a scaffold app-bar slot, so arbitrary idle heights do not overflow.
+class M3ESelectionAppBar extends StatefulWidget {
   /// Creates a selection app bar wrapper.
   const M3ESelectionAppBar({
     required this.idle,
@@ -25,8 +27,8 @@ class M3ESelectionAppBar extends StatefulWidget implements PreferredSizeWidget {
     super.key,
   });
 
-  /// Shown when nothing is selected.
-  final PreferredSizeWidget idle;
+  /// Shown when nothing is selected. Any widget; height is intrinsic.
+  final Widget idle;
 
   /// Selection controller. Optional under [M3ESelectionScope].
   final M3ESelectionController? controller;
@@ -69,20 +71,6 @@ class M3ESelectionAppBar extends StatefulWidget implements PreferredSizeWidget {
       onClear: onClear,
       onAllSelected: onAllSelected ?? this.onAllSelected,
       theme: theme,
-    );
-  }
-
-  double _selectionHeight() {
-    final M3ESelectionTheme t = theme ?? M3ESelectionTheme.defaults;
-    return t.contextualToolbarHeight + (showSelectAll ? t.selectAllHeight : 0);
-  }
-
-  @override
-  Size get preferredSize {
-    // Hold max(idle, selection) so Scaffold does not shrink under the
-    // AnimatedSwitcher exit child when leaving selection mode.
-    return Size.fromHeight(
-      math.max(idle.preferredSize.height, _selectionHeight()),
     );
   }
 
@@ -254,11 +242,22 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     final M3ESelectionController controller = _resolveController(context);
     _attach(controller);
 
+    // Stack layout sizes to the larger transitioning child so height changes
+    // between idle and contextual do not overflow a tight Scaffold appBar slot.
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
       reverseDuration: const Duration(milliseconds: 90),
       switchInCurve: const Cubic(0.2, 0, 0, 1),
       switchOutCurve: const Cubic(0.4, 0, 1, 1),
+      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: <Widget>[
+            ...previousChildren,
+            ?currentChild,
+          ],
+        );
+      },
       transitionBuilder: (Widget child, Animation<double> animation) {
         final Animation<double> scale = Tween<double>(
           begin: 0.95,
