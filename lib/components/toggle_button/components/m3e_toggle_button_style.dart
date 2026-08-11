@@ -160,6 +160,11 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
       padding: padding,
       foregroundColor: _foregroundColorProperty(checked, fgColor),
       backgroundColor: _backgroundColorProperty(checked, bgColor, transparent),
+      backgroundBuilder: m3eGradientBackgroundBuilder(
+        widget.decoration?.backgroundGradient,
+        explicitBuilder: widget.decoration?.backgroundBuilder,
+      ),
+      foregroundBuilder: widget.decoration?.foregroundBuilder,
       shape: buttonShape,
       elevation: WidgetStateProperty.resolveWith((states) {
         return _buttonTheme.elevation(widget.style, states);
@@ -240,7 +245,9 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
               alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
             );
     }
-    return transparent ? Colors.transparent : bgColor;
+    return transparent || widget.decoration?.backgroundGradient != null
+        ? Colors.transparent
+        : bgColor;
   }
 
   WidgetStateProperty<BorderSide?> _sideProperty(bool checked) {

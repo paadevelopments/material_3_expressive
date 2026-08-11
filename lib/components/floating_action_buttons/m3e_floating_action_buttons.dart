@@ -16,6 +16,7 @@ class M3EFab extends StatelessWidget {
     this.size = M3EFabSize.medium,
     this.color = M3EFabColor.primary,
     this.cornerRadius,
+    this.gradient,
     this.tooltip,
     this.focusNode,
     this.autofocus = false,
@@ -37,6 +38,9 @@ class M3EFab extends StatelessWidget {
 
   /// When set, overrides the themed corner radius (e.g. for open/close morph).
   final double? cornerRadius;
+
+  /// Optional gradient fill; when set, replaces the solid container color.
+  final Gradient? gradient;
 
   /// tooltip.
   final String? tooltip;
@@ -84,7 +88,10 @@ class M3EFab extends StatelessWidget {
             width: metrics.container,
             height: metrics.container,
             decoration: BoxDecoration(
-              color: metrics.background,
+              color: (gradient ?? fabTheme.gradient) == null
+                  ? metrics.background
+                  : null,
+              gradient: gradient ?? fabTheme.gradient,
               borderRadius: borderRadius,
               boxShadow: M3EElevation.shadows(
                 elevation,

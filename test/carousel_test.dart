@@ -39,6 +39,30 @@ void main() {
     'hero tap pulse preserves per-edge pixel budget on mixed widths',
     _heroTapPulsePixelBudget,
   );
+  testWidgets('onChange reports focal index after scroll', _onChangeFocal);
+}
+
+Future<void> _onChangeFocal(WidgetTester tester) async {
+  M3ECarouselChangeDetails? latest;
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        onChange: (M3ECarouselChangeDetails details) {
+          latest = details;
+        },
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pump();
+  expect(latest, isNull);
+
+  await tester.fling(find.byType(M3ECarousel), const Offset(-300, 0), 800);
+  await tester.pumpAndSettle();
+  expect(latest, isNotNull);
+  expect(latest!.itemCount, 6);
+  expect(latest!.focalIndex, inInclusiveRange(0, 5));
+  expect(latest!.leadingIndex, inInclusiveRange(0, 5));
 }
 
 Future<void> _hero(WidgetTester tester) async {

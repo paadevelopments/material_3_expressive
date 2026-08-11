@@ -42,6 +42,8 @@ class M3EListItem extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.selected = false,
+    this.variant,
+    this.border,
     super.key,
   });
 
@@ -67,6 +69,12 @@ class M3EListItem extends StatelessWidget {
   /// selected.
   final bool selected;
 
+  /// Card variant override; falls back to [M3EListItemTheme.variant].
+  final M3ECardVariant? variant;
+
+  /// Card outline override; falls back to [M3EListItemTheme.border].
+  final BorderSide? border;
+
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(builder: _buildItem);
@@ -84,7 +92,8 @@ class M3EListItem extends StatelessWidget {
     final bool threeLine = _isThreeLine;
 
     return M3ECard(
-      variant: M3ECardVariant.filled,
+      variant: variant ?? listTheme.variant,
+      border: border ?? listTheme.border,
       color: selected ? listTheme.selectedColor(scheme) : null,
       onPressed: onTap,
       semanticLabel: headline,
@@ -239,6 +248,12 @@ class M3ECardList extends StatelessWidget {
   /// Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
 
+  /// Card variant override; falls back to [M3EListCardListTheme.variant].
+  final M3ECardVariant? variant;
+
+  /// Card outline override; falls back to [M3EListCardListTheme.border].
+  final BorderSide? border;
+
   /// Widget displayed when the list is empty (itemCount is 0).
   ///
   /// If null, an empty container is shown.
@@ -291,6 +306,8 @@ class M3ECardList extends StatelessWidget {
     this.semanticLabelBuilder,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant,
+    this.border,
     this.emptyBuilder,
   }) : _isBuilder = false,
        controller = null,
@@ -314,6 +331,8 @@ class M3ECardList extends StatelessWidget {
     this.semanticLabelBuilder,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant,
+    this.border,
     this.emptyBuilder,
     this.controller,
     this.physics,
@@ -363,6 +382,7 @@ class M3ECardList extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, int index, int total) {
+    final cardListTheme = M3ETheme.of(context).listTheme.cardList;
     return M3ECardListItem(
       index: index,
       position: calculateCardPosition(index, total),
@@ -376,6 +396,8 @@ class M3ECardList extends StatelessWidget {
       semanticLabel: semanticLabelBuilder?.call(index),
       mouseCursor: mouseCursor,
       haptic: haptic,
+      variant: variant ?? cardListTheme.variant,
+      border: border ?? cardListTheme.border,
       child: itemBuilder(context, index),
     );
   }

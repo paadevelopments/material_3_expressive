@@ -5,7 +5,6 @@ import 'package:material_3_expressive/components/navigation_bar/models/m3e_navig
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_fab_slot.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
-import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../widgets/gallery_section.dart';

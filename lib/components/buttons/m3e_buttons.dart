@@ -18,10 +18,13 @@ import 'components/m3e_base_button_state.dart';
 import 'components/m3e_focus_ring.dart';
 import 'components/m3e_radius_and_padding_motion.dart';
 import 'enums/m3e_button_enums.dart';
+import 'utils/m3e_button_gradient_layer.dart';
 
 export 'models/m3e_button_measurements.dart';
 export 'res/m3e_button_constants.dart';
+export 'styles/m3e_button_decoration.dart';
 export 'styles/m3e_button_theme.dart';
+export 'utils/m3e_button_gradient_layer.dart';
 
 part 'components/m3e_button_state.dart';
 part 'components/m3e_button_style.dart';

@@ -164,6 +164,10 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       internalBottom: 0,
       targetRadius: BorderRadius.circular(targetRadius),
       builder: (padding, animatedRadius) {
+        final gradient =
+            widget.backgroundGradient ??
+            _themeGradientForVariant(M3ETheme.of(context).iconButtonTheme);
+        final useGradient = gradient != null;
         return M3EInkSplashTheme(
           color: colors.fg,
           child: IconButton(
@@ -187,7 +191,24 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
               shape: WidgetStateProperty.all(
                 RoundedRectangleBorder(borderRadius: animatedRadius),
               ),
-              backgroundColor: WidgetStateProperty.all(colors.bg),
+              backgroundColor: WidgetStateProperty.all(
+                useGradient ? Colors.transparent : colors.bg,
+              ),
+              backgroundBuilder: useGradient
+                  ? (
+                      BuildContext context,
+                      Set<WidgetState> states,
+                      Widget? child,
+                    ) {
+                      return ClipRRect(
+                        borderRadius: animatedRadius,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(gradient: gradient),
+                          child: child,
+                        ),
+                      );
+                    }
+                  : null,
               foregroundColor: WidgetStateProperty.resolveWith(
                 (_) => colors.fg,
               ),
@@ -205,6 +226,14 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         );
       },
     );
+  }
+
+  Gradient? _themeGradientForVariant(M3EIconButtonTheme theme) {
+    return switch (widget.variant) {
+      M3EIconButtonVariant.filled => theme.filledBackgroundGradient,
+      M3EIconButtonVariant.tonal => theme.tonalBackgroundGradient,
+      M3EIconButtonVariant.standard || M3EIconButtonVariant.outlined => null,
+    };
   }
 
   Widget _wrapWithBadge(

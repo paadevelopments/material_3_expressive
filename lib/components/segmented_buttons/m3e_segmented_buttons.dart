@@ -140,12 +140,19 @@ class _M3ESegmentTile<T> extends StatelessWidget {
           resolvedScheme,
           selected: isSelected,
         );
+        final Gradient? gradient = isSelected
+            ? segmentedButtonTheme.selectedBackgroundGradient
+            : segmentedButtonTheme.unselectedBackgroundGradient;
+        final Color? solidBg = segmentedButtonTheme.backgroundColor(
+          resolvedScheme,
+          selected: isSelected,
+        );
         return Container(
           width: double.infinity,
           height: segmentedButtonTheme.height,
-          color: segmentedButtonTheme.backgroundColor(
-            resolvedScheme,
-            selected: isSelected,
+          decoration: BoxDecoration(
+            color: gradient == null ? solidBg : null,
+            gradient: gradient,
           ),
           child: M3EStateLayerOverlay(
             state: state,

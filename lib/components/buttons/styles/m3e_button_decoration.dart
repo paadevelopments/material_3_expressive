@@ -76,6 +76,10 @@ class M3EButtonDecoration {
   /// backgroundBuilder.
   final ButtonLayerBuilder? backgroundBuilder;
 
+  /// Optional gradient fill. When set (and [backgroundBuilder] is null), paints
+  /// behind the button content with a transparent Material background.
+  final WidgetStateProperty<Gradient?>? backgroundGradient;
+
   /// foregroundBuilder.
   final ButtonLayerBuilder? foregroundBuilder;
 
@@ -119,6 +123,7 @@ class M3EButtonDecoration {
     this.alignment,
     this.splashFactory,
     this.backgroundBuilder,
+    this.backgroundGradient,
     this.foregroundBuilder,
     this.motion,
     this.haptic,
@@ -155,6 +160,7 @@ class M3EButtonDecoration {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -217,6 +223,7 @@ class M3EButtonDecoration {
       alignment: alignment,
       splashFactory: splashFactory,
       backgroundBuilder: backgroundBuilder,
+      backgroundGradient: backgroundGradient,
       foregroundBuilder: foregroundBuilder,
       motion: motion,
       haptic: haptic,
@@ -251,6 +258,7 @@ class M3EButtonDecoration {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -281,6 +289,7 @@ class M3EButtonDecoration {
       alignment: alignment ?? this.alignment,
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
+      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
       motion: motion ?? this.motion,
       haptic: haptic ?? this.haptic,
@@ -316,6 +325,7 @@ class M3EButtonDecoration {
           alignment == other.alignment &&
           splashFactory == other.splashFactory &&
           backgroundBuilder == other.backgroundBuilder &&
+          backgroundGradient == other.backgroundGradient &&
           foregroundBuilder == other.foregroundBuilder &&
           motion == other.motion &&
           haptic == other.haptic &&
@@ -401,6 +411,15 @@ class M3EToggleButtonDecoration {
   /// connectedInnerRadius.
   final double? connectedInnerRadius;
 
+  /// Optional gradient fill (same precedence as [M3EButtonDecoration]).
+  final WidgetStateProperty<Gradient?>? backgroundGradient;
+
+  /// backgroundBuilder.
+  final ButtonLayerBuilder? backgroundBuilder;
+
+  /// foregroundBuilder.
+  final ButtonLayerBuilder? foregroundBuilder;
+
   /// M3EToggleButtonDecoration.
 
   const M3EToggleButtonDecoration({
@@ -418,6 +437,9 @@ class M3EToggleButtonDecoration {
     this.pressedRadius,
     this.hoveredRadius,
     this.connectedInnerRadius,
+    this.backgroundGradient,
+    this.backgroundBuilder,
+    this.foregroundBuilder,
   });
 
   /// styleFrom.
@@ -442,6 +464,9 @@ class M3EToggleButtonDecoration {
     MouseCursor? disabledMouseCursor,
     Color? overlayColor,
     Color? surfaceTintColor,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     final WidgetStateProperty<Color?>? backgroundColorProp =
         (backgroundColor == null &&
@@ -496,6 +521,9 @@ class M3EToggleButtonDecoration {
       mouseCursor: mouseCursorProp,
       overlayColor: overlayColorProp,
       surfaceTintColor: surfaceTintColorProp,
+      backgroundGradient: backgroundGradient,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
   }
 
@@ -516,6 +544,9 @@ class M3EToggleButtonDecoration {
     double? pressedRadius,
     double? hoveredRadius,
     double? connectedInnerRadius,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     return M3EToggleButtonDecoration(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -532,6 +563,9 @@ class M3EToggleButtonDecoration {
       pressedRadius: pressedRadius ?? this.pressedRadius,
       hoveredRadius: hoveredRadius ?? this.hoveredRadius,
       connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
+      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
+      foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
     );
   }
 
@@ -552,7 +586,10 @@ class M3EToggleButtonDecoration {
           uncheckedRadius == other.uncheckedRadius &&
           pressedRadius == other.pressedRadius &&
           hoveredRadius == other.hoveredRadius &&
-          connectedInnerRadius == other.connectedInnerRadius;
+          connectedInnerRadius == other.connectedInnerRadius &&
+          backgroundGradient == other.backgroundGradient &&
+          backgroundBuilder == other.backgroundBuilder &&
+          foregroundBuilder == other.foregroundBuilder;
 
   @override
   int get hashCode => Object.hashAll([
@@ -570,6 +607,9 @@ class M3EToggleButtonDecoration {
     pressedRadius,
     hoveredRadius,
     connectedInnerRadius,
+    backgroundGradient,
+    backgroundBuilder,
+    foregroundBuilder,
   ]);
 }
 

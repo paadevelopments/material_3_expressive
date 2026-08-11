@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../../foundations/foundations.dart';
+import '../models/m3e_carousel_change_details.dart';
 import 'm3e_carousel_view.dart';
 
 part 'm3e_carousel_wrapper_anchors.dart';
@@ -39,6 +40,7 @@ class M3ECarouselWrapper extends StatefulWidget {
     this.flexWeights,
     required this.children,
     this.onIndexChanged,
+    this.onChange,
 
     /// Fixed logical pixels added or removed per animating edge at peak pulse.
     ///
@@ -113,6 +115,9 @@ class M3ECarouselWrapper extends StatefulWidget {
 
   /// Called when the leading item index changes.
   final void Function(int)? onIndexChanged;
+
+  /// Called when the leading or focal item index changes.
+  final ValueChanged<M3ECarouselChangeDetails>? onChange;
 
   /// Fixed logical pixels added or removed per animating edge at peak pulse.
   final double fixedPulseDelta;
@@ -498,6 +503,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
         infinite: widget.infinite,
         flexWeights: widget.flexWeights!,
         onIndexChanged: widget.onIndexChanged,
+        onChange: widget.onChange,
         children: carouselChildren,
       );
     }
@@ -518,6 +524,7 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       infinite: widget.infinite,
       itemExtent: widget.itemExtent!,
       onIndexChanged: widget.onIndexChanged,
+      onChange: widget.onChange,
       children: carouselChildren,
     );
   }

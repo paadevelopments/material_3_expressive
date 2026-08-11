@@ -95,6 +95,7 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     this.largeIconSize = 36,
     this.largeRadius = 28,
     this.extended = const M3EExtendedFabTheme(),
+    this.gradient,
   });
 
   /// defaults.
@@ -134,6 +135,9 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
 
   /// extended.
   final M3EExtendedFabTheme extended;
+
+  /// Optional theme-level FAB gradient fill.
+  final Gradient? gradient;
 
   /// resolve.
 
@@ -208,6 +212,7 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     double? largeIconSize,
     double? largeRadius,
     M3EExtendedFabTheme? extended,
+    Gradient? gradient,
   }) {
     return M3EFabTheme(
       pressedScale: pressedScale ?? this.pressedScale,
@@ -221,6 +226,7 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
       largeIconSize: largeIconSize ?? this.largeIconSize,
       largeRadius: largeRadius ?? this.largeRadius,
       extended: extended ?? this.extended,
+      gradient: gradient ?? this.gradient,
     );
   }
 
@@ -241,6 +247,7 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
       largeIconSize: _lerpDouble(largeIconSize, other.largeIconSize, t)!,
       largeRadius: _lerpDouble(largeRadius, other.largeRadius, t)!,
       extended: extended,
+      gradient: t < 0.5 ? gradient : other.gradient,
     );
   }
 

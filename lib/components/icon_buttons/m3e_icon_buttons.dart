@@ -55,6 +55,7 @@ class M3EIconButton extends StatefulWidget {
     this.badgeValue,
     this.suppressInk = false,
     this.visualSize,
+    this.backgroundGradient,
   });
 
   /// icon.
@@ -106,6 +107,9 @@ class M3EIconButton extends StatefulWidget {
   /// [size]/[width]. The outer tap target uses at least the theme target,
   /// or this size when larger.
   final Size? visualSize;
+
+  /// Optional gradient fill for filled/tonal surfaces.
+  final Gradient? backgroundGradient;
 
   @override
   State<M3EIconButton> createState() => _M3EIconButtonState();

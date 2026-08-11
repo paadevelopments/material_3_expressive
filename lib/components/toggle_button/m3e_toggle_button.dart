@@ -10,6 +10,7 @@ import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_decoration.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_theme.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import '../toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
 import 'styles/m3e_toggle_button_theme.dart';
 

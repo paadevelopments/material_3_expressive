@@ -59,6 +59,8 @@ class M3ECardListItem extends StatelessWidget {
     this.semanticLabel,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant = M3ECardVariant.filled,
+    this.border,
     super.key,
   });
 
@@ -102,6 +104,12 @@ class M3ECardListItem extends StatelessWidget {
   /// haptic.
   final M3EHapticFeedback haptic;
 
+  /// Card variant for this item.
+  final M3ECardVariant variant;
+
+  /// Optional card outline.
+  final BorderSide? border;
+
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
@@ -127,7 +135,8 @@ class M3ECardListItem extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
       child: M3ECard(
-        variant: M3ECardVariant.filled,
+        variant: variant,
+        border: border,
         borderRadius: borderRadius,
         color: color ?? cardListTheme.backgroundColor(scheme),
         padding: padding ?? cardListTheme.itemPadding,

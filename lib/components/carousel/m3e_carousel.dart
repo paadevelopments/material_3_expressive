@@ -5,10 +5,12 @@ import 'package:material_3_expressive/foundations/foundations.dart';
 
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';
+import 'models/m3e_carousel_change_details.dart';
 import 'styles/m3e_carousel_theme.dart';
 import 'utils/m3e_carousel_scroll_helper.dart';
 
 export 'enums/m3e_carousel_type.dart';
+export 'models/m3e_carousel_change_details.dart';
 export 'styles/m3e_carousel_theme.dart';
 
 /// Creates a Material Design carousel.
@@ -44,6 +46,7 @@ class M3ECarousel extends StatefulWidget {
     this.singleSwipeGestureSensitivityRange =
         M3ECarouselTheme.defaultSingleSwipeGestureSensitivityRange,
     this.onTap,
+    this.onChange,
     this.haptic = M3EHapticFeedback.none,
     required this.children,
   });
@@ -97,6 +100,9 @@ class M3ECarousel extends StatefulWidget {
 
   /// Click event notification pipe exposing the zero-based list tracking index of the interacted element.
   final void Function(int selectedIndex)? onTap;
+
+  /// Called when the leading or focal item index changes after scrolling.
+  final ValueChanged<M3ECarouselChangeDetails>? onChange;
 
   /// Haptic intensity on item tap. Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
@@ -239,6 +245,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
                   ),
                 ),
                 onTap: widget.onTap,
+                onChange: widget.onChange,
                 haptic: widget.haptic,
                 flexWeights: widget.type == M3ECarouselType.uncontained
                     ? null

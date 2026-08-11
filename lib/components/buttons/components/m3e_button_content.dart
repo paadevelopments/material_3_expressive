@@ -147,7 +147,10 @@ extension _M3EButtonContent on _M3EButtonState {
         RoundedRectangleBorder(borderRadius: animatedRadius),
       ),
       backgroundBuilder: _wrapLayerBuilder(
-        widget.decoration?.backgroundBuilder,
+        m3eGradientBackgroundBuilder(
+          widget.decoration?.backgroundGradient,
+          explicitBuilder: widget.decoration?.backgroundBuilder,
+        ),
         animatedRadius,
       ),
       foregroundBuilder: _wrapLayerBuilder(

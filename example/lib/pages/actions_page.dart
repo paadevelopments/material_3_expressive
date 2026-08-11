@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
-import 'package:material_3_expressive/components/split_buttons/models/m3e_split_button_item.dart';
 import 'package:material_3_expressive/components/toggle_button_group/models/m3e_button_group_action.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -71,6 +70,37 @@ class _ActionsPageState extends State<ActionsPage>
               style: M3EButtonStyle.text,
               onPressed: () {},
               child: const Text('Text'),
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Gradient fill',
+          children: <Widget>[
+            M3EButton(
+              decoration: M3EButtonDecoration(
+                backgroundGradient: WidgetStateProperty.all(
+                  const LinearGradient(
+                    colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                  ),
+                ),
+              ),
+              onPressed: () {},
+              child: const Text('Gradient'),
+            ),
+            M3EIconButton(
+              icon: const Icon(M3EIcons.favorite),
+              variant: M3EIconButtonVariant.filled,
+              backgroundGradient: const LinearGradient(
+                colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+              ),
+              onPressed: () {},
+            ),
+            M3EFab(
+              icon: const Icon(M3EIcons.add),
+              gradient: const LinearGradient(
+                colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],
+              ),
+              onPressed: () {},
             ),
           ],
         ),
@@ -348,6 +378,41 @@ class _ActionsPageState extends State<ActionsPage>
                 M3ESplitButtonItem<String>(
                   value: 'copy',
                   child: Text('Save a copy'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label: 'Split button (custom M3E menu)',
+          children: <Widget>[
+            M3ESplitButton<String>(
+              label: 'Share',
+              leadingIcon: M3EIcons.share,
+              onPressed: () {},
+              onSelected: (String value) {},
+              items: null,
+              m3eMenuBuilder: (BuildContext context) => <M3EMenuNode>[
+                M3EMenuGroup.entries(
+                  entries: <M3EMenuNode>[
+                    M3EMenuSelectable(
+                      label: 'Copy link',
+                      value: 'link',
+                      leading: const Icon(M3EIcons.link),
+                    ),
+                    M3EMenuSelectable(
+                      label: 'Email',
+                      value: 'email',
+                      leading: const Icon(M3EIcons.email),
+                    ),
+                  ],
+                ),
+                M3EMenuSubmenu(
+                  label: 'More',
+                  children: <M3EMenuNode>[
+                    M3EMenuSelectable(label: 'Message', value: 'message'),
+                    M3EMenuSelectable(label: 'QR code', value: 'qr'),
+                  ],
                 ),
               ],
             ),

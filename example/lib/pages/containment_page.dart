@@ -28,6 +28,8 @@ class _ContainmentPageState extends State<ContainmentPage>
     {"image": "assets/i6.png", "title": "Others"},
   ];
 
+  int _carouselFocalIndex = 1;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -105,10 +107,18 @@ class _ContainmentPageState extends State<ContainmentPage>
               type: M3ECarouselType.hero,
               heroAlignment: M3ECarouselHeroAlignment.center,
               onTap: (int tapIndex) => log(tapIndex.toString()),
+              onChange: (M3ECarouselChangeDetails details) {
+                setState(() => _carouselFocalIndex = details.focalIndex);
+              },
               children: images
                   .asMap()
                   .entries
-                  .map((listItem) => _ImageElement(listValue: listItem.value))
+                  .map(
+                    (listItem) => _ImageElement(
+                      listValue: listItem.value,
+                      showTitle: listItem.key == _carouselFocalIndex,
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -160,8 +170,9 @@ class _ContainmentPageState extends State<ContainmentPage>
           onTap: () {},
         ),
         const SizedBox(height: 24),
-        const _ListLabel('Card list items'),
+        const _ListLabel('Card list items (outlined)'),
         M3ECardList(
+          variant: M3ECardVariant.outlined,
           itemCount: 3,
           onTap: (index) => log('Tapped card $index'),
           itemBuilder: (context, index) {
@@ -489,8 +500,9 @@ class _ListLabel extends StatelessWidget {
 
 class _ImageElement extends StatelessWidget {
   final Map listValue;
+  final bool showTitle;
 
-  const _ImageElement({required this.listValue});
+  const _ImageElement({required this.listValue, this.showTitle = true});
 
   @override
   Widget build(BuildContext context) {
@@ -503,29 +515,33 @@ class _ImageElement extends StatelessWidget {
           width: double.maxFinite,
           height: double.maxFinite,
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Text(
-              listValue["title"]!,
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
+        if (showTitle)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.5),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.clip,
+            ),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                listValue["title"]!,
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+              ),
             ),
           ),
-        ),
       ],
     );
   }

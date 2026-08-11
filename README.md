@@ -223,7 +223,9 @@ needed.
 
 #### M3EButton
 
-Five color variants with shape morphing on press.
+Five color variants with shape morphing on press. Optional
+`M3EButtonDecoration.backgroundGradient` paints a gradient fill (Material
+background becomes transparent).
 
 ```dart
 M3EButton(
@@ -232,10 +234,14 @@ M3EButton(
   child: const Text('Elevated'),
 );
 
-M3EButton.icon(
-  icon: const Icon(M3EIcons.add),
-  label: const Text('Add'),
+M3EButton(
+  decoration: M3EButtonDecoration(
+    backgroundGradient: WidgetStateProperty.all(
+      const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
+    ),
+  ),
   onPressed: () {},
+  child: const Text('Gradient'),
 );
 ```
 
@@ -387,7 +393,9 @@ M3ESegmentedButton<String>(
 
 #### M3ESplitButton
 
-Primary action with a trailing menu.
+Primary action with a trailing menu. Use `items` for a flat list, or
+`m3eMenuBuilder` for a rich M3E menu tree (groups, dividers, submenus). Legacy
+`menuBuilder` still opens Flutter `showMenu`.
 
 ```dart
 M3ESplitButton<String>(
@@ -398,6 +406,17 @@ M3ESplitButton<String>(
   items: const [
     M3ESplitButtonItem(value: 'draft', child: Text('Save as draft')),
     M3ESplitButtonItem(value: 'copy', child: Text('Save a copy')),
+  ],
+);
+
+M3ESplitButton<String>(
+  label: 'Share',
+  items: null,
+  onSelected: (value) {},
+  m3eMenuBuilder: (context) => [
+    M3EMenuSelectable(label: 'Copy link', value: 'link'),
+    const M3EMenuDivider(),
+    M3EMenuSelectable(label: 'Email', value: 'email'),
   ],
 );
 ```
@@ -675,39 +694,25 @@ M3ECard(
 #### M3ECarousel
 
 Hero, contained, and uncontained layouts — horizontal by default, or vertical
-via `axis`.
+via `axis`. Use `onChange` for leading/focal index updates (e.g. hide labels on
+smaller items).
 
 ```dart
 M3ECarousel(
   type: M3ECarouselType.hero,
   heroAlignment: M3ECarouselHeroAlignment.center,
   onTap: (index) {},
+  onChange: (details) {
+    // details.focalIndex / details.leadingIndex / details.isFocal(i)
+  },
   children: List.generate(10, (i) => ColoredBox(color: Colors.blue)),
-);
-
-M3ECarousel(
-  type: M3ECarouselType.contained,
-  isExtended: true,
-  children: items,
-);
-
-M3ECarousel(
-  type: M3ECarouselType.uncontained,
-  uncontainedItemExtent: 80,
-  children: items,
-);
-
-// Vertical (hero left/right map to top/bottom)
-M3ECarousel(
-  axis: Axis.vertical,
-  type: M3ECarouselType.hero,
-  children: items,
 );
 ```
 
 #### M3EListItem
 
-Standard list row with headline, supporting text, and slots.
+Standard list row with headline, supporting text, and slots. Optional
+`variant` / `border` control the standalone card outline.
 
 ```dart
 M3EListItem(
@@ -715,16 +720,19 @@ M3EListItem(
   supportingText: 'On · Fast charge enabled',
   leading: const Icon(M3EIcons.schedule),
   trailing: const Icon(M3EIcons.chevron_right),
+  variant: M3ECardVariant.outlined,
   onTap: () {},
 );
 ```
 
 #### M3ECardList
 
-Vertically stacked cards with dynamic corner rounding.
+Vertically stacked cards with dynamic corner rounding. Pass
+`variant: M3ECardVariant.outlined` (or `border`) for outlined cards.
 
 ```dart
 M3ECardList(
+  variant: M3ECardVariant.outlined,
   itemCount: 3,
   onTap: (index) {},
   itemBuilder: (context, index) => M3EListItem(

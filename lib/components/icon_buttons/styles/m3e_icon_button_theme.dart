@@ -12,6 +12,8 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
     this.outlineWidth = 1,
     this.morphDuration = const Duration(milliseconds: 120),
     this.morphCurve = Curves.easeOut,
+    this.filledBackgroundGradient,
+    this.tonalBackgroundGradient,
   });
 
   /// defaults.
@@ -27,6 +29,12 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
 
   /// morphCurve.
   final Curve morphCurve;
+
+  /// Optional gradient for filled icon buttons.
+  final Gradient? filledBackgroundGradient;
+
+  /// Optional gradient for tonal icon buttons.
+  final Gradient? tonalBackgroundGradient;
 
   static const Map<M3EIconButtonSize, double> _icon = {
     M3EIconButtonSize.xs: 20,
@@ -160,11 +168,17 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
     double? outlineWidth,
     Duration? morphDuration,
     Curve? morphCurve,
+    Gradient? filledBackgroundGradient,
+    Gradient? tonalBackgroundGradient,
   }) {
     return M3EIconButtonTheme(
       outlineWidth: outlineWidth ?? this.outlineWidth,
       morphDuration: morphDuration ?? this.morphDuration,
       morphCurve: morphCurve ?? this.morphCurve,
+      filledBackgroundGradient:
+          filledBackgroundGradient ?? this.filledBackgroundGradient,
+      tonalBackgroundGradient:
+          tonalBackgroundGradient ?? this.tonalBackgroundGradient,
     );
   }
 
@@ -183,6 +197,12 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
         )!.round(),
       ),
       morphCurve: t < 0.5 ? morphCurve : other.morphCurve,
+      filledBackgroundGradient: t < 0.5
+          ? filledBackgroundGradient
+          : other.filledBackgroundGradient,
+      tonalBackgroundGradient: t < 0.5
+          ? tonalBackgroundGradient
+          : other.tonalBackgroundGradient,
     );
   }
 

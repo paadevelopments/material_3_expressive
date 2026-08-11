@@ -13,6 +13,8 @@ class M3ESegmentedButtonTheme
     this.segmentHorizontalPadding = 12,
     this.iconLabelGap = 8,
     this.borderWidth = 1,
+    this.selectedBackgroundGradient,
+    this.unselectedBackgroundGradient,
   });
 
   /// defaults.
@@ -34,6 +36,12 @@ class M3ESegmentedButtonTheme
 
   /// borderWidth.
   final double borderWidth;
+
+  /// Optional gradient for selected segments.
+  final Gradient? selectedBackgroundGradient;
+
+  /// Optional gradient for unselected segments.
+  final Gradient? unselectedBackgroundGradient;
 
   /// The borderRadius.
 
@@ -58,6 +66,8 @@ class M3ESegmentedButtonTheme
     double? segmentHorizontalPadding,
     double? iconLabelGap,
     double? borderWidth,
+    Gradient? selectedBackgroundGradient,
+    Gradient? unselectedBackgroundGradient,
   }) {
     return M3ESegmentedButtonTheme(
       height: height ?? this.height,
@@ -66,6 +76,10 @@ class M3ESegmentedButtonTheme
           segmentHorizontalPadding ?? this.segmentHorizontalPadding,
       iconLabelGap: iconLabelGap ?? this.iconLabelGap,
       borderWidth: borderWidth ?? this.borderWidth,
+      selectedBackgroundGradient:
+          selectedBackgroundGradient ?? this.selectedBackgroundGradient,
+      unselectedBackgroundGradient:
+          unselectedBackgroundGradient ?? this.unselectedBackgroundGradient,
     );
   }
 
@@ -84,6 +98,12 @@ class M3ESegmentedButtonTheme
       )!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
+      selectedBackgroundGradient: t < 0.5
+          ? selectedBackgroundGradient
+          : other.selectedBackgroundGradient,
+      unselectedBackgroundGradient: t < 0.5
+          ? unselectedBackgroundGradient
+          : other.unselectedBackgroundGradient,
     );
   }
 

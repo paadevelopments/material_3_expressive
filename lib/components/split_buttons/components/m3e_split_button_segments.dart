@@ -25,7 +25,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       pressed: pressed,
       enabled: enabled,
     );
-    final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
+    final hasBackgroundBuilder =
+        widget.decoration?.backgroundBuilder != null ||
+        widget.decoration?.backgroundGradient != null;
 
     final animatedButton = M3ERadiusAndPaddingMotion(
       motion: springMotion,
@@ -216,7 +218,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       selected: _menuOpen,
       enabled: enabled,
     );
-    final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
+    final hasBackgroundBuilder =
+        widget.decoration?.backgroundBuilder != null ||
+        widget.decoration?.backgroundGradient != null;
     final chevron = _buildTrailingChevron(
       onColor: onColor,
       customSize: customSize,

@@ -88,7 +88,9 @@ extension _M3EButtonStyle on _M3EButtonState {
               alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
             );
     }
-    return (dec?.backgroundBuilder != null || isTransparent)
+    return (dec?.backgroundBuilder != null ||
+            dec?.backgroundGradient != null ||
+            isTransparent)
         ? Colors.transparent
         : _buttonTheme.container(_scheme, widget.style);
   }

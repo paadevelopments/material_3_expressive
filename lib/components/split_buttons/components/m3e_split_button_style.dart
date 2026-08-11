@@ -26,10 +26,14 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
   }) {
     var result = child;
 
-    if (widget.decoration?.backgroundBuilder != null) {
+    final ButtonLayerBuilder? backgroundLayer = m3eGradientBackgroundBuilder(
+      widget.decoration?.backgroundGradient,
+      explicitBuilder: widget.decoration?.backgroundBuilder,
+    );
+    if (backgroundLayer != null) {
       result = ClipRRect(
         borderRadius: radius,
-        child: widget.decoration!.backgroundBuilder!(context, states, result),
+        child: backgroundLayer(context, states, result),
       );
     }
 

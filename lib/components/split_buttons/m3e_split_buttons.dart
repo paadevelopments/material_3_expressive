@@ -11,6 +11,7 @@ import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/res/m3e_button_constants.dart';
 import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_theme.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import '../menus/m3e_menus.dart';
 import 'components/m3e_split_button_bottom_sheet.dart';
 import 'enums/m3e_split_button_menu_style.dart';
@@ -22,6 +23,9 @@ import 'styles/m3e_split_button_decoration.dart';
 import 'styles/m3e_split_button_popup_decoration.dart';
 import 'styles/m3e_split_button_theme.dart';
 
+export '../menus/models/m3e_menu_node.dart';
+export 'models/m3e_split_button_item.dart';
+export 'styles/m3e_split_button_decoration.dart';
 export 'styles/m3e_split_button_theme.dart';
 
 part 'components/m3e_split_button_widgets.dart';
@@ -50,6 +54,7 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.trailingTooltip,
     this.enabled = true,
     this.menuBuilder,
+    this.m3eMenuBuilder,
     this.decoration,
     this.mouseCursor,
     this.statesController,
@@ -63,8 +68,8 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.enableFeedback = _kDefaultEnableFeedback,
     this.splashFactory,
   }) : assert(
-         items != null || menuBuilder != null,
-         'Provide either `items` or `menuBuilder`.',
+         items != null || menuBuilder != null || m3eMenuBuilder != null,
+         'Provide either `items`, `menuBuilder`, or `m3eMenuBuilder`.',
        ),
        assert(
          style != M3EButtonStyle.text,
@@ -74,8 +79,9 @@ class M3ESplitButton<T> extends StatefulWidget {
          !enabled ||
              onPressed != null ||
              onSelected != null ||
-             menuBuilder != null,
-         'Provide either onPressed, onSelected, or a custom menuBuilder when the split button is enabled.',
+             menuBuilder != null ||
+             m3eMenuBuilder != null,
+         'Provide either onPressed, onSelected, menuBuilder, or m3eMenuBuilder when the split button is enabled.',
        );
 
   /// A filled split button (highest emphasis).
@@ -93,6 +99,7 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.trailingTooltip,
     this.enabled = true,
     this.menuBuilder,
+    this.m3eMenuBuilder,
     this.decoration,
     this.mouseCursor,
     this.statesController,
@@ -107,8 +114,8 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.splashFactory,
   }) : style = M3EButtonStyle.filled,
        assert(
-         items != null || menuBuilder != null,
-         'Provide either `items` or `menuBuilder`.',
+         items != null || menuBuilder != null || m3eMenuBuilder != null,
+         'Provide either `items`, `menuBuilder`, or `m3eMenuBuilder`.',
        );
 
   /// A tonal split button (medium emphasis).
@@ -126,6 +133,7 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.trailingTooltip,
     this.enabled = true,
     this.menuBuilder,
+    this.m3eMenuBuilder,
     this.decoration,
     this.mouseCursor,
     this.statesController,
@@ -140,8 +148,8 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.splashFactory,
   }) : style = M3EButtonStyle.tonal,
        assert(
-         items != null || menuBuilder != null,
-         'Provide either `items` or `menuBuilder`.',
+         items != null || menuBuilder != null || m3eMenuBuilder != null,
+         'Provide either `items`, `menuBuilder`, or `m3eMenuBuilder`.',
        );
 
   /// An elevated split button (medium emphasis with a shadow).
@@ -159,6 +167,7 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.trailingTooltip,
     this.enabled = true,
     this.menuBuilder,
+    this.m3eMenuBuilder,
     this.decoration,
     this.mouseCursor,
     this.statesController,
@@ -173,8 +182,8 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.splashFactory,
   }) : style = M3EButtonStyle.elevated,
        assert(
-         items != null || menuBuilder != null,
-         'Provide either `items` or `menuBuilder`.',
+         items != null || menuBuilder != null || m3eMenuBuilder != null,
+         'Provide either `items`, `menuBuilder`, or `m3eMenuBuilder`.',
        );
 
   /// An outlined split button (medium emphasis with a border).
@@ -192,6 +201,7 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.trailingTooltip,
     this.enabled = true,
     this.menuBuilder,
+    this.m3eMenuBuilder,
     this.decoration,
     this.mouseCursor,
     this.statesController,
@@ -206,8 +216,8 @@ class M3ESplitButton<T> extends StatefulWidget {
     this.splashFactory,
   }) : style = M3EButtonStyle.outlined,
        assert(
-         items != null || menuBuilder != null,
-         'Provide either `items` or `menuBuilder`.',
+         items != null || menuBuilder != null || m3eMenuBuilder != null,
+         'Provide either `items`, `menuBuilder`, or `m3eMenuBuilder`.',
        );
 
   /// final.
@@ -247,8 +257,17 @@ class M3ESplitButton<T> extends StatefulWidget {
   /// final.
   final bool enabled;
 
-  /// final.
+  /// Flutter [PopupMenuEntry] builder. Uses Material [showMenu] (not M3E).
+  ///
+  /// When set, takes priority over [m3eMenuBuilder] and [items].
   final List<PopupMenuEntry<T>> Function(BuildContext)? menuBuilder;
+
+  /// Rich M3E menu tree. Respects [M3ESplitButtonDecoration.menuStyle] for
+  /// popup / native paths. Ignored when [menuBuilder] is set.
+  ///
+  /// Bottom-sheet [M3ESplitButtonMenuStyle.bottomSheet] is not supported for
+  /// custom trees — falls back to the spring popup.
+  final List<M3EMenuNode> Function(BuildContext)? m3eMenuBuilder;
 
   /// final.
   final M3ESplitButtonDecoration? decoration;

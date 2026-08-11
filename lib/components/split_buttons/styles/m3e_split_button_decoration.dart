@@ -74,6 +74,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     super.alignment,
     super.splashFactory,
     super.backgroundBuilder,
+    super.backgroundGradient,
     super.foregroundBuilder,
     super.motion,
     super.haptic,
@@ -122,6 +123,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -167,6 +169,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       alignment: alignment,
       splashFactory: splashFactory,
       backgroundBuilder: backgroundBuilder,
+      backgroundGradient: backgroundGradient,
       foregroundBuilder: foregroundBuilder,
       motion: motion,
       haptic: haptic,
@@ -230,6 +233,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       alignment: base.alignment,
       splashFactory: base.splashFactory,
       backgroundBuilder: base.backgroundBuilder,
+      backgroundGradient: base.backgroundGradient,
       foregroundBuilder: base.foregroundBuilder,
       motion: base.motion,
       haptic: base.haptic,
@@ -274,6 +278,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
+    WidgetStateProperty<Gradient?>? backgroundGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -316,6 +321,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       alignment: alignment ?? this.alignment,
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
+      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
       motion: motion ?? this.motion,
       haptic: haptic ?? this.haptic,
@@ -367,6 +373,7 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
           alignment == other.alignment &&
           splashFactory == other.splashFactory &&
           backgroundBuilder == other.backgroundBuilder &&
+          backgroundGradient == other.backgroundGradient &&
           foregroundBuilder == other.foregroundBuilder &&
           motion == other.motion &&
           haptic == other.haptic &&
