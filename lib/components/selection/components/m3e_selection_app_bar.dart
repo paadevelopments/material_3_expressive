@@ -163,6 +163,9 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     }
   }
 
+  /// Leading/trailing action slot width (M3EIconButton sm target).
+  static const double _actionSlot = 48;
+
   Widget _buildContextual(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EColorScheme scheme = theme.colorScheme;
@@ -174,17 +177,21 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     final topInset = EdgeInsets.only(
       top: MediaQuery.viewPaddingOf(context).top,
     );
-    // Match M3EAppBar content band height + contentPadding (incl. vertical).
     final appBarPad = theme.appBarTheme.contentPadding.resolve(
       Directionality.of(context),
     );
-    final double toolbarHeight = theme.appBarTheme.smallHeight;
+    final double titleGap = theme.appBarTheme.titleGap;
 
+    // NavigationToolbar expands to max height — must be bounded (Column /
+    // AnimatedSize pass infinite max height). Band matches the idle app bar;
+    // overall header height still varies with select-all / idle content.
+    final double toolbarHeight = theme.appBarTheme.smallHeight;
     final Widget toolbar = SizedBox(
       height: toolbarHeight,
       child: Padding(
         padding: appBarPad,
         child: NavigationToolbar(
+          middleSpacing: titleGap,
           leading: M3EIconButton(
             icon: Icon(M3EIcons.close, color: fg),
             onPressed: () => _clear(controller),
@@ -203,30 +210,42 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
       ),
     );
 
+    // Match toolbar: same contentPadding + 48dp leading slot (like close /
+    // trailing icon buttons) and titleGap before the label.
     final Widget? selectAll = widget.showSelectAll
-        ? SizedBox(
-            height: selectionTheme.selectAllHeight,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: appBarPad.left,
-                right: appBarPad.right,
-              ),
+        ? Padding(
+            padding: EdgeInsets.only(
+              left: appBarPad.left,
+              right: appBarPad.right,
+              bottom: appBarPad.bottom,
+            ),
+            child: SizedBox(
+              height: selectionTheme.selectAllHeight,
               child: Row(
                 children: <Widget>[
-                  M3ECheckbox(
-                    tristate: true,
-                    value: controller.allSelectedFor(itemCount),
-                    onChanged: (_) => _toggleSelectAll(controller, itemCount),
-                    semanticLabel: widget.selectAllLabel,
+                  SizedBox(
+                    width: _actionSlot,
+                    child: Center(
+                      child: M3ECheckbox(
+                        tristate: true,
+                        value: controller.allSelectedFor(itemCount),
+                        onChanged: (_) =>
+                            _toggleSelectAll(controller, itemCount),
+                        semanticLabel: widget.selectAllLabel,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: titleGap),
                   Expanded(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => _toggleSelectAll(controller, itemCount),
-                      child: Text(
-                        widget.selectAllLabel,
-                        style: theme.typeScale.bodyLarge.copyWith(color: fg),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          widget.selectAllLabel,
+                          style: theme.typeScale.bodyLarge.copyWith(color: fg),
+                        ),
                       ),
                     ),
                   ),
@@ -256,34 +275,49 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     final M3ESelectionController controller = _resolveController(context);
     _attach(controller);
 
-    // Stack layout sizes to the larger transitioning child so height changes
-    // between idle and contextual do not overflow a tight Scaffold appBar slot.
-    return AnimatedSwitcher(
+    // AnimatedSize tracks the active child height. Switcher layout only sizes
+    // to the current child; exiting children are overlayed so they do not
+    // force a taller slot (avoids overflow when heights differ).
+    return AnimatedSize(
       duration: const Duration(milliseconds: 220),
       reverseDuration: const Duration(milliseconds: 90),
-      switchInCurve: const Cubic(0.2, 0, 0, 1),
-      switchOutCurve: const Cubic(0.4, 0, 1, 1),
-      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: <Widget>[...previousChildren, ?currentChild],
-        );
-      },
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        final Animation<double> scale = Tween<double>(
-          begin: 0.95,
-          end: 1,
-        ).animate(animation);
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(scale: scale, child: child),
-        );
-      },
-      child: KeyedSubtree(
-        key: ValueKey<bool>(controller.isSelectionMode),
-        child: controller.isSelectionMode
-            ? _buildContextual(context)
-            : widget.idle,
+      curve: const Cubic(0.2, 0, 0, 1),
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 220),
+        reverseDuration: const Duration(milliseconds: 90),
+        switchInCurve: const Cubic(0.2, 0, 0, 1),
+        switchOutCurve: const Cubic(0.4, 0, 1, 1),
+        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+          return Stack(
+            children: <Widget>[
+              for (final Widget previous in previousChildren)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(child: previous),
+                ),
+              ?currentChild,
+            ],
+          );
+        },
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final Animation<double> scale = Tween<double>(
+            begin: 0.95,
+            end: 1,
+          ).animate(animation);
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(scale: scale, child: child),
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey<bool>(controller.isSelectionMode),
+          child: controller.isSelectionMode
+              ? _buildContextual(context)
+              : widget.idle,
+        ),
       ),
     );
   }

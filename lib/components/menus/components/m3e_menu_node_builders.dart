@@ -4,6 +4,7 @@ import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_color_style.dart';
 import '../models/m3e_menu_node.dart';
 import '../styles/m3e_menu_theme.dart';
+import '../utils/m3e_menu_overlay_rect.dart';
 import 'm3e_menu_content.dart';
 import 'm3e_menu_item.dart';
 import 'm3e_menu_style_scope.dart';
@@ -133,11 +134,10 @@ abstract final class M3EMenuNodeBuilders {
           autofocus: autofocus,
           onTap: item.enabled && onOpenSubmenu != null
               ? () {
-                  final box = itemContext.findRenderObject() as RenderBox?;
-                  if (box == null) {
+                  final Rect? rect = m3eOverlayRectFor(itemContext);
+                  if (rect == null) {
                     return;
                   }
-                  final rect = box.localToGlobal(Offset.zero) & box.size;
                   onOpenSubmenu(rect, item.children);
                 }
               : null,

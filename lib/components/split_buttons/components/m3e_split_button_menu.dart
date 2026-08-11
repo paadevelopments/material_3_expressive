@@ -68,8 +68,13 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
     setState(() => _menuOpen = true);
 
     final tCtx = _trailingKey.currentContext;
-    final tb = tCtx?.findRenderObject() as RenderBox?;
-    if (tb == null) {
+    if (tCtx == null) {
+      _closeMenu();
+      return;
+    }
+    final Rect? anchor = m3eOverlayRectFor(tCtx);
+    final tb = tCtx.findRenderObject() as RenderBox?;
+    if (anchor == null || tb == null || !tb.hasSize) {
       _closeMenu();
       return;
     }
@@ -101,7 +106,6 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
           )
         : null;
 
-    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
     final double preferredWidth = applyPopupTheme
         ? (tb.size.width + 176.0).clamp(popupDec.minWidth, popupDec.maxWidth)
         : tb.size.width;
@@ -323,7 +327,10 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
       for (final item in items) _splitItemToMenuNode(item, iconSize: iconSize),
     ];
 
-    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
+    final BuildContext? tCtx = _trailingKey.currentContext;
+    final Rect anchor =
+        (tCtx != null ? m3eOverlayRectFor(tCtx) : null) ??
+        (tb.localToGlobal(Offset.zero) & tb.size);
     final res = await showM3EMenu<T>(
       context: context,
       anchor: anchor,
