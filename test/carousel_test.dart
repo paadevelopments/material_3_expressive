@@ -89,9 +89,9 @@ Future<void> _onChangeMidpointSymmetric(WidgetTester tester) async {
   // Truncation would keep leading at 0 until pixels >= 80; rounding flips at 40.
   final ScrollPosition position = tester
       .state<ScrollableState>(find.byType(Scrollable))
-      .position;
+      .position
 
-  position.jumpTo(39);
+  ..jumpTo(39);
   await tester.pump();
   expect(latest, isNull, reason: 'still before midpoint when scrolling next');
 
