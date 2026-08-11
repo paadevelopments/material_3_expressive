@@ -44,10 +44,9 @@ class M3EAppBarMetrics {
 class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
   /// M3EAppBarTheme.
   const M3EAppBarTheme({
-    this.contentPadding = const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 8,
-    ),
+    // Horizontal 0: leading/trailing sit on the bar edge; icon-button targets
+    // provide optical inset — matches the selection contextual header.
+    this.contentPadding = const EdgeInsets.symmetric(vertical: 8),
     this.iconSize = 24,
     this.elevation = 0,
     this.compactHeightReduction = 8,
@@ -58,7 +57,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     this.largeExpanded = 152,
     this.bottomHeight = 80,
     this.bottomIconSize = 24,
-    this.bottomPadding = const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    this.bottomPadding = const EdgeInsets.symmetric(vertical: 8),
   });
 
   /// defaults.

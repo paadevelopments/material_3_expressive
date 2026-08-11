@@ -174,21 +174,35 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     final topInset = EdgeInsets.only(
       top: MediaQuery.viewPaddingOf(context).top,
     );
+    // Same horizontal inset as M3EAppBar so idle ↔ contextual edges align.
+    final appBarPad = theme.appBarTheme.contentPadding.resolve(
+      Directionality.of(context),
+    );
+    final rowPad = EdgeInsets.only(
+      left: appBarPad.left,
+      right: appBarPad.right,
+    );
 
     final Widget toolbar = SizedBox(
       height: selectionTheme.contextualToolbarHeight,
-      child: NavigationToolbar(
-        leading: M3EIconButton(
-          icon: Icon(M3EIcons.close, color: fg),
-          onPressed: () => _clear(controller),
-          tooltip: 'Clear selection',
-          semanticLabel: 'Clear selection',
+      child: Padding(
+        padding: rowPad,
+        child: NavigationToolbar(
+          leading: M3EIconButton(
+            icon: Icon(M3EIcons.close, color: fg),
+            onPressed: () => _clear(controller),
+            tooltip: 'Clear selection',
+            semanticLabel: 'Clear selection',
+          ),
+          middle: Text(
+            '${controller.selectedCount}',
+            style: theme.typeScale.titleLarge.copyWith(color: fg),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: widget.actions,
+          ),
         ),
-        middle: Text(
-          '${controller.selectedCount}',
-          style: theme.typeScale.titleLarge.copyWith(color: fg),
-        ),
-        trailing: Row(mainAxisSize: MainAxisSize.min, children: widget.actions),
       ),
     );
 
@@ -196,7 +210,7 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
         ? SizedBox(
             height: selectionTheme.selectAllHeight,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: rowPad,
               child: Row(
                 children: <Widget>[
                   M3ECheckbox(
@@ -252,10 +266,7 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
       layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
         return Stack(
           alignment: Alignment.topCenter,
-          children: <Widget>[
-            ...previousChildren,
-            ?currentChild,
-          ],
+          children: <Widget>[...previousChildren, ?currentChild],
         );
       },
       transitionBuilder: (Widget child, Animation<double> animation) {
