@@ -166,41 +166,31 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
   /// Leading/trailing action slot width (M3EIconButton sm target).
   static const double _actionSlot = 48;
 
-  Widget _buildContextual(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3EColorScheme scheme = theme.colorScheme;
-    final M3ESelectionTheme selectionTheme = _theme(context);
-    final M3ESelectionController controller = _resolveController(context);
-    final int itemCount = _resolveItemCount(context);
-    final Color bg = selectionTheme.contextualBackground(scheme);
-    final Color fg = selectionTheme.contextualForeground(scheme);
-    final topInset = EdgeInsets.only(
-      top: MediaQuery.viewPaddingOf(context).top,
-    );
-    final appBarPad = theme.appBarTheme.contentPadding.resolve(
-      Directionality.of(context),
-    );
-    final double titleGap = theme.appBarTheme.titleGap;
-
+  Widget _buildContextualToolbar({
+    required M3EThemeData theme,
+    required Color foreground,
+    required EdgeInsets appBarPad,
+    required double titleGap,
+    required M3ESelectionController controller,
+  }) {
     // NavigationToolbar expands to max height — must be bounded (Column /
     // AnimatedSize pass infinite max height). Band matches the idle app bar;
     // overall header height still varies with select-all / idle content.
-    final double toolbarHeight = theme.appBarTheme.smallHeight;
-    final Widget toolbar = SizedBox(
-      height: toolbarHeight,
+    return SizedBox(
+      height: theme.appBarTheme.smallHeight,
       child: Padding(
         padding: appBarPad,
         child: NavigationToolbar(
           middleSpacing: titleGap,
           leading: M3EIconButton(
-            icon: Icon(M3EIcons.close, color: fg),
+            icon: Icon(M3EIcons.close, color: foreground),
             onPressed: () => _clear(controller),
             tooltip: 'Clear selection',
             semanticLabel: 'Clear selection',
           ),
           middle: Text(
             '${controller.selectedCount}',
-            style: theme.typeScale.titleLarge.copyWith(color: fg),
+            style: theme.typeScale.titleLarge.copyWith(color: foreground),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -209,61 +199,103 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
         ),
       ),
     );
+  }
 
+  Widget? _buildSelectAllRow({
+    required M3EThemeData theme,
+    required M3ESelectionTheme selectionTheme,
+    required Color foreground,
+    required EdgeInsets appBarPad,
+    required double titleGap,
+    required M3ESelectionController controller,
+    required int itemCount,
+  }) {
+    if (!widget.showSelectAll) {
+      return null;
+    }
     // Match toolbar: same contentPadding + 48dp leading slot (like close /
     // trailing icon buttons) and titleGap before the label.
-    final Widget? selectAll = widget.showSelectAll
-        ? Padding(
-            padding: EdgeInsets.only(
-              left: appBarPad.left,
-              right: appBarPad.right,
-              bottom: appBarPad.bottom,
-            ),
-            child: SizedBox(
-              height: selectionTheme.selectAllHeight,
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: _actionSlot,
-                    child: Center(
-                      child: M3ECheckbox(
-                        tristate: true,
-                        value: controller.allSelectedFor(itemCount),
-                        onChanged: (_) =>
-                            _toggleSelectAll(controller, itemCount),
-                        semanticLabel: widget.selectAllLabel,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: titleGap),
-                  Expanded(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => _toggleSelectAll(controller, itemCount),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          widget.selectAllLabel,
-                          style: theme.typeScale.bodyLarge.copyWith(color: fg),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+    return Padding(
+      padding: EdgeInsets.only(
+        left: appBarPad.left,
+        right: appBarPad.right,
+        bottom: appBarPad.bottom,
+      ),
+      child: SizedBox(
+        height: selectionTheme.selectAllHeight,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: _actionSlot,
+              child: Center(
+                child: M3ECheckbox(
+                  tristate: true,
+                  value: controller.allSelectedFor(itemCount),
+                  onChanged: (_) => _toggleSelectAll(controller, itemCount),
+                  semanticLabel: widget.selectAllLabel,
+                ),
               ),
             ),
-          )
-        : null;
+            SizedBox(width: titleGap),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _toggleSelectAll(controller, itemCount),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    widget.selectAllLabel,
+                    style: theme.typeScale.bodyLarge.copyWith(
+                      color: foreground,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContextual(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EColorScheme scheme = theme.colorScheme;
+    final M3ESelectionTheme selectionTheme = _theme(context);
+    final M3ESelectionController controller = _resolveController(context);
+    final int itemCount = _resolveItemCount(context);
+    final Color foreground = selectionTheme.contextualForeground(scheme);
+    final EdgeInsets appBarPad = theme.appBarTheme.contentPadding.resolve(
+      Directionality.of(context),
+    );
+    final double titleGap = theme.appBarTheme.titleGap;
 
     return ColoredBox(
-      color: bg,
+      color: selectionTheme.contextualBackground(scheme),
       child: Padding(
-        padding: topInset,
+        padding: EdgeInsets.only(top: MediaQuery.viewPaddingOf(context).top),
         child: IconTheme.merge(
-          data: IconThemeData(color: fg),
+          data: IconThemeData(color: foreground),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[toolbar, ?selectAll],
+            children: <Widget>[
+              _buildContextualToolbar(
+                theme: theme,
+                foreground: foreground,
+                appBarPad: appBarPad,
+                titleGap: titleGap,
+                controller: controller,
+              ),
+              ?_buildSelectAllRow(
+                theme: theme,
+                selectionTheme: selectionTheme,
+                foreground: foreground,
+                appBarPad: appBarPad,
+                titleGap: titleGap,
+                controller: controller,
+                itemCount: itemCount,
+              ),
+            ],
           ),
         ),
       ),
