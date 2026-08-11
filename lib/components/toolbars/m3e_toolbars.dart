@@ -280,8 +280,9 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// When true (default), labeled action selection springs the toolbar pill
   /// width in sync with each action's label morph.
   ///
-  /// When false, actions keep their label animation but the pill layout width
-  /// snaps immediately on active-index changes.
+  /// When false, the pill reserves a fixed width (widest labeled action +
+  /// icon-only neighbors + gaps) so the outer pill does not resize while
+  /// action labels still morph.
   final bool pillActiveSpring;
 
   /// fabPosition.

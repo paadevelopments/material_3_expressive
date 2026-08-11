@@ -1066,7 +1066,8 @@ show/hide. Set `onActiveIndexChanged` for toolbar-managed action selection
 (labeled actions animate width). Use `fabExpandIcon` / `fabCollapseIcon` when a
 FAB morphs with the pill. Set `fabExpandsToolbar: false` for a fixed small FAB
 that only runs `onFabPressed` (pill stays open). Set `pillActiveSpring: false`
-to snap pill width on selection while action labels still morph.
+to keep a fixed pill width for labeled selection (widest label + icon-only
+neighbors) while action labels still morph.
 
 ```dart
 // Floating (default) — pill, wrap-content
@@ -1117,7 +1118,7 @@ M3EToolbar(
   ],
 );
 
-// Labeled selection — pill width snaps (action labels still spring)
+// Labeled selection — fixed pill width (action labels still spring)
 M3EToolbar(
   pillActiveSpring: false,
   onActiveIndexChanged: (i) {},

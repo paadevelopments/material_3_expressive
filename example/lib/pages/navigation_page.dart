@@ -477,7 +477,7 @@ class _NavigationPageState extends State<NavigationPage>
         ),
         DemoRow(
           label:
-              'Labeled selection (pillActiveSpring: false — pill width snaps)',
+              'Labeled selection (pillActiveSpring: false — fixed pill width)',
           children: <Widget>[
             M3EToolbar(
               colorStyle: M3EToolbarColorStyle.vibrant,
