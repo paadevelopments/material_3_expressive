@@ -34,35 +34,34 @@ class SectionListPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    return ListView.separated(
+    return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      itemCount: entries.length + 1,
-      separatorBuilder: (BuildContext context, int index) {
-        return const SizedBox(height: 8);
-      },
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(section.navLabel, style: theme.typeScale.headlineSmall),
-          );
-        }
-        final M3EDemoEntry entry = entries[index - 1];
-        final bool selected = wide && entry.id == selectedId;
-        return M3EListItem(
-          headline: entry.title,
-          supportingText: entry.subtitle,
-          leading: Icon(entry.icon),
-          trailing: wide
-              ? null
-              : Icon(
-                  M3EIcons.chevron_right,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-          selected: selected,
-          onTap: () => onSelect(entry),
-        );
-      },
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Text(section.navLabel, style: theme.typeScale.headlineSmall),
+        ),
+        M3ECardList(
+          itemCount: entries.length,
+          onTap: (int index) => onSelect(entries[index]),
+          itemBuilder: (BuildContext context, int index) {
+            final M3EDemoEntry entry = entries[index];
+            final bool selected = wide && entry.id == selectedId;
+            return M3EListItem(
+              headline: entry.title,
+              supportingText: entry.subtitle,
+              leading: Icon(entry.icon),
+              trailing: wide
+                  ? null
+                  : Icon(
+                      M3EIcons.chevron_right,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+              selected: selected,
+            );
+          },
+        ),
+      ],
     );
   }
 }

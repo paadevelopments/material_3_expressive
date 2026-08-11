@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_enum_menu.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
@@ -16,7 +17,7 @@ class RefreshIndicatorPlayground extends StatefulWidget {
       _RefreshIndicatorPlaygroundState();
 }
 
-enum _RefreshKind { expressive, contained }
+enum _RefreshKind { expressive, contained, material, adaptive, noSpinner }
 
 class _RefreshIndicatorPlaygroundState
     extends State<RefreshIndicatorPlayground> {
@@ -32,35 +33,56 @@ class _RefreshIndicatorPlaygroundState
   }
 
   Widget _listChild() {
-    return ListView.builder(
-      primary: false,
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: NeverScrollableScrollPhysics(),
-      ),
+    return M3ECardList.builder(
       itemCount: 12,
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      listPadding: const EdgeInsets.all(8),
       itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text('Item ${index + 1}'),
+        return M3EListItem(
+          headline: 'Item ${index + 1}',
+          supportingText: 'Pull down to refresh',
+          leading: const Icon(M3EIcons.refresh),
         );
       },
     );
   }
 
   Widget _buildIndicator() {
+    final Key key = ValueKey<_RefreshKind>(_kind);
     final Widget child = _listChild();
-    if (_kind == _RefreshKind.contained) {
-      return M3ERefreshIndicator.contained(
+    return switch (_kind) {
+      _RefreshKind.expressive => M3ERefreshIndicator(
+        key: key,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
-      );
-    }
-    return M3ERefreshIndicator(
-      onRefresh: _handleRefresh,
-      triggerMode: _trigger,
-      child: child,
-    );
+      ),
+      _RefreshKind.contained => M3ERefreshIndicator.contained(
+        key: key,
+        onRefresh: _handleRefresh,
+        triggerMode: _trigger,
+        child: child,
+      ),
+      _RefreshKind.material => M3ERefreshIndicator.material(
+        key: key,
+        onRefresh: _handleRefresh,
+        triggerMode: _trigger,
+        child: child,
+      ),
+      _RefreshKind.adaptive => M3ERefreshIndicator.adaptive(
+        key: key,
+        onRefresh: _handleRefresh,
+        triggerMode: _trigger,
+        child: child,
+      ),
+      _RefreshKind.noSpinner => M3ERefreshIndicator.noSpinner(
+        key: key,
+        onRefresh: _handleRefresh,
+        triggerMode: _trigger,
+        child: child,
+      ),
+    };
   }
 
   @override
@@ -71,7 +93,7 @@ class _RefreshIndicatorPlaygroundState
         PlayPreviewCard(
           label: 'Pull to refresh (count: $_refreshCount)',
           child: SizedBox(
-            height: 200,
+            height: 280,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: M3EShapes.radiusLarge,
@@ -89,7 +111,7 @@ class _RefreshIndicatorPlaygroundState
         PlayControlPanel(
           title: 'Appearance',
           children: <Widget>[
-            PlayEnumSegmented<_RefreshKind>(
+            PlayEnumMenu<_RefreshKind>(
               label: 'Kind',
               value: _kind,
               values: _RefreshKind.values,

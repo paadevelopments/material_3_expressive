@@ -112,6 +112,43 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
             ],
           ),
         ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              M3EButton(
+                decoration: M3EButtonDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                    ),
+                  ),
+                ),
+                onPressed: _onPressed,
+                size: _size,
+                shape: _shape,
+                child: const Text('Gradient'),
+              ),
+              M3EButton.icon(
+                decoration: M3EButtonDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                    ),
+                  ),
+                ),
+                onPressed: _onPressed,
+                icon: const Icon(M3EIcons.favorite),
+                label: const Text('Favorite'),
+                size: _size,
+                shape: _shape,
+              ),
+            ],
+          ),
+        ),
       ],
       controls: <Widget>[
         PlayControlPanel(
