@@ -106,6 +106,7 @@ abstract final class M3EMenuPlacer {
       spaceAbove: spaceAbove,
       spaceBelow: spaceBelow,
       edge: edge,
+      approxHeight: approxHeight,
     );
     return M3EMenuPlacement(
       left: horizontal.left,
@@ -236,6 +237,7 @@ abstract final class M3EMenuPlacer {
     required double spaceAbove,
     required double spaceBelow,
     required double edge,
+    required double approxHeight,
   }) {
     final maxHeight =
         (isSide
@@ -243,13 +245,15 @@ abstract final class M3EMenuPlacer {
                 : (opensAbove ? spaceAbove : spaceBelow))
             .clamp(0.0, theme.maxHeight);
     if (isSide) {
+      // Top-align with the triggering row. Do not use [maxHeight] as the
+      // intrinsic height — it is only a scroll viewport cap; using it pushed
+      // cascading menus to the top of the screen.
+      final heightBudget = approxHeight.clamp(0.0, maxHeight);
       var top = anchorRect.top;
-      if (top + maxHeight > screenSize.height - edge) {
-        top = (screenSize.height - edge - maxHeight).clamp(
-          edge,
-          double.infinity,
-        );
+      if (top + heightBudget > screenSize.height - edge) {
+        top = screenSize.height - edge - heightBudget;
       }
+      top = top.clamp(edge, screenSize.height - edge);
       return (top: top, bottom: null, maxHeight: maxHeight);
     }
     if (opensAbove) {
