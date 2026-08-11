@@ -47,6 +47,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     // Horizontal 0: leading/trailing sit on the bar edge; icon-button targets
     // provide optical inset — matches the selection contextual header.
     this.contentPadding = const EdgeInsets.symmetric(vertical: 8),
+    this.titleGap = 8,
     this.iconSize = 24,
     this.elevation = 0,
     this.compactHeightReduction = 8,
@@ -66,6 +67,11 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
 
   /// Padding around the toolbar content row (inside the bar, outside safe area).
   final EdgeInsetsGeometry contentPadding;
+
+  /// Horizontal inset on the title/search slot (both sides).
+  ///
+  /// Owns the gap to leading/actions, or to the bar edge when those are absent.
+  final double titleGap;
 
   /// iconSize.
   final double iconSize;
@@ -148,6 +154,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
   @override
   M3EAppBarTheme copyWith({
     EdgeInsetsGeometry? contentPadding,
+    double? titleGap,
     double? iconSize,
     double? elevation,
     double? compactHeightReduction,
@@ -161,6 +168,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
   }) {
     return M3EAppBarTheme(
       contentPadding: contentPadding ?? this.contentPadding,
+      titleGap: titleGap ?? this.titleGap,
       iconSize: iconSize ?? this.iconSize,
       elevation: elevation ?? this.elevation,
       compactHeightReduction:
@@ -184,6 +192,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
       contentPadding:
           EdgeInsetsGeometry.lerp(contentPadding, other.contentPadding, t) ??
           contentPadding,
+      titleGap: _lerpDouble(titleGap, other.titleGap, t)!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       elevation: _lerpDouble(elevation, other.elevation, t)!,
       compactHeightReduction: _lerpDouble(

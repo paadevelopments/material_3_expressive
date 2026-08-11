@@ -162,6 +162,15 @@ class _NavigationPageState extends State<NavigationPage>
     );
   }
 
+  /// Matches M3EIconButton sm default target so bare icons align with buttons.
+  Widget _appBarIcon(IconData icon) {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(child: Icon(icon, size: 24)),
+    );
+  }
+
   Widget _appBars(M3EThemeData theme) {
     return GallerySection(
       title: 'App bars',
@@ -170,8 +179,8 @@ class _NavigationPageState extends State<NavigationPage>
           theme,
           M3EAppBar.top(
             titleText: 'Small',
-            leading: const Icon(M3EIcons.menu),
-            actions: const <Widget>[Icon(M3EIcons.search)],
+            leading: _appBarIcon(M3EIcons.menu),
+            actions: <Widget>[_appBarIcon(M3EIcons.search)],
             safeArea: false,
           ),
         ),
@@ -183,7 +192,7 @@ class _NavigationPageState extends State<NavigationPage>
             centerTitle: true,
             density: M3EAppBarDensity.compact,
             shapeFamily: M3EAppBarShapeFamily.square,
-            actions: const <Widget>[Icon(M3EIcons.file_copy)],
+            actions: <Widget>[_appBarIcon(M3EIcons.file_copy)],
             safeArea: false,
           ),
         ),
@@ -193,10 +202,10 @@ class _NavigationPageState extends State<NavigationPage>
           M3EAppBar.search(
             searchController: _appBarSearchController,
             barHintText: 'Search mail',
-            leading: const Icon(M3EIcons.menu),
-            actions: const <Widget>[
-              Icon(M3EIcons.tune),
-              Icon(M3EIcons.account_circle),
+            leading: _appBarIcon(M3EIcons.menu),
+            actions: <Widget>[
+              _appBarIcon(M3EIcons.tune),
+              _appBarIcon(M3EIcons.account_circle),
             ],
             suggestionsBuilder: _appBarSuggestions,
             safeArea: false,
@@ -213,8 +222,8 @@ class _NavigationPageState extends State<NavigationPage>
             child: M3EAppBar.search(
               searchController: _appBarSafeAreaSearchController,
               barHintText: 'Search • safe area',
-              leading: const Icon(M3EIcons.menu),
-              actions: const <Widget>[Icon(M3EIcons.account_circle)],
+              leading: _appBarIcon(M3EIcons.menu),
+              actions: <Widget>[_appBarIcon(M3EIcons.account_circle)],
               suggestionsBuilder: _appBarSuggestions,
             ),
           ),
@@ -230,7 +239,7 @@ class _NavigationPageState extends State<NavigationPage>
                 slivers: <Widget>[
                   M3EAppBar.sliver(
                     titleText: 'Sliver • medium',
-                    actions: const <Widget>[Icon(M3EIcons.search)],
+                    actions: <Widget>[_appBarIcon(M3EIcons.search)],
                   ),
                   SliverList.list(
                     children: <Widget>[
@@ -240,7 +249,12 @@ class _NavigationPageState extends State<NavigationPage>
                             horizontal: 16,
                             vertical: 12,
                           ),
-                          child: Text('Scrollable item ${i + 1}'),
+                          child: Text(
+                            'Scrollable item ${i + 1}',
+                            style: theme.typeScale.bodyMedium.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -254,10 +268,10 @@ class _NavigationPageState extends State<NavigationPage>
           theme,
           M3EAppBar.bottom(
             safeArea: false,
-            actions: const <Widget>[
-              Icon(M3EIcons.menu),
-              Icon(M3EIcons.search),
-              Icon(M3EIcons.edit),
+            actions: <Widget>[
+              _appBarIcon(M3EIcons.menu),
+              _appBarIcon(M3EIcons.search),
+              _appBarIcon(M3EIcons.edit),
             ],
             floatingActionButton: M3EFab(
               icon: const Icon(M3EIcons.add),

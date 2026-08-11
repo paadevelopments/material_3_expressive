@@ -174,19 +174,16 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     final topInset = EdgeInsets.only(
       top: MediaQuery.viewPaddingOf(context).top,
     );
-    // Same horizontal inset as M3EAppBar so idle ↔ contextual edges align.
+    // Match M3EAppBar content band height + contentPadding (incl. vertical).
     final appBarPad = theme.appBarTheme.contentPadding.resolve(
       Directionality.of(context),
     );
-    final rowPad = EdgeInsets.only(
-      left: appBarPad.left,
-      right: appBarPad.right,
-    );
+    final double toolbarHeight = theme.appBarTheme.smallHeight;
 
     final Widget toolbar = SizedBox(
-      height: selectionTheme.contextualToolbarHeight,
+      height: toolbarHeight,
       child: Padding(
-        padding: rowPad,
+        padding: appBarPad,
         child: NavigationToolbar(
           leading: M3EIconButton(
             icon: Icon(M3EIcons.close, color: fg),
@@ -210,7 +207,10 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
         ? SizedBox(
             height: selectionTheme.selectAllHeight,
             child: Padding(
-              padding: rowPad,
+              padding: EdgeInsets.only(
+                left: appBarPad.left,
+                right: appBarPad.right,
+              ),
               child: Row(
                 children: <Widget>[
                   M3ECheckbox(

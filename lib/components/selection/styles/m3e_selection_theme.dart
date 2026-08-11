@@ -18,7 +18,7 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
     this.border,
     this.leadingFlipDuration = const Duration(milliseconds: 220),
     this.selectAllHeight = 48,
-    this.contextualToolbarHeight = 64,
+    this.contextualToolbarHeight = 72,
   });
 
   /// defaults.
@@ -49,6 +49,9 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
   final double selectAllHeight;
 
   /// Height of the contextual selection toolbar (excluding safe area).
+  ///
+  /// Prefer matching the app bar small height; the selection header applies
+  /// app-bar content padding (including vertical) at build time.
   final double contextualToolbarHeight;
 
   /// Selected card fill.

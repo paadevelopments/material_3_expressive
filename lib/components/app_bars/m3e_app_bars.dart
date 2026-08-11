@@ -307,21 +307,18 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               children: [
                 ?resolvedLeading,
-                if (resolvedLeading != null) const SizedBox(width: 8),
                 if (resolvedTitle != null)
                   Expanded(
                     child: _TitleSlot(
                       centerTitle: centerTitle,
                       maxContentWidth: searchMaxWidth,
+                      titleGap: appBarTheme.titleGap,
                       child: resolvedTitle,
                     ),
                   )
                 else
                   const Spacer(),
-                if (actions != null) ...[
-                  const SizedBox(width: 8),
-                  ..._withSpacers(actions!),
-                ],
+                if (actions != null) ..._withSpacers(actions!),
               ],
             ),
           ),
@@ -497,11 +494,13 @@ class _TitleSlot extends StatelessWidget {
   const _TitleSlot({
     required this.centerTitle,
     required this.maxContentWidth,
+    required this.titleGap,
     required this.child,
   });
 
   final bool centerTitle;
   final double maxContentWidth;
+  final double titleGap;
   final Widget child;
 
   @override
@@ -510,20 +509,26 @@ class _TitleSlot extends StatelessWidget {
         ? Alignment.center
         : AlignmentDirectional.centerStart;
 
+    final Widget slot;
     final bool fillSlot =
         child is M3ESearchAnchor || child is _M3EAppBarSearchTitle;
     if (!fillSlot) {
-      return Align(alignment: alignment, child: child);
+      slot = Align(alignment: alignment, child: child);
+    } else {
+      slot = LayoutBuilder(
+        builder: (context, constraints) {
+          final width = math.min(constraints.maxWidth, maxContentWidth);
+          return Align(
+            alignment: alignment,
+            child: SizedBox(width: width, child: child),
+          );
+        },
+      );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = math.min(constraints.maxWidth, maxContentWidth);
-        return Align(
-          alignment: alignment,
-          child: SizedBox(width: width, child: child),
-        );
-      },
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: titleGap),
+      child: slot,
     );
   }
 }
