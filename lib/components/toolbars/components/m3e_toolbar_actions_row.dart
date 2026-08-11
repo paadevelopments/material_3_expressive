@@ -29,6 +29,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     this.axis = Axis.horizontal,
     this.expand = false,
     this.mainAxisAlignment = MainAxisAlignment.start,
+    this.pillActiveSpring = true,
     super.key,
   });
 
@@ -68,6 +69,9 @@ class M3EToolbarActionsRow extends StatelessWidget {
 
   /// mainAxisAlignment.
   final MainAxisAlignment mainAxisAlignment;
+
+  /// When false, labeled actions snap pill layout width on active changes.
+  final bool pillActiveSpring;
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +143,11 @@ class M3EToolbarActionsRow extends StatelessWidget {
       availableExtent: availableExtent,
       axis: axis,
       opticalInset: opticalInset,
-      buildAction: (M3EToolbarAction action) =>
-          M3EToolbarIconButton(action: action, size: iconButtonSize),
+      buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+        action: action,
+        size: iconButtonSize,
+        pillActiveSpring: pillActiveSpring,
+      ),
     );
     if (expandWidgets && item is M3EToolbarWidget) {
       return Expanded(child: built);

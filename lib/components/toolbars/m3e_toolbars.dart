@@ -87,6 +87,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.exitExtent,
     this.activeIndex,
     this.onActiveIndexChanged,
+    this.fabExpandsToolbar = true,
+    this.pillActiveSpring = true,
     super.key,
   }) : placement = M3EToolbarPlacement.floating;
 
@@ -128,6 +130,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.exitExtent,
     this.activeIndex,
     this.onActiveIndexChanged,
+    this.fabExpandsToolbar = true,
+    this.pillActiveSpring = true,
     super.key,
   }) : placement = M3EToolbarPlacement.floating;
 
@@ -174,7 +178,9 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
        fabExpandIcon = null,
        fabCollapseIcon = null,
        onFabPressed = null,
-       fabPosition = M3EToolbarFabPosition.end;
+       fabPosition = M3EToolbarFabPosition.end,
+       fabExpandsToolbar = true,
+       pillActiveSpring = true;
 
   /// placement.
   final M3EToolbarPlacement placement;
@@ -258,7 +264,25 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// the FAB toggles whole-pill expand. When set, it is invoked in addition
   /// to the expand toggle (for default FAB) or alone (custom [floatingActionButton]
   /// that does not wire expand — keep [expanded] true for always-open pill).
+  ///
+  /// When [fabExpandsToolbar] is false, this is the only FAB callback (no
+  /// expand toggle). If null, the FAB tap is a no-op.
   final VoidCallback? onFabPressed;
+
+  /// When true (default), an adjacent FAB toggles whole-pill expand/collapse
+  /// and morphs between large (80) and small (56) sizes.
+  ///
+  /// When false, the pill stays open, the FAB stays at [M3EToolbarTokens.fabBaseline]
+  /// (56), and only [onFabPressed] runs. [expanded] / [onExpandedChanged] are
+  /// ignored. Floating toolbars only.
+  final bool fabExpandsToolbar;
+
+  /// When true (default), labeled action selection springs the toolbar pill
+  /// width in sync with each action's label morph.
+  ///
+  /// When false, actions keep their label animation but the pill layout width
+  /// snaps immediately on active-index changes.
+  final bool pillActiveSpring;
 
   /// fabPosition.
   final M3EToolbarFabPosition fabPosition;
@@ -337,7 +361,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
 
   /// Neighbor-reveal expand (no FAB). FAB path uses whole-pill morph instead.
   bool get _usesTriggerExpand => _floating && !_hasFab && _hasTrigger;
-  bool get _usesFabExpand => _hasFab;
+  bool get _usesFabExpand => _hasFab && widget.fabExpandsToolbar;
 
   M3EToolbarVisibilityController? get _visibility {
     return widget.visibilityController ?? widget.scrollBehavior?.controller;
@@ -419,7 +443,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
       vsync: this,
       initialValue: startExpanded ? 1 : 0,
     )..addListener(_handleExpandTick);
-    _fabSize = _lerpFabSize(_expandCtrl.value);
+    _fabSize = _resolvedFabSize(_expandCtrl.value);
     _visibility?.attach(this);
     _applyExitExtent();
   }
@@ -476,15 +500,23 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   }
 
   void _handleExpandTick() {
+    if (!_usesFabExpand) {
+      return;
+    }
     setState(() {
-      _fabSize = _lerpFabSize(_expandCtrl.value);
+      _fabSize = _resolvedFabSize(_expandCtrl.value);
     });
   }
 
-  double _lerpFabSize(double progress) {
+  double _resolvedFabSize(double progress) {
+    if (_hasFab && !widget.fabExpandsToolbar) {
+      return M3EToolbarTokens.fabBaseline;
+    }
     return M3EToolbarTokens.fabMedium +
         (M3EToolbarTokens.fabBaseline - M3EToolbarTokens.fabMedium) * progress;
   }
+
+  double get _fabLayoutProgress => _usesFabExpand ? _expandCtrl.value : 1.0;
 
   void _applyExitExtent() {
     final double? extent = widget.exitExtent ?? _visibility?.exitExtent;
@@ -511,6 +543,8 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   void _onFabPressed() {
     if (_usesFabExpand) {
       _toggleExpanded();
+      widget.onFabPressed?.call();
+      return;
     }
     widget.onFabPressed?.call();
   }
@@ -550,16 +584,19 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
         widget.fabExpandIcon ?? widget.fabIcon ?? const Icon(M3EIcons.add);
     final Widget collapseIcon =
         widget.fabCollapseIcon ?? const Icon(M3EIcons.close);
+    final bool fabExpands = widget.fabExpandsToolbar;
+    final fabIcon = fabExpands && _expanded ? collapseIcon : expandIcon;
+    final VoidCallback? fabOnPressed = widget.floatingActionButton == null
+        ? (fabExpands ? _onFabPressed : widget.onFabPressed)
+        : widget.onFabPressed;
     final Widget fab = M3EToolbarFabSlot(
       fab: widget.floatingActionButton,
-      icon: _expanded ? collapseIcon : expandIcon,
-      onPressed: widget.floatingActionButton == null
-          ? _onFabPressed
-          : widget.onFabPressed,
+      icon: fabIcon,
+      onPressed: fabOnPressed,
       color: style == M3EToolbarColorStyle.vibrant
           ? M3EFabColor.tertiary
           : M3EFabColor.primary,
-      containerSize: _fabSize,
+      containerSize: fabExpands ? _fabSize : M3EToolbarTokens.fabBaseline,
     );
 
     final horizontal = widget.axis == Axis.horizontal;
@@ -575,7 +612,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
               ? widget.fabPosition
               : M3EToolbarFabPosition.end;
           return M3EToolbarHorizontalFabLayout(
-            progress: _expandCtrl.value,
+            progress: _fabLayoutProgress,
             fabPosition: pos,
             isRtl: isRtl,
             toolbar: toolbar,
@@ -588,7 +625,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
             ? widget.fabPosition
             : M3EToolbarFabPosition.bottom;
         return M3EToolbarVerticalFabLayout(
-          progress: _expandCtrl.value,
+          progress: _fabLayoutProgress,
           fabPosition: pos,
           toolbar: toolbar,
           fab: fab,

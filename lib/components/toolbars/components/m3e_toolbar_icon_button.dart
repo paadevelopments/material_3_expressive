@@ -20,6 +20,7 @@ class M3EToolbarIconButton extends StatefulWidget {
     required this.size,
     this.onPressed,
     this.variant,
+    this.pillActiveSpring = true,
     super.key,
   });
 
@@ -35,6 +36,9 @@ class M3EToolbarIconButton extends StatefulWidget {
   /// Defaults to filled when [M3EToolbarAction.isExpandTrigger] or
   /// [M3EToolbarAction.active], else standard.
   final M3EIconButtonVariant? variant;
+
+  /// When false, layout width snaps while label morph animation still runs.
+  final bool pillActiveSpring;
 
   @override
   State<M3EToolbarIconButton> createState() => _M3EToolbarIconButtonState();
@@ -140,6 +144,8 @@ class _M3EToolbarIconButtonState extends State<M3EToolbarIconButton>
     final double expandedWidth = visual.width + labelGap + labelWidth;
     final double sprungWidth =
         visual.width + (expandedWidth - visual.width) * t;
+    final layoutWidth = _showLabeled ? expandedWidth : visual.width;
+    final widthForLayout = widget.pillActiveSpring ? sprungWidth : layoutWidth;
 
     final Widget icon = Row(
       mainAxisSize: MainAxisSize.min,
@@ -177,7 +183,7 @@ class _M3EToolbarIconButtonState extends State<M3EToolbarIconButton>
 
     return _buildIconButton(
       icon: icon,
-      visualSize: Size(sprungWidth, visual.height),
+      visualSize: Size(widthForLayout, visual.height),
     );
   }
 

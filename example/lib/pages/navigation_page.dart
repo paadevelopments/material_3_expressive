@@ -28,6 +28,8 @@ class _NavigationPageState extends State<NavigationPage>
   int _drawerIndex = 0;
   int _primaryTab = 0;
   int _secondaryTab = 0;
+  int _toolbarLabeledIndex = 0;
+  int _toolbarLabeledNoSpringIndex = 0;
   late final M3EToolbarVisibilityController _toolbarVisibility =
       M3EToolbarVisibilityController();
   late final M3EToolbarScrollBehavior _toolbarScrollBehavior =
@@ -425,12 +427,66 @@ class _NavigationPageState extends State<NavigationPage>
           ],
         ),
         DemoRow(
+          label:
+              'Floating + FAB (fabExpandsToolbar: false — small FAB, pill static)',
+          children: <Widget>[
+            M3EToolbar(
+              fabExpandsToolbar: false,
+              onFabPressed: () {},
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.share, onPressed: () {}),
+                M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+              ],
+              fabExpandIcon: const Icon(M3EIcons.add),
+            ),
+          ],
+        ),
+        DemoRow(
           label: 'Floating actions with label + active (tap to select)',
           children: <Widget>[
             M3EToolbar(
               colorStyle: M3EToolbarColorStyle.vibrant,
-              activeIndex: 0,
-              onActiveIndexChanged: (int index) {},
+              activeIndex: _toolbarLabeledIndex,
+              onActiveIndexChanged: (int index) {
+                setState(() => _toolbarLabeledIndex = index);
+              },
+              actions: <M3EToolbarItem>[
+                M3EToolbarAction(
+                  icon: M3EIcons.home,
+                  label: 'Home',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.search,
+                  label: 'Search',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.favorite,
+                  label: 'Favorites',
+                  onPressed: () {},
+                ),
+                M3EToolbarAction(
+                  icon: M3EIcons.person,
+                  label: 'Profile',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
+        DemoRow(
+          label:
+              'Labeled selection (pillActiveSpring: false — pill width snaps)',
+          children: <Widget>[
+            M3EToolbar(
+              colorStyle: M3EToolbarColorStyle.vibrant,
+              pillActiveSpring: false,
+              activeIndex: _toolbarLabeledNoSpringIndex,
+              onActiveIndexChanged: (int index) {
+                setState(() => _toolbarLabeledNoSpringIndex = index);
+              },
               actions: <M3EToolbarItem>[
                 M3EToolbarAction(
                   icon: M3EIcons.home,

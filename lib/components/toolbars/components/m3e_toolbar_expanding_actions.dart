@@ -28,6 +28,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     this.trailing,
     this.gap = 0,
     this.opticalInset = 0,
+    this.pillActiveSpring = true,
     super.key,
   });
 
@@ -76,6 +77,9 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   /// Icon-button target overhang; applied to widget slots for optical parity.
   final double opticalInset;
 
+  /// When false, labeled actions snap pill layout width on active changes.
+  final bool pillActiveSpring;
+
   static const double _iconRevealStart = 0.4;
 
   @override
@@ -112,6 +116,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       action: trigger,
       size: iconButtonSize,
       onPressed: onTriggerPressed,
+      pillActiveSpring: pillActiveSpring,
     );
 
     final Widget? beforeSide = sidesVisible
@@ -158,8 +163,11 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           availableExtent: availableExtent,
           axis: axis,
           opticalInset: opticalInset,
-          buildAction: (M3EToolbarAction action) =>
-              M3EToolbarIconButton(action: action, size: iconButtonSize),
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+            pillActiveSpring: pillActiveSpring,
+          ),
         ),
       if (partitioned.overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
@@ -211,8 +219,11 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           availableExtent: availableExtent,
           axis: axis,
           opticalInset: opticalInset,
-          buildAction: (M3EToolbarAction action) =>
-              M3EToolbarIconButton(action: action, size: iconButtonSize),
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+            pillActiveSpring: pillActiveSpring,
+          ),
         ),
       if (overflow != null && overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
