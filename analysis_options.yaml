@@ -18,6 +18,7 @@ custom_lint:
 analyzer:
   exclude:
     - "analysis_options.yaml"
+    - "README.md"
     # Generated Material Icons glyph registry (~52k lines); not practical to split.
     - "lib/foundations/m3e_icons.dart"
 
