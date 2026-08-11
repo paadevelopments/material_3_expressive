@@ -283,8 +283,8 @@ class _ContainmentPageState extends State<ContainmentPage>
       title: 'Selection',
       children: <Widget>[
         Text(
-          'Gmail-style multi-select with contextual app bar. Long-press a row '
-          'or tap an avatar to enter selection mode.',
+          'Multi-select with a contextual app bar. Long-press a row or tap a '
+          'leading avatar to enter selection mode.',
           style: theme.typeScale.bodyMedium.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

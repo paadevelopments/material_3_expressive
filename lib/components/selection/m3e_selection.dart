@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'components/m3e_selection_app_bar.dart';
-import 'components/m3e_selection_list.dart';
 import 'components/m3e_selection_scope.dart';
 import 'controllers/m3e_selection_controller.dart';
 
 export 'components/m3e_selection_app_bar.dart';
 export 'components/m3e_selection_leading.dart';
-export 'components/m3e_selection_list.dart';
 export 'components/m3e_selection_scope.dart';
 export 'controllers/m3e_selection_controller.dart';
 export 'styles/m3e_selection_theme.dart';
 
-/// Host widget that wires [M3ESelectionAppBar] and [M3ESelectionList] to one
+/// Host widget that wires [M3ESelectionAppBar] and any list [body] to one
 /// [M3ESelectionController].
 ///
-/// When [controller] is omitted, an internal controller is created and disposed
-/// with this widget. Prefer wrapping the route with [PopScope] so system back
-/// clears selection instead of popping:
+/// Prefer wrapping the route with [PopScope] so system back clears selection
+/// instead of popping:
 ///
 /// ```dart
 /// PopScope(
@@ -25,14 +22,20 @@ export 'styles/m3e_selection_theme.dart';
 ///   onPopInvokedWithResult: (didPop, _) {
 ///     if (!didPop) controller.clear();
 ///   },
-///   child: M3ESelection(...),
+///   child: M3ESelection(
+///     controller: controller,
+///     itemCount: items.length,
+///     appBar: M3ESelectionAppBar(...),
+///     body: M3ECardList.builder(...),
+///   ),
 /// )
 /// ```
 class M3ESelection extends StatefulWidget {
   /// Creates a selection host.
   const M3ESelection({
     required this.appBar,
-    required this.list,
+    required this.body,
+    required this.itemCount,
     this.controller,
     this.scaffold = true,
     this.backgroundColor,
@@ -43,13 +46,16 @@ class M3ESelection extends StatefulWidget {
   /// Idle / contextual app bar wrapper.
   final M3ESelectionAppBar appBar;
 
-  /// Selection list.
-  final M3ESelectionList list;
+  /// Any list body (card list, dismissible list, etc.).
+  final Widget body;
+
+  /// Item count for select-all / [M3ESelectionScope].
+  final int itemCount;
 
   /// Optional external controller. When null, one is owned internally.
   final M3ESelectionController? controller;
 
-  /// When true (default), builds a [Scaffold] with [appBar] and [list] as body.
+  /// When true (default), builds a [Scaffold] with [appBar] and [body].
   /// Set false to embed under a host that already owns a [Scaffold].
   final bool scaffold;
 
@@ -108,8 +114,7 @@ class _M3ESelectionState extends State<M3ESelection> {
   Widget build(BuildContext context) {
     final M3ESelectionAppBar wiredBar = widget.appBar.copyWithWiring(
       controller: _controller,
-      itemCount: widget.appBar.itemCount ?? widget.list.itemCount,
-      onAllSelected: widget.appBar.onAllSelected ?? widget.list.onAllSelected,
+      itemCount: widget.appBar.itemCount ?? widget.itemCount,
     );
 
     return ListenableBuilder(
@@ -117,18 +122,18 @@ class _M3ESelectionState extends State<M3ESelection> {
       builder: (BuildContext context, Widget? _) {
         return M3ESelectionScope(
           controller: _controller,
-          itemCount: widget.list.itemCount,
+          itemCount: widget.itemCount,
           child: widget.scaffold
               ? Scaffold(
                   appBar: wiredBar,
                   backgroundColor: widget.backgroundColor,
                   resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-                  body: widget.list,
+                  body: widget.body,
                 )
               : Column(
                   children: <Widget>[
                     wiredBar,
-                    Expanded(child: widget.list),
+                    Expanded(child: widget.body),
                   ],
                 ),
         );

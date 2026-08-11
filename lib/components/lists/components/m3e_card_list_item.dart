@@ -61,6 +61,8 @@ class M3ECardListItem extends StatelessWidget {
     this.haptic = M3EHapticFeedback.none,
     this.variant = M3ECardVariant.filled,
     this.border,
+    this.resolvedColor,
+    this.resolvedBorderRadius,
     super.key,
   });
 
@@ -110,17 +112,25 @@ class M3ECardListItem extends StatelessWidget {
   /// Optional card outline.
   final BorderSide? border;
 
+  /// Per-item color override. When null for an index, uses [color].
+  final Color? resolvedColor;
+
+  /// Per-item radius override. When null, uses position-based radii.
+  final BorderRadius? resolvedBorderRadius;
+
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final cardListTheme = theme.listTheme.cardList;
 
-    final borderRadius = calculateCardRadius(
-      position: position,
-      outerRadius: outerRadius,
-      innerRadius: innerRadius,
-    );
+    final borderRadius =
+        resolvedBorderRadius ??
+        calculateCardRadius(
+          position: position,
+          outerRadius: outerRadius,
+          innerRadius: innerRadius,
+        );
 
     final bool isLast =
         position == M3ECardPosition.last || position == M3ECardPosition.single;
@@ -138,7 +148,7 @@ class M3ECardListItem extends StatelessWidget {
         variant: variant,
         border: border,
         borderRadius: borderRadius,
-        color: color ?? cardListTheme.backgroundColor(scheme),
+        color: resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
         padding: padding ?? cardListTheme.itemPadding,
         onPressed: wrappedOnTap,
         onLongPress: wrappedOnLongPress,

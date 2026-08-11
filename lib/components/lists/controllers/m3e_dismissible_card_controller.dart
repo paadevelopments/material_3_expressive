@@ -5,6 +5,7 @@ import 'package:motor/motor.dart';
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
 import '../components/m3e_list_item_scope.dart';
+import '../enums/m3e_list_enums.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
 
@@ -59,6 +60,16 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
 
   /// The Function.
   void Function(int index)? get onTapCallback;
+
+  /// Optional long-press callback (visible item index).
+  void Function(int index)? get onLongPressCallback => null;
+
+  /// Optional per-index card color override.
+  Color? Function(int index)? get colorBuilder => null;
+
+  /// Optional per-index border radius override.
+  BorderRadius? Function(int index, M3ECardPosition position)?
+  get borderRadiusBuilder => null;
 
   final List<M3EDismissibleSlot> _slots = [];
   M3EDismissibleSlot? _dragSlotRef;

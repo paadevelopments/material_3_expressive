@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-/// Full-screen Gmail-style selection demo (opened from Containment).
+/// Full-screen multi-select demo (opened from Containment).
 class SelectionDemoPage extends StatefulWidget {
   /// Creates the selection demo page.
   const SelectionDemoPage({super.key});
@@ -13,49 +13,18 @@ class SelectionDemoPage extends StatefulWidget {
 class _SelectionDemoPageState extends State<SelectionDemoPage> {
   final M3ESelectionController _selection = M3ESelectionController();
   late final M3ESearchController _search;
+  bool _dismissible = false;
 
-  static const List<({String from, String subject, String preview})> _mail =
-      <({String from, String subject, String preview})>[
-        (
-          from: 'Google Pay',
-          subject: 'Your receipt from Google Pay',
-          preview: 'You paid ¢1.00 to …',
-        ),
-        (
-          from: 'Play Developer Console',
-          subject: 'Action Required: Complete your account details',
-          preview: 'To keep publishing on Google Play…',
-        ),
-        (
-          from: 'Firebase',
-          subject: '[Firebase] Your monthly insights',
-          preview: 'See how your projects performed…',
-        ),
-        (
-          from: 'Material Design',
-          subject: 'New expressive shape tokens',
-          preview: 'Explore the latest guidance…',
-        ),
-        (
-          from: 'Flutter',
-          subject: 'Stable release notes',
-          preview: 'Highlights from the latest release…',
-        ),
-        (
-          from: 'GitHub',
-          subject: '[GitHub] Security alert',
-          preview: 'A dependency in your repository…',
-        ),
-        (
-          from: 'Figma',
-          subject: 'Comments on your file',
-          preview: 'Someone left feedback on…',
-        ),
-        (
-          from: 'Notion',
-          subject: 'Weekly digest',
-          preview: 'Pages you may have missed…',
-        ),
+  static const List<({String title, String subtitle})> _items =
+      <({String title, String subtitle})>[
+        (title: 'Design review', subtitle: 'Expressive shapes and motion'),
+        (title: 'Release checklist', subtitle: 'Ship blockers and owners'),
+        (title: 'Weekly sync notes', subtitle: 'Decisions from Monday'),
+        (title: 'Accessibility audit', subtitle: 'Contrast and focus order'),
+        (title: 'Theme tokens', subtitle: 'Spacing and type scale'),
+        (title: 'Demo gallery', subtitle: 'Containment samples'),
+        (title: 'Toolbar polish', subtitle: 'Pill spacing and springs'),
+        (title: 'Selection patterns', subtitle: 'Multi-select with app bar'),
       ];
 
   @override
@@ -97,10 +66,118 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     return const <Widget>[];
   }
 
+  Widget _leading(BuildContext context, int index) {
+    final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
+    final bool selected = _selection.isSelected(index);
+    return M3ESelectionLeading(
+      selected: selected,
+      onTap: () => _selection.toggle(index),
+      selectedChild: CircleAvatar(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        child: const Icon(M3EIcons.check, size: 20),
+      ),
+      child: CircleAvatar(
+        backgroundColor: _avatarColor(index, scheme),
+        foregroundColor: scheme.onPrimary,
+        child: Text(_items[index].title.substring(0, 1)),
+      ),
+    );
+  }
+
+  Widget _item(BuildContext context, int index) {
+    final item = _items[index];
+    return M3EListItem(
+      headline: item.title,
+      supportingText: item.subtitle,
+      leading: _leading(context, index),
+    );
+  }
+
+  void _onTap(int index) {
+    if (_selection.isSelectionMode) {
+      _selection.toggle(index);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Open ${_items[index].title}')));
+    }
+  }
+
+  void _onLongPress(int index) {
+    M3EHaptics.trigger(M3EHapticFeedback.medium);
+    if (!_selection.isSelected(index)) {
+      _selection.select(index);
+    }
+  }
+
+  Color? _colorBuilder(int index) {
+    if (!_selection.isSelected(index)) {
+      return null;
+    }
+    return M3ETheme.of(context).colorScheme.secondaryContainer;
+  }
+
+  BorderRadius? _radiusBuilder(int index, M3ECardPosition position) {
+    if (!_selection.isSelected(index)) {
+      return null;
+    }
+    return BorderRadius.circular(M3EListCardListTheme.defaultOuterRadius);
+  }
+
+  static const EdgeInsets _listPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 8,
+  );
+
+  Widget _cardListBody() {
+    return M3ECardList.builder(
+      itemCount: _items.length,
+      listPadding: _listPadding,
+      colorBuilder: _colorBuilder,
+      borderRadiusBuilder: _radiusBuilder,
+      onTap: _onTap,
+      onLongPress: _onLongPress,
+      haptic: M3EHapticFeedback.medium,
+      itemBuilder: _item,
+    );
+  }
+
+  Widget _dismissibleBody(M3EThemeData theme) {
+    return M3EDismissibleList(
+      itemCount: _items.length,
+      listPadding: _listPadding,
+      colorBuilder: _colorBuilder,
+      borderRadiusBuilder: _radiusBuilder,
+      onTap: _onTap,
+      onLongPress: _onLongPress,
+      onDismiss: (int index, DismissDirection direction) async {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Dismissed ${_items[index].title}')),
+        );
+        return true;
+      },
+      style: M3EDismissibleListStyle(
+        background: Container(
+          color: theme.colorScheme.success,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Icon(M3EIcons.check, color: theme.colorScheme.onSurface),
+        ),
+        secondaryBackground: Container(
+          color: theme.colorScheme.danger,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Icon(M3EIcons.close, color: theme.colorScheme.onSurface),
+        ),
+      ),
+      itemBuilder: _item,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final M3EColorScheme scheme = theme.colorScheme;
 
     return PopScope(
       canPop: !_selection.isSelectionMode,
@@ -111,16 +188,28 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
       },
       child: M3ESelection(
         controller: _selection,
+        itemCount: _items.length,
         appBar: M3ESelectionAppBar(
           idle: M3EAppBar.search(
             searchController: _search,
             suggestionsBuilder: _suggestions,
-            barHintText: 'Search in mail',
+            barHintText: 'Search items',
             leading: M3EIconButton(
               icon: const Icon(M3EIcons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),
               tooltip: 'Back',
             ),
+            actions: <Widget>[
+              M3EIconButton(
+                icon: Icon(_dismissible ? M3EIcons.swipe : M3EIcons.view_list),
+                onPressed: () {
+                  setState(() => _dismissible = !_dismissible);
+                },
+                tooltip: _dismissible
+                    ? 'Show card list'
+                    : 'Show dismissible list',
+              ),
+            ],
           ),
           actions: <Widget>[
             M3EIconButton(
@@ -134,47 +223,13 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
               tooltip: 'Delete',
             ),
             M3EIconButton(
-              icon: const Icon(M3EIcons.mail),
-              onPressed: () {},
-              tooltip: 'Mark unread',
-            ),
-            M3EIconButton(
               icon: const Icon(M3EIcons.more_vert),
               onPressed: () {},
               tooltip: 'More',
             ),
           ],
         ),
-        list: M3ESelectionList(
-          itemCount: _mail.length,
-          onTap: (int index) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Open ${_mail[index].subject}')),
-            );
-          },
-          leadingBuilder: (BuildContext context, int index) {
-            final String letter = _mail[index].from.substring(0, 1);
-            return CircleAvatar(
-              backgroundColor: _avatarColor(index, scheme),
-              foregroundColor: scheme.onPrimary,
-              child: Text(letter),
-            );
-          },
-          selectedLeadingBuilder: (BuildContext context, int index) {
-            return CircleAvatar(
-              backgroundColor: scheme.primary,
-              foregroundColor: scheme.onPrimary,
-              child: const Icon(M3EIcons.check, size: 20),
-            );
-          },
-          itemBuilder: (BuildContext context, int index) {
-            final item = _mail[index];
-            return M3EListItem(
-              headline: item.from,
-              supportingText: '${item.subject}\n${item.preview}',
-            );
-          },
-        ),
+        body: _dismissible ? _dismissibleBody(theme) : _cardListBody(),
       ),
     );
   }

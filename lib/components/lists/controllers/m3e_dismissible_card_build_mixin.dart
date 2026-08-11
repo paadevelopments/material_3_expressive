@@ -145,7 +145,16 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     final isLast = slotPos == total - 1;
     final isDragged = slotIndex == _dragSlotIndex;
     final dragPos = _dragSlotIndex >= 0 ? visible.indexOf(_dragSlotIndex) : -1;
-    final br = computeRadius(slotIndex, slotPos, dragPos, visible);
+    final M3ECardPosition position = total == 1
+        ? M3ECardPosition.single
+        : slotPos == 0
+        ? M3ECardPosition.first
+        : slotPos == total - 1
+        ? M3ECardPosition.last
+        : M3ECardPosition.middle;
+    final br =
+        borderRadiusBuilder?.call(slotPos, position) ??
+        computeRadius(slotIndex, slotPos, dragPos, visible);
     final nOff = computeNeighbourOffset(slotPos, dragPos);
     final swipingRight = _dragOffset > 0;
     final activeBg = swipingRight
@@ -246,6 +255,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
             surfaceKey: _measureKey(slot),
             borderRadius: borderRadius,
             color:
+                colorBuilder?.call(slotPos) ??
                 s.color ??
                 M3ETheme.of(context).colorScheme.surfaceContainerHighest,
             border: s.border,
@@ -258,6 +268,9 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
             onPressed: isInteractionLocked || onTapCallback == null
                 ? null
                 : () => onTapCallback!(slotPos),
+            onLongPress: isInteractionLocked || onLongPressCallback == null
+                ? null
+                : () => onLongPressCallback!(slotPos),
             haptic: s.hapticOnTap,
             child: Padding(
               padding: s.padding ?? const EdgeInsets.all(16),

@@ -8,6 +8,7 @@ import 'components/m3e_expandable_data.dart';
 import 'components/m3e_expandable_list_base.dart';
 import 'components/m3e_list_item_scope.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
+import 'enums/m3e_list_enums.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_expandable_style.dart';
 import 'styles/m3e_list_theme.dart';
@@ -216,7 +217,15 @@ class M3ECardList extends StatelessWidget {
   /// The background color for each card.
   ///
   /// Defaults to `M3EListCardListTheme.defaults.backgroundColor` if null.
+  /// Overridden per index when [colorBuilder] returns a non-null color.
   final Color? color;
+
+  /// Optional per-index card color. Non-null wins over [color].
+  final Color? Function(int index)? colorBuilder;
+
+  /// Optional per-index border radius. Non-null wins over position radii.
+  final BorderRadius? Function(int index, M3ECardPosition position)?
+  borderRadiusBuilder;
 
   /// The inner padding applied to the [itemBuilder] child of each item.
   ///
@@ -302,6 +311,8 @@ class M3ECardList extends StatelessWidget {
     this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
     this.gap = M3EListCardListTheme.defaultGap,
     this.color,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.padding,
     this.margin,
     this.onTap,
@@ -327,6 +338,8 @@ class M3ECardList extends StatelessWidget {
     this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
     this.gap = M3EListCardListTheme.defaultGap,
     this.color,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.padding,
     this.margin,
     this.onTap,
@@ -386,13 +399,16 @@ class M3ECardList extends StatelessWidget {
 
   Widget _buildItem(BuildContext context, int index, int total) {
     final cardListTheme = M3ETheme.of(context).listTheme.cardList;
+    final M3ECardPosition position = calculateCardPosition(index, total);
     return M3ECardListItem(
       index: index,
-      position: calculateCardPosition(index, total),
+      position: position,
       outerRadius: outerRadius,
       innerRadius: innerRadius,
       gap: gap,
       color: color,
+      resolvedColor: colorBuilder?.call(index),
+      resolvedBorderRadius: borderRadiusBuilder?.call(index, position),
       padding: padding,
       onTap: onTap,
       onLongPress: onLongPress,

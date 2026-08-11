@@ -753,11 +753,12 @@ M3ECardList.builder(
 
 #### M3ESelection
 
-Gmail-style multi-select host: optional [M3ESelectionController],
-[M3ESelectionAppBar] (idle bar → contextual bar + select-all), and
-[M3ESelectionList] (card radii, selected fill, leading flip). Long-press a row
-or tap the leading widget to enter selection; body taps toggle only while
-selecting. Wrap with [PopScope] so system back clears selection first.
+Multi-select host: optional [M3ESelectionController], [M3ESelectionAppBar]
+(idle bar → contextual bar + select-all), and any list [body]
+([M3ECardList], [M3EDismissibleList], …). Wire selection chrome on the list via
+`colorBuilder` / `borderRadiusBuilder`, gestures (`onTap` / `onLongPress`), and
+[M3ESelectionLeading] on each item. Wrap with [PopScope] so system back clears
+selection first. Prefer `listPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)`.
 
 ```dart
 final selection = M3ESelectionController();
@@ -769,31 +770,48 @@ PopScope(
   },
   child: M3ESelection(
     controller: selection,
+    itemCount: items.length,
     appBar: M3ESelectionAppBar(
       idle: M3EAppBar.search(
         searchController: searchController,
         suggestionsBuilder: (_, __) => const [],
-        barHintText: 'Search in mail',
+        barHintText: 'Search items',
       ),
       actions: [
         M3EIconButton(icon: Icon(M3EIcons.archive), onPressed: () {}),
         M3EIconButton(icon: Icon(M3EIcons.delete), onPressed: () {}),
       ],
     ),
-    list: M3ESelectionList(
+    body: M3ECardList.builder(
       itemCount: items.length,
-      leadingBuilder: (context, i) => CircleAvatar(child: Text('$i')),
-      selectedLeadingBuilder: (context, i) =>
-          CircleAvatar(child: Icon(M3EIcons.check)),
-      itemBuilder: (context, i) => M3EListItem(headline: items[i]),
-      onTap: (i) {},
+      listPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      colorBuilder: (i) =>
+          selection.isSelected(i) ? scheme.secondaryContainer : null,
+      borderRadiusBuilder: (i, pos) => selection.isSelected(i)
+          ? BorderRadius.circular(24)
+          : null,
+      onLongPress: (i) => selection.select(i),
+      onTap: (i) {
+        if (selection.isSelectionMode) {
+          selection.toggle(i);
+        }
+      },
+      itemBuilder: (context, i) => M3EListItem(
+        headline: items[i],
+        leading: M3ESelectionLeading(
+          selected: selection.isSelected(i),
+          onTap: () => selection.toggle(i),
+          selectedChild: CircleAvatar(child: Icon(M3EIcons.check)),
+          child: CircleAvatar(child: Text('$i')),
+        ),
+      ),
     ),
   ),
 );
 ```
 
-Advanced: wire `M3ESelectionAppBar` + `M3ESelectionList` yourself with a shared
-controller (omit `M3ESelection`).
+Advanced: wire `M3ESelectionAppBar` + a shared controller yourself (omit
+`M3ESelection`), or pass `M3EDismissibleList` as `body` for swipe + select.
 
 #### M3EDismissibleColumn
 

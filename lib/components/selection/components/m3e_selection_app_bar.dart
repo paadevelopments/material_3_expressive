@@ -31,7 +31,7 @@ class M3ESelectionAppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Selection controller. Optional under [M3ESelectionScope].
   final M3ESelectionController? controller;
 
-  /// Item count for select-all. Optional under [M3ESelectionScope] (from list).
+  /// Item count for select-all. Optional under [M3ESelectionScope].
   final int? itemCount;
 
   /// Contextual action widgets (typically [M3EIconButton]s).
@@ -79,13 +79,8 @@ class M3ESelectionAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize {
-    final M3ESelectionController? c = controller;
-    if (c != null) {
-      if (c.isSelectionMode) {
-        return Size.fromHeight(_selectionHeight());
-      }
-      return idle.preferredSize;
-    }
+    // Hold max(idle, selection) so Scaffold does not shrink under the
+    // AnimatedSwitcher exit child when leaving selection mode.
     return Size.fromHeight(
       math.max(idle.preferredSize.height, _selectionHeight()),
     );
