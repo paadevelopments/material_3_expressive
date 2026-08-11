@@ -1,19 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-/// Full-screen multi-select demo (opened from Containment).
-class SelectionDemoPage extends StatefulWidget {
-  /// Creates the selection demo page.
-  const SelectionDemoPage({super.key});
+import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/play_preview_card.dart';
+import '../../../widgets/playground/playground_body.dart';
+
+/// Live playground for [M3ESelection], adapted from [SelectionDemoPage].
+class SelectionPlayground extends StatefulWidget {
+  /// Creates the selection playground.
+  const SelectionPlayground({super.key});
 
   @override
-  State<SelectionDemoPage> createState() => _SelectionDemoPageState();
+  State<SelectionPlayground> createState() => _SelectionPlaygroundState();
 }
 
-class _SelectionDemoPageState extends State<SelectionDemoPage> {
+class _SelectionPlaygroundState extends State<SelectionPlayground> {
+  bool _dismissible = false;
+  bool _showSelectAll = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    return PlaygroundBody(
+      previews: <Widget>[
+        PlayPreviewCard(
+          label: 'Selection demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Long-press a row or tap a leading avatar to enter selection '
+                'mode. System back clears selection first.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return _SelectionDemoHost(
+                          dismissible: _dismissible,
+                          showSelectAll: _showSelectAll,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Open selection demo'),
+              ),
+            ],
+          ),
+        ),
+      ],
+      controls: <Widget>[
+        PlayControlPanel(
+          title: 'Demo options',
+          children: <Widget>[
+            PlaySwitch(
+              label: 'Dismissible list',
+              value: _dismissible,
+              onChanged: (bool v) => setState(() => _dismissible = v),
+            ),
+            PlaySwitch(
+              label: 'Show select all',
+              value: _showSelectAll,
+              onChanged: (bool v) => setState(() => _showSelectAll = v),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SelectionDemoHost extends StatefulWidget {
+  const _SelectionDemoHost({
+    required this.dismissible,
+    required this.showSelectAll,
+  });
+
+  final bool dismissible;
+  final bool showSelectAll;
+
+  @override
+  State<_SelectionDemoHost> createState() => _SelectionDemoHostState();
+}
+
+class _SelectionDemoHostState extends State<_SelectionDemoHost> {
   final M3ESelectionController _selection = M3ESelectionController();
   late final M3ESearchController _search;
-  bool _dismissible = false;
 
   static const List<({String title, String subtitle})> _items =
       <({String title, String subtitle})>[
@@ -34,9 +113,7 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     _selection.addListener(_onSelection);
   }
 
-  void _onSelection() {
-    setState(() {});
-  }
+  void _onSelection() => setState(() {});
 
   @override
   void dispose() {
@@ -47,23 +124,12 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
   }
 
   Color _avatarColor(int index, M3EColorScheme scheme) {
-    switch (index % 4) {
-      case 0:
-        return scheme.primary;
-      case 1:
-        return scheme.secondary;
-      case 2:
-        return scheme.tertiary;
-      default:
-        return scheme.error;
-    }
-  }
-
-  Iterable<Widget> _suggestions(
-    BuildContext context,
-    M3ESearchController controller,
-  ) {
-    return const <Widget>[];
+    return switch (index % 4) {
+      0 => scheme.primary,
+      1 => scheme.secondary,
+      2 => scheme.tertiary,
+      _ => scheme.error,
+    };
   }
 
   Widget _leading(BuildContext context, int index) {
@@ -90,7 +156,7 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
   }
 
   Widget _item(BuildContext context, int index) {
-    final item = _items[index];
+    final ({String title, String subtitle}) item = _items[index];
     return M3EListItem(
       headline: item.title,
       supportingText: item.subtitle,
@@ -98,15 +164,11 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     );
   }
 
-  void _showMessage(String message) {
-    M3ESnackbar.show(context, message: message);
-  }
-
   void _onTap(int index) {
     if (_selection.isSelectionMode) {
       _selection.toggle(index);
     } else {
-      _showMessage('Open ${_items[index].title}');
+      M3ESnackbar.show(context, message: 'Open ${_items[index].title}');
     }
   }
 
@@ -136,7 +198,39 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     vertical: 8,
   );
 
-  Widget _cardListBody() {
+  Widget _body(M3EThemeData theme) {
+    if (widget.dismissible) {
+      return M3EDismissibleList(
+        itemCount: _items.length,
+        listPadding: _listPadding,
+        colorBuilder: _colorBuilder,
+        borderRadiusBuilder: _radiusBuilder,
+        onTap: _onTap,
+        onLongPress: _onLongPress,
+        onDismiss: (int index, DismissDirection direction) async {
+          M3ESnackbar.show(
+            context,
+            message: 'Dismissed ${_items[index].title}',
+          );
+          return true;
+        },
+        style: M3EDismissibleListStyle(
+          background: Container(
+            color: theme.colorScheme.success,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Icon(M3EIcons.check, color: theme.colorScheme.onSurface),
+          ),
+          secondaryBackground: Container(
+            color: theme.colorScheme.danger,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Icon(M3EIcons.close, color: theme.colorScheme.onSurface),
+          ),
+        ),
+        itemBuilder: _item,
+      );
+    }
     return M3ECardList.builder(
       itemCount: _items.length,
       listPadding: _listPadding,
@@ -149,40 +243,9 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
     );
   }
 
-  Widget _dismissibleBody(M3EThemeData theme) {
-    return M3EDismissibleList(
-      itemCount: _items.length,
-      listPadding: _listPadding,
-      colorBuilder: _colorBuilder,
-      borderRadiusBuilder: _radiusBuilder,
-      onTap: _onTap,
-      onLongPress: _onLongPress,
-      onDismiss: (int index, DismissDirection direction) async {
-        _showMessage('Dismissed ${_items[index].title}');
-        return true;
-      },
-      style: M3EDismissibleListStyle(
-        background: Container(
-          color: theme.colorScheme.success,
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Icon(M3EIcons.check, color: theme.colorScheme.onSurface),
-        ),
-        secondaryBackground: Container(
-          color: theme.colorScheme.danger,
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Icon(M3EIcons.close, color: theme.colorScheme.onSurface),
-        ),
-      ),
-      itemBuilder: _item,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-
     return PopScope(
       canPop: !_selection.isSelectionMode,
       onPopInvokedWithResult: (bool didPop, Object? result) {
@@ -195,26 +258,18 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
         controller: _selection,
         itemCount: _items.length,
         appBar: M3ESelectionAppBar(
+          showSelectAll: widget.showSelectAll,
           idle: M3EAppBar.search(
             searchController: _search,
-            suggestionsBuilder: _suggestions,
+            suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+              return const <Widget>[];
+            },
             barHintText: 'Search items',
             leading: M3EIconButton(
               icon: const Icon(M3EIcons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),
               tooltip: 'Back',
             ),
-            actions: <Widget>[
-              M3EIconButton(
-                icon: Icon(_dismissible ? M3EIcons.swipe : M3EIcons.view_list),
-                onPressed: () {
-                  setState(() => _dismissible = !_dismissible);
-                },
-                tooltip: _dismissible
-                    ? 'Show card list'
-                    : 'Show dismissible list',
-              ),
-            ],
           ),
           actions: <Widget>[
             M3EIconButton(
@@ -227,14 +282,9 @@ class _SelectionDemoPageState extends State<SelectionDemoPage> {
               onPressed: () {},
               tooltip: 'Delete',
             ),
-            M3EIconButton(
-              icon: const Icon(M3EIcons.more_vert),
-              onPressed: () {},
-              tooltip: 'More',
-            ),
           ],
         ),
-        body: _dismissible ? _dismissibleBody(theme) : _cardListBody(),
+        body: _body(theme),
       ),
     );
   }
