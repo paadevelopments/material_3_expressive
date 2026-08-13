@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -121,6 +121,9 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
             children: <Widget>[
               M3EButton(
                 decoration: M3EButtonDecoration(
+                  foregroundColor: WidgetStateProperty.all(
+                    Colors.white,
+                  ),
                   backgroundGradient: WidgetStateProperty.all(
                     const LinearGradient(
                       colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
@@ -134,6 +137,9 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
               ),
               M3EButton.icon(
                 decoration: M3EButtonDecoration(
+                  foregroundColor: WidgetStateProperty.all(
+                    Colors.white,
+                  ),
                   backgroundGradient: WidgetStateProperty.all(
                     const LinearGradient(
                       colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],

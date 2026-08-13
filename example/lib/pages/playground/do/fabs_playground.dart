@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
@@ -52,7 +52,7 @@ class _FabsPlaygroundState extends State<FabsPlayground> {
           label: 'Gradient fill',
           child: M3EFab(
             onPressed: () {},
-            icon: const Icon(M3EIcons.add),
+            icon: const Icon(M3EIcons.add, color: Colors.white,),
             size: _size,
             gradient: const LinearGradient(
               colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],

@@ -24,8 +24,6 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
   M3EButtonShape _shape = M3EButtonShape.round;
   M3EButtonSize _size = M3EButtonSize.sm;
   M3EButtonStyle _style = M3EButtonStyle.filled;
-  M3EButtonGroupDensity _density = M3EButtonGroupDensity.regular;
-  Axis _direction = Axis.horizontal;
   bool _neighborSquish = true;
   int _selectedIndex = 0;
   bool _toggleChecked = false;
@@ -47,8 +45,6 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
             shape: _shape,
             size: _size,
             style: _style,
-            density: _density,
-            direction: _direction,
             neighborSquish: _neighborSquish,
             selectedIndex: _selectedIndex,
             onSelectedIndexChanged: (int? index) {
@@ -139,22 +135,6 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
               values: M3EButtonStyle.values,
               labelOf: (M3EButtonStyle v) => v.name,
               onChanged: (M3EButtonStyle v) => setState(() => _style = v),
-            ),
-            PlayEnumSegmented<M3EButtonGroupDensity>(
-              label: 'Density',
-              value: _density,
-              values: M3EButtonGroupDensity.values,
-              labelOf: (M3EButtonGroupDensity v) => v.name,
-              onChanged: (M3EButtonGroupDensity v) {
-                setState(() => _density = v);
-              },
-            ),
-            PlayEnumSegmented<Axis>(
-              label: 'Direction',
-              value: _direction,
-              values: Axis.values,
-              labelOf: (Axis v) => v.name,
-              onChanged: (Axis v) => setState(() => _direction = v),
             ),
             PlaySwitch(
               label: 'Neighbor squish',

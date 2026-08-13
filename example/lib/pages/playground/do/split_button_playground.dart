@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/buttons/enums/m3e_button_enums.dart';
 import 'package:material_3_expressive/components/split_buttons/enums/m3e_split_button_menu_style.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -116,6 +116,9 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
             enabled: _enabled,
             decoration: M3ESplitButtonDecoration(
               menuStyle: _menuStyle,
+              foregroundColor: WidgetStateProperty.all(
+                Colors.white,
+              ),
               backgroundGradient: WidgetStateProperty.all(
                 const LinearGradient(
                   colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],

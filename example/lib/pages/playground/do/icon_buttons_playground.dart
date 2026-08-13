@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
@@ -53,7 +53,7 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               M3EIconButton(
-                icon: const Icon(M3EIcons.favorite),
+                icon: const Icon(M3EIcons.favorite, color: Colors.white,),
                 variant: M3EIconButtonVariant.filled,
                 size: _size,
                 shape: _shape,
@@ -65,7 +65,7 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
                 tooltip: 'Favorite',
               ),
               M3EIconButton(
-                icon: const Icon(M3EIcons.bookmark),
+                icon: const Icon(M3EIcons.bookmark, color: Colors.white,),
                 variant: M3EIconButtonVariant.tonal,
                 size: _size,
                 shape: _shape,
