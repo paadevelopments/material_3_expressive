@@ -23,28 +23,95 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     required Set<WidgetState> states,
     required BorderRadius radius,
     required Widget child,
+    bool trailing = false,
   }) {
+    final M3ESplitButtonDecoration? dec = widget.decoration;
+    final WidgetStateProperty<Gradient?>? backgroundGradient = trailing
+        ? (dec?.trailingBackgroundGradient ?? dec?.backgroundGradient)
+        : dec?.backgroundGradient;
+    final WidgetStateProperty<Gradient?>? overlayGradient = trailing
+        ? (dec?.trailingOverlayGradient ?? dec?.overlayGradient)
+        : dec?.overlayGradient;
+    final WidgetStateProperty<Gradient?>? foregroundGradient = trailing
+        ? (dec?.trailingForegroundGradient ?? dec?.foregroundGradient)
+        : dec?.foregroundGradient;
+    final WidgetStateProperty<Gradient?>? outlineGradient = trailing
+        ? (dec?.trailingOutlineGradient ?? dec?.outlineGradient)
+        : dec?.outlineGradient;
+
     var result = child;
-
-    final ButtonLayerBuilder? backgroundLayer = m3eGradientBackgroundBuilder(
-      widget.decoration?.backgroundGradient,
-      explicitBuilder: widget.decoration?.backgroundBuilder,
+    final fill = m3eGradientBackgroundBuilder(
+      clipRadius: radius,
+      gradient: backgroundGradient,
+      explicitBuilder: trailing ? null : dec?.backgroundBuilder,
     );
-    if (backgroundLayer != null) {
-      result = ClipRRect(
-        borderRadius: radius,
-        child: backgroundLayer(context, states, result),
+    if (fill != null) {
+      result = fill(context, states, result);
+    }
+    result = m3eResolveGradientOverlay(
+      clipRadius: radius,
+      states: states,
+      overlayGradient: overlayGradient,
+      child: result,
+    );
+    final ButtonLayerBuilder? foreground = m3eGradientForegroundBuilder(
+      clipRadius: radius,
+      gradient: foregroundGradient,
+      explicitBuilder: trailing ? null : dec?.foregroundBuilder,
+    );
+    if (foreground != null) {
+      result = foreground(context, states, result);
+    }
+    final Gradient? outline = outlineGradient?.resolve(states);
+    if (outline != null) {
+      result = m3eGradientOutlineLayer(
+        clipRadius: radius,
+        gradient: outline,
+        width: m3eOutlineWidth(dec?.side?.resolve(states)),
+        child: result,
       );
     }
-
-    if (widget.decoration?.foregroundBuilder != null) {
-      result = ClipRRect(
-        borderRadius: radius,
-        child: widget.decoration!.foregroundBuilder!(context, states, result),
-      );
-    }
-
     return result;
+  }
+
+  bool _segmentHasFill({required bool trailing}) {
+    final M3ESplitButtonDecoration? dec = widget.decoration;
+    if (dec?.backgroundBuilder != null && !trailing) {
+      return true;
+    }
+    if (trailing) {
+      return dec?.trailingBackgroundGradient != null ||
+          dec?.backgroundGradient != null;
+    }
+    return dec?.backgroundGradient != null;
+  }
+
+  bool _segmentHasOutlineGradient({required bool trailing}) {
+    final M3ESplitButtonDecoration? dec = widget.decoration;
+    if (trailing) {
+      return dec?.trailingOutlineGradient != null ||
+          dec?.outlineGradient != null;
+    }
+    return dec?.outlineGradient != null;
+  }
+
+  bool _segmentHasOverlayGradient({required bool trailing}) {
+    final M3ESplitButtonDecoration? dec = widget.decoration;
+    if (trailing) {
+      return m3eUsesGradientOverlay(
+        dec?.trailingOverlayGradient ?? dec?.overlayGradient,
+      );
+    }
+    return m3eUsesGradientOverlay(dec?.overlayGradient);
+  }
+
+  bool _segmentHasForegroundGradient({required bool trailing}) {
+    final M3ESplitButtonDecoration? dec = widget.decoration;
+    if (trailing) {
+      return dec?.trailingForegroundGradient != null ||
+          dec?.foregroundGradient != null;
+    }
+    return dec?.foregroundGradient != null;
   }
 
   (Color, Color, BorderSide?, double?) _resolveColorsAndShapes(

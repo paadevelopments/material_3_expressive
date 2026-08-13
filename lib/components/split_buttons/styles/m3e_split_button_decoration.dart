@@ -40,6 +40,20 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
   /// gap.
   final double? gap;
 
+  /// Optional trailing fill gradient; null inherits [backgroundGradient].
+  final WidgetStateProperty<Gradient?>? trailingBackgroundGradient;
+
+  /// Optional trailing content gradient; null inherits [foregroundGradient].
+  final WidgetStateProperty<Gradient?>? trailingForegroundGradient;
+
+  /// Optional trailing outline gradient; null inherits [outlineGradient].
+  final WidgetStateProperty<Gradient?>? trailingOutlineGradient;
+
+  /// Optional trailing overlay gradient; null inherits [overlayGradient].
+  final WidgetStateProperty<Gradient?>? trailingOverlayGradient;
+
+  /// menuStyle.
+
   /// menuStyle.
   final M3ESplitButtonMenuStyle menuStyle;
 
@@ -75,6 +89,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     super.splashFactory,
     super.backgroundBuilder,
     super.backgroundGradient,
+    super.foregroundGradient,
+    super.overlayGradient,
+    super.outlineGradient,
     super.foregroundBuilder,
     super.motion,
     super.haptic,
@@ -90,6 +107,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     this.trailingCustomSize,
     this.trailingSelectedRadius,
     this.gap,
+    this.trailingBackgroundGradient,
+    this.trailingForegroundGradient,
+    this.trailingOutlineGradient,
+    this.trailingOverlayGradient,
     this.menuStyle = M3ESplitButtonMenuStyle.popup,
     this.popupDecoration,
     this.bottomSheetDecoration,
@@ -124,6 +145,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -139,6 +163,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     M3EButtonSize? trailingCustomSize,
     double? trailingSelectedRadius,
     double? gap,
+    WidgetStateProperty<Gradient?>? trailingBackgroundGradient,
+    WidgetStateProperty<Gradient?>? trailingForegroundGradient,
+    WidgetStateProperty<Gradient?>? trailingOutlineGradient,
+    WidgetStateProperty<Gradient?>? trailingOverlayGradient,
     M3ESplitButtonMenuStyle menuStyle = M3ESplitButtonMenuStyle.popup,
     M3ESplitButtonPopupDecoration? popupDecoration,
     M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
@@ -170,6 +198,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       splashFactory: splashFactory,
       backgroundBuilder: backgroundBuilder,
       backgroundGradient: backgroundGradient,
+      foregroundGradient: foregroundGradient,
+      overlayGradient: overlayGradient,
+      outlineGradient: outlineGradient,
       foregroundBuilder: foregroundBuilder,
       motion: motion,
       haptic: haptic,
@@ -189,6 +220,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       trailingCustomSize: trailingCustomSize,
       trailingSelectedRadius: trailingSelectedRadius,
       gap: gap,
+      trailingBackgroundGradient: trailingBackgroundGradient,
+      trailingForegroundGradient: trailingForegroundGradient,
+      trailingOutlineGradient: trailingOutlineGradient,
+      trailingOverlayGradient: trailingOverlayGradient,
       menuStyle: menuStyle,
       popupDecoration: popupDecoration,
       bottomSheetDecoration: bottomSheetDecoration,
@@ -206,6 +241,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     M3EButtonSize? trailingCustomSize,
     double? trailingSelectedRadius,
     double? gap,
+    WidgetStateProperty<Gradient?>? trailingBackgroundGradient,
+    WidgetStateProperty<Gradient?>? trailingForegroundGradient,
+    WidgetStateProperty<Gradient?>? trailingOutlineGradient,
+    WidgetStateProperty<Gradient?>? trailingOverlayGradient,
     required M3ESplitButtonMenuStyle menuStyle,
     M3ESplitButtonPopupDecoration? popupDecoration,
     M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
@@ -234,6 +273,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       splashFactory: base.splashFactory,
       backgroundBuilder: base.backgroundBuilder,
       backgroundGradient: base.backgroundGradient,
+      foregroundGradient: base.foregroundGradient,
+      overlayGradient: base.overlayGradient,
+      outlineGradient: base.outlineGradient,
       foregroundBuilder: base.foregroundBuilder,
       motion: base.motion,
       haptic: base.haptic,
@@ -248,6 +290,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       trailingCustomSize: trailingCustomSize,
       trailingSelectedRadius: trailingSelectedRadius,
       gap: gap,
+      trailingBackgroundGradient: trailingBackgroundGradient,
+      trailingForegroundGradient: trailingForegroundGradient,
+      trailingOutlineGradient: trailingOutlineGradient,
+      trailingOverlayGradient: trailingOverlayGradient,
       menuStyle: menuStyle,
       popupDecoration: popupDecoration,
       bottomSheetDecoration: bottomSheetDecoration,
@@ -279,6 +325,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -294,6 +343,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     M3EButtonSize? trailingCustomSize,
     double? trailingSelectedRadius,
     double? gap,
+    WidgetStateProperty<Gradient?>? trailingBackgroundGradient,
+    WidgetStateProperty<Gradient?>? trailingForegroundGradient,
+    WidgetStateProperty<Gradient?>? trailingOutlineGradient,
+    WidgetStateProperty<Gradient?>? trailingOverlayGradient,
     M3ESplitButtonMenuStyle? menuStyle,
     M3ESplitButtonPopupDecoration? popupDecoration,
     M3ESplitButtonBottomSheetDecoration? bottomSheetDecoration,
@@ -322,6 +375,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      foregroundGradient: foregroundGradient ?? this.foregroundGradient,
+      overlayGradient: overlayGradient ?? this.overlayGradient,
+      outlineGradient: outlineGradient ?? this.outlineGradient,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
       motion: motion ?? this.motion,
       haptic: haptic ?? this.haptic,
@@ -340,6 +396,14 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
       trailingSelectedRadius:
           trailingSelectedRadius ?? this.trailingSelectedRadius,
       gap: gap ?? this.gap,
+      trailingBackgroundGradient:
+          trailingBackgroundGradient ?? this.trailingBackgroundGradient,
+      trailingForegroundGradient:
+          trailingForegroundGradient ?? this.trailingForegroundGradient,
+      trailingOutlineGradient:
+          trailingOutlineGradient ?? this.trailingOutlineGradient,
+      trailingOverlayGradient:
+          trailingOverlayGradient ?? this.trailingOverlayGradient,
       menuStyle: menuStyle ?? this.menuStyle,
       popupDecoration: popupDecoration ?? this.popupDecoration,
       bottomSheetDecoration:
@@ -374,6 +438,9 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
           splashFactory == other.splashFactory &&
           backgroundBuilder == other.backgroundBuilder &&
           backgroundGradient == other.backgroundGradient &&
+          foregroundGradient == other.foregroundGradient &&
+          overlayGradient == other.overlayGradient &&
+          outlineGradient == other.outlineGradient &&
           foregroundBuilder == other.foregroundBuilder &&
           motion == other.motion &&
           haptic == other.haptic &&
@@ -389,6 +456,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
           trailingCustomSize == other.trailingCustomSize &&
           trailingSelectedRadius == other.trailingSelectedRadius &&
           gap == other.gap &&
+          trailingBackgroundGradient == other.trailingBackgroundGradient &&
+          trailingForegroundGradient == other.trailingForegroundGradient &&
+          trailingOutlineGradient == other.trailingOutlineGradient &&
+          trailingOverlayGradient == other.trailingOverlayGradient &&
           menuStyle == other.menuStyle &&
           popupDecoration == other.popupDecoration &&
           bottomSheetDecoration == other.bottomSheetDecoration;
@@ -417,6 +488,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     alignment,
     splashFactory,
     backgroundBuilder,
+    backgroundGradient,
+    foregroundGradient,
+    overlayGradient,
+    outlineGradient,
     foregroundBuilder,
     motion,
     haptic,
@@ -432,6 +507,10 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     trailingCustomSize,
     trailingSelectedRadius,
     gap,
+    trailingBackgroundGradient,
+    trailingForegroundGradient,
+    trailingOutlineGradient,
+    trailingOverlayGradient,
     menuStyle,
     popupDecoration,
     bottomSheetDecoration,

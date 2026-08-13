@@ -121,12 +121,19 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
             children: <Widget>[
               M3EButton(
                 decoration: M3EButtonDecoration(
-                  foregroundColor: WidgetStateProperty.all(
-                    Colors.white,
-                  ),
                   backgroundGradient: WidgetStateProperty.all(
                     const LinearGradient(
                       colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                    ),
+                  ),
+                  foregroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
+                    ),
+                  ),
+                  outlineGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
                     ),
                   ),
                 ),
@@ -137,12 +144,14 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
               ),
               M3EButton.icon(
                 decoration: M3EButtonDecoration(
-                  foregroundColor: WidgetStateProperty.all(
-                    Colors.white,
-                  ),
                   backgroundGradient: WidgetStateProperty.all(
                     const LinearGradient(
                       colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                    ),
+                  ),
+                  foregroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFFFFFFFF), Color(0xFFFECACA)],
                     ),
                   ),
                 ),

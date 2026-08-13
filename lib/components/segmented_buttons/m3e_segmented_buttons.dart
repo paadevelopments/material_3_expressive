@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import 'models/m3e_segment.dart';
 import 'styles/m3e_segmented_button_theme.dart';
 
@@ -50,14 +51,17 @@ class M3ESegmentedButton<T> extends StatelessWidget {
     final scheme = theme.colorScheme;
     final borderRadius = segmentedButtonTheme.borderRadius;
 
-    return Container(
+    final Color outlineColor = segmentedButtonTheme.outline(scheme);
+    Widget ring = Container(
       height: segmentedButtonTheme.height,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        border: Border.all(
-          color: scheme.outline,
-          width: segmentedButtonTheme.borderWidth,
-        ),
+        border: segmentedButtonTheme.outlineGradient == null
+            ? Border.all(
+                color: outlineColor,
+                width: segmentedButtonTheme.borderWidth,
+              )
+            : null,
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -67,6 +71,16 @@ class M3ESegmentedButton<T> extends StatelessWidget {
         ),
       ),
     );
+    final Gradient? outlineGradient = segmentedButtonTheme.outlineGradient;
+    if (outlineGradient != null) {
+      ring = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outlineGradient,
+        width: segmentedButtonTheme.borderWidth,
+        child: ring,
+      );
+    }
+    return ring;
   }
 
   List<Widget> _buildSegments(
@@ -80,7 +94,7 @@ class M3ESegmentedButton<T> extends StatelessWidget {
         children.add(
           Container(
             width: segmentedButtonTheme.borderWidth,
-            color: theme.colorScheme.outline,
+            color: segmentedButtonTheme.outline(theme.colorScheme),
           ),
         );
       }
@@ -136,10 +150,15 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         final resolvedScheme = M3ETheme.of(context).colorScheme;
-        final resolvedForeground = segmentedButtonTheme.foregroundColor(
-          resolvedScheme,
-          selected: isSelected,
-        );
+        final Gradient? fgGradient = isSelected
+            ? segmentedButtonTheme.selectedForegroundGradient
+            : segmentedButtonTheme.unselectedForegroundGradient;
+        final resolvedForeground = fgGradient != null
+            ? m3eGradientForegroundSourceColor
+            : segmentedButtonTheme.foregroundColor(
+                resolvedScheme,
+                selected: isSelected,
+              );
         final Gradient? gradient = isSelected
             ? segmentedButtonTheme.selectedBackgroundGradient
             : segmentedButtonTheme.unselectedBackgroundGradient;
@@ -167,11 +186,15 @@ class _M3ESegmentTile<T> extends StatelessWidget {
                   padding: EdgeInsets.symmetric(
                     horizontal: segmentedButtonTheme.segmentHorizontalPadding,
                   ),
-                  child: _buildLabel(
-                    context,
-                    segment,
-                    resolvedForeground,
+                  child: _wrapForeground(
+                    segmentedButtonTheme,
                     isSelected,
+                    _buildLabel(
+                      context,
+                      segment,
+                      resolvedForeground,
+                      isSelected,
+                    ),
                   ),
                 ),
               ),
@@ -209,6 +232,24 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: children,
+    );
+  }
+
+  Widget _wrapForeground(
+    M3ESegmentedButtonTheme theme,
+    bool selected,
+    Widget child,
+  ) {
+    final Gradient? gradient = selected
+        ? theme.selectedForegroundGradient
+        : theme.unselectedForegroundGradient;
+    if (gradient == null) {
+      return child;
+    }
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+      child: child,
     );
   }
 

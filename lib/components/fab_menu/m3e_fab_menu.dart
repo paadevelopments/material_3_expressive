@@ -318,11 +318,22 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
         for (int i = 0; i < widget.items.length; i++)
           if (_itemVisible[i])
             Padding(
-              padding: EdgeInsets.only(bottom: fabMenuTheme.itemGap),
+              padding: EdgeInsets.only(
+                bottom: _isLastVisibleItem(i) ? 0 : fabMenuTheme.itemGap,
+              ),
               child: _buildItem(theme, widget.items[i], i),
             ),
       ],
     );
+  }
+
+  bool _isLastVisibleItem(int index) {
+    for (int i = index + 1; i < _itemVisible.length; i++) {
+      if (_itemVisible[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Maps spring progress `t` (0→1, may overshoot) to width factor.

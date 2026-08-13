@@ -53,25 +53,43 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               M3EIconButton(
-                icon: const Icon(M3EIcons.favorite, color: Colors.white,),
+                icon: const Icon(M3EIcons.favorite),
                 variant: M3EIconButtonVariant.filled,
                 size: _size,
                 shape: _shape,
                 width: _width,
-                backgroundGradient: const LinearGradient(
-                  colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                decoration: M3EIconButtonDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
+                    ),
+                  ),
+                  outlineGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF7F1D1D), Color(0xFFFECACA)],
+                    ),
+                  ),
                 ),
                 onPressed: _enabled ? () {} : null,
                 tooltip: 'Favorite',
               ),
               M3EIconButton(
-                icon: const Icon(M3EIcons.bookmark, color: Colors.white,),
+                icon: const Icon(M3EIcons.bookmark),
                 variant: M3EIconButtonVariant.tonal,
                 size: _size,
                 shape: _shape,
                 width: _width,
-                backgroundGradient: const LinearGradient(
-                  colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                decoration: M3EIconButtonDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                    ),
+                  ),
+                  foregroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
+                    ),
+                  ),
                 ),
                 onPressed: _enabled ? () {} : null,
                 tooltip: 'Bookmark',

@@ -80,6 +80,15 @@ class M3EButtonDecoration {
   /// behind the button content with a transparent Material background.
   final WidgetStateProperty<Gradient?>? backgroundGradient;
 
+  /// Optional gradient for text and icons.
+  final WidgetStateProperty<Gradient?>? foregroundGradient;
+
+  /// Optional gradient state layer (hover / focus / pressed).
+  final WidgetStateProperty<Gradient?>? overlayGradient;
+
+  /// Optional gradient outline. Solid [side] still supplies stroke width.
+  final WidgetStateProperty<Gradient?>? outlineGradient;
+
   /// foregroundBuilder.
   final ButtonLayerBuilder? foregroundBuilder;
 
@@ -124,6 +133,9 @@ class M3EButtonDecoration {
     this.splashFactory,
     this.backgroundBuilder,
     this.backgroundGradient,
+    this.foregroundGradient,
+    this.overlayGradient,
+    this.outlineGradient,
     this.foregroundBuilder,
     this.motion,
     this.haptic,
@@ -161,6 +173,9 @@ class M3EButtonDecoration {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -224,6 +239,9 @@ class M3EButtonDecoration {
       splashFactory: splashFactory,
       backgroundBuilder: backgroundBuilder,
       backgroundGradient: backgroundGradient,
+      foregroundGradient: foregroundGradient,
+      overlayGradient: overlayGradient,
+      outlineGradient: outlineGradient,
       foregroundBuilder: foregroundBuilder,
       motion: motion,
       haptic: haptic,
@@ -259,6 +277,9 @@ class M3EButtonDecoration {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? foregroundBuilder,
     M3EButtonMotion? motion,
     M3EHapticFeedback? haptic,
@@ -290,6 +311,9 @@ class M3EButtonDecoration {
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      foregroundGradient: foregroundGradient ?? this.foregroundGradient,
+      overlayGradient: overlayGradient ?? this.overlayGradient,
+      outlineGradient: outlineGradient ?? this.outlineGradient,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
       motion: motion ?? this.motion,
       haptic: haptic ?? this.haptic,
@@ -326,6 +350,9 @@ class M3EButtonDecoration {
           splashFactory == other.splashFactory &&
           backgroundBuilder == other.backgroundBuilder &&
           backgroundGradient == other.backgroundGradient &&
+          foregroundGradient == other.foregroundGradient &&
+          overlayGradient == other.overlayGradient &&
+          outlineGradient == other.outlineGradient &&
           foregroundBuilder == other.foregroundBuilder &&
           motion == other.motion &&
           haptic == other.haptic &&
@@ -357,6 +384,10 @@ class M3EButtonDecoration {
     alignment,
     splashFactory,
     backgroundBuilder,
+    backgroundGradient,
+    foregroundGradient,
+    overlayGradient,
+    outlineGradient,
     foregroundBuilder,
     motion,
     haptic,
@@ -414,6 +445,15 @@ class M3EToggleButtonDecoration {
   /// Optional gradient fill (same precedence as [M3EButtonDecoration]).
   final WidgetStateProperty<Gradient?>? backgroundGradient;
 
+  /// Optional gradient for text and icons.
+  final WidgetStateProperty<Gradient?>? foregroundGradient;
+
+  /// Optional gradient state layer (hover / focus / pressed).
+  final WidgetStateProperty<Gradient?>? overlayGradient;
+
+  /// Optional gradient outline. Solid [side] still supplies stroke width.
+  final WidgetStateProperty<Gradient?>? outlineGradient;
+
   /// backgroundBuilder.
   final ButtonLayerBuilder? backgroundBuilder;
 
@@ -438,6 +478,9 @@ class M3EToggleButtonDecoration {
     this.hoveredRadius,
     this.connectedInnerRadius,
     this.backgroundGradient,
+    this.foregroundGradient,
+    this.overlayGradient,
+    this.outlineGradient,
     this.backgroundBuilder,
     this.foregroundBuilder,
   });
@@ -465,6 +508,9 @@ class M3EToggleButtonDecoration {
     Color? overlayColor,
     Color? surfaceTintColor,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
@@ -522,6 +568,9 @@ class M3EToggleButtonDecoration {
       overlayColor: overlayColorProp,
       surfaceTintColor: surfaceTintColorProp,
       backgroundGradient: backgroundGradient,
+      foregroundGradient: foregroundGradient,
+      overlayGradient: overlayGradient,
+      outlineGradient: outlineGradient,
       backgroundBuilder: backgroundBuilder,
       foregroundBuilder: foregroundBuilder,
     );
@@ -545,6 +594,9 @@ class M3EToggleButtonDecoration {
     double? hoveredRadius,
     double? connectedInnerRadius,
     WidgetStateProperty<Gradient?>? backgroundGradient,
+    WidgetStateProperty<Gradient?>? foregroundGradient,
+    WidgetStateProperty<Gradient?>? overlayGradient,
+    WidgetStateProperty<Gradient?>? outlineGradient,
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
@@ -564,6 +616,9 @@ class M3EToggleButtonDecoration {
       hoveredRadius: hoveredRadius ?? this.hoveredRadius,
       connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
       backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      foregroundGradient: foregroundGradient ?? this.foregroundGradient,
+      overlayGradient: overlayGradient ?? this.overlayGradient,
+      outlineGradient: outlineGradient ?? this.outlineGradient,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
     );
@@ -588,6 +643,9 @@ class M3EToggleButtonDecoration {
           hoveredRadius == other.hoveredRadius &&
           connectedInnerRadius == other.connectedInnerRadius &&
           backgroundGradient == other.backgroundGradient &&
+          foregroundGradient == other.foregroundGradient &&
+          overlayGradient == other.overlayGradient &&
+          outlineGradient == other.outlineGradient &&
           backgroundBuilder == other.backgroundBuilder &&
           foregroundBuilder == other.foregroundBuilder;
 
@@ -608,6 +666,9 @@ class M3EToggleButtonDecoration {
     hoveredRadius,
     connectedInnerRadius,
     backgroundGradient,
+    foregroundGradient,
+    overlayGradient,
+    outlineGradient,
     backgroundBuilder,
     foregroundBuilder,
   ]);

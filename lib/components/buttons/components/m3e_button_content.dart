@@ -146,16 +146,16 @@ extension _M3EButtonContent on _M3EButtonState {
       shape: WidgetStateProperty.all<OutlinedBorder>(
         RoundedRectangleBorder(borderRadius: animatedRadius),
       ),
-      backgroundBuilder: _wrapLayerBuilder(
-        m3eGradientBackgroundBuilder(
-          widget.decoration?.backgroundGradient,
-          explicitBuilder: widget.decoration?.backgroundBuilder,
-        ),
-        animatedRadius,
+      backgroundBuilder: m3eGradientSurfaceBuilder(
+        clipRadius: animatedRadius,
+        backgroundGradient: widget.decoration?.backgroundGradient,
+        overlayGradient: widget.decoration?.overlayGradient,
+        explicitBuilder: widget.decoration?.backgroundBuilder,
       ),
-      foregroundBuilder: _wrapLayerBuilder(
-        widget.decoration?.foregroundBuilder,
-        animatedRadius,
+      foregroundBuilder: m3eGradientForegroundBuilder(
+        clipRadius: animatedRadius,
+        gradient: widget.decoration?.foregroundGradient,
+        explicitBuilder: widget.decoration?.foregroundBuilder,
       ),
     );
 
@@ -166,20 +166,19 @@ extension _M3EButtonContent on _M3EButtonState {
       child: child,
     );
 
-    return _wrapButtonChrome(button);
-  }
-
-  ButtonLayerBuilder? _wrapLayerBuilder(
-    ButtonLayerBuilder? builder,
-    BorderRadius animatedRadius,
-  ) {
-    if (builder == null) {
-      return null;
-    }
-    return (context, states, child) => ClipRRect(
-      borderRadius: animatedRadius,
-      child: builder(context, states, child),
+    Widget chrome = _wrapButtonChrome(button);
+    final Gradient? outline = widget.decoration?.outlineGradient?.resolve(
+      const <WidgetState>{},
     );
+    if (outline != null) {
+      chrome = m3eGradientOutlineLayer(
+        clipRadius: animatedRadius,
+        gradient: outline,
+        width: m3eOutlineWidth(widget.decoration?.side?.resolve(const {})),
+        child: chrome,
+      );
+    }
+    return chrome;
   }
 
   VoidCallback? get _effectiveOnPressed {

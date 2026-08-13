@@ -100,6 +100,16 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
                   colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],
                 ),
               ),
+              foregroundGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFFFFFFFF), Color(0xFFFECACA)],
+                ),
+              ),
+              outlineGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFF7F1D1D), Color(0xFFFECACA)],
+                ),
+              ),
             ),
           ),
         ),

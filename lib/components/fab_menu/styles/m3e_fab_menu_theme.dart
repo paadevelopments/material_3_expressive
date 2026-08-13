@@ -25,13 +25,13 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
 
   /// Vertical gap between the FAB and the nearest menu item.
   ///
-  /// Defaults to the same value as [itemGap].
+  /// Independent of [itemGap] (spacing between items). Defaults to 12.
   final double menuOffset;
 
   /// scrimOpacity.
   final double scrimOpacity;
 
-  /// itemGap.
+  /// Spacing between adjacent menu items. Not applied below the last item.
   final double itemGap;
 
   /// itemHeight.

@@ -50,14 +50,43 @@ class _FabsPlaygroundState extends State<FabsPlayground> {
         ),
         PlayPreviewCard(
           label: 'Gradient fill',
-          child: M3EFab(
-            onPressed: () {},
-            icon: const Icon(M3EIcons.add, color: Colors.white,),
-            size: _size,
-            gradient: const LinearGradient(
-              colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],
-            ),
-            tooltip: 'Add',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              M3EFab(
+                onPressed: () {},
+                icon: const Icon(M3EIcons.add),
+                size: _size,
+                decoration: M3EFabDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],
+                    ),
+                  ),
+                ),
+                tooltip: 'Add',
+              ),
+              M3EExtendedFab(
+                onPressed: () {},
+                icon: const Icon(M3EIcons.edit),
+                label: _label,
+                extended: _extended,
+                decoration: M3EFabDecoration(
+                  backgroundGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF006A6A), Color(0xFF4ECDC4)],
+                    ),
+                  ),
+                  outlineGradient: WidgetStateProperty.all(
+                    const LinearGradient(
+                      colors: <Color>[Color(0xFF003F3F), Color(0xFF99F6E4)],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

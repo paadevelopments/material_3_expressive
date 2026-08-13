@@ -116,12 +116,19 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
             enabled: _enabled,
             decoration: M3ESplitButtonDecoration(
               menuStyle: _menuStyle,
-              foregroundColor: WidgetStateProperty.all(
-                Colors.white,
-              ),
               backgroundGradient: WidgetStateProperty.all(
                 const LinearGradient(
                   colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+                ),
+              ),
+              foregroundGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
+                ),
+              ),
+              outlineGradient: WidgetStateProperty.all(
+                const LinearGradient(
+                  colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
                 ),
               ),
             ),
