@@ -375,12 +375,14 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
   late FocusNode _trailingFocusNode;
 
   void _closeMenu() {
-    if (mounted) {
-      setState(() {
-        _menuOpen = false;
-        _trailingPressed = false;
-      });
+    if (!mounted) {
+      return;
     }
+    isPointerDownNotifier.value = false;
+    setState(() {
+      _menuOpen = false;
+      _trailingPressed = false;
+    });
   }
 
   Set<T>? _selectedValues;

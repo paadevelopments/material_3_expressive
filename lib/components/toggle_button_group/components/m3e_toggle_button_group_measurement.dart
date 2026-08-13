@@ -59,6 +59,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       old,
       nextFocusNodeSignature: nextFocusNodeSignature,
     );
+    _updateDecorations();
     _syncLayoutMeasurement(old, nextLayoutSignature: nextLayoutSignature);
     _syncOverflowWindowOnUpdate();
     _layoutSignature = nextLayoutSignature;
@@ -176,6 +177,24 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
         connectedInnerRadius:
             action.decoration?.connectedInnerRadius ??
             widget.decoration?.connectedInnerRadius,
+        backgroundGradient:
+            action.decoration?.backgroundGradient ??
+            widget.decoration?.backgroundGradient,
+        foregroundGradient:
+            action.decoration?.foregroundGradient ??
+            widget.decoration?.foregroundGradient,
+        overlayGradient:
+            action.decoration?.overlayGradient ??
+            widget.decoration?.overlayGradient,
+        outlineGradient:
+            action.decoration?.outlineGradient ??
+            widget.decoration?.outlineGradient,
+        backgroundBuilder:
+            action.decoration?.backgroundBuilder ??
+            widget.decoration?.backgroundBuilder,
+        foregroundBuilder:
+            action.decoration?.foregroundBuilder ??
+            widget.decoration?.foregroundBuilder,
       );
     });
   }

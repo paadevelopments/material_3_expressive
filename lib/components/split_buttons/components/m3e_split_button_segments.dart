@@ -232,7 +232,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
     );
 
     final animatedButton = M3ERadiusAndPaddingMotion(
-      motion: springMotion,
+      motion: _menuOpen
+          ? springMotion
+          : M3EButtonMotion.standardSpatialFast.toMotion(),
       internalLeft: 0,
       internalRight: 0,
       internalTop: 0,
@@ -283,7 +285,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           size:
               customSize?.iconSize ??
               _splitTheme.splitTrailingIconSize(widget.size),
-          color: onColor,
+          color: _segmentHasForegroundGradient(trailing: true)
+              ? m3eGradientForegroundSourceColor
+              : onColor,
         ),
       ),
     );

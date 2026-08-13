@@ -83,7 +83,7 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
           ),
         ),
         PlayPreviewCard(
-          label: 'Gradient fill',
+          label: 'Toggle gradient fill',
           child: M3EToggleButton(
             checked: _toggleChecked,
             onCheckedChange: (bool value) {

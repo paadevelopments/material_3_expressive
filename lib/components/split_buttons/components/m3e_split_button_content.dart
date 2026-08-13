@@ -298,7 +298,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     final gap = baseGap + (eitherFocused ? focusRingOutset : 0.0);
 
     final leadingPressed = leadingEnabled && (pressed || _leadingPressed);
-    final trailingPressed = trailingEnabled && (_trailingPressed || _menuOpen);
+    final trailingPressed = trailingEnabled && _trailingPressed;
     final leadingHovered = leadingEnabled && hovered && !leadingPressed;
     final trailingHovered =
         trailingEnabled &&

@@ -35,7 +35,7 @@ class SectionListPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: EdgeInsets.all(16),
       children: <Widget>[
         M3ECardList(
           itemCount: entries.length,

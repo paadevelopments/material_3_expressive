@@ -40,6 +40,14 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
         : dec?.outlineGradient;
 
     var result = child;
+    final ButtonLayerBuilder? foreground = m3eGradientForegroundBuilder(
+      clipRadius: radius,
+      gradient: foregroundGradient,
+      explicitBuilder: trailing ? null : dec?.foregroundBuilder,
+    );
+    if (foreground != null) {
+      result = foreground(context, states, result);
+    }
     final fill = m3eGradientBackgroundBuilder(
       clipRadius: radius,
       gradient: backgroundGradient,
@@ -54,14 +62,6 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
       overlayGradient: overlayGradient,
       child: result,
     );
-    final ButtonLayerBuilder? foreground = m3eGradientForegroundBuilder(
-      clipRadius: radius,
-      gradient: foregroundGradient,
-      explicitBuilder: trailing ? null : dec?.foregroundBuilder,
-    );
-    if (foreground != null) {
-      result = foreground(context, states, result);
-    }
     final Gradient? outline = outlineGradient?.resolve(states);
     if (outline != null) {
       result = m3eGradientOutlineLayer(
