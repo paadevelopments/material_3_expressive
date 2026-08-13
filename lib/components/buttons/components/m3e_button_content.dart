@@ -150,6 +150,8 @@ extension _M3EButtonContent on _M3EButtonState {
         clipRadius: animatedRadius,
         backgroundGradient: widget.decoration?.backgroundGradient,
         overlayGradient: widget.decoration?.overlayGradient,
+        outlineGradient: widget.decoration?.outlineGradient,
+        outlineSide: widget.decoration?.side,
         explicitBuilder: widget.decoration?.backgroundBuilder,
       ),
       foregroundBuilder: m3eGradientForegroundBuilder(
@@ -166,19 +168,7 @@ extension _M3EButtonContent on _M3EButtonState {
       child: child,
     );
 
-    Widget chrome = _wrapButtonChrome(button);
-    final Gradient? outline = widget.decoration?.outlineGradient?.resolve(
-      const <WidgetState>{},
-    );
-    if (outline != null) {
-      chrome = m3eGradientOutlineLayer(
-        clipRadius: animatedRadius,
-        gradient: outline,
-        width: m3eOutlineWidth(widget.decoration?.side?.resolve(const {})),
-        child: chrome,
-      );
-    }
-    return chrome;
+    return _wrapButtonChrome(button);
   }
 
   VoidCallback? get _effectiveOnPressed {

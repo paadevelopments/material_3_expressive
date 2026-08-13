@@ -1,18 +1,20 @@
 import 'package:flutter/widgets.dart';
 
-/// Paints a gradient stroke around [child] using [clipRadius].
+/// Paints a stroke around [child] using [clipRadius].
 Widget m3eGradientOutlineLayer({
   required BorderRadius clipRadius,
-  required Gradient gradient,
   required double width,
   required Widget child,
+  Gradient? gradient,
+  Color? color,
 }) {
-  if (width <= 0) {
+  if (width <= 0 || (gradient == null && color == null)) {
     return child;
   }
   return CustomPaint(
     foregroundPainter: M3EGradientOutlinePainter(
       gradient: gradient,
+      color: color,
       radius: clipRadius,
       width: width,
     ),
@@ -20,17 +22,21 @@ Widget m3eGradientOutlineLayer({
   );
 }
 
-/// Stroke painter for a rounded-rect gradient outline.
+/// Stroke painter for a rounded-rect outline (solid or gradient).
 class M3EGradientOutlinePainter extends CustomPainter {
   /// Creates an outline painter.
   const M3EGradientOutlinePainter({
-    required this.gradient,
     required this.radius,
     required this.width,
+    this.gradient,
+    this.color,
   });
 
-  /// Stroke shader.
-  final Gradient gradient;
+  /// Stroke shader. Wins over [color] when both are set.
+  final Gradient? gradient;
+
+  /// Solid stroke color.
+  final Color? color;
 
   /// Corner radii matching the morphing surface.
   final BorderRadius radius;
@@ -43,15 +49,22 @@ class M3EGradientOutlinePainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rrect = radius.toRRect(rect).deflate(width / 2);
     final paint = Paint()
-      ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.stroke
       ..strokeWidth = width;
+    if (gradient != null) {
+      paint.shader = gradient!.createShader(rect);
+    } else if (color != null) {
+      paint.color = color!;
+    } else {
+      return;
+    }
     canvas.drawRRect(rrect, paint);
   }
 
   @override
   bool shouldRepaint(M3EGradientOutlinePainter oldDelegate) {
     return oldDelegate.gradient != gradient ||
+        oldDelegate.color != color ||
         oldDelegate.radius != radius ||
         oldDelegate.width != width;
   }

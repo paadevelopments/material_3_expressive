@@ -113,7 +113,7 @@ extension _M3EButtonStyle on _M3EButtonState {
 
   BorderSide? _resolveSide(Set<WidgetState> states) {
     final dec = widget.decoration;
-    if (dec?.outlineGradient?.resolve(states) != null) {
+    if (dec?.outlineGradient?.resolve(states) != null || dec?.side != null) {
       return BorderSide.none;
     }
     if (dec?.side != null) {

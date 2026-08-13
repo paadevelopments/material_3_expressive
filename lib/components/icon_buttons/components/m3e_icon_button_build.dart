@@ -138,13 +138,13 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       if (selected) WidgetState.selected,
     };
     final useFgGradient = dec?.foregroundGradient != null;
-    final useOutlineGradient = dec?.outlineGradient != null;
+    final paintInnerOutline = dec?.outlineGradient != null || dec?.side != null;
     return (
       bg: dec?.backgroundColor?.resolve(states) ?? defaults.bg,
       fg: useFgGradient
           ? m3eGradientForegroundSourceColor
           : (dec?.foregroundColor?.resolve(states) ?? defaults.fg),
-      side: useOutlineGradient
+      side: paintInnerOutline
           ? null
           : (dec?.side?.resolve(states) ?? defaults.side),
     );
@@ -241,6 +241,11 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
                     ? null
                     : WidgetStatePropertyAll<Gradient?>(fill),
                 overlayGradient: dec?.overlayGradient,
+                outlineGradient: dec?.outlineGradient,
+                outlineSide: dec?.side,
+                outlineFallbackWidth: M3ETheme.of(
+                  context,
+                ).iconButtonTheme.outlineWidth,
               ),
               foregroundColor: WidgetStateProperty.resolveWith(
                 (_) => colors.fg,
@@ -258,18 +263,6 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             ),
           ),
         );
-        final Gradient? outline = dec?.outlineGradient?.resolve(morphStates);
-        if (outline != null) {
-          button = m3eGradientOutlineLayer(
-            clipRadius: animatedRadius,
-            gradient: outline,
-            width: m3eOutlineWidth(
-              dec?.side?.resolve(morphStates),
-              fallback: M3ETheme.of(context).iconButtonTheme.outlineWidth,
-            ),
-            child: button,
-          );
-        }
         return button;
       },
     );

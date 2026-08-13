@@ -34,17 +34,6 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
           : _resolvedForegroundColor(checked),
       child: button,
     );
-    final Gradient? outline = widget.decoration?.outlineGradient?.resolve(
-      checked ? const {WidgetState.selected} : const <WidgetState>{},
-    );
-    if (outline != null) {
-      result = m3eGradientOutlineLayer(
-        clipRadius: animatedRadius,
-        gradient: outline,
-        width: m3eOutlineWidth(widget.decoration?.side?.resolve(const {})),
-        child: result,
-      );
-    }
     if (widget.tooltip != null) {
       result = Tooltip(message: widget.tooltip, child: result);
     }
@@ -186,6 +175,8 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
         clipRadius: animatedRadius,
         backgroundGradient: widget.decoration?.backgroundGradient,
         overlayGradient: widget.decoration?.overlayGradient,
+        outlineGradient: widget.decoration?.outlineGradient,
+        outlineSide: widget.decoration?.side,
         explicitBuilder: widget.decoration?.backgroundBuilder,
       ),
       foregroundBuilder: m3eGradientForegroundBuilder(
@@ -293,7 +284,8 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
 
   BorderSide? _resolveSideForStates(Set<WidgetState> states, bool checked) {
     final activeStates = checked ? {...states, WidgetState.selected} : states;
-    if (widget.decoration?.outlineGradient?.resolve(activeStates) != null) {
+    if (widget.decoration?.outlineGradient?.resolve(activeStates) != null ||
+        widget.decoration?.side != null) {
       return BorderSide.none;
     }
     if (widget.decoration?.side != null) {
