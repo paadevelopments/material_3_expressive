@@ -25,6 +25,7 @@ class M3ETextField extends StatefulWidget {
     this.enabled = true,
     this.keyboardType,
     this.textInputAction,
+    this.inputFormatters,
     this.onChanged,
     this.onSubmitted,
     this.onTapOutside,
@@ -68,6 +69,9 @@ class M3ETextField extends StatefulWidget {
 
   /// textInputAction.
   final TextInputAction? textInputAction;
+
+  /// inputFormatters.
+  final List<TextInputFormatter>? inputFormatters;
 
   /// onChanged.
   final ValueChanged<String>? onChanged;
@@ -261,6 +265,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
       maxLines: widget.maxLines,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
+      inputFormatters: widget.inputFormatters,
       onSubmitted: widget.onSubmitted,
       onTapOutside:
           widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
