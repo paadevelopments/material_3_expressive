@@ -1,5 +1,6 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../buttons/enums/m3e_button_enums.dart';
@@ -414,58 +415,12 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is M3ESplitButtonDecoration &&
-          backgroundColor == other.backgroundColor &&
-          foregroundColor == other.foregroundColor &&
-          shadowColor == other.shadowColor &&
-          elevation == other.elevation &&
-          side == other.side &&
-          mouseCursor == other.mouseCursor &&
-          overlayColor == other.overlayColor &&
-          surfaceTintColor == other.surfaceTintColor &&
-          iconSize == other.iconSize &&
-          iconAlignment == other.iconAlignment &&
-          textStyle == other.textStyle &&
-          padding == other.padding &&
-          minimumSize == other.minimumSize &&
-          fixedSize == other.fixedSize &&
-          maximumSize == other.maximumSize &&
-          visualDensity == other.visualDensity &&
-          tapTargetSize == other.tapTargetSize &&
-          animationDuration == other.animationDuration &&
-          enableFeedback == other.enableFeedback &&
-          alignment == other.alignment &&
-          splashFactory == other.splashFactory &&
-          backgroundBuilder == other.backgroundBuilder &&
-          backgroundGradient == other.backgroundGradient &&
-          foregroundGradient == other.foregroundGradient &&
-          overlayGradient == other.overlayGradient &&
-          outlineGradient == other.outlineGradient &&
-          foregroundBuilder == other.foregroundBuilder &&
-          motion == other.motion &&
-          haptic == other.haptic &&
-          borderRadius == other.borderRadius &&
-          hoveredRadius == other.hoveredRadius &&
-          pressedRadius == other.pressedRadius &&
-          trailingBackgroundColor == other.trailingBackgroundColor &&
-          trailingForegroundColor == other.trailingForegroundColor &&
-          menuBackgroundColor == other.menuBackgroundColor &&
-          menuForegroundColor == other.menuForegroundColor &&
-          dividerColor == other.dividerColor &&
-          leadingCustomSize == other.leadingCustomSize &&
-          trailingCustomSize == other.trailingCustomSize &&
-          trailingSelectedRadius == other.trailingSelectedRadius &&
-          gap == other.gap &&
-          trailingBackgroundGradient == other.trailingBackgroundGradient &&
-          trailingForegroundGradient == other.trailingForegroundGradient &&
-          trailingOutlineGradient == other.trailingOutlineGradient &&
-          trailingOverlayGradient == other.trailingOverlayGradient &&
-          menuStyle == other.menuStyle &&
-          popupDecoration == other.popupDecoration &&
-          bottomSheetDecoration == other.bottomSheetDecoration;
+      other is M3ESplitButtonDecoration && listEquals(_props, other._props);
 
   @override
-  int get hashCode => Object.hashAll([
+  int get hashCode => Object.hashAll(_props);
+
+  List<Object?> get _props => <Object?>[
     backgroundColor,
     foregroundColor,
     shadowColor,
@@ -514,5 +469,5 @@ class M3ESplitButtonDecoration extends M3EButtonDecoration {
     menuStyle,
     popupDecoration,
     bottomSheetDecoration,
-  ]);
+  ];
 }

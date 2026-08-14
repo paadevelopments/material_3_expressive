@@ -209,7 +209,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             child: icon,
           );
         }
-        Widget button = M3EInkSplashTheme(
+        return M3EInkSplashTheme(
           color: colors.fg,
           child: IconButton(
             onPressed: widget.onPressed == null
@@ -226,45 +226,59 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
                 ? false
                 : widget.enableFeedback,
             statesController: _statesController,
-            style: ButtonStyle(
-              fixedSize: WidgetStateProperty.all(visual),
-              padding: WidgetStateProperty.all(EdgeInsets.zero),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: animatedRadius),
-              ),
-              backgroundColor: WidgetStateProperty.all(
-                useGradient ? Colors.transparent : colors.bg,
-              ),
-              backgroundBuilder: m3eGradientSurfaceBuilder(
-                clipRadius: animatedRadius,
-                backgroundGradient: fill == null
-                    ? null
-                    : WidgetStatePropertyAll<Gradient?>(fill),
-                overlayGradient: dec?.overlayGradient,
-                outlineGradient: dec?.outlineGradient,
-                outlineSide: dec?.side,
-                outlineFallbackWidth: M3ETheme.of(
-                  context,
-                ).iconButtonTheme.outlineWidth,
-              ),
-              foregroundColor: WidgetStateProperty.resolveWith(
-                (_) => colors.fg,
-              ),
-              side: WidgetStateProperty.resolveWith((_) => colors.side),
-              splashFactory: widget.suppressInk || gradientOverlay
-                  ? NoSplash.splashFactory
-                  : InkSparkle.splashFactory,
-              overlayColor: widget.suppressInk || gradientOverlay
-                  ? WidgetStateProperty.all(Colors.transparent)
-                  : (dec?.overlayColor ??
-                        M3EStateLayer.overlayColorHoverFocus(colors.fg)),
-              animationDuration: Duration.zero,
-              visualDensity: VisualDensity.standard,
+            style: _morphButtonStyle(
+              visual: visual,
+              colors: colors,
+              animatedRadius: animatedRadius,
+              fill: fill,
+              useGradient: useGradient,
+              gradientOverlay: gradientOverlay,
             ),
           ),
         );
-        return button;
       },
+    );
+  }
+
+  ButtonStyle _morphButtonStyle({
+    required Size visual,
+    required ({Color bg, Color fg, BorderSide? side}) colors,
+    required BorderRadius animatedRadius,
+    required Gradient? fill,
+    required bool useGradient,
+    required bool gradientOverlay,
+  }) {
+    final dec = widget.decoration;
+    return ButtonStyle(
+      fixedSize: WidgetStateProperty.all(visual),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: animatedRadius),
+      ),
+      backgroundColor: WidgetStateProperty.all(
+        useGradient ? Colors.transparent : colors.bg,
+      ),
+      backgroundBuilder: m3eGradientSurfaceBuilder(
+        clipRadius: animatedRadius,
+        backgroundGradient: fill == null
+            ? null
+            : WidgetStatePropertyAll<Gradient?>(fill),
+        overlayGradient: dec?.overlayGradient,
+        outlineGradient: dec?.outlineGradient,
+        outlineSide: dec?.side,
+        outlineFallbackWidth: M3ETheme.of(context).iconButtonTheme.outlineWidth,
+      ),
+      foregroundColor: WidgetStateProperty.resolveWith((_) => colors.fg),
+      side: WidgetStateProperty.resolveWith((_) => colors.side),
+      splashFactory: widget.suppressInk || gradientOverlay
+          ? NoSplash.splashFactory
+          : InkSparkle.splashFactory,
+      overlayColor: widget.suppressInk || gradientOverlay
+          ? WidgetStateProperty.all(Colors.transparent)
+          : (dec?.overlayColor ??
+                M3EStateLayer.overlayColorHoverFocus(colors.fg)),
+      animationDuration: Duration.zero,
+      visualDensity: VisualDensity.standard,
     );
   }
 

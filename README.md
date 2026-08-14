@@ -31,20 +31,23 @@ Runtime dependencies are intentionally small — see
 Try the live gallery on the web:
 [paadevelopments.github.io/material_3_expressive](https://paadevelopments.github.io/material_3_expressive/).
 
-An interactive gallery demonstrating **all 44 widgets** also lives in the
+An interactive gallery demonstrating **all 45 widgets** also lives in the
 [`example/`](example/) directory (same build as the live demo). It groups
-components the same way as the official Material 3 catalog:
+components the same way as the official Material 3 catalog, with a live
+playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/):
 
-| Tab | Page | Components |
-| --- | ---- | ---------- |
-| **Do** | [`actions_page.dart`](example/lib/pages/actions_page.dart) | Buttons, FABs, groups, toggles, segmented & split buttons |
-| **Pick** | [`selection_page.dart`](example/lib/pages/selection_page.dart) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
-| **View** | [`containment_page.dart`](example/lib/pages/containment_page.dart) | Cards, carousel, lists, divider, dialogs, sheets |
-| **Nav** | [`navigation_page.dart`](example/lib/pages/navigation_page.dart) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
-| **Find** | [`feedback_page.dart`](example/lib/pages/feedback_page.dart) | Badges, progress, refresh, tooltip, snackbar, inputs |
+| Tab | Playgrounds | Components |
+| --- | ----------- | ---------- |
+| **Do** | [`playground/do/`](example/lib/pages/playground/do/) | Buttons, FABs, FAB menu, groups, segmented & split buttons |
+| **Pick** | [`playground/pick/`](example/lib/pages/playground/pick/) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
+| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets |
+| **Nav** | [`playground/nav/`](example/lib/pages/playground/nav/) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
+| **Find** | [`playground/find/`](example/lib/pages/playground/find/) | Badges, progress, refresh, tooltip, snackbar, inputs |
 
 The gallery shell in [`example/lib/main.dart`](example/lib/main.dart) uses
-`M3EMaterialApp` with adaptive theming and a light/dark toggle.
+`M3EMaterialApp` with adaptive theming, a light/dark toggle, and a palette
+action that opens [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart)
+(auto theming, dynamic color, and five seed colors).
 
 ```bash
 cd example
@@ -53,10 +56,11 @@ flutter run
 
 ## Features
 
-- **44 widgets** across 39 component modules, covering Actions, Selection,
+- **45 widgets** across 40 component modules, covering Actions, Selection,
   Containment, Navigation, and Feedback (communication + text input).
 - **Direct component API** — construct each `M3E*` widget directly; enums and
-  models are exported from a single library import.
+  models are exported from a single library import. Action surfaces accept
+  optional gradient decorations (fill, foreground, overlay, outline).
 - **Expressive motion & interaction** — spring physics (via [`motor`](https://pub.dev/packages/motor)),
   shape morphing, liquid selection indicators, shared haptics (`M3EHaptics`), and
   proper state layers on every interactive surface.
@@ -70,7 +74,7 @@ flutter run
 
 | Tool    | Version    |
 | ------- | ---------- |
-| Flutter | `>= 3.3.0` |
+| Flutter | `>= 3.38.0` |
 | Dart    | `^3.12.0`  |
 
 ## Installation
@@ -79,7 +83,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.5
+  material_3_expressive: ^1.0.6
 ```
 
 Then fetch it:
@@ -219,13 +223,14 @@ needed.
 
 ### Actions
 
-> See also: [`example/lib/pages/actions_page.dart`](example/lib/pages/actions_page.dart) (Do tab)
+> See also: [`example/lib/pages/playground/do/`](example/lib/pages/playground/do/) (Do tab)
 
 #### M3EButton
 
 Five color variants with shape morphing on press. Optional
-`M3EButtonDecoration.backgroundGradient` paints a gradient fill (Material
-background becomes transparent).
+`M3EButtonDecoration` gradients: `backgroundGradient`, `foregroundGradient`
+(text/icons), `overlayGradient` (state layer), and `outlineGradient` (stroke
+width still comes from `side`).
 
 ```dart
 M3EButton(
@@ -239,6 +244,13 @@ M3EButton(
     backgroundGradient: WidgetStateProperty.all(
       const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
     ),
+    foregroundGradient: WidgetStateProperty.all(
+      const LinearGradient(colors: [Color(0xFFFFFFFF), Color(0xFFEADDFF)]),
+    ),
+    outlineGradient: WidgetStateProperty.all(
+      const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
+    ),
+    side: WidgetStateProperty.all(const BorderSide(width: 1)),
   ),
   onPressed: () {},
   child: const Text('Gradient'),
@@ -249,7 +261,9 @@ M3EButton(
 
 Icon-only actions; supports toggle selection. Optional `visualSize` overrides
 the painted control size while hit target follows theme rules. Hover and press
-morph container radius (theme `radiusHovered` / press tokens).
+morph container radius (theme `radiusHovered` / press tokens). Pass
+`decoration: M3EIconButtonDecoration(...)` for fill, foreground, overlay, and
+outline gradients (same fields as `M3EButtonDecoration`).
 
 ```dart
 M3EIconButton(
@@ -269,7 +283,8 @@ M3EIconButton(
 
 #### M3EFab
 
-Floating action button in three sizes.
+Floating action button in three sizes. Optional `decoration: M3EFabDecoration`
+for fill, foreground, overlay, and outline gradients.
 
 ```dart
 M3EFab(
@@ -282,7 +297,7 @@ M3EFab(
 
 #### M3EExtendedFab
 
-FAB with a text label.
+FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`.
 
 ```dart
 M3EExtendedFab(
@@ -296,13 +311,21 @@ M3EExtendedFab(
 
 Speed-dial menu anchored to a FAB. The FAB morphs size (80↔56) and circle when
 opening; use `position` for left/right anchor, and optional `expandIcon` /
-`collapseIcon` (fallbacks: `icon` / `closeIcon`).
+`collapseIcon` (fallbacks: `icon` / `closeIcon`). Pass `decoration` for the
+trigger FAB. Menu-item fill, foreground, and outline gradients live on
+`M3EFabMenuTheme` (`itemBackgroundGradient`, `itemForegroundGradient`,
+`itemOutlineGradient` / `itemOutlineColor`, `itemBorderWidth`).
 
 ```dart
 M3EFabMenu(
   position: M3EFabMenuPosition.right,
   expandIcon: const Icon(M3EIcons.add),
   collapseIcon: const Icon(M3EIcons.close),
+  decoration: M3EFabDecoration(
+    backgroundGradient: WidgetStateProperty.all(
+      const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
+    ),
+  ),
   items: [
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.edit),
@@ -346,7 +369,10 @@ M3EButtonGroup(
 
 #### M3EToggleButton
 
-Toggle with round-to-square shape morphing.
+Toggle with round-to-square shape morphing. Optional
+`decoration: M3EToggleButtonDecoration(...)` for the same gradient fields as
+`M3EButtonDecoration`. `M3EButtonGroup` / `M3EToggleButtonGroup` accept a
+group-level `decoration` and per-action `M3EButtonGroupAction.decoration`.
 
 ```dart
 // in State
@@ -366,7 +392,10 @@ M3EToggleButton.text(
 
 #### M3ESegmentedButton
 
-Single- or multi-select segmented control.
+Single- or multi-select segmented control. Theme
+`M3ESegmentedButtonTheme` can set `outlineColor` / `outlineGradient`,
+`dividerColor` / `dividerGradient` (sampled across the whole group), and
+selected/unselected background and foreground colors or gradients.
 
 ```dart
 // in State — single select
@@ -395,7 +424,12 @@ M3ESegmentedButton<String>(
 
 Primary action with a trailing menu. Use `items` for a flat list, or
 `m3eMenuBuilder` for a rich M3E menu tree (groups, dividers, submenus). Legacy
-`menuBuilder` still opens Flutter `showMenu`.
+`menuBuilder` still opens Flutter `showMenu`. Gradients on
+`M3ESplitButtonDecoration` span both segments; optional
+`trailingBackgroundGradient` / `trailingForegroundGradient` /
+`trailingOutlineGradient` / `trailingOverlayGradient` override the trailing
+half. `decoration.animationDuration` defaults to `Duration.zero` so the
+trailing radius morph stays on the spring.
 
 ```dart
 M3ESplitButton<String>(
@@ -425,7 +459,7 @@ M3ESplitButton<String>(
 
 ### Selection
 
-> See also: [`example/lib/pages/selection_page.dart`](example/lib/pages/selection_page.dart) (Pick tab)
+> See also: [`example/lib/pages/playground/pick/`](example/lib/pages/playground/pick/) (Pick tab)
 
 #### M3ECheckbox
 
@@ -670,7 +704,7 @@ M3EDialTimePicker(
 
 ### Containment
 
-> See also: [`example/lib/pages/containment_page.dart`](example/lib/pages/containment_page.dart) (View tab)
+> See also: [`example/lib/pages/playground/view/`](example/lib/pages/playground/view/) (View tab)
 
 #### M3ECard
 
@@ -755,10 +789,12 @@ M3ECardList.builder(
 
 Multi-select host: optional [M3ESelectionController], [M3ESelectionAppBar]
 (idle header → contextual bar + select-all; `idle` is any [Widget]), and any
-list [body] ([M3ECardList], [M3EDismissibleList], …). Wire selection chrome on
-the list via `colorBuilder` / `borderRadiusBuilder`, gestures (`onTap` /
-`onLongPress`), and [M3ESelectionLeading] on each item. Wrap with [PopScope] so
-system back clears selection first. Prefer
+list [body] ([M3ECardList], [M3EDismissibleList], …). Selected rows pick up
+`selectedColor` (or `M3ESelectionTheme.highlightColor`, default
+`secondaryContainer`) automatically — no `colorBuilder` required for the
+highlight. Use `borderRadiusBuilder` for selected-item corner morph (spring),
+gestures (`onTap` / `onLongPress`), and [M3ESelectionLeading] on each item.
+Wrap with [PopScope] so system back clears selection first. Prefer
 `listPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)`.
 
 ```dart
@@ -772,6 +808,7 @@ PopScope(
   child: M3ESelection(
     controller: selection,
     itemCount: items.length,
+    selectedColor: const Color(0xFFC8E6C9),
     appBar: M3ESelectionAppBar(
       idle: M3EAppBar.search(
         searchController: searchController,
@@ -786,8 +823,6 @@ PopScope(
     body: M3ECardList.builder(
       itemCount: items.length,
       listPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      colorBuilder: (i) =>
-          selection.isSelected(i) ? scheme.secondaryContainer : null,
       borderRadiusBuilder: (i, pos) => selection.isSelected(i)
           ? BorderRadius.circular(24)
           : null,
@@ -813,6 +848,7 @@ PopScope(
 
 Advanced: wire `M3ESelectionAppBar` + a shared controller yourself (omit
 `M3ESelection`), or pass `M3EDismissibleList` as `body` for swipe + select.
+An explicit `colorBuilder` still wins over the selection highlight.
 
 #### M3EDismissibleColumn
 
@@ -975,7 +1011,7 @@ M3ESideSheet.show<void>(
 
 ### Navigation
 
-> See also: [`example/lib/pages/navigation_page.dart`](example/lib/pages/navigation_page.dart) (Nav tab)
+> See also: [`example/lib/pages/playground/nav/`](example/lib/pages/playground/nav/) (Nav tab)
 
 #### M3EAppBar
 
@@ -1285,11 +1321,15 @@ M3EMenu(
 
 ### Feedback
 
-> See also: [`example/lib/pages/feedback_page.dart`](example/lib/pages/feedback_page.dart) (Find tab)
+> See also: [`example/lib/pages/playground/find/`](example/lib/pages/playground/find/) (Find tab)
 
 #### M3EBadge
 
-Notification dot or numeric badge on a child.
+Notification dot or numeric badge on a child. `alignment` places the
+indicator at `topLeft`, `topCenter`, or `topRight` of the child's own box
+(default `topRight`). The badge sizes itself to cover the child plus
+indicator — no parent `SizedBox` is required. `offset` nudges away from the
+anchored edge (`dx` is ignored when centered).
 
 ```dart
 const M3EBadge(
@@ -1299,6 +1339,7 @@ const M3EBadge(
 
 const M3EBadge(
   count: 8,
+  alignment: M3EBadgeAlignment.topLeft,
   child: Icon(M3EIcons.calendar_today, size: 28),
 );
 ```
@@ -1400,7 +1441,11 @@ M3ESnackbar.show(
 
 #### M3ETextField
 
-Filled and outlined text input with floating label.
+Filled and outlined text input with floating label. The focused stroke is
+painted over the field so width/height stay stable. Height grows with
+`maxLines`. An empty label sits vertically centered; with no label, the
+value is centered. `inputFormatters` are forwarded to the inner
+`EditableText`. `M3ETextFieldVariant` and `M3ETextFieldTheme` are public.
 
 ```dart
 M3ETextField(
@@ -1478,9 +1523,13 @@ The [`example/`](example/) project is a full gallery app:
 
 - **Entry point:** [`example/lib/main.dart`](example/lib/main.dart) —
   `M3EMaterialApp` with `autoTheming`, `dynamicColoring`, and a five-tab
-  gallery shell.
-- **Pages:** one file per Material 3 category under
-  [`example/lib/pages/`](example/lib/pages/).
+  catalog-driven gallery shell. The home app bar palette action opens
+  [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart) to
+  toggle auto theming and dynamic color, and to pick one of five seed colors
+  when dynamic color is off.
+- **Pages:** playgrounds under
+  [`example/lib/pages/playground/`](example/lib/pages/playground/), grouped
+  by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`).
 - **Theme toggle:** app-bar `M3EIconButton` calls
   `M3ETheme.controllerOf(context)?.toggleBrightness(...)`.
 
@@ -1491,7 +1540,8 @@ flutter run
 ```
 
 Pick a device or simulator when prompted. Use the bottom navigation bar to
-switch between component groups and the app-bar icon to toggle light/dark mode.
+switch between component groups, the palette icon for theme settings, and the
+brightness icon to toggle light/dark mode.
 
 ## Development
 

@@ -24,7 +24,8 @@ class NavigationRailPlayground extends StatefulWidget {
 class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
   int _index = 0;
   M3ENavigationRailType _type = M3ENavigationRailType.expanded;
-  final M3ENavigationRailModality _modality = M3ENavigationRailModality.standard;
+  final M3ENavigationRailModality _modality =
+      M3ENavigationRailModality.standard;
   M3ENavigationRailLabelBehavior _labelBehavior =
       M3ENavigationRailLabelBehavior.alwaysShow;
   bool _showFab = true;

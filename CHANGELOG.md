@@ -1,3 +1,58 @@
+## 1.0.6
+
+### Added
+
+* Multi-select host `M3ESelection` with `M3ESelectionController`,
+  `M3ESelectionAppBar`, `M3ESelectionLeading`, `M3ESelectionScope`, and
+  `M3ESelectionTheme`. Optional `selectedColor` / theme `highlightColor` fill
+  selected rows; `M3ECardList` and `M3EDismissibleList` pick that fill up
+  automatically when hosted under the selection scope.
+* Gradient decorations on action surfaces:
+  `backgroundGradient`, `foregroundGradient`, `overlayGradient`, and
+  `outlineGradient` on `M3EButtonDecoration`, `M3EToggleButtonDecoration`,
+  `M3EIconButtonDecoration`, `M3EFabDecoration`, and
+  `M3ESplitButtonDecoration` (plus trailing-segment gradient overrides).
+* `M3ESegmentedButtonTheme` outline, divider, selected/unselected fill, and
+  foreground colors/gradients. Dividers can sample a group-wide
+  `dividerGradient`.
+* `M3EFabMenu.decoration` (`M3EFabDecoration`) for the trigger FAB, plus
+  `M3EFabMenuTheme` item fill, foreground, and outline gradients.
+* `M3EBadge.alignment` (`M3EBadgeAlignment.topLeft` / `topCenter` /
+  `topRight`). The badge sizes itself to the child's box; no parent
+  `SizedBox` is required.
+* `M3ETextField.inputFormatters`. `M3ETextFieldVariant` and
+  `M3ETextFieldTheme` are exported from the package barrel.
+* `M3ECarousel.onChange` with `M3ECarouselChangeDetails` (leading / focal
+  index).
+* `M3ESplitButton.m3eMenuBuilder` for a rich M3E menu tree (groups, dividers,
+  submenus). `M3EButtonDecoration.animationDuration` is honored by split
+  segments (defaults to `Duration.zero` so radius morph stays on the spring).
+* Search idle `alignment` / `barAlignment` (`M3EAppBar.search` defaults to
+  center). Toolbar `fabExpandsToolbar` and `pillActiveSpring`.
+* List `colorBuilder` / `borderRadiusBuilder`, plus spring radius motion when
+  a selected card's corners change. Card list / list item `variant` and
+  `border`.
+* Example gallery: catalog-driven playgrounds, palette theme-config screen
+  (auto theming, dynamic color, five seed colors).
+
+### Fixed
+
+* `M3ETextField` no longer grows when the focused stroke thickens (border is
+  painted as a foreground decoration). Height grows with `maxLines`. Empty
+  labels sit vertically centered; unlabeled values sit vertically centered.
+* Split-button foreground gradients tint text/icons instead of filling the
+  segment; trailing radius morphs immediately after the menu closes when a
+  background gradient is set.
+* Button gradient outlines no longer expand into unbounded height.
+* Selection highlight color (`selectedColor` / `highlightColor`) now reaches
+  hosted list rows.
+
+### Changed
+
+* Example app shell uses the playground catalog under
+  `example/lib/pages/playground/` and a theme config route from the home
+  app bar.
+
 ## 1.0.5
 
 ### Fixed
