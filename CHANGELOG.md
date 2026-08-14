@@ -1,3 +1,9 @@
+## 1.0.7
+
+### Changed
+
+* Package version bump for a new pub.dev publish.
+
 ## 1.0.6
 
 ### Added
