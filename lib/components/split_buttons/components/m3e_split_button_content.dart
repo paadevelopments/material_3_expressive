@@ -186,6 +186,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: metrics.minTap),
             child: Row(
+              key: _splitGradientHostKey,
               mainAxisSize: MainAxisSize.min,
               textDirection: metrics.dir,
               children: [

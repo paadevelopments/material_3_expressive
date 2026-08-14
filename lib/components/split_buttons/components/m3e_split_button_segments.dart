@@ -232,9 +232,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
     );
 
     final animatedButton = M3ERadiusAndPaddingMotion(
-      motion: _menuOpen
-          ? springMotion
-          : M3EButtonMotion.standardSpatialFast.toMotion(),
+      motion: springMotion,
       internalLeft: 0,
       internalRight: 0,
       internalTop: 0,

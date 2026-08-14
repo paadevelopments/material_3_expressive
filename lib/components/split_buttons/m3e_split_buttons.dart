@@ -33,6 +33,7 @@ part 'components/m3e_split_button_style.dart';
 part 'components/m3e_split_button_content.dart';
 part 'components/m3e_split_button_segments.dart';
 part 'components/m3e_split_button_menu.dart';
+part 'components/m3e_split_button_gradient.dart';
 
 const bool _kDefaultEnableFeedback = true;
 
@@ -387,6 +388,7 @@ class _M3ESplitButtonState<T> extends State<M3ESplitButton<T>>
 
   Set<T>? _selectedValues;
   final GlobalKey _trailingKey = GlobalKey();
+  final GlobalKey _splitGradientHostKey = GlobalKey();
 
   @override
   M3EButtonSize get buttonSize => widget.size;

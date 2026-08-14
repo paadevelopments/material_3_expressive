@@ -26,52 +26,50 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     bool trailing = false,
   }) {
     final M3ESplitButtonDecoration? dec = widget.decoration;
-    final WidgetStateProperty<Gradient?>? backgroundGradient = trailing
-        ? (dec?.trailingBackgroundGradient ?? dec?.backgroundGradient)
-        : dec?.backgroundGradient;
-    final WidgetStateProperty<Gradient?>? overlayGradient = trailing
-        ? (dec?.trailingOverlayGradient ?? dec?.overlayGradient)
-        : dec?.overlayGradient;
-    final WidgetStateProperty<Gradient?>? foregroundGradient = trailing
-        ? (dec?.trailingForegroundGradient ?? dec?.foregroundGradient)
-        : dec?.foregroundGradient;
-    final WidgetStateProperty<Gradient?>? outlineGradient = trailing
-        ? (dec?.trailingOutlineGradient ?? dec?.outlineGradient)
-        : dec?.outlineGradient;
+    final WidgetStateProperty<Gradient?>? backgroundGradient =
+        dec?.backgroundGradient ?? dec?.trailingBackgroundGradient;
+    final WidgetStateProperty<Gradient?>? overlayGradient =
+        dec?.overlayGradient ?? dec?.trailingOverlayGradient;
+    final WidgetStateProperty<Gradient?>? foregroundGradient =
+        dec?.foregroundGradient ?? dec?.trailingForegroundGradient;
+    final WidgetStateProperty<Gradient?>? outlineGradient =
+        dec?.outlineGradient ?? dec?.trailingOutlineGradient;
 
     var result = child;
-    final ButtonLayerBuilder? foreground = m3eGradientForegroundBuilder(
-      clipRadius: radius,
-      gradient: foregroundGradient,
-      explicitBuilder: trailing ? null : dec?.foregroundBuilder,
-    );
+    final Gradient? foreground = foregroundGradient?.resolve(states);
     if (foreground != null) {
-      result = foreground(context, states, result);
+      result = _M3ESplitSharedForegroundLayer(
+        hostKey: _splitGradientHostKey,
+        gradient: foreground,
+        child: result,
+      );
+    } else if (dec?.foregroundBuilder != null && !trailing) {
+      result = dec!.foregroundBuilder!(context, states, result);
     }
-    final fill = m3eGradientBackgroundBuilder(
-      clipRadius: radius,
-      gradient: backgroundGradient,
-      explicitBuilder: trailing ? null : dec?.backgroundBuilder,
-    );
-    if (fill != null) {
-      result = fill(context, states, result);
+    final Gradient? fill = backgroundGradient?.resolve(states);
+    final Gradient? outline = outlineGradient?.resolve(states);
+    if (dec?.backgroundBuilder != null && !trailing) {
+      result = ClipRRect(
+        borderRadius: radius,
+        child: dec!.backgroundBuilder!(context, states, result),
+      );
+    } else if (fill != null || outline != null) {
+      result = _M3ESplitSharedGradientLayer(
+        hostKey: _splitGradientHostKey,
+        radius: radius,
+        fill: fill,
+        outline: outline,
+        outlineWidth: m3eOutlineWidth(dec?.side?.resolve(states)),
+        disabled: states.contains(WidgetState.disabled),
+        child: result,
+      );
     }
-    result = m3eResolveGradientOverlay(
+    return m3eResolveGradientOverlay(
       clipRadius: radius,
       states: states,
       overlayGradient: overlayGradient,
       child: result,
     );
-    final Gradient? outline = outlineGradient?.resolve(states);
-    if (outline != null) {
-      result = m3eGradientOutlineLayer(
-        clipRadius: radius,
-        gradient: outline,
-        width: m3eOutlineWidth(dec?.side?.resolve(states)),
-        child: result,
-      );
-    }
-    return result;
   }
 
   bool _segmentHasFill({required bool trailing}) {
@@ -79,39 +77,26 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     if (dec?.backgroundBuilder != null && !trailing) {
       return true;
     }
-    if (trailing) {
-      return dec?.trailingBackgroundGradient != null ||
-          dec?.backgroundGradient != null;
-    }
-    return dec?.backgroundGradient != null;
+    return dec?.backgroundGradient != null ||
+        dec?.trailingBackgroundGradient != null;
   }
 
   bool _segmentHasOutlineGradient({required bool trailing}) {
     final M3ESplitButtonDecoration? dec = widget.decoration;
-    if (trailing) {
-      return dec?.trailingOutlineGradient != null ||
-          dec?.outlineGradient != null;
-    }
-    return dec?.outlineGradient != null;
+    return dec?.outlineGradient != null || dec?.trailingOutlineGradient != null;
   }
 
   bool _segmentHasOverlayGradient({required bool trailing}) {
     final M3ESplitButtonDecoration? dec = widget.decoration;
-    if (trailing) {
-      return m3eUsesGradientOverlay(
-        dec?.trailingOverlayGradient ?? dec?.overlayGradient,
-      );
-    }
-    return m3eUsesGradientOverlay(dec?.overlayGradient);
+    return m3eUsesGradientOverlay(
+      dec?.overlayGradient ?? dec?.trailingOverlayGradient,
+    );
   }
 
   bool _segmentHasForegroundGradient({required bool trailing}) {
     final M3ESplitButtonDecoration? dec = widget.decoration;
-    if (trailing) {
-      return dec?.trailingForegroundGradient != null ||
-          dec?.foregroundGradient != null;
-    }
-    return dec?.foregroundGradient != null;
+    return dec?.foregroundGradient != null ||
+        dec?.trailingForegroundGradient != null;
   }
 
   (Color, Color, BorderSide?, double?) _resolveColorsAndShapes(
