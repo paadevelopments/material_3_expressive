@@ -29,6 +29,7 @@ import '../components/refresh_indicator/styles/m3e_refresh_indicator_theme.dart'
 import '../components/search/styles/m3e_search_bar_theme.dart';
 import '../components/search/styles/m3e_search_view_theme.dart';
 import '../components/segmented_buttons/styles/m3e_segmented_button_theme.dart';
+import '../components/selection/styles/m3e_selection_theme.dart';
 import '../components/side_sheets/styles/m3e_side_sheet_theme.dart';
 import '../components/sliders/styles/m3e_slider_theme.dart';
 import '../components/snackbar/styles/m3e_snackbar_theme.dart';
@@ -86,6 +87,7 @@ class M3EThemeData {
     this.searchBarTheme = M3ESearchBarTheme.defaults,
     this.searchViewTheme = M3ESearchViewTheme.defaults,
     this.segmentedButtonTheme = M3ESegmentedButtonTheme.defaults,
+    this.selectionTheme = M3ESelectionTheme.defaults,
     this.sideSheetTheme = M3ESideSheetTheme.defaults,
     this.sliderTheme = M3ESliderTheme.defaults,
     this.snackBarTheme = M3ESnackbarTheme.defaults,
@@ -261,6 +263,9 @@ class M3EThemeData {
   /// Segmented button component theme.
   final M3ESegmentedButtonTheme segmentedButtonTheme;
 
+  /// Selection list / app bar component theme.
+  final M3ESelectionTheme selectionTheme;
+
   /// Side sheet component theme.
   final M3ESideSheetTheme sideSheetTheme;
 
@@ -343,6 +348,7 @@ class M3EThemeData {
       searchBarTheme: searchBarTheme,
       searchViewTheme: searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme,
+      selectionTheme: selectionTheme,
       sideSheetTheme: sideSheetTheme,
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
@@ -362,6 +368,10 @@ class M3EThemeData {
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
+    List<FontVariation>? fontVariations,
     IconThemeData? iconTheme,
     M3ESpacing? spacing,
     double? visualDensity,
@@ -396,6 +406,7 @@ class M3EThemeData {
     M3ESearchBarTheme? searchBarTheme,
     M3ESearchViewTheme? searchViewTheme,
     M3ESegmentedButtonTheme? segmentedButtonTheme,
+    M3ESelectionTheme? selectionTheme,
     M3ESideSheetTheme? sideSheetTheme,
     M3ESliderTheme? sliderTheme,
     M3ESnackbarTheme? snackBarTheme,
@@ -409,9 +420,21 @@ class M3EThemeData {
     M3EToolbarTheme? toolbarTheme,
     M3ETooltipTheme? tooltipTheme,
   }) {
+    M3ETypeScale nextScale = typeScale ?? this.typeScale;
+    if (fontFamily != null ||
+        fontFamilyFallback != null ||
+        package != null ||
+        fontVariations != null) {
+      nextScale = nextScale.apply(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
+        package: package,
+        fontVariations: fontVariations,
+      );
+    }
     return M3EThemeData(
       colorScheme: colorScheme ?? this.colorScheme,
-      typeScale: typeScale ?? this.typeScale,
+      typeScale: nextScale,
       iconTheme: iconTheme ?? this.iconTheme,
       spacing: spacing ?? this.spacing,
       visualDensity: visualDensity ?? this.visualDensity,
@@ -450,6 +473,7 @@ class M3EThemeData {
       searchBarTheme: searchBarTheme ?? this.searchBarTheme,
       searchViewTheme: searchViewTheme ?? this.searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
+      selectionTheme: selectionTheme ?? this.selectionTheme,
       sideSheetTheme: sideSheetTheme ?? this.sideSheetTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,

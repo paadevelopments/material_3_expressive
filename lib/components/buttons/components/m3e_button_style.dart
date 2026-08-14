@@ -34,18 +34,20 @@ extension _M3EButtonStyle on _M3EButtonState {
       visualDensity: dec?.visualDensity ?? _kVisualDensityStandard,
       tapTargetSize: dec?.tapTargetSize,
       animationDuration: dec?.animationDuration ?? _kDurationZero,
-      splashFactory:
-          dec?.splashFactory ??
-          widget.splashFactory ??
-          InkSparkle.splashFactory,
+      splashFactory: m3eUsesGradientOverlay(dec?.overlayGradient)
+          ? NoSplash.splashFactory
+          : (dec?.splashFactory ??
+                widget.splashFactory ??
+                InkSparkle.splashFactory),
       foregroundColor: WidgetStateProperty.resolveWith(_resolveForegroundColor),
       backgroundColor: WidgetStateProperty.resolveWith(_resolveBackgroundColor),
       elevation: WidgetStateProperty.resolveWith(_resolveElevation),
       side: WidgetStateProperty.resolveWith(_resolveSide),
       mouseCursor: WidgetStateProperty.resolveWith(_resolveMouseCursor),
-      overlayColor:
-          dec?.overlayColor ??
-          WidgetStateProperty.resolveWith(_resolveOverlayColor),
+      overlayColor: m3eUsesGradientOverlay(dec?.overlayGradient)
+          ? const WidgetStatePropertyAll<Color?>(Colors.transparent)
+          : (dec?.overlayColor ??
+                WidgetStateProperty.resolveWith(_resolveOverlayColor)),
       surfaceTintColor: dec?.surfaceTintColor,
       enableFeedback:
           (dec?.haptic ?? M3EHapticFeedback.none) == M3EHapticFeedback.none &&
@@ -55,6 +57,9 @@ extension _M3EButtonStyle on _M3EButtonState {
 
   Color? _resolveForegroundColor(Set<WidgetState> states) {
     final dec = widget.decoration;
+    if (dec?.foregroundGradient?.resolve(states) != null) {
+      return m3eGradientForegroundSourceColor;
+    }
     if (dec?.foregroundColor != null) {
       final color = dec!.foregroundColor!.resolve(states);
       if (color != null) {
@@ -88,7 +93,9 @@ extension _M3EButtonStyle on _M3EButtonState {
               alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
             );
     }
-    return (dec?.backgroundBuilder != null || isTransparent)
+    return (dec?.backgroundBuilder != null ||
+            dec?.backgroundGradient != null ||
+            isTransparent)
         ? Colors.transparent
         : _buttonTheme.container(_scheme, widget.style);
   }
@@ -106,6 +113,9 @@ extension _M3EButtonStyle on _M3EButtonState {
 
   BorderSide? _resolveSide(Set<WidgetState> states) {
     final dec = widget.decoration;
+    if (dec?.outlineGradient?.resolve(states) != null || dec?.side != null) {
+      return BorderSide.none;
+    }
     if (dec?.side != null) {
       final s = dec!.side!.resolve(states);
       if (s != null) {

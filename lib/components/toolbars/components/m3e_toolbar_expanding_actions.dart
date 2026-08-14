@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../models/m3e_toolbar_item.dart';
 import '../utils/m3e_toolbar_item_layout.dart';
@@ -28,6 +29,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     this.trailing,
     this.gap = 0,
     this.opticalInset = 0,
+    this.pillActiveSpring = true,
     super.key,
   });
 
@@ -76,6 +78,9 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   /// Icon-button target overhang; applied to widget slots for optical parity.
   final double opticalInset;
 
+  /// When false, the parent toolbar reserves a fixed labeled-selection width.
+  final bool pillActiveSpring;
+
   static const double _iconRevealStart = 0.4;
 
   @override
@@ -86,7 +91,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
 
     // No trigger → always show full actions row (no expand morph).
     if (triggerIndex < 0) {
-      return _staticRow(actions);
+      return _staticRow(context, actions);
     }
 
     final partitioned = M3EToolbarItemLayout.partitionInline(
@@ -112,6 +117,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       action: trigger,
       size: iconButtonSize,
       onPressed: onTriggerPressed,
+      pillActiveSpring: pillActiveSpring,
     );
 
     final Widget? beforeSide = sidesVisible
@@ -145,7 +151,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 
-  Widget _staticRow(List<M3EToolbarItem> all) {
+  Widget _staticRow(BuildContext context, List<M3EToolbarItem> all) {
     final partitioned = M3EToolbarItemLayout.partitionInline(
       items: all,
       maxInline: maxInline,
@@ -158,8 +164,11 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           availableExtent: availableExtent,
           axis: axis,
           opticalInset: opticalInset,
-          buildAction: (M3EToolbarAction action) =>
-              M3EToolbarIconButton(action: action, size: iconButtonSize),
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+            pillActiveSpring: pillActiveSpring,
+          ),
         ),
       if (partitioned.overflow.isNotEmpty)
         M3EToolbarOverflowMenu(
@@ -171,16 +180,84 @@ class M3EToolbarExpandingActions extends StatelessWidget {
         ),
     ];
 
+    // Leading/trailing slots are not measured here — only pure action rows
+    // get a fixed labeled-selection reservation.
+    final double? reservedWidth = (leading == null && trailing == null)
+        ? _reservedSelectionWidth(
+            context: context,
+            inline: partitioned.inline,
+            hasOverflow: partitioned.overflow.isNotEmpty,
+          )
+        : null;
+    final evenlySpace = reservedWidth != null;
+    final slotChildren = evenlySpace
+        ? slots
+        : M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis);
     final children = <Widget>[
       if (leading != null) ...<Widget>[leading!, _gapBox()],
-      ...M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis),
+      ...slotChildren,
       if (trailing != null) ...<Widget>[_gapBox(), trailing!],
     ];
 
-    if (axis == Axis.vertical) {
-      return Column(mainAxisSize: MainAxisSize.min, children: children);
+    final MainAxisSize mainAxisSize = evenlySpace
+        ? MainAxisSize.max
+        : MainAxisSize.min;
+    final MainAxisAlignment alignment = evenlySpace
+        ? MainAxisAlignment.spaceBetween
+        : MainAxisAlignment.start;
+
+    final Widget content = axis == Axis.vertical
+        ? Column(
+            mainAxisSize: mainAxisSize,
+            mainAxisAlignment: alignment,
+            children: children,
+          )
+        : Row(
+            mainAxisSize: mainAxisSize,
+            mainAxisAlignment: alignment,
+            children: children,
+          );
+
+    if (reservedWidth == null) {
+      return content;
     }
-    return Row(mainAxisSize: MainAxisSize.min, children: children);
+    return SizedBox(width: reservedWidth, child: content);
+  }
+
+  double? _reservedSelectionWidth({
+    required BuildContext context,
+    required List<M3EToolbarItem> inline,
+    required bool hasOverflow,
+  }) {
+    if (pillActiveSpring) {
+      return null;
+    }
+    final theme = M3ETheme.of(context);
+    final iconTheme = theme.iconButtonTheme;
+    final Size visual = iconTheme.visual(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final Size target = iconTheme.target(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final double iconSlot = visual.width > target.width
+        ? visual.width
+        : target.width;
+    return M3EToolbarItemLayout.reservedLabeledSelectionExtent(
+      inline: inline,
+      axis: axis,
+      iconVisualExtent: visual.width,
+      iconSlotExtent: iconSlot,
+      labelStyle: theme.typeScale.labelLarge.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+      textScaler: MediaQuery.textScalerOf(context),
+      gap: gap,
+      labelGap: M3EToolbarIconButton.labelGap,
+      includeOverflowSlot: hasOverflow,
+    );
   }
 
   /// Side cluster that grows away from the trigger.
@@ -211,8 +288,11 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           availableExtent: availableExtent,
           axis: axis,
           opticalInset: opticalInset,
-          buildAction: (M3EToolbarAction action) =>
-              M3EToolbarIconButton(action: action, size: iconButtonSize),
+          buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+            action: action,
+            size: iconButtonSize,
+            pillActiveSpring: pillActiveSpring,
+          ),
         ),
       if (overflow != null && overflow.isNotEmpty)
         M3EToolbarOverflowMenu(

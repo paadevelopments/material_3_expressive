@@ -1,15 +1,21 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'components/m3e_badge_layout.dart';
+import 'enums/m3e_badge_alignment.dart';
 import 'styles/m3e_badge_theme.dart';
 
+export 'enums/m3e_badge_alignment.dart';
 export 'styles/m3e_badge_theme.dart';
 
 /// A Material 3 Expressive badge.
 ///
-/// Shows a small dot or a numeric count anchored to the top-end corner of
-/// [child]. Set [showDot] for a dot badge, or provide [count] for a numeric
-/// badge.
+/// Shows a small dot or a numeric count anchored to a top edge of [child].
+///
+/// [alignment] places the indicator at the top-left, top-center, or top-right
+/// of [child]'s own box, and [offset] nudges it away from that edge. The badge
+/// sizes itself to cover both, so a parent never has to reserve room.
+/// Set [showDot] for a dot badge, or provide [count] for a numeric badge.
 class M3EBadge extends StatelessWidget {
   /// M3EBadge.
   const M3EBadge({
@@ -18,6 +24,7 @@ class M3EBadge extends StatelessWidget {
     this.count,
     this.showDot = false,
     this.maxCount = 99,
+    this.alignment = M3EBadgeAlignment.topRight,
     this.offset,
     this.backgroundColor,
     this.foregroundColor,
@@ -37,7 +44,10 @@ class M3EBadge extends StatelessWidget {
   /// maxCount.
   final int maxCount;
 
-  /// offset.
+  /// Top-edge placement of the indicator. Defaults to [M3EBadgeAlignment.topRight].
+  final M3EBadgeAlignment alignment;
+
+  /// Nudge away from the anchored edge. `dx` is ignored when centered.
   final Offset? offset;
 
   /// backgroundColor.
@@ -74,21 +84,16 @@ class M3EBadge extends StatelessWidget {
           );
 
     return M3EComponentTheme(
-      builder: (context) => Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          child,
-          Positioned(
-            right: effectiveOffset.dx,
-            top: effectiveOffset.dy,
-            child: Semantics(
-              label:
-                  semanticLabel ??
-                  (count != null ? 'Notifications: $count' : 'Notifications'),
-              child: badge,
-            ),
-          ),
-        ],
+      builder: (context) => M3EBadgeLayout(
+        alignment: alignment,
+        offset: effectiveOffset,
+        content: child,
+        indicator: Semantics(
+          label:
+              semanticLabel ??
+              (count != null ? 'Notifications: $count' : 'Notifications'),
+          child: badge,
+        ),
       ),
     );
   }

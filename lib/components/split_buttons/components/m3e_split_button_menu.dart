@@ -10,6 +10,10 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
       await _showNativeMenu(context);
       return;
     }
+    if (widget.m3eMenuBuilder != null) {
+      await _showM3eCustomMenu(context);
+      return;
+    }
 
     final items = widget.items!;
     final menuStyle =
@@ -25,15 +29,52 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
     }
   }
 
+  Future<void> _showM3eCustomMenu(BuildContext context) async {
+    final menuStyle =
+        widget.decoration?.menuStyle ?? M3ESplitButtonMenuStyle.popup;
+    if (menuStyle == M3ESplitButtonMenuStyle.bottomSheet) {
+      assert(() {
+        debugPrint(
+          'M3ESplitButton.m3eMenuBuilder does not support '
+          'M3ESplitButtonMenuStyle.bottomSheet; falling back to popup.',
+        );
+        return true;
+      }(), 'm3eMenuBuilder does not support bottomSheet menu style');
+    }
+    final useNativeTheme = menuStyle == M3ESplitButtonMenuStyle.native;
+    await _showM3eMenuNodes(
+      context,
+      widget.m3eMenuBuilder!(context),
+      applyPopupTheme: !useNativeTheme,
+    );
+  }
+
   Future<void> _showSpringPopup(
     BuildContext context,
     List<M3ESplitButtonItem<T>> items,
   ) async {
+    final iconSize = _splitTheme.splitIcon(widget.size);
+    final nodes = <M3EMenuNode>[
+      for (final item in items) _splitItemToMenuNode(item, iconSize: iconSize),
+    ];
+    await _showM3eMenuNodes(context, nodes, applyPopupTheme: true);
+  }
+
+  Future<void> _showM3eMenuNodes(
+    BuildContext context,
+    List<M3EMenuNode> nodes, {
+    required bool applyPopupTheme,
+  }) async {
     setState(() => _menuOpen = true);
 
     final tCtx = _trailingKey.currentContext;
-    final tb = tCtx?.findRenderObject() as RenderBox?;
-    if (tb == null) {
+    if (tCtx == null) {
+      _closeMenu();
+      return;
+    }
+    final Rect? anchor = m3eOverlayRectFor(tCtx);
+    final tb = tCtx.findRenderObject() as RenderBox?;
+    if (anchor == null || tb == null || !tb.hasSize) {
       _closeMenu();
       return;
     }
@@ -52,32 +93,29 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
           motion: _splitTheme.popupMotion,
         );
 
-    final iconSize = _splitTheme.splitIcon(widget.size);
-    final menuTheme = M3ETheme.of(context).menuTheme.copyWith(
-      minWidth: popupDec.minWidth,
-      maxWidth: popupDec.maxWidth,
-      maxHeight: popupDec.maxHeight,
-      elevation: popupDec.elevation ?? _splitTheme.popupElevation,
-      backgroundColor: popupDec.backgroundColor,
-      anchorOffset: popupDec.offset.dy != 0
-          ? popupDec.offset.dy
-          : M3ETheme.of(context).menuTheme.anchorOffset,
-    );
+    final M3EMenuTheme? menuTheme = applyPopupTheme
+        ? M3ETheme.of(context).menuTheme.copyWith(
+            minWidth: popupDec.minWidth,
+            maxWidth: popupDec.maxWidth,
+            maxHeight: popupDec.maxHeight,
+            elevation: popupDec.elevation ?? _splitTheme.popupElevation,
+            backgroundColor: popupDec.backgroundColor,
+            anchorOffset: popupDec.offset.dy != 0
+                ? popupDec.offset.dy
+                : M3ETheme.of(context).menuTheme.anchorOffset,
+          )
+        : null;
 
-    final nodes = <M3EMenuNode>[
-      for (final item in items) _splitItemToMenuNode(item, iconSize: iconSize),
-    ];
+    final double preferredWidth = applyPopupTheme
+        ? (tb.size.width + 176.0).clamp(popupDec.minWidth, popupDec.maxWidth)
+        : tb.size.width;
 
-    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
     final res = await showM3EMenu<T>(
       context: context,
       anchor: anchor,
       children: nodes,
       selectedValue: widget.selectedValue,
-      preferredWidth: (tb.size.width + 176.0).clamp(
-        popupDec.minWidth,
-        popupDec.maxWidth,
-      ),
+      preferredWidth: preferredWidth,
       callerFocusNode: _trailingFocusNode,
       themeOverride: menuTheme,
     );
@@ -289,7 +327,10 @@ extension _M3ESplitButtonMenu<T> on _M3ESplitButtonState<T> {
       for (final item in items) _splitItemToMenuNode(item, iconSize: iconSize),
     ];
 
-    final anchor = tb.localToGlobal(Offset.zero) & tb.size;
+    final BuildContext? tCtx = _trailingKey.currentContext;
+    final Rect anchor =
+        (tCtx != null ? m3eOverlayRectFor(tCtx) : null) ??
+        (tb.localToGlobal(Offset.zero) & tb.size);
     final res = await showM3EMenu<T>(
       context: context,
       anchor: anchor,

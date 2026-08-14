@@ -7,6 +7,7 @@ import 'package:material_3_expressive/material_3_expressive.dart'
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
 import '../enums/m3e_list_enums.dart';
+import 'm3e_card_radius_motion.dart';
 import 'm3e_list_item_scope.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
@@ -59,6 +60,10 @@ class M3ECardListItem extends StatelessWidget {
     this.semanticLabel,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant = M3ECardVariant.filled,
+    this.border,
+    this.resolvedColor,
+    this.resolvedBorderRadius,
     super.key,
   });
 
@@ -102,17 +107,31 @@ class M3ECardListItem extends StatelessWidget {
   /// haptic.
   final M3EHapticFeedback haptic;
 
+  /// Card variant for this item.
+  final M3ECardVariant variant;
+
+  /// Optional card outline.
+  final BorderSide? border;
+
+  /// Per-item color override. When null for an index, uses [color].
+  final Color? resolvedColor;
+
+  /// Per-item radius override. When null, uses position-based radii.
+  final BorderRadius? resolvedBorderRadius;
+
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final cardListTheme = theme.listTheme.cardList;
 
-    final borderRadius = calculateCardRadius(
-      position: position,
-      outerRadius: outerRadius,
-      innerRadius: innerRadius,
-    );
+    final borderRadius =
+        resolvedBorderRadius ??
+        calculateCardRadius(
+          position: position,
+          outerRadius: outerRadius,
+          innerRadius: innerRadius,
+        );
 
     final bool isLast =
         position == M3ECardPosition.last || position == M3ECardPosition.single;
@@ -126,18 +145,26 @@ class M3ECardListItem extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
-      child: M3ECard(
-        variant: M3ECardVariant.filled,
-        borderRadius: borderRadius,
-        color: color ?? cardListTheme.backgroundColor(scheme),
-        padding: padding ?? cardListTheme.itemPadding,
-        onPressed: wrappedOnTap,
-        onLongPress: wrappedOnLongPress,
-        mouseCursor: mouseCursor,
-        semanticLabel: semanticLabel,
-        haptic: haptic,
-        width: double.infinity,
-        child: M3EListItemScope(child: child),
+      child: M3ECardRadiusMotion(
+        radius: borderRadius,
+        builder: (BuildContext context, BorderRadius animatedRadius) {
+          return M3ECard(
+            variant: variant,
+            border: border,
+            borderRadius: animatedRadius,
+            color:
+                resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
+            padding: padding ?? cardListTheme.itemPadding,
+            onPressed: wrappedOnTap,
+            onLongPress: wrappedOnLongPress,
+            mouseCursor: mouseCursor,
+            semanticLabel: semanticLabel,
+            haptic: haptic,
+            width: double.infinity,
+            animationDuration: Duration.zero,
+            child: M3EListItemScope(child: child),
+          );
+        },
       ),
     );
   }

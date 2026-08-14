@@ -103,6 +103,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             states: morphStates,
           ),
           innerIcon: innerIcon,
+          morphStates: morphStates,
         );
       },
     );
@@ -122,6 +123,34 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
   }
 
   ({Color bg, Color fg, BorderSide? side}) _resolveColors(
+    M3EColorScheme scheme,
+    bool selected,
+    double outlineWidth,
+  ) {
+    final ({Color bg, Color fg, BorderSide? side}) defaults = _variantColors(
+      scheme,
+      selected,
+      outlineWidth,
+    );
+    final dec = widget.decoration;
+    final states = <WidgetState>{
+      if (widget.onPressed == null) WidgetState.disabled,
+      if (selected) WidgetState.selected,
+    };
+    final useFgGradient = dec?.foregroundGradient != null;
+    final paintInnerOutline = dec?.outlineGradient != null || dec?.side != null;
+    return (
+      bg: dec?.backgroundColor?.resolve(states) ?? defaults.bg,
+      fg: useFgGradient
+          ? m3eGradientForegroundSourceColor
+          : (dec?.foregroundColor?.resolve(states) ?? defaults.fg),
+      side: paintInnerOutline
+          ? null
+          : (dec?.side?.resolve(states) ?? defaults.side),
+    );
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _variantColors(
     M3EColorScheme scheme,
     bool selected,
     double outlineWidth,
@@ -155,6 +184,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     required ({Color bg, Color fg, BorderSide? side}) colors,
     required double targetRadius,
     required Widget innerIcon,
+    required Set<WidgetState> morphStates,
   }) {
     return M3ERadiusAndPaddingMotion(
       motion: _kIconButtonMorphMotion,
@@ -164,6 +194,21 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       internalBottom: 0,
       targetRadius: BorderRadius.circular(targetRadius),
       builder: (padding, animatedRadius) {
+        final dec = widget.decoration;
+        final fill =
+            dec?.backgroundGradient?.resolve(morphStates) ??
+            _themeGradientForVariant(M3ETheme.of(context).iconButtonTheme);
+        final useGradient = fill != null;
+        final gradientOverlay = m3eUsesGradientOverlay(dec?.overlayGradient);
+        var icon = innerIcon;
+        final fgGradient = dec?.foregroundGradient?.resolve(morphStates);
+        if (fgGradient != null) {
+          icon = m3eGradientForegroundLayer(
+            clipRadius: animatedRadius,
+            gradient: fgGradient,
+            child: icon,
+          );
+        }
         return M3EInkSplashTheme(
           color: colors.fg,
           child: IconButton(
@@ -175,36 +220,74 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
                   },
             isSelected: widget.isSelected,
             selectedIcon: widget.selectedIcon,
-            icon: innerIcon,
+            icon: icon,
             tooltip: widget.tooltip,
             enableFeedback: widget.haptic != M3EHapticFeedback.none
                 ? false
                 : widget.enableFeedback,
             statesController: _statesController,
-            style: ButtonStyle(
-              fixedSize: WidgetStateProperty.all(visual),
-              padding: WidgetStateProperty.all(EdgeInsets.zero),
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: animatedRadius),
-              ),
-              backgroundColor: WidgetStateProperty.all(colors.bg),
-              foregroundColor: WidgetStateProperty.resolveWith(
-                (_) => colors.fg,
-              ),
-              side: WidgetStateProperty.resolveWith((_) => colors.side),
-              splashFactory: widget.suppressInk
-                  ? NoSplash.splashFactory
-                  : InkSparkle.splashFactory,
-              overlayColor: widget.suppressInk
-                  ? WidgetStateProperty.all(Colors.transparent)
-                  : M3EStateLayer.overlayColorHoverFocus(colors.fg),
-              animationDuration: Duration.zero,
-              visualDensity: VisualDensity.standard,
+            style: _morphButtonStyle(
+              visual: visual,
+              colors: colors,
+              animatedRadius: animatedRadius,
+              fill: fill,
+              useGradient: useGradient,
+              gradientOverlay: gradientOverlay,
             ),
           ),
         );
       },
     );
+  }
+
+  ButtonStyle _morphButtonStyle({
+    required Size visual,
+    required ({Color bg, Color fg, BorderSide? side}) colors,
+    required BorderRadius animatedRadius,
+    required Gradient? fill,
+    required bool useGradient,
+    required bool gradientOverlay,
+  }) {
+    final dec = widget.decoration;
+    return ButtonStyle(
+      fixedSize: WidgetStateProperty.all(visual),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: animatedRadius),
+      ),
+      backgroundColor: WidgetStateProperty.all(
+        useGradient ? Colors.transparent : colors.bg,
+      ),
+      backgroundBuilder: m3eGradientSurfaceBuilder(
+        clipRadius: animatedRadius,
+        backgroundGradient: fill == null
+            ? null
+            : WidgetStatePropertyAll<Gradient?>(fill),
+        overlayGradient: dec?.overlayGradient,
+        outlineGradient: dec?.outlineGradient,
+        outlineSide: dec?.side,
+        outlineFallbackWidth: M3ETheme.of(context).iconButtonTheme.outlineWidth,
+      ),
+      foregroundColor: WidgetStateProperty.resolveWith((_) => colors.fg),
+      side: WidgetStateProperty.resolveWith((_) => colors.side),
+      splashFactory: widget.suppressInk || gradientOverlay
+          ? NoSplash.splashFactory
+          : InkSparkle.splashFactory,
+      overlayColor: widget.suppressInk || gradientOverlay
+          ? WidgetStateProperty.all(Colors.transparent)
+          : (dec?.overlayColor ??
+                M3EStateLayer.overlayColorHoverFocus(colors.fg)),
+      animationDuration: Duration.zero,
+      visualDensity: VisualDensity.standard,
+    );
+  }
+
+  Gradient? _themeGradientForVariant(M3EIconButtonTheme theme) {
+    return switch (widget.variant) {
+      M3EIconButtonVariant.filled => theme.filledBackgroundGradient,
+      M3EIconButtonVariant.tonal => theme.tonalBackgroundGradient,
+      M3EIconButtonVariant.standard || M3EIconButtonVariant.outlined => null,
+    };
   }
 
   Widget _wrapWithBadge(

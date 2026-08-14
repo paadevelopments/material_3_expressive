@@ -135,4 +135,108 @@ abstract final class M3EToolbarItemLayout {
 
     return (inline: inline, overflow: overflow);
   }
+
+  /// Fixed pill width for labeled selection when the outer pill should not
+  /// grow/shrink: widest (icon+label) action + icon-only neighbors + gaps.
+  ///
+  /// Returns null when reservation does not apply (no labeled actions, or
+  /// inline widgets that cannot be measured cheaply).
+  ///
+  /// [iconSlotExtent] must be the laid-out icon-only width
+  /// (`max(visual, target)`), matching the icon button outer size.
+  ///
+  /// For [Axis.horizontal] this is the full row main-axis extent. For
+  /// [Axis.vertical] it is the column cross-axis width (widest expanded
+  /// action) — labels expand horizontally even in a vertical toolbar.
+  static double? reservedLabeledSelectionExtent({
+    required List<M3EToolbarItem> inline,
+    required Axis axis,
+    required double iconVisualExtent,
+    required double iconSlotExtent,
+    required TextStyle labelStyle,
+    required TextScaler textScaler,
+    required double gap,
+    required double labelGap,
+    bool includeOverflowSlot = false,
+  }) {
+    final metrics = _labeledSelectionMetrics(
+      inline: inline,
+      iconVisualExtent: iconVisualExtent,
+      iconSlotExtent: iconSlotExtent,
+      labelStyle: labelStyle,
+      textScaler: textScaler,
+      labelGap: labelGap,
+    );
+    if (metrics == null) {
+      return null;
+    }
+    final slotCount = metrics.slotCount + (includeOverflowSlot ? 1 : 0);
+    if (metrics.labeledCount == 0 || slotCount == 0) {
+      return null;
+    }
+    if (axis == Axis.vertical) {
+      return metrics.maxExpanded;
+    }
+    return metrics.maxExpanded +
+        (slotCount - 1) * iconSlotExtent +
+        (slotCount - 1) * gap;
+  }
+
+  static ({int labeledCount, int slotCount, double maxExpanded})?
+  _labeledSelectionMetrics({
+    required List<M3EToolbarItem> inline,
+    required double iconVisualExtent,
+    required double iconSlotExtent,
+    required TextStyle labelStyle,
+    required TextScaler textScaler,
+    required double labelGap,
+  }) {
+    if (inline.any((M3EToolbarItem item) => item is M3EToolbarWidget)) {
+      return null;
+    }
+    final actions = inline.whereType<M3EToolbarAction>().toList();
+    if (actions.isEmpty) {
+      return null;
+    }
+    var maxExpanded = iconSlotExtent;
+    var labeledCount = 0;
+    for (final action in actions) {
+      final label = action.label;
+      if (label == null || label.isEmpty) {
+        continue;
+      }
+      labeledCount++;
+      // Match [M3EToolbarIconButton]: visual + gap + label, then at least slot.
+      final expanded = _maxDouble(
+        iconSlotExtent,
+        iconVisualExtent +
+            labelGap +
+            _measureLabelWidth(label, labelStyle, textScaler),
+      );
+      if (expanded > maxExpanded) {
+        maxExpanded = expanded;
+      }
+    }
+    return (
+      labeledCount: labeledCount,
+      slotCount: actions.length,
+      maxExpanded: maxExpanded,
+    );
+  }
+
+  static double _maxDouble(double a, double b) => a > b ? a : b;
+
+  static double _measureLabelWidth(
+    String label,
+    TextStyle style,
+    TextScaler textScaler,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+    return painter.width;
+  }
 }

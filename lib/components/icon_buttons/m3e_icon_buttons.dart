@@ -14,11 +14,14 @@ import 'package:motor/motor.dart';
 import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_radius_and_padding_motion.dart';
 import '../buttons/styles/m3e_button_motion.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import 'enums/m3e_icon_button_enums.dart';
+import 'styles/m3e_icon_button_decoration.dart';
 import 'styles/m3e_icon_button_shapes.dart';
 import 'styles/m3e_icon_button_theme.dart';
 
 export 'enums/m3e_icon_button_enums.dart';
+export 'styles/m3e_icon_button_decoration.dart';
 export 'styles/m3e_icon_button_theme.dart';
 
 part 'components/m3e_icon_button_build.dart';
@@ -55,6 +58,7 @@ class M3EIconButton extends StatefulWidget {
     this.badgeValue,
     this.suppressInk = false,
     this.visualSize,
+    this.decoration,
   });
 
   /// icon.
@@ -106,6 +110,9 @@ class M3EIconButton extends StatefulWidget {
   /// [size]/[width]. The outer tap target uses at least the theme target,
   /// or this size when larger.
   final Size? visualSize;
+
+  /// Optional decoration for solid and gradient surfaces.
+  final M3EIconButtonDecoration? decoration;
 
   @override
   State<M3EIconButton> createState() => _M3EIconButtonState();

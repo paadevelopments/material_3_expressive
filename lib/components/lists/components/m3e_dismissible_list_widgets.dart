@@ -9,6 +9,9 @@ class M3EDismissibleList extends StatefulWidget {
     required this.itemBuilder,
     this.onDismiss,
     this.onTap,
+    this.onLongPress,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.style = const M3EDismissibleListStyle(),
     this.physics,
     this.scrollController,
@@ -30,6 +33,16 @@ class M3EDismissibleList extends StatefulWidget {
 
   /// Function.
   final void Function(int index)? onTap;
+
+  /// Optional long-press callback.
+  final void Function(int index)? onLongPress;
+
+  /// Optional per-index card color.
+  final Color? Function(int index)? colorBuilder;
+
+  /// Optional per-index border radius.
+  final BorderRadius? Function(int index, M3ECardPosition position)?
+  borderRadiusBuilder;
 
   /// style.
   final M3EDismissibleListStyle style;
@@ -75,6 +88,16 @@ class _M3EDismissibleListState extends State<M3EDismissibleList>
 
   @override
   void Function(int)? get onTapCallback => widget.onTap;
+
+  @override
+  void Function(int)? get onLongPressCallback => widget.onLongPress;
+
+  @override
+  Color? Function(int index)? get colorBuilder => widget.colorBuilder;
+
+  @override
+  BorderRadius? Function(int index, M3ECardPosition position)?
+  get borderRadiusBuilder => widget.borderRadiusBuilder;
 
   @override
   void initState() {
@@ -123,6 +146,9 @@ class M3EDismissibleColumn extends StatefulWidget {
     required this.itemBuilder,
     this.onDismiss,
     this.onTap,
+    this.onLongPress,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.style = const M3EDismissibleListStyle(),
     super.key,
   });
@@ -140,6 +166,16 @@ class M3EDismissibleColumn extends StatefulWidget {
   /// Function.
   final void Function(int index)? onTap;
 
+  /// Optional long-press callback.
+  final void Function(int index)? onLongPress;
+
+  /// Optional per-index card color.
+  final Color? Function(int index)? colorBuilder;
+
+  /// Optional per-index border radius.
+  final BorderRadius? Function(int index, M3ECardPosition position)?
+  borderRadiusBuilder;
+
   /// style.
   final M3EDismissibleListStyle style;
 
@@ -149,6 +185,10 @@ class M3EDismissibleColumn extends StatefulWidget {
     required List<Widget> children,
     Future<bool> Function(int index, DismissDirection direction)? onDismiss,
     void Function(int index)? onTap,
+    void Function(int index)? onLongPress,
+    Color? Function(int index)? colorBuilder,
+    BorderRadius? Function(int index, M3ECardPosition position)?
+    borderRadiusBuilder,
     M3EDismissibleListStyle style = const M3EDismissibleListStyle(),
     Key? key,
   }) {
@@ -158,6 +198,9 @@ class M3EDismissibleColumn extends StatefulWidget {
       itemBuilder: (_, i) => children[i],
       onDismiss: onDismiss,
       onTap: onTap,
+      onLongPress: onLongPress,
+      colorBuilder: colorBuilder,
+      borderRadiusBuilder: borderRadiusBuilder,
       style: style,
     );
   }
@@ -188,6 +231,16 @@ class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
 
   @override
   void Function(int)? get onTapCallback => widget.onTap;
+
+  @override
+  void Function(int)? get onLongPressCallback => widget.onLongPress;
+
+  @override
+  Color? Function(int index)? get colorBuilder => widget.colorBuilder;
+
+  @override
+  BorderRadius? Function(int index, M3ECardPosition position)?
+  get borderRadiusBuilder => widget.borderRadiusBuilder;
 
   @override
   void initState() {

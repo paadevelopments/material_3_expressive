@@ -19,7 +19,7 @@ class M3ENavBadge extends StatelessWidget {
     this.backgroundColor,
     this.foregroundColor,
     this.semanticLabel,
-    this.offset = const Offset(8, -6),
+    this.offset = Offset.zero,
   }) : assert(
          count == null || count >= 0,
          'count must be null or non-negative',
@@ -47,7 +47,9 @@ class M3ENavBadge extends StatelessWidget {
   /// semanticLabel.
   final String? semanticLabel;
 
-  /// offset.
+  /// Nudge away from the icon's top-right corner.
+  ///
+  /// Defaults to none so a badge never shifts the icon inside its indicator.
   final Offset offset;
 
   @override

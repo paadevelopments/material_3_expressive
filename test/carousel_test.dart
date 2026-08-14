@@ -39,6 +39,76 @@ void main() {
     'hero tap pulse preserves per-edge pixel budget on mixed widths',
     _heroTapPulsePixelBudget,
   );
+  testWidgets('onChange reports focal index after scroll', _onChangeFocal);
+  testWidgets(
+    'onChange flips at midpoint for forward and reverse swipes',
+    _onChangeMidpointSymmetric,
+  );
+}
+
+Future<void> _onChangeFocal(WidgetTester tester) async {
+  M3ECarouselChangeDetails? latest;
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        onChange: (M3ECarouselChangeDetails details) {
+          latest = details;
+        },
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pump();
+  expect(latest, isNull);
+
+  await tester.fling(find.byType(M3ECarousel), const Offset(-300, 0), 800);
+  await tester.pumpAndSettle();
+  expect(latest, isNotNull);
+  expect(latest!.itemCount, 6);
+  expect(latest!.focalIndex, inInclusiveRange(0, 5));
+  expect(latest!.leadingIndex, inInclusiveRange(0, 5));
+}
+
+Future<void> _onChangeMidpointSymmetric(WidgetTester tester) async {
+  M3ECarouselChangeDetails? latest;
+  await tester.pumpWidget(
+    _host(
+      M3ECarousel(
+        freeScroll: true,
+        onChange: (M3ECarouselChangeDetails details) {
+          latest = details;
+        },
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pump();
+  expect(latest, isNull);
+
+  // Host width 400; hero center weights [2, 6, 2] → item step = 400 * 2/10 = 80.
+  // Truncation would keep leading at 0 until pixels >= 80; rounding flips at 40.
+  final ScrollPosition position =
+      tester.state<ScrollableState>(find.byType(Scrollable)).position
+        ..jumpTo(39);
+  await tester.pump();
+  expect(latest, isNull, reason: 'still before midpoint when scrolling next');
+
+  position.jumpTo(40);
+  await tester.pump();
+  expect(latest, isNotNull, reason: 'forward swipe should flip at midpoint');
+  expect(latest!.leadingIndex, 1);
+  expect(latest!.focalIndex, 2);
+
+  latest = null;
+  position.jumpTo(41);
+  await tester.pump();
+  expect(latest, isNull, reason: 'no change while staying on same side');
+
+  position.jumpTo(39);
+  await tester.pump();
+  expect(latest, isNotNull, reason: 'reverse swipe should flip at midpoint');
+  expect(latest!.leadingIndex, 0);
+  expect(latest!.focalIndex, 1);
 }
 
 Future<void> _hero(WidgetTester tester) async {

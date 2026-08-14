@@ -4,9 +4,12 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
+import '../components/m3e_card_radius_motion.dart';
 import '../components/m3e_list_item_scope.dart';
+import '../enums/m3e_list_enums.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
+import '../utils/m3e_list_selection_fill.dart';
 
 part 'm3e_dismissible_card_drag_mixin.dart';
 part 'm3e_dismissible_card_build_mixin.dart';
@@ -28,8 +31,6 @@ final _kDetachPush = const MaterialSpringMotion.expressiveSpatialDefault()
 
 final _kRoundnessSnap = const MaterialSpringMotion.expressiveSpatialDefault()
     .copyWith(stiffness: 1000, damping: 0.4);
-
-const _kCardSettleCurve = Cubic(0.34, 1.56, 0.64, 1);
 
 const int _kVibrationThresholdMs = 60;
 const double _kMaxPreDetachRoundness = 0.6;
@@ -59,6 +60,16 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
 
   /// The Function.
   void Function(int index)? get onTapCallback;
+
+  /// Optional long-press callback (visible item index).
+  void Function(int index)? get onLongPressCallback => null;
+
+  /// Optional per-index card color override.
+  Color? Function(int index)? get colorBuilder => null;
+
+  /// Optional per-index border radius override.
+  BorderRadius? Function(int index, M3ECardPosition position)?
+  get borderRadiusBuilder => null;
 
   final List<M3EDismissibleSlot> _slots = [];
   M3EDismissibleSlot? _dragSlotRef;

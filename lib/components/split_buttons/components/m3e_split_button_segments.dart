@@ -25,7 +25,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       pressed: pressed,
       enabled: enabled,
     );
-    final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
+    final hasBackgroundBuilder = _segmentHasFill(trailing: false);
 
     final animatedButton = M3ERadiusAndPaddingMotion(
       motion: springMotion,
@@ -82,7 +82,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
         decoration: BoxDecoration(
           color: hasBackgroundBuilder ? Colors.transparent : color,
           borderRadius: animatedRadius,
-          border: outlineSide != null
+          border:
+              outlineSide != null &&
+                  !_segmentHasOutlineGradient(trailing: false)
               ? Border.fromBorderSide(outlineSide)
               : null,
           boxShadow: _segmentShadows(
@@ -94,6 +96,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           color: Colors.transparent,
           clipBehavior: Clip.antiAlias,
           borderRadius: animatedRadius,
+          animationDuration: widget.decorationAnimationDuration,
           child: Focus(
             focusNode: effectiveFocusNode,
             autofocus: widget.autofocus,
@@ -161,12 +164,15 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
         segmentStates: segmentStates,
       ),
       enableFeedback: widget.enableFeedback,
-      splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
+      splashFactory: _segmentHasOverlayGradient(trailing: false)
+          ? NoSplash.splashFactory
+          : (widget.splashFactory ?? InkSparkle.splashFactory),
       splashColor: M3EStateLayer.splashColor(onColor),
       highlightColor: Colors.transparent,
-      overlayColor:
-          widget.decorationOverlayColor ??
-          M3EStateLayer.overlayColorHoverFocus(onColor),
+      overlayColor: _segmentHasOverlayGradient(trailing: false)
+          ? const WidgetStatePropertyAll<Color?>(Colors.transparent)
+          : (widget.decorationOverlayColor ??
+                M3EStateLayer.overlayColorHoverFocus(onColor)),
       child: _applyDecorationLayers(
         context: context,
         states: segmentStates,
@@ -178,7 +184,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
               size: size,
               icon: widget.leadingIcon,
               label: widget.label,
-              color: onColor,
+              color: _segmentHasForegroundGradient(trailing: false)
+                  ? m3eGradientForegroundSourceColor
+                  : onColor,
               customSize: customSize,
             ),
           ),
@@ -216,7 +224,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       selected: _menuOpen,
       enabled: enabled,
     );
-    final hasBackgroundBuilder = widget.decoration?.backgroundBuilder != null;
+    final hasBackgroundBuilder = _segmentHasFill(trailing: true);
     final chevron = _buildTrailingChevron(
       onColor: onColor,
       customSize: customSize,
@@ -276,7 +284,9 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           size:
               customSize?.iconSize ??
               _splitTheme.splitTrailingIconSize(widget.size),
-          color: onColor,
+          color: _segmentHasForegroundGradient(trailing: true)
+              ? m3eGradientForegroundSourceColor
+              : onColor,
         ),
       ),
     );
@@ -308,7 +318,8 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
         decoration: BoxDecoration(
           color: hasBackgroundBuilder ? Colors.transparent : color,
           borderRadius: animatedRadius,
-          border: outlineSide != null
+          border:
+              outlineSide != null && !_segmentHasOutlineGradient(trailing: true)
               ? Border.fromBorderSide(outlineSide)
               : null,
           boxShadow: _segmentShadows(
@@ -320,6 +331,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           color: Colors.transparent,
           clipBehavior: Clip.antiAlias,
           borderRadius: animatedRadius,
+          animationDuration: widget.decorationAnimationDuration,
           child: Focus(
             focusNode: _trailingFocusNode,
             canRequestFocus: enabled,
@@ -390,16 +402,20 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           : null,
       canRequestFocus: false,
       enableFeedback: widget.enableFeedback,
-      splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
+      splashFactory: _segmentHasOverlayGradient(trailing: true)
+          ? NoSplash.splashFactory
+          : (widget.splashFactory ?? InkSparkle.splashFactory),
       splashColor: M3EStateLayer.splashColor(onColor),
       highlightColor: Colors.transparent,
-      overlayColor:
-          widget.decorationOverlayColor ??
-          M3EStateLayer.overlayColorHoverFocus(onColor),
+      overlayColor: _segmentHasOverlayGradient(trailing: true)
+          ? const WidgetStatePropertyAll<Color?>(Colors.transparent)
+          : (widget.decorationOverlayColor ??
+                M3EStateLayer.overlayColorHoverFocus(onColor)),
       child: _applyDecorationLayers(
         context: context,
         states: segmentStates,
         radius: animatedRadius,
+        trailing: true,
         child: Padding(
           padding: EdgeInsets.only(
             left: trailingLeftPad,

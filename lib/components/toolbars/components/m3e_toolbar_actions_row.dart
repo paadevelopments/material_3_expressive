@@ -4,6 +4,7 @@ import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EToolbar;
 
+import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../models/m3e_toolbar_item.dart';
 import '../utils/m3e_toolbar_item_layout.dart';
@@ -29,6 +30,7 @@ class M3EToolbarActionsRow extends StatelessWidget {
     this.axis = Axis.horizontal,
     this.expand = false,
     this.mainAxisAlignment = MainAxisAlignment.start,
+    this.pillActiveSpring = true,
     super.key,
   });
 
@@ -69,6 +71,11 @@ class M3EToolbarActionsRow extends StatelessWidget {
   /// mainAxisAlignment.
   final MainAxisAlignment mainAxisAlignment;
 
+  /// When false, reserves a fixed pill width for labeled selection (widest
+  /// labeled action + icon-only neighbors) and distributes leftover space
+  /// evenly between actions.
+  final bool pillActiveSpring;
+
   @override
   Widget build(BuildContext context) {
     if (actions.isEmpty) {
@@ -101,28 +108,84 @@ class M3EToolbarActionsRow extends StatelessWidget {
         ),
     ];
 
-    // spaceBetween already distributes free space — skip fixed gaps there.
-    final bool insertGaps =
-        gap > 0 && mainAxisAlignment != MainAxisAlignment.spaceBetween;
+    // Fixed-pill selection keeps theme [gap] inside the reserved width and
+    // distributes leftover space evenly between slots (no trailing dead zone).
+    final double? reservedWidth = _reservedSelectionWidth(
+      context: context,
+      inline: inline,
+      hasOverflow: overflow.isNotEmpty,
+    );
+    final evenlySpace = reservedWidth != null;
+    final insertGaps =
+        gap > 0 &&
+        !evenlySpace &&
+        mainAxisAlignment != MainAxisAlignment.spaceBetween;
     final List<Widget> children = insertGaps
         ? M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis)
         : slots;
 
-    final MainAxisSize mainAxisSize = expand
+    final MainAxisAlignment alignment = evenlySpace
+        ? MainAxisAlignment.spaceBetween
+        : mainAxisAlignment;
+    final MainAxisSize mainAxisSize = expand || evenlySpace
         ? MainAxisSize.max
         : MainAxisSize.min;
 
+    Widget content;
     if (axis == Axis.vertical) {
-      return Column(
+      content = Column(
         mainAxisSize: mainAxisSize,
-        mainAxisAlignment: mainAxisAlignment,
+        mainAxisAlignment: alignment,
+        children: children,
+      );
+    } else {
+      content = Row(
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: alignment,
         children: children,
       );
     }
-    return Row(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: mainAxisAlignment,
-      children: children,
+
+    if (reservedWidth == null) {
+      return content;
+    }
+    return SizedBox(width: reservedWidth, child: content);
+  }
+
+  double? _reservedSelectionWidth({
+    required BuildContext context,
+    required List<M3EToolbarItem> inline,
+    required bool hasOverflow,
+  }) {
+    if (pillActiveSpring) {
+      return null;
+    }
+    final theme = M3ETheme.of(context);
+    final iconTheme = theme.iconButtonTheme;
+    final Size visual = iconTheme.visual(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final Size target = iconTheme.target(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
+    final double iconSlot = visual.width > target.width
+        ? visual.width
+        : target.width;
+    return M3EToolbarItemLayout.reservedLabeledSelectionExtent(
+      inline: inline,
+      axis: axis,
+      iconVisualExtent: visual.width,
+      iconSlotExtent: iconSlot,
+      labelStyle: theme.typeScale.labelLarge.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+      textScaler: MediaQuery.textScalerOf(context),
+      // Minimum inter-action space; leftover width is shared via spaceBetween.
+      gap: gap,
+      labelGap: M3EToolbarIconButton.labelGap,
+      includeOverflowSlot: hasOverflow,
     );
   }
 
@@ -139,8 +202,11 @@ class M3EToolbarActionsRow extends StatelessWidget {
       availableExtent: availableExtent,
       axis: axis,
       opticalInset: opticalInset,
-      buildAction: (M3EToolbarAction action) =>
-          M3EToolbarIconButton(action: action, size: iconButtonSize),
+      buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
+        action: action,
+        size: iconButtonSize,
+        pillActiveSpring: pillActiveSpring,
+      ),
     );
     if (expandWidgets && item is M3EToolbarWidget) {
       return Expanded(child: built);

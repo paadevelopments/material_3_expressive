@@ -28,18 +28,10 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     return _buildBarShell(
       styles: styles,
       textDirection: textDirection,
-      leading: _buildLeading(
-        barTheme: barTheme,
-        scheme: scheme,
-        actionSlotWidth: actionSlotWidth,
-        actionIconSize: actionIconSize,
-      ),
-      trailing: _buildTrailing(
-        barTheme: barTheme,
-        scheme: scheme,
-        actionSlotWidth: actionSlotWidth,
-        actionIconSize: actionIconSize,
-      ),
+      barTheme: barTheme,
+      scheme: scheme,
+      actionIconSize: actionIconSize,
+      actionSlotWidth: actionSlotWidth,
       input: M3ESearchBarInput(
         controller: _controller,
         focusNode: _focusNode,
@@ -69,16 +61,47 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               )
             : EdgeInsetsDirectional.zero,
       ),
+      idleHintStyle: styles.hintStyle,
     );
   }
 
   Widget _buildBarShell({
     required _BarResolvedStyles styles,
     required TextDirection textDirection,
-    required Widget? leading,
-    required List<Widget>? trailing,
+    required M3ESearchBarTheme barTheme,
+    required M3EColorScheme scheme,
+    required double actionIconSize,
+    required double actionSlotWidth,
     required Widget input,
+    required TextStyle idleHintStyle,
   }) {
+    final Widget content = _groupsIdleContent(textDirection)
+        ? _buildIdleGroupedContent(
+            textDirection: textDirection,
+            barTheme: barTheme,
+            scheme: scheme,
+            actionIconSize: actionIconSize,
+            idleHintStyle: idleHintStyle,
+          )
+        : _buildEditingRow(
+            textDirection: textDirection,
+            leading: _buildLeading(
+              barTheme: barTheme,
+              scheme: scheme,
+              actionSlotWidth: actionSlotWidth,
+              actionIconSize: actionIconSize,
+              compact: false,
+            ),
+            trailing: _buildTrailing(
+              barTheme: barTheme,
+              scheme: scheme,
+              actionSlotWidth: actionSlotWidth,
+              actionIconSize: actionIconSize,
+              compact: false,
+            ),
+            input: input,
+          );
+
     return Opacity(
       opacity: widget.enabled ? 1 : M3ESearchConstants.disabledOpacity,
       child: Material(
@@ -101,19 +124,92 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               statesController: _statesController,
               child: Padding(
                 padding: styles.padding,
-                child: Row(
-                  textDirection: textDirection,
-                  children: <Widget>[
-                    ?leading,
-                    Expanded(child: input),
-                    ...?trailing,
-                  ],
+                child: Semantics(
+                  textField: true,
+                  label: widget.hintText,
+                  child: content,
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildIdleGroupedContent({
+    required TextDirection textDirection,
+    required M3ESearchBarTheme barTheme,
+    required M3EColorScheme scheme,
+    required double actionIconSize,
+    required TextStyle idleHintStyle,
+  }) {
+    // Compact leading/trailing (no tap-target slot) so optical center matches
+    // geometric center. Keep the row shrink-wrapped so Align can center it.
+    final Widget? leading = _buildLeading(
+      barTheme: barTheme,
+      scheme: scheme,
+      actionSlotWidth: actionIconSize,
+      actionIconSize: actionIconSize,
+      compact: true,
+    );
+    final List<Widget>? trailing = _buildTrailing(
+      barTheme: barTheme,
+      scheme: scheme,
+      actionSlotWidth: actionIconSize,
+      actionIconSize: actionIconSize,
+      compact: true,
+    );
+    final double leadingGap = leading != null ? barTheme.horizontalPadding : 0;
+    final double trailingGap = trailing != null && trailing.isNotEmpty
+        ? barTheme.horizontalPadding
+        : 0;
+
+    return Align(
+      alignment: widget.alignment,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        textDirection: textDirection,
+        children: <Widget>[
+          ?leading,
+          if (widget.hintText != null) ...<Widget>[
+            if (leadingGap > 0) SizedBox(width: leadingGap),
+            Flexible(
+              child: Padding(
+                padding: leading == null
+                    ? EdgeInsetsDirectional.only(
+                        start: barTheme.noLeadingHintExtraPadding,
+                      )
+                    : EdgeInsets.zero,
+                child: Text(
+                  widget.hintText!,
+                  style: idleHintStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            if (trailingGap > 0) SizedBox(width: trailingGap),
+          ],
+          ...?trailing,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditingRow({
+    required TextDirection textDirection,
+    required Widget? leading,
+    required List<Widget>? trailing,
+    required Widget input,
+  }) {
+    return Row(
+      textDirection: textDirection,
+      children: <Widget>[
+        ?leading,
+        Expanded(child: input),
+        ...?trailing,
+      ],
     );
   }
 
@@ -172,22 +268,24 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required M3EColorScheme scheme,
     required double actionSlotWidth,
     required double actionIconSize,
+    required bool compact,
   }) {
     if (widget.leading == null) {
       return null;
     }
-    return _wrapActionSlot(
-      width: actionSlotWidth,
-      child: widget.leading is M3EIconButton
-          ? widget.leading!
-          : IconTheme.merge(
-              data: IconThemeData(
-                color: barTheme.leadingIconColor(scheme),
-                size: actionIconSize,
-              ),
-              child: widget.leading!,
+    final Widget child = widget.leading is M3EIconButton
+        ? widget.leading!
+        : IconTheme.merge(
+            data: IconThemeData(
+              color: barTheme.leadingIconColor(scheme),
+              size: actionIconSize,
             ),
-    );
+            child: widget.leading!,
+          );
+    if (compact) {
+      return child;
+    }
+    return _wrapActionSlot(width: actionSlotWidth, child: child);
   }
 
   List<Widget>? _buildTrailing({
@@ -195,23 +293,23 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required M3EColorScheme scheme,
     required double actionSlotWidth,
     required double actionIconSize,
+    required bool compact,
   }) {
-    return widget.trailing
-        ?.map(
-          (Widget action) => action is M3EIconButton
-              ? _wrapActionSlot(width: actionSlotWidth, child: action)
-              : _wrapActionSlot(
-                  width: actionSlotWidth,
-                  child: IconTheme.merge(
-                    data: IconThemeData(
-                      color: barTheme.trailingIconColor(scheme),
-                      size: actionIconSize,
-                    ),
-                    child: action,
-                  ),
-                ),
-        )
-        .toList();
+    return widget.trailing?.map((Widget action) {
+      final Widget child = action is M3EIconButton
+          ? action
+          : IconTheme.merge(
+              data: IconThemeData(
+                color: barTheme.trailingIconColor(scheme),
+                size: actionIconSize,
+              ),
+              child: action,
+            );
+      if (compact) {
+        return child;
+      }
+      return _wrapActionSlot(width: actionSlotWidth, child: child);
+    }).toList();
   }
 }
 

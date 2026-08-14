@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
 import '../floating_action_buttons/m3e_floating_action_buttons.dart';
 import 'enums/m3e_fab_menu_position.dart';
 import 'models/m3e_fab_menu_item.dart';
+import 'styles/m3e_fab_menu_theme.dart';
 
 export 'enums/m3e_fab_menu_position.dart';
 export 'models/m3e_fab_menu_item.dart';
+export 'styles/m3e_fab_menu_theme.dart';
 
 /// A Material 3 Expressive FAB menu.
 ///
@@ -30,6 +33,7 @@ class M3EFabMenu extends StatefulWidget {
     this.color = M3EFabColor.primary,
     this.size = M3EFabSize.medium,
     this.position = M3EFabMenuPosition.right,
+    this.decoration,
     super.key,
   }) : assert(items.length > 0, 'A FAB menu needs at least one item.');
 
@@ -58,6 +62,9 @@ class M3EFabMenu extends StatefulWidget {
   /// Which horizontal corner the open FAB morphs toward, and from which edge
   /// menu items grow. Defaults to [M3EFabMenuPosition.right].
   final M3EFabMenuPosition position;
+
+  /// Styling for the trigger FAB. Menu items are styled by `M3EFabMenuTheme`.
+  final M3EFabDecoration? decoration;
 
   @override
   State<M3EFabMenu> createState() => _M3EFabMenuState();
@@ -263,6 +270,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
                           color: widget.color,
                           size: widget.size,
                           cornerRadius: radius,
+                          decoration: widget.decoration,
                           onPressed: _toggle,
                         ),
                       ),
@@ -318,11 +326,22 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
         for (int i = 0; i < widget.items.length; i++)
           if (_itemVisible[i])
             Padding(
-              padding: EdgeInsets.only(bottom: fabMenuTheme.itemGap),
+              padding: EdgeInsets.only(
+                bottom: _isLastVisibleItem(i) ? 0 : fabMenuTheme.itemGap,
+              ),
               child: _buildItem(theme, widget.items[i], i),
             ),
       ],
     );
+  }
+
+  bool _isLastVisibleItem(int index) {
+    for (int i = index + 1; i < _itemVisible.length; i++) {
+      if (_itemVisible[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Maps spring progress `t` (0→1, may overshoot) to width factor.
@@ -334,6 +353,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     final scheme = theme.colorScheme;
     final fabMenuTheme = theme.fabMenuTheme;
     final SingleMotionController ctrl = _itemCtrls[index];
+    final Gradient? fill = fabMenuTheme.itemBackgroundGradient;
 
     // Only the pill width springs (and may overshoot). Icon + label stay at
     // their intrinsic size, edge-aligned, and clipped by the stadium shape.
@@ -342,20 +362,31 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
       builder: (BuildContext context, Widget? child) {
         final double widthFactor = _widthFactor(ctrl.value).clamp(0.001, 1.5);
         final Alignment edge = _menuItemAlign;
+        final Widget body = Align(
+          alignment: edge,
+          widthFactor: widthFactor,
+          child: child,
+        );
 
         return Align(
           alignment: edge,
-          child: Material(
-            color: fabMenuTheme.itemContainerColor(scheme),
-            elevation: fabMenuTheme.itemElevation,
-            shadowColor: scheme.shadow,
-            surfaceTintColor: const Color(0x00000000),
-            shape: const StadiumBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: Align(
-              alignment: edge,
-              widthFactor: widthFactor,
-              child: child,
+          child: _itemOutline(
+            fabMenuTheme,
+            Material(
+              color: fill == null
+                  ? fabMenuTheme.itemContainerColor(scheme)
+                  : const Color(0x00000000),
+              elevation: fabMenuTheme.itemElevation,
+              shadowColor: scheme.shadow,
+              surfaceTintColor: const Color(0x00000000),
+              shape: const StadiumBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: fill == null
+                  ? body
+                  : DecoratedBox(
+                      decoration: BoxDecoration(gradient: fill),
+                      child: body,
+                    ),
             ),
           ),
         );
@@ -374,6 +405,22 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     );
   }
 
+  /// Strokes the pill edge with the item outline color or gradient.
+  Widget _itemOutline(M3EFabMenuTheme fabMenuTheme, Widget child) {
+    final Gradient? gradient = fabMenuTheme.itemOutlineGradient;
+    final Color? color = fabMenuTheme.itemOutlineColor;
+    if (gradient == null && color == null) {
+      return child;
+    }
+    return m3eGradientOutlineLayer(
+      clipRadius: BorderRadius.circular(fabMenuTheme.itemHeight / 2),
+      gradient: gradient,
+      color: gradient == null ? color : null,
+      width: fabMenuTheme.itemBorderWidth,
+      child: child,
+    );
+  }
+
   Widget _itemBody(
     M3EThemeData theme,
     M3EFabMenuItem item,
@@ -381,10 +428,38 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
     M3EInteractionState state,
   ) {
     final fabMenuTheme = theme.fabMenuTheme;
+    final Gradient? foreground = fabMenuTheme.itemForegroundGradient;
+    final Color contentColor = foreground == null
+        ? fabMenuTheme.itemForegroundColor(scheme)
+        : m3eGradientForegroundSourceColor;
+    Widget content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        IconTheme.merge(
+          data: IconThemeData(color: contentColor, size: fabMenuTheme.iconSize),
+          child: item.icon,
+        ),
+        SizedBox(width: fabMenuTheme.iconLabelGap),
+        Text(
+          item.label,
+          style: fabMenuTheme
+              .itemLabelStyle(theme.typeScale, scheme)
+              .copyWith(color: contentColor),
+        ),
+      ],
+    );
+    if (foreground != null) {
+      content = ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (Rect bounds) => foreground.createShader(bounds),
+        child: content,
+      );
+    }
     return SizedBox(
       height: fabMenuTheme.itemHeight,
       child: M3EStateLayerOverlay(
         state: state,
+        // Ripple keeps the solid color so it reads on any fill.
         color: fabMenuTheme.itemForegroundColor(scheme),
         shape: M3EShapes.stadium,
         alignment: Alignment.center,
@@ -392,23 +467,7 @@ class _M3EFabMenuState extends State<M3EFabMenu> with TickerProviderStateMixin {
           padding: EdgeInsets.symmetric(
             horizontal: fabMenuTheme.itemHorizontalPadding,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              IconTheme.merge(
-                data: IconThemeData(
-                  color: fabMenuTheme.itemForegroundColor(scheme),
-                  size: fabMenuTheme.iconSize,
-                ),
-                child: item.icon,
-              ),
-              SizedBox(width: fabMenuTheme.iconLabelGap),
-              Text(
-                item.label,
-                style: fabMenuTheme.itemLabelStyle(theme.typeScale, scheme),
-              ),
-            ],
-          ),
+          child: content,
         ),
       ),
     );

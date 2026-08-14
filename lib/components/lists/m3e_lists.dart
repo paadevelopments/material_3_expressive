@@ -8,12 +8,17 @@ import 'components/m3e_expandable_data.dart';
 import 'components/m3e_expandable_list_base.dart';
 import 'components/m3e_list_item_scope.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
+import 'enums/m3e_list_enums.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_expandable_style.dart';
 import 'styles/m3e_list_theme.dart';
+import 'utils/m3e_list_selection_fill.dart';
 
+export 'components/m3e_card_list_item.dart'
+    show calculateCardPosition, calculateCardRadius;
 export 'components/m3e_expandable_data.dart';
 export 'components/m3e_expandable_item.dart';
+export 'components/m3e_list_item_scope.dart';
 export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
 export 'styles/m3e_dismissible_list_style.dart';
@@ -42,6 +47,8 @@ class M3EListItem extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.selected = false,
+    this.variant,
+    this.border,
     super.key,
   });
 
@@ -67,6 +74,12 @@ class M3EListItem extends StatelessWidget {
   /// selected.
   final bool selected;
 
+  /// Card variant override; falls back to [M3EListItemTheme.variant].
+  final M3ECardVariant? variant;
+
+  /// Card outline override; falls back to [M3EListItemTheme.border].
+  final BorderSide? border;
+
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(builder: _buildItem);
@@ -84,7 +97,8 @@ class M3EListItem extends StatelessWidget {
     final bool threeLine = _isThreeLine;
 
     return M3ECard(
-      variant: M3ECardVariant.filled,
+      variant: variant ?? listTheme.variant,
+      border: border ?? listTheme.border,
       color: selected ? listTheme.selectedColor(scheme) : null,
       onPressed: onTap,
       semanticLabel: headline,
@@ -204,7 +218,15 @@ class M3ECardList extends StatelessWidget {
   /// The background color for each card.
   ///
   /// Defaults to `M3EListCardListTheme.defaults.backgroundColor` if null.
+  /// Overridden per index when [colorBuilder] returns a non-null color.
   final Color? color;
+
+  /// Optional per-index card color. Non-null wins over [color].
+  final Color? Function(int index)? colorBuilder;
+
+  /// Optional per-index border radius. Non-null wins over position radii.
+  final BorderRadius? Function(int index, M3ECardPosition position)?
+  borderRadiusBuilder;
 
   /// The inner padding applied to the [itemBuilder] child of each item.
   ///
@@ -238,6 +260,12 @@ class M3ECardList extends StatelessWidget {
   ///
   /// Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
+
+  /// Card variant override; falls back to [M3EListCardListTheme.variant].
+  final M3ECardVariant? variant;
+
+  /// Card outline override; falls back to [M3EListCardListTheme.border].
+  final BorderSide? border;
 
   /// Widget displayed when the list is empty (itemCount is 0).
   ///
@@ -284,6 +312,8 @@ class M3ECardList extends StatelessWidget {
     this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
     this.gap = M3EListCardListTheme.defaultGap,
     this.color,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.padding,
     this.margin,
     this.onTap,
@@ -291,6 +321,8 @@ class M3ECardList extends StatelessWidget {
     this.semanticLabelBuilder,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant,
+    this.border,
     this.emptyBuilder,
   }) : _isBuilder = false,
        controller = null,
@@ -307,6 +339,8 @@ class M3ECardList extends StatelessWidget {
     this.innerRadius = M3EListCardListTheme.defaultInnerRadius,
     this.gap = M3EListCardListTheme.defaultGap,
     this.color,
+    this.colorBuilder,
+    this.borderRadiusBuilder,
     this.padding,
     this.margin,
     this.onTap,
@@ -314,6 +348,8 @@ class M3ECardList extends StatelessWidget {
     this.semanticLabelBuilder,
     this.mouseCursor,
     this.haptic = M3EHapticFeedback.none,
+    this.variant,
+    this.border,
     this.emptyBuilder,
     this.controller,
     this.physics,
@@ -363,19 +399,26 @@ class M3ECardList extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, int index, int total) {
+    final cardListTheme = M3ETheme.of(context).listTheme.cardList;
+    final M3ECardPosition position = calculateCardPosition(index, total);
     return M3ECardListItem(
       index: index,
-      position: calculateCardPosition(index, total),
+      position: position,
       outerRadius: outerRadius,
       innerRadius: innerRadius,
       gap: gap,
       color: color,
+      resolvedColor:
+          colorBuilder?.call(index) ?? m3eSelectionFill(context, index),
+      resolvedBorderRadius: borderRadiusBuilder?.call(index, position),
       padding: padding,
       onTap: onTap,
       onLongPress: onLongPress,
       semanticLabel: semanticLabelBuilder?.call(index),
       mouseCursor: mouseCursor,
       haptic: haptic,
+      variant: variant ?? cardListTheme.variant,
+      border: border ?? cardListTheme.border,
       child: itemBuilder(context, index),
     );
   }

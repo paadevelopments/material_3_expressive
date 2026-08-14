@@ -186,6 +186,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: metrics.minTap),
             child: Row(
+              key: _splitGradientHostKey,
               mainAxisSize: MainAxisSize.min,
               textDirection: metrics.dir,
               children: [
@@ -298,7 +299,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     final gap = baseGap + (eitherFocused ? focusRingOutset : 0.0);
 
     final leadingPressed = leadingEnabled && (pressed || _leadingPressed);
-    final trailingPressed = trailingEnabled && (_trailingPressed || _menuOpen);
+    final trailingPressed = trailingEnabled && _trailingPressed;
     final leadingHovered = leadingEnabled && hovered && !leadingPressed;
     final trailingHovered =
         trailingEnabled &&

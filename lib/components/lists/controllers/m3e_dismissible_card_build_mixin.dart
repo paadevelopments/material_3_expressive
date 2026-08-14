@@ -145,7 +145,16 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     final isLast = slotPos == total - 1;
     final isDragged = slotIndex == _dragSlotIndex;
     final dragPos = _dragSlotIndex >= 0 ? visible.indexOf(_dragSlotIndex) : -1;
-    final br = computeRadius(slotIndex, slotPos, dragPos, visible);
+    final M3ECardPosition position = total == 1
+        ? M3ECardPosition.single
+        : slotPos == 0
+        ? M3ECardPosition.first
+        : slotPos == total - 1
+        ? M3ECardPosition.last
+        : M3ECardPosition.middle;
+    final br =
+        borderRadiusBuilder?.call(slotPos, position) ??
+        computeRadius(slotIndex, slotPos, dragPos, visible);
     final nOff = computeNeighbourOffset(slotPos, dragPos);
     final swipingRight = _dragOffset > 0;
     final activeBg = swipingRight
@@ -241,30 +250,38 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
           onHorizontalDragStart: (_) => handleDragStart(slot),
           onHorizontalDragUpdate: handleDragUpdate,
           onHorizontalDragEnd: handleDragEnd,
-          child: M3ECard(
-            variant: M3ECardVariant.filled,
-            surfaceKey: _measureKey(slot),
-            borderRadius: borderRadius,
-            color:
-                s.color ??
-                M3ETheme.of(context).colorScheme.surfaceContainerHighest,
-            border: s.border,
-            animationDuration: _dragSlotRef != null
-                ? Duration.zero
-                : const Duration(milliseconds: 520),
-            animationCurve: _kCardSettleCurve,
-            width: double.infinity,
-            padding: EdgeInsets.zero,
-            onPressed: isInteractionLocked || onTapCallback == null
-                ? null
-                : () => onTapCallback!(slotPos),
-            haptic: s.hapticOnTap,
-            child: Padding(
-              padding: s.padding ?? const EdgeInsets.all(16),
-              child: M3EListItemScope(
-                child: swipeItemBuilder(context, slotPos),
-              ),
-            ),
+          child: M3ECardRadiusMotion(
+            snap: _dragSlotRef != null,
+            radius: borderRadius,
+            builder: (BuildContext context, BorderRadius animatedRadius) {
+              return M3ECard(
+                variant: M3ECardVariant.filled,
+                surfaceKey: _measureKey(slot),
+                borderRadius: animatedRadius,
+                color:
+                    colorBuilder?.call(slotPos) ??
+                    m3eSelectionFill(context, slotPos) ??
+                    s.color ??
+                    M3ETheme.of(context).colorScheme.surfaceContainerHighest,
+                border: s.border,
+                animationDuration: Duration.zero,
+                width: double.infinity,
+                padding: EdgeInsets.zero,
+                onPressed: isInteractionLocked || onTapCallback == null
+                    ? null
+                    : () => onTapCallback!(slotPos),
+                onLongPress: isInteractionLocked || onLongPressCallback == null
+                    ? null
+                    : () => onLongPressCallback!(slotPos),
+                haptic: s.hapticOnTap,
+                child: Padding(
+                  padding: s.padding ?? const EdgeInsets.all(16),
+                  child: M3EListItemScope(
+                    child: swipeItemBuilder(context, slotPos),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

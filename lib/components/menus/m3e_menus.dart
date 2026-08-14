@@ -5,6 +5,7 @@ import 'components/m3e_menu_popup.dart';
 import 'enums/m3e_menu_anchor_position.dart';
 import 'enums/m3e_menu_color_style.dart';
 import 'models/m3e_menu_node.dart';
+import 'utils/m3e_menu_overlay_rect.dart';
 
 export 'components/m3e_menu_content.dart';
 export 'components/m3e_menu_divider.dart';
@@ -15,6 +16,7 @@ export 'enums/m3e_menu_color_style.dart';
 export 'enums/m3e_menu_item_shape.dart';
 export 'models/m3e_menu_node.dart';
 export 'styles/m3e_menu_theme.dart';
+export 'utils/m3e_menu_overlay_rect.dart';
 export 'utils/m3e_menu_placer.dart';
 export 'utils/m3e_menu_spring_motion.dart';
 
@@ -108,11 +110,13 @@ class _M3EMenuState extends State<M3EMenu> {
     if (_open) {
       return;
     }
-    final box = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) {
+    final BuildContext? anchorContext = _anchorKey.currentContext;
+    final Rect? anchor = anchorContext == null
+        ? null
+        : m3eOverlayRectFor(anchorContext);
+    if (anchor == null) {
       return;
     }
-    final anchor = box.localToGlobal(Offset.zero) & box.size;
     setState(() => _open = true);
 
     final result = await showM3EMenu<Object>(

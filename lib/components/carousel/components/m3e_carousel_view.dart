@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../../foundations/foundations.dart';
+import '../models/m3e_carousel_change_details.dart';
 import '../styles/m3e_carousel_theme.dart';
 
 part 'm3e_sliver_fixed_extent_carousel.dart';
@@ -50,6 +51,7 @@ class M3ECarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.children,
     this.onIndexChanged,
+    this.onChange,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        itemBuilder = null,
@@ -79,6 +81,7 @@ class M3ECarouselView extends StatefulWidget {
     required List<int> this.flexWeights,
     required this.children,
     this.onIndexChanged,
+    this.onChange,
   }) : itemExtent = null,
        itemBuilder = null,
        itemCount = null;
@@ -104,6 +107,7 @@ class M3ECarouselView extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount,
     this.onIndexChanged,
+    this.onChange,
     this.infinite = false,
     this.physics,
   }) : consumeMaxWeight = true,
@@ -132,6 +136,7 @@ class M3ECarouselView extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount,
     this.onIndexChanged,
+    this.onChange,
     this.infinite = false,
     this.physics,
   }) : itemExtent = null,
@@ -256,6 +261,9 @@ class M3ECarouselView extends StatefulWidget {
   /// A callback invoked when the leading item changes.
   final ValueChanged<int>? onIndexChanged;
 
+  /// Called when the leading or focal item index changes.
+  final ValueChanged<M3ECarouselChangeDetails>? onChange;
+
   /// Called to build carousel item on demand.
   final NullableIndexedWidgetBuilder? itemBuilder;
 
@@ -282,6 +290,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
   M3ECarouselController get _controller =>
       widget.controller ?? _internalController!;
   late int _lastReportedLeadingItem;
+  late int _lastReportedFocalItem;
 
   /// Cached from [didChangeDependencies] so item builds do not each register
   /// an [M3ETheme] dependency during sliver child updates.
@@ -296,6 +305,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
       _internalController = M3ECarouselController();
     }
     _lastReportedLeadingItem = _getInitialLeadingItem();
+    _lastReportedFocalItem = _focalIndexForLeading(_lastReportedLeadingItem);
     _controller
       .._carouselState = this
       ..addListener(_handleScroll);
@@ -351,17 +361,76 @@ class _CarouselViewState extends State<M3ECarouselView> {
   }
 
   void _handleScroll() {
-    if (widget.onIndexChanged == null) {
+    if (widget.onIndexChanged == null && widget.onChange == null) {
       return;
     }
 
-    final ScrollPosition position = _controller.position;
-    final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
+    final position = _controller.position as _CarouselPosition;
+    // Round continuous scroll item (not truncate) so forward and reverse
+    // swipes report the new leading/focal at the midpoint — truncation via
+    // [leadingItem] delays next-item updates until nearly fully scrolled.
+    final currentLeadingIndex = _reportedLeadingIndex(position);
+    final currentFocalIndex = _focalIndexForLeading(currentLeadingIndex);
+    final itemCount = widget.itemCount ?? widget.children.length;
 
-    if (currentLeadingIndex != _lastReportedLeadingItem) {
-      _lastReportedLeadingItem = currentLeadingIndex;
-      widget.onIndexChanged!(currentLeadingIndex);
+    final leadingChanged = currentLeadingIndex != _lastReportedLeadingItem;
+    final focalChanged = currentFocalIndex != _lastReportedFocalItem;
+    if (!leadingChanged && !focalChanged) {
+      return;
     }
+
+    _lastReportedLeadingItem = currentLeadingIndex;
+    _lastReportedFocalItem = currentFocalIndex;
+
+    if (leadingChanged) {
+      widget.onIndexChanged?.call(currentLeadingIndex);
+    }
+    widget.onChange?.call(
+      M3ECarouselChangeDetails(
+        leadingIndex: currentLeadingIndex,
+        focalIndex: currentFocalIndex,
+        itemCount: itemCount,
+      ),
+    );
+  }
+
+  /// Leading index for change callbacks; mirrors [ _CarouselPosition.leadingItem]
+  /// but uses [num.round] so both swipe directions cross at the half-item mark.
+  int _reportedLeadingIndex(_CarouselPosition position) {
+    if (!position.hasPixels ||
+        !position.hasViewportDimension ||
+        position.viewportDimension <= 0) {
+      return _lastReportedLeadingItem;
+    }
+    var leading = position
+        .getItemFromPixels(position.pixels, position.viewportDimension)
+        .round();
+    if (position.consumeMaxWeight && position.flexWeights != null) {
+      leading = math.max(
+        leading - position.flexWeights!.indexOf(position.flexWeights!.max),
+        0,
+      );
+    }
+    if (position.infinite &&
+        position.itemCount != null &&
+        position.itemCount! > 0) {
+      leading = leading % position.itemCount!;
+    }
+    return leading;
+  }
+
+  int _focalIndexForLeading(int leadingIndex) {
+    final List<int>? weights = widget.flexWeights;
+    if (weights == null || weights.isEmpty) {
+      return leadingIndex;
+    }
+    final int maxWeight = weights.max;
+    final int firstMaxWeightIndex = weights.indexOf(maxWeight);
+    final int itemCount = widget.itemCount ?? widget.children.length;
+    if (itemCount <= 0) {
+      return leadingIndex;
+    }
+    return (leadingIndex + firstMaxWeightIndex).clamp(0, itemCount - 1);
   }
 
   // For weighted carousel, the initialItem means the index of the item to occupy the first maximum weight

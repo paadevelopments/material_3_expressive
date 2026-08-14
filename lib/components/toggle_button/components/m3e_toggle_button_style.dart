@@ -14,7 +14,12 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
     final padding = WidgetStateProperty.all<EdgeInsetsGeometry>(
       internalPadding,
     );
-    final style = _buildButtonStyle(checked, buttonShape, padding);
+    final style = _buildButtonStyle(
+      checked,
+      buttonShape,
+      padding,
+      animatedRadius,
+    );
     final content = _buildContent(m, checked);
     final onPressed = widget.enabled ? _handleTap : null;
     final button = _createMaterialButton(
@@ -24,7 +29,9 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
     );
 
     Widget result = M3EInkSplashTheme(
-      color: _resolvedForegroundColor(checked),
+      color: widget.decoration?.foregroundGradient != null
+          ? m3eGradientForegroundSourceColor
+          : _resolvedForegroundColor(checked),
       child: button,
     );
     if (widget.tooltip != null) {
@@ -148,10 +155,14 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
     bool checked,
     WidgetStateProperty<OutlinedBorder> buttonShape,
     WidgetStateProperty<EdgeInsetsGeometry> padding,
+    BorderRadius animatedRadius,
   ) {
     final fgColor = _resolvedForegroundColor(checked);
     final bgColor = _resolvedBackgroundColor(checked);
     final transparent = _isTransparentStyle;
+    final bool gradientOverlay = m3eUsesGradientOverlay(
+      widget.decoration?.overlayGradient,
+    );
 
     return ButtonStyle(
       alignment: _kAlignmentCenter,
@@ -160,6 +171,19 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
       padding: padding,
       foregroundColor: _foregroundColorProperty(checked, fgColor),
       backgroundColor: _backgroundColorProperty(checked, bgColor, transparent),
+      backgroundBuilder: m3eGradientSurfaceBuilder(
+        clipRadius: animatedRadius,
+        backgroundGradient: widget.decoration?.backgroundGradient,
+        overlayGradient: widget.decoration?.overlayGradient,
+        outlineGradient: widget.decoration?.outlineGradient,
+        outlineSide: widget.decoration?.side,
+        explicitBuilder: widget.decoration?.backgroundBuilder,
+      ),
+      foregroundBuilder: m3eGradientForegroundBuilder(
+        clipRadius: animatedRadius,
+        gradient: widget.decoration?.foregroundGradient,
+        explicitBuilder: widget.decoration?.foregroundBuilder,
+      ),
       shape: buttonShape,
       elevation: WidgetStateProperty.resolveWith((states) {
         return _buttonTheme.elevation(widget.style, states);
@@ -168,10 +192,13 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
       mouseCursor: _mouseCursorProperty(),
       animationDuration: _kDurationZero,
       visualDensity: _kVisualDensityStandard,
-      splashFactory: widget.splashFactory ?? InkSparkle.splashFactory,
-      overlayColor:
-          widget.decorationOverlayColor ??
-          _overlayColorProperty(checked, fgColor),
+      splashFactory: gradientOverlay
+          ? NoSplash.splashFactory
+          : (widget.splashFactory ?? InkSparkle.splashFactory),
+      overlayColor: gradientOverlay
+          ? const WidgetStatePropertyAll<Color?>(Colors.transparent)
+          : (widget.decorationOverlayColor ??
+                _overlayColorProperty(checked, fgColor)),
       surfaceTintColor: widget.decorationSurfaceTintColor,
       enableFeedback: widget.enableFeedback,
     );
@@ -192,6 +219,10 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
     Color fgColor,
   ) {
     final activeStates = checked ? {...states, WidgetState.selected} : states;
+
+    if (widget.decoration?.foregroundGradient?.resolve(activeStates) != null) {
+      return m3eGradientForegroundSourceColor;
+    }
 
     if (widget.decoration?.foregroundColor != null) {
       final color = widget.decoration!.foregroundColor!.resolve(activeStates);
@@ -240,7 +271,9 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
               alpha: M3EButtonConstants.kDisabledBackgroundAlpha,
             );
     }
-    return transparent ? Colors.transparent : bgColor;
+    return transparent || widget.decoration?.backgroundGradient != null
+        ? Colors.transparent
+        : bgColor;
   }
 
   WidgetStateProperty<BorderSide?> _sideProperty(bool checked) {
@@ -251,6 +284,10 @@ extension _M3EToggleButtonStyle on _M3EToggleButtonState {
 
   BorderSide? _resolveSideForStates(Set<WidgetState> states, bool checked) {
     final activeStates = checked ? {...states, WidgetState.selected} : states;
+    if (widget.decoration?.outlineGradient?.resolve(activeStates) != null ||
+        widget.decoration?.side != null) {
+      return BorderSide.none;
+    }
     if (widget.decoration?.side != null) {
       final side = widget.decoration!.side!.resolve(activeStates);
       if (side != null) {

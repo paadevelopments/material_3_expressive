@@ -254,6 +254,7 @@ extension _M3EToolbarBuild on _M3EToolbarState {
             leading: widget.leading,
             trailing: widget.trailing,
             gap: metrics.gap,
+            pillActiveSpring: widget.pillActiveSpring,
           );
         },
       );
@@ -275,6 +276,7 @@ extension _M3EToolbarBuild on _M3EToolbarState {
       mainAxisAlignment: dockedIconsOnly
           ? MainAxisAlignment.spaceBetween
           : MainAxisAlignment.start,
+      pillActiveSpring: widget.pillActiveSpring,
     );
   }
 

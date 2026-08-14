@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
+import 'components/m3e_segment_divider.dart';
 import 'models/m3e_segment.dart';
 import 'styles/m3e_segmented_button_theme.dart';
 
@@ -12,7 +14,7 @@ export 'styles/m3e_segmented_button_theme.dart';
 /// Presents 2-5 connected [M3ESegment]s for selecting options, switching views
 /// or sorting. Supports single or multiple selection and shows a check icon on
 /// selected segments.
-class M3ESegmentedButton<T> extends StatelessWidget {
+class M3ESegmentedButton<T> extends StatefulWidget {
   /// M3ESegmentedButton.
   const M3ESegmentedButton({
     required this.segments,
@@ -40,62 +42,7 @@ class M3ESegmentedButton<T> extends StatelessWidget {
   final bool showSelectedIcon;
 
   @override
-  Widget build(BuildContext context) {
-    return M3EComponentTheme(builder: _buildButton);
-  }
-
-  Widget _buildButton(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final segmentedButtonTheme = theme.segmentedButtonTheme;
-    final scheme = theme.colorScheme;
-    final borderRadius = segmentedButtonTheme.borderRadius;
-
-    return Container(
-      height: segmentedButtonTheme.height,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: Border.all(
-          color: scheme.outline,
-          width: segmentedButtonTheme.borderWidth,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: _buildSegments(context, segmentedButtonTheme),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildSegments(
-    BuildContext context,
-    M3ESegmentedButtonTheme segmentedButtonTheme,
-  ) {
-    final theme = M3ETheme.of(context);
-    final children = <Widget>[];
-    for (var i = 0; i < segments.length; i++) {
-      if (i > 0) {
-        children.add(
-          Container(
-            width: segmentedButtonTheme.borderWidth,
-            color: theme.colorScheme.outline,
-          ),
-        );
-      }
-      children.add(
-        Flexible(
-          child: _M3ESegmentTile<T>(
-            segmentedButtonTheme: segmentedButtonTheme,
-            index: i,
-            parent: this,
-          ),
-        ),
-      );
-    }
-    return children;
-  }
+  State<M3ESegmentedButton<T>> createState() => _M3ESegmentedButtonState<T>();
 
   void _handleTap(T value) {
     final next = Set<T>.of(selected);
@@ -111,6 +58,85 @@ class M3ESegmentedButton<T> extends StatelessWidget {
         ..add(value);
     }
     onSelectionChanged(next);
+  }
+}
+
+class _M3ESegmentedButtonState<T> extends State<M3ESegmentedButton<T>> {
+  /// Segment row. Dividers sample their gradient across this box.
+  final GlobalKey _rowKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return M3EComponentTheme(builder: _buildButton);
+  }
+
+  Widget _buildButton(BuildContext context) {
+    final theme = M3ETheme.of(context);
+    final segmentedButtonTheme = theme.segmentedButtonTheme;
+    final scheme = theme.colorScheme;
+    final borderRadius = segmentedButtonTheme.borderRadius;
+
+    final Color outlineColor = segmentedButtonTheme.outline(scheme);
+    Widget ring = Container(
+      height: segmentedButtonTheme.height,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: segmentedButtonTheme.outlineGradient == null
+            ? Border.all(
+                color: outlineColor,
+                width: segmentedButtonTheme.borderWidth,
+              )
+            : null,
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Row(
+          key: _rowKey,
+          mainAxisSize: MainAxisSize.min,
+          children: _buildSegments(context, segmentedButtonTheme),
+        ),
+      ),
+    );
+    final Gradient? outlineGradient = segmentedButtonTheme.outlineGradient;
+    if (outlineGradient != null) {
+      ring = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outlineGradient,
+        width: segmentedButtonTheme.borderWidth,
+        child: ring,
+      );
+    }
+    return ring;
+  }
+
+  List<Widget> _buildSegments(
+    BuildContext context,
+    M3ESegmentedButtonTheme segmentedButtonTheme,
+  ) {
+    final theme = M3ETheme.of(context);
+    final children = <Widget>[];
+    for (var i = 0; i < widget.segments.length; i++) {
+      if (i > 0) {
+        children.add(
+          M3ESegmentDivider(
+            hostKey: _rowKey,
+            width: segmentedButtonTheme.borderWidth,
+            color: segmentedButtonTheme.divider(theme.colorScheme),
+            gradient: segmentedButtonTheme.dividerGradient,
+          ),
+        );
+      }
+      children.add(
+        Flexible(
+          child: _M3ESegmentTile<T>(
+            segmentedButtonTheme: segmentedButtonTheme,
+            index: i,
+            parent: widget,
+          ),
+        ),
+      );
+    }
+    return children;
   }
 }
 
@@ -136,16 +162,28 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       materialInk: true,
       builder: (BuildContext context, M3EInteractionState state) {
         final resolvedScheme = M3ETheme.of(context).colorScheme;
-        final resolvedForeground = segmentedButtonTheme.foregroundColor(
+        final Gradient? fgGradient = isSelected
+            ? segmentedButtonTheme.selectedForegroundGradient
+            : segmentedButtonTheme.unselectedForegroundGradient;
+        final resolvedForeground = fgGradient != null
+            ? m3eGradientForegroundSourceColor
+            : segmentedButtonTheme.foregroundColor(
+                resolvedScheme,
+                selected: isSelected,
+              );
+        final Gradient? gradient = isSelected
+            ? segmentedButtonTheme.selectedBackgroundGradient
+            : segmentedButtonTheme.unselectedBackgroundGradient;
+        final Color? solidBg = segmentedButtonTheme.backgroundColor(
           resolvedScheme,
           selected: isSelected,
         );
         return Container(
           width: double.infinity,
           height: segmentedButtonTheme.height,
-          color: segmentedButtonTheme.backgroundColor(
-            resolvedScheme,
-            selected: isSelected,
+          decoration: BoxDecoration(
+            color: gradient == null ? solidBg : null,
+            gradient: gradient,
           ),
           child: M3EStateLayerOverlay(
             state: state,
@@ -160,11 +198,15 @@ class _M3ESegmentTile<T> extends StatelessWidget {
                   padding: EdgeInsets.symmetric(
                     horizontal: segmentedButtonTheme.segmentHorizontalPadding,
                   ),
-                  child: _buildLabel(
-                    context,
-                    segment,
-                    resolvedForeground,
+                  child: _wrapForeground(
+                    segmentedButtonTheme,
                     isSelected,
+                    _buildLabel(
+                      context,
+                      segment,
+                      resolvedForeground,
+                      isSelected,
+                    ),
                   ),
                 ),
               ),
@@ -202,6 +244,24 @@ class _M3ESegmentTile<T> extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: children,
+    );
+  }
+
+  Widget _wrapForeground(
+    M3ESegmentedButtonTheme theme,
+    bool selected,
+    Widget child,
+  ) {
+    final Gradient? gradient = selected
+        ? theme.selectedForegroundGradient
+        : theme.unselectedForegroundGradient;
+    if (gradient == null) {
+      return child;
+    }
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+      child: child,
     );
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
+import '../floating_action_buttons/styles/m3e_fab_decoration.dart';
 import '../floating_action_buttons/styles/m3e_fab_theme.dart';
 
 /// A Material 3 Expressive extended floating action button.
@@ -17,6 +19,7 @@ class M3EExtendedFab extends StatelessWidget {
     this.onPressed,
     this.color = M3EFabColor.primary,
     this.extended = true,
+    this.decoration,
     this.focusNode,
     this.autofocus = false,
     super.key,
@@ -37,6 +40,9 @@ class M3EExtendedFab extends StatelessWidget {
 
   /// Whether the label is shown. When false the button collapses to the icon.
   final bool extended;
+
+  /// Optional decoration for solid and gradient surfaces.
+  final M3EFabDecoration? decoration;
 
   /// focusNode.
 
@@ -68,38 +74,120 @@ class M3EExtendedFab extends StatelessWidget {
         autofocus: autofocus,
         semanticLabel: label,
         pressedScale: extendedTheme.pressedScale,
-        materialInk: true,
-        builder: (context, state) {
-          final elevation = extendedTheme.elevation(hovered: state.hovered);
-          return AnimatedContainer(
-            duration: M3EMotion.medium2,
-            curve: M3EMotion.emphasized,
-            height: extendedTheme.height,
-            decoration: BoxDecoration(
-              color: metrics.background,
-              borderRadius: borderRadius,
-              boxShadow: M3EElevation.shadows(
-                elevation,
-                shadowColor: theme.colorScheme.shadow,
-              ),
-            ),
-            child: M3EStateLayerOverlay(
-              state: state,
-              color: metrics.foreground,
-              shape: border,
-              alignment: Alignment.center,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: extended
-                      ? extendedTheme.extendedHorizontalPadding
-                      : extendedTheme.collapsedHorizontalPadding,
-                ),
-                child: _buildContent(theme, metrics, extendedTheme),
-              ),
-            ),
-          );
-        },
+        materialInk: !m3eUsesGradientOverlay(decoration?.overlayGradient),
+        builder: (context, state) => _buildSurface(
+          theme: theme,
+          fabTheme: fabTheme,
+          extendedTheme: extendedTheme,
+          metrics: metrics,
+          borderRadius: borderRadius,
+          border: border,
+          state: state,
+        ),
       ),
+    );
+  }
+
+  Widget _buildSurface({
+    required M3EThemeData theme,
+    required M3EFabTheme fabTheme,
+    required M3EExtendedFabTheme extendedTheme,
+    required M3EFabMetrics metrics,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required M3EInteractionState state,
+  }) {
+    final states = m3eStatesForInteraction(state, enabled: _enabled);
+    final Gradient? fill =
+        decoration?.backgroundGradient?.resolve(states) ?? fabTheme.gradient;
+    final Color? solidBg =
+        decoration?.backgroundColor?.resolve(states) ??
+        (fill == null ? metrics.background : null);
+    final Color fg = decoration?.foregroundGradient?.resolve(states) != null
+        ? m3eGradientForegroundSourceColor
+        : (decoration?.foregroundColor?.resolve(states) ?? metrics.foreground);
+    final Gradient? outline = decoration?.outlineGradient?.resolve(states);
+    final BorderSide? side = outline != null
+        ? null
+        : decoration?.side?.resolve(states);
+    final elevation = extendedTheme.elevation(hovered: state.hovered);
+
+    Widget content = _decorateContent(
+      state: state,
+      states: states,
+      fg: fg,
+      borderRadius: borderRadius,
+      border: border,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: extended
+              ? extendedTheme.extendedHorizontalPadding
+              : extendedTheme.collapsedHorizontalPadding,
+        ),
+        child: _buildContent(theme, metrics, extendedTheme, fg),
+      ),
+    );
+
+    Widget surface = AnimatedContainer(
+      duration: M3EMotion.medium2,
+      curve: M3EMotion.emphasized,
+      height: extendedTheme.height,
+      decoration: BoxDecoration(
+        color: fill == null ? solidBg : null,
+        gradient: fill,
+        borderRadius: borderRadius,
+        border: side == null ? null : Border.fromBorderSide(side),
+        boxShadow: M3EElevation.shadows(
+          elevation,
+          shadowColor: theme.colorScheme.shadow,
+        ),
+      ),
+      child: content,
+    );
+    if (outline != null) {
+      surface = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outline,
+        width: m3eOutlineWidth(decoration?.side?.resolve(states)),
+        child: surface,
+      );
+    }
+    return surface;
+  }
+
+  Widget _decorateContent({
+    required M3EInteractionState state,
+    required Set<WidgetState> states,
+    required Color fg,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required Widget child,
+  }) {
+    var content = child;
+    final Gradient? fgGradient = decoration?.foregroundGradient?.resolve(
+      states,
+    );
+    if (fgGradient != null) {
+      content = m3eGradientForegroundLayer(
+        clipRadius: borderRadius,
+        gradient: fgGradient,
+        child: content,
+      );
+    }
+    if (m3eUsesGradientOverlay(decoration?.overlayGradient)) {
+      return m3eResolveGradientOverlay(
+        clipRadius: borderRadius,
+        states: states,
+        overlayGradient: decoration?.overlayGradient,
+        child: content,
+      );
+    }
+    return M3EStateLayerOverlay(
+      state: state,
+      color: fg,
+      shape: border,
+      alignment: Alignment.center,
+      child: content,
     );
   }
 
@@ -107,15 +195,13 @@ class M3EExtendedFab extends StatelessWidget {
     M3EThemeData theme,
     M3EFabMetrics metrics,
     M3EExtendedFabTheme extendedTheme,
+    Color foreground,
   ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         IconTheme.merge(
-          data: IconThemeData(
-            color: metrics.foreground,
-            size: extendedTheme.iconSize,
-          ),
+          data: IconThemeData(color: foreground, size: extendedTheme.iconSize),
           child: icon,
         ),
         AnimatedSize(
@@ -128,7 +214,7 @@ class M3EExtendedFab extends StatelessWidget {
                     label,
                     style: extendedTheme.labelStyle(
                       theme.typeScale,
-                      metrics.foreground,
+                      foreground,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

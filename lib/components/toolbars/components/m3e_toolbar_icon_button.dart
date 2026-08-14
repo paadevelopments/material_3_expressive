@@ -12,7 +12,8 @@ import '../models/m3e_toolbar_item.dart';
 /// When [M3EToolbarAction.label] is set, the label lives **inside** the button
 /// pill. Width springs between the icon-button visual size (inactive, icon
 /// only) and the natural icon+label width (active). Layout width follows the
-/// spring so the parent toolbar pill grows/shrinks in sync.
+/// spring so the parent toolbar pill grows/shrinks in sync — unless the parent
+/// reserves a fixed selection width (`pillActiveSpring: false`).
 class M3EToolbarIconButton extends StatefulWidget {
   /// M3EToolbarIconButton.
   const M3EToolbarIconButton({
@@ -20,8 +21,12 @@ class M3EToolbarIconButton extends StatefulWidget {
     required this.size,
     this.onPressed,
     this.variant,
+    this.pillActiveSpring = true,
     super.key,
   });
+
+  /// Gap between the icon and label inside an expanded action.
+  static const double labelGap = 6;
 
   /// action.
   final M3EToolbarAction action;
@@ -35,6 +40,10 @@ class M3EToolbarIconButton extends StatefulWidget {
   /// Defaults to filled when [M3EToolbarAction.isExpandTrigger] or
   /// [M3EToolbarAction.active], else standard.
   final M3EIconButtonVariant? variant;
+
+  /// Reserved for parent [M3EToolbar.pillActiveSpring]; labeled width always
+  /// follows the morph spring so padding and animation stay correct.
+  final bool pillActiveSpring;
 
   @override
   State<M3EToolbarIconButton> createState() => _M3EToolbarIconButtonState();
@@ -134,27 +143,43 @@ class _M3EToolbarIconButtonState extends State<M3EToolbarIconButton>
     final double labelWidth = _measureLabelWidth(
       widget.action.label!,
       labelStyle,
+      MediaQuery.textScalerOf(context),
     );
-    // Icon-only visual → icon + gap + label; layout follows this spring.
-    const double labelGap = 6;
-    final double expandedWidth = visual.width + labelGap + labelWidth;
-    final double sprungWidth =
-        visual.width + (expandedWidth - visual.width) * t;
+    final expandedWidth =
+        visual.width + M3EToolbarIconButton.labelGap + labelWidth;
+    final sprungWidth = visual.width + (expandedWidth - visual.width) * t;
 
-    final Widget icon = Row(
+    return _buildIconButton(
+      icon: _buildLabeledRow(
+        iconPx: iconPx,
+        labelStyle: labelStyle,
+        progress: t,
+      ),
+      visualSize: Size(sprungWidth, visual.height),
+    );
+  }
+
+  Widget _buildLabeledRow({
+    required double iconPx,
+    required TextStyle labelStyle,
+    required double progress,
+  }) {
+    return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Icon(widget.action.icon, size: iconPx),
-        if (t > 0.01)
+        if (progress > 0.01)
           ClipRect(
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              widthFactor: t,
+              widthFactor: progress,
               child: Opacity(
-                opacity: t,
+                opacity: progress,
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.only(start: labelGap),
+                  padding: const EdgeInsetsDirectional.only(
+                    start: M3EToolbarIconButton.labelGap,
+                  ),
                   child: Builder(
                     builder: (BuildContext context) {
                       return Text(
@@ -174,18 +199,18 @@ class _M3EToolbarIconButtonState extends State<M3EToolbarIconButton>
           ),
       ],
     );
-
-    return _buildIconButton(
-      icon: icon,
-      visualSize: Size(sprungWidth, visual.height),
-    );
   }
 
-  double _measureLabelWidth(String label, TextStyle style) {
+  double _measureLabelWidth(
+    String label,
+    TextStyle style,
+    TextScaler textScaler,
+  ) {
     final painter = TextPainter(
       text: TextSpan(text: label, style: style),
       maxLines: 1,
       textDirection: TextDirection.ltr,
+      textScaler: textScaler,
     )..layout();
     return painter.width;
   }

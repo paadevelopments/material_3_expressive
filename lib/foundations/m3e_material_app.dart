@@ -19,6 +19,10 @@ class M3EMaterialApp extends StatefulWidget {
   const M3EMaterialApp({
     required this.data,
     required this.home,
+    this.fontFamily,
+    this.fontFamilyFallback,
+    this.package,
+    this.fontVariations,
     this.autoTheming,
     this.dynamicColoring,
     this.initialTheme,
@@ -64,6 +68,18 @@ class M3EMaterialApp extends StatefulWidget {
 
   /// Expressive theme tokens for the app.
   final M3EThemeData data;
+
+  /// Font family applied to [data]'s type scale when non-null.
+  final String? fontFamily;
+
+  /// Fallback families applied with [fontFamily] when non-null.
+  final List<String>? fontFamilyFallback;
+
+  /// Font package name applied with [fontFamily] when non-null.
+  final String? package;
+
+  /// Variable-font axes applied to [data]'s type scale when non-null.
+  final List<FontVariation>? fontVariations;
 
   /// The default route widget.
   final Widget home;
@@ -325,6 +341,13 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     );
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
 
+    final M3EThemeData data = widget.data.copyWith(
+      fontFamily: widget.fontFamily,
+      fontFamilyFallback: widget.fontFamilyFallback,
+      package: widget.package,
+      fontVariations: widget.fontVariations,
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: MaterialApp(
@@ -341,9 +364,8 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
         color: widget.color,
-        theme: widget.theme ?? widget.data.toThemeData(),
-        darkTheme:
-            widget.darkTheme ?? widget.data.deriveDarkTemplate().toThemeData(),
+        theme: widget.theme ?? data.toThemeData(),
+        darkTheme: widget.darkTheme ?? data.deriveDarkTemplate().toThemeData(),
         highContrastTheme: widget.highContrastTheme,
         highContrastDarkTheme: widget.highContrastDarkTheme,
         themeMode: themeMode,
@@ -367,7 +389,7 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
         themeAnimationStyle: widget.themeAnimationStyle,
         builder: (BuildContext context, Widget? child) {
           Widget themed = M3ETheme(
-            data: widget.data,
+            data: data,
             autoTheming: widget.autoTheming,
             dynamicColoring: widget.dynamicColoring,
             initialTheme: widget.initialTheme,

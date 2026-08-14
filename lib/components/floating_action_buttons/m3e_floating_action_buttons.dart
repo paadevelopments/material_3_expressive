@@ -1,7 +1,12 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../buttons/utils/m3e_button_gradient_layer.dart';
 import 'enums/m3e_fab.dart';
+import 'styles/m3e_fab_decoration.dart';
+import 'styles/m3e_fab_theme.dart';
+
+export 'styles/m3e_fab_decoration.dart';
 
 /// A Material 3 Expressive floating action button.
 ///
@@ -16,6 +21,7 @@ class M3EFab extends StatelessWidget {
     this.size = M3EFabSize.medium,
     this.color = M3EFabColor.primary,
     this.cornerRadius,
+    this.decoration,
     this.tooltip,
     this.focusNode,
     this.autofocus = false,
@@ -37,6 +43,9 @@ class M3EFab extends StatelessWidget {
 
   /// When set, overrides the themed corner radius (e.g. for open/close morph).
   final double? cornerRadius;
+
+  /// Optional decoration for solid and gradient surfaces.
+  final M3EFabDecoration? decoration;
 
   /// tooltip.
   final String? tooltip;
@@ -60,7 +69,6 @@ class M3EFab extends StatelessWidget {
     );
     final borderRadius = M3EShapes.resolve(cornerRadius ?? metrics.radius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);
-    // External radius is driven frame-by-frame; skip AnimatedContainer lerp.
     final radiusDuration = cornerRadius != null
         ? Duration.zero
         : M3EMotion.short4;
@@ -73,46 +81,123 @@ class M3EFab extends StatelessWidget {
         autofocus: autofocus,
         semanticLabel: tooltip,
         pressedScale: fabTheme.pressedScale,
-        materialInk: true,
-        builder: (context, state) {
-          final elevation = state.hovered
-              ? M3EElevation.level4
-              : M3EElevation.level3;
-          return AnimatedContainer(
-            duration: radiusDuration,
-            curve: M3EMotion.standard,
-            width: metrics.container,
-            height: metrics.container,
-            decoration: BoxDecoration(
-              color: metrics.background,
-              borderRadius: borderRadius,
-              boxShadow: M3EElevation.shadows(
-                elevation,
-                shadowColor: theme.colorScheme.shadow,
-              ),
-            ),
-            child: M3EStateLayerOverlay(
-              state: state,
-              color: metrics.foreground,
-              shape: border,
-              alignment: Alignment.center,
-              child: SizedBox(
-                width: metrics.container,
-                height: metrics.container,
-                child: Align(
-                  child: IconTheme.merge(
-                    data: IconThemeData(
-                      color: metrics.foreground,
-                      size: metrics.iconSize,
-                    ),
-                    child: icon,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+        materialInk: !m3eUsesGradientOverlay(decoration?.overlayGradient),
+        builder: (context, state) => _buildSurface(
+          theme: theme,
+          fabTheme: fabTheme,
+          metrics: metrics,
+          borderRadius: borderRadius,
+          border: border,
+          radiusDuration: radiusDuration,
+          state: state,
+        ),
       ),
+    );
+  }
+
+  Widget _buildSurface({
+    required M3EThemeData theme,
+    required M3EFabTheme fabTheme,
+    required M3EFabMetrics metrics,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required Duration radiusDuration,
+    required M3EInteractionState state,
+  }) {
+    final states = m3eStatesForInteraction(state, enabled: _enabled);
+    final Gradient? fill =
+        decoration?.backgroundGradient?.resolve(states) ?? fabTheme.gradient;
+    final Color? solidBg =
+        decoration?.backgroundColor?.resolve(states) ??
+        (fill == null ? metrics.background : null);
+    final Color fg = decoration?.foregroundGradient?.resolve(states) != null
+        ? m3eGradientForegroundSourceColor
+        : (decoration?.foregroundColor?.resolve(states) ?? metrics.foreground);
+    final Gradient? outline = decoration?.outlineGradient?.resolve(states);
+    final BorderSide? side = outline != null
+        ? null
+        : decoration?.side?.resolve(states);
+    final elevation = state.hovered ? M3EElevation.level4 : M3EElevation.level3;
+
+    Widget content = _decorateContent(
+      state: state,
+      states: states,
+      fg: fg,
+      borderRadius: borderRadius,
+      border: border,
+      child: SizedBox(
+        width: metrics.container,
+        height: metrics.container,
+        child: Align(
+          child: IconTheme.merge(
+            data: IconThemeData(color: fg, size: metrics.iconSize),
+            child: icon,
+          ),
+        ),
+      ),
+    );
+
+    Widget surface = AnimatedContainer(
+      duration: radiusDuration,
+      curve: M3EMotion.standard,
+      width: metrics.container,
+      height: metrics.container,
+      decoration: BoxDecoration(
+        color: fill == null ? solidBg : null,
+        gradient: fill,
+        borderRadius: borderRadius,
+        border: side == null ? null : Border.fromBorderSide(side),
+        boxShadow: M3EElevation.shadows(
+          elevation,
+          shadowColor: theme.colorScheme.shadow,
+        ),
+      ),
+      child: content,
+    );
+    if (outline != null) {
+      surface = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outline,
+        width: m3eOutlineWidth(decoration?.side?.resolve(states)),
+        child: surface,
+      );
+    }
+    return surface;
+  }
+
+  Widget _decorateContent({
+    required M3EInteractionState state,
+    required Set<WidgetState> states,
+    required Color fg,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required Widget child,
+  }) {
+    var content = child;
+    final Gradient? fgGradient = decoration?.foregroundGradient?.resolve(
+      states,
+    );
+    if (fgGradient != null) {
+      content = m3eGradientForegroundLayer(
+        clipRadius: borderRadius,
+        gradient: fgGradient,
+        child: content,
+      );
+    }
+    if (m3eUsesGradientOverlay(decoration?.overlayGradient)) {
+      return m3eResolveGradientOverlay(
+        clipRadius: borderRadius,
+        states: states,
+        overlayGradient: decoration?.overlayGradient,
+        child: content,
+      );
+    }
+    return M3EStateLayerOverlay(
+      state: state,
+      color: fg,
+      shape: border,
+      alignment: Alignment.center,
+      child: content,
     );
   }
 }

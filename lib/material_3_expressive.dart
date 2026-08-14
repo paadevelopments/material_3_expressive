@@ -29,6 +29,7 @@ export 'components/radio_button/m3e_radio_button.dart';
 export 'components/refresh_indicator/m3e_refresh_indicator.dart';
 export 'components/search/m3e_search.dart';
 export 'components/segmented_buttons/m3e_segmented_buttons.dart';
+export 'components/selection/m3e_selection.dart';
 export 'components/side_sheets/m3e_side_sheets.dart';
 export 'components/sliders/m3e_sliders.dart';
 export 'components/snackbar/m3e_snackbar.dart';

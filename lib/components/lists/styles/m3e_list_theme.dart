@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../cards/enums/m3e_card_variant.dart';
 
 /// Theme values for `M3EListItem`.
 @immutable
@@ -15,6 +16,8 @@ class M3EListItemTheme {
     this.minHeight = 40,
     this.iconSize = 24,
     this.gap = 16,
+    this.variant = M3ECardVariant.filled,
+    this.border,
   });
 
   /// defaults.
@@ -39,6 +42,12 @@ class M3EListItemTheme {
 
   /// gap.
   final double gap;
+
+  /// Card variant for standalone list items.
+  final M3ECardVariant variant;
+
+  /// Optional card outline; null keeps the variant default.
+  final BorderSide? border;
 
   /// selectedColor.
 
@@ -72,6 +81,8 @@ class M3EListItemTheme {
     double? minHeight,
     double? iconSize,
     double? gap,
+    M3ECardVariant? variant,
+    BorderSide? border,
   }) {
     return M3EListItemTheme(
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
@@ -81,6 +92,8 @@ class M3EListItemTheme {
       minHeight: minHeight ?? this.minHeight,
       iconSize: iconSize ?? this.iconSize,
       gap: gap ?? this.gap,
+      variant: variant ?? this.variant,
+      border: border ?? this.border,
     );
   }
 }
@@ -107,6 +120,8 @@ class M3EListCardListTheme {
     this.innerRadius = defaultInnerRadius,
     this.gap = defaultGap,
     this.itemPadding = defaultItemPadding,
+    this.variant = M3ECardVariant.filled,
+    this.border,
   });
 
   /// defaults.
@@ -126,6 +141,12 @@ class M3EListCardListTheme {
   /// itemPadding.
   final EdgeInsetsGeometry itemPadding;
 
+  /// Card variant for each card-list item.
+  final M3ECardVariant variant;
+
+  /// Optional card outline; null keeps the variant default.
+  final BorderSide? border;
+
   /// backgroundColor.
 
   Color backgroundColor(M3EColorScheme scheme) =>
@@ -138,27 +159,37 @@ class M3EListCardListTheme {
     double? innerRadius,
     double? gap,
     EdgeInsetsGeometry? itemPadding,
+    M3ECardVariant? variant,
+    BorderSide? border,
   }) {
     return M3EListCardListTheme(
       outerRadius: outerRadius ?? this.outerRadius,
       innerRadius: innerRadius ?? this.innerRadius,
       gap: gap ?? this.gap,
       itemPadding: itemPadding ?? this.itemPadding,
+      variant: variant ?? this.variant,
+      border: border ?? this.border,
     );
   }
 }
 
 /// Theme values for dismissible list widgets.
+///
+/// Stack geometry ([defaultOuterRadius], [defaultInnerRadius], [defaultGap],
+/// [defaultItemPadding]) matches [M3EListCardListTheme] so card and dismissible
+/// lists share the same item layout defaults.
 @immutable
 class M3EListDismissibleTheme {
   /// defaultOuterRadius.
-  static const double defaultOuterRadius = 18;
+  static const double defaultOuterRadius =
+      M3EListCardListTheme.defaultOuterRadius;
 
   /// defaultInnerRadius.
-  static const double defaultInnerRadius = 4;
+  static const double defaultInnerRadius =
+      M3EListCardListTheme.defaultInnerRadius;
 
   /// defaultGap.
-  static const double defaultGap = 3;
+  static const double defaultGap = M3EListCardListTheme.defaultGap;
 
   /// defaultActionGap.
   static const double defaultActionGap = 8;
@@ -179,7 +210,8 @@ class M3EListDismissibleTheme {
   static const double defaultCollapseSpeed = 50;
 
   /// defaultItemPadding.
-  static const EdgeInsets defaultItemPadding = EdgeInsets.all(16);
+  static const EdgeInsets defaultItemPadding =
+      M3EListCardListTheme.defaultItemPadding;
 
   /// M3EListDismissibleTheme.
 
@@ -267,13 +299,18 @@ class M3EListDismissibleTheme {
 }
 
 /// Theme values for expandable list widgets.
+///
+/// Stack geometry ([defaultOuterRadius], [defaultInnerRadius], [defaultGap])
+/// matches [M3EListCardListTheme].
 @immutable
 class M3EListExpandableTheme {
   /// defaultOuterRadius.
-  static const double defaultOuterRadius = 24;
+  static const double defaultOuterRadius =
+      M3EListCardListTheme.defaultOuterRadius;
 
   /// defaultInnerRadius.
-  static const double defaultInnerRadius = 6;
+  static const double defaultInnerRadius =
+      M3EListCardListTheme.defaultInnerRadius;
 
   /// defaultHoverRadius.
   static const double defaultHoverRadius = 10;
@@ -282,7 +319,7 @@ class M3EListExpandableTheme {
   static const double defaultPressedRadius = 4;
 
   /// defaultGap.
-  static const double defaultGap = 3;
+  static const double defaultGap = M3EListCardListTheme.defaultGap;
 
   /// defaultTitleSubtitleGap.
   static const double defaultTitleSubtitleGap = 4;
