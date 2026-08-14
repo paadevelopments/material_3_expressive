@@ -47,7 +47,8 @@ playground per component under [`example/lib/pages/playground/`](example/lib/pag
 The gallery shell in [`example/lib/main.dart`](example/lib/main.dart) uses
 `M3EMaterialApp` with adaptive theming, a light/dark toggle, and a palette
 action that opens [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart)
-(auto theming, dynamic color, and five seed colors).
+(auto theming, dynamic color, five seed colors, font family, and M3 Expressive
+type styles on Roboto Flex).
 
 ```bash
 cd example
@@ -231,10 +232,10 @@ M3EMaterialApp(
 );
 ```
 
-`M3ETypeVariations` lists Roboto Flex axes for emphasized type, condensed /
-wide width, and roundness. Static and mono fonts ignore axes they do not
-define. The shell projects the type scale onto `ThemeData.textTheme` and
-`DefaultTextStyle`.
+`M3ETypeVariations` is an enum of Roboto Flex axes (`.variations`): regular,
+emphasized, condensed, extra condensed, wide, extra wide, and round. Static
+and mono fonts ignore axes they do not define. The shell projects the type
+scale onto `ThemeData.textTheme` and `DefaultTextStyle`.
 
 ## Components
 

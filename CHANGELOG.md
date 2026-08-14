@@ -34,8 +34,9 @@
   `border`.
 * `M3ETypeScale.apply` for shared typography (family, fallback, package,
   size factor/delta, color, decoration, `fontVariations`). `withColor`
-  delegates to `apply`. `M3ETypeVariations` holds Roboto Flex presets
-  (emphasized, condensed, extra condensed, wide, extra wide, round).
+  delegates to `apply`. `M3ETypeVariations` is an enum of Roboto Flex
+  presets (`.variations`: regular, emphasized, condensed, extra condensed,
+  wide, extra wide, round).
 * `M3EThemeData.copyWith(fontFamily:)` / `fontFamilyFallback` / `package` /
   `fontVariations` and the same fields on `M3EMaterialApp`.
 * Example gallery: catalog-driven playgrounds, palette theme-config screen
