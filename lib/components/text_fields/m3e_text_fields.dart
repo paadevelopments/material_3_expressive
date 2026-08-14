@@ -224,7 +224,13 @@ class _M3ETextFieldState extends State<M3ETextField> {
     );
 
     if (widget.label == null) {
-      return _contentBox(textFieldTheme, child: editable);
+      return _contentBox(
+        textFieldTheme,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: editable,
+        ),
+      );
     }
 
     final TextStyle labelStyle = _floating
@@ -240,6 +246,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
         children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               SizedBox(height: labelSlot),

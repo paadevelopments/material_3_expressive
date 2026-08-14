@@ -16,6 +16,10 @@ void main() {
     _m3etextfieldCentersTheLabelUntilItFloats,
   );
   testWidgets(
+    'M3ETextField centers the input when there is no label',
+    _m3etextfieldCentersTheInputWhenThereIsNoLabel,
+  );
+  testWidgets(
     'M3ETextField unfocuses on tap outside by default',
     _m3etextfieldUnfocusesOnTapOutsideByDefault,
   );
@@ -116,6 +120,27 @@ Future<void> _m3etextfieldCentersTheLabelUntilItFloats(
     tester.getRect(find.text('Name')).center.dy,
     lessThan(field.center.dy - 4),
   );
+}
+
+Future<void> _m3etextfieldCentersTheInputWhenThereIsNoLabel(
+  WidgetTester tester,
+) async {
+  final controller = TextEditingController(text: 'Value');
+  addTearDown(controller.dispose);
+
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+      home: Scaffold(
+        body: Center(child: M3ETextField(controller: controller)),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final Rect field = tester.getRect(find.byType(M3ETextField));
+  final Rect input = tester.getRect(find.byType(EditableText));
+  expect(input.center.dy, closeTo(field.center.dy, 1));
 }
 
 Future<void> _m3etextfieldUnfocusesOnTapOutsideByDefault(
