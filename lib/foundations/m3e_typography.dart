@@ -172,25 +172,108 @@ class M3ETypeScale {
   }
 
   /// Returns a copy with [color] applied to every role.
-  M3ETypeScale withColor(Color color) {
-    TextStyle apply(TextStyle style) => style.copyWith(color: color);
+  M3ETypeScale withColor(Color color) => apply(color: color);
+
+  /// Applies shared typography attributes to every role.
+  ///
+  /// Mirrors [TextTheme.apply] for family, fallback, package, size, color, and
+  /// decoration. [fontVariations] is the one-knob for M3 Expressive axes
+  /// (width, grade, weight, roundness). Per-role size, weight, and tracking
+  /// stay unless size factor/delta change the size.
+  M3ETypeScale apply({
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    Color? color,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    TextDecorationStyle? decorationStyle,
+    List<FontVariation>? fontVariations,
+  }) {
+    TextStyle map(TextStyle style) {
+      return style.copyWith(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
+        package: package,
+        fontSize: style.fontSize == null
+            ? null
+            : style.fontSize! * fontSizeFactor + fontSizeDelta,
+        color: color,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontVariations: fontVariations,
+      );
+    }
+
     return M3ETypeScale(
-      displayLarge: apply(displayLarge),
-      displayMedium: apply(displayMedium),
-      displaySmall: apply(displaySmall),
-      headlineLarge: apply(headlineLarge),
-      headlineMedium: apply(headlineMedium),
-      headlineSmall: apply(headlineSmall),
-      titleLarge: apply(titleLarge),
-      titleMedium: apply(titleMedium),
-      titleSmall: apply(titleSmall),
-      bodyLarge: apply(bodyLarge),
-      bodyMedium: apply(bodyMedium),
-      bodySmall: apply(bodySmall),
-      labelLarge: apply(labelLarge),
-      labelMedium: apply(labelMedium),
-      labelSmall: apply(labelSmall),
+      displayLarge: map(displayLarge),
+      displayMedium: map(displayMedium),
+      displaySmall: map(displaySmall),
+      headlineLarge: map(headlineLarge),
+      headlineMedium: map(headlineMedium),
+      headlineSmall: map(headlineSmall),
+      titleLarge: map(titleLarge),
+      titleMedium: map(titleMedium),
+      titleSmall: map(titleSmall),
+      bodyLarge: map(bodyLarge),
+      bodyMedium: map(bodyMedium),
+      bodySmall: map(bodySmall),
+      labelLarge: map(labelLarge),
+      labelMedium: map(labelMedium),
+      labelSmall: map(labelSmall),
     );
+  }
+}
+
+/// Named Roboto Flex axis presets for Material 3 Expressive type.
+///
+/// Static and mono fonts ignore axes they do not define.
+enum M3ETypeVariations {
+  /// No extra axes; the baseline scale weights stand.
+  regular,
+
+  /// Slight weight and grade bump for emphasized type.
+  emphasized,
+
+  /// Condensed width (`wdth` 75).
+  condensed,
+
+  /// Extra-condensed width (`wdth` 50).
+  extraCondensed,
+
+  /// Wide width (`wdth` 125).
+  wide,
+
+  /// Extra-wide width (`wdth` 151).
+  extraWide,
+
+  /// Roundness on (`ROND` 100).
+  round;
+
+  /// Variable-font axes for this preset.
+  List<FontVariation> get variations {
+    switch (this) {
+      case M3ETypeVariations.regular:
+        return const <FontVariation>[];
+      case M3ETypeVariations.emphasized:
+        return const <FontVariation>[
+          FontVariation('wght', 600),
+          FontVariation('GRAD', 50),
+        ];
+      case M3ETypeVariations.condensed:
+        return const <FontVariation>[FontVariation('wdth', 75)];
+      case M3ETypeVariations.extraCondensed:
+        return const <FontVariation>[FontVariation('wdth', 50)];
+      case M3ETypeVariations.wide:
+        return const <FontVariation>[FontVariation('wdth', 125)];
+      case M3ETypeVariations.extraWide:
+        return const <FontVariation>[FontVariation('wdth', 151)];
+      case M3ETypeVariations.round:
+        return const <FontVariation>[FontVariation('ROND', 100)];
+    }
   }
 }
 

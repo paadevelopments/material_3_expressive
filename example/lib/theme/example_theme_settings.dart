@@ -1,4 +1,54 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+
+/// Named M3 Expressive type styles for the gallery picker.
+enum ExampleTypeStyle {
+  /// Baseline scale with no extra axes.
+  regular('Regular'),
+
+  /// Weight and grade bump.
+  emphasized('Emphasized'),
+
+  /// Condensed width.
+  condensed('Condensed'),
+
+  /// Extra-condensed width.
+  extraCondensed('Extra condensed'),
+
+  /// Wide width.
+  wide('Wide'),
+
+  /// Extra-wide width.
+  extraWide('Extra wide'),
+
+  /// Roundness on.
+  round('Round');
+
+  const ExampleTypeStyle(this.label);
+
+  /// Short label shown in the theme config picker.
+  final String label;
+
+  /// Roboto Flex axes for this style.
+  List<FontVariation> get variations {
+    switch (this) {
+      case ExampleTypeStyle.regular:
+        return M3ETypeVariations.regular.variations;
+      case ExampleTypeStyle.emphasized:
+        return M3ETypeVariations.emphasized.variations;
+      case ExampleTypeStyle.condensed:
+        return M3ETypeVariations.condensed.variations;
+      case ExampleTypeStyle.extraCondensed:
+        return M3ETypeVariations.extraCondensed.variations;
+      case ExampleTypeStyle.wide:
+        return M3ETypeVariations.wide.variations;
+      case ExampleTypeStyle.extraWide:
+        return M3ETypeVariations.extraWide.variations;
+      case ExampleTypeStyle.round:
+        return M3ETypeVariations.round.variations;
+    }
+  }
+}
 
 /// Runtime theme choices for the gallery, edited from the theme config screen.
 ///
@@ -24,9 +74,17 @@ class ExampleThemeSettings extends ChangeNotifier {
     'Rose',
   ];
 
+  /// Family name registered for Roboto Flex in the example app.
+  static const String robotoFlex = 'Roboto Flex';
+
+  /// Family name registered for Roboto Mono in the example app.
+  static const String robotoMono = 'Roboto Mono';
+
   bool _autoTheming = true;
   bool _dynamicColoring = true;
   Color _seedColor = seedOptions.first;
+  String? _fontFamily;
+  ExampleTypeStyle _typeStyle = ExampleTypeStyle.regular;
 
   /// Whether the theme follows the platform brightness.
   bool get autoTheming => _autoTheming;
@@ -59,5 +117,38 @@ class ExampleThemeSettings extends ChangeNotifier {
     }
     _seedColor = value;
     notifyListeners();
+  }
+
+  /// Font family for the gallery, or null for the platform default.
+  String? get fontFamily => _fontFamily;
+
+  set fontFamily(String? value) {
+    if (value == _fontFamily) {
+      return;
+    }
+    _fontFamily = value;
+    if (value != robotoFlex && _typeStyle != ExampleTypeStyle.regular) {
+      _typeStyle = ExampleTypeStyle.regular;
+    }
+    notifyListeners();
+  }
+
+  /// M3 Expressive type style. Applied only when [fontFamily] is Roboto Flex.
+  ExampleTypeStyle get typeStyle => _typeStyle;
+
+  set typeStyle(ExampleTypeStyle value) {
+    if (value == _typeStyle) {
+      return;
+    }
+    _typeStyle = value;
+    notifyListeners();
+  }
+
+  /// Variable-font axes for [M3EMaterialApp.fontVariations], or null.
+  List<FontVariation>? get fontVariations {
+    if (_fontFamily != robotoFlex) {
+      return null;
+    }
+    return _typeStyle.variations;
   }
 }

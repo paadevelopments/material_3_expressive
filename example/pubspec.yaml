@@ -23,3 +23,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: Roboto Flex
+      fonts:
+        - asset: assets/fonts/RobotoFlex.ttf
+    - family: Roboto Mono
+      fonts:
+        - asset: assets/fonts/RobotoMono.ttf

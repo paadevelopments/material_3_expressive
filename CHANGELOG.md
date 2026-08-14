@@ -32,8 +32,15 @@
 * List `colorBuilder` / `borderRadiusBuilder`, plus spring radius motion when
   a selected card's corners change. Card list / list item `variant` and
   `border`.
+* `M3ETypeScale.apply` for shared typography (family, fallback, package,
+  size factor/delta, color, decoration, `fontVariations`). `withColor`
+  delegates to `apply`. `M3ETypeVariations` holds Roboto Flex presets
+  (emphasized, condensed, extra condensed, wide, extra wide, round).
+* `M3EThemeData.copyWith(fontFamily:)` / `fontFamilyFallback` / `package` /
+  `fontVariations` and the same fields on `M3EMaterialApp`.
 * Example gallery: catalog-driven playgrounds, palette theme-config screen
-  (auto theming, dynamic color, five seed colors).
+  (auto theming, dynamic color, five seed colors, font family and M3
+  Expressive type styles).
 
 ### Fixed
 

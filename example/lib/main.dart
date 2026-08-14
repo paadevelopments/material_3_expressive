@@ -43,6 +43,8 @@ class _ExampleAppState extends State<ExampleApp> {
             debugShowCheckedModeBanner: false,
             drawUnderSystemBars: true,
             data: M3EThemeData.light(seedColor: _settings.seedColor),
+            fontFamily: _settings.fontFamily,
+            fontVariations: _settings.fontVariations,
             autoTheming: _settings.autoTheming,
             dynamicColoring: _settings.dynamicColoring,
             home: const _GalleryShell(),

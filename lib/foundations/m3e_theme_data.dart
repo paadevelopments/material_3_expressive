@@ -368,6 +368,10 @@ class M3EThemeData {
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
     M3ETypeScale? typeScale,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
+    List<FontVariation>? fontVariations,
     IconThemeData? iconTheme,
     M3ESpacing? spacing,
     double? visualDensity,
@@ -416,9 +420,21 @@ class M3EThemeData {
     M3EToolbarTheme? toolbarTheme,
     M3ETooltipTheme? tooltipTheme,
   }) {
+    M3ETypeScale nextScale = typeScale ?? this.typeScale;
+    if (fontFamily != null ||
+        fontFamilyFallback != null ||
+        package != null ||
+        fontVariations != null) {
+      nextScale = nextScale.apply(
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
+        package: package,
+        fontVariations: fontVariations,
+      );
+    }
     return M3EThemeData(
       colorScheme: colorScheme ?? this.colorScheme,
-      typeScale: typeScale ?? this.typeScale,
+      typeScale: nextScale,
       iconTheme: iconTheme ?? this.iconTheme,
       spacing: spacing ?? this.spacing,
       visualDensity: visualDensity ?? this.visualDensity,

@@ -197,10 +197,44 @@ Key properties on `M3EThemeData`:
 - `typeScale` — `M3ETypeScale` (display, headline, title, label, body)
 - `spacing`, `visualDensity`, per-component `*Theme` extensions
 
+Shared typography (font family, fallback, package, size factor/delta, color,
+decoration, and variable-font axes) is a one-knob on the type scale — not a
+full `TextStyle`:
+
+```dart
+final themed = M3EThemeData.light(seedColor: seed).copyWith(
+  typeScale: M3ETypeScale.baseline().apply(
+    fontFamily: 'Roboto Flex',
+    fontVariations: M3ETypeVariations.emphasized.variations,
+  ),
+);
+
+// Sugar: same result without building a type scale by hand
+final alsoThemed = M3EThemeData.light(seedColor: seed).copyWith(
+  fontFamily: 'Roboto Flex',
+  fontVariations: M3ETypeVariations.emphasized.variations,
+);
+```
+
 `M3EMaterialApp` additionally supports `autoTheming` (platform brightness) and
 `dynamicColoring` (OS seed color on supported platforms — Material You primary
 on Android 12+, accent color on desktop — with schemes generated via
-`ColorScheme.fromSeed`).
+`ColorScheme.fromSeed`). Pass `fontFamily` / `fontFamilyFallback` /
+`fontVariations` to apply the same type-scale knobs at the shell:
+
+```dart
+M3EMaterialApp(
+  data: M3EThemeData.light(seedColor: seed),
+  fontFamily: 'Roboto Flex',
+  fontVariations: M3ETypeVariations.wide.variations,
+  home: const HomePage(),
+);
+```
+
+`M3ETypeVariations` lists Roboto Flex axes for emphasized type, condensed /
+wide width, and roundness. Static and mono fonts ignore axes they do not
+define. The shell projects the type scale onto `ThemeData.textTheme` and
+`DefaultTextStyle`.
 
 ## Components
 
@@ -1525,8 +1559,9 @@ The [`example/`](example/) project is a full gallery app:
   `M3EMaterialApp` with `autoTheming`, `dynamicColoring`, and a five-tab
   catalog-driven gallery shell. The home app bar palette action opens
   [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart) to
-  toggle auto theming and dynamic color, and to pick one of five seed colors
-  when dynamic color is off.
+  toggle auto theming and dynamic color, pick one of five seed colors when
+  dynamic color is off, and choose a font family (platform default, Roboto
+  Flex, Roboto Mono) plus M3 Expressive type styles on Flex.
 - **Pages:** playgrounds under
   [`example/lib/pages/playground/`](example/lib/pages/playground/), grouped
   by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`).

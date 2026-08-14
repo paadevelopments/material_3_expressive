@@ -15,6 +15,7 @@ void main() {
     expect(find.text('Auto theming'), findsOneWidget);
     expect(find.text('Dynamic color'), findsOneWidget);
     expect(find.text('Seed color'), findsOneWidget);
+    expect(find.text('Type'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -50,6 +51,39 @@ void main() {
     expect(_scheme(tester).primary, isNot(before));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Picking Flex applies the family immediately', (
+    WidgetTester tester,
+  ) async {
+    await _openThemeConfig(tester);
+
+    await tester.ensureVisible(find.text('Flex'));
+    await tester.tap(find.text('Flex'));
+    await tester.pumpAndSettle();
+
+    expect(_typeScale(tester).bodyMedium.fontFamily, 'Roboto Flex');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Emphasized style applies Flex variations', (
+    WidgetTester tester,
+  ) async {
+    await _openThemeConfig(tester);
+
+    await tester.ensureVisible(find.text('Flex'));
+    await tester.tap(find.text('Flex'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Emphasized'));
+    await tester.tap(find.text('Emphasized'));
+    await tester.pumpAndSettle();
+
+    expect(
+      _typeScale(tester).bodyMedium.fontVariations,
+      M3ETypeVariations.emphasized.variations,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _openThemeConfig(WidgetTester tester) async {
@@ -67,4 +101,8 @@ Future<void> _toggle(WidgetTester tester, String semanticLabel) async {
 
 M3EColorScheme _scheme(WidgetTester tester) {
   return M3ETheme.of(tester.element(find.text('Seed color'))).colorScheme;
+}
+
+M3ETypeScale _typeScale(WidgetTester tester) {
+  return M3ETheme.of(tester.element(find.text('Type'))).typeScale;
 }
