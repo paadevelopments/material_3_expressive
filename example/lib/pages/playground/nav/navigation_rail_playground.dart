@@ -7,7 +7,6 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
 import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
@@ -25,7 +24,7 @@ class NavigationRailPlayground extends StatefulWidget {
 class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
   int _index = 0;
   M3ENavigationRailType _type = M3ENavigationRailType.expanded;
-  M3ENavigationRailModality _modality = M3ENavigationRailModality.standard;
+  final M3ENavigationRailModality _modality = M3ENavigationRailModality.standard;
   M3ENavigationRailLabelBehavior _labelBehavior =
       M3ENavigationRailLabelBehavior.alwaysShow;
   bool _showFab = true;
@@ -106,15 +105,6 @@ class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
               labelOf: (M3ENavigationRailType v) => v.name,
               onChanged: (M3ENavigationRailType v) {
                 setState(() => _type = v);
-              },
-            ),
-            PlayEnumSegmented<M3ENavigationRailModality>(
-              label: 'Modality',
-              value: _modality,
-              values: M3ENavigationRailModality.values,
-              labelOf: (M3ENavigationRailModality v) => v.name,
-              onChanged: (M3ENavigationRailModality v) {
-                setState(() => _modality = v);
               },
             ),
             PlayEnumMenu<M3ENavigationRailLabelBehavior>(
