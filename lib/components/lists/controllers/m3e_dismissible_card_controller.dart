@@ -4,6 +4,7 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
+import '../components/m3e_card_radius_motion.dart';
 import '../components/m3e_list_item_scope.dart';
 import '../enums/m3e_list_enums.dart';
 import '../models/m3e_dismissible_slot.dart';
@@ -29,8 +30,6 @@ final _kDetachPush = const MaterialSpringMotion.expressiveSpatialDefault()
 
 final _kRoundnessSnap = const MaterialSpringMotion.expressiveSpatialDefault()
     .copyWith(stiffness: 1000, damping: 0.4);
-
-const _kCardSettleCurve = Cubic(0.34, 1.56, 0.64, 1);
 
 const int _kVibrationThresholdMs = 60;
 const double _kMaxPreDetachRoundness = 0.6;

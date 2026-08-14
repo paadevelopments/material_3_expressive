@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/foundations.dart';
 import 'components/m3e_selection_app_bar.dart';
 import 'components/m3e_selection_scope.dart';
 import 'controllers/m3e_selection_controller.dart';
@@ -39,6 +40,7 @@ class M3ESelection extends StatefulWidget {
     this.controller,
     this.scaffold = true,
     this.backgroundColor,
+    this.selectedColor,
     this.resizeToAvoidBottomInset,
     super.key,
   });
@@ -62,6 +64,9 @@ class M3ESelection extends StatefulWidget {
 
   /// Scaffold background color when [scaffold] is true.
   final Color? backgroundColor;
+
+  /// Fill used for selected list items. Overrides the selection theme highlight.
+  final Color? selectedColor;
 
   /// Forwarded to [Scaffold.resizeToAvoidBottomInset].
   final bool? resizeToAvoidBottomInset;
@@ -128,7 +133,7 @@ class _M3ESelectionState extends State<M3ESelection> {
             Expanded(child: widget.body),
           ],
         );
-        return M3ESelectionScope(
+        Widget hosted = M3ESelectionScope(
           controller: _controller,
           itemCount: widget.itemCount,
           child: widget.scaffold
@@ -139,6 +144,19 @@ class _M3ESelectionState extends State<M3ESelection> {
                 )
               : content,
         );
+        final Color? selectedColor = widget.selectedColor;
+        if (selectedColor != null) {
+          final M3EThemeData theme = M3ETheme.of(context);
+          hosted = M3ETheme(
+            data: theme.copyWith(
+              selectionTheme: theme.selectionTheme.copyWith(
+                highlightColor: selectedColor,
+              ),
+            ),
+            child: hosted,
+          );
+        }
+        return hosted;
       },
     );
   }

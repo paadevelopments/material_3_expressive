@@ -188,9 +188,13 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
             tooltip: 'Clear selection',
             semanticLabel: 'Clear selection',
           ),
-          middle: Text(
-            '${controller.selectedCount}',
-            style: theme.typeScale.titleLarge.copyWith(color: foreground),
+          centerMiddle: false,
+          middle: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              '${controller.selectedCount}',
+              style: theme.typeScale.titleLarge.copyWith(color: foreground),
+            ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

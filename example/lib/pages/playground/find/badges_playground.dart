@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_enum_segmented.dart';
 import '../../../widgets/playground/controls/play_slider.dart';
 import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/play_preview_card.dart';
@@ -21,6 +22,7 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
   bool _showCount = true;
   double _count = 8;
   double _maxCount = 99;
+  M3EBadgeAlignment _alignment = M3EBadgeAlignment.topRight;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,12 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
                 showDot: _showDot,
                 count: _showCount && !_showDot ? count : null,
                 maxCount: _maxCount.round(),
-                child: const Icon(M3EIcons.notifications, size: 28),
+                alignment: _alignment,
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Icon(M3EIcons.notifications, size: 28),
+                ),
               ),
               M3EBadge(
                 showDot: true,
@@ -82,6 +89,19 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
               max: 99,
               divisions: 90,
               onChanged: (double v) => setState(() => _maxCount = v),
+            ),
+            PlayEnumSegmented<M3EBadgeAlignment>(
+              label: 'Alignment',
+              value: _alignment,
+              values: M3EBadgeAlignment.values,
+              labelOf: (M3EBadgeAlignment v) => switch (v) {
+                M3EBadgeAlignment.topLeft => 'Left',
+                M3EBadgeAlignment.topCenter => 'Center',
+                M3EBadgeAlignment.topRight => 'Right',
+              },
+              onChanged: (M3EBadgeAlignment v) {
+                setState(() => _alignment = v);
+              },
             ),
           ],
         ),

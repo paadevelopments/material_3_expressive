@@ -8,7 +8,7 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   /// M3ETextFieldTheme.
   const M3ETextFieldTheme({
     this.minHeight = 56,
-    this.contentHeight = 48,
+    this.contentHeight = 54,
     this.labelRestingOffset = 12,
     this.horizontalPadding = const EdgeInsets.symmetric(horizontal: 16),
     this.iconSize = 24,
@@ -61,6 +61,13 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
 
   /// supportingTextPadding.
   final EdgeInsets supportingTextPadding;
+
+  /// Top offset of the input once the label has floated.
+  ///
+  /// Sits just under the floating label so the value is not pinned to the
+  /// bottom outline.
+  double get floatingInputTop =>
+      labelFloatingTopPadding + 16 + labelBottomPadding;
 
   /// accentColor.
 

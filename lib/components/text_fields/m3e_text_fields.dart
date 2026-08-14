@@ -226,6 +226,12 @@ class _M3ETextFieldState extends State<M3ETextField> {
     final TextStyle labelStyle = _floating
         ? theme.typeScale.bodySmall.copyWith(color: accent)
         : theme.typeScale.bodyLarge.copyWith(color: scheme.onSurfaceVariant);
+    final double labelTop = _floating
+        ? textFieldTheme.labelFloatingTopPadding
+        : textFieldTheme.labelRestingTopPadding;
+    final double inputTop = _floating
+        ? textFieldTheme.floatingInputTop
+        : textFieldTheme.labelRestingTopPadding;
 
     return SizedBox(
       height: textFieldTheme.contentHeight,
@@ -235,7 +241,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
           AnimatedPositioned(
             duration: M3EMotion.short3,
             curve: M3EMotion.standard,
-            top: _floating ? 0 : textFieldTheme.labelRestingOffset,
+            top: labelTop,
             left: 0,
             right: 0,
             child: AnimatedDefaultTextStyle(
@@ -245,7 +251,14 @@ class _M3ETextFieldState extends State<M3ETextField> {
               child: Text(widget.label!),
             ),
           ),
-          Positioned(left: 0, right: 0, bottom: 0, child: editable),
+          AnimatedPositioned(
+            duration: M3EMotion.short3,
+            curve: M3EMotion.standard,
+            left: 0,
+            right: 0,
+            top: inputTop,
+            child: editable,
+          ),
         ],
       ),
     );

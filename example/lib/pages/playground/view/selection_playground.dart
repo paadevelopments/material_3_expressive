@@ -18,6 +18,7 @@ class SelectionPlayground extends StatefulWidget {
 class _SelectionPlaygroundState extends State<SelectionPlayground> {
   bool _dismissible = false;
   bool _showSelectAll = true;
+  bool _customHighlight = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,7 @@ class _SelectionPlaygroundState extends State<SelectionPlayground> {
                         return _SelectionDemoHost(
                           dismissible: _dismissible,
                           showSelectAll: _showSelectAll,
+                          customHighlight: _customHighlight,
                         );
                       },
                     ),
@@ -70,6 +72,11 @@ class _SelectionPlaygroundState extends State<SelectionPlayground> {
               value: _showSelectAll,
               onChanged: (bool v) => setState(() => _showSelectAll = v),
             ),
+            PlaySwitch(
+              label: 'Custom highlight',
+              value: _customHighlight,
+              onChanged: (bool v) => setState(() => _customHighlight = v),
+            ),
           ],
         ),
       ],
@@ -81,10 +88,12 @@ class _SelectionDemoHost extends StatefulWidget {
   const _SelectionDemoHost({
     required this.dismissible,
     required this.showSelectAll,
+    required this.customHighlight,
   });
 
   final bool dismissible;
   final bool showSelectAll;
+  final bool customHighlight;
 
   @override
   State<_SelectionDemoHost> createState() => _SelectionDemoHostState();
@@ -183,7 +192,9 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
     if (!_selection.isSelected(index)) {
       return null;
     }
-    return M3ETheme.of(context).colorScheme.secondaryContainer;
+    return M3ETheme.of(
+      context,
+    ).selectionTheme.selectedColor(M3ETheme.of(context).colorScheme);
   }
 
   BorderRadius? _radiusBuilder(int index, M3ECardPosition position) {
@@ -257,6 +268,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
         backgroundColor: theme.colorScheme.surface,
         controller: _selection,
         itemCount: _items.length,
+        selectedColor: widget.customHighlight ? const Color(0xFFD0BCFF) : null,
         appBar: M3ESelectionAppBar(
           showSelectAll: widget.showSelectAll,
           idle: M3EAppBar.search(
@@ -284,10 +296,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
             ),
           ],
         ),
-        body: Padding(
-          padding: EdgeInsets.only(top: 8),
-          child: _body(theme),
-        ),
+        body: Padding(padding: EdgeInsets.only(top: 8), child: _body(theme)),
       ),
     );
   }

@@ -19,6 +19,7 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
     this.leadingFlipDuration = const Duration(milliseconds: 220),
     this.selectAllHeight = 48,
     this.contextualToolbarHeight = 72,
+    this.highlightColor,
   });
 
   /// defaults.
@@ -54,8 +55,12 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
   /// app-bar content padding (including vertical) at build time.
   final double contextualToolbarHeight;
 
+  /// Optional selected-item fill. Defaults to the secondary container.
+  final Color? highlightColor;
+
   /// Selected card fill.
-  Color selectedColor(M3EColorScheme scheme) => scheme.secondaryContainer;
+  Color selectedColor(M3EColorScheme scheme) =>
+      highlightColor ?? scheme.secondaryContainer;
 
   /// Contextual selection app bar container.
   Color contextualBackground(M3EColorScheme scheme) => scheme.primaryContainer;
@@ -75,6 +80,7 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
     Duration? leadingFlipDuration,
     double? selectAllHeight,
     double? contextualToolbarHeight,
+    Color? highlightColor,
   }) {
     return M3ESelectionTheme(
       outerRadius: outerRadius ?? this.outerRadius,
@@ -87,6 +93,7 @@ class M3ESelectionTheme extends M3EThemeExtension<M3ESelectionTheme> {
       selectAllHeight: selectAllHeight ?? this.selectAllHeight,
       contextualToolbarHeight:
           contextualToolbarHeight ?? this.contextualToolbarHeight,
+      highlightColor: highlightColor ?? this.highlightColor,
     );
   }
 

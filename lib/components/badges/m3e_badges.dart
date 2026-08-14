@@ -1,15 +1,18 @@
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
+import 'enums/m3e_badge_alignment.dart';
 import 'styles/m3e_badge_theme.dart';
 
+export 'enums/m3e_badge_alignment.dart';
 export 'styles/m3e_badge_theme.dart';
 
 /// A Material 3 Expressive badge.
 ///
-/// Shows a small dot or a numeric count anchored to the top-end corner of
-/// [child]. Set [showDot] for a dot badge, or provide [count] for a numeric
-/// badge.
+/// Shows a small dot or a numeric count anchored to a top edge of [child].
+///
+/// [alignment] places the indicator at the top-left, top-center, or top-right.
+/// Set [showDot] for a dot badge, or provide [count] for a numeric badge.
 class M3EBadge extends StatelessWidget {
   /// M3EBadge.
   const M3EBadge({
@@ -18,6 +21,7 @@ class M3EBadge extends StatelessWidget {
     this.count,
     this.showDot = false,
     this.maxCount = 99,
+    this.alignment = M3EBadgeAlignment.topRight,
     this.offset,
     this.backgroundColor,
     this.foregroundColor,
@@ -36,6 +40,9 @@ class M3EBadge extends StatelessWidget {
 
   /// maxCount.
   final int maxCount;
+
+  /// Top-edge placement of the indicator. Defaults to [M3EBadgeAlignment.topRight].
+  final M3EBadgeAlignment alignment;
 
   /// offset.
   final Offset? offset;
@@ -78,9 +85,8 @@ class M3EBadge extends StatelessWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           child,
-          Positioned(
-            right: effectiveOffset.dx,
-            top: effectiveOffset.dy,
+          _positionedIndicator(
+            offset: effectiveOffset,
             child: Semantics(
               label:
                   semanticLabel ??
@@ -91,6 +97,27 @@ class M3EBadge extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _positionedIndicator({required Offset offset, required Widget child}) {
+    switch (alignment) {
+      case M3EBadgeAlignment.topLeft:
+        return Positioned(left: offset.dx, top: offset.dy, child: child);
+      case M3EBadgeAlignment.topCenter:
+        return Positioned(
+          left: 0,
+          right: 0,
+          top: offset.dy,
+          child: Center(
+            child: Transform.translate(
+              offset: Offset(offset.dx, 0),
+              child: child,
+            ),
+          ),
+        );
+      case M3EBadgeAlignment.topRight:
+        return Positioned(right: offset.dx, top: offset.dy, child: child);
+    }
   }
 
   Widget _dot(M3EBadgeTheme badgeTheme, Color bg) {

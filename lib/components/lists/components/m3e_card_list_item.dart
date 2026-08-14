@@ -7,6 +7,7 @@ import 'package:material_3_expressive/material_3_expressive.dart'
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
 import '../enums/m3e_list_enums.dart';
+import 'm3e_card_radius_motion.dart';
 import 'm3e_list_item_scope.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
@@ -144,19 +145,26 @@ class M3ECardListItem extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
-      child: M3ECard(
-        variant: variant,
-        border: border,
-        borderRadius: borderRadius,
-        color: resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
-        padding: padding ?? cardListTheme.itemPadding,
-        onPressed: wrappedOnTap,
-        onLongPress: wrappedOnLongPress,
-        mouseCursor: mouseCursor,
-        semanticLabel: semanticLabel,
-        haptic: haptic,
-        width: double.infinity,
-        child: M3EListItemScope(child: child),
+      child: M3ECardRadiusMotion(
+        radius: borderRadius,
+        builder: (BuildContext context, BorderRadius animatedRadius) {
+          return M3ECard(
+            variant: variant,
+            border: border,
+            borderRadius: animatedRadius,
+            color:
+                resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
+            padding: padding ?? cardListTheme.itemPadding,
+            onPressed: wrappedOnTap,
+            onLongPress: wrappedOnLongPress,
+            mouseCursor: mouseCursor,
+            semanticLabel: semanticLabel,
+            haptic: haptic,
+            width: double.infinity,
+            animationDuration: Duration.zero,
+            child: M3EListItemScope(child: child),
+          );
+        },
       ),
     );
   }
