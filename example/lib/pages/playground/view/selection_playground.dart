@@ -188,15 +188,6 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
     }
   }
 
-  Color? _colorBuilder(int index) {
-    if (!_selection.isSelected(index)) {
-      return null;
-    }
-    return M3ETheme.of(
-      context,
-    ).selectionTheme.selectedColor(M3ETheme.of(context).colorScheme);
-  }
-
   BorderRadius? _radiusBuilder(int index, M3ECardPosition position) {
     if (!_selection.isSelected(index)) {
       return null;
@@ -214,7 +205,6 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
       return M3EDismissibleList(
         itemCount: _items.length,
         listPadding: _listPadding,
-        colorBuilder: _colorBuilder,
         borderRadiusBuilder: _radiusBuilder,
         onTap: _onTap,
         onLongPress: _onLongPress,
@@ -245,7 +235,6 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
     return M3ECardList.builder(
       itemCount: _items.length,
       listPadding: _listPadding,
-      colorBuilder: _colorBuilder,
       borderRadiusBuilder: _radiusBuilder,
       onTap: _onTap,
       onLongPress: _onLongPress,
@@ -268,7 +257,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
         backgroundColor: theme.colorScheme.surface,
         controller: _selection,
         itemCount: _items.length,
-        selectedColor: widget.customHighlight ? const Color(0xFFD0BCFF) : null,
+        selectedColor: widget.customHighlight ? Colors.green : null,
         appBar: M3ESelectionAppBar(
           showSelectAll: widget.showSelectAll,
           idle: M3EAppBar.search(

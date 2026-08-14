@@ -3,6 +3,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import 'enums/m3e_text_field_variant.dart';
+import 'styles/m3e_text_field_theme.dart';
+
+export 'enums/m3e_text_field_variant.dart';
+export 'styles/m3e_text_field_theme.dart';
 
 /// A Material 3 Expressive text field.
 ///
@@ -158,7 +162,13 @@ class _M3ETextFieldState extends State<M3ETextField> {
         curve: M3EMotion.standard,
         padding: textFieldTheme.horizontalPadding,
         constraints: BoxConstraints(minHeight: textFieldTheme.minHeight),
-        decoration: textFieldTheme.decoration(
+        decoration: textFieldTheme.backgroundDecoration(
+          scheme,
+          outlined: outlined,
+        ),
+        // Painted over the container so the focused stroke does not inset
+        // layout and grow the field.
+        foregroundDecoration: textFieldTheme.borderDecoration(
           scheme,
           accent: accent,
           outlined: outlined,
@@ -214,52 +224,61 @@ class _M3ETextFieldState extends State<M3ETextField> {
     );
 
     if (widget.label == null) {
-      return SizedBox(
-        height: textFieldTheme.contentHeight,
-        child: Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: editable,
-        ),
-      );
+      return _contentBox(textFieldTheme, child: editable);
     }
 
     final TextStyle labelStyle = _floating
         ? theme.typeScale.bodySmall.copyWith(color: accent)
         : theme.typeScale.bodyLarge.copyWith(color: scheme.onSurfaceVariant);
-    final double labelTop = _floating
-        ? textFieldTheme.labelFloatingTopPadding
-        : textFieldTheme.labelRestingTopPadding;
-    final double inputTop = _floating
-        ? textFieldTheme.floatingInputTop
-        : textFieldTheme.labelRestingTopPadding;
+    // The slot is reserved in both states, so only the label moves on focus.
+    final double labelSlot = textFieldTheme.labelSlotHeight(theme.typeScale);
 
-    return SizedBox(
-      height: textFieldTheme.contentHeight,
+    return _contentBox(
+      textFieldTheme,
       child: Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
-          AnimatedPositioned(
-            duration: M3EMotion.short3,
-            curve: M3EMotion.standard,
-            top: labelTop,
-            left: 0,
-            right: 0,
-            child: AnimatedDefaultTextStyle(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              SizedBox(height: labelSlot),
+              editable,
+            ],
+          ),
+          // Rests centered on the field and floats up into the slot.
+          Positioned.fill(
+            child: AnimatedAlign(
               duration: M3EMotion.short3,
               curve: M3EMotion.standard,
-              style: labelStyle,
-              child: Text(widget.label!),
+              alignment: _floating
+                  ? AlignmentDirectional.topStart
+                  : AlignmentDirectional.centerStart,
+              child: AnimatedDefaultTextStyle(
+                duration: M3EMotion.short3,
+                curve: M3EMotion.standard,
+                style: labelStyle,
+                child: Text(widget.label!),
+              ),
             ),
           ),
-          AnimatedPositioned(
-            duration: M3EMotion.short3,
-            curve: M3EMotion.standard,
-            left: 0,
-            right: 0,
-            top: inputTop,
-            child: editable,
-          ),
         ],
+      ),
+    );
+  }
+
+  /// Sizes to the label + input, growing with multi-line values.
+  Widget _contentBox(
+    M3ETextFieldTheme textFieldTheme, {
+    required Widget child,
+  }) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: textFieldTheme.contentHeight),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: textFieldTheme.contentVerticalPadding,
+        ),
+        child: child,
       ),
     );
   }

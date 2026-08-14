@@ -41,11 +41,7 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
                 count: _showCount && !_showDot ? count : null,
                 maxCount: _maxCount.round(),
                 alignment: _alignment,
-                child: const SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Icon(M3EIcons.notifications, size: 28),
-                ),
+                child: const Icon(M3EIcons.notifications, size: 28),
               ),
               M3EBadge(
                 showDot: true,

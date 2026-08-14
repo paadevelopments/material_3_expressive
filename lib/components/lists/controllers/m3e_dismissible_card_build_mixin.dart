@@ -260,6 +260,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
                 borderRadius: animatedRadius,
                 color:
                     colorBuilder?.call(slotPos) ??
+                    m3eSelectionFill(context, slotPos) ??
                     s.color ??
                     M3ETheme.of(context).colorScheme.surfaceContainerHighest,
                 border: s.border,

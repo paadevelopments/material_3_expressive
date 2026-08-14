@@ -9,6 +9,7 @@ import '../components/m3e_list_item_scope.dart';
 import '../enums/m3e_list_enums.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../styles/m3e_dismissible_list_style.dart';
+import '../utils/m3e_list_selection_fill.dart';
 
 part 'm3e_dismissible_card_drag_mixin.dart';
 part 'm3e_dismissible_card_build_mixin.dart';

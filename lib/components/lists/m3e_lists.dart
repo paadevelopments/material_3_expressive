@@ -12,6 +12,7 @@ import 'enums/m3e_list_enums.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_expandable_style.dart';
 import 'styles/m3e_list_theme.dart';
+import 'utils/m3e_list_selection_fill.dart';
 
 export 'components/m3e_card_list_item.dart'
     show calculateCardPosition, calculateCardRadius;
@@ -407,7 +408,8 @@ class M3ECardList extends StatelessWidget {
       innerRadius: innerRadius,
       gap: gap,
       color: color,
-      resolvedColor: colorBuilder?.call(index),
+      resolvedColor:
+          colorBuilder?.call(index) ?? m3eSelectionFill(context, index),
       resolvedBorderRadius: borderRadiusBuilder?.call(index, position),
       padding: padding,
       onTap: onTap,
