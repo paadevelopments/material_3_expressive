@@ -96,6 +96,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           color: Colors.transparent,
           clipBehavior: Clip.antiAlias,
           borderRadius: animatedRadius,
+          animationDuration: widget.decorationAnimationDuration,
           child: Focus(
             focusNode: effectiveFocusNode,
             autofocus: widget.autofocus,
@@ -330,6 +331,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
           color: Colors.transparent,
           clipBehavior: Clip.antiAlias,
           borderRadius: animatedRadius,
+          animationDuration: widget.decorationAnimationDuration,
           child: Focus(
             focusNode: _trailingFocusNode,
             canRequestFocus: enabled,

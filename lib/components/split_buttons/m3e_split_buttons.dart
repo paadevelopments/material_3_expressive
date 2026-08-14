@@ -351,6 +351,10 @@ class M3ESplitButton<T> extends StatefulWidget {
   M3EHapticFeedback get decorationHaptic =>
       decoration?.haptic ?? M3EHapticFeedback.none;
 
+  /// Duration. Zero keeps the segment clip on the spring, not Material's tween.
+  Duration get decorationAnimationDuration =>
+      decoration?.animationDuration ?? Duration.zero;
+
   /// double.
   double? get decorationBorderRadius => decoration?.borderRadius;
 
