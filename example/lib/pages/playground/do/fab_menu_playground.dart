@@ -21,8 +21,41 @@ class _FabMenuPlaygroundState extends State<FabMenuPlayground> {
   M3EFabSize _size = M3EFabSize.medium;
   M3EFabColor _color = M3EFabColor.primary;
 
+  static const LinearGradient _fill = LinearGradient(
+    colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+  );
+
+  static const LinearGradient _outline = LinearGradient(
+    colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
+  );
+
+  static const LinearGradient _foreground = LinearGradient(
+    colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
+  );
+
+  List<M3EFabMenuItem> _items() {
+    return <M3EFabMenuItem>[
+      M3EFabMenuItem(
+        icon: const Icon(M3EIcons.image),
+        label: 'Image',
+        onPressed: () {},
+      ),
+      M3EFabMenuItem(
+        icon: const Icon(M3EIcons.videocam),
+        label: 'Video',
+        onPressed: () {},
+      ),
+      M3EFabMenuItem(
+        icon: const Icon(M3EIcons.mic),
+        label: 'Audio',
+        onPressed: () {},
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
@@ -35,23 +68,36 @@ class _FabMenuPlaygroundState extends State<FabMenuPlayground> {
                 position: _position,
                 size: _size,
                 color: _color,
-                items: <M3EFabMenuItem>[
-                  M3EFabMenuItem(
-                    icon: const Icon(M3EIcons.image),
-                    label: 'Image',
-                    onPressed: () {},
+                items: _items(),
+              ),
+            ),
+          ),
+        ),
+        PlayPreviewCard(
+          label: 'Gradient fill',
+          child: SizedBox(
+            height: 280,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: M3ETheme(
+                data: theme.copyWith(
+                  fabMenuTheme: theme.fabMenuTheme.copyWith(
+                    itemBackgroundGradient: _fill,
+                    itemForegroundGradient: _foreground,
+                    itemOutlineGradient: _outline,
                   ),
-                  M3EFabMenuItem(
-                    icon: const Icon(M3EIcons.videocam),
-                    label: 'Video',
-                    onPressed: () {},
+                ),
+                child: M3EFabMenu(
+                  position: _position,
+                  size: _size,
+                  color: _color,
+                  decoration: M3EFabDecoration(
+                    backgroundGradient: WidgetStateProperty.all(_fill),
+                    foregroundGradient: WidgetStateProperty.all(_foreground),
+                    outlineGradient: WidgetStateProperty.all(_outline),
                   ),
-                  M3EFabMenuItem(
-                    icon: const Icon(M3EIcons.mic),
-                    label: 'Audio',
-                    onPressed: () {},
-                  ),
-                ],
+                  items: _items(),
+                ),
               ),
             ),
           ),

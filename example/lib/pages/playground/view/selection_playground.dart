@@ -284,7 +284,10 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
             ),
           ],
         ),
-        body: _body(theme),
+        body: Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: _body(theme),
+        ),
       ),
     );
   }

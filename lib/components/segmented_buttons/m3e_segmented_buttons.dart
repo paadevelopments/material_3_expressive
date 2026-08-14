@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../buttons/utils/m3e_button_gradient_layer.dart';
+import 'components/m3e_segment_divider.dart';
 import 'models/m3e_segment.dart';
 import 'styles/m3e_segmented_button_theme.dart';
 
@@ -13,7 +14,7 @@ export 'styles/m3e_segmented_button_theme.dart';
 /// Presents 2-5 connected [M3ESegment]s for selecting options, switching views
 /// or sorting. Supports single or multiple selection and shows a check icon on
 /// selected segments.
-class M3ESegmentedButton<T> extends StatelessWidget {
+class M3ESegmentedButton<T> extends StatefulWidget {
   /// M3ESegmentedButton.
   const M3ESegmentedButton({
     required this.segments,
@@ -41,6 +42,30 @@ class M3ESegmentedButton<T> extends StatelessWidget {
   final bool showSelectedIcon;
 
   @override
+  State<M3ESegmentedButton<T>> createState() => _M3ESegmentedButtonState<T>();
+
+  void _handleTap(T value) {
+    final next = Set<T>.of(selected);
+    if (multiSelect) {
+      if (next.contains(value)) {
+        next.remove(value);
+      } else {
+        next.add(value);
+      }
+    } else {
+      next
+        ..clear()
+        ..add(value);
+    }
+    onSelectionChanged(next);
+  }
+}
+
+class _M3ESegmentedButtonState<T> extends State<M3ESegmentedButton<T>> {
+  /// Segment row. Dividers sample their gradient across this box.
+  final GlobalKey _rowKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(builder: _buildButton);
   }
@@ -66,6 +91,7 @@ class M3ESegmentedButton<T> extends StatelessWidget {
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Row(
+          key: _rowKey,
           mainAxisSize: MainAxisSize.min,
           children: _buildSegments(context, segmentedButtonTheme),
         ),
@@ -89,12 +115,14 @@ class M3ESegmentedButton<T> extends StatelessWidget {
   ) {
     final theme = M3ETheme.of(context);
     final children = <Widget>[];
-    for (var i = 0; i < segments.length; i++) {
+    for (var i = 0; i < widget.segments.length; i++) {
       if (i > 0) {
         children.add(
-          Container(
+          M3ESegmentDivider(
+            hostKey: _rowKey,
             width: segmentedButtonTheme.borderWidth,
-            color: segmentedButtonTheme.outline(theme.colorScheme),
+            color: segmentedButtonTheme.divider(theme.colorScheme),
+            gradient: segmentedButtonTheme.dividerGradient,
           ),
         );
       }
@@ -103,28 +131,12 @@ class M3ESegmentedButton<T> extends StatelessWidget {
           child: _M3ESegmentTile<T>(
             segmentedButtonTheme: segmentedButtonTheme,
             index: i,
-            parent: this,
+            parent: widget,
           ),
         ),
       );
     }
     return children;
-  }
-
-  void _handleTap(T value) {
-    final next = Set<T>.of(selected);
-    if (multiSelect) {
-      if (next.contains(value)) {
-        next.remove(value);
-      } else {
-        next.add(value);
-      }
-    } else {
-      next
-        ..clear()
-        ..add(value);
-    }
-    onSelectionChanged(next);
   }
 }
 

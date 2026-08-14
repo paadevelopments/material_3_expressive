@@ -68,6 +68,9 @@ class _SegmentedButtonPlaygroundState extends State<SegmentedButtonPlayground> {
                 outlineGradient: const LinearGradient(
                   colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
                 ),
+                dividerGradient: const LinearGradient(
+                  colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
+                ),
                 selectedForegroundGradient: const LinearGradient(
                   colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
                 ),

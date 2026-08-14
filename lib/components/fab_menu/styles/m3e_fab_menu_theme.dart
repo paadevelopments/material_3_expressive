@@ -17,6 +17,11 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
     this.itemElevation = M3EElevation.level3,
     this.closedFabContainer = 80,
     this.openFabContainer = 56,
+    this.itemBorderWidth = 1,
+    this.itemOutlineColor,
+    this.itemOutlineGradient,
+    this.itemBackgroundGradient,
+    this.itemForegroundGradient,
   });
 
   /// defaults.
@@ -55,6 +60,21 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
   /// FAB outer size when the menu is open (matches toolbar FAB baseline).
   final double openFabContainer;
 
+  /// Item outline thickness. Only drawn with an outline color or gradient.
+  final double itemBorderWidth;
+
+  /// Solid outline for item pills. Items have no outline by default.
+  final Color? itemOutlineColor;
+
+  /// Gradient outline for item pills. Wins over [itemOutlineColor].
+  final Gradient? itemOutlineGradient;
+
+  /// Gradient fill for item pills, replacing [itemContainerColor].
+  final Gradient? itemBackgroundGradient;
+
+  /// Gradient tint for item icons and labels.
+  final Gradient? itemForegroundGradient;
+
   /// scrimColor.
 
   Color scrimColor(M3EColorScheme scheme) =>
@@ -85,6 +105,11 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
     double? itemElevation,
     double? closedFabContainer,
     double? openFabContainer,
+    double? itemBorderWidth,
+    Color? itemOutlineColor,
+    Gradient? itemOutlineGradient,
+    Gradient? itemBackgroundGradient,
+    Gradient? itemForegroundGradient,
   }) {
     return M3EFabMenuTheme(
       menuOffset: menuOffset ?? this.menuOffset,
@@ -98,6 +123,13 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
       itemElevation: itemElevation ?? this.itemElevation,
       closedFabContainer: closedFabContainer ?? this.closedFabContainer,
       openFabContainer: openFabContainer ?? this.openFabContainer,
+      itemBorderWidth: itemBorderWidth ?? this.itemBorderWidth,
+      itemOutlineColor: itemOutlineColor ?? this.itemOutlineColor,
+      itemOutlineGradient: itemOutlineGradient ?? this.itemOutlineGradient,
+      itemBackgroundGradient:
+          itemBackgroundGradient ?? this.itemBackgroundGradient,
+      itemForegroundGradient:
+          itemForegroundGradient ?? this.itemForegroundGradient,
     );
   }
 
@@ -129,6 +161,17 @@ class M3EFabMenuTheme extends M3EThemeExtension<M3EFabMenuTheme> {
         other.openFabContainer,
         t,
       )!,
+      itemBorderWidth: _lerpDouble(itemBorderWidth, other.itemBorderWidth, t)!,
+      itemOutlineColor: Color.lerp(itemOutlineColor, other.itemOutlineColor, t),
+      itemOutlineGradient: t < 0.5
+          ? itemOutlineGradient
+          : other.itemOutlineGradient,
+      itemBackgroundGradient: t < 0.5
+          ? itemBackgroundGradient
+          : other.itemBackgroundGradient,
+      itemForegroundGradient: t < 0.5
+          ? itemForegroundGradient
+          : other.itemForegroundGradient,
     );
   }
 

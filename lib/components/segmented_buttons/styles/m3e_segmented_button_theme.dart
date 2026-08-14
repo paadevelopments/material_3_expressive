@@ -15,6 +15,8 @@ class M3ESegmentedButtonTheme
     this.borderWidth = 1,
     this.outlineColor,
     this.outlineGradient,
+    this.dividerColor,
+    this.dividerGradient,
     this.selectedBackgroundGradient,
     this.unselectedBackgroundGradient,
     this.selectedForegroundColor,
@@ -49,6 +51,12 @@ class M3ESegmentedButtonTheme
   /// Optional gradient for the group outline ring.
   final Gradient? outlineGradient;
 
+  /// Divider color between segments. Defaults to the group outline color.
+  final Color? dividerColor;
+
+  /// Optional gradient for the dividers, sampled across the whole group.
+  final Gradient? dividerGradient;
+
   /// Optional gradient for selected segments.
   final Gradient? selectedBackgroundGradient;
 
@@ -74,6 +82,9 @@ class M3ESegmentedButtonTheme
   /// Solid outline color for the group ring.
   Color outline(M3EColorScheme scheme) => outlineColor ?? scheme.outline;
 
+  /// Solid divider color between segments.
+  Color divider(M3EColorScheme scheme) => dividerColor ?? outline(scheme);
+
   /// foregroundColor.
 
   Color foregroundColor(M3EColorScheme scheme, {required bool selected}) {
@@ -98,6 +109,8 @@ class M3ESegmentedButtonTheme
     double? borderWidth,
     Color? outlineColor,
     Gradient? outlineGradient,
+    Color? dividerColor,
+    Gradient? dividerGradient,
     Gradient? selectedBackgroundGradient,
     Gradient? unselectedBackgroundGradient,
     Color? selectedForegroundColor,
@@ -114,6 +127,8 @@ class M3ESegmentedButtonTheme
       borderWidth: borderWidth ?? this.borderWidth,
       outlineColor: outlineColor ?? this.outlineColor,
       outlineGradient: outlineGradient ?? this.outlineGradient,
+      dividerColor: dividerColor ?? this.dividerColor,
+      dividerGradient: dividerGradient ?? this.dividerGradient,
       selectedBackgroundGradient:
           selectedBackgroundGradient ?? this.selectedBackgroundGradient,
       unselectedBackgroundGradient:
@@ -146,6 +161,8 @@ class M3ESegmentedButtonTheme
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
       outlineColor: Color.lerp(outlineColor, other.outlineColor, t),
       outlineGradient: t < 0.5 ? outlineGradient : other.outlineGradient,
+      dividerColor: Color.lerp(dividerColor, other.dividerColor, t),
+      dividerGradient: t < 0.5 ? dividerGradient : other.dividerGradient,
       selectedBackgroundGradient: t < 0.5
           ? selectedBackgroundGradient
           : other.selectedBackgroundGradient,

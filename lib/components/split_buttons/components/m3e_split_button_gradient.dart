@@ -1,25 +1,5 @@
 part of '../m3e_split_buttons.dart';
 
-/// Maps [local] into the split row so both segments sample one gradient.
-Rect _splitHostShaderRect({
-  required GlobalKey hostKey,
-  required BuildContext context,
-  required Rect local,
-}) {
-  final host = hostKey.currentContext?.findRenderObject() as RenderBox?;
-  final box = context.findRenderObject() as RenderBox?;
-  if (host == null || box == null || !host.hasSize || !box.hasSize) {
-    return local;
-  }
-  final Offset origin = box.localToGlobal(Offset.zero, ancestor: host);
-  return Rect.fromLTWH(
-    -origin.dx,
-    -origin.dy,
-    host.size.width,
-    host.size.height,
-  );
-}
-
 /// Fill and/or outline using the split row as the gradient's coordinate space.
 class _M3ESplitSharedGradientLayer extends StatelessWidget {
   const _M3ESplitSharedGradientLayer({
@@ -91,7 +71,7 @@ class _M3ESplitSharedGradientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Rect local = Offset.zero & size;
-    final Rect shaderRect = _splitHostShaderRect(
+    final Rect shaderRect = m3eGradientSpanRect(
       hostKey: hostKey,
       context: context,
       local: local,
@@ -155,7 +135,7 @@ class _M3ESplitSharedForegroundLayer extends StatelessWidget {
       blendMode: BlendMode.srcIn,
       shaderCallback: (Rect bounds) {
         return gradient.createShader(
-          _splitHostShaderRect(
+          m3eGradientSpanRect(
             hostKey: hostKey,
             context: context,
             local: bounds,
