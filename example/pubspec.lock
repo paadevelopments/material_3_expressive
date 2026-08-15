@@ -160,7 +160,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.6"
+    version: "1.0.7"
   material_color_utilities:
     dependency: transitive
     description:
