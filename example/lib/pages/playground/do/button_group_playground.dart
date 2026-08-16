@@ -39,6 +39,32 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
+          label: 'Compact xs (scroll overflow)',
+          child: SizedBox(
+            height: 32,
+            child: M3EButtonGroup(
+              type: _type,
+              shape: _shape,
+              size: M3EButtonSize.xs,
+              style: _style,
+              density: M3EButtonGroupDensity.compact,
+              spacing: 8,
+              neighborSquish: _neighborSquish,
+              selectedIndex: _selectedIndex,
+              onSelectedIndexChanged: (int? index) {
+                if (index != null) {
+                  setState(() => _selectedIndex = index);
+                }
+              },
+              actions: const <M3EButtonGroupAction>[
+                M3EButtonGroupAction(label: Text('Every day')),
+                M3EButtonGroupAction(label: Text('Days per week')),
+                M3EButtonGroupAction(label: Text('Selected days')),
+              ],
+            ),
+          ),
+        ),
+        PlayPreviewCard(
           label: 'Button group',
           child: M3EButtonGroup(
             type: _type,

@@ -1,5 +1,11 @@
 ## 1.0.7
 
+### Fixed
+
+* `M3EButtonGroup` no longer jumps when `selectedIndex` changes while using
+  the default scroll overflow. Fitting groups keep an unclipped, non-scrolling
+  viewport; overflowing groups keep their scroll offset across rebuilds.
+
 ### Changed
 
 * Package version bump for a new pub.dev publish.

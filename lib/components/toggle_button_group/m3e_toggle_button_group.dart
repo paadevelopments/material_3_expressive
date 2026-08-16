@@ -186,6 +186,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   late int _layoutSignature;
   late int _focusNodeSignature;
   late final M3EButtonGroupOverflowController _overflowController;
+  late final ScrollController _scrollOverflowController;
   late final _ToggleGroupPressCoordinator _pressCoordinator;
   late final _ToggleGroupMeasurementOrchestrator _measurement;
   int? _lastOverflowSelectionIndex;
@@ -246,6 +247,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       _handleOverflowChange,
     );
     _overflowController.dispose();
+    _scrollOverflowController.dispose();
     _pressCoordinator.dispose();
     _focusedIndexNotifier.dispose();
     _disposeControllers();

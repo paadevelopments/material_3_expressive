@@ -31,6 +31,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
     _measurement = _ToggleGroupMeasurementOrchestrator();
     _pressCoordinator = _ToggleGroupPressCoordinator(isMounted: () => mounted);
     _overflowController = M3EButtonGroupOverflowController();
+    _scrollOverflowController = ScrollController();
     _overflowController.stableAllOverflowMeasured.addListener(
       _handleOverflowChange,
     );
