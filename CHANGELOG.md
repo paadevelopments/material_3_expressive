@@ -1,5 +1,11 @@
 ## 1.0.7
 
+### Added
+
+* Shape catalog helpers: `M3EShapeKind`, `M3EShapeClipper`, and
+  `M3EShapeContainer` (named constructors for all 35 expressive polygons).
+  Clip paths come from `M3EMaterialNewShapes` morph polygons.
+
 ### Fixed
 
 * `M3EButtonGroup` no longer jumps when `selectedIndex` changes while using
