@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../catalog/m3e_demo_catalog.dart';
 import '../catalog/m3e_demo_entry.dart';

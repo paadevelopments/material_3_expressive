@@ -1,8 +1,9 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Brightness, Color, ColorScheme;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart'
+    show Brightness, Color, ColorScheme;
 
 /// Builds a subtree from device light and dark dynamic [ColorScheme]s.
 typedef M3EDynamicColorBuilder =

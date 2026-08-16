@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show Theme;
 
 import 'm3e_resolved_theme.dart';
 import 'm3e_theme_controller.dart';

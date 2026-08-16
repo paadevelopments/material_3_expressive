@@ -75,7 +75,7 @@ flutter run
 
 | Tool    | Version    |
 | ------- | ---------- |
-| Flutter | `>= 3.38.0` |
+| Flutter | `>= 3.44.0` |
 | Dart    | `^3.12.0`  |
 
 ## Installation
@@ -105,7 +105,8 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 
 | Package | Role in this library |
 | ------- | -------------------- |
-| [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures, and Material primitives used throughout |
+| [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures |
+| [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`) |
 | [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |

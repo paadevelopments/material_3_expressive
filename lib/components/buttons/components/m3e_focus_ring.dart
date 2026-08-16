@@ -4,9 +4,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
-
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../res/m3e_button_constants.dart';
 

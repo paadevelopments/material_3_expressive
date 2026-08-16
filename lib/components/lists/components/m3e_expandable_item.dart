@@ -1,10 +1,9 @@
 // Ported from https://github.com/Mudit200408/m3e_expandable
 // Adapted for material_3_expressive: M3ECard, M3ETheme, M3ESpring.
-
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart' show InkWell, Tooltip;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show InkWell, Tooltip;
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';

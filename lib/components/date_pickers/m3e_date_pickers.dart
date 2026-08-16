@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
 import '../dialogs/styles/m3e_dialog_theme.dart';

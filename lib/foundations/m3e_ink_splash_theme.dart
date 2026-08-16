@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show Colors;
 
 import 'm3e_state_layer.dart';
 import 'm3e_theme.dart';

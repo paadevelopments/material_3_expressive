@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'm3e_button_gradient_fill.dart';
 import 'm3e_button_gradient_outline.dart';

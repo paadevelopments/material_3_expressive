@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'components/m3e_carousel_view.dart';
 import 'enums/m3e_carousel_type.dart';

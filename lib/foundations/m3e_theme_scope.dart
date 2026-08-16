@@ -1,6 +1,5 @@
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/material.dart' show Brightness, ColorScheme;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show Brightness, ColorScheme;
 
 import 'm3e_color_scheme.dart';
 import 'm3e_dynamic_color_host.dart';

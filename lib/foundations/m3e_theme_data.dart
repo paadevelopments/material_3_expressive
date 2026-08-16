@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart'
-    show Brightness, Color, TargetPlatform, TextTheme, ThemeData, VisualDensity;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart'
+    show Brightness, Color, TargetPlatform, TextTheme, ThemeData, VisualDensity;
 
 import '../components/app_bars/styles/m3e_app_bar_theme.dart';
 import '../components/badges/styles/m3e_badge_theme.dart';

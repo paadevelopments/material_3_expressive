@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'
-    show Color, Colors, Material, WidgetStatePropertyAll;
 import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -14,6 +12,8 @@ import 'package:material_3_expressive/components/search/m3e_search_anchor.dart'
     show M3ESearchAnchor;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3ESearchAnchor;
+import 'package:material_ui/material_ui.dart'
+    show Color, Colors, Material, WidgetStatePropertyAll;
 
 import '../../../foundations/foundations.dart';
 import '../../divider/m3e_divider.dart';

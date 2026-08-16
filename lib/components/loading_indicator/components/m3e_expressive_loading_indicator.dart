@@ -11,14 +11,13 @@
 // Source: androidx/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt
 // Copyright (c) 2024 The Android Open Source Project
 // Licensed under the Apache License, Version 2.0
-
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A Material Design loading indicator.
 ///

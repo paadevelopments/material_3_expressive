@@ -2,8 +2,7 @@
 // HorizontalFloatingToolbar / VerticalFloatingToolbar / FlexibleBottomAppBar
 //
 // FAB morph / scroll exit also reference m3e_core floating_toolbar (not vendored).
-
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';

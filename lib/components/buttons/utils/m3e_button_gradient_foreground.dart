@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Tints [child] with [gradient] via [BlendMode.srcIn], clipped to [clipRadius].
 Widget m3eGradientForegroundLayer({

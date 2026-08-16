@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// X-axis scale from a [Transform.scale] matrix (Z is always 1.0).
 double _xyScale(Transform transform) => transform.transform.storage[0];

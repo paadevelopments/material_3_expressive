@@ -4,13 +4,12 @@
 //
 // Vendored from `package:m3_carousel/base_layout.dart` (Flutter CarouselView).
 // Split into part files for klin_dart file_length; behaviour unchanged.
-
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../models/m3e_carousel_change_details.dart';

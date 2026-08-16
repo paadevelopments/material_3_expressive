@@ -1,6 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/material.dart' show ColorScheme;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show ColorScheme;
 
 /// The full set of Material 3 color roles used across expressive components.
 ///
@@ -426,6 +426,19 @@ class M3EColorScheme {
     );
     _colorSchemeCache[this] = scheme;
     return scheme;
+  }
+}
+
+/// Same as `dynamic_color`'s ColorScheme.harmonized for `material_ui`.
+extension M3EFrameworkColorSchemeHarmonization on ColorScheme {
+  /// Shifts error roles toward [ColorScheme.primary].
+  ColorScheme harmonized() {
+    return copyWith(
+      error: error.harmonizeWith(primary),
+      onError: onError.harmonizeWith(primary),
+      errorContainer: errorContainer.harmonizeWith(primary),
+      onErrorContainer: onErrorContainer.harmonizeWith(primary),
+    );
   }
 }
 

@@ -3,6 +3,9 @@
 ### Changed
 
 * Package version bump for a new pub.dev publish.
+* Depend on [`material_ui`](https://pub.dev/packages/material_ui) `^1.0.0` and
+  import `package:material_ui/material_ui.dart` instead of
+  `package:flutter/material.dart`. Flutter SDK constraint is `>=3.44.0`.
 
 ## 1.0.6
 

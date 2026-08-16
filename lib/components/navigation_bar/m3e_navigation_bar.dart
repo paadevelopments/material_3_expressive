@@ -1,9 +1,8 @@
 // Vendored from the `navigation_bar_m3e` package
 // (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
 // Adapted for material_3_expressive: liquid selection indicator (spatial springs).
-
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../navigation_rail/components/m3e_nav_selection_indicator.dart';

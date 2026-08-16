@@ -2,8 +2,7 @@
 // (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
 // The logic is kept identical to the reference `NavigationRailM3ESection`; only
 // the public class name carries the `M3E` prefix.
-
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'm3e_navigation_rail_destination.dart';
 

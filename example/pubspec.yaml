@@ -6,11 +6,12 @@ environment:
   sdk: ^3.12.0
 
 dependencies:
+  cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
   material_3_expressive:
     path: ../
-  cupertino_icons: ^1.0.8
+  material_ui: ^1.0.0
 
 dev_dependencies:
   integration_test:
