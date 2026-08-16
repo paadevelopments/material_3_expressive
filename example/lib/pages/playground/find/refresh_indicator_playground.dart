@@ -85,6 +85,29 @@ class _RefreshIndicatorPlaygroundState
     };
   }
 
+  List<PlaySnippet> get _snippets {
+    final String ctor = switch (_kind) {
+      _RefreshKind.expressive => 'M3ERefreshIndicator',
+      _RefreshKind.contained => 'M3ERefreshIndicator.contained',
+      _RefreshKind.material => 'M3ERefreshIndicator.material',
+      _RefreshKind.adaptive => 'M3ERefreshIndicator.adaptive',
+      _RefreshKind.noSpinner => 'M3ERefreshIndicator.noSpinner',
+    };
+    final String sample =
+        '''
+$ctor(
+  onRefresh: () async {},
+  triggerMode: M3ERefreshTriggerMode.${_trigger.name},
+  child: ListView(),
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Pull to refresh',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -107,6 +130,7 @@ class _RefreshIndicatorPlaygroundState
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

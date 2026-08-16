@@ -5,6 +5,7 @@ library;
 export 'components/m3e_component_theme.dart';
 export 'm3e_color_scheme.dart';
 export 'm3e_color_utils.dart';
+export 'm3e_dimensions.dart';
 export 'm3e_elevation.dart';
 export 'm3e_focus.dart';
 export 'm3e_haptics.dart';

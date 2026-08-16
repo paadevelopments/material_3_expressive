@@ -24,6 +24,37 @@ class _FabsPlaygroundState extends State<FabsPlayground> {
   bool _extended = true;
   String _label = 'Compose';
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'FAB',
+        code:
+            '''
+$kPlaySnippetImport
+M3EFab(
+  onPressed: () {},
+  icon: const Icon(M3EIcons.add),
+  size: M3EFabSize.${_size.name},
+  color: M3EFabColor.${_color.name},
+  tooltip: 'Add',
+);''',
+      ),
+      PlaySnippet(
+        label: 'Extended FAB',
+        code:
+            '''
+$kPlaySnippetImport
+M3EExtendedFab(
+  onPressed: () {},
+  icon: const Icon(M3EIcons.edit),
+  label: ${playDartString(_label)},
+  extended: $_extended,
+  color: M3EFabColor.${_color.name},
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -90,6 +121,7 @@ class _FabsPlaygroundState extends State<FabsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'FAB',

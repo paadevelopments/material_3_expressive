@@ -36,6 +36,30 @@ class _CarouselPlaygroundState extends State<CarouselPlayground> {
         (image: 'assets/i6.png', title: 'Others'),
       ];
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Carousel',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ECarousel(
+  axis: Axis.${_axis.name},
+  type: M3ECarouselType.${_type.name},
+  isExtended: $_isExtended,
+  freeScroll: $_freeScroll,
+  heroAlignment: M3ECarouselHeroAlignment.${_alignment.name},
+  children: <Widget>[
+    Image.asset('assets/i1.png', fit: BoxFit.cover),
+    Image.asset('assets/i2.png', fit: BoxFit.cover),
+    Image.asset('assets/i3.png', fit: BoxFit.cover),
+  ],
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool vertical = _axis == Axis.vertical;
@@ -68,6 +92,7 @@ class _CarouselPlaygroundState extends State<CarouselPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Layout',

@@ -52,6 +52,54 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
     ];
   }
 
+  List<PlaySnippet> get _snippets {
+    final String destinations = _badges
+        ? '''
+  destinations: const <M3ENavigationBarDestination>[
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(
+      icon: Icon(M3EIcons.search),
+      label: 'Search',
+      badgeDot: true,
+    ),
+    M3ENavigationBarDestination(
+      icon: Icon(M3EIcons.calendar_today),
+      label: 'Agenda',
+      badgeCount: 3,
+    ),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ],'''
+        : '''
+  destinations: const <M3ENavigationBarDestination>[
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Search'),
+    M3ENavigationBarDestination(
+      icon: Icon(M3EIcons.calendar_today),
+      label: 'Agenda',
+    ),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ],''';
+    final String sample =
+        '''
+M3ENavigationBar(
+$destinations
+  selectedIndex: $_index,
+  onDestinationSelected: (int i) {},
+  labelBehavior: M3ENavBarLabelBehavior.${_labelBehavior.name},
+  size: M3ENavBarSize.${_size.name},
+  shapeFamily: M3ENavBarShapeFamily.${_shape.name},
+  density: M3ENavBarDensity.${_density.name},
+  indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},
+  safeArea: false,
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Navigation bar',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   Widget _framed(M3EThemeData theme, Widget child) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -85,6 +133,7 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

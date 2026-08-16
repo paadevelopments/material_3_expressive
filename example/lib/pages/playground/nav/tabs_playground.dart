@@ -38,6 +38,33 @@ class _TabsPlaygroundState extends State<TabsPlayground> {
     ];
   }
 
+  List<PlaySnippet> get _snippets {
+    final String tabs = _showIcons
+        ? '''
+  tabs: const <M3ETab>[
+    M3ETab(label: 'Overview', icon: Icon(M3EIcons.home)),
+    M3ETab(label: 'Specs', icon: Icon(M3EIcons.tune)),
+    M3ETab(label: 'Reviews', icon: Icon(M3EIcons.star_outline)),
+  ],'''
+        : '''
+  tabs: const <M3ETab>[
+    M3ETab(label: 'Overview'),
+    M3ETab(label: 'Specs'),
+    M3ETab(label: 'Reviews'),
+  ],''';
+    final String sample =
+        '''
+M3ETabs(
+  variant: M3ETabsVariant.${_variant.name},
+  selectedIndex: $_selected,
+  onTabSelected: (int i) {},
+$tabs
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Tabs', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -52,6 +79,7 @@ class _TabsPlaygroundState extends State<TabsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

@@ -60,6 +60,39 @@ class ShapesPlayground extends StatelessWidget {
           ),
         ),
       ],
+      snippets: <PlaySnippet>[
+        PlaySnippet(
+          label: 'Catalog tile',
+          code:
+              '''
+$kPlaySnippetImport
+
+M3EShapeContainer(
+  kind: M3EShapeKind.circle,
+  width: 72,
+  height: 72,
+  color: theme.colorScheme.primaryContainer,
+);''',
+        ),
+        PlaySnippet(
+          label: 'Clipped child',
+          code:
+              '''
+$kPlaySnippetImport
+
+M3EShapeContainer.cookie4Sided(
+  width: 120,
+  height: 120,
+  color: theme.colorScheme.tertiaryContainer,
+  child: Center(
+    child: Icon(
+      M3EIcons.favorite,
+      color: theme.colorScheme.onTertiaryContainer,
+    ),
+  ),
+);''',
+        ),
+      ],
       controls: const <Widget>[],
     );
   }

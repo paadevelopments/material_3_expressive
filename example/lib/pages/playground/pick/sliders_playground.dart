@@ -27,6 +27,75 @@ class _SlidersPlaygroundState extends State<SlidersPlayground> {
   double _trackThickness = 16;
   M3ESliderIconPosition _iconPosition = M3ESliderIconPosition.end;
 
+  String _num(double value) {
+    return value == value.roundToDouble() ? '${value.toInt()}' : '$value';
+  }
+
+  List<PlaySnippet> get _snippets {
+    final String thickness = _num(_trackThickness);
+    final String sample = switch (_kind) {
+      _SliderKind.continuous =>
+        '''
+M3ESlider(
+  value: ${_num(_value)},
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  onChanged: (double v) {},
+);''',
+      _SliderKind.wavy =>
+        '''
+M3ESlider.wavy(
+  value: ${_num(_value)},
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  onChanged: (double v) {},
+);''',
+      _SliderKind.centered =>
+        '''
+M3ESlider.centered(
+  value: ${_num((_value * 200) - 100)},
+  min: -100,
+  max: 100,
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  onChanged: (double v) {},
+);''',
+      _SliderKind.discrete =>
+        '''
+M3ESlider(
+  value: ${_num((_value * 5).roundToDouble())},
+  max: 5,
+  divisions: 5,
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  haptic: M3EHapticFeedback.light,
+  onChanged: (double v) {},
+);''',
+      _SliderKind.vertical =>
+        '''
+M3ESlider.vertical(
+  value: ${_num(_value)},
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  thumbLength: 80,
+  icon: const Icon(M3EIcons.volume_up),
+  iconPosition: M3ESliderIconPosition.${_iconPosition.name},
+  onChanged: (double v) {},
+);''',
+      _SliderKind.range =>
+        '''
+M3ERangeSlider(
+  values: M3ESliderRange(${_num(_range.start)}, ${_num(_range.end)}),
+  enabled: $_enabled,
+  trackThickness: $thickness,
+  onChanged: (M3ESliderRange v) {},
+);''',
+    };
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Slider', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -38,6 +107,7 @@ class _SlidersPlaygroundState extends State<SlidersPlayground> {
               : SizedBox(width: 280, child: _buildPreview()),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

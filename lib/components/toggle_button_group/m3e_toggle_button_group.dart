@@ -43,6 +43,7 @@ part 'components/m3e_toggle_button_group_overflow_presenter.dart';
 part 'components/m3e_toggle_button_group_render.dart';
 part 'components/m3e_toggle_button_group_measurement.dart';
 part 'components/m3e_toggle_button_group_layout.dart';
+part 'components/m3e_toggle_button_group_scroll.dart';
 part 'components/m3e_toggle_button_group_build.dart';
 
 // ---------------------------------------------------------------------------

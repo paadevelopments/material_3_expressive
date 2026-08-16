@@ -20,6 +20,45 @@ class _SelectionPlaygroundState extends State<SelectionPlayground> {
   bool _showSelectAll = true;
   bool _customHighlight = false;
 
+  List<PlaySnippet> get _snippets {
+    final String body = _dismissible
+        ? 'M3EDismissibleList(itemCount: items.length, itemBuilder: itemBuilder)'
+        : 'M3ECardList.builder(itemCount: items.length, itemBuilder: itemBuilder)';
+    final String selectedColor = _customHighlight
+        ? '\n  selectedColor: const Color(0xFF4CAF50),'
+        : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Selection',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ESelection(
+  controller: selection,
+  itemCount: items.length,$selectedColor
+  appBar: M3ESelectionAppBar(
+    showSelectAll: $_showSelectAll,
+    idle: M3EAppBar.search(
+      searchController: search,
+      suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+        return const <Widget>[];
+      },
+      barHintText: 'Search items',
+    ),
+    actions: <Widget>[
+      M3EIconButton(
+        icon: const Icon(M3EIcons.delete),
+        onPressed: () {},
+      ),
+    ],
+  ),
+  body: $body,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -58,6 +97,7 @@ class _SelectionPlaygroundState extends State<SelectionPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Demo options',

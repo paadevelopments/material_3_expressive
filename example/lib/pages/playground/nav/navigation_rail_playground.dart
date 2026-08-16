@@ -55,6 +55,46 @@ class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
         ),
       ];
 
+  List<PlaySnippet> get _snippets {
+    final String fab = _showFab
+        ? '''
+  fab: M3ENavigationRailFabSlot(
+    icon: const Icon(M3EIcons.add),
+    label: 'Compose',
+    onPressed: () {},
+  ),'''
+        : '';
+    final String sample =
+        '''
+M3ENavigationRail(
+  sections: const <M3ENavigationRailSection>[
+    M3ENavigationRailSection(
+      destinations: <M3ENavigationRailDestination>[
+        M3ENavigationRailDestination(
+          icon: Icon(M3EIcons.home),
+          label: 'Home',
+        ),
+        M3ENavigationRailDestination(
+          icon: Icon(M3EIcons.search),
+          label: 'Search',
+        ),
+      ],
+    ),
+  ],
+  selectedIndex: $_index,
+  onDestinationSelected: (int i) {},
+  type: M3ENavigationRailType.${_type.name},
+  modality: M3ENavigationRailModality.${_modality.name},
+  labelBehavior: M3ENavigationRailLabelBehavior.${_labelBehavior.name},$fab
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Navigation rail',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   Widget _framed(M3EThemeData theme, Widget child) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -95,6 +135,7 @@ class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

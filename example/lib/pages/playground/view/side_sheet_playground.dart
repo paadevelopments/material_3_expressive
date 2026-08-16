@@ -22,6 +22,41 @@ class _SideSheetPlaygroundState extends State<SideSheetPlayground> {
   String _body = 'Side sheet content for detailed options.';
   bool _showActions = true;
 
+  List<PlaySnippet> get _snippets {
+    final String actions = _showActions
+        ? '''
+  actions: <Widget>[
+    M3EButton(
+      style: M3EButtonStyle.text,
+      onPressed: () => Navigator.of(context).pop(),
+      child: const Text('Reset'),
+    ),
+    M3EButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: const Text('Apply'),
+    ),
+  ],
+'''
+        : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Side sheet',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ESideSheet.show<void>(
+  context,
+  title: ${playDartString(_title)},
+  body: Padding(
+    padding: const EdgeInsets.all(24),
+    child: Text(${playDartString(_body)}),
+  ),
+$actions);''',
+      ),
+    ];
+  }
+
   void _showSheet() {
     M3ESideSheet.show<void>(
       context,
@@ -64,6 +99,7 @@ class _SideSheetPlaygroundState extends State<SideSheetPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Sheet',

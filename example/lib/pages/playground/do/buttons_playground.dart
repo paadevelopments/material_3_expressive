@@ -82,6 +82,33 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
     };
   }
 
+  List<PlaySnippet> get _snippets {
+    final String pressed = _enabled ? '() {}' : 'null';
+    final String sample = _showIcon
+        ? '''
+M3EButton.icon(
+  onPressed: $pressed,
+  icon: const Icon(M3EIcons.add),
+  label: Text(${playDartString(_label)}),
+  style: M3EButtonStyle.${_style.name},
+  size: M3EButtonSize.${_size.name},
+  shape: M3EButtonShape.${_shape.name},
+);'''
+        : '''
+M3EButton.${_style.name}(
+  onPressed: $pressed,
+  size: M3EButtonSize.${_size.name},
+  shape: M3EButtonShape.${_shape.name},
+  child: Text(${playDartString(_label)}),
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Selected style',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -165,6 +192,7 @@ class _ButtonsPlaygroundState extends State<ButtonsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

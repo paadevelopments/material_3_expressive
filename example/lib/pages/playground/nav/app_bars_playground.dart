@@ -179,6 +179,62 @@ class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
     };
   }
 
+  List<PlaySnippet> get _snippets {
+    final String sample = switch (_kind) {
+      _AppBarKind.top =>
+        '''
+M3EAppBar.top(
+  titleText: ${playDartString(_title)},
+  centerTitle: $_centerTitle,
+  density: M3EAppBarDensity.${_density.name},
+  shapeFamily: M3EAppBarShapeFamily.${_shape.name},
+  safeArea: $_safeArea,
+  leading: const Icon(M3EIcons.menu),
+  actions: const <Widget>[Icon(M3EIcons.search)],
+);''',
+      _AppBarKind.search =>
+        '''
+M3EAppBar.search(
+  searchController: searchController,
+  barHintText: 'Search mail',
+  density: M3EAppBarDensity.${_density.name},
+  shapeFamily: M3EAppBarShapeFamily.${_shape.name},
+  centerTitle: $_centerTitle,
+  safeArea: $_safeArea,
+  leading: const Icon(M3EIcons.menu),
+  suggestionsBuilder: (context, controller) => const <Widget>[],
+);''',
+      _AppBarKind.bottom =>
+        '''
+M3EAppBar.bottom(
+  safeArea: $_safeArea,
+  actions: const <Widget>[
+    Icon(M3EIcons.menu),
+    Icon(M3EIcons.search),
+    Icon(M3EIcons.edit),
+  ],
+  floatingActionButton: M3EFab(
+    icon: const Icon(M3EIcons.add),
+    size: M3EFabSize.small,
+    onPressed: () {},
+  ),
+);''',
+      _AppBarKind.sliver =>
+        '''
+M3EAppBar.sliver(
+  titleText: ${playDartString(_title)},
+  centerTitle: $_centerTitle,
+  density: M3EAppBarDensity.${_density.name},
+  shapeFamily: M3EAppBarShapeFamily.${_shape.name},
+  variant: M3EAppBarVariant.${_variant.name},
+  actions: const <Widget>[Icon(M3EIcons.search)],
+);''',
+    };
+    return <PlaySnippet>[
+      PlaySnippet(label: _kind.name, code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -186,6 +242,7 @@ class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
       previews: <Widget>[
         PlayPreviewCard(label: _kind.name, child: _preview(theme)),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Variant',

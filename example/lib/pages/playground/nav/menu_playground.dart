@@ -72,6 +72,41 @@ class _MenuPlaygroundState extends State<MenuPlayground> {
     ];
   }
 
+  List<PlaySnippet> get _snippets {
+    final String sample =
+        '''
+M3EMenu(
+  position: M3EMenuAnchorPosition.${_position.name},
+  colorStyle: M3EMenuColorStyle.${_colorStyle.name},
+  closeOnSelect: $_closeOnSelect,
+  selectedValue: ${playDartString(_selected)},
+  onSelected: (Object? value) {},
+  anchorBuilder: (BuildContext context, VoidCallback open) {
+    return M3EButton.icon(
+      style: M3EButtonStyle.tonal,
+      icon: const Icon(M3EIcons.more_vert),
+      label: Text(${playDartString(_selected)}),
+      onPressed: open,
+    );
+  },
+  children: <M3EMenuNode>[
+    M3EMenuSelectable(
+      label: 'Inbox',
+      value: 'Inbox',
+      selected: ${_selected == 'Inbox'},
+    ),
+    M3EMenuToggleable(
+      label: 'Starred',
+      checked: $_starred,
+      onChanged: (bool value) {},
+    ),
+  ],
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Anchored menu', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -100,6 +135,7 @@ class _MenuPlaygroundState extends State<MenuPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

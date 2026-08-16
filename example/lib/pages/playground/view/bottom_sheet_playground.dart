@@ -21,6 +21,28 @@ class _BottomSheetPlaygroundState extends State<BottomSheetPlayground> {
   bool _showDragHandle = true;
   String _body = 'A modal bottom sheet with a drag handle.';
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Bottom sheet',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EBottomSheet.show<void>(
+  context,
+  showDragHandle: $_showDragHandle,
+  builder: (BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(${playDartString(_body)}),
+    );
+  },
+);''',
+      ),
+    ];
+  }
+
   void _showSheet() {
     M3EBottomSheet.show<void>(
       context,
@@ -48,6 +70,7 @@ class _BottomSheetPlaygroundState extends State<BottomSheetPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Sheet',

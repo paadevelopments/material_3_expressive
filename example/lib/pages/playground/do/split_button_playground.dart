@@ -42,6 +42,79 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
     M3EButtonStyle.outlined,
   ];
 
+  List<PlaySnippet> get _snippets {
+    final String pressed = _enabled ? '() {}' : 'null';
+    final String selected = _selected == null
+        ? 'null'
+        : playDartString(_selected!);
+    final String onSelected = _enabled ? '(String value) {}' : 'null';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Split button',
+        code:
+            '''
+$kPlaySnippetImport
+M3ESplitButton<String>(
+  label: ${playDartString(_label)},
+  leadingIcon: M3EIcons.save,
+  style: M3EButtonStyle.${_style.name},
+  size: M3EButtonSize.${_size.name},
+  shape: M3EButtonShape.${_shape.name},
+  enabled: $_enabled,
+  selectedValue: $selected,
+  decoration: M3ESplitButtonDecoration(
+    menuStyle: M3ESplitButtonMenuStyle.${_menuStyle.name},
+  ),
+  onPressed: $pressed,
+  onSelected: $onSelected,
+  items: const <M3ESplitButtonItem<String>>[
+    M3ESplitButtonItem<String>(
+      value: 'draft',
+      child: Text('Save draft'),
+    ),
+    M3ESplitButtonItem<String>(
+      value: 'copy',
+      child: Text('Save a copy'),
+    ),
+  ],
+);''',
+      ),
+      PlaySnippet(
+        label: 'Custom M3E menu',
+        code:
+            '''
+$kPlaySnippetImport
+M3ESplitButton<String>(
+  label: 'Share',
+  leadingIcon: M3EIcons.share,
+  style: M3EButtonStyle.${_style.name},
+  size: M3EButtonSize.${_size.name},
+  shape: M3EButtonShape.${_shape.name},
+  enabled: $_enabled,
+  items: null,
+  onPressed: $pressed,
+  m3eMenuBuilder: (BuildContext context) {
+    return <M3EMenuNode>[
+      const M3EMenuEntry(
+        label: 'Email',
+        leading: Icon(M3EIcons.mail),
+        value: 'email',
+      ),
+      M3EMenuSubmenu(
+        label: 'More',
+        children: const <M3EMenuNode>[
+          M3EMenuEntry(label: 'Message', value: 'message'),
+          M3EMenuEntry(label: 'QR code', value: 'qr'),
+        ],
+      ),
+    ];
+  },
+  onSelected: $onSelected,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -149,6 +222,7 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

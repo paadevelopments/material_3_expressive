@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'm3e_dimensions.dart';
+
 /// Material 3 Expressive spacing tokens.
 ///
 /// Mirrors the spacing scale from the `m3e_design` package: a six-step scale
@@ -18,12 +20,12 @@ class M3ESpacing {
 
   /// The regular density spacing scale (4 / 8 / 12 / 16 / 24 / 32).
   const M3ESpacing.regular()
-    : xs = 4,
-      sm = 8,
-      md = 12,
-      lg = 16,
-      xl = 24,
-      xxl = 32;
+    : xs = M3EDimensions.spaceXs,
+      sm = M3EDimensions.spaceSm,
+      md = M3EDimensions.spaceMd,
+      lg = M3EDimensions.spaceLg,
+      xl = M3EDimensions.spaceXl,
+      xxl = M3EDimensions.spaceXxl;
 
   /// 4dp.
   final double xs;

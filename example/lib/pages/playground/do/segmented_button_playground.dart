@@ -40,6 +40,41 @@ class _SegmentedButtonPlaygroundState extends State<SegmentedButtonPlayground> {
     ),
   ];
 
+  List<PlaySnippet> get _snippets {
+    final String selected = '<int>{${_selected.join(', ')}}';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Segmented button',
+        code:
+            '''
+$kPlaySnippetImport
+M3ESegmentedButton<int>(
+  multiSelect: $_multiSelect,
+  showSelectedIcon: $_showSelectedIcon,
+  selected: $selected,
+  onSelectionChanged: (Set<int> next) {},
+  segments: const <M3ESegment<int>>[
+    M3ESegment<int>(
+      value: 0,
+      label: 'Day',
+      icon: Icon(M3EIcons.calendar_today),
+    ),
+    M3ESegment<int>(
+      value: 1,
+      label: 'Week',
+      icon: Icon(M3EIcons.calendar_view_week),
+    ),
+    M3ESegment<int>(
+      value: 2,
+      label: 'Month',
+      icon: Icon(M3EIcons.calendar_month),
+    ),
+  ],
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -88,6 +123,7 @@ class _SegmentedButtonPlaygroundState extends State<SegmentedButtonPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Behavior',

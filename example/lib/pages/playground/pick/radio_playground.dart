@@ -26,6 +26,28 @@ class _RadioPlaygroundState extends State<RadioPlayground> {
   ValueChanged<String>? get _onChanged =>
       _enabled ? (String value) => setState(() => _plan = value) : null;
 
+  List<PlaySnippet> get _snippets {
+    final String changed = _enabled ? '(String value) {}' : 'null';
+    final String label = _showLabels
+        ? '\n  label: Text(${playDartString(_plan)}),'
+        : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Radio group',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ERadio<String>(
+  value: ${playDartString(_plan)},
+  groupValue: ${playDartString(_plan)},
+  error: $_error,$label
+  onChanged: $changed,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -50,6 +72,7 @@ class _RadioPlaygroundState extends State<RadioPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'State',

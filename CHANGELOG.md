@@ -1,10 +1,15 @@
-## 1.0.7
+## 1.0.8
 
 ### Added
 
+* `M3EDimensions` — shared spacing (4dp grid) and corner-radius catalog.
+  `M3ESpacing.regular` and `M3EShapes` radius tokens forward to it.
 * Shape catalog helpers: `M3EShapeKind`, `M3EShapeClipper`, and
   `M3EShapeContainer` (named constructors for all 35 expressive polygons).
   Clip paths come from `M3EMaterialNewShapes` morph polygons.
+* Example gallery: copyable Dart snippets on every playground (live with
+  current controls). Wide split view highlights the active catalog row with
+  the same fill and radius spring as selection list cards.
 
 ### Fixed
 
@@ -14,7 +19,6 @@
 
 ### Changed
 
-* Package version bump for a new pub.dev publish.
 * Depend on [`material_ui`](https://pub.dev/packages/material_ui) `^1.0.0` and
   import `package:material_ui/material_ui.dart` instead of
   `package:flutter/material.dart`. Flutter SDK constraint is `>=3.44.0`.

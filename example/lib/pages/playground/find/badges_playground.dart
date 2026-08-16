@@ -24,6 +24,23 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
   double _maxCount = 99;
   M3EBadgeAlignment _alignment = M3EBadgeAlignment.topRight;
 
+  List<PlaySnippet> get _snippets {
+    final int count = _count.round();
+    final String countArg = _showCount && !_showDot ? '$count' : 'null';
+    final String sample =
+        '''
+M3EBadge(
+  showDot: $_showDot,
+  count: $countArg,
+  maxCount: ${_maxCount.round()},
+  alignment: M3EBadgeAlignment.${_alignment.name},
+  child: const Icon(M3EIcons.notifications, size: 28),
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Badge', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final int count = _count.round();
@@ -56,6 +73,7 @@ class _BadgesPlaygroundState extends State<BadgesPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Primary badge',

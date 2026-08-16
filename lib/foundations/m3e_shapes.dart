@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'm3e_dimensions.dart';
+
 /// Material 3 Expressive shape (corner radius) tokens.
 ///
 /// The expressive shape scale extends the baseline scale with the
@@ -9,77 +11,67 @@ abstract final class M3EShapes {
   const M3EShapes._();
 
   /// 0dp — sharp corners.
-  static const double none = 0;
+  static const double none = M3EDimensions.radiusNone;
 
   /// 4dp corner radius.
-  static const double extraSmall = 4;
+  static const double extraSmall = M3EDimensions.radiusExtraSmall;
 
   /// 8dp corner radius.
-  static const double small = 8;
+  static const double small = M3EDimensions.radiusSmall;
 
   /// 12dp corner radius.
-  static const double medium = 12;
+  static const double medium = M3EDimensions.radiusMedium;
 
   /// 16dp corner radius.
-  static const double large = 16;
+  static const double large = M3EDimensions.radiusLarge;
 
   /// 20dp corner radius (expressive large+).
-  static const double largeIncreased = 20;
+  static const double largeIncreased = M3EDimensions.radiusLargeIncreased;
 
   /// 28dp corner radius.
-  static const double extraLarge = 28;
+  static const double extraLarge = M3EDimensions.radiusExtraLarge;
 
   /// 32dp corner radius (expressive XL+).
-  static const double extraLargeIncreased = 32;
+  static const double extraLargeIncreased =
+      M3EDimensions.radiusExtraLargeIncreased;
 
   /// 48dp corner radius.
-  static const double extraExtraLarge = 48;
+  static const double extraExtraLarge = M3EDimensions.radiusExtraExtraLarge;
 
   /// Sentinel radius that resolves to a fully rounded (stadium) shape.
-  static const double full = 9999;
+  static const double full = M3EDimensions.radiusFull;
 
   /// [BorderRadius] for [none].
-  static const BorderRadius radiusNone = BorderRadius.zero;
+  static const BorderRadius radiusNone = M3EDimensions.borderRadiusNone;
 
   /// [BorderRadius] for [extraSmall].
-  static const BorderRadius radiusExtraSmall = BorderRadius.all(
-    Radius.circular(extraSmall),
-  );
+  static const BorderRadius radiusExtraSmall =
+      M3EDimensions.borderRadiusExtraSmall;
 
   /// [BorderRadius] for [small].
-  static const BorderRadius radiusSmall = BorderRadius.all(
-    Radius.circular(small),
-  );
+  static const BorderRadius radiusSmall = M3EDimensions.borderRadiusSmall;
 
   /// [BorderRadius] for [medium].
-  static const BorderRadius radiusMedium = BorderRadius.all(
-    Radius.circular(medium),
-  );
+  static const BorderRadius radiusMedium = M3EDimensions.borderRadiusMedium;
 
   /// [BorderRadius] for [large].
-  static const BorderRadius radiusLarge = BorderRadius.all(
-    Radius.circular(large),
-  );
+  static const BorderRadius radiusLarge = M3EDimensions.borderRadiusLarge;
 
   /// [BorderRadius] for [largeIncreased].
-  static const BorderRadius radiusLargeIncreased = BorderRadius.all(
-    Radius.circular(largeIncreased),
-  );
+  static const BorderRadius radiusLargeIncreased =
+      M3EDimensions.borderRadiusLargeIncreased;
 
   /// [BorderRadius] for [extraLarge].
-  static const BorderRadius radiusExtraLarge = BorderRadius.all(
-    Radius.circular(extraLarge),
-  );
+  static const BorderRadius radiusExtraLarge =
+      M3EDimensions.borderRadiusExtraLarge;
 
   /// [BorderRadius] for [extraLargeIncreased].
-  static const BorderRadius radiusExtraLargeIncreased = BorderRadius.all(
-    Radius.circular(extraLargeIncreased),
-  );
+  static const BorderRadius radiusExtraLargeIncreased =
+      M3EDimensions.borderRadiusExtraLargeIncreased;
 
   /// [BorderRadius] for [extraExtraLarge].
-  static const BorderRadius radiusExtraExtraLarge = BorderRadius.all(
-    Radius.circular(extraExtraLarge),
-  );
+  static const BorderRadius radiusExtraExtraLarge =
+      M3EDimensions.borderRadiusExtraExtraLarge;
 
   /// Fully rounded stadium shape border.
   static const StadiumBorder stadium = StadiumBorder();
@@ -89,7 +81,7 @@ abstract final class M3EShapes {
   /// The [full] sentinel produces a very large radius that reads as a stadium
   /// for any realistic component height.
   static BorderRadius resolve(double token) {
-    return BorderRadius.all(Radius.circular(token));
+    return M3EDimensions.resolveRadius(token);
   }
 
   /// The expressive *round* shape set (mirrors `m3e_design`'s round family).

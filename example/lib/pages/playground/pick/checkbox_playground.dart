@@ -25,6 +25,26 @@ class _CheckboxPlaygroundState extends State<CheckboxPlayground> {
     setState(() => _value = next);
   }
 
+  List<PlaySnippet> get _snippets {
+    final bool? value = _tristate ? _value : (_value ?? false);
+    final String changed = _enabled ? '(bool? next) {}' : 'null';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Checkbox',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ECheckbox(
+  value: $value,
+  tristate: $_tristate,
+  error: $_error,
+  onChanged: $changed,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -51,6 +71,7 @@ class _CheckboxPlaygroundState extends State<CheckboxPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'State',

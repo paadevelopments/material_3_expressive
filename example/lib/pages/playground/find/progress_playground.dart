@@ -51,6 +51,29 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
     };
   }
 
+  List<PlaySnippet> get _snippets {
+    final String value = _determinate ? _value.toStringAsFixed(2) : 'null';
+    final bool isLinear =
+        _kind == _ProgressKind.linear || _kind == _ProgressKind.linearWavy;
+    final String linearSize = isLinear
+        ? '\n  linearSize: M3EProgressIndicatorSize.${_linearSize.name},'
+        : '';
+    final String ctor = switch (_kind) {
+      _ProgressKind.circular => 'circular',
+      _ProgressKind.circularWavy => 'circularWavy',
+      _ProgressKind.linear => 'linear',
+      _ProgressKind.linearWavy => 'linearWavy',
+    };
+    final String sample =
+        '''
+M3EProgressIndicator.$ctor(
+  value: $value,$linearSize
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: _kind.name, code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isLinear =
@@ -82,6 +105,7 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',
