@@ -154,28 +154,33 @@ class _M3ETextFieldState extends State<M3ETextField> {
     );
     final outlined = widget.variant == M3ETextFieldVariant.outlined;
 
-    return GestureDetector(
-      onTap: () => _focusNode.requestFocus(),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: M3EMotion.short3,
-        curve: M3EMotion.standard,
-        padding: textFieldTheme.horizontalPadding,
-        constraints: BoxConstraints(minHeight: textFieldTheme.minHeight),
-        decoration: textFieldTheme.backgroundDecoration(
-          scheme,
-          outlined: outlined,
+    return TapRegion(
+      enabled: widget.enabled,
+      onTapOutside:
+          widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
+      child: GestureDetector(
+        onTap: () => _focusNode.requestFocus(),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: M3EMotion.short3,
+          curve: M3EMotion.standard,
+          padding: textFieldTheme.horizontalPadding,
+          constraints: BoxConstraints(minHeight: textFieldTheme.minHeight),
+          decoration: textFieldTheme.backgroundDecoration(
+            scheme,
+            outlined: outlined,
+          ),
+          // Painted over the container so the focused stroke does not inset
+          // layout and grow the field.
+          foregroundDecoration: textFieldTheme.borderDecoration(
+            scheme,
+            accent: accent,
+            outlined: outlined,
+            focused: _focused,
+            hasError: widget.hasError,
+          ),
+          child: Row(children: _buildRowChildren(theme, scheme, accent)),
         ),
-        // Painted over the container so the focused stroke does not inset
-        // layout and grow the field.
-        foregroundDecoration: textFieldTheme.borderDecoration(
-          scheme,
-          accent: accent,
-          outlined: outlined,
-          focused: _focused,
-          hasError: widget.hasError,
-        ),
-        child: Row(children: _buildRowChildren(theme, scheme, accent)),
       ),
     );
   }
@@ -306,8 +311,7 @@ class _M3ETextFieldState extends State<M3ETextField> {
       textInputAction: widget.textInputAction,
       inputFormatters: widget.inputFormatters,
       onSubmitted: widget.onSubmitted,
-      onTapOutside:
-          widget.onTapOutside ?? M3EFocus.tapOutsideHandler(_focusNode),
+      onTapOutside: (_) {},
       style: inputStyle,
       cursorColor: accent,
       backgroundCursorColor: scheme.outlineVariant,
