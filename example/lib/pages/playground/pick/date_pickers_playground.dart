@@ -54,6 +54,51 @@ class _DatePickersPlaygroundState extends State<DatePickersPlayground> {
     }
   }
 
+  String _dateLit(DateTime? date) {
+    if (date == null) {
+      return 'null';
+    }
+    if (date.month == 1 && date.day == 1) {
+      return 'DateTime(${date.year})';
+    }
+    return 'DateTime(${date.year}, ${date.month}, ${date.day})';
+  }
+
+  List<PlaySnippet> get _snippets {
+    final String initial = _dateLit(_date);
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Calendar',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ECalendarDatePicker(
+  initialDate: $initial,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+  initialCalendarMode: M3EDatePickerMode.${_calendarMode.name},
+  onDateChanged: (DateTime value) {},
+);''',
+      ),
+      PlaySnippet(
+        label: 'Dialogs',
+        code:
+            '''
+$kPlaySnippetImport
+
+await M3EDatePicker.show(
+  context,
+  initialDate: $initial,
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+  initialEntryMode: M3EDatePickerEntryMode.${_entryMode.name},
+  initialCalendarMode: M3EDatePickerMode.${_calendarMode.name},
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -119,6 +164,7 @@ class _DatePickersPlaygroundState extends State<DatePickersPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Picker',

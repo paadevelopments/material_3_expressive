@@ -53,6 +53,39 @@ class _FabMenuPlaygroundState extends State<FabMenuPlayground> {
     ];
   }
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'FAB menu',
+        code:
+            '''
+$kPlaySnippetImport
+M3EFabMenu(
+  position: M3EFabMenuPosition.${_position.name},
+  size: M3EFabSize.${_size.name},
+  color: M3EFabColor.${_color.name},
+  items: <M3EFabMenuItem>[
+    M3EFabMenuItem(
+      icon: const Icon(M3EIcons.image),
+      label: 'Image',
+      onPressed: () {},
+    ),
+    M3EFabMenuItem(
+      icon: const Icon(M3EIcons.videocam),
+      label: 'Video',
+      onPressed: () {},
+    ),
+    M3EFabMenuItem(
+      icon: const Icon(M3EIcons.mic),
+      label: 'Audio',
+      onPressed: () {},
+    ),
+  ],
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -103,6 +136,7 @@ class _FabMenuPlaygroundState extends State<FabMenuPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

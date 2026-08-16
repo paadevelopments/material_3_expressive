@@ -81,6 +81,46 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
     );
   }
 
+  List<PlaySnippet> get _snippets {
+    final String actions = _labeled
+        ? '''
+  actions: <M3EToolbarItem>[
+    M3EToolbarAction(icon: M3EIcons.home, label: 'Home', onPressed: () {}),
+    M3EToolbarAction(icon: M3EIcons.search, label: 'Search', onPressed: () {}),
+  ],'''
+        : '''
+  actions: <M3EToolbarItem>[
+    M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
+    M3EToolbarAction(
+      icon: M3EIcons.share,
+      onPressed: () {},
+      isExpandTrigger: true,
+    ),
+    M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
+  ],''';
+    final String sample = _placement == M3EToolbarPlacement.docked
+        ? '''
+M3EToolbar.docked(
+  colorStyle: M3EToolbarColorStyle.${_colorStyle.name},
+  safeArea: false,
+  dockEdge: M3EToolbarDockEdge.bottom,
+  activeIndex: ${_labeled ? _activeIndex : 'null'},
+$actions
+);'''
+        : '''
+M3EToolbar(
+  colorStyle: M3EToolbarColorStyle.${_colorStyle.name},
+  axis: Axis.${_axis.name},
+  expanded: $_expanded,
+  activeIndex: ${_labeled ? _activeIndex : 'null'},
+  fabExpandIcon: ${_showFab ? 'const Icon(M3EIcons.add)' : 'null'},
+$actions
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Toolbar', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -90,6 +130,7 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
           child: Center(child: _buildToolbar()),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

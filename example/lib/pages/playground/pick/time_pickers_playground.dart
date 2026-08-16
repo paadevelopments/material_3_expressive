@@ -35,6 +35,38 @@ class _TimePickersPlaygroundState extends State<TimePickersPlayground> {
     }
   }
 
+  List<PlaySnippet> get _snippets {
+    final String time =
+        'const M3ETime(hour: ${_time.hour}, minute: ${_time.minute})';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Dial',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EDialTimePicker(
+  value: $time,
+  use24HourFormat: $_use24Hour,
+  onChanged: (M3ETime value) {},
+);''',
+      ),
+      PlaySnippet(
+        label: 'Dialog',
+        code:
+            '''
+$kPlaySnippetImport
+
+await M3ETimePicker.show(
+  context,
+  initialTime: $time,
+  initialEntryMode: M3ETimePickerEntryMode.${_entryMode.name},
+  alwaysUse24HourFormat: $_use24Hour,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -72,6 +104,7 @@ class _TimePickersPlaygroundState extends State<TimePickersPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Picker',

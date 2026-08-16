@@ -20,6 +20,20 @@ class _LoadingIndicatorPlaygroundState
     extends State<LoadingIndicatorPlayground> {
   M3ELoadingIndicatorVariant _variant = M3ELoadingIndicatorVariant.defaultStyle;
 
+  List<PlaySnippet> get _snippets {
+    final String sample =
+        '''
+M3ELoadingIndicator(
+  variant: M3ELoadingIndicatorVariant.${_variant.name},
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Loading indicator',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -43,6 +57,7 @@ class _LoadingIndicatorPlaygroundState
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

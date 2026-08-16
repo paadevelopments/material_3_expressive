@@ -46,6 +46,36 @@ class _DropdownMenuPlaygroundState extends State<DropdownMenuPlayground> {
     });
   }
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Dropdown menu',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EDropdownMenu<String>(
+  singleSelect: $_singleSelect,
+  searchEnabled: $_searchEnabled,
+  enabled: $_enabled,
+  items: const <M3EDropdownItem<String>>[
+    M3EDropdownItem(label: 'Flutter', value: 'flutter'),
+    M3EDropdownItem(label: 'Dart', value: 'dart'),
+    M3EDropdownItem(label: 'Material 3', value: 'm3'),
+  ],
+  fieldStyle: M3EDropdownFieldStyle(
+    hintText: ${playDartString(_hint)},
+    showClearIcon: $_showClear,
+  ),
+  dropdownStyle: M3EDropdownPanelStyle(
+    expandDirection: M3EDropdownExpandDirection.${_expand.name},
+  ),
+  onSelectionChanged: (List<M3EDropdownItem<String>> items) {},
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -89,6 +119,7 @@ class _DropdownMenuPlaygroundState extends State<DropdownMenuPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Behavior',

@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart'
+import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart'
     show
         AdaptiveTextSelectionToolbar,
         InkWell,
@@ -7,9 +10,6 @@ import 'package:flutter/material.dart'
         WidgetStateProperty,
         WidgetStatePropertyAll,
         WidgetStatesController;
-import 'package:flutter/physics.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../icon_buttons/m3e_icon_buttons.dart';

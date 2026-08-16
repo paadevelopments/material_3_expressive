@@ -26,6 +26,77 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
   bool _barrierDismissible = true;
   bool _multiSelect = false;
 
+  List<PlaySnippet> get _snippets {
+    final String icon = _showIcon
+        ? '\n    icon: const Icon(M3EIcons.error),'
+        : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Dialog',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EDialog.show<void>(
+  context,
+  barrierDismissible: $_barrierDismissible,
+  dialog: M3EDialog(
+    title: ${playDartString(_title)},$icon
+    content: Text(${playDartString(_content)}),
+    topDivider: $_topDivider,
+    bottomDivider: $_bottomDivider,
+    actions: <Widget>[
+      M3EButton(
+        style: M3EButtonStyle.text,
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
+      ),
+      M3EButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Confirm'),
+      ),
+    ],
+  ),
+);''',
+      ),
+      PlaySnippet(
+        label: 'Selection',
+        code:
+            '''
+$kPlaySnippetImport
+
+await M3EDialog.showSelectionScreen(
+  context,
+  title: ${playDartString(_title)},
+  multiSelect: $_multiSelect,
+  barrierDismissible: $_barrierDismissible,
+  options: const <String>['Standard', 'Pro', 'Team', 'Enterprise'],
+  confirmLabel: ${_multiSelect ? "'Done'" : "'OK'"},
+);''',
+      ),
+      PlaySnippet(
+        label: 'Full screen',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EDialog.showFullScreen<void>(
+  context,
+  title: ${playDartString(_title)},
+  action: M3EButton(
+    style: M3EButtonStyle.text,
+    onPressed: () => Navigator.of(context).pop(),
+    child: const Text('Save'),
+  ),
+  body: Padding(
+    padding: const EdgeInsets.all(24),
+    child: Text(${playDartString(_content)}),
+  ),
+);''',
+      ),
+    ];
+  }
+
   void _showBasic() {
     M3EDialog.show<void>(
       context,
@@ -104,6 +175,7 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Content',

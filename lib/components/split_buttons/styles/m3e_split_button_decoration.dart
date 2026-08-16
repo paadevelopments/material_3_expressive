@@ -1,7 +1,7 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../../buttons/styles/m3e_button_decoration.dart';

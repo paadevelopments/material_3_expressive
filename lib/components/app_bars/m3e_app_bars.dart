@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EToolbar;
+import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
 import '../search/controllers/m3e_search_controller.dart';

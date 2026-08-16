@@ -28,6 +28,57 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
   String _headline = 'Wireless charging';
   String _supporting = 'On · Fast charge enabled';
 
+  List<PlaySnippet> get _snippets {
+    final String headline = playDartString(_headline);
+    final String supporting = playDartString(_supporting);
+    final String sample = switch (_kind) {
+      _ListKind.item =>
+        '''
+M3EListItem(
+  headline: $headline,
+  supportingText: $supporting,${_showLeading ? '\n  leading: const Icon(M3EIcons.schedule),' : ''}${_showTrailing ? '\n  trailing: const Icon(M3EIcons.chevron_right),' : ''}
+  onTap: () {},
+);''',
+      _ListKind.cardList =>
+        '''
+M3ECardList(
+  variant: M3ECardVariant.${_variant.name},
+  itemCount: 3,
+  itemBuilder: (BuildContext context, int index) {
+    return M3EListItem(
+      headline: $headline,
+      supportingText: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.inbox),' : ''}${_showTrailing ? '\n      trailing: const Icon(M3EIcons.chevron_right),' : ''}
+    );
+  },
+);''',
+      _ListKind.dismissible =>
+        '''
+M3EDismissibleColumn(
+  itemCount: 3,
+  onDismiss: (int index, DismissDirection direction) async => true,
+  itemBuilder: (BuildContext context, int index) {
+    return M3EListItem(
+      headline: $headline,${_showLeading ? '\n      leading: const Icon(M3EIcons.schedule),' : ''}
+    );
+  },
+);''',
+      _ListKind.expandable =>
+        '''
+M3EExpandableList(
+  data: <M3EExpandableData>[
+    M3EExpandableData(
+      title: $headline,
+      subtitle: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.battery_alert),' : ''}
+      body: const Text('Expanded body'),
+    ),
+  ],
+);''',
+    };
+    return <PlaySnippet>[
+      PlaySnippet(label: 'List', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -60,6 +111,7 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
           },
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Content',

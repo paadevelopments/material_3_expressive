@@ -22,6 +22,33 @@ class _SwitchPlaygroundState extends State<SwitchPlayground> {
   bool _showIcons = true;
   double _stateLayerSize = 40;
 
+  List<PlaySnippet> get _snippets {
+    final String changed = _enabled ? '(bool next) {}' : 'null';
+    final String icons = _showIcons
+        ? '''
+  selectedIcon: const Icon(M3EIcons.check),
+  unselectedIcon: const Icon(M3EIcons.close),
+'''
+        : '';
+    final String layer = _stateLayerSize == _stateLayerSize.roundToDouble()
+        ? '${_stateLayerSize.toInt()}'
+        : '$_stateLayerSize';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Switch',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ESwitch(
+  value: $_value,
+$icons  stateLayerSize: $layer,
+  onChanged: $changed,
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -46,6 +73,7 @@ class _SwitchPlaygroundState extends State<SwitchPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

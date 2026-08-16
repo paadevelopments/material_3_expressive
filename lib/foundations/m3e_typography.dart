@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show TextTheme;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show TextTheme;
 
 /// The Material 3 type scale.
 ///

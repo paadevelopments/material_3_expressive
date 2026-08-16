@@ -1,16 +1,15 @@
 // Ported from https://github.com/Mudit200408/m3e_dropdown_menu
 // Adapted for material_3_expressive: import paths, foundations wiring, M3E naming.
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/dropdown_menus/m3e_dropdown_menus.dart'
     show M3EDropdownItemStyle;
 import 'package:material_3_expressive/components/dropdown_menus/styles/m3e_dropdown_item_style.dart'
     show M3EDropdownItemStyle;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EDropdownItemStyle;
+import 'package:material_ui/material_ui.dart';
 
 /// M3EDropdownFieldStyle.
 

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show CircleAvatar;
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show CircleAvatar;
 
 /// A data container used to configure items for `M3EExpandableList`.
 class M3EExpandableData {

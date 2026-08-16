@@ -34,13 +34,15 @@ Try the live gallery on the web:
 An interactive gallery demonstrating **all 45 widgets** also lives in the
 [`example/`](example/) directory (same build as the live demo). It groups
 components the same way as the official Material 3 catalog, with a live
-playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/):
+playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/).
+Each playground includes a **Code** section with paste-ready Dart that tracks
+the current controls (copy to clipboard).
 
 | Tab | Playgrounds | Components |
 | --- | ----------- | ---------- |
 | **Do** | [`playground/do/`](example/lib/pages/playground/do/) | Buttons, FABs, FAB menu, groups, segmented & split buttons |
 | **Pick** | [`playground/pick/`](example/lib/pages/playground/pick/) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
-| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets |
+| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets, shapes |
 | **Nav** | [`playground/nav/`](example/lib/pages/playground/nav/) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
 | **Find** | [`playground/find/`](example/lib/pages/playground/find/) | Badges, progress, refresh, tooltip, snackbar, inputs |
 
@@ -67,7 +69,8 @@ flutter run
   proper state layers on every interactive surface.
 - **Design token foundations** — color schemes, typography, motion, shapes
   (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
-  morph polygons), elevation, haptics, and state layers via the `M3ETheme` inherited widget.
+  morph polygons), spacing and radius via `M3EDimensions`, elevation, haptics,
+  and state layers via the `M3ETheme` inherited widget.
 - **Interactive example gallery** — run locally from [`example/`](example/), or
   open the [live web demo](https://paadevelopments.github.io/material_3_expressive/).
 
@@ -75,8 +78,23 @@ flutter run
 
 | Tool    | Version    |
 | ------- | ---------- |
-| Flutter | `>= 3.38.0` |
+| Flutter | `>= 3.44.0` |
 | Dart    | `^3.12.0`  |
+
+## Migrating to `material_ui`
+
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.0.0`
+for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
+the Material library). **Do not import** `package:flutter/material.dart`.
+
+```dart
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+```
+
+Apps that still import `package:flutter/material.dart` should switch those
+imports to `package:material_ui/material_ui.dart`. Flutter **3.44.0 or newer**
+is required (`material_ui` will not resolve on older SDKs).
 
 ## Installation
 
@@ -84,7 +102,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.7
+  material_3_expressive: ^1.0.8
 ```
 
 Then fetch it:
@@ -105,11 +123,12 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 
 | Package | Role in this library |
 | ------- | -------------------- |
-| [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures, and Material primitives used throughout |
+| [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures |
+| [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`) |
 | [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |
-| [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`) used by loading / shape-driven surfaces |
+| [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`, `M3EShapeKind`, `M3EShapeClipper`, `M3EShapeContainer`) used by loading / shape-driven surfaces |
 
 Dev-only: [`flutter_lints`](https://pub.dev/packages/flutter_lints), [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html), and [`custom_lint`](https://pub.dev/packages/custom_lint).
 

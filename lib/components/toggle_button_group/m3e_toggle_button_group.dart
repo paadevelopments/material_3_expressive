@@ -1,17 +1,17 @@
 // GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
 // Adapted for material_3_expressive: import paths + M3E naming only.
-import 'dart:math' as math;
-
 // Copyright (c) 2026 Mudit Purohit
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
@@ -43,6 +43,7 @@ part 'components/m3e_toggle_button_group_overflow_presenter.dart';
 part 'components/m3e_toggle_button_group_render.dart';
 part 'components/m3e_toggle_button_group_measurement.dart';
 part 'components/m3e_toggle_button_group_layout.dart';
+part 'components/m3e_toggle_button_group_scroll.dart';
 part 'components/m3e_toggle_button_group_build.dart';
 
 // ---------------------------------------------------------------------------
@@ -186,6 +187,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   late int _layoutSignature;
   late int _focusNodeSignature;
   late final M3EButtonGroupOverflowController _overflowController;
+  late final ScrollController _scrollOverflowController;
   late final _ToggleGroupPressCoordinator _pressCoordinator;
   late final _ToggleGroupMeasurementOrchestrator _measurement;
   int? _lastOverflowSelectionIndex;
@@ -246,6 +248,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       _handleOverflowChange,
     );
     _overflowController.dispose();
+    _scrollOverflowController.dispose();
     _pressCoordinator.dispose();
     _focusedIndexNotifier.dispose();
     _disposeControllers();

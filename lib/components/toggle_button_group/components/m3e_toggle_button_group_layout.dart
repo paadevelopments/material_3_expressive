@@ -270,28 +270,6 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     );
   }
 
-  Widget _linearScrollable(BuildContext context, double spacing) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isBounded = widget.direction == Axis.horizontal
-            ? constraints.hasBoundedWidth
-            : constraints.hasBoundedHeight;
-        final maxMain = widget.direction == Axis.horizontal
-            ? constraints.maxWidth
-            : constraints.maxHeight;
-        final core = _buildAnimatedLinearLayout(context, spacing, maxMain);
-        if (!isBounded) {
-          return core;
-        }
-        return SingleChildScrollView(
-          scrollDirection: widget.direction,
-          primary: false,
-          child: core,
-        );
-      },
-    );
-  }
-
   Widget _linearWithOverflowMenu(BuildContext context, double spacing) {
     return LayoutBuilder(
       builder: (context, constraints) {

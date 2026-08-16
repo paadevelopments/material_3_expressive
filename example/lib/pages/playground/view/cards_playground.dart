@@ -23,6 +23,31 @@ class _CardsPlaygroundState extends State<CardsPlayground> {
   String _title = 'Card title';
   String _body = 'Supporting text for the card body.';
 
+  List<PlaySnippet> get _snippets {
+    final String pressed = _tappable ? '() {}' : 'null';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Card',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3ECard(
+  variant: M3ECardVariant.${_variant.name},
+  onPressed: $pressed,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Text(${playDartString(_title)}),
+      const SizedBox(height: 4),
+      Text(${playDartString(_body)}),
+    ],
+  ),
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -62,6 +87,7 @@ class _CardsPlaygroundState extends State<CardsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

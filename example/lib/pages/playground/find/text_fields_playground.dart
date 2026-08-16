@@ -35,6 +35,29 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
     super.dispose();
   }
 
+  List<PlaySnippet> get _snippets {
+    final String supporting = _showError
+        ? ''
+        : '\n  supportingText: ${playDartString(_supporting)},';
+    final String error = _showError
+        ? '\n  errorText: ${playDartString(_error)},'
+        : '';
+    final String leading = _showLeading
+        ? '\n  leading: const Icon(M3EIcons.edit),'
+        : '';
+    final String sample =
+        '''
+M3ETextField(
+  label: ${playDartString(_label)},$supporting$error
+  variant: M3ETextFieldVariant.${_variant.name},
+  enabled: $_enabled,
+  obscureText: $_obscure,$leading
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(label: 'Text field', code: '$kPlaySnippetImport\n$sample'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -53,6 +76,7 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

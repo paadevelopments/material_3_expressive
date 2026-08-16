@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/foundations/m3e_scrim_system_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   test('overlayStyle uses transparent bars and light icons', () {

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -25,6 +25,31 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
   bool _enabled = true;
   bool _selected = false;
   bool _badge = false;
+
+  List<PlaySnippet> get _snippets {
+    final String pressed = _enabled ? '() {}' : 'null';
+    final String badge = _badge ? '3' : 'null';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Icon button',
+        code:
+            '''
+$kPlaySnippetImport
+M3EIconButton(
+  icon: const Icon(M3EIcons.favorite),
+  selectedIcon: const Icon(M3EIcons.favorite),
+  onPressed: $pressed,
+  variant: M3EIconButtonVariant.${_variant.name},
+  size: M3EIconButtonSize.${_size.name},
+  shape: M3EIconButtonShapeVariant.${_shape.name},
+  width: M3EIconButtonWidth.${_width.name},
+  isSelected: $_selected,
+  badgeValue: $badge,
+  tooltip: 'Favorite',
+);''',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +123,7 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

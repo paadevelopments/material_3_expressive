@@ -36,6 +36,30 @@ class _ChipsPlaygroundState extends State<ChipsPlayground> {
   VoidCallback? get _onDeleted =>
       _enabled && _type == M3EChipType.input ? () {} : null;
 
+  List<PlaySnippet> get _snippets {
+    final String leading = _showLeading
+        ? '\n  leading: const Icon(M3EIcons.edit),'
+        : '';
+    final String deleted = _onDeleted != null ? '\n  onDeleted: () {},' : '';
+    final String pressed = _onPressed != null ? '() {}' : 'null';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Selected type',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EChip(
+  label: ${playDartString(_label)},
+  type: M3EChipType.${_type.name},
+  selected: $_selected,
+  elevated: $_elevated,$leading
+  onPressed: $pressed,$deleted
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -74,6 +98,7 @@ class _ChipsPlaygroundState extends State<ChipsPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',

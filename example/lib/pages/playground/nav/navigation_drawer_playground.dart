@@ -43,6 +43,51 @@ class _NavigationDrawerPlaygroundState
     ];
   }
 
+  List<PlaySnippet> get _snippets {
+    final String headline = _headline.isEmpty
+        ? ''
+        : '  headline: ${playDartString(_headline)},\n';
+    final String destinations = _badges
+        ? '''
+  destinations: const <M3ENavigationDestination>[
+    M3ENavigationDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationDestination(
+      icon: Icon(M3EIcons.search),
+      label: 'Search',
+      showBadge: true,
+    ),
+    M3ENavigationDestination(
+      icon: Icon(M3EIcons.calendar_today),
+      label: 'Agenda',
+      badgeLabel: '3',
+    ),
+    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ],'''
+        : '''
+  destinations: const <M3ENavigationDestination>[
+    M3ENavigationDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationDestination(icon: Icon(M3EIcons.search), label: 'Search'),
+    M3ENavigationDestination(
+      icon: Icon(M3EIcons.calendar_today),
+      label: 'Agenda',
+    ),
+    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ],''';
+    final String sample =
+        '''
+M3ENavigationDrawer(
+$headline$destinations
+  selectedIndex: $_index,
+  onDestinationSelected: (int i) {},
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Navigation drawer',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   Widget _framed(M3EThemeData theme, Widget child) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -74,6 +119,7 @@ class _NavigationDrawerPlaygroundState
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Content',

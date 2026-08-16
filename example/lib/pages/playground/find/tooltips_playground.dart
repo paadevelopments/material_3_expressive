@@ -22,6 +22,38 @@ class _TooltipsPlaygroundState extends State<TooltipsPlayground> {
   String _richTitle = 'Compose';
   String _richMessage = 'Start a new draft with expressive defaults.';
 
+  List<PlaySnippet> get _snippets {
+    final String sample = _rich
+        ? '''
+M3ETooltip(
+  richTitle: ${playDartString(_richTitle)},
+  richMessage: ${playDartString(_richMessage)},
+  actions: <Widget>[
+    M3EButton.text(onPressed: () {}, child: const Text('Got it')),
+  ],
+  child: M3EIconButton(
+    icon: const Icon(M3EIcons.edit),
+    variant: M3EIconButtonVariant.tonal,
+    onPressed: () {},
+  ),
+);'''
+        : '''
+M3ETooltip(
+  message: ${playDartString(_message)},
+  child: M3EIconButton(
+    icon: const Icon(M3EIcons.edit),
+    variant: M3EIconButtonVariant.tonal,
+    onPressed: () {},
+  ),
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: _rich ? 'Rich tooltip' : 'Plain tooltip',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget child = M3EIconButton(
@@ -48,6 +80,7 @@ class _TooltipsPlaygroundState extends State<TooltipsPlayground> {
               : M3ETooltip(message: _message, child: child),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Content',

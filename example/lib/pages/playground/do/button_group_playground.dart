@@ -34,10 +34,85 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
     M3EButtonSize.md,
   ];
 
+  List<PlaySnippet> get _snippets {
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Button group',
+        code:
+            '''
+$kPlaySnippetImport
+M3EButtonGroup(
+  type: M3EButtonGroupType.${_type.name},
+  shape: M3EButtonShape.${_shape.name},
+  size: M3EButtonSize.${_size.name},
+  style: M3EButtonStyle.${_style.name},
+  neighborSquish: $_neighborSquish,
+  selectedIndex: $_selectedIndex,
+  onSelectedIndexChanged: (int? index) {},
+  actions: const <M3EButtonGroupAction>[
+    M3EButtonGroupAction(
+      icon: Icon(M3EIcons.format_align_left),
+      label: Text('Left'),
+    ),
+    M3EButtonGroupAction(
+      icon: Icon(M3EIcons.format_align_center),
+      label: Text('Center'),
+    ),
+    M3EButtonGroupAction(
+      icon: Icon(M3EIcons.format_align_right),
+      label: Text('Right'),
+    ),
+  ],
+);''',
+      ),
+      PlaySnippet(
+        label: 'Toggle button',
+        code:
+            '''
+$kPlaySnippetImport
+M3EToggleButton(
+  checked: $_toggleChecked,
+  onCheckedChange: (bool value) {},
+  icon: const Icon(M3EIcons.star),
+  checkedIcon: const Icon(M3EIcons.star),
+  label: const Text('Star'),
+  style: M3EButtonStyle.${_style.name},
+  size: M3EButtonSize.${_size.name},
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
       previews: <Widget>[
+        PlayPreviewCard(
+          label: 'Compact xs (scroll overflow)',
+          child: SizedBox(
+            height: 32,
+            child: M3EButtonGroup(
+              type: _type,
+              shape: _shape,
+              size: M3EButtonSize.xs,
+              style: _style,
+              density: M3EButtonGroupDensity.compact,
+              spacing: 8,
+              neighborSquish: _neighborSquish,
+              selectedIndex: _selectedIndex,
+              onSelectedIndexChanged: (int? index) {
+                if (index != null) {
+                  setState(() => _selectedIndex = index);
+                }
+              },
+              actions: const <M3EButtonGroupAction>[
+                M3EButtonGroupAction(label: Text('Every day')),
+                M3EButtonGroupAction(label: Text('Days per week')),
+                M3EButtonGroupAction(label: Text('Selected days')),
+              ],
+            ),
+          ),
+        ),
         PlayPreviewCard(
           label: 'Button group',
           child: M3EButtonGroup(
@@ -114,6 +189,7 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Group',

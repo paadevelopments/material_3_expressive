@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/navigation_rail/enums/m3e_navigation_rail_enums.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
 import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Captures the resolved [M3EThemeData] beneath [app].
 Future<M3EThemeData> _resolve(WidgetTester tester, Widget app) async {

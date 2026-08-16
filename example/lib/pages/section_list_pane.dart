@@ -34,12 +34,29 @@ class SectionListPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
+    final Color selectedFill = theme.selectionTheme.selectedColor(
+      theme.colorScheme,
+    );
     return ListView(
       padding: EdgeInsets.all(16),
       children: <Widget>[
         M3ECardList(
           itemCount: entries.length,
           onTap: (int index) => onSelect(entries[index]),
+          colorBuilder: (int index) {
+            if (!wide || entries[index].id != selectedId) {
+              return null;
+            }
+            return selectedFill;
+          },
+          borderRadiusBuilder: (int index, M3ECardPosition position) {
+            if (!wide || entries[index].id != selectedId) {
+              return null;
+            }
+            return BorderRadius.circular(
+              M3EListCardListTheme.defaultOuterRadius,
+            );
+          },
           itemBuilder: (BuildContext context, int index) {
             final M3EDemoEntry entry = entries[index];
             final bool selected = wide && entry.id == selectedId;

@@ -6,12 +6,11 @@
 //
 // As vendored third-party code kept intentionally identical to its source, the
 // project's opinionated lints are relaxed for this file.
-
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart'
     show M3ENavSelectionIndicator;
 import 'package:material_3_expressive/components/navigation_rail/styles/m3e_navigation_rail_theme.dart'
     show M3ENavigationRailTheme;
+import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';

@@ -4,15 +4,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:material_3_expressive/components/buttons/models/m3e_button_measurements.dart';
 import 'package:material_3_expressive/components/buttons/res/m3e_button_constants.dart';
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_decoration.dart';
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_motion.dart';
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_theme.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'components/m3e_base_button_state.dart';
 import 'components/m3e_focus_ring.dart';

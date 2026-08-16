@@ -30,6 +30,37 @@ class _SnackbarPlaygroundState extends State<SnackbarPlayground> {
     );
   }
 
+  List<PlaySnippet> get _snippets {
+    final String action = _showAction
+        ? '''
+  actionLabel: ${playDartString(_actionLabel)},
+  onAction: () {},'''
+        : '';
+    final String widgetSample =
+        '''
+M3ESnackbar(
+  message: ${playDartString(_message)},$action
+);''';
+    final String showSample =
+        '''
+M3ESnackbar.show(
+  context,
+  message: ${playDartString(_message)},${_showAction ? '''
+  actionLabel: ${playDartString(_actionLabel)},
+  onAction: () {},''' : ''}
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Inline preview',
+        code: '$kPlaySnippetImport\n$widgetSample',
+      ),
+      PlaySnippet(
+        label: 'Show overlay',
+        code: '$kPlaySnippetImport\n$showSample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -50,6 +81,7 @@ class _SnackbarPlaygroundState extends State<SnackbarPlayground> {
           ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Content',

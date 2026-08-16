@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart' show ListTile;
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart' show ListTile;
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_switch.dart';
@@ -59,6 +59,29 @@ class _SearchPlaygroundState extends State<SearchPlayground> {
     );
   }
 
+  List<PlaySnippet> get _snippets {
+    final String sample = _useAnchor
+        ? '''
+M3ESearchAnchor.bar(
+  searchController: searchController,
+  barHintText: ${playDartString(_hint)},
+  shrinkWrap: true,
+  suggestionsBuilder: (context, controller) => const <Widget>[],
+);'''
+        : '''
+M3ESearchBar(
+  hintText: ${playDartString(_hint)},
+  enabled: $_enabled,
+  expandOnFocus: $_expandOnFocus,
+);''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: _useAnchor ? 'Search anchor' : 'Search bar',
+        code: '$kPlaySnippetImport\n$sample',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
@@ -86,6 +109,7 @@ class _SearchPlaygroundState extends State<SearchPlayground> {
                 ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Mode',

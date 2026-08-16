@@ -22,6 +22,25 @@ class _DividersPlaygroundState extends State<DividersPlayground> {
   double _indent = 0;
   double _endIndent = 0;
 
+  List<PlaySnippet> get _snippets {
+    String n(double v) => v == v.roundToDouble() ? '${v.toInt()}' : '$v';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Divider',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EDivider(
+  axis: M3EDividerAxis.${_axis.name},
+  thickness: ${n(_thickness)},
+  indent: ${n(_indent)},
+  endIndent: ${n(_endIndent)},
+);''',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -72,6 +91,7 @@ class _DividersPlaygroundState extends State<DividersPlayground> {
                 ),
         ),
       ],
+      snippets: _snippets,
       controls: <Widget>[
         PlayControlPanel(
           title: 'Appearance',
