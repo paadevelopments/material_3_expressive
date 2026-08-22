@@ -136,7 +136,10 @@ extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
                   removeTop: true,
                   child: ListView(
                     padding: EdgeInsets.only(
-                      bottom: MediaQuery.viewInsetsOf(context).bottom,
+                      bottom: math.max(
+                        MediaQuery.viewPaddingOf(context).bottom,
+                        MediaQuery.viewInsetsOf(context).bottom,
+                      ),
                     ),
                     shrinkWrap: styles.shrinkWrap,
                     children: _suggestions.toList(),
