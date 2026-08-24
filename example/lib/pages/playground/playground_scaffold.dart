@@ -24,14 +24,14 @@ class PlaygroundScaffold extends StatelessWidget {
 
     final MediaQueryData rawMetrics = MediaQueryData.fromView(View.of(context));
     final bool keyboardVisible = rawMetrics.viewInsets.bottom > 0;
-    final double bottomBarHeight = keyboardVisible ? 0.0 : rawMetrics.viewPadding.bottom;
+    final double bottomBarHeight = keyboardVisible
+        ? 0.0
+        : rawMetrics.viewPadding.bottom;
 
     return ColoredBox(
       color: theme.colorScheme.surface,
       child: Padding(
-        padding: EdgeInsets.only(
-          bottom: bottomBarHeight,
-        ),
+        padding: EdgeInsets.only(bottom: bottomBarHeight),
         child: Column(
           children: <Widget>[
             M3EAppBar.top(

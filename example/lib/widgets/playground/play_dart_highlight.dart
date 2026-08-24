@@ -249,7 +249,7 @@ _TokenKind _consume(String source, int i, void Function(int next) advance) {
   }
 
   // Block comment
-  if (c == 0x2F && i + 1 < n && source.codeUnitAt(i + 1) == 0x2A /* * */) {
+  if (c == 0x2F && i + 1 < n && source.codeUnitAt(i + 1) == 0x2A /* * */ ) {
     var j = i + 2;
     while (j + 1 < n &&
         !(source.codeUnitAt(j) == 0x2A && source.codeUnitAt(j + 1) == 0x2F)) {
@@ -266,13 +266,13 @@ _TokenKind _consume(String source, int i, void Function(int next) advance) {
     advance(_scanString(source, i + 1, raw: true));
     return _TokenKind.string;
   }
-  if (c == 0x27 /* ' */ || c == 0x22 /* " */) {
+  if (c == 0x27 /* ' */ || c == 0x22 /* " */ ) {
     advance(_scanString(source, i, raw: false));
     return _TokenKind.string;
   }
 
   // Annotation
-  if (c == 0x40 /* @ */) {
+  if (c == 0x40 /* @ */ ) {
     var j = i + 1;
     while (j < n && _isIdentPart(source.codeUnitAt(j))) {
       j++;
@@ -298,7 +298,7 @@ _TokenKind _consume(String source, int i, void Function(int next) advance) {
     if (_isTypeName(word)) {
       return _TokenKind.typeName;
     }
-    if (_peekNonWs(source, j) == 0x28 /* ( */) {
+    if (_peekNonWs(source, j) == 0x28 /* ( */ ) {
       return _TokenKind.function;
     }
     if (_precededByDot(source, i)) {

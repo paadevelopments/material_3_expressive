@@ -148,12 +148,7 @@ Future<void> _shortPullCancels(WidgetTester tester) async {
 
 Future<void> _revealDelayedByPadding(WidgetTester tester) async {
   await tester.pumpWidget(
-    _host(
-      M3ERefreshIndicator(
-        onRefresh: () async {},
-        child: _list(),
-      ),
-    ),
+    _host(M3ERefreshIndicator(onRefresh: () async {}, child: _list())),
   );
 
   final TestGesture gesture = await tester.startGesture(

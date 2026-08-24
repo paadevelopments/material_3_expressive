@@ -65,6 +65,8 @@
 
 ### Changed
 
+* Internal `klin_dart` compliance: split `M3EInputTimePickerFormField` build
+  helpers to clear cognitive complexity (no behavior change).
 * `M3EExpressiveLoadingIndicator` applies a noticeable scale pulse (spatial
   spring) to the active polygon holder on each morph — not the outer
   container. Morph rotation defaults are slower (45° / cycle, slower spring);
