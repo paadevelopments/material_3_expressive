@@ -15,6 +15,10 @@ export 'styles/m3e_loading_indicator_theme.dart';
 ///    on the surface.
 ///  * [M3ELoadingIndicatorVariant.contained] draws the shape inside a filled
 ///    container, using the on-container color for the shape.
+///
+/// Colors:
+///  * [color] — morphing shape (inner) color for both variants.
+///  * [containerColor] — filled shell behind a contained indicator.
 class M3ELoadingIndicator extends StatelessWidget {
   /// M3ELoadingIndicator.
   const M3ELoadingIndicator({
@@ -33,6 +37,7 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.pulseStartScale,
     this.pulseSpring,
     this.pulseSpringVelocity,
+    this.rotationTurns,
     this.semanticLabel,
     this.semanticValue,
   });
@@ -41,10 +46,11 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   final M3ELoadingIndicatorVariant variant;
 
-  /// color.
+  /// Morphing shape (inner) color.
   final Color? color;
 
-  /// containerColor.
+  /// Contained shell color behind the shape. Ignored for the default variant
+  /// when left null (transparent).
   final Color? containerColor;
 
   /// polygons.
@@ -79,6 +85,10 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   /// Initial pulse spring velocity.
   final double? pulseSpringVelocity;
+
+  /// When non-null, disables auto spin and pulse; rotation is driven by this
+  /// value in turns (`1.0` = 360°).
+  final double? rotationTurns;
 
   /// semanticLabel.
   final String? semanticLabel;
@@ -118,6 +128,7 @@ class M3ELoadingIndicator extends StatelessWidget {
       pulseStartScale: pulseStartScale,
       pulseSpring: pulseSpring,
       pulseSpringVelocity: pulseSpringVelocity,
+      rotationTurns: rotationTurns,
     );
 
     return M3EComponentTheme(

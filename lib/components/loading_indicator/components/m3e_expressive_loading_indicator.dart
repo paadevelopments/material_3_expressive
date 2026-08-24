@@ -58,6 +58,10 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// Initial pulse spring velocity. Defaults to theme.
   final double? pulseSpringVelocity;
 
+  /// When non-null, auto spin and morph pulse are disabled; this value (in
+  /// turns, where `1.0` is 360°) drives rotation instead.
+  final double? rotationTurns;
+
   /// M3EExpressiveLoadingIndicator.
 
   const M3EExpressiveLoadingIndicator({
@@ -73,6 +77,7 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     this.pulseStartScale,
     this.pulseSpring,
     this.pulseSpringVelocity,
+    this.rotationTurns,
     super.semanticsLabel,
     super.semanticsValue,
   }) : assert(
@@ -140,6 +145,8 @@ class _M3EExpressiveLoadingIndicatorState
 
   double get _activeSize => _loadingTheme.activeIndicatorSize;
 
+  bool get _manualRotation => widget.rotationTurns != null;
+
   @override
   Widget build(BuildContext context) {
     final m3eTheme = M3ETheme.of(context);
@@ -174,23 +181,27 @@ class _M3EExpressiveLoadingIndicatorState
                 ]),
                 builder: (context, child) {
                   final morphProgress = _morphController.value.clamp(0.0, 1.0);
-                  final globalRotationDegrees =
-                      _globalRotationController.value * _fullRotation;
+                  final double globalRotationDegrees = _manualRotation
+                      ? (widget.rotationTurns! * _fullRotation)
+                      : (_globalRotationController.value * _fullRotation);
 
-                  // Morph contributes a reduced quarter-turn by default (theme).
-                  final totalRotationDegrees =
-                      morphProgress * _morphRotationDegrees +
-                      _morphRotationTargetAngle +
-                      globalRotationDegrees;
+                  final double totalRotationDegrees = _manualRotation
+                      ? globalRotationDegrees
+                      : morphProgress * _morphRotationDegrees +
+                            _morphRotationTargetAngle +
+                            globalRotationDegrees;
 
                   final totalRotationRadians =
                       totalRotationDegrees * (math.pi / 180.0);
 
-                  // Pulse the active shape holder only — not the outer container.
+                  final double pulseScale = _manualRotation
+                      ? 1.0
+                      : _pulseController.value;
+
                   return Transform.rotate(
                     angle: totalRotationRadians,
                     child: Transform.scale(
-                      scale: _pulseController.value,
+                      scale: pulseScale,
                       child: SizedBox(
                         width: _activeSize,
                         height: _activeSize,
@@ -256,8 +267,17 @@ class _M3EExpressiveLoadingIndicatorState
   @override
   void didUpdateWidget(M3EExpressiveLoadingIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.globalRotationDuration != widget.globalRotationDuration ||
-        oldWidget.morphInterval != widget.morphInterval) {
+    final wasManual = oldWidget.rotationTurns != null;
+    final isManual = widget.rotationTurns != null;
+    if (wasManual != isManual) {
+      if (isManual) {
+        _enterManualRotation();
+      } else {
+        _exitManualRotation(seedTurns: oldWidget.rotationTurns);
+      }
+    } else if (!isManual &&
+        (oldWidget.globalRotationDuration != widget.globalRotationDuration ||
+            oldWidget.morphInterval != widget.morphInterval)) {
       _restartPeriodicAnimations();
     }
   }
@@ -266,13 +286,43 @@ class _M3EExpressiveLoadingIndicatorState
 
   void _ensureAnimationsStarted() {
     if (_animationsStarted) {
-      _syncGlobalRotationDuration();
+      if (!_manualRotation) {
+        _syncGlobalRotationDuration();
+      }
       return;
     }
     _animationsStarted = true;
     _morphRotationTargetAngle = _morphRotationDegrees;
+    if (_manualRotation) {
+      _pulseController.value = 1;
+      return;
+    }
     _syncGlobalRotationDuration();
     _startAnimations();
+  }
+
+  void _enterManualRotation() {
+    _morphTimer?.cancel();
+    _morphTimer = null;
+    _globalRotationController.stop();
+    _morphController.stop();
+    _pulseController
+      ..stop()
+      ..value = 1;
+  }
+
+  void _exitManualRotation({double? seedTurns}) {
+    if (seedTurns != null) {
+      _globalRotationController.value = seedTurns % 1.0;
+      _morphRotationTargetAngle = 0;
+    }
+    _syncGlobalRotationDuration();
+    if (!_globalRotationController.isAnimating) {
+      _globalRotationController.repeat();
+    }
+    _morphTimer?.cancel();
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
+    _startMorphCycle();
   }
 
   void _syncGlobalRotationDuration() {
@@ -289,6 +339,9 @@ class _M3EExpressiveLoadingIndicatorState
   }
 
   void _restartPeriodicAnimations() {
+    if (_manualRotation) {
+      return;
+    }
     _morphTimer?.cancel();
     _syncGlobalRotationDuration();
     if (!_globalRotationController.isAnimating) {
@@ -352,6 +405,9 @@ class _M3EExpressiveLoadingIndicatorState
   }
 
   void _startAnimations() {
+    if (_manualRotation) {
+      return;
+    }
     // infinite global rotation
     _globalRotationController.repeat();
 
@@ -362,7 +418,7 @@ class _M3EExpressiveLoadingIndicatorState
   }
 
   void _startMorphCycle() {
-    if (!mounted) {
+    if (!mounted || _manualRotation) {
       return;
     }
 
