@@ -154,6 +154,7 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
       semanticLabel: widget.semanticsLabel,
       semanticValue: widget.semanticsValue,
       rotationTurns: _dragRotationTurns(context),
+      elevation: widget.elevation,
     );
   }
 

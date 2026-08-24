@@ -3,6 +3,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
+import '../../../widgets/playground/controls/play_slider.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
 
@@ -19,12 +20,14 @@ class LoadingIndicatorPlayground extends StatefulWidget {
 class _LoadingIndicatorPlaygroundState
     extends State<LoadingIndicatorPlayground> {
   M3ELoadingIndicatorVariant _variant = M3ELoadingIndicatorVariant.defaultStyle;
+  double _elevation = 0;
 
   List<PlaySnippet> get _snippets {
     final String sample =
         '''
 M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.${_variant.name},
+  elevation: ${_elevation.toStringAsFixed(0)},
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -40,7 +43,12 @@ M3ELoadingIndicator(
       previews: <Widget>[
         PlayPreviewCard(
           label: 'Loading indicator',
-          child: Center(child: M3ELoadingIndicator(variant: _variant)),
+          child: Center(
+            child: M3ELoadingIndicator(
+              variant: _variant,
+              elevation: _elevation,
+            ),
+          ),
         ),
         PlayPreviewCard(
           label: 'Both variants',
@@ -48,10 +56,11 @@ M3ELoadingIndicator(
             spacing: 24,
             runSpacing: 16,
             crossAxisAlignment: WrapCrossAlignment.center,
-            children: const <Widget>[
-              M3ELoadingIndicator(),
+            children: <Widget>[
+              M3ELoadingIndicator(elevation: _elevation),
               M3ELoadingIndicator(
                 variant: M3ELoadingIndicatorVariant.contained,
+                elevation: _elevation,
               ),
             ],
           ),
@@ -70,6 +79,14 @@ M3ELoadingIndicator(
               onChanged: (M3ELoadingIndicatorVariant v) {
                 setState(() => _variant = v);
               },
+            ),
+            PlaySlider(
+              label: 'Elevation',
+              value: _elevation,
+              min: 0,
+              max: 12,
+              divisions: 12,
+              onChanged: (double v) => setState(() => _elevation = v),
             ),
           ],
         ),

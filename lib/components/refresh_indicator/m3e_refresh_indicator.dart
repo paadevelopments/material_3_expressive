@@ -49,6 +49,8 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
+    this.releaseBubbleSpring,
+    this.releaseBubbleFromScale,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
@@ -56,6 +58,10 @@ class M3ERefreshIndicator extends StatefulWidget {
        strokeWidth = 0.0,
        assert(elevation >= 0.0, 'assertion failed'),
        assert(indicatorPadding >= 0.0, 'assertion failed'),
+       assert(
+         releaseBubbleFromScale == null || releaseBubbleFromScale > 0.0,
+         'assertion failed',
+       ),
        assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
 
   /// const.
@@ -75,6 +81,8 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
+    this.releaseBubbleSpring,
+    this.releaseBubbleFromScale,
     this.polygons,
     this.indicatorConstraints,
     this.onStatusChange,
@@ -82,6 +90,10 @@ class M3ERefreshIndicator extends StatefulWidget {
        strokeWidth = 0.0,
        assert(elevation >= 0.0, 'assertion failed'),
        assert(indicatorPadding >= 0.0, 'assertion failed'),
+       assert(
+         releaseBubbleFromScale == null || releaseBubbleFromScale > 0.0,
+         'assertion failed',
+       ),
        assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
 
   /// const.
@@ -102,12 +114,18 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
+    this.releaseBubbleSpring,
+    this.releaseBubbleFromScale,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.material,
        polygons = null,
        indicatorConstraints = null,
        assert(elevation >= 0.0, 'assertion failed'),
-       assert(indicatorPadding >= 0.0, 'assertion failed');
+       assert(indicatorPadding >= 0.0, 'assertion failed'),
+       assert(
+         releaseBubbleFromScale == null || releaseBubbleFromScale > 0.0,
+         'assertion failed',
+       );
 
   /// const.
   const M3ERefreshIndicator.adaptive({
@@ -127,12 +145,18 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = M3ERefreshTriggerMode.onEdge,
     this.elevation = M3ERefreshIndicatorTheme.kDefaultElevation,
+    this.releaseBubbleSpring,
+    this.releaseBubbleFromScale,
     this.onStatusChange,
   }) : _indicatorType = _IndicatorType.adaptive,
        polygons = null,
        indicatorConstraints = null,
        assert(elevation >= 0.0, 'assertion failed'),
-       assert(indicatorPadding >= 0.0, 'assertion failed');
+       assert(indicatorPadding >= 0.0, 'assertion failed'),
+       assert(
+         releaseBubbleFromScale == null || releaseBubbleFromScale > 0.0,
+         'assertion failed',
+       );
 
   /// const.
   const M3ERefreshIndicator.noSpinner({
@@ -156,6 +180,8 @@ class M3ERefreshIndicator extends StatefulWidget {
        strokeWidth = 0.0,
        polygons = null,
        indicatorConstraints = null,
+       releaseBubbleSpring = null,
+       releaseBubbleFromScale = null,
        assert(elevation >= 0.0, 'assertion failed'),
        assert(indicatorPadding >= 0.0, 'assertion failed');
 
@@ -214,6 +240,15 @@ class M3ERefreshIndicator extends StatefulWidget {
 
   /// final.
   final double elevation;
+
+  /// Override for the release scale-bubble spring. Defaults to theme
+  /// [M3ERefreshIndicatorTheme.releaseBubbleSpring].
+  final M3ESpring? releaseBubbleSpring;
+
+  /// Override for the bubble start scale. Defaults to theme
+  /// [M3ERefreshIndicatorTheme.releaseBubbleFromScale].
+  final double? releaseBubbleFromScale;
+
   final _IndicatorType _indicatorType;
 
   /// final.
@@ -277,12 +312,23 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   /// Pull (px) at which scale/fade/downward motion begins.
   double get _revealDelayPx => 2 * widget.indicatorPadding;
 
-  /// Same recipe as nav icon / press morph: overshoots then settles at 1.
-  SpringMotion get _releaseBubbleMotion =>
-      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
-        stiffness: 350,
-        damping: 0.1,
-      );
+  M3ERefreshIndicatorTheme get _refreshTheme =>
+      M3ETheme.of(context).refreshIndicatorTheme;
+
+  M3ESpring get _resolvedReleaseBubbleSpring =>
+      widget.releaseBubbleSpring ?? _refreshTheme.releaseBubbleSpring;
+
+  double get _resolvedReleaseBubbleFromScale =>
+      widget.releaseBubbleFromScale ?? _refreshTheme.releaseBubbleFromScale;
+
+  /// Motor spring from theme / widget override (user-tuned defaults: 350 / 0.1).
+  SpringMotion get _releaseBubbleMotion {
+    final M3ESpring spring = _resolvedReleaseBubbleSpring;
+    return const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+      stiffness: spring.stiffness,
+      damping: spring.damping,
+    );
+  }
 
   @override
   void initState() {
@@ -292,8 +338,13 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _scaleController = AnimationController.unbounded(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
     _contentPadController = AnimationController.unbounded(vsync: this);
+    // Theme may not be available yet; _playReleaseBubble applies resolved motion.
     _bubbleController = SingleMotionController(
-      motion: _releaseBubbleMotion,
+      motion: const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        stiffness:
+            M3ERefreshIndicatorTheme.kDefaultReleaseBubbleSpring.stiffness,
+        damping: M3ERefreshIndicatorTheme.kDefaultReleaseBubbleSpring.damping,
+      ),
       vsync: this,
       initialValue: 1,
     );

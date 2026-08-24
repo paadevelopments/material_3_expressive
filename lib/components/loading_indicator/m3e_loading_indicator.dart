@@ -26,6 +26,7 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.variant = M3ELoadingIndicatorVariant.defaultStyle,
     this.color,
     this.containerColor,
+    this.elevation,
     this.polygons,
     this.constraints,
     this.padding,
@@ -40,10 +41,9 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.rotationTurns,
     this.semanticLabel,
     this.semanticValue,
-  });
+  }) : assert(elevation == null || elevation >= 0.0, 'assertion failed');
 
   /// variant.
-
   final M3ELoadingIndicatorVariant variant;
 
   /// Morphing shape (inner) color.
@@ -52,6 +52,9 @@ class M3ELoadingIndicator extends StatelessWidget {
   /// Contained shell color behind the shape. Ignored for the default variant
   /// when left null (transparent).
   final Color? containerColor;
+
+  /// Surface elevation for both variants. Defaults to theme (`0`).
+  final double? elevation;
 
   /// polygons.
   final List<RoundedPolygon>? polygons;
@@ -114,6 +117,8 @@ class M3ELoadingIndicator extends StatelessWidget {
     final containerBg =
         containerColor ?? loadingTheme.resolveContainerColor(scheme, variant);
 
+    final double resolvedElevation = elevation ?? loadingTheme.elevation;
+
     final indicator = M3EExpressiveLoadingIndicator(
       color: activeColor,
       polygons: polygons,
@@ -136,6 +141,10 @@ class M3ELoadingIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: containerBg,
           borderRadius: loadingTheme.containerRadius,
+          boxShadow: M3EElevation.shadows(
+            resolvedElevation,
+            shadowColor: scheme.shadow,
+          ),
         ),
         child: Padding(padding: padding ?? EdgeInsets.zero, child: indicator),
       ),

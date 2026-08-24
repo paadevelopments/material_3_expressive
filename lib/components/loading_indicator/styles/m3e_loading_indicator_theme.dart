@@ -12,6 +12,7 @@ class M3ELoadingIndicatorTheme
     this.containerWidth = 48,
     this.containerHeight = 48,
     this.activeIndicatorSize = 38,
+    this.elevation = 0,
     this.globalRotationDuration = const Duration(milliseconds: 1600),
     this.morphInterval = const Duration(milliseconds: 1000),
     this.morphRotationDegrees = 45,
@@ -35,6 +36,9 @@ class M3ELoadingIndicatorTheme
 
   /// activeIndicatorSize.
   final double activeIndicatorSize;
+
+  /// Default surface elevation for both variants (`0` = flat).
+  final double elevation;
 
   /// Full 360° continuous spin period.
   final Duration globalRotationDuration;
@@ -115,6 +119,7 @@ class M3ELoadingIndicatorTheme
     double? containerWidth,
     double? containerHeight,
     double? activeIndicatorSize,
+    double? elevation,
     Duration? globalRotationDuration,
     Duration? morphInterval,
     double? morphRotationDegrees,
@@ -128,6 +133,7 @@ class M3ELoadingIndicatorTheme
       containerWidth: containerWidth ?? this.containerWidth,
       containerHeight: containerHeight ?? this.containerHeight,
       activeIndicatorSize: activeIndicatorSize ?? this.activeIndicatorSize,
+      elevation: elevation ?? this.elevation,
       globalRotationDuration:
           globalRotationDuration ?? this.globalRotationDuration,
       morphInterval: morphInterval ?? this.morphInterval,
@@ -153,6 +159,7 @@ class M3ELoadingIndicatorTheme
         other.activeIndicatorSize,
         t,
       )!,
+      elevation: _lerpDouble(elevation, other.elevation, t)!,
       globalRotationDuration: t < 0.5
           ? globalRotationDuration
           : other.globalRotationDuration,

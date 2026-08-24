@@ -398,10 +398,9 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
 
   /// Spatial spring scale bubble at the fixed rest inset (layout unchanged).
   void _playReleaseBubble() {
-    // One overshooting spring into 1 — same idea as [M3ENavIconScale].
     _bubbleController
       ..motion = _releaseBubbleMotion
-      ..value = 0.96
+      ..value = _resolvedReleaseBubbleFromScale
       ..animateTo(1);
   }
 }

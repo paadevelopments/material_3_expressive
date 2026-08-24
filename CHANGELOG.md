@@ -13,6 +13,11 @@
   pulling (defaults to indicator height + `2 * indicatorPadding`).
 * `M3ERefreshIndicator.indicatorPadding` — vertical gap above/below the
   spinner in the list pad (default 8); reveal starts after `2 ×` this value.
+* `M3ERefreshIndicatorTheme.releaseBubbleSpring` /
+  `releaseBubbleFromScale` (and matching widget overrides) for the release
+  scale bubble (defaults stiffness 350 / damping 0.1 / from-scale 0.96).
+* `M3ELoadingIndicator.elevation` (theme default `0`) — applies
+  [M3EElevation] shadows for both contained and default variants.
 * `M3ELoadingIndicator.rotationTurns` — when set, disables auto spin and
   morph pulse so a host (e.g. refresh) can drive rotation.
 * `M3ELoadingIndicator.color` / `containerColor` document shape vs contained
