@@ -1,6 +1,3 @@
-// Vendored from the `navigation_bar_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
-// Adapted for material_3_expressive: liquid selection indicator (spatial springs).
 import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -148,7 +145,7 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     final Color bg = widget.backgroundColor ?? navTheme.containerColor(scheme);
     final ShapeBorder shape = navTheme.containerShape(widget.shapeFamily);
     final double bottomInset = widget.safeArea
-        ? MediaQuery.viewPaddingOf(context).bottom
+        ? M3ESafeArea.bottomOf(context)
         : 0.0;
     final Color indicator =
         widget.indicatorColor ?? navTheme.indicatorColor(scheme);

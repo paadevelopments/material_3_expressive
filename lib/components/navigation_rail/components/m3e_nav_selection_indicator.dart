@@ -4,6 +4,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
+import '../../../foundations/foundations.dart';
+
 /// Liquid selection indicator: lead/trail springs elongate into a bridge
 /// between destinations, then settle to a stadium pill (spatial springs spec).
 ///
@@ -170,7 +172,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
     // Safe-area often settles after first paint. Other MediaQuery churn
     // (keyboard viewInsets from fullscreen search) must not force-jump the
     // pill — that snaps to transitional / bogus geometry.
-    final EdgeInsets padding = MediaQuery.viewPaddingOf(context);
+    final EdgeInsets padding = M3ESafeArea.paddingOf(context);
     final first = _viewPadding == null;
     final bool paddingChanged = !first && _viewPadding != padding;
     _viewPadding = padding;
@@ -471,7 +473,7 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   @override
   Widget build(BuildContext context) {
     // Rebuild/remeasure when safe-area insets change after first paint.
-    MediaQuery.viewPaddingOf(context);
+    M3ESafeArea.paddingOf(context);
 
     if (widget.enabled && !_ready) {
       _scheduleMeasure(forceJump: true);

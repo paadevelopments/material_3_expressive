@@ -1,6 +1,3 @@
-// GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
-// Adapted for material_3_expressive: import paths + M3E naming only.
-
 import 'package:material_3_expressive/components/split_buttons/styles/m3e_split_button_decoration.dart'
     show M3ESplitButtonDecoration;
 

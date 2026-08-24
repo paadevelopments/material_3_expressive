@@ -114,8 +114,8 @@ abstract final class M3EMotion {
 
   /// Slow expressive spatial spring with slight overshoot.
   static const M3ESpring expressiveSpatialSlow = M3ESpring(
-    stiffness: 200,
-    damping: 0.8,
+    stiffness: 300,
+    damping: 1,
   );
 
   /// Fast effects spring for color and opacity (no overshoot).

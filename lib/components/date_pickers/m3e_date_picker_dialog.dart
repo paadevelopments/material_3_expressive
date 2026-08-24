@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
+import '../dialogs/components/m3e_dialog_inset.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_date_picker_actions.dart';
 import 'components/m3e_date_picker_dialog_content.dart';
@@ -35,6 +36,7 @@ class M3EDatePickerDialog extends StatefulWidget {
     this.restorationId,
     this.onDatePickerModeChange,
     this.insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+    this.resizeToAvoidBottomInset,
     super.key,
   });
 
@@ -92,6 +94,9 @@ class M3EDatePickerDialog extends StatefulWidget {
 
   /// insetPadding.
   final EdgeInsets insetPadding;
+
+  /// When null, uses dialog theme `resizeToAvoidBottomInset`.
+  final bool? resizeToAvoidBottomInset;
 
   @override
   State<M3EDatePickerDialog> createState() => _M3EDatePickerDialogState();
@@ -271,13 +276,13 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           orientation == Orientation.landscape &&
           (_entryMode.value == M3EDatePickerEntryMode.input ||
               _entryMode.value == M3EDatePickerEntryMode.inputOnly),
-      entryModeButton: resolved.entryModeButton,
     );
     final Widget actions = M3EDatePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
+      entryModeButton: resolved.entryModeButton,
     );
     final double textScaleFactor =
         MediaQuery.textScalerOf(context)
@@ -295,8 +300,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           ? null
           : _calendarBodyHeight(context),
     );
-    return Padding(
+    return M3EDialogInset(
       padding: widget.insetPadding,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       child: Material(
         color: dateTheme.backgroundColor(theme.colorScheme),
         elevation: dateTheme.elevation,
@@ -365,7 +371,7 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
             currentDate: currentDate,
           ),
           entryModeButton: M3EDatePickerEntryModeButton(
-            icon: M3EIcons.edit_outlined,
+            icon: M3EIcons.keyboard_outlined,
             tooltip: localizations.inputDateModeButtonLabel,
             onPressed: _handleEntryModeToggle,
           ),

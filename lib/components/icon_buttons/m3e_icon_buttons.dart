@@ -1,10 +1,3 @@
-// Vendored from the `icon_button_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e/lib).
-// Adapted for material_3_expressive: spatial spring press morph via
-// [M3ERadiusAndPaddingMotion] (Phase 2 button morph).
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';

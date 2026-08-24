@@ -1,7 +1,3 @@
-// Vendored from the `icon_button_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e/lib).
-// The logic is kept identical to the reference implementation; only the public
-// identifiers carry the `M3E` prefix to match this package's conventions.
 import 'package:material_ui/material_ui.dart';
 
 import '../enums/m3e_icon_button_enums.dart';

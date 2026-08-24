@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// FloatingToolbar / FlexibleBottomAppBar variants
-
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
 import 'package:material_3_expressive/material_3_expressive.dart'

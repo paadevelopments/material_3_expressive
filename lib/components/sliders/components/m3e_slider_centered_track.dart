@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// SliderDefaults.CenteredTrack
-
 import 'package:flutter/widgets.dart';
 
 import '../enums/m3e_slider_enums.dart';

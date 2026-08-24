@@ -152,8 +152,14 @@ class M3ECardListItem extends StatelessWidget {
             variant: variant,
             border: border,
             borderRadius: animatedRadius,
+            // Outlined uses the card theme's transparent fill; other variants
+            // keep the card-list background unless an explicit color is set.
             color:
-                resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
+                resolvedColor ??
+                color ??
+                (variant == M3ECardVariant.outlined
+                    ? null
+                    : cardListTheme.backgroundColor(scheme)),
             padding: padding ?? cardListTheme.itemPadding,
             onPressed: wrappedOnTap,
             onLongPress: wrappedOnLongPress,

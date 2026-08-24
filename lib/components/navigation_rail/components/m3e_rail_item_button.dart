@@ -1,11 +1,3 @@
-// Vendored from the `navigation_rail_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
-// The logic is kept identical to the reference `RailItemButtonM3E`; only the
-// public identifiers carry the `M3E` prefix and it uses this package's own
-// `M3EIconButton`.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
 import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart'
     show M3ENavSelectionIndicator;
 import 'package:material_3_expressive/components/navigation_rail/styles/m3e_navigation_rail_theme.dart'

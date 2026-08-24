@@ -1,9 +1,3 @@
-// GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
-// Adapted for material_3_expressive: import paths + M3E naming only.
-// Copyright (c) 2026 Mudit Purohit
-//
-// This source code is licensed under the MIT license found in the
-// LICENSE file in the root directory of this source tree.
 import 'package:material_ui/material_ui.dart';
 
 import '../../toggle_button_group/models/m3e_button_group_action.dart';

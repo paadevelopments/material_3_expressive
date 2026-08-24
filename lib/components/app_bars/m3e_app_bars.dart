@@ -24,7 +24,7 @@ enum _M3EAppBarDockEdge { top, bottom }
 class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// A fixed top app bar for use in `Scaffold.appBar`.
   ///
-  /// When [safeArea] is true, only the top `MediaQuery.viewPadding` is applied
+  /// When [safeArea] is true, only the top [M3ESafeArea] inset is applied
   /// outside the content band (same model as [M3EToolbar.docked]).
   const M3EAppBar.top({
     super.key,
@@ -121,7 +121,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// A bottom app bar with actions and an optional floating action button.
   ///
-  /// When [safeArea] is true, only the bottom `MediaQuery.viewPadding` is
+  /// When [safeArea] is true, only the bottom [M3ESafeArea] inset is
   /// applied outside the content band.
   const M3EAppBar.bottom({
     super.key,
@@ -214,7 +214,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// automaticallyImplyLeading.
   final bool automaticallyImplyLeading;
 
-  /// When true, applies `MediaQuery.viewPadding` on the docked edge only
+  /// When true, applies [M3ESafeArea] padding on the docked edge only
   /// (top for [M3EAppBar.top]/[M3EAppBar.search], bottom for [M3EAppBar.bottom]).
   final bool safeArea;
 
@@ -262,7 +262,7 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     if (!safeArea) {
       return EdgeInsets.zero;
     }
-    final EdgeInsets mq = MediaQuery.viewPaddingOf(context);
+    final EdgeInsets mq = M3ESafeArea.paddingOf(context);
     return EdgeInsets.only(
       top: _dockEdge == _M3EAppBarDockEdge.top ? mq.top : 0,
       bottom: _dockEdge == _M3EAppBarDockEdge.bottom ? mq.bottom : 0,

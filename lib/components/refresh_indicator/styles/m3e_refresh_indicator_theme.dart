@@ -6,8 +6,11 @@ import '../../../foundations/foundations.dart';
 @immutable
 class M3ERefreshIndicatorTheme
     extends M3EThemeExtension<M3ERefreshIndicatorTheme> {
-  /// kDefaultDisplacement.
-  static const double kDefaultDisplacement = 40;
+  /// Default resting top inset of the spinner (matches default indicator padding).
+  static const double kDefaultDisplacement = 8;
+
+  /// Default vertical gap above/below the spinner inside the list pad.
+  static const double kDefaultIndicatorPadding = 8;
 
   /// kDefaultEdgeOffset.
   static const double kDefaultEdgeOffset = 0;
@@ -21,8 +24,16 @@ class M3ERefreshIndicatorTheme
   /// kDragSizeFactorLimit.
   static const double kDragSizeFactorLimit = 1.5;
 
-  /// M3ERefreshIndicatorTheme.
+  /// Default release bubble spring (noticeable overshoot at rest).
+  static const M3ESpring kDefaultReleaseBubbleSpring = M3ESpring(
+    stiffness: 350,
+    damping: 0.1,
+  );
 
+  /// Scale the bubble spring starts from before settling at 1.
+  static const double kDefaultReleaseBubbleFromScale = 0.96;
+
+  /// M3ERefreshIndicatorTheme.
   const M3ERefreshIndicatorTheme({
     this.defaultDisplacement = kDefaultDisplacement,
     this.defaultEdgeOffset = kDefaultEdgeOffset,
@@ -31,14 +42,14 @@ class M3ERefreshIndicatorTheme
     this.dragSizeFactorLimit = kDragSizeFactorLimit,
     this.indicatorSnapDuration = const Duration(milliseconds: 150),
     this.indicatorScaleDuration = const Duration(milliseconds: 200),
+    this.releaseBubbleSpring = kDefaultReleaseBubbleSpring,
+    this.releaseBubbleFromScale = kDefaultReleaseBubbleFromScale,
   });
 
   /// defaults.
-
   static const M3ERefreshIndicatorTheme defaults = M3ERefreshIndicatorTheme();
 
   /// defaultDisplacement.
-
   final double defaultDisplacement;
 
   /// defaultEdgeOffset.
@@ -59,21 +70,23 @@ class M3ERefreshIndicatorTheme
   /// indicatorScaleDuration.
   final Duration indicatorScaleDuration;
 
-  /// activeColor.
+  /// Spatial spring for the release scale bubble at the resting inset.
+  final M3ESpring releaseBubbleSpring;
 
+  /// Starting scale for the release bubble before it springs to 1.
+  final double releaseBubbleFromScale;
+
+  /// activeColor.
   Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
   /// containerColorDefault.
-
   Color containerColorDefault() => const Color(0x00000000);
 
   /// containedContainerColor.
-
   Color containedContainerColor(M3EColorScheme scheme) =>
       scheme.primaryContainer;
 
   /// containedActiveColor.
-
   Color containedActiveColor(M3EColorScheme scheme) =>
       scheme.onPrimaryContainer;
 
@@ -86,6 +99,8 @@ class M3ERefreshIndicatorTheme
     double? dragSizeFactorLimit,
     Duration? indicatorSnapDuration,
     Duration? indicatorScaleDuration,
+    M3ESpring? releaseBubbleSpring,
+    double? releaseBubbleFromScale,
   }) {
     return M3ERefreshIndicatorTheme(
       defaultDisplacement: defaultDisplacement ?? this.defaultDisplacement,
@@ -98,6 +113,9 @@ class M3ERefreshIndicatorTheme
           indicatorSnapDuration ?? this.indicatorSnapDuration,
       indicatorScaleDuration:
           indicatorScaleDuration ?? this.indicatorScaleDuration,
+      releaseBubbleSpring: releaseBubbleSpring ?? this.releaseBubbleSpring,
+      releaseBubbleFromScale:
+          releaseBubbleFromScale ?? this.releaseBubbleFromScale,
     );
   }
 
@@ -138,6 +156,14 @@ class M3ERefreshIndicatorTheme
       indicatorScaleDuration: t < 0.5
           ? indicatorScaleDuration
           : other.indicatorScaleDuration,
+      releaseBubbleSpring: t < 0.5
+          ? releaseBubbleSpring
+          : other.releaseBubbleSpring,
+      releaseBubbleFromScale: _lerpDouble(
+        releaseBubbleFromScale,
+        other.releaseBubbleFromScale,
+        t,
+      )!,
     );
   }
 

@@ -16,7 +16,10 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     this.dialLabelFontSize = 16,
     this.fieldSize = const Size(96, 80),
     this.fieldMargin = const EdgeInsets.symmetric(horizontal: 4),
-    this.periodOptionSize = const Size(48, 40),
+    this.periodOptionSize = const Size(52, 40),
+    this.periodPortraitSize = const Size(52, 80),
+    this.periodLandscapeSize = const Size(216, 38),
+    this.periodInputSize = const Size(52, 72),
     this.fieldPeriodGap = 12,
     this.headerDialGap = 24,
     this.elevation = 6,
@@ -55,8 +58,17 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
   /// fieldMargin.
   final EdgeInsets fieldMargin;
 
-  /// periodOptionSize.
+  /// Half of [periodPortraitSize] (legacy per-option size).
   final Size periodOptionSize;
+
+  /// Full AM/PM control size in portrait dial mode (Material dayPeriodPortraitSize).
+  final Size periodPortraitSize;
+
+  /// Full AM/PM control size in landscape dial mode.
+  final Size periodLandscapeSize;
+
+  /// Full AM/PM control size in input mode (slightly shorter than portrait).
+  final Size periodInputSize;
 
   /// fieldPeriodGap.
   final double fieldPeriodGap;
@@ -162,6 +174,9 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     Size? fieldSize,
     EdgeInsets? fieldMargin,
     Size? periodOptionSize,
+    Size? periodPortraitSize,
+    Size? periodLandscapeSize,
+    Size? periodInputSize,
     double? fieldPeriodGap,
     double? headerDialGap,
     double? elevation,
@@ -178,6 +193,9 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
       fieldSize: fieldSize ?? this.fieldSize,
       fieldMargin: fieldMargin ?? this.fieldMargin,
       periodOptionSize: periodOptionSize ?? this.periodOptionSize,
+      periodPortraitSize: periodPortraitSize ?? this.periodPortraitSize,
+      periodLandscapeSize: periodLandscapeSize ?? this.periodLandscapeSize,
+      periodInputSize: periodInputSize ?? this.periodInputSize,
       fieldPeriodGap: fieldPeriodGap ?? this.fieldPeriodGap,
       headerDialGap: headerDialGap ?? this.headerDialGap,
       elevation: elevation ?? this.elevation,
@@ -209,6 +227,17 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
       fieldSize: Size.lerp(fieldSize, other.fieldSize, t)!,
       fieldMargin: EdgeInsets.lerp(fieldMargin, other.fieldMargin, t)!,
       periodOptionSize: Size.lerp(periodOptionSize, other.periodOptionSize, t)!,
+      periodPortraitSize: Size.lerp(
+        periodPortraitSize,
+        other.periodPortraitSize,
+        t,
+      )!,
+      periodLandscapeSize: Size.lerp(
+        periodLandscapeSize,
+        other.periodLandscapeSize,
+        t,
+      )!,
+      periodInputSize: Size.lerp(periodInputSize, other.periodInputSize, t)!,
       fieldPeriodGap: _lerpDouble(fieldPeriodGap, other.fieldPeriodGap, t)!,
       headerDialGap: _lerpDouble(headerDialGap, other.headerDialGap, t)!,
       elevation: _lerpDouble(elevation, other.elevation, t)!,

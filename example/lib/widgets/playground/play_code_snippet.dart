@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_3_expressive_example/theme/example_theme_settings.dart';
+import 'package:material_3_expressive_example/widgets/playground/play_dart_highlight.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Paste-ready Dart sample shown under a playground preview.
@@ -23,7 +25,7 @@ String playDartString(String value) {
   return "'${value.replaceAll(r'\', r'\\').replaceAll("'", r"\'")}'";
 }
 
-/// Monospace snippet with a copy action.
+/// Syntax-highlighted Dart snippet with a copy action (Roboto Mono).
 class PlayCodeSnippet extends StatelessWidget {
   /// Creates a code snippet card.
   const PlayCodeSnippet({required this.snippet, super.key});
@@ -43,12 +45,28 @@ class PlayCodeSnippet extends StatelessWidget {
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EColorScheme scheme = theme.colorScheme;
+    final PlayDartHighlightStyle highlight = PlayDartHighlightStyle.fromScheme(
+      scheme,
+    );
+    final TextStyle codeStyle = theme.typeScale.bodySmall.copyWith(
+      fontFamily: ExampleThemeSettings.robotoMono,
+      height: 1.45,
+      color: highlight.base,
+    );
+    final TextSpan highlighted = playHighlightDart(
+      snippet.code,
+      baseStyle: codeStyle,
+      colors: highlight,
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
+          color: highlight.editorBackground,
           borderRadius: BorderRadius.circular(M3EDimensions.radiusLarge),
+          border: Border.all(
+            color: M3EColorUtils.withOpacity(scheme.outlineVariant, 0.6),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(M3EDimensions.space16),
@@ -61,7 +79,7 @@ class PlayCodeSnippet extends StatelessWidget {
                     child: Text(
                       snippet.label,
                       style: theme.typeScale.labelLarge.copyWith(
-                        color: scheme.onSurfaceVariant,
+                        color: highlight.comment,
                       ),
                     ),
                   ),
@@ -75,13 +93,7 @@ class PlayCodeSnippet extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: M3EDimensions.space12),
-              SelectableText(
-                snippet.code,
-                style: theme.typeScale.bodySmall.copyWith(
-                  fontFamily: 'monospace',
-                  color: scheme.onSurface,
-                ),
-              ),
+              SelectableText.rich(highlighted),
             ],
           ),
         ),

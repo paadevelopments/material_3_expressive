@@ -1,6 +1,3 @@
-// Vendored from the `navigation_bar_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
-
 import 'package:flutter/widgets.dart';
 
 /// Resolved height/padding/icon metrics for the navigation bar.

@@ -1,6 +1,3 @@
-// Ported from https://github.com/Mudit200408/m3e_dropdown_menu
-// Adapted for material_3_expressive: import paths, foundations wiring, M3E naming.
-
 /// Controls the direction in which the dropdown overlay expands.
 ///
 /// * [M3EDropdownExpandDirection.auto]: Automatically determines the direction based on

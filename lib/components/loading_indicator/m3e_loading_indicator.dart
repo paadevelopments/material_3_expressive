@@ -15,6 +15,14 @@ export 'styles/m3e_loading_indicator_theme.dart';
 ///    on the surface.
 ///  * [M3ELoadingIndicatorVariant.contained] draws the shape inside a filled
 ///    container, using the on-container color for the shape.
+///
+/// Colors:
+///  * [color] — morphing shape (inner) color for both variants.
+///  * [containerColor] — filled shell behind a contained indicator.
+///
+/// Elevation:
+///  * Contained — rounded container casts [M3EElevation] shadows.
+///  * Default — shadow follows the morphing polygon path (rotate/scale/morph).
 class M3ELoadingIndicator extends StatelessWidget {
   /// M3ELoadingIndicator.
   const M3ELoadingIndicator({
@@ -22,22 +30,37 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.variant = M3ELoadingIndicatorVariant.defaultStyle,
     this.color,
     this.containerColor,
+    this.elevation,
     this.polygons,
     this.constraints,
     this.padding,
+    this.globalRotationDuration,
+    this.morphInterval,
+    this.morphRotationDegrees,
+    this.morphSpring,
+    this.morphSpringVelocity,
+    this.pulseStartScale,
+    this.pulseSpring,
+    this.pulseSpringVelocity,
+    this.rotationTurns,
     this.semanticLabel,
     this.semanticValue,
-  });
+  }) : assert(elevation == null || elevation >= 0.0, 'assertion failed');
 
   /// variant.
-
   final M3ELoadingIndicatorVariant variant;
 
-  /// color.
+  /// Morphing shape (inner) color.
   final Color? color;
 
-  /// containerColor.
+  /// Contained shell color behind the shape. Ignored for the default variant
+  /// when left null (transparent).
   final Color? containerColor;
+
+  /// Surface elevation. Defaults to theme (`0`).
+  ///
+  /// Contained uses container shadows; default follows the polygon path.
+  final double? elevation;
 
   /// polygons.
   final List<RoundedPolygon>? polygons;
@@ -47,6 +70,34 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   /// padding.
   final EdgeInsetsGeometry? padding;
+
+  /// Full 360° continuous spin period.
+  final Duration? globalRotationDuration;
+
+  /// Delay between polygon morph cycles.
+  final Duration? morphInterval;
+
+  /// Extra rotation (degrees) across each morph transition.
+  final double? morphRotationDegrees;
+
+  /// Spring for morph progress.
+  final M3ESpring? morphSpring;
+
+  /// Initial morph spring velocity.
+  final double? morphSpringVelocity;
+
+  /// Scale at the start of each morph-in pulse (default expands above 1, then settles).
+  final double? pulseStartScale;
+
+  /// Spring for the morph-in scale pulse settle.
+  final M3ESpring? pulseSpring;
+
+  /// Initial pulse spring velocity.
+  final double? pulseSpringVelocity;
+
+  /// When non-null, disables auto spin and pulse; rotation is driven by this
+  /// value in turns (`1.0` = 360°).
+  final double? rotationTurns;
 
   /// semanticLabel.
   final String? semanticLabel;
@@ -72,12 +123,27 @@ class M3ELoadingIndicator extends StatelessWidget {
     final containerBg =
         containerColor ?? loadingTheme.resolveContainerColor(scheme, variant);
 
+    final resolvedElevation = elevation ?? loadingTheme.elevation;
+    final contained = variant == M3ELoadingIndicatorVariant.contained;
+
     final indicator = M3EExpressiveLoadingIndicator(
       color: activeColor,
       polygons: polygons,
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,
       constraints: cons,
+      globalRotationDuration: globalRotationDuration,
+      morphInterval: morphInterval,
+      morphRotationDegrees: morphRotationDegrees,
+      morphSpring: morphSpring,
+      morphSpringVelocity: morphSpringVelocity,
+      pulseStartScale: pulseStartScale,
+      pulseSpring: pulseSpring,
+      pulseSpringVelocity: pulseSpringVelocity,
+      rotationTurns: rotationTurns,
+      // Uncontained: shadow is painted on the morphing path.
+      elevation: contained ? 0 : resolvedElevation,
+      shadowColor: scheme.shadow,
     );
 
     return M3EComponentTheme(
@@ -85,6 +151,13 @@ class M3ELoadingIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: containerBg,
           borderRadius: loadingTheme.containerRadius,
+          // Contained: elevation on the rounded shell only.
+          boxShadow: contained
+              ? M3EElevation.shadows(
+                  resolvedElevation,
+                  shadowColor: scheme.shadow,
+                )
+              : const <BoxShadow>[],
         ),
         child: Padding(padding: padding ?? EdgeInsets.zero, child: indicator),
       ),

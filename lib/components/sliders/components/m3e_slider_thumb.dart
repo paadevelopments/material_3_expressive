@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// SliderDefaults.Thumb / ThumbContent
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';

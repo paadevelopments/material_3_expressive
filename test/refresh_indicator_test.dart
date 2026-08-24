@@ -20,9 +20,21 @@ Widget _list() {
 
 void main() {
   testWidgets('renders its child at rest', _rendersChild);
-  testWidgets('overscroll drag triggers the refresh callback', _dragRefreshes);
+  testWidgets('overscroll past full reveal triggers refresh', _dragRefreshes);
   testWidgets('show() drives a refresh and reports status', _showRefreshes);
   testWidgets('contained variant drives a refresh', _containedRefreshes);
+  testWidgets(
+    'short pull cancels without calling onRefresh',
+    _shortPullCancels,
+  );
+  testWidgets(
+    'reveal stays 0 until pad passes 2× indicatorPadding',
+    _revealDelayedByPadding,
+  );
+  testWidgets(
+    'resting inset stays put while refresh runs',
+    _restingInsetStableDuringRefresh,
+  );
 }
 
 Future<void> _rendersChild(WidgetTester tester) async {
@@ -47,7 +59,8 @@ Future<void> _dragRefreshes(WidgetTester tester) async {
     ),
   );
 
-  await tester.fling(find.text('row0'), const Offset(0, 300), 1000);
+  // Need enough overscroll to fully reveal (height + 2*padding ≈ 64).
+  await tester.fling(find.text('row0'), const Offset(0, 400), 2000);
   await tester.pump();
   await tester.pump(const Duration(seconds: 1));
   await tester.pumpAndSettle();
@@ -95,10 +108,107 @@ Future<void> _containedRefreshes(WidgetTester tester) async {
     ),
   );
 
-  await tester.fling(find.text('row0'), const Offset(0, 300), 1000);
+  await tester.fling(find.text('row0'), const Offset(0, 400), 2000);
   await tester.pump();
   await tester.pump(const Duration(seconds: 1));
   await tester.pumpAndSettle();
 
   expect(statuses, contains(M3ERefreshStatus.refresh));
+}
+
+Future<void> _shortPullCancels(WidgetTester tester) async {
+  var refreshed = false;
+  final statuses = <M3ERefreshStatus?>[];
+
+  await tester.pumpWidget(
+    _host(
+      M3ERefreshIndicator(
+        onStatusChange: statuses.add,
+        onRefresh: () async {
+          refreshed = true;
+        },
+        child: _list(),
+      ),
+    ),
+  );
+
+  final TestGesture gesture = await tester.startGesture(
+    tester.getCenter(find.text('row0')),
+  );
+  // Pad grows but stays below full reveal (max ≈ 64 with defaults).
+  await gesture.moveBy(const Offset(0, 24));
+  await tester.pump();
+  await gesture.up();
+  await tester.pumpAndSettle();
+
+  expect(refreshed, isFalse);
+  expect(statuses, contains(M3ERefreshStatus.canceled));
+  expect(statuses, isNot(contains(M3ERefreshStatus.refresh)));
+}
+
+Future<void> _revealDelayedByPadding(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(M3ERefreshIndicator(onRefresh: () async {}, child: _list())),
+  );
+
+  final TestGesture gesture = await tester.startGesture(
+    tester.getCenter(find.text('row0')),
+  );
+  // Below 2× padding (16): reveal must stay at 0.
+  await gesture.moveBy(const Offset(0, 10));
+  await tester.pump();
+
+  final Finder opacityFinder = find.descendant(
+    of: find.byType(M3ERefreshIndicator),
+    matching: find.byType(Opacity),
+  );
+  expect(opacityFinder, findsWidgets);
+  expect(tester.widget<Opacity>(opacityFinder.first).opacity, 0);
+
+  // Past the delay, reveal should begin.
+  await gesture.moveBy(const Offset(0, 20));
+  await tester.pump();
+  expect(tester.widget<Opacity>(opacityFinder.first).opacity, greaterThan(0));
+  expect(tester.widget<Opacity>(opacityFinder.first).opacity, lessThan(1));
+
+  await gesture.up();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _restingInsetStableDuringRefresh(WidgetTester tester) async {
+  final refreshHold = Completer<void>();
+  final statuses = <M3ERefreshStatus?>[];
+
+  await tester.pumpWidget(
+    _host(
+      M3ERefreshIndicator(
+        onStatusChange: statuses.add,
+        onRefresh: () => refreshHold.future,
+        child: _list(),
+      ),
+    ),
+  );
+
+  await tester.fling(find.text('row0'), const Offset(0, 400), 2000);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 50));
+  expect(statuses, contains(M3ERefreshStatus.refresh));
+
+  final Finder indicator = find.byType(M3ELoadingIndicator);
+  expect(indicator, findsOneWidget);
+
+  await tester.pump(const Duration(milliseconds: 600));
+  final double yAfterBubble = tester.getTopLeft(indicator).dy;
+
+  await tester.pump(const Duration(seconds: 1));
+  final double yAfterOneSecond = tester.getTopLeft(indicator).dy;
+
+  expect(
+    yAfterOneSecond,
+    closeTo(yAfterBubble, 0.5),
+    reason: 'resting inset must not move after loading has started',
+  );
+
+  refreshHold.complete();
+  await tester.pumpAndSettle();
 }

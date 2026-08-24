@@ -1,12 +1,3 @@
-// Vendored from the `navigation_rail_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
-// The logic is kept identical to the reference `NavigationRailM3E`; only the
-// public class name carries the `M3E` prefix and it uses this package's own
-// `M3EIconButton`, `M3EFab` and `M3EExtendedFab` instead of the external
-// `icon_button_m3e`/`fab_m3e` packages.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
 import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 

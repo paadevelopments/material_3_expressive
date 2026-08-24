@@ -1,16 +1,3 @@
-// Vendored verbatim from the `loading_indicator_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/blob/main/packages/loading_indicator_m3e/lib/src/expressive_loading_indicator.dart),
-// itself a port of Android's LoadingIndicator. The logic is kept identical to
-// the reference `ExpressiveLoadingIndicator`; only the public class name carries
-// the `M3E` prefix.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
-
-// Port of Android's LoadingIndicator
-// Source: androidx/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt
-// Copyright (c) 2024 The Android Open Source Project
-// Licensed under the Apache License, Version 2.0
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -18,6 +5,8 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../styles/m3e_loading_indicator_theme.dart';
 
 /// A Material Design loading indicator.
 ///
@@ -32,6 +21,40 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// If null, then the [ProgressIndicatorThemeData.constraints] will be used. Otherwise, defaults to a minimum width and height of 48 pixels.
   final BoxConstraints? constraints;
 
+  /// Full 360° continuous spin period. Defaults to theme.
+  final Duration? globalRotationDuration;
+
+  /// Delay between polygon morph cycles. Defaults to theme.
+  final Duration? morphInterval;
+
+  /// Extra rotation (degrees) across each morph. Defaults to theme (45).
+  final double? morphRotationDegrees;
+
+  /// Spring for morph progress. Defaults to theme.
+  final M3ESpring? morphSpring;
+
+  /// Initial morph spring velocity. Defaults to theme.
+  final double? morphSpringVelocity;
+
+  /// Scale at the start of each morph-in pulse (`→ 1`; default expands above 1).
+  final double? pulseStartScale;
+
+  /// Spring for pulse settle. Defaults to theme.
+  final M3ESpring? pulseSpring;
+
+  /// Initial pulse spring velocity. Defaults to theme.
+  final double? pulseSpringVelocity;
+
+  /// When non-null, auto spin and morph pulse are disabled; this value (in
+  /// turns, where `1.0` is 360°) drives rotation instead.
+  final double? rotationTurns;
+
+  /// Elevation shadow cast by the morphing polygon path (`0` = none).
+  final double elevation;
+
+  /// Shadow color for [elevation]. Defaults to black when null.
+  final Color? shadowColor;
+
   /// M3EExpressiveLoadingIndicator.
 
   const M3EExpressiveLoadingIndicator({
@@ -39,12 +62,24 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     super.color,
     this.polygons,
     this.constraints,
+    this.globalRotationDuration,
+    this.morphInterval,
+    this.morphRotationDegrees,
+    this.morphSpring,
+    this.morphSpringVelocity,
+    this.pulseStartScale,
+    this.pulseSpring,
+    this.pulseSpringVelocity,
+    this.rotationTurns,
+    this.elevation = 0,
+    this.shadowColor,
     super.semanticsLabel,
     super.semanticsValue,
   }) : assert(
          !(polygons != null) || polygons.length > 1,
          'polygons must contain more than one shape when provided',
-       );
+       ),
+       assert(elevation >= 0.0, 'assertion failed');
 
   @override
   State<M3EExpressiveLoadingIndicator> createState() =>
@@ -66,51 +101,62 @@ class _M3EExpressiveLoadingIndicatorState
 
   late final List<RoundedPolygon> _polygons;
 
-  static const int _globalRotationDurationMs = 4666;
-  static const int _morphIntervalMs = 650;
   static const double _fullRotation = 360;
-
-  static const double _quarterRotation = _fullRotation / 4;
-  static const double _activeSize = 38; // based on source spec
 
   late final List<Morph> _morphSequence;
 
   late final AnimationController _morphController;
   late final AnimationController _globalRotationController;
+  late final AnimationController _pulseController;
   int _currentMorphIndex = 0;
-  double _morphRotationTargetAngle = _quarterRotation;
+  double _morphRotationTargetAngle = 0;
 
   Timer? _morphTimer;
 
-  final _morphAnimationSpec = SpringSimulation(
-    M3EMotion.expressiveSpatialDefault.toDescription(),
-    0,
-    1,
-    5,
-    snapToEnd: true,
-  );
-
   late BoxConstraints _constraints;
   late Color _color;
+  late M3ELoadingIndicatorTheme _loadingTheme;
+
+  Duration get _globalRotationDuration =>
+      widget.globalRotationDuration ?? _loadingTheme.globalRotationDuration;
+
+  Duration get _morphInterval =>
+      widget.morphInterval ?? _loadingTheme.morphInterval;
+
+  double get _morphRotationDegrees =>
+      widget.morphRotationDegrees ?? _loadingTheme.morphRotationDegrees;
+
+  M3ESpring get _morphSpring => widget.morphSpring ?? _loadingTheme.morphSpring;
+
+  double get _morphSpringVelocity =>
+      widget.morphSpringVelocity ?? _loadingTheme.morphSpringVelocity;
+
+  double get _pulseStartScale =>
+      widget.pulseStartScale ?? _loadingTheme.pulseStartScale;
+
+  M3ESpring get _pulseSpring => widget.pulseSpring ?? _loadingTheme.pulseSpring;
+
+  double get _pulseSpringVelocity =>
+      widget.pulseSpringVelocity ?? _loadingTheme.pulseSpringVelocity;
+
+  double get _activeSize => _loadingTheme.activeIndicatorSize;
+
+  bool get _manualRotation => widget.rotationTurns != null;
 
   @override
   Widget build(BuildContext context) {
     final m3eTheme = M3ETheme.of(context);
-    _color =
-        widget.color ??
-        m3eTheme.loadingIndicatorTheme.activeColor(m3eTheme.colorScheme);
+    _loadingTheme = m3eTheme.loadingIndicatorTheme;
+    _color = widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme);
     _constraints =
         widget.constraints ??
         BoxConstraints.tightFor(
-          width: m3eTheme.loadingIndicatorTheme.containerWidth,
-          height: m3eTheme.loadingIndicatorTheme.containerHeight,
+          width: _loadingTheme.containerWidth,
+          height: _loadingTheme.containerHeight,
         );
 
-    final activeIndicatorScale =
-        _activeSize / math.min(_constraints.maxWidth, _constraints.maxHeight);
-
-    final shapesScaleFactor =
-        _calculateScaleFactor(_polygons) * activeIndicatorScale;
+    // Fit polygons into the active shape size only — outer container stays fixed.
+    final shapesScaleFactor = _calculateScaleFactor(_polygons);
 
     return Semantics.fromProperties(
       properties: SemanticsProperties(
@@ -122,42 +168,60 @@ class _M3EExpressiveLoadingIndicatorState
           constraints: _constraints,
           child: AspectRatio(
             aspectRatio: 1,
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _morphController,
-                _globalRotationController,
-              ]),
-              builder: (context, child) {
-                final morphProgress = _morphController.value.clamp(0.0, 1.0);
-                final globalRotationDegrees =
-                    _globalRotationController.value * _fullRotation;
+            child: Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  _morphController,
+                  _globalRotationController,
+                  _pulseController,
+                ]),
+                builder: (context, child) {
+                  final morphProgress = _morphController.value.clamp(0.0, 1.0);
+                  final double globalRotationDegrees = _manualRotation
+                      ? (widget.rotationTurns! * _fullRotation)
+                      : (_globalRotationController.value * _fullRotation);
 
-                // calculate total rotation (clockwise, matching Kotlin implementation)
-                final totalRotationDegrees =
-                    morphProgress * _quarterRotation +
-                    _morphRotationTargetAngle +
-                    globalRotationDegrees;
+                  final double totalRotationDegrees = _manualRotation
+                      ? globalRotationDegrees
+                      : morphProgress * _morphRotationDegrees +
+                            _morphRotationTargetAngle +
+                            globalRotationDegrees;
 
-                final totalRotationRadians =
-                    totalRotationDegrees * (math.pi / 180.0);
+                  final totalRotationRadians =
+                      totalRotationDegrees * (math.pi / 180.0);
 
-                return Transform.rotate(
-                  angle: totalRotationRadians,
-                  child: CustomPaint(
-                    painter: _MorphPainter(
-                      morph: _morphSequence[_currentMorphIndex],
-                      progress: morphProgress,
-                      color: _color,
-                      scaleFactor: shapesScaleFactor,
-                      repaint: Listenable.merge([
-                        _morphController,
-                        _globalRotationController,
-                      ]),
+                  final double pulseScale = _manualRotation
+                      ? 1.0
+                      : _pulseController.value;
+
+                  return Transform.rotate(
+                    angle: totalRotationRadians,
+                    child: Transform.scale(
+                      scale: pulseScale,
+                      child: SizedBox(
+                        width: _activeSize,
+                        height: _activeSize,
+                        child: CustomPaint(
+                          painter: _MorphPainter(
+                            morph: _morphSequence[_currentMorphIndex],
+                            progress: morphProgress,
+                            color: _color,
+                            scaleFactor: shapesScaleFactor,
+                            elevation: widget.elevation,
+                            shadowColor: widget.shadowColor,
+                            repaint: Listenable.merge([
+                              _morphController,
+                              _globalRotationController,
+                              _pulseController,
+                            ]),
+                          ),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
                     ),
-                    child: const SizedBox.expand(),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -170,6 +234,7 @@ class _M3EExpressiveLoadingIndicatorState
     _morphTimer?.cancel();
     _morphController.dispose();
     _globalRotationController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -182,14 +247,105 @@ class _M3EExpressiveLoadingIndicatorState
     _morphSequence = _createMorphSequence(_polygons, circularSequence: true);
 
     _morphController = AnimationController.unbounded(vsync: this);
+    _pulseController = AnimationController.unbounded(vsync: this, value: 1);
 
-    // continuous linear rotation
-    _globalRotationController = AnimationController(
-      duration: const Duration(milliseconds: _globalRotationDurationMs),
-      vsync: this,
-    );
+    // continuous linear rotation — duration applied once theme is available
+    _globalRotationController = AnimationController(vsync: this);
 
+    // Theme is read in didChangeDependencies before first morph tick.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadingTheme = M3ETheme.of(context).loadingIndicatorTheme;
+    _ensureAnimationsStarted();
+  }
+
+  @override
+  void didUpdateWidget(M3EExpressiveLoadingIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final wasManual = oldWidget.rotationTurns != null;
+    final isManual = widget.rotationTurns != null;
+    if (wasManual != isManual) {
+      if (isManual) {
+        _enterManualRotation();
+      } else {
+        _exitManualRotation(seedTurns: oldWidget.rotationTurns);
+      }
+    } else if (!isManual &&
+        (oldWidget.globalRotationDuration != widget.globalRotationDuration ||
+            oldWidget.morphInterval != widget.morphInterval)) {
+      _restartPeriodicAnimations();
+    }
+  }
+
+  bool _animationsStarted = false;
+
+  void _ensureAnimationsStarted() {
+    if (_animationsStarted) {
+      if (!_manualRotation) {
+        _syncGlobalRotationDuration();
+      }
+      return;
+    }
+    _animationsStarted = true;
+    _morphRotationTargetAngle = _morphRotationDegrees;
+    if (_manualRotation) {
+      _pulseController.value = 1;
+      return;
+    }
+    _syncGlobalRotationDuration();
     _startAnimations();
+  }
+
+  void _enterManualRotation() {
+    _morphTimer?.cancel();
+    _morphTimer = null;
+    _globalRotationController.stop();
+    _morphController.stop();
+    _pulseController
+      ..stop()
+      ..value = 1;
+  }
+
+  void _exitManualRotation({double? seedTurns}) {
+    if (seedTurns != null) {
+      _globalRotationController.value = seedTurns % 1.0;
+      _morphRotationTargetAngle = 0;
+    }
+    _syncGlobalRotationDuration();
+    if (!_globalRotationController.isAnimating) {
+      _globalRotationController.repeat();
+    }
+    _morphTimer?.cancel();
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
+    _startMorphCycle();
+  }
+
+  void _syncGlobalRotationDuration() {
+    final Duration duration = _globalRotationDuration;
+    if (_globalRotationController.duration != duration) {
+      final double value = _globalRotationController.value;
+      _globalRotationController.duration = duration;
+      if (_globalRotationController.isAnimating) {
+        _globalRotationController
+          ..value = value
+          ..repeat();
+      }
+    }
+  }
+
+  void _restartPeriodicAnimations() {
+    if (_manualRotation) {
+      return;
+    }
+    _morphTimer?.cancel();
+    _syncGlobalRotationDuration();
+    if (!_globalRotationController.isAnimating) {
+      _globalRotationController.repeat();
+    }
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
   }
 
   List<Morph> _createMorphSequence(
@@ -247,20 +403,20 @@ class _M3EExpressiveLoadingIndicatorState
   }
 
   void _startAnimations() {
+    if (_manualRotation) {
+      return;
+    }
     // infinite global rotation
     _globalRotationController.repeat();
 
     // periodic morph cycle
-    _morphTimer = Timer.periodic(
-      const Duration(milliseconds: _morphIntervalMs),
-      (_) => _startMorphCycle(),
-    );
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
 
     _startMorphCycle();
   }
 
   void _startMorphCycle() {
-    if (!mounted) {
+    if (!mounted || _manualRotation) {
       return;
     }
 
@@ -269,12 +425,32 @@ class _M3EExpressiveLoadingIndicatorState
 
     // accumulate rotation target
     _morphRotationTargetAngle =
-        (_morphRotationTargetAngle + _quarterRotation) % _fullRotation;
+        (_morphRotationTargetAngle + _morphRotationDegrees) % _fullRotation;
 
-    // Reset and start morph animation
+    // Reset and start morph animation (slower spring + lower velocity by default)
     _morphController
       ..value = 0.0
-      ..animateWith(_morphAnimationSpec);
+      ..animateWith(
+        SpringSimulation(
+          _morphSpring.toDescription(),
+          0,
+          1,
+          _morphSpringVelocity,
+          snapToEnd: true,
+        ),
+      );
+
+    // Outward pulse (scale > 1) then smooth settle down to 1.
+    _pulseController
+      ..value = _pulseStartScale
+      ..animateWith(
+        SpringSimulation(
+          _pulseSpring.toDescription(),
+          _pulseStartScale,
+          1,
+          _pulseSpringVelocity,
+        ),
+      );
   }
 }
 
@@ -288,11 +464,16 @@ class _MorphPainter extends CustomPainter {
   /// the size height x the scale factor)
   final double scaleFactor;
 
+  final double elevation;
+  final Color? shadowColor;
+
   _MorphPainter({
     required this.morph,
     required this.progress,
     required this.color,
     this.scaleFactor = 1.0,
+    this.elevation = 0,
+    this.shadowColor,
     super.repaint,
   });
 
@@ -300,6 +481,15 @@ class _MorphPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = morph.toPath(progress: progress);
     final processedPath = _processPath(path, size);
+    if (elevation > 0) {
+      // Follows the morphing polygon (and parent rotate/scale transforms).
+      canvas.drawShadow(
+        processedPath,
+        shadowColor ?? const Color(0xFF000000),
+        elevation,
+        true,
+      );
+    }
     canvas.drawPath(
       processedPath,
       Paint()
@@ -313,7 +503,9 @@ class _MorphPainter extends CustomPainter {
     return oldDelegate.morph != morph ||
         oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.scaleFactor != scaleFactor;
+        oldDelegate.scaleFactor != scaleFactor ||
+        oldDelegate.elevation != elevation ||
+        oldDelegate.shadowColor != shadowColor;
   }
 
   /// Process a given path to scale it and center it inside the given size.

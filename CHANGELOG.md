@@ -1,3 +1,86 @@
+## 1.0.9
+
+### Added
+
+* `M3ESafeArea` — keyboard-aware system insets from raw view metrics
+  (`paddingOf`, `topOf` / `bottomOf` / `leftOf` / `rightOf`, and
+  `overlayBottomOf` for floating overlays). Docked chrome, snackbar, search,
+  nav rail indicator, and dialog inset hosts use it instead of
+  `MediaQuery.viewPaddingOf`.
+* `M3EDialogInset` — pads dialogs with screen margin and optional keyboard
+  view insets (Material Dialog behavior).
+* `M3EDialogTheme.resizeToAvoidBottomInset` (default true),
+  `insetAnimationDuration`, and `insetAnimationCurve`.
+* `M3ECheckbox` optional `label`, `boxSize`, `hitSize`, `checkedChild`,
+  `uncheckedChild`, and `checkIconPadding` (default right inset for optical
+  centering of the built-in check), with a spatial-spring pulse on value
+  changes.
+* `M3EProgressIndicator.circular` / `.linear` optional `trackStrokeWidth`
+  (and `.linear` `strokeWidth`) so all kinds can override track and value
+  thickness.
+* `M3ERefreshIndicator.contentDragOffset` — caps list top padding while
+  pulling (defaults to indicator height + `2 * indicatorPadding`).
+* `M3ERefreshIndicator.indicatorPadding` — vertical gap above/below the
+  spinner in the list pad (default 8); reveal starts after `2 ×` this value.
+* `M3ERefreshIndicatorTheme.releaseBubbleSpring` /
+  `releaseBubbleFromScale` (and matching widget overrides) for the release
+  scale bubble (defaults stiffness 350 / damping 0.1 / from-scale 0.96).
+* `M3ELoadingIndicator.elevation` (theme default `0`) — contained uses
+  rounded-shell [M3EElevation] shadows; uncontained casts a path shadow that
+  follows the morphing polygon (including rotate / scale / morph).
+* `M3ELoadingIndicator.rotationTurns` — when set, disables auto spin and
+  morph pulse so a host (e.g. refresh) can drive rotation.
+* `M3ELoadingIndicator.color` / `containerColor` document shape vs contained
+  shell colors (both overridable).
+* `M3ERefreshIndicatorController` to trigger refresh programmatically
+  (same as Material `RefreshIndicatorState.show`).
+
+### Fixed
+
+* `M3ECheckbox` check mark is centered in the box (with default optical
+  padding on the built-in check icon).
+* `M3EProgressIndicator.linearWavy` honors `linearSize` for stroke thickness;
+  linear painters draw track and active with separate stroke widths.
+* `M3EButtonGroup` labeled actions with distinct `checkedLabel` no longer
+  blank for a frame when the parent rebuilds a new `actions` list on
+  selection change. Measured widths are kept across remotion, and layout
+  signatures ignore visual-only decoration / widget identity noise.
+* `M3ERefreshIndicator` locks resting inset on refresh; release bubble is
+  scale-only (does not move layout). Short pulls cancel without `onRefresh`.
+* `M3ECard` outlined variant defaults to a transparent fill (border only);
+  list surfaces that use `M3ECard` inherit this unless an explicit color is set.
+* Time dial minutes: drag selects any 0–59; tap snaps to nearest ×5; interstitial
+  selector dot when between labels (Material `_Dial` behavior).
+* Time AM/PM control uses Material portrait / landscape / input sizes and sits
+  beside dial/input hour–minute fields (not a button row below input).
+* Date range input fields are side-by-side (8dp gap), matching Material.
+* Date, date-range, and time picker entry-mode toggles sit at the bottom-left
+  of the dialog actions row (Material time-picker placement).
+* Date and time entry-mode icons use `keyboard_outlined` (calendar/clock when
+  returning from input).
+* Time picker manual entry no longer autofocuses the hour field.
+* `M3EDialogInset` + `M3EDialogTheme.resizeToAvoidBottomInset` (default true)
+  shift dialogs above the keyboard; opt out via theme or
+  `resizeToAvoidBottomInset: false` on `M3EDialog.show` / date / time pickers.
+
+### Changed
+
+* Internal `klin_dart` compliance: split `M3EInputTimePickerFormField` build
+  helpers to clear cognitive complexity (no behavior change).
+* `M3EExpressiveLoadingIndicator` applies a noticeable scale pulse (spatial
+  spring) to the active polygon holder on each morph — not the outer
+  container. Morph rotation defaults are slower (45° / cycle, slower spring);
+  timing and springs are configurable via widget params and
+  `M3ELoadingIndicatorTheme`.
+* `M3ERefreshIndicator` default `displacement` is 8 (top padding). List pad
+  defaults to spinner height + 16. Scale/fade/downward reveal lags until pad
+  reaches `2 × indicatorPadding`, then fills through full visibility.
+  `onRefresh` runs only when fully revealed and the pointer is released.
+* `M3ETimePickerTheme` period sizes align with Material (`periodPortraitSize`
+  52×80, `periodLandscapeSize` 216×38, `periodInputSize` 52×72).
+* Vendor/source attribution headers removed from `lib/` Dart sources;
+  third-party notices remain in `NOTICE` only.
+
 ## 1.0.8
 
 ### Added

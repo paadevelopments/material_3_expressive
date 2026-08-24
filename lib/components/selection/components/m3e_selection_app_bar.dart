@@ -277,7 +277,7 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
     return ColoredBox(
       color: selectionTheme.contextualBackground(scheme),
       child: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.viewPaddingOf(context).top),
+        padding: EdgeInsets.only(top: M3ESafeArea.topOf(context)),
         child: IconTheme.merge(
           data: IconThemeData(color: foreground),
           child: Column(

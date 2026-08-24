@@ -24,6 +24,14 @@ class _RefreshIndicatorPlaygroundState
   _RefreshKind _kind = _RefreshKind.expressive;
   M3ERefreshTriggerMode _trigger = M3ERefreshTriggerMode.onEdge;
   int _refreshCount = 0;
+  final M3ERefreshIndicatorController _controller =
+      M3ERefreshIndicatorController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleRefresh() async {
     await Future<void>.delayed(const Duration(seconds: 2));
@@ -54,30 +62,35 @@ class _RefreshIndicatorPlaygroundState
     return switch (_kind) {
       _RefreshKind.expressive => M3ERefreshIndicator(
         key: key,
+        controller: _controller,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
       ),
       _RefreshKind.contained => M3ERefreshIndicator.contained(
         key: key,
+        controller: _controller,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
       ),
       _RefreshKind.material => M3ERefreshIndicator.material(
         key: key,
+        controller: _controller,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
       ),
       _RefreshKind.adaptive => M3ERefreshIndicator.adaptive(
         key: key,
+        controller: _controller,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
       ),
       _RefreshKind.noSpinner => M3ERefreshIndicator.noSpinner(
         key: key,
+        controller: _controller,
         onRefresh: _handleRefresh,
         triggerMode: _trigger,
         child: child,
@@ -95,11 +108,17 @@ class _RefreshIndicatorPlaygroundState
     };
     final String sample =
         '''
+final controller = M3ERefreshIndicatorController();
+
 $ctor(
+  controller: controller,
   onRefresh: () async {},
   triggerMode: M3ERefreshTriggerMode.${_trigger.name},
   child: ListView(),
-);''';
+);
+
+// Manual trigger:
+await controller.show();''';
     return <PlaySnippet>[
       PlaySnippet(
         label: 'Pull to refresh',
@@ -150,6 +169,11 @@ $ctor(
               onChanged: (M3ERefreshTriggerMode v) {
                 setState(() => _trigger = v);
               },
+            ),
+            const SizedBox(height: 8),
+            M3EButton(
+              onPressed: () => _controller.show(),
+              child: const Text('Trigger refresh'),
             ),
           ],
         ),

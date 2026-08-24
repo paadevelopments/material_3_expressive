@@ -1,7 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// HorizontalFloatingToolbar / VerticalFloatingToolbar / FlexibleBottomAppBar
-//
-// FAB morph / scroll exit also reference m3e_core floating_toolbar (not vendored).
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
@@ -47,7 +43,7 @@ part 'components/m3e_toolbar_build.dart';
 class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// Floating toolbar (default). Horizontal unless [axis] is vertical.
   ///
-  /// When [safeArea] is true, only [dockEdge] gets an **external** system
+  /// When [safeArea] is true, only [dockEdge] gets an **external** [M3ESafeArea]
   /// inset (outside the pill) — never inside [Material].
   const M3EToolbar({
     this.leading,
@@ -558,7 +554,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     if (!widget.safeArea) {
       return EdgeInsets.zero;
     }
-    final EdgeInsets mq = MediaQuery.viewPaddingOf(context);
+    final EdgeInsets mq = M3ESafeArea.paddingOf(context);
     return EdgeInsets.only(
       top: widget.dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
       bottom: widget.dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,

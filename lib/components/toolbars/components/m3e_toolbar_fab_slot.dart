@@ -1,4 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
 // Adjacent FAB slot — size morphs with FAB-driven toolbar expand progress.
 
 import 'package:flutter/widgets.dart';

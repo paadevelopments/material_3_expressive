@@ -14,7 +14,8 @@ enum M3ERefreshStatus {
   /// Pointer is down and the indicator is following the drag.
   drag,
 
-  /// Pull has passed the threshold; releasing now will trigger a refresh.
+  /// Pull has fully revealed the spinner; releasing now will trigger a refresh.
+  /// Does not start the refresh callback by itself.
   armed,
 
   /// Pointer released past the threshold; the indicator is snapping into the
