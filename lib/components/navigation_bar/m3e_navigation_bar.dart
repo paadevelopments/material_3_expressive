@@ -148,7 +148,7 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     final Color bg = widget.backgroundColor ?? navTheme.containerColor(scheme);
     final ShapeBorder shape = navTheme.containerShape(widget.shapeFamily);
     final double bottomInset = widget.safeArea
-        ? MediaQuery.viewPaddingOf(context).bottom
+        ? M3ESafeArea.bottomOf(context)
         : 0.0;
     final Color indicator =
         widget.indicatorColor ?? navTheme.indicatorColor(scheme);

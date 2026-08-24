@@ -287,7 +287,7 @@ class M3ESearchViewRoute extends PopupRoute<void> {
         final double topPadding = showFullScreenView
             ? lerpDouble(
                 0,
-                MediaQuery.paddingOf(context).top,
+                M3ESafeArea.topOf(context),
                 _curvedAnimation!.value,
               )!
             : 0;

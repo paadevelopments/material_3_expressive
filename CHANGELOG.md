@@ -2,6 +2,11 @@
 
 ### Added
 
+* `M3ESafeArea` — keyboard-aware system insets from raw view metrics
+  (`paddingOf`, `topOf` / `bottomOf` / `leftOf` / `rightOf`, and
+  `overlayBottomOf` for floating overlays). Docked chrome, snackbar, search,
+  nav rail indicator, and dialog inset hosts use it instead of
+  `MediaQuery.viewPaddingOf`.
 * `M3EDialogInset` — pads dialogs with screen margin and optional keyboard
   view insets (Material Dialog behavior).
 * `M3EDialogTheme.resizeToAvoidBottomInset` (default true),

@@ -43,6 +43,8 @@ class M3EDialogInset extends StatelessWidget {
     final dialogTheme = M3ETheme.of(context).dialogTheme;
     final bool resize =
         resizeToAvoidBottomInset ?? dialogTheme.resizeToAvoidBottomInset;
+    // Share the keyboard-aware safe-area stream with other M3E hosts.
+    M3ESafeArea.paddingOf(context);
     final EdgeInsets viewInsets = resize
         ? MediaQuery.viewInsetsOf(context)
         : EdgeInsets.zero;

@@ -14,6 +14,7 @@ export 'm3e_ink_splash_theme.dart';
 export 'm3e_material_app.dart';
 export 'm3e_material_new_shapes_bridge.dart';
 export 'm3e_motion.dart';
+export 'm3e_safe_area.dart';
 export 'm3e_scrim_system_ui.dart';
 export 'm3e_shape_clipper.dart';
 export 'm3e_shape_container.dart';
