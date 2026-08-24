@@ -247,10 +247,16 @@ class _ToggleGroupMeasurementOrchestrator {
   }) {
     uncheckedKeys = List.generate(actionCount, (_) => GlobalKey());
     checkedKeys = List.generate(actionCount, (_) => GlobalKey());
-    measuredUncheckedWidths = List.filled(actionCount, null);
-    measuredCheckedWidths = List.filled(actionCount, null);
 
-    // Layout changed, old extents are stale.
+    // Same count: keep last-known widths so interim frames do not collapse
+    // labeled buttons to the icon-only fallback while remotion runs.
+    if (measuredUncheckedWidths.length != actionCount ||
+        measuredCheckedWidths.length != actionCount) {
+      measuredUncheckedWidths = List.filled(actionCount, null);
+      measuredCheckedWidths = List.filled(actionCount, null);
+    }
+
+    // Remotion may produce new extents; remeasure before treating as stable.
     overflowController.stableAllOverflowMeasured.value = false;
 
     disposeMeasurerControllers();

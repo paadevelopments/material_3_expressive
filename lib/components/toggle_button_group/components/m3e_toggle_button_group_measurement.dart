@@ -386,13 +386,13 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       actionsHash = Object.hash(actionsHash, _actionLayoutSignature(action));
     }
 
+    // Decoration is excluded: colors / sides do not change intrinsic size.
     final styleHash = Object.hash(
       group.type,
       group.shape,
       group.size,
       group.style,
       group.density,
-      group.decoration,
     );
 
     return Object.hash(
@@ -407,13 +407,15 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   int _actionLayoutSignature(M3EButtonGroupAction action) {
+    // Decoration is excluded: selection-dependent colors must not wipe
+    // measured widths. Size comes from content / explicit width.
     return Object.hash(
       _widgetContentHash(action.icon),
       _widgetContentHash(action.checkedIcon),
       _widgetContentHash(action.label),
       _widgetContentHash(action.checkedLabel),
       action.enabled,
-      action.decoration,
+      action.width,
     );
   }
 
@@ -422,11 +424,41 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       return 0;
     }
     if (w is Icon) {
-      return w.icon.hashCode;
+      return Object.hash(w.icon, w.size);
     }
     if (w is Text) {
-      return w.data.hashCode;
+      return Object.hash(w.data, w.style?.fontSize, w.style?.fontWeight);
     }
+    if (w is Flex) {
+      return Object.hash(
+        w.runtimeType,
+        w.mainAxisSize,
+        w.direction,
+        Object.hashAll(w.children.map(_widgetContentHash)),
+      );
+    }
+    if (w is Padding) {
+      return Object.hash(w.padding, _widgetContentHash(w.child));
+    }
+    if (w is SizedBox) {
+      return Object.hash(w.width, w.height, _widgetContentHash(w.child));
+    }
+    if (w is Center) {
+      return Object.hash(
+        w.widthFactor,
+        w.heightFactor,
+        _widgetContentHash(w.child),
+      );
+    }
+    if (w is Align) {
+      return Object.hash(
+        w.alignment,
+        w.widthFactor,
+        w.heightFactor,
+        _widgetContentHash(w.child),
+      );
+    }
+    // Unknown custom widgets: identity is the safest size-signal fallback.
     return w.hashCode;
   }
 
@@ -440,8 +472,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
         old.neighborSquish != next.neighborSquish ||
         old.expandedRatio != next.expandedRatio ||
         old.overflow != next.overflow ||
-        old.overflowMenuStyle != next.overflowMenuStyle ||
-        old.decoration != next.decoration;
+        old.overflowMenuStyle != next.overflowMenuStyle;
   }
 
   void _focusNextButton(int currentIndex, int direction) {

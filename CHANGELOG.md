@@ -1,3 +1,12 @@
+## 1.0.9
+
+### Fixed
+
+* `M3EButtonGroup` labeled actions with distinct `checkedLabel` no longer
+  blank for a frame when the parent rebuilds a new `actions` list on
+  selection change. Measured widths are kept across remotion, and layout
+  signatures ignore visual-only decoration / widget identity noise.
+
 ## 1.0.8
 
 ### Added
