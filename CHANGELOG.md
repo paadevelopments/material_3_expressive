@@ -1,3 +1,10 @@
+## 1.0.10
+
+### Fixed
+
+* Nav bar / rail selection pill remasures on size changes (window resize);
+  stale geometry cache no longer blocks morphs to other destinations.
+
 ## 1.0.9
 
 ### Added

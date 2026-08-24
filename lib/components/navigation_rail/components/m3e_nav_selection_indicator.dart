@@ -489,9 +489,11 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
       },
       child: NotificationListener<SizeChangedLayoutNotification>(
         onNotification: (SizeChangedLayoutNotification notification) {
-          // Soft remasure keeps last-good geometry if this frame is transitional
-          // (keyboard / route MediaQuery), instead of snapping to a bad top.
-          _scheduleMeasure(forceJump: !_ready);
+          // Window / bar reflow moves Expanded slots by large deltas — soft
+          // remasure would keep stale cache via _isSuspiciousJump and break
+          // later selection morphs. Snap like scroll / layoutToken changes.
+          _geoCache.clear();
+          _scheduleMeasure(forceJump: true);
           return false;
         },
         child: Stack(

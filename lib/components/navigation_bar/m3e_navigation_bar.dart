@@ -213,14 +213,20 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     if (widget.indicatorStyle != M3ENavBarIndicatorStyle.pill) {
       return destinationsRow;
     }
-    return M3ENavSelectionIndicator(
-      selectedIndex: widget.selectedIndex,
-      targetKeys: _keys,
-      axis: Axis.horizontal,
-      color: indicator,
-      layoutToken: bottomInset,
-      onTravelingChanged: _onTravelingChanged,
-      child: destinationsRow,
+    // Include bar width so horizontal window resize invalidates geometry
+    // (bottomInset alone does not change when only width changes).
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return M3ENavSelectionIndicator(
+          selectedIndex: widget.selectedIndex,
+          targetKeys: _keys,
+          axis: Axis.horizontal,
+          color: indicator,
+          layoutToken: (bottomInset, constraints.maxWidth),
+          onTravelingChanged: _onTravelingChanged,
+          child: destinationsRow,
+        );
+      },
     );
   }
 }
