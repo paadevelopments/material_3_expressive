@@ -242,6 +242,7 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     _dragOffset = 0.0;
     _scaleController.value = 0.0;
     _positionController.value = 0.0;
+    _contentPadController.value = 0.0;
     return true;
   }
 
@@ -261,6 +262,11 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       );
     }
     final double clamped = clampDouble(newValue, 0, 1);
+    // Keep content pad in sync (capped) while dragging.
+    _contentPadController.value = math.min(
+      math.max(0, _dragOffset ?? 0),
+      _resolvedContentDragOffset,
+    );
     // Rebuild even when the controller is saturated so the indicator can still
     // settle at its snap cap while the finger keeps moving.
     if (clamped == _positionController.value) {
@@ -291,6 +297,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
         return;
       }
       _syncPositionToVisualPull();
+      _contentPadController.value = math.min(
+        _visualPull(context),
+        _resolvedContentDragOffset,
+      );
     }
 
     setState(() {
@@ -318,18 +328,32 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
         );
   }
 
+  Future<void> _springTo(
+    AnimationController controller, {
+    required double target,
+  }) {
+    return controller.animateWith(
+      SpringSimulation(
+        M3EMotion.expressiveSpatialDefault.toDescription(),
+        controller.value,
+        target,
+        controller.velocity,
+      ),
+    );
+  }
+
   Future<void> _animateDismiss() async {
     switch (_status!) {
       case M3ERefreshStatus.done:
-        await _scaleController.animateTo(
-          1,
-          duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
-        );
+        await Future.wait(<Future<void>>[
+          _springTo(_scaleController, target: 1),
+          _springTo(_contentPadController, target: 0),
+        ]);
       case M3ERefreshStatus.canceled:
-        await _positionController.animateTo(
-          0,
-          duration: M3ERefreshIndicatorTheme.defaults.indicatorScaleDuration,
-        );
+        await Future.wait(<Future<void>>[
+          _springTo(_positionController, target: 0),
+          _springTo(_contentPadController, target: 0),
+        ]);
       case M3ERefreshStatus.armed:
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.refresh:
@@ -347,19 +371,21 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     // Keep the indicator where it visually is, then animate to the resting
     // refresh offset (displacement below the edge).
     _syncPositionToVisualPull();
+    _contentPadController.value = math.min(
+      _visualPull(context),
+      _resolvedContentDragOffset,
+    );
 
     _status = M3ERefreshStatus.snap;
     widget.onStatusChange?.call(_status);
 
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
-    _positionController
-        .animateTo(
-          1.0 / limit,
-          duration: M3ERefreshIndicatorTheme.defaults.indicatorSnapDuration,
-        )
-        .then<void>((void value) {
-          _onSnapComplete(completer);
-        });
+    Future.wait(<Future<void>>[
+      _springTo(_positionController, target: 1.0 / limit),
+      _springTo(_contentPadController, target: 0),
+    ]).then<void>((_) {
+      _onSnapComplete(completer);
+    });
   }
 
   void _onSnapComplete(Completer<void> completer) {

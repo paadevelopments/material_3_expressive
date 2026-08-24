@@ -25,20 +25,38 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
   bool _determinate = true;
   double _value = 0.6;
   M3EProgressIndicatorSize _linearSize = M3EProgressIndicatorSize.m;
+  double _strokeWidth = 8;
+  double _trackStrokeWidth = 8;
+  double _wavelength = 40;
+
+  bool get _isLinear =>
+      _kind == _ProgressKind.linear || _kind == _ProgressKind.linearWavy;
+
+  bool get _isWavy =>
+      _kind == _ProgressKind.circularWavy || _kind == _ProgressKind.linearWavy;
 
   double? get _progress => _determinate ? _value : null;
 
   Widget _buildIndicator() {
     return switch (_kind) {
-      _ProgressKind.circular => M3EProgressIndicator.circular(value: _progress),
+      _ProgressKind.circular => M3EProgressIndicator.circular(
+        value: _progress,
+        strokeWidth: _strokeWidth,
+        trackStrokeWidth: _trackStrokeWidth,
+      ),
       _ProgressKind.circularWavy => M3EProgressIndicator.circularWavy(
         value: _progress,
+        strokeWidth: _strokeWidth,
+        trackStrokeWidth: _trackStrokeWidth,
+        wavelength: _wavelength,
       ),
       _ProgressKind.linear => SizedBox(
         width: 220,
         child: M3EProgressIndicator.linear(
           value: _progress,
           linearSize: _linearSize,
+          strokeWidth: _strokeWidth,
+          trackStrokeWidth: _trackStrokeWidth,
         ),
       ),
       _ProgressKind.linearWavy => SizedBox(
@@ -46,6 +64,9 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
         child: M3EProgressIndicator.linearWavy(
           value: _progress,
           linearSize: _linearSize,
+          strokeWidth: _strokeWidth,
+          trackStrokeWidth: _trackStrokeWidth,
+          wavelength: _wavelength,
         ),
       ),
     };
@@ -53,10 +74,11 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
 
   List<PlaySnippet> get _snippets {
     final String value = _determinate ? _value.toStringAsFixed(2) : 'null';
-    final bool isLinear =
-        _kind == _ProgressKind.linear || _kind == _ProgressKind.linearWavy;
-    final String linearSize = isLinear
+    final String linearSize = _isLinear
         ? '\n  linearSize: M3EProgressIndicatorSize.${_linearSize.name},'
+        : '';
+    final String wave = _isWavy
+        ? '\n  wavelength: ${_wavelength.toStringAsFixed(0)},'
         : '';
     final String ctor = switch (_kind) {
       _ProgressKind.circular => 'circular',
@@ -68,6 +90,8 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
         '''
 M3EProgressIndicator.$ctor(
   value: $value,$linearSize
+  strokeWidth: ${_strokeWidth.toStringAsFixed(0)},
+  trackStrokeWidth: ${_trackStrokeWidth.toStringAsFixed(0)},$wave
 );''';
     return <PlaySnippet>[
       PlaySnippet(label: _kind.name, code: '$kPlaySnippetImport\n$sample'),
@@ -76,8 +100,6 @@ M3EProgressIndicator.$ctor(
 
   @override
   Widget build(BuildContext context) {
-    final bool isLinear =
-        _kind == _ProgressKind.linear || _kind == _ProgressKind.linearWavy;
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
@@ -117,14 +139,19 @@ M3EProgressIndicator.$ctor(
               labelOf: (_ProgressKind v) => v.name,
               onChanged: (_ProgressKind v) => setState(() => _kind = v),
             ),
-            if (isLinear)
+            if (_isLinear)
               PlayEnumSegmented<M3EProgressIndicatorSize>(
                 label: 'Linear size',
                 value: _linearSize,
                 values: M3EProgressIndicatorSize.values,
                 labelOf: (M3EProgressIndicatorSize v) => v.name,
                 onChanged: (M3EProgressIndicatorSize v) {
-                  setState(() => _linearSize = v);
+                  setState(() {
+                    _linearSize = v;
+                    final double h = v == M3EProgressIndicatorSize.s ? 4 : 8;
+                    _strokeWidth = h;
+                    _trackStrokeWidth = h;
+                  });
                 },
               ),
             PlaySwitch(
@@ -137,6 +164,31 @@ M3EProgressIndicator.$ctor(
                 label: 'Value',
                 value: _value,
                 onChanged: (double v) => setState(() => _value = v),
+              ),
+            PlaySlider(
+              label: 'Stroke',
+              value: _strokeWidth,
+              min: 2,
+              max: 16,
+              divisions: 14,
+              onChanged: (double v) => setState(() => _strokeWidth = v),
+            ),
+            PlaySlider(
+              label: 'Track stroke',
+              value: _trackStrokeWidth,
+              min: 2,
+              max: 16,
+              divisions: 14,
+              onChanged: (double v) => setState(() => _trackStrokeWidth = v),
+            ),
+            if (_isWavy)
+              PlaySlider(
+                label: 'Wavelength',
+                value: _wavelength,
+                min: 10,
+                max: 80,
+                divisions: 70,
+                onChanged: (double v) => setState(() => _wavelength = v),
               ),
           ],
         ),

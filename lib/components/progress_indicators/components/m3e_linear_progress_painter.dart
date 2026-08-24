@@ -38,10 +38,10 @@ class M3ELinearProgressPainter extends CustomPainter {
   /// track.
   final Color track;
 
-  /// strokeWidth.
+  /// Active indicator stroke width.
   final double strokeWidth;
 
-  /// trackStrokeWidth.
+  /// Track stroke width.
   final double trackStrokeWidth;
 
   /// gap.
@@ -76,6 +76,12 @@ class M3ELinearProgressPainter extends CustomPainter {
   /// Inflates [gap] so round stroke caps leave a visible empty space.
   double _visualGap(double stroke) => gap + stroke;
 
+  Paint _strokePaint(double width) => Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = width
+    ..isAntiAlias = true;
+
   /// Stop diameter and center so the dot sits inside the track end with equal
   /// padding on all sides.
   ({double diameter, double centerX}) _stopPlacement({
@@ -102,23 +108,21 @@ class M3ELinearProgressPainter extends CustomPainter {
 
   void _paintFlat(Canvas canvas, Size size) {
     final M3ELinearProgressLayout spec = flatLayout!;
-    final double stroke = strokeWidth;
-    final double visualGap = _visualGap(stroke);
+    final double activeStroke = strokeWidth;
+    final double trackStroke = trackStrokeWidth;
+    final double visualGap = _visualGap(activeStroke);
     final double left = inset;
     final double trackRight = size.width - spec.trailingMargin;
     final ({double diameter, double centerX}) stop = _stopPlacement(
       trackRight: trackRight,
-      trackStroke: stroke,
+      trackStroke: trackStroke,
     );
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
 
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = stroke
-      ..isAntiAlias = true;
+    final Paint activePaint = _strokePaint(activeStroke);
+    final Paint trackPaint = _strokePaint(trackStroke);
 
     final indeterminate = value == null;
     final bool complete = !indeterminate && p >= 1.0;
@@ -126,7 +130,8 @@ class M3ELinearProgressPainter extends CustomPainter {
     if (indeterminate) {
       _paintFlatIndeterminate(
         canvas,
-        paint: paint,
+        activePaint: activePaint,
+        trackPaint: trackPaint,
         left: left,
         trackRight: trackRight,
         width: width,
@@ -140,7 +145,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(
         Offset(left, cy),
         Offset(trackRight, cy),
-        paint..color = active,
+        activePaint..color = active,
       );
     } else {
       final double activeEndX = left + width * p;
@@ -150,7 +155,7 @@ class M3ELinearProgressPainter extends CustomPainter {
         canvas.drawLine(
           Offset(trackStartX, cy),
           Offset(trackRight, cy),
-          paint..color = track,
+          trackPaint..color = track,
         );
       }
 
@@ -158,7 +163,7 @@ class M3ELinearProgressPainter extends CustomPainter {
         canvas.drawLine(
           Offset(left, cy),
           Offset(activeEndX, cy),
-          paint..color = active,
+          activePaint..color = active,
         );
       }
     }
@@ -172,7 +177,8 @@ class M3ELinearProgressPainter extends CustomPainter {
 
   void _paintFlatIndeterminate(
     Canvas canvas, {
-    required Paint paint,
+    required Paint activePaint,
+    required Paint trackPaint,
     required double left,
     required double trackRight,
     required double width,
@@ -188,7 +194,7 @@ class M3ELinearProgressPainter extends CustomPainter {
     segs = _indetSegments();
     final double gapFrac = width > 0 ? visualGap / width : 0;
 
-    void drawSeg(double startF, double endF, Color color) {
+    void drawSeg(double startF, double endF, Paint paint, Color color) {
       if (endF - startF <= 0) {
         return;
       }
@@ -200,64 +206,60 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(Offset(x0, cy), Offset(x1, cy), paint..color = color);
     }
 
-    // Track after first line (with gap).
     if (segs.firstHead < 1.0 - gapFrac) {
       final double start = segs.firstHead > 0 ? segs.firstHead + gapFrac : 0;
-      drawSeg(start, 1, track);
+      drawSeg(start, 1, trackPaint, track);
     }
 
     if (segs.firstHead - segs.firstTail > 0) {
-      drawSeg(segs.firstTail, segs.firstHead, active);
+      drawSeg(segs.firstTail, segs.firstHead, activePaint, active);
     }
 
-    // Track between second and first (with gaps).
     if (segs.firstTail > gapFrac) {
       final double start = segs.secondHead > 0 ? segs.secondHead + gapFrac : 0;
       final double end = segs.firstTail < 1.0 ? segs.firstTail - gapFrac : 1.0;
       if (start < end) {
-        drawSeg(start, end, track);
+        drawSeg(start, end, trackPaint, track);
       }
     }
 
     if (segs.secondHead - segs.secondTail > 0) {
-      drawSeg(segs.secondTail, segs.secondHead, active);
+      drawSeg(segs.secondTail, segs.secondHead, activePaint, active);
     }
 
-    // Track before second line (with gap).
     if (segs.secondTail > gapFrac) {
       final double end = segs.secondTail < 1.0
           ? segs.secondTail - gapFrac
           : 1.0;
-      drawSeg(0, end, track);
+      drawSeg(0, end, trackPaint, track);
     }
   }
 
   void _paintWavy(Canvas canvas, Size size) {
-    final double stroke = strokeWidth;
-    final double visualGap = _visualGap(stroke);
+    final double activeStroke = strokeWidth;
+    final double trackStroke = trackStrokeWidth;
+    final double visualGap = _visualGap(activeStroke);
     final double left = inset;
     final double trailing = math.max(gap, 4);
     final double trackRight = size.width - trailing;
     final ({double diameter, double centerX}) stop = _stopPlacement(
       trackRight: trackRight,
-      trackStroke: stroke,
+      trackStroke: trackStroke,
     );
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
     final double amplitude = waveAmplitude * amplitudeFactor.clamp(0.0, 1.0);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = stroke
-      ..isAntiAlias = true;
+    final Paint activePaint = _strokePaint(activeStroke);
+    final Paint trackPaint = _strokePaint(trackStroke);
 
     final indeterminate = value == null;
     final bool complete = !indeterminate && p >= 1.0;
     if (indeterminate) {
       _paintWavyIndeterminate(
         canvas,
-        paint: paint,
+        activePaint: activePaint,
+        trackPaint: trackPaint,
         left: left,
         trackRight: trackRight,
         width: width,
@@ -268,7 +270,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       return;
     }
     if (complete) {
-      _drawWave(canvas, paint, left, trackRight, cy, amplitude);
+      _drawWave(canvas, activePaint, left, trackRight, cy, amplitude);
       canvas.drawCircle(
         Offset(stop.centerX, cy),
         stop.diameter / 2,
@@ -283,10 +285,10 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(
         Offset(trackStartX, cy),
         Offset(trackRight, cy),
-        paint..color = track,
+        trackPaint..color = track,
       );
     }
-    _drawWave(canvas, paint, left, activeEndX, cy, amplitude);
+    _drawWave(canvas, activePaint, left, activeEndX, cy, amplitude);
     canvas.drawCircle(
       Offset(stop.centerX, cy),
       stop.diameter / 2,
@@ -296,7 +298,8 @@ class M3ELinearProgressPainter extends CustomPainter {
 
   void _paintWavyIndeterminate(
     Canvas canvas, {
-    required Paint paint,
+    required Paint activePaint,
+    required Paint trackPaint,
     required double left,
     required double trackRight,
     required double width,
@@ -318,7 +321,11 @@ class M3ELinearProgressPainter extends CustomPainter {
       if (x1 <= x0) {
         return;
       }
-      canvas.drawLine(Offset(x0, cy), Offset(x1, cy), paint..color = track);
+      canvas.drawLine(
+        Offset(x0, cy),
+        Offset(x1, cy),
+        trackPaint..color = track,
+      );
     }
 
     void drawActive(double startF, double endF) {
@@ -327,10 +334,9 @@ class M3ELinearProgressPainter extends CustomPainter {
       }
       final double x0 = left + width * startF.clamp(0.0, 1.0);
       final double x1 = left + width * endF.clamp(0.0, 1.0);
-      _drawWave(canvas, paint, x0, x1, cy, amplitude);
+      _drawWave(canvas, activePaint, x0, x1, cy, amplitude);
     }
 
-    // Gap / track segments around the two traveling waves.
     final double firstTrackEnd = segs.secondTail * width + left - adjustedGap;
     if (firstTrackEnd > left + strokeCap) {
       drawTrack(left + strokeCap, firstTrackEnd);

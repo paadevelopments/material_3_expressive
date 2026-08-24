@@ -14,6 +14,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     this.indeterminateHeight = 2,
     this.borderWidth = 2,
     this.disabledOpacity = 0.38,
+    this.labelGap = 8,
   });
 
   /// defaults.
@@ -41,6 +42,9 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
 
   /// disabledOpacity.
   final double disabledOpacity;
+
+  /// Gap between the control and an optional label beside the checkbox.
+  final double labelGap;
 
   /// The borderRadius.
 
@@ -111,6 +115,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     double? indeterminateHeight,
     double? borderWidth,
     double? disabledOpacity,
+    double? labelGap,
   }) {
     return M3ECheckboxTheme(
       boxSize: boxSize ?? this.boxSize,
@@ -120,6 +125,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
       indeterminateHeight: indeterminateHeight ?? this.indeterminateHeight,
       borderWidth: borderWidth ?? this.borderWidth,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
+      labelGap: labelGap ?? this.labelGap,
     );
   }
 
@@ -144,6 +150,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
       )!,
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
+      labelGap: _lerpDouble(labelGap, other.labelGap, t)!,
     );
   }
 

@@ -1,11 +1,32 @@
 ## 1.0.9
 
+### Added
+
+* `M3ECheckbox` optional `label`, `boxSize`, `hitSize`, `checkedChild`, and
+  `uncheckedChild`, with a spatial-spring pulse on value changes.
+* `M3EProgressIndicator.circular` / `.linear` optional `trackStrokeWidth`
+  (and `.linear` `strokeWidth`) so all kinds can override track and value
+  thickness.
+* `M3ERefreshIndicator.contentDragOffset` — caps list top padding while
+  pulling (defaults to `displacement`).
+
 ### Fixed
 
+* `M3ECheckbox` check mark is centered in the box.
+* `M3EProgressIndicator.linearWavy` honors `linearSize` for stroke thickness;
+  linear painters draw track and active with separate stroke widths.
 * `M3EButtonGroup` labeled actions with distinct `checkedLabel` no longer
   blank for a frame when the parent rebuilds a new `actions` list on
   selection change. Measured widths are kept across remotion, and layout
   signatures ignore visual-only decoration / widget identity noise.
+
+### Changed
+
+* `M3EExpressiveLoadingIndicator` applies a tiny scale pulse (spatial spring)
+  when morphing between polygons.
+* `M3ERefreshIndicator` reveals the spinner with scale + fade (no slide-down),
+  settles with an expressive spatial spring overshoot, and springs list top
+  padding back to zero on release.
 
 ## 1.0.8
 

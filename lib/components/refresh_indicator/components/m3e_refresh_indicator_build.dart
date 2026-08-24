@@ -10,8 +10,7 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     return M3ETheme.of(context).loadingIndicatorTheme.containerHeight;
   }
 
-  /// Max visual travel during drag: resting refresh position
-  /// (`top == displacement`).
+  /// Max visual travel during drag used for arming / material progress.
   double _maxVisualPull(BuildContext context) =>
       widget.displacement + _indicatorHeight(context);
 
@@ -20,23 +19,45 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     return math.min(math.max(0, _dragOffset ?? 0.0), _maxVisualPull(context));
   }
 
-  /// Pull distance in pixels used for positioning.
-  ///
-  /// Drag/armed follow the finger via [_dragOffset] until the snap cap.
-  /// Animated phases derive pull from [_positionFactor] so the resting refresh
-  /// position is [M3ERefreshIndicator.displacement] below the edge.
-  double _pullDistance(BuildContext context) {
-    final double height = _indicatorHeight(context);
+  /// List top/bottom padding while dragging (capped) or while springing back.
+  double _contentPad(BuildContext context) {
     switch (_status) {
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.armed:
-        return _visualPull(context);
+        return math.min(_visualPull(context), _resolvedContentDragOffset);
       case M3ERefreshStatus.snap:
       case M3ERefreshStatus.refresh:
       case M3ERefreshStatus.done:
       case M3ERefreshStatus.canceled:
-        // positionFactor 1.0 → pull = displacement + height → top = displacement.
-        return _positionFactor.value * (widget.displacement + height);
+        return math.max(0, _contentPadController.value);
+      case null:
+        return 0;
+    }
+  }
+
+  /// Scale / opacity progress for the parked indicator (0 → 1 with pull).
+  double _revealProgress(BuildContext context) {
+    final double target = widget.displacement > 0
+        ? widget.displacement
+        : _resolvedContentDragOffset;
+    if (target <= 0) {
+      return 1;
+    }
+    final double restingPosition =
+        1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+    switch (_status) {
+      case M3ERefreshStatus.drag:
+      case M3ERefreshStatus.armed:
+        return (_visualPull(context) / target).clamp(0.0, 1.0);
+      case M3ERefreshStatus.snap:
+        // Allow slight overshoot past 1 while the spatial spring settles.
+        return (_positionController.value / restingPosition).clamp(0.0, 1.2);
+      case M3ERefreshStatus.refresh:
+        return 1;
+      case M3ERefreshStatus.done:
+        return _scaleFactor.value.clamp(0.0, 1.2);
+      case M3ERefreshStatus.canceled:
+        return (_positionController.value / restingPosition).clamp(0.0, 1.2);
       case null:
         return 0;
     }
@@ -46,24 +67,25 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =
         _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
-    final double height = _indicatorHeight(context);
-    final double pull = _pullDistance(context);
-    // pull 0 → fully above the clip; as the user drags, the indicator slides
-    // out of the top edge and continues downward with the finger.
-    final double inset = pull - height;
+    final double reveal = _revealProgress(context);
+    // Park at displacement; reveal via scale + fade (no slide-down).
+    final double restingInset = widget.displacement;
 
     return Positioned(
-      top: atTop ? widget.edgeOffset + inset : null,
-      bottom: atTop ? null : widget.edgeOffset + inset,
+      top: atTop ? widget.edgeOffset + restingInset : null,
+      bottom: atTop ? null : widget.edgeOffset + restingInset,
       left: 0,
       right: 0,
       child: IgnorePointer(
         child: Align(
           alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-          child: ScaleTransition(
-            scale: _scaleFactor,
-            alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-            child: _buildIndicator(context, showIndeterminate),
+          child: Opacity(
+            opacity: reveal.clamp(0.0, 1.0),
+            child: Transform.scale(
+              scale: reveal,
+              alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
+              child: _buildIndicator(context, showIndeterminate),
+            ),
           ),
         ),
       ),
@@ -90,7 +112,6 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
   }
 
   Widget _buildLoadingIndicator({required M3ELoadingIndicatorVariant variant}) {
-    // Keep loading indicators fully opaque; reveal is the edge slide-in.
     return M3ELoadingIndicator(
       variant: variant,
       color: _effectiveValueColor,

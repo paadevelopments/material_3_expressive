@@ -77,6 +77,7 @@ class _M3EExpressiveLoadingIndicatorState
 
   late final AnimationController _morphController;
   late final AnimationController _globalRotationController;
+  late final AnimationController _pulseController;
   int _currentMorphIndex = 0;
   double _morphRotationTargetAngle = _quarterRotation;
 
@@ -89,6 +90,8 @@ class _M3EExpressiveLoadingIndicatorState
     5,
     snapToEnd: true,
   );
+
+  static const double _pulseStartScale = 0.94;
 
   late BoxConstraints _constraints;
   late Color _color;
@@ -126,6 +129,7 @@ class _M3EExpressiveLoadingIndicatorState
               animation: Listenable.merge([
                 _morphController,
                 _globalRotationController,
+                _pulseController,
               ]),
               builder: (context, child) {
                 final morphProgress = _morphController.value.clamp(0.0, 1.0);
@@ -143,18 +147,22 @@ class _M3EExpressiveLoadingIndicatorState
 
                 return Transform.rotate(
                   angle: totalRotationRadians,
-                  child: CustomPaint(
-                    painter: _MorphPainter(
-                      morph: _morphSequence[_currentMorphIndex],
-                      progress: morphProgress,
-                      color: _color,
-                      scaleFactor: shapesScaleFactor,
-                      repaint: Listenable.merge([
-                        _morphController,
-                        _globalRotationController,
-                      ]),
+                  child: Transform.scale(
+                    scale: _pulseController.value,
+                    child: CustomPaint(
+                      painter: _MorphPainter(
+                        morph: _morphSequence[_currentMorphIndex],
+                        progress: morphProgress,
+                        color: _color,
+                        scaleFactor: shapesScaleFactor,
+                        repaint: Listenable.merge([
+                          _morphController,
+                          _globalRotationController,
+                          _pulseController,
+                        ]),
+                      ),
+                      child: const SizedBox.expand(),
                     ),
-                    child: const SizedBox.expand(),
                   ),
                 );
               },
@@ -170,6 +178,7 @@ class _M3EExpressiveLoadingIndicatorState
     _morphTimer?.cancel();
     _morphController.dispose();
     _globalRotationController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -182,6 +191,7 @@ class _M3EExpressiveLoadingIndicatorState
     _morphSequence = _createMorphSequence(_polygons, circularSequence: true);
 
     _morphController = AnimationController.unbounded(vsync: this);
+    _pulseController = AnimationController.unbounded(vsync: this, value: 1);
 
     // continuous linear rotation
     _globalRotationController = AnimationController(
@@ -275,6 +285,18 @@ class _M3EExpressiveLoadingIndicatorState
     _morphController
       ..value = 0.0
       ..animateWith(_morphAnimationSpec);
+
+    // Tiny scale pulse while morphing in (Compose-style shrink then settle).
+    _pulseController
+      ..value = _pulseStartScale
+      ..animateWith(
+        SpringSimulation(
+          M3EMotion.expressiveSpatialDefault.toDescription(),
+          _pulseStartScale,
+          1,
+          0,
+        ),
+      );
   }
 }
 

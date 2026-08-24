@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
@@ -27,6 +28,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
@@ -50,6 +52,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
@@ -73,6 +76,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
@@ -95,6 +99,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
     this.color,
@@ -118,6 +123,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     required this.child,
     required this.onRefresh,
     this.onStatusChange,
+    this.contentDragOffset,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
@@ -137,8 +143,12 @@ class M3ERefreshIndicator extends StatefulWidget {
 
   final Widget child;
 
-  /// final.
+  /// Resting offset of the indicator below the scroll edge.
   final double displacement;
+
+  /// Max list top padding while dragging. Defaults to [displacement]
+  /// (or [M3ERefreshIndicatorTheme.kDefaultDisplacement] when displacement is 0).
+  final double? contentDragOffset;
 
   /// final.
   final double edgeOffset;
@@ -190,7 +200,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     with TickerProviderStateMixin<M3ERefreshIndicator> {
   late AnimationController _positionController;
   late AnimationController _scaleController;
-  late Animation<double> _positionFactor;
+  late AnimationController _contentPadController;
   late Animation<double> _scaleFactor;
   late Animation<double> _value;
   late Animation<Color?> _valueColor;
@@ -206,23 +216,30 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     begin: 0,
     end: 0.75,
   );
-  static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
-    begin: 0,
-    end: M3ERefreshIndicatorTheme.kDragSizeFactorLimit,
-  );
   static final Animatable<double> _oneToZeroTween = Tween<double>(
     begin: 1,
     end: 0,
   );
 
+  double get _resolvedContentDragOffset {
+    if (widget.contentDragOffset != null) {
+      return widget.contentDragOffset!;
+    }
+    if (widget.displacement > 0) {
+      return widget.displacement;
+    }
+    return M3ERefreshIndicatorTheme.kDefaultDisplacement;
+  }
+
   @override
   void initState() {
     super.initState();
-    _positionController = AnimationController(vsync: this);
-    _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
+    // Unbounded so expressive spatial springs can overshoot settle targets.
+    _positionController = AnimationController.unbounded(vsync: this);
     _value = _positionController.drive(_threeQuarterTween);
-    _scaleController = AnimationController(vsync: this);
+    _scaleController = AnimationController.unbounded(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
+    _contentPadController = AnimationController.unbounded(vsync: this);
   }
 
   @override
@@ -243,6 +260,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   void dispose() {
     _positionController.dispose();
     _scaleController.dispose();
+    _contentPadController.dispose();
     super.dispose();
   }
 
@@ -261,30 +279,38 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final Widget child = NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification n) => _handleScrollNotification(n),
-      child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (OverscrollIndicatorNotification n) =>
-            _handleIndicatorNotification(n),
-        child: widget.child,
-      ),
-    );
-
     return M3EComponentTheme(
-      builder: (BuildContext context) => Stack(
-        children: <Widget>[
-          child,
-          if (_status != null)
-            AnimatedBuilder(
-              animation: Listenable.merge(<Listenable>[
-                _positionController,
-                _scaleController,
-              ]),
-              builder: (BuildContext context, Widget? _) {
-                return _buildPositionedIndicator(context);
-              },
+      builder: (BuildContext context) => AnimatedBuilder(
+        animation: Listenable.merge(<Listenable>[
+          _positionController,
+          _scaleController,
+          _contentPadController,
+        ]),
+        builder: (BuildContext context, Widget? _) {
+          final double pad = _contentPad(context);
+          final Widget child = NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification n) =>
+                _handleScrollNotification(n),
+            child: NotificationListener<OverscrollIndicatorNotification>(
+              onNotification: (OverscrollIndicatorNotification n) =>
+                  _handleIndicatorNotification(n),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: (_isIndicatorAtTop ?? false) ? pad : 0,
+                  bottom: _isIndicatorAtTop == false ? pad : 0,
+                ),
+                child: widget.child,
+              ),
             ),
-        ],
+          );
+
+          return Stack(
+            children: <Widget>[
+              child,
+              if (_status != null) _buildPositionedIndicator(context),
+            ],
+          );
+        },
       ),
     );
   }

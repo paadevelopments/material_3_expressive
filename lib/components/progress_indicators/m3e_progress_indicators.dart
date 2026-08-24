@@ -33,11 +33,11 @@ class M3EProgressIndicator extends StatefulWidget {
     this.value,
     this.size,
     this.strokeWidth,
+    this.trackStrokeWidth,
     this.color,
     this.trackColor,
   }) : _kind = _M3EProgressKind.circular,
        linearSize = M3EProgressIndicatorSize.m,
-       trackStrokeWidth = null,
        gapSize = null,
        stopSize = null,
        amplitude = null,
@@ -68,12 +68,12 @@ class M3EProgressIndicator extends StatefulWidget {
     super.key,
     this.value,
     this.linearSize = M3EProgressIndicatorSize.m,
+    this.strokeWidth,
+    this.trackStrokeWidth,
     this.color,
     this.trackColor,
   }) : _kind = _M3EProgressKind.linear,
        size = null,
-       strokeWidth = null,
-       trackStrokeWidth = null,
        gapSize = null,
        stopSize = null,
        amplitude = null,
@@ -119,7 +119,7 @@ class M3EProgressIndicator extends StatefulWidget {
   /// Active stroke width.
   final double? strokeWidth;
 
-  /// Track stroke width (wavy variants).
+  /// Track stroke width.
   final double? trackStrokeWidth;
 
   /// Gap between active indicator and track (wavy variants).
@@ -449,10 +449,13 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final M3ELinearProgressLayout layout = linear.resolveFlat(
       widget.linearSize,
     );
+    final double stroke = widget.strokeWidth ?? layout.trackHeight;
+    final double trackStroke = widget.trackStrokeWidth ?? layout.trackHeight;
     final indet = widget.value == null;
+    final double height = math.max(stroke, trackStroke);
     return RepaintBoundary(
       child: SizedBox(
-        height: layout.trackHeight,
+        height: height,
         width: double.infinity,
         child: AnimatedBuilder(
           animation: _linearIndetController,
@@ -463,8 +466,8 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 animationValue: indet ? _linearIndetController.value : 0,
                 active: active,
                 track: track,
-                strokeWidth: layout.trackHeight,
-                trackStrokeWidth: layout.trackHeight,
+                strokeWidth: stroke,
+                trackStrokeWidth: trackStroke,
                 gap: layout.gap,
                 stopSize: layout.dotDiameter,
                 isWavy: false,
@@ -486,11 +489,14 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     required Color active,
     required Color track,
   }) {
-    final double stroke = widget.strokeWidth ?? linear.strokeWidth;
-    final double trackStroke =
-        widget.trackStrokeWidth ?? linear.trackStrokeWidth;
-    final double gap = widget.gapSize ?? linear.gapSize;
-    final double stop = widget.stopSize ?? linear.stopSize;
+    final M3ELinearProgressLayout layout = linear.resolveFlat(
+      widget.linearSize,
+    );
+    // Explicit strokes > linearSize matrix > theme defaults.
+    final double stroke = widget.strokeWidth ?? layout.trackHeight;
+    final double trackStroke = widget.trackStrokeWidth ?? layout.trackHeight;
+    final double gap = widget.gapSize ?? layout.gap;
+    final double stop = widget.stopSize ?? layout.dotDiameter;
     final indeterminate = widget.value == null;
     final double wavelength =
         widget.wavelength ??
@@ -502,8 +508,11 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
       themeAmplitude: linear.amplitudeForProgress,
     );
     final double height = math.max(
+      math.max(
+        trackStroke,
+        stroke + 2 * linear.waveAmplitude * amplitudeFactor,
+      ),
       linear.wavyContainerHeight,
-      stroke + 2 * linear.waveAmplitude * amplitudeFactor,
     );
 
     final Listenable listenable = indeterminate
