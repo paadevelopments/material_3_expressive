@@ -6,8 +6,11 @@ import '../../../foundations/foundations.dart';
 @immutable
 class M3ERefreshIndicatorTheme
     extends M3EThemeExtension<M3ERefreshIndicatorTheme> {
-  /// kDefaultDisplacement.
-  static const double kDefaultDisplacement = 40;
+  /// Default resting top inset of the spinner (matches default indicator padding).
+  static const double kDefaultDisplacement = 8;
+
+  /// Default vertical gap above/below the spinner inside the list pad.
+  static const double kDefaultIndicatorPadding = 8;
 
   /// kDefaultEdgeOffset.
   static const double kDefaultEdgeOffset = 0;

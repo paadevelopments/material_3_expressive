@@ -27,12 +27,16 @@ enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 ///
 /// Call [M3ERefreshIndicatorState.show] via a [GlobalKey], or pass a
 /// [M3ERefreshIndicatorController] to trigger refresh programmatically.
+///
+/// Refresh runs only when the indicator is fully revealed (scale/opacity at 1)
+/// and the pointer is released. Releasing earlier cancels with a scale/fade out.
 class M3ERefreshIndicator extends StatefulWidget {
   /// const.
   const M3ERefreshIndicator({
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.indicatorPadding = M3ERefreshIndicatorTheme.kDefaultIndicatorPadding,
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
@@ -50,14 +54,15 @@ class M3ERefreshIndicator extends StatefulWidget {
   }) : _indicatorType = _IndicatorType.expressive,
        strokeWidth = 0.0,
        assert(elevation >= 0.0, 'assertion failed'),
+       assert(indicatorPadding >= 0.0, 'assertion failed'),
        assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
 
   /// const.
-
   const M3ERefreshIndicator.contained({
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.indicatorPadding = M3ERefreshIndicatorTheme.kDefaultIndicatorPadding,
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
@@ -75,14 +80,15 @@ class M3ERefreshIndicator extends StatefulWidget {
   }) : _indicatorType = _IndicatorType.contained,
        strokeWidth = 0.0,
        assert(elevation >= 0.0, 'assertion failed'),
+       assert(indicatorPadding >= 0.0, 'assertion failed'),
        assert(!(polygons != null) || polygons.length > 1, 'assertion failed');
 
   /// const.
-
   const M3ERefreshIndicator.material({
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.indicatorPadding = M3ERefreshIndicatorTheme.kDefaultIndicatorPadding,
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
@@ -99,14 +105,15 @@ class M3ERefreshIndicator extends StatefulWidget {
   }) : _indicatorType = _IndicatorType.material,
        polygons = null,
        indicatorConstraints = null,
-       assert(elevation >= 0.0, 'assertion failed');
+       assert(elevation >= 0.0, 'assertion failed'),
+       assert(indicatorPadding >= 0.0, 'assertion failed');
 
   /// const.
-
   const M3ERefreshIndicator.adaptive({
     super.key,
     required this.child,
     this.displacement = M3ERefreshIndicatorTheme.kDefaultDisplacement,
+    this.indicatorPadding = M3ERefreshIndicatorTheme.kDefaultIndicatorPadding,
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
@@ -123,16 +130,17 @@ class M3ERefreshIndicator extends StatefulWidget {
   }) : _indicatorType = _IndicatorType.adaptive,
        polygons = null,
        indicatorConstraints = null,
-       assert(elevation >= 0.0, 'assertion failed');
+       assert(elevation >= 0.0, 'assertion failed'),
+       assert(indicatorPadding >= 0.0, 'assertion failed');
 
   /// const.
-
   const M3ERefreshIndicator.noSpinner({
     super.key,
     required this.child,
     required this.onRefresh,
     this.controller,
     this.onStatusChange,
+    this.indicatorPadding = M3ERefreshIndicatorTheme.kDefaultIndicatorPadding,
     this.contentDragOffset,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
@@ -147,18 +155,27 @@ class M3ERefreshIndicator extends StatefulWidget {
        strokeWidth = 0.0,
        polygons = null,
        indicatorConstraints = null,
-       assert(elevation >= 0.0, 'assertion failed');
+       assert(elevation >= 0.0, 'assertion failed'),
+       assert(indicatorPadding >= 0.0, 'assertion failed');
 
   /// final.
-
   final Widget child;
 
-  /// Resting offset of the indicator below the scroll edge.
+  /// Resting offset of the indicator below the scroll edge (top of spinner).
+  ///
+  /// Defaults to [M3ERefreshIndicatorTheme.kDefaultDisplacement] (8), matching
+  /// the top [indicatorPadding] so the spinner sits in the list pad.
   final double displacement;
 
-  /// Max list top padding while dragging. Defaults to [displacement]
-  /// (or [M3ERefreshIndicatorTheme.kDefaultDisplacement] when displacement is 0).
-  /// Does not move the indicator's drop edge.
+  /// Vertical gap above and below the spinner inside the list pad (default 8).
+  ///
+  /// Max list pad defaults to `indicatorHeight + 2 * indicatorPadding`.
+  /// Scale/fade/downward reveal starts after the pad reaches
+  /// `2 * indicatorPadding`.
+  final double indicatorPadding;
+
+  /// Max list top padding while dragging. Defaults to indicator height +
+  /// `2 * indicatorPadding`. Does not move the indicator's resting edge.
   final double? contentDragOffset;
 
   /// final.
@@ -209,12 +226,14 @@ class M3ERefreshIndicator extends StatefulWidget {
 }
 
 /// class.
-
 class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     with TickerProviderStateMixin<M3ERefreshIndicator> {
   late AnimationController _positionController;
   late AnimationController _scaleController;
   late AnimationController _contentPadController;
+
+  /// Release “bubble” scale at the locked rest inset (does not move layout).
+  late AnimationController _bubbleController;
   late Animation<double> _scaleFactor;
   late Animation<double> _value;
   late Animation<Color?> _valueColor;
@@ -223,6 +242,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
+
+  /// Indicator top inset locked when loading starts.
+  double? _restingInset;
   late Color _effectiveValueColor;
   late Color _effectiveContainerColor;
 
@@ -235,25 +257,34 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     end: 0,
   );
 
-  double get _resolvedContentDragOffset {
+  double _indicatorHeight(BuildContext context) {
+    final double? maxHeight = widget.indicatorConstraints?.maxHeight;
+    if (maxHeight != null && maxHeight.isFinite) {
+      return maxHeight;
+    }
+    return M3ETheme.of(context).loadingIndicatorTheme.containerHeight;
+  }
+
+  /// Max list pad: enough for the spinner plus padding above and below.
+  double _resolvedContentDragOffset(BuildContext context) {
     if (widget.contentDragOffset != null) {
       return widget.contentDragOffset!;
     }
-    if (widget.displacement > 0) {
-      return widget.displacement;
-    }
-    return M3ERefreshIndicatorTheme.kDefaultDisplacement;
+    return _indicatorHeight(context) + 2 * widget.indicatorPadding;
   }
+
+  /// Pull (px) at which scale/fade/downward motion begins.
+  double get _revealDelayPx => 2 * widget.indicatorPadding;
 
   @override
   void initState() {
     super.initState();
-    // Unbounded so expressive spatial springs can overshoot settle targets.
     _positionController = AnimationController.unbounded(vsync: this);
     _value = _positionController.drive(_threeQuarterTween);
     _scaleController = AnimationController.unbounded(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
     _contentPadController = AnimationController.unbounded(vsync: this);
+    _bubbleController = AnimationController.unbounded(vsync: this, value: 1);
     _pendingRefreshFuture = Future<void>.value();
     widget.controller?.attach(show);
   }
@@ -282,13 +313,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _positionController.dispose();
     _scaleController.dispose();
     _contentPadController.dispose();
+    _bubbleController.dispose();
     super.dispose();
   }
 
   /// Shows the refresh indicator and runs [M3ERefreshIndicator.onRefresh].
-  ///
-  /// Same entry point used by [M3ERefreshIndicatorController.show] and a
-  /// [GlobalKey] for [M3ERefreshIndicatorState].
   Future<void> show({bool atTop = true}) {
     if (_status != M3ERefreshStatus.refresh &&
         _status != M3ERefreshStatus.snap) {
@@ -308,6 +337,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
           _positionController,
           _scaleController,
           _contentPadController,
+          _bubbleController,
         ]),
         builder: (BuildContext context, Widget? _) {
           final double pad = _contentPad(context);

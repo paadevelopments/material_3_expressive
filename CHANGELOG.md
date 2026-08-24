@@ -10,7 +10,13 @@
   (and `.linear` `strokeWidth`) so all kinds can override track and value
   thickness.
 * `M3ERefreshIndicator.contentDragOffset` — caps list top padding while
-  pulling (defaults to `displacement`; does not move the indicator edge).
+  pulling (defaults to indicator height + `2 * indicatorPadding`).
+* `M3ERefreshIndicator.indicatorPadding` — vertical gap above/below the
+  spinner in the list pad (default 8); reveal starts after `2 ×` this value.
+* `M3ELoadingIndicator.rotationTurns` — when set, disables auto spin and
+  morph pulse so a host (e.g. refresh) can drive rotation.
+* `M3ELoadingIndicator.color` / `containerColor` document shape vs contained
+  shell colors (both overridable).
 * `M3ERefreshIndicatorController` to trigger refresh programmatically
   (same as Material `RefreshIndicatorState.show`).
 
@@ -24,6 +30,8 @@
   blank for a frame when the parent rebuilds a new `actions` list on
   selection change. Measured widths are kept across remotion, and layout
   signatures ignore visual-only decoration / widget identity noise.
+* `M3ERefreshIndicator` locks resting inset on refresh; release bubble is
+  scale-only (does not move layout). Short pulls cancel without `onRefresh`.
 
 ### Changed
 
@@ -32,9 +40,10 @@
   container. Morph rotation defaults are slower (45° / cycle, slower spring);
   timing and springs are configurable via widget params and
   `M3ELoadingIndicatorTheme`.
-* `M3ERefreshIndicator` drops from the scroll edge with scale + fade reveal,
-  settles with an expressive spatial spring overshoot, and springs list top
-  padding back to zero on release.
+* `M3ERefreshIndicator` default `displacement` is 8 (top padding). List pad
+  defaults to spinner height + 16. Scale/fade/downward reveal lags until pad
+  reaches `2 × indicatorPadding`, then fills through full visibility.
+  `onRefresh` runs only when fully revealed and the pointer is released.
 
 ## 1.0.8
 
