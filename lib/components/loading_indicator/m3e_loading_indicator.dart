@@ -25,6 +25,14 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.polygons,
     this.constraints,
     this.padding,
+    this.globalRotationDuration,
+    this.morphInterval,
+    this.morphRotationDegrees,
+    this.morphSpring,
+    this.morphSpringVelocity,
+    this.pulseStartScale,
+    this.pulseSpring,
+    this.pulseSpringVelocity,
     this.semanticLabel,
     this.semanticValue,
   });
@@ -47,6 +55,30 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   /// padding.
   final EdgeInsetsGeometry? padding;
+
+  /// Full 360° continuous spin period.
+  final Duration? globalRotationDuration;
+
+  /// Delay between polygon morph cycles.
+  final Duration? morphInterval;
+
+  /// Extra rotation (degrees) across each morph transition.
+  final double? morphRotationDegrees;
+
+  /// Spring for morph progress.
+  final M3ESpring? morphSpring;
+
+  /// Initial morph spring velocity.
+  final double? morphSpringVelocity;
+
+  /// Scale at the start of each morph-in pulse (default expands above 1, then settles).
+  final double? pulseStartScale;
+
+  /// Spring for the morph-in scale pulse settle.
+  final M3ESpring? pulseSpring;
+
+  /// Initial pulse spring velocity.
+  final double? pulseSpringVelocity;
 
   /// semanticLabel.
   final String? semanticLabel;
@@ -78,6 +110,14 @@ class M3ELoadingIndicator extends StatelessWidget {
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,
       constraints: cons,
+      globalRotationDuration: globalRotationDuration,
+      morphInterval: morphInterval,
+      morphRotationDegrees: morphRotationDegrees,
+      morphSpring: morphSpring,
+      morphSpringVelocity: morphSpringVelocity,
+      pulseStartScale: pulseStartScale,
+      pulseSpring: pulseSpring,
+      pulseSpringVelocity: pulseSpringVelocity,
     );
 
     return M3EComponentTheme(

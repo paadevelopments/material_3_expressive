@@ -19,6 +19,8 @@ import 'package:flutter/semantics.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../styles/m3e_loading_indicator_theme.dart';
+
 /// A Material Design loading indicator.
 ///
 /// This version of the loading indicator morphs between its [polygons] shapes.
@@ -32,6 +34,30 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// If null, then the [ProgressIndicatorThemeData.constraints] will be used. Otherwise, defaults to a minimum width and height of 48 pixels.
   final BoxConstraints? constraints;
 
+  /// Full 360° continuous spin period. Defaults to theme.
+  final Duration? globalRotationDuration;
+
+  /// Delay between polygon morph cycles. Defaults to theme.
+  final Duration? morphInterval;
+
+  /// Extra rotation (degrees) across each morph. Defaults to theme (45).
+  final double? morphRotationDegrees;
+
+  /// Spring for morph progress. Defaults to theme.
+  final M3ESpring? morphSpring;
+
+  /// Initial morph spring velocity. Defaults to theme.
+  final double? morphSpringVelocity;
+
+  /// Scale at the start of each morph-in pulse (`→ 1`; default expands above 1).
+  final double? pulseStartScale;
+
+  /// Spring for pulse settle. Defaults to theme.
+  final M3ESpring? pulseSpring;
+
+  /// Initial pulse spring velocity. Defaults to theme.
+  final double? pulseSpringVelocity;
+
   /// M3EExpressiveLoadingIndicator.
 
   const M3EExpressiveLoadingIndicator({
@@ -39,6 +65,14 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     super.color,
     this.polygons,
     this.constraints,
+    this.globalRotationDuration,
+    this.morphInterval,
+    this.morphRotationDegrees,
+    this.morphSpring,
+    this.morphSpringVelocity,
+    this.pulseStartScale,
+    this.pulseSpring,
+    this.pulseSpringVelocity,
     super.semanticsLabel,
     super.semanticsValue,
   }) : assert(
@@ -66,12 +100,7 @@ class _M3EExpressiveLoadingIndicatorState
 
   late final List<RoundedPolygon> _polygons;
 
-  static const int _globalRotationDurationMs = 4666;
-  static const int _morphIntervalMs = 650;
   static const double _fullRotation = 360;
-
-  static const double _quarterRotation = _fullRotation / 4;
-  static const double _activeSize = 38; // based on source spec
 
   late final List<Morph> _morphSequence;
 
@@ -79,34 +108,48 @@ class _M3EExpressiveLoadingIndicatorState
   late final AnimationController _globalRotationController;
   late final AnimationController _pulseController;
   int _currentMorphIndex = 0;
-  double _morphRotationTargetAngle = _quarterRotation;
+  double _morphRotationTargetAngle = 0;
 
   Timer? _morphTimer;
 
-  final _morphAnimationSpec = SpringSimulation(
-    M3EMotion.expressiveSpatialDefault.toDescription(),
-    0,
-    1,
-    5,
-    snapToEnd: true,
-  );
-
-  static const double _pulseStartScale = 0.78;
-
   late BoxConstraints _constraints;
   late Color _color;
+  late M3ELoadingIndicatorTheme _loadingTheme;
+
+  Duration get _globalRotationDuration =>
+      widget.globalRotationDuration ?? _loadingTheme.globalRotationDuration;
+
+  Duration get _morphInterval =>
+      widget.morphInterval ?? _loadingTheme.morphInterval;
+
+  double get _morphRotationDegrees =>
+      widget.morphRotationDegrees ?? _loadingTheme.morphRotationDegrees;
+
+  M3ESpring get _morphSpring => widget.morphSpring ?? _loadingTheme.morphSpring;
+
+  double get _morphSpringVelocity =>
+      widget.morphSpringVelocity ?? _loadingTheme.morphSpringVelocity;
+
+  double get _pulseStartScale =>
+      widget.pulseStartScale ?? _loadingTheme.pulseStartScale;
+
+  M3ESpring get _pulseSpring => widget.pulseSpring ?? _loadingTheme.pulseSpring;
+
+  double get _pulseSpringVelocity =>
+      widget.pulseSpringVelocity ?? _loadingTheme.pulseSpringVelocity;
+
+  double get _activeSize => _loadingTheme.activeIndicatorSize;
 
   @override
   Widget build(BuildContext context) {
     final m3eTheme = M3ETheme.of(context);
-    _color =
-        widget.color ??
-        m3eTheme.loadingIndicatorTheme.activeColor(m3eTheme.colorScheme);
+    _loadingTheme = m3eTheme.loadingIndicatorTheme;
+    _color = widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme);
     _constraints =
         widget.constraints ??
         BoxConstraints.tightFor(
-          width: m3eTheme.loadingIndicatorTheme.containerWidth,
-          height: m3eTheme.loadingIndicatorTheme.containerHeight,
+          width: _loadingTheme.containerWidth,
+          height: _loadingTheme.containerHeight,
         );
 
     // Fit polygons into the active shape size only — outer container stays fixed.
@@ -134,9 +177,9 @@ class _M3EExpressiveLoadingIndicatorState
                   final globalRotationDegrees =
                       _globalRotationController.value * _fullRotation;
 
-                  // calculate total rotation (clockwise, matching Kotlin implementation)
+                  // Morph contributes a reduced quarter-turn by default (theme).
                   final totalRotationDegrees =
-                      morphProgress * _quarterRotation +
+                      morphProgress * _morphRotationDegrees +
                       _morphRotationTargetAngle +
                       globalRotationDegrees;
 
@@ -197,13 +240,61 @@ class _M3EExpressiveLoadingIndicatorState
     _morphController = AnimationController.unbounded(vsync: this);
     _pulseController = AnimationController.unbounded(vsync: this, value: 1);
 
-    // continuous linear rotation
-    _globalRotationController = AnimationController(
-      duration: const Duration(milliseconds: _globalRotationDurationMs),
-      vsync: this,
-    );
+    // continuous linear rotation — duration applied once theme is available
+    _globalRotationController = AnimationController(vsync: this);
 
+    // Theme is read in didChangeDependencies before first morph tick.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadingTheme = M3ETheme.of(context).loadingIndicatorTheme;
+    _ensureAnimationsStarted();
+  }
+
+  @override
+  void didUpdateWidget(M3EExpressiveLoadingIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.globalRotationDuration != widget.globalRotationDuration ||
+        oldWidget.morphInterval != widget.morphInterval) {
+      _restartPeriodicAnimations();
+    }
+  }
+
+  bool _animationsStarted = false;
+
+  void _ensureAnimationsStarted() {
+    if (_animationsStarted) {
+      _syncGlobalRotationDuration();
+      return;
+    }
+    _animationsStarted = true;
+    _morphRotationTargetAngle = _morphRotationDegrees;
+    _syncGlobalRotationDuration();
     _startAnimations();
+  }
+
+  void _syncGlobalRotationDuration() {
+    final Duration duration = _globalRotationDuration;
+    if (_globalRotationController.duration != duration) {
+      final double value = _globalRotationController.value;
+      _globalRotationController.duration = duration;
+      if (_globalRotationController.isAnimating) {
+        _globalRotationController
+          ..value = value
+          ..repeat();
+      }
+    }
+  }
+
+  void _restartPeriodicAnimations() {
+    _morphTimer?.cancel();
+    _syncGlobalRotationDuration();
+    if (!_globalRotationController.isAnimating) {
+      _globalRotationController.repeat();
+    }
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
   }
 
   List<Morph> _createMorphSequence(
@@ -265,10 +356,7 @@ class _M3EExpressiveLoadingIndicatorState
     _globalRotationController.repeat();
 
     // periodic morph cycle
-    _morphTimer = Timer.periodic(
-      const Duration(milliseconds: _morphIntervalMs),
-      (_) => _startMorphCycle(),
-    );
+    _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
 
     _startMorphCycle();
   }
@@ -283,22 +371,30 @@ class _M3EExpressiveLoadingIndicatorState
 
     // accumulate rotation target
     _morphRotationTargetAngle =
-        (_morphRotationTargetAngle + _quarterRotation) % _fullRotation;
+        (_morphRotationTargetAngle + _morphRotationDegrees) % _fullRotation;
 
-    // Reset and start morph animation
+    // Reset and start morph animation (slower spring + lower velocity by default)
     _morphController
       ..value = 0.0
-      ..animateWith(_morphAnimationSpec);
+      ..animateWith(
+        SpringSimulation(
+          _morphSpring.toDescription(),
+          0,
+          1,
+          _morphSpringVelocity,
+          snapToEnd: true,
+        ),
+      );
 
-    // Noticeable scale pulse on the active shape holder while morphing in.
+    // Outward pulse (scale > 1) then smooth settle down to 1.
     _pulseController
       ..value = _pulseStartScale
       ..animateWith(
         SpringSimulation(
-          M3EMotion.expressiveSpatialDefault.toDescription(),
+          _pulseSpring.toDescription(),
           _pulseStartScale,
           1,
-          8,
+          _pulseSpringVelocity,
         ),
       );
   }

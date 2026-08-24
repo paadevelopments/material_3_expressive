@@ -28,8 +28,10 @@
 ### Changed
 
 * `M3EExpressiveLoadingIndicator` applies a noticeable scale pulse (spatial
-  spring with overshoot) to the active polygon holder on each morph — not the
-  outer container.
+  spring) to the active polygon holder on each morph — not the outer
+  container. Morph rotation defaults are slower (45° / cycle, slower spring);
+  timing and springs are configurable via widget params and
+  `M3ELoadingIndicatorTheme`.
 * `M3ERefreshIndicator` drops from the scroll edge with scale + fade reveal,
   settles with an expressive spatial spring overshoot, and springs list top
   padding back to zero on release.
