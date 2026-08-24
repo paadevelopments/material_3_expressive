@@ -15,7 +15,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     this.borderWidth = 2,
     this.disabledOpacity = 0.38,
     this.labelGap = 8,
-    this.checkIconPadding = const EdgeInsets.only(right: 1.5),
+    this.checkIconPadding = const EdgeInsets.only(right: 1),
   });
 
   /// defaults.
@@ -47,7 +47,9 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
   /// Gap between the control and an optional label beside the checkbox.
   final double labelGap;
 
-  /// Default optical padding for the built-in check icon.
+  /// Optical offset for the built-in check icon (paint translation, not layout).
+  ///
+  /// `left`/`top` nudge the glyph right/down; `right`/`bottom` nudge left/up.
   final EdgeInsetsGeometry checkIconPadding;
 
   /// The borderRadius.

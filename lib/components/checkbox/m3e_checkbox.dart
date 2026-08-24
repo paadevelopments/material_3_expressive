@@ -62,10 +62,12 @@ class M3ECheckbox extends StatefulWidget {
   /// Custom widget for the unchecked state. Replaces the default empty box.
   final Widget? uncheckedChild;
 
-  /// Extra padding around the default check icon only (checked state).
+  /// Extra optical offset for the default check icon only (checked state).
   ///
-  /// Does not apply to [checkedChild], indeterminate, or unchecked. Defaults to
-  /// a slight right inset for optical centering.
+  /// Applied as a paint-time translation (not layout padding) so the glyph
+  /// stays inside the box: `left`/`top` shift it right/down, `right`/`bottom`
+  /// shift it left/up. Does not apply to [checkedChild], indeterminate, or
+  /// unchecked.
   final EdgeInsetsGeometry? checkIconPadding;
 
   /// focusNode.
@@ -264,7 +266,6 @@ class _M3ECheckboxState extends State<M3ECheckbox>
     return AnimatedContainer(
       duration: M3EMotion.short3,
       curve: M3EMotion.standard,
-      alignment: Alignment.center,
       width: boxSize,
       height: boxSize,
       decoration: BoxDecoration(
@@ -275,6 +276,7 @@ class _M3ECheckboxState extends State<M3ECheckbox>
           width: checkboxTheme.borderWidth * sizeScale.clamp(0.5, 2),
         ),
       ),
+      // Tight child: mark handles its own centering so checkIconPadding insets.
       child: _buildMark(checkboxTheme, scheme, sizeScale),
     );
   }
@@ -295,12 +297,23 @@ class _M3ECheckboxState extends State<M3ECheckbox>
       );
     }
     if (widget.value ?? false) {
-      return Padding(
-        padding: widget.checkIconPadding ?? checkboxTheme.checkIconPadding,
-        child: Icon(
-          M3EIcons.check,
-          size: checkboxTheme.markSize * sizeScale,
-          color: color,
+      final EdgeInsets insets =
+          (widget.checkIconPadding ?? checkboxTheme.checkIconPadding).resolve(
+            Directionality.of(context),
+          );
+      final EdgeInsets scaled = sizeScale == 1 ? insets : insets * sizeScale;
+      // Paint-time nudge only — layout Padding overflowed the 18dp box.
+      return Center(
+        child: Transform.translate(
+          offset: Offset(
+            scaled.left - scaled.right,
+            scaled.top - scaled.bottom,
+          ),
+          child: Icon(
+            M3EIcons.check,
+            size: checkboxTheme.markSize * sizeScale,
+            color: color,
+          ),
         ),
       );
     }
