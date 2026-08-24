@@ -2,17 +2,22 @@
 
 ### Added
 
-* `M3ECheckbox` optional `label`, `boxSize`, `hitSize`, `checkedChild`, and
-  `uncheckedChild`, with a spatial-spring pulse on value changes.
+* `M3ECheckbox` optional `label`, `boxSize`, `hitSize`, `checkedChild`,
+  `uncheckedChild`, and `checkIconPadding` (default right inset for optical
+  centering of the built-in check), with a spatial-spring pulse on value
+  changes.
 * `M3EProgressIndicator.circular` / `.linear` optional `trackStrokeWidth`
   (and `.linear` `strokeWidth`) so all kinds can override track and value
   thickness.
 * `M3ERefreshIndicator.contentDragOffset` — caps list top padding while
-  pulling (defaults to `displacement`).
+  pulling (defaults to `displacement`; does not move the indicator edge).
+* `M3ERefreshIndicatorController` to trigger refresh programmatically
+  (same as Material `RefreshIndicatorState.show`).
 
 ### Fixed
 
-* `M3ECheckbox` check mark is centered in the box.
+* `M3ECheckbox` check mark is centered in the box (with default optical
+  padding on the built-in check icon).
 * `M3EProgressIndicator.linearWavy` honors `linearSize` for stroke thickness;
   linear painters draw track and active with separate stroke widths.
 * `M3EButtonGroup` labeled actions with distinct `checkedLabel` no longer
@@ -22,9 +27,10 @@
 
 ### Changed
 
-* `M3EExpressiveLoadingIndicator` applies a tiny scale pulse (spatial spring)
-  when morphing between polygons.
-* `M3ERefreshIndicator` reveals the spinner with scale + fade (no slide-down),
+* `M3EExpressiveLoadingIndicator` applies a noticeable scale pulse (spatial
+  spring with overshoot) to the active polygon holder on each morph — not the
+  outer container.
+* `M3ERefreshIndicator` drops from the scroll edge with scale + fade reveal,
   settles with an expressive spatial spring overshoot, and springs list top
   padding back to zero on release.
 

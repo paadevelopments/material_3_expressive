@@ -91,7 +91,7 @@ class _M3EExpressiveLoadingIndicatorState
     snapToEnd: true,
   );
 
-  static const double _pulseStartScale = 0.94;
+  static const double _pulseStartScale = 0.78;
 
   late BoxConstraints _constraints;
   late Color _color;
@@ -109,11 +109,8 @@ class _M3EExpressiveLoadingIndicatorState
           height: m3eTheme.loadingIndicatorTheme.containerHeight,
         );
 
-    final activeIndicatorScale =
-        _activeSize / math.min(_constraints.maxWidth, _constraints.maxHeight);
-
-    final shapesScaleFactor =
-        _calculateScaleFactor(_polygons) * activeIndicatorScale;
+    // Fit polygons into the active shape size only — outer container stays fixed.
+    final shapesScaleFactor = _calculateScaleFactor(_polygons);
 
     return Semantics.fromProperties(
       properties: SemanticsProperties(
@@ -125,47 +122,54 @@ class _M3EExpressiveLoadingIndicatorState
           constraints: _constraints,
           child: AspectRatio(
             aspectRatio: 1,
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _morphController,
-                _globalRotationController,
-                _pulseController,
-              ]),
-              builder: (context, child) {
-                final morphProgress = _morphController.value.clamp(0.0, 1.0);
-                final globalRotationDegrees =
-                    _globalRotationController.value * _fullRotation;
+            child: Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  _morphController,
+                  _globalRotationController,
+                  _pulseController,
+                ]),
+                builder: (context, child) {
+                  final morphProgress = _morphController.value.clamp(0.0, 1.0);
+                  final globalRotationDegrees =
+                      _globalRotationController.value * _fullRotation;
 
-                // calculate total rotation (clockwise, matching Kotlin implementation)
-                final totalRotationDegrees =
-                    morphProgress * _quarterRotation +
-                    _morphRotationTargetAngle +
-                    globalRotationDegrees;
+                  // calculate total rotation (clockwise, matching Kotlin implementation)
+                  final totalRotationDegrees =
+                      morphProgress * _quarterRotation +
+                      _morphRotationTargetAngle +
+                      globalRotationDegrees;
 
-                final totalRotationRadians =
-                    totalRotationDegrees * (math.pi / 180.0);
+                  final totalRotationRadians =
+                      totalRotationDegrees * (math.pi / 180.0);
 
-                return Transform.rotate(
-                  angle: totalRotationRadians,
-                  child: Transform.scale(
-                    scale: _pulseController.value,
-                    child: CustomPaint(
-                      painter: _MorphPainter(
-                        morph: _morphSequence[_currentMorphIndex],
-                        progress: morphProgress,
-                        color: _color,
-                        scaleFactor: shapesScaleFactor,
-                        repaint: Listenable.merge([
-                          _morphController,
-                          _globalRotationController,
-                          _pulseController,
-                        ]),
+                  // Pulse the active shape holder only — not the outer container.
+                  return Transform.rotate(
+                    angle: totalRotationRadians,
+                    child: Transform.scale(
+                      scale: _pulseController.value,
+                      child: SizedBox(
+                        width: _activeSize,
+                        height: _activeSize,
+                        child: CustomPaint(
+                          painter: _MorphPainter(
+                            morph: _morphSequence[_currentMorphIndex],
+                            progress: morphProgress,
+                            color: _color,
+                            scaleFactor: shapesScaleFactor,
+                            repaint: Listenable.merge([
+                              _morphController,
+                              _globalRotationController,
+                              _pulseController,
+                            ]),
+                          ),
+                          child: const SizedBox.expand(),
+                        ),
                       ),
-                      child: const SizedBox.expand(),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -286,7 +290,7 @@ class _M3EExpressiveLoadingIndicatorState
       ..value = 0.0
       ..animateWith(_morphAnimationSpec);
 
-    // Tiny scale pulse while morphing in (Compose-style shrink then settle).
+    // Noticeable scale pulse on the active shape holder while morphing in.
     _pulseController
       ..value = _pulseStartScale
       ..animateWith(
@@ -294,7 +298,7 @@ class _M3EExpressiveLoadingIndicatorState
           M3EMotion.expressiveSpatialDefault.toDescription(),
           _pulseStartScale,
           1,
-          0,
+          8,
         ),
       );
   }

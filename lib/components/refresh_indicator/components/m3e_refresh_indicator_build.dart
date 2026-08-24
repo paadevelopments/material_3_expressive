@@ -10,13 +10,40 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     return M3ETheme.of(context).loadingIndicatorTheme.containerHeight;
   }
 
-  /// Max visual travel during drag used for arming / material progress.
+  /// Max visual travel during drag: resting refresh position
+  /// (`top == displacement`).
   double _maxVisualPull(BuildContext context) =>
       widget.displacement + _indicatorHeight(context);
 
   /// Finger pull clamped to the snap cap.
   double _visualPull(BuildContext context) {
     return math.min(math.max(0, _dragOffset ?? 0.0), _maxVisualPull(context));
+  }
+
+  /// Pull distance in pixels used for drop positioning.
+  ///
+  /// Drag/armed follow the finger via [_dragOffset] until the snap cap.
+  /// Animated phases derive pull from the position controller so the resting
+  /// refresh position is the widget displacement below the edge.
+  /// Independent of list content-drag padding.
+  double _pullDistance(BuildContext context) {
+    final double height = _indicatorHeight(context);
+    final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+    switch (_status) {
+      case M3ERefreshStatus.drag:
+      case M3ERefreshStatus.armed:
+        return _visualPull(context);
+      case M3ERefreshStatus.snap:
+      case M3ERefreshStatus.refresh:
+      case M3ERefreshStatus.done:
+      case M3ERefreshStatus.canceled:
+        // position 1/limit → pull = displacement + height → top = displacement.
+        return _positionController.value *
+            limit *
+            (widget.displacement + height);
+      case null:
+        return 0;
+    }
   }
 
   /// List top/bottom padding while dragging (capped) or while springing back.
@@ -35,29 +62,25 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     }
   }
 
-  /// Scale / opacity progress for the parked indicator (0 → 1 with pull).
+  /// Scale / opacity progress as the indicator drops from the edge.
   double _revealProgress(BuildContext context) {
-    final double target = widget.displacement > 0
-        ? widget.displacement
-        : _resolvedContentDragOffset;
-    if (target <= 0) {
+    final double maxPull = _maxVisualPull(context);
+    if (maxPull <= 0) {
       return 1;
     }
-    final double restingPosition =
-        1.0 / M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
     switch (_status) {
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.armed:
-        return (_visualPull(context) / target).clamp(0.0, 1.0);
+        return (_pullDistance(context) / maxPull).clamp(0.0, 1.0);
       case M3ERefreshStatus.snap:
         // Allow slight overshoot past 1 while the spatial spring settles.
-        return (_positionController.value / restingPosition).clamp(0.0, 1.2);
+        return (_pullDistance(context) / maxPull).clamp(0.0, 1.2);
       case M3ERefreshStatus.refresh:
         return 1;
       case M3ERefreshStatus.done:
         return _scaleFactor.value.clamp(0.0, 1.2);
       case M3ERefreshStatus.canceled:
-        return (_positionController.value / restingPosition).clamp(0.0, 1.2);
+        return (_pullDistance(context) / maxPull).clamp(0.0, 1.2);
       case null:
         return 0;
     }
@@ -67,13 +90,17 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =
         _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
+    final double height = _indicatorHeight(context);
+    final double pull = _pullDistance(context);
     final double reveal = _revealProgress(context);
-    // Park at displacement; reveal via scale + fade (no slide-down).
-    final double restingInset = widget.displacement;
+    // Drop from the scroll edge (not affected by list content pad).
+    // pull 0 → fully above the clip; as the user drags, the indicator slides
+    // out and continues downward with the finger.
+    final double inset = pull - height;
 
     return Positioned(
-      top: atTop ? widget.edgeOffset + restingInset : null,
-      bottom: atTop ? null : widget.edgeOffset + restingInset,
+      top: atTop ? widget.edgeOffset + inset : null,
+      bottom: atTop ? null : widget.edgeOffset + inset,
       left: 0,
       right: 0,
       child: IgnorePointer(

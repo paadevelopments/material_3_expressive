@@ -15,6 +15,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     this.borderWidth = 2,
     this.disabledOpacity = 0.38,
     this.labelGap = 8,
+    this.checkIconPadding = const EdgeInsets.only(right: 1.5),
   });
 
   /// defaults.
@@ -45,6 +46,9 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
 
   /// Gap between the control and an optional label beside the checkbox.
   final double labelGap;
+
+  /// Default optical padding for the built-in check icon.
+  final EdgeInsetsGeometry checkIconPadding;
 
   /// The borderRadius.
 
@@ -116,6 +120,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
     double? borderWidth,
     double? disabledOpacity,
     double? labelGap,
+    EdgeInsetsGeometry? checkIconPadding,
   }) {
     return M3ECheckboxTheme(
       boxSize: boxSize ?? this.boxSize,
@@ -126,6 +131,7 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
       borderWidth: borderWidth ?? this.borderWidth,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
       labelGap: labelGap ?? this.labelGap,
+      checkIconPadding: checkIconPadding ?? this.checkIconPadding,
     );
   }
 
@@ -151,6 +157,11 @@ class M3ECheckboxTheme extends M3EThemeExtension<M3ECheckboxTheme> {
       borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
       labelGap: _lerpDouble(labelGap, other.labelGap, t)!,
+      checkIconPadding: EdgeInsetsGeometry.lerp(
+        checkIconPadding,
+        other.checkIconPadding,
+        t,
+      )!,
     );
   }
 

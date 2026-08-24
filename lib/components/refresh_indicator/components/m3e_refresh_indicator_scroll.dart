@@ -376,8 +376,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       _resolvedContentDragOffset,
     );
 
-    _status = M3ERefreshStatus.snap;
-    widget.onStatusChange?.call(_status);
+    setState(() {
+      _status = M3ERefreshStatus.snap;
+      widget.onStatusChange?.call(_status);
+    });
 
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
     Future.wait(<Future<void>>[

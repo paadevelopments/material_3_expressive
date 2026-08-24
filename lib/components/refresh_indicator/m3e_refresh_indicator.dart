@@ -8,9 +8,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
 import '../loading_indicator/m3e_loading_indicator.dart';
+import 'controllers/m3e_refresh_indicator_controller.dart';
 import 'enums/m3e_refresh_status.dart';
 import 'styles/m3e_refresh_indicator_theme.dart';
 
+export 'controllers/m3e_refresh_indicator_controller.dart';
 export 'enums/m3e_refresh_status.dart';
 export 'styles/m3e_refresh_indicator_theme.dart';
 
@@ -22,6 +24,9 @@ enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 /// A Material Design 3 expressive refresh indicator.
 ///
 /// Expressive and contained variants use [M3ELoadingIndicator] for the spinner.
+///
+/// Call [M3ERefreshIndicatorState.show] via a [GlobalKey], or pass a
+/// [M3ERefreshIndicatorController] to trigger refresh programmatically.
 class M3ERefreshIndicator extends StatefulWidget {
   /// const.
   const M3ERefreshIndicator({
@@ -31,6 +36,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
+    this.controller,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -55,6 +61,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
+    this.controller,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -79,6 +86,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
+    this.controller,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -102,6 +110,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     this.contentDragOffset,
     this.edgeOffset = M3ERefreshIndicatorTheme.kDefaultEdgeOffset,
     required this.onRefresh,
+    this.controller,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -122,6 +131,7 @@ class M3ERefreshIndicator extends StatefulWidget {
     super.key,
     required this.child,
     required this.onRefresh,
+    this.controller,
     this.onStatusChange,
     this.contentDragOffset,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -148,6 +158,7 @@ class M3ERefreshIndicator extends StatefulWidget {
 
   /// Max list top padding while dragging. Defaults to [displacement]
   /// (or [M3ERefreshIndicatorTheme.kDefaultDisplacement] when displacement is 0).
+  /// Does not move the indicator's drop edge.
   final double? contentDragOffset;
 
   /// final.
@@ -155,6 +166,9 @@ class M3ERefreshIndicator extends StatefulWidget {
 
   /// final.
   final M3ERefreshCallback onRefresh;
+
+  /// Optional controller to call [M3ERefreshIndicatorController.show].
+  final M3ERefreshIndicatorController? controller;
 
   /// final.
   final ValueChanged<M3ERefreshStatus?>? onStatusChange;
@@ -240,6 +254,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _scaleController = AnimationController.unbounded(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
     _contentPadController = AnimationController.unbounded(vsync: this);
+    _pendingRefreshFuture = Future<void>.value();
+    widget.controller?.attach(show);
   }
 
   @override
@@ -251,6 +267,10 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   @override
   void didUpdateWidget(covariant M3ERefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.detach();
+      widget.controller?.attach(show);
+    }
     if (oldWidget.color != widget.color) {
       _setupColorTween();
     }
@@ -258,14 +278,17 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   @override
   void dispose() {
+    widget.controller?.detach();
     _positionController.dispose();
     _scaleController.dispose();
     _contentPadController.dispose();
     super.dispose();
   }
 
-  /// Future.
-
+  /// Shows the refresh indicator and runs [M3ERefreshIndicator.onRefresh].
+  ///
+  /// Same entry point used by [M3ERefreshIndicatorController.show] and a
+  /// [GlobalKey] for [M3ERefreshIndicatorState].
   Future<void> show({bool atTop = true}) {
     if (_status != M3ERefreshStatus.refresh &&
         _status != M3ERefreshStatus.snap) {
@@ -305,6 +328,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
           );
 
           return Stack(
+            clipBehavior: Clip.none,
             children: <Widget>[
               child,
               if (_status != null) _buildPositionedIndicator(context),

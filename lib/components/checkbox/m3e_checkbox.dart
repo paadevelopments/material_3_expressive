@@ -25,6 +25,7 @@ class M3ECheckbox extends StatefulWidget {
     this.hitSize,
     this.checkedChild,
     this.uncheckedChild,
+    this.checkIconPadding,
     this.focusNode,
     this.autofocus = false,
     this.semanticLabel,
@@ -60,6 +61,12 @@ class M3ECheckbox extends StatefulWidget {
 
   /// Custom widget for the unchecked state. Replaces the default empty box.
   final Widget? uncheckedChild;
+
+  /// Extra padding around the default check icon only (checked state).
+  ///
+  /// Does not apply to [checkedChild], indeterminate, or unchecked. Defaults to
+  /// a slight right inset for optical centering.
+  final EdgeInsetsGeometry? checkIconPadding;
 
   /// focusNode.
   final FocusNode? focusNode;
@@ -288,10 +295,13 @@ class _M3ECheckboxState extends State<M3ECheckbox>
       );
     }
     if (widget.value ?? false) {
-      return Icon(
-        M3EIcons.check,
-        size: checkboxTheme.markSize * sizeScale,
-        color: color,
+      return Padding(
+        padding: widget.checkIconPadding ?? checkboxTheme.checkIconPadding,
+        child: Icon(
+          M3EIcons.check,
+          size: checkboxTheme.markSize * sizeScale,
+          color: color,
+        ),
       );
     }
     return const SizedBox.shrink();
