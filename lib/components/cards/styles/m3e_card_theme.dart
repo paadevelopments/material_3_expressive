@@ -30,7 +30,8 @@ class M3ECardTheme extends M3EThemeExtension<M3ECardTheme> {
       case M3ECardVariant.filled:
         return scheme.surfaceContainerHighest;
       case M3ECardVariant.outlined:
-        return scheme.surface;
+        // Border-only surface; callers pass [M3ECard.color] when a fill is needed.
+        return const Color(0x00000000);
     }
   }
 

@@ -38,8 +38,8 @@
   signatures ignore visual-only decoration / widget identity noise.
 * `M3ERefreshIndicator` locks resting inset on refresh; release bubble is
   scale-only (does not move layout). Short pulls cancel without `onRefresh`.
-* `M3ECardList` outlined variant no longer fills items with the card-list
-  background — outline is border-only unless a color is set.
+* `M3ECard` outlined variant defaults to a transparent fill (border only);
+  list surfaces that use `M3ECard` inherit this unless an explicit color is set.
 
 ### Changed
 
