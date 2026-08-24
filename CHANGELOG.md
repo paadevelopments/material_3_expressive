@@ -2,8 +2,9 @@
 
 ### Fixed
 
-* Nav bar / rail selection pill remasures on size changes (window resize);
-  stale geometry cache no longer blocks morphs to other destinations.
+* Nav bar, rail, and drawer selection pills remasure on size / constraint
+  changes (window resize); stale geometry cache no longer blocks morphs to
+  other destinations.
 
 ## 1.0.9
 
