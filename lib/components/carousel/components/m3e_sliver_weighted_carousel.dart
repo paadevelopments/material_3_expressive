@@ -1,9 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-//
-// Vendored from `package:m3_carousel/base_layout.dart` (Flutter CarouselView).
-// Split into part files for klin_dart file_length; behaviour unchanged.
 part of 'm3e_carousel_view.dart';
 
 /// A sliver that arranges its box children in a linear array, constraining them

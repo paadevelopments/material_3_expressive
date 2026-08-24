@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// FloatingToolbarTokens.kt / DockedToolbarTokens.kt
-
 /// Numeric constants matching Compose Material 3 toolbar tokens.
 abstract final class M3EToolbarTokens {
   const M3EToolbarTokens._();

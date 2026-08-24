@@ -1,5 +1,3 @@
-// Ported from https://github.com/Mudit200408/m3e_dropdown_menu
-// Adapted for material_3_expressive: import paths, foundations wiring, M3E naming.
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 

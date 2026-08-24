@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// Helpers for Slider.kt scale / stepsToTickFractions / snapValueToTick.
-
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart' show LogicalKeyboardKey;

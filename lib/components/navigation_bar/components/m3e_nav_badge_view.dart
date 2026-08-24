@@ -1,5 +1,3 @@
-// Vendored from the `navigation_bar_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
 // Delegates to [M3EBadge] for the shared badge implementation.
 
 import 'package:flutter/widgets.dart';

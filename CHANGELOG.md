@@ -76,6 +76,8 @@
   `onRefresh` runs only when fully revealed and the pointer is released.
 * `M3ETimePickerTheme` period sizes align with Material (`periodPortraitSize`
   52×80, `periodLandscapeSize` 216×38, `periodInputSize` 52×72).
+* Vendor/source attribution headers removed from `lib/` Dart sources;
+  third-party notices remain in `NOTICE` only.
 
 ## 1.0.8
 

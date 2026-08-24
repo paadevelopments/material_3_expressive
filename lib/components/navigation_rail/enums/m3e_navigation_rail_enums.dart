@@ -1,8 +1,3 @@
-// Vendored from the `navigation_rail_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
-// The logic is kept identical to the reference implementation; only the public
-// identifiers carry the `M3E` prefix to match this package's conventions.
-
 /// Modality for the expanded rail.
 enum M3ENavigationRailModality {
   /// Occupies layout space.

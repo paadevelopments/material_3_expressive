@@ -1,8 +1,3 @@
-// Vendored from the `navigation_bar_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e/lib).
-// The logic is kept identical to the reference implementation; only the public
-// identifiers carry the `M3E` prefix to match this package's conventions.
-
 /// Controls when destination labels are shown in the navigation bar.
 enum M3ENavBarLabelBehavior {
   /// Always show destination labels.

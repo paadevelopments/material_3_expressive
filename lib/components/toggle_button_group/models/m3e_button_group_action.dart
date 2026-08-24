@@ -1,5 +1,3 @@
-// GENERATED VENDOR FILE. Ported from https://github.com/Mudit200408/m3e_buttons
-// Adapted for material_3_expressive: import paths + M3E naming only.
 import 'package:material_3_expressive/components/toggle_button_group/m3e_toggle_button_group.dart'
     show M3EButtonGroup;
 import 'package:material_3_expressive/material_3_expressive.dart'

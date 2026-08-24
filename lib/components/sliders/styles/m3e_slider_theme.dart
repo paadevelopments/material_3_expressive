@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// SliderTokens.kt / SliderColors
-
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/sliders/m3e_sliders.dart'
     show M3ERangeSlider, M3ESlider;

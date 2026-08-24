@@ -1,7 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// HorizontalFloatingToolbar / VerticalFloatingToolbar / FlexibleBottomAppBar
-//
-// FAB morph / scroll exit also reference m3e_core floating_toolbar (not vendored).
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 

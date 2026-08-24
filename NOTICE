@@ -2,9 +2,9 @@ Third-Party and Vendored Code
 ================================================================================
 
 This package includes source code vendored or ported from other projects.
-Vendored files are marked in their headers (for example, "Vendored from",
-"GENERATED VENDOR FILE", or "Ported from"). The notices below preserve the
-original copyrights and license terms.
+Attributions, copyrights, and license terms for that code are listed in this
+file (with local paths under each notice). Do not rely on per-file source
+headers for third-party attribution.
 
 The package itself is licensed under the MIT License; see LICENSE.
 

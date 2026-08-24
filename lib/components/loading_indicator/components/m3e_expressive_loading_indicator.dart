@@ -1,16 +1,3 @@
-// Vendored verbatim from the `loading_indicator_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/blob/main/packages/loading_indicator_m3e/lib/src/expressive_loading_indicator.dart),
-// itself a port of Android's LoadingIndicator. The logic is kept identical to
-// the reference `ExpressiveLoadingIndicator`; only the public class name carries
-// the `M3E` prefix.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
-
-// Port of Android's LoadingIndicator
-// Source: androidx/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt
-// Copyright (c) 2024 The Android Open Source Project
-// Licensed under the Apache License, Version 2.0
 import 'dart:async';
 import 'dart:math' as math;
 

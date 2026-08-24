@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// FloatingToolbar content row/column slots
-
 import 'package:flutter/widgets.dart';
 
 /// Leading / content / trailing layout for floating or docked toolbars.

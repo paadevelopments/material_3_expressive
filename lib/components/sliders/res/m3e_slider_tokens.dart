@@ -1,8 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// SliderTokens.kt (v2_3_5)
-// Copyright (c) The Android Open Source Project
-// Licensed under the Apache License, Version 2.0
-
 /// Numeric constants matching Compose Material 3 `SliderTokens`.
 abstract final class M3ESliderTokens {
   const M3ESliderTokens._();

@@ -1,6 +1,3 @@
-// Compose reference: androidx.compose.material3:material3:1.4.0-alpha01
-// FloatingToolbarColors / DockedToolbarTokens
-
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;

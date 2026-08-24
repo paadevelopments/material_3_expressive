@@ -1,10 +1,3 @@
-// Vendored from the `navigation_rail_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
-// The logic is kept identical to the reference `RailBadgeM3E`; only the public
-// class name carries the `M3E` prefix.
-//
-// As vendored third-party code kept intentionally identical to its source, the
-// project's opinionated lints are relaxed for this file.
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';

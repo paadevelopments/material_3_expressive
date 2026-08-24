@@ -1,5 +1,3 @@
-// Ported from https://github.com/Mudit200408/m3e_expandable
-// Adapted for material_3_expressive: M3ECard, M3ETheme, M3ESpring.
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';

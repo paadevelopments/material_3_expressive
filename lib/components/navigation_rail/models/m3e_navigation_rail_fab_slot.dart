@@ -1,8 +1,3 @@
-// Vendored from the `navigation_rail_m3e` package
-// (https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e/lib).
-// The logic is kept identical to the reference `NavigationRailM3EFabSlot`; the
-// external `fab_m3e` configuration types are mapped onto this package's own
-// `M3EFab`/`M3EExtendedFab` API ([M3EFabColor], [M3EFabSize]).
 import 'package:material_ui/material_ui.dart';
 
 import '../../floating_action_buttons/enums/m3e_fab.dart';

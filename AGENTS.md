@@ -231,7 +231,8 @@ Before adding anything new, search for how similar things are already done:
 | Dynamic color from OS | [`lib/foundations/m3e_dynamic_color_host.dart`](lib/foundations/m3e_dynamic_color_host.dart) |
 | Split oversized files | Same component folder; prefer extracted widgets/helpers or `part` + `extension on State` over fragile cross-mixin stubs |
 
-Match existing patterns for vendored/portions: headers may note upstream sources; see [`NOTICE`](NOTICE) for third-party attributions.
+Match existing patterns for vendored/portions: third-party attributions live in
+[`NOTICE`](NOTICE) only — do not re-add upstream source headers in Dart files.
 
 ---
 
