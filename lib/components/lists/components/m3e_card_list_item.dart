@@ -143,6 +143,14 @@ class M3ECardListItem extends StatelessWidget {
         ? () => onLongPress!(index)
         : null;
 
+    // Outlined list cards: border only — no fill unless the caller set a color.
+    final Color? explicitColor = resolvedColor ?? color;
+    final Color cardColor =
+        explicitColor ??
+        (variant == M3ECardVariant.outlined
+            ? const Color(0x00000000)
+            : cardListTheme.backgroundColor(scheme));
+
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
       child: M3ECardRadiusMotion(
@@ -152,8 +160,7 @@ class M3ECardListItem extends StatelessWidget {
             variant: variant,
             border: border,
             borderRadius: animatedRadius,
-            color:
-                resolvedColor ?? color ?? cardListTheme.backgroundColor(scheme),
+            color: cardColor,
             padding: padding ?? cardListTheme.itemPadding,
             onPressed: wrappedOnTap,
             onLongPress: wrappedOnLongPress,

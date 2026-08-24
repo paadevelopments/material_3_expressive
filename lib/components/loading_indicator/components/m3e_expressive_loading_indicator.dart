@@ -62,6 +62,12 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// turns, where `1.0` is 360°) drives rotation instead.
   final double? rotationTurns;
 
+  /// Elevation shadow cast by the morphing polygon path (`0` = none).
+  final double elevation;
+
+  /// Shadow color for [elevation]. Defaults to black when null.
+  final Color? shadowColor;
+
   /// M3EExpressiveLoadingIndicator.
 
   const M3EExpressiveLoadingIndicator({
@@ -78,12 +84,15 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     this.pulseSpring,
     this.pulseSpringVelocity,
     this.rotationTurns,
+    this.elevation = 0,
+    this.shadowColor,
     super.semanticsLabel,
     super.semanticsValue,
   }) : assert(
          !(polygons != null) || polygons.length > 1,
          'polygons must contain more than one shape when provided',
-       );
+       ),
+       assert(elevation >= 0.0, 'assertion failed');
 
   @override
   State<M3EExpressiveLoadingIndicator> createState() =>
@@ -211,6 +220,8 @@ class _M3EExpressiveLoadingIndicatorState
                             progress: morphProgress,
                             color: _color,
                             scaleFactor: shapesScaleFactor,
+                            elevation: widget.elevation,
+                            shadowColor: widget.shadowColor,
                             repaint: Listenable.merge([
                               _morphController,
                               _globalRotationController,
@@ -466,11 +477,16 @@ class _MorphPainter extends CustomPainter {
   /// the size height x the scale factor)
   final double scaleFactor;
 
+  final double elevation;
+  final Color? shadowColor;
+
   _MorphPainter({
     required this.morph,
     required this.progress,
     required this.color,
     this.scaleFactor = 1.0,
+    this.elevation = 0,
+    this.shadowColor,
     super.repaint,
   });
 
@@ -478,6 +494,15 @@ class _MorphPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = morph.toPath(progress: progress);
     final processedPath = _processPath(path, size);
+    if (elevation > 0) {
+      // Follows the morphing polygon (and parent rotate/scale transforms).
+      canvas.drawShadow(
+        processedPath,
+        shadowColor ?? const Color(0xFF000000),
+        elevation,
+        true,
+      );
+    }
     canvas.drawPath(
       processedPath,
       Paint()
@@ -491,7 +516,9 @@ class _MorphPainter extends CustomPainter {
     return oldDelegate.morph != morph ||
         oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.scaleFactor != scaleFactor;
+        oldDelegate.scaleFactor != scaleFactor ||
+        oldDelegate.elevation != elevation ||
+        oldDelegate.shadowColor != shadowColor;
   }
 
   /// Process a given path to scale it and center it inside the given size.

@@ -16,8 +16,9 @@
 * `M3ERefreshIndicatorTheme.releaseBubbleSpring` /
   `releaseBubbleFromScale` (and matching widget overrides) for the release
   scale bubble (defaults stiffness 350 / damping 0.1 / from-scale 0.96).
-* `M3ELoadingIndicator.elevation` (theme default `0`) — applies
-  [M3EElevation] shadows for both contained and default variants.
+* `M3ELoadingIndicator.elevation` (theme default `0`) — contained uses
+  rounded-shell [M3EElevation] shadows; uncontained casts a path shadow that
+  follows the morphing polygon (including rotate / scale / morph).
 * `M3ELoadingIndicator.rotationTurns` — when set, disables auto spin and
   morph pulse so a host (e.g. refresh) can drive rotation.
 * `M3ELoadingIndicator.color` / `containerColor` document shape vs contained
@@ -37,6 +38,8 @@
   signatures ignore visual-only decoration / widget identity noise.
 * `M3ERefreshIndicator` locks resting inset on refresh; release bubble is
   scale-only (does not move layout). Short pulls cancel without `onRefresh`.
+* `M3ECardList` outlined variant no longer fills items with the card-list
+  background — outline is border-only unless a color is set.
 
 ### Changed
 

@@ -19,6 +19,10 @@ export 'styles/m3e_loading_indicator_theme.dart';
 /// Colors:
 ///  * [color] — morphing shape (inner) color for both variants.
 ///  * [containerColor] — filled shell behind a contained indicator.
+///
+/// Elevation:
+///  * Contained — rounded container casts [M3EElevation] shadows.
+///  * Default — shadow follows the morphing polygon path (rotate/scale/morph).
 class M3ELoadingIndicator extends StatelessWidget {
   /// M3ELoadingIndicator.
   const M3ELoadingIndicator({
@@ -53,7 +57,9 @@ class M3ELoadingIndicator extends StatelessWidget {
   /// when left null (transparent).
   final Color? containerColor;
 
-  /// Surface elevation for both variants. Defaults to theme (`0`).
+  /// Surface elevation. Defaults to theme (`0`).
+  ///
+  /// Contained uses container shadows; default follows the polygon path.
   final double? elevation;
 
   /// polygons.
@@ -117,7 +123,8 @@ class M3ELoadingIndicator extends StatelessWidget {
     final containerBg =
         containerColor ?? loadingTheme.resolveContainerColor(scheme, variant);
 
-    final double resolvedElevation = elevation ?? loadingTheme.elevation;
+    final resolvedElevation = elevation ?? loadingTheme.elevation;
+    final contained = variant == M3ELoadingIndicatorVariant.contained;
 
     final indicator = M3EExpressiveLoadingIndicator(
       color: activeColor,
@@ -134,6 +141,9 @@ class M3ELoadingIndicator extends StatelessWidget {
       pulseSpring: pulseSpring,
       pulseSpringVelocity: pulseSpringVelocity,
       rotationTurns: rotationTurns,
+      // Uncontained: shadow is painted on the morphing path.
+      elevation: contained ? 0 : resolvedElevation,
+      shadowColor: scheme.shadow,
     );
 
     return M3EComponentTheme(
@@ -141,10 +151,13 @@ class M3ELoadingIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: containerBg,
           borderRadius: loadingTheme.containerRadius,
-          boxShadow: M3EElevation.shadows(
-            resolvedElevation,
-            shadowColor: scheme.shadow,
-          ),
+          // Contained: elevation on the rounded shell only.
+          boxShadow: contained
+              ? M3EElevation.shadows(
+                  resolvedElevation,
+                  shadowColor: scheme.shadow,
+                )
+              : const <BoxShadow>[],
         ),
         child: Padding(padding: padding ?? EdgeInsets.zero, child: indicator),
       ),
