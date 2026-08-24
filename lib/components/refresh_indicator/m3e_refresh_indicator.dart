@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
 import '../loading_indicator/m3e_loading_indicator.dart';
@@ -232,8 +233,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late AnimationController _scaleController;
   late AnimationController _contentPadController;
 
-  /// Release “bubble” scale at the locked rest inset (does not move layout).
-  late AnimationController _bubbleController;
+  /// Release scale bubble at the locked rest inset (motor / M3EMotion spring).
+  late SingleMotionController _bubbleController;
   late Animation<double> _scaleFactor;
   late Animation<double> _value;
   late Animation<Color?> _valueColor;
@@ -276,6 +277,13 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   /// Pull (px) at which scale/fade/downward motion begins.
   double get _revealDelayPx => 2 * widget.indicatorPadding;
 
+  /// Same recipe as nav icon / press morph: overshoots then settles at 1.
+  SpringMotion get _releaseBubbleMotion =>
+      const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+        stiffness: 350,
+        damping: 0.1,
+      );
+
   @override
   void initState() {
     super.initState();
@@ -284,7 +292,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     _scaleController = AnimationController.unbounded(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
     _contentPadController = AnimationController.unbounded(vsync: this);
-    _bubbleController = AnimationController.unbounded(vsync: this, value: 1);
+    _bubbleController = SingleMotionController(
+      motion: _releaseBubbleMotion,
+      vsync: this,
+      initialValue: 1,
+    );
     _pendingRefreshFuture = Future<void>.value();
     widget.controller?.attach(show);
   }

@@ -393,27 +393,15 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     });
 
     unawaited(_springTo(_contentPadController, target: 0));
-    unawaited(_playReleaseBubble());
+    _playReleaseBubble();
   }
 
   /// Spatial spring scale bubble at the fixed rest inset (layout unchanged).
-  Future<void> _playReleaseBubble() async {
-    const double peak = 1.08;
-    await _springTo(
-      _bubbleController,
-      target: peak,
-      spring: M3EMotion.expressiveSpatialPress,
-      velocity: 6,
-    );
-    if (!mounted || _status != M3ERefreshStatus.refresh) {
-      return;
-    }
-    await _springTo(
-      _bubbleController,
-      target: 1,
-    );
-    if (mounted) {
-      _bubbleController.value = 1;
-    }
+  void _playReleaseBubble() {
+    // One overshooting spring into 1 — same idea as [M3ENavIconScale].
+    _bubbleController
+      ..motion = _releaseBubbleMotion
+      ..value = 0.96
+      ..animateTo(1);
   }
 }
