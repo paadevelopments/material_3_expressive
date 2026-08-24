@@ -12,11 +12,11 @@ class M3EDatePickerActions extends StatelessWidget {
     required this.onConfirm,
     required this.cancelText,
     required this.confirmText,
+    this.entryModeButton,
     super.key,
   });
 
   /// onCancel.
-
   final VoidCallback onCancel;
 
   /// onConfirm.
@@ -27,6 +27,9 @@ class M3EDatePickerActions extends StatelessWidget {
 
   /// confirmText.
   final String confirmText;
+
+  /// Optional dial/input (or calendar/input) toggle at the far start.
+  final Widget? entryModeButton;
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +43,27 @@ class M3EDatePickerActions extends StatelessWidget {
         padding.right,
         padding.bottom,
       ),
-      child: Align(
-        alignment: AlignmentDirectional.centerEnd,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            M3EButton(
-              style: M3EButtonStyle.text,
-              onPressed: onCancel,
-              child: Text(cancelText),
+      child: Row(
+        children: <Widget>[
+          ?entryModeButton,
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  M3EButton(
+                    style: M3EButtonStyle.text,
+                    onPressed: onCancel,
+                    child: Text(cancelText),
+                  ),
+                  SizedBox(width: dialogTheme.actionGap),
+                  M3EButton(onPressed: onConfirm, child: Text(confirmText)),
+                ],
+              ),
             ),
-            SizedBox(width: dialogTheme.actionGap),
-            M3EButton(onPressed: onConfirm, child: Text(confirmText)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -23,6 +23,9 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     this.closeButtonPadding = const EdgeInsets.all(12),
     this.headerActionGap = 16,
     this.scrimOpacity = 0.32,
+    this.resizeToAvoidBottomInset = true,
+    this.insetAnimationDuration = const Duration(milliseconds: 100),
+    this.insetAnimationCurve = Curves.decelerate,
   });
 
   /// defaults.
@@ -78,6 +81,15 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   /// scrimOpacity.
   final double scrimOpacity;
 
+  /// Whether dialog hosts pad with keyboard view insets.
+  final bool resizeToAvoidBottomInset;
+
+  /// Duration for keyboard / inset padding animation.
+  final Duration insetAnimationDuration;
+
+  /// Curve for keyboard / inset padding animation.
+  final Curve insetAnimationCurve;
+
   /// The borderRadius.
 
   BorderRadius get borderRadius => M3EShapes.radiusExtraLarge;
@@ -113,6 +125,9 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     EdgeInsets? closeButtonPadding,
     double? headerActionGap,
     double? scrimOpacity,
+    bool? resizeToAvoidBottomInset,
+    Duration? insetAnimationDuration,
+    Curve? insetAnimationCurve,
   }) {
     return M3EDialogTheme(
       minWidth: minWidth ?? this.minWidth,
@@ -132,6 +147,11 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
       closeButtonPadding: closeButtonPadding ?? this.closeButtonPadding,
       headerActionGap: headerActionGap ?? this.headerActionGap,
       scrimOpacity: scrimOpacity ?? this.scrimOpacity,
+      resizeToAvoidBottomInset:
+          resizeToAvoidBottomInset ?? this.resizeToAvoidBottomInset,
+      insetAnimationDuration:
+          insetAnimationDuration ?? this.insetAnimationDuration,
+      insetAnimationCurve: insetAnimationCurve ?? this.insetAnimationCurve,
     );
   }
 
@@ -173,6 +193,15 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
       )!,
       headerActionGap: _lerpDouble(headerActionGap, other.headerActionGap, t)!,
       scrimOpacity: _lerpDouble(scrimOpacity, other.scrimOpacity, t)!,
+      resizeToAvoidBottomInset: t < 0.5
+          ? resizeToAvoidBottomInset
+          : other.resizeToAvoidBottomInset,
+      insetAnimationDuration: t < 0.5
+          ? insetAnimationDuration
+          : other.insetAnimationDuration,
+      insetAnimationCurve: t < 0.5
+          ? insetAnimationCurve
+          : other.insetAnimationCurve,
     );
   }
 

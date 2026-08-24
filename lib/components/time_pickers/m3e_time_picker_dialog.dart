@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
+import '../dialogs/components/m3e_dialog_inset.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_dial_time_picker.dart';
 import 'components/m3e_input_time_picker_form_field.dart';
@@ -31,6 +32,7 @@ class M3ETimePickerDialog extends StatefulWidget {
     this.restorationId,
     this.onTimePickerModeChange,
     this.insetPadding = M3ETimePickerConstants.defaultInsetPadding,
+    this.resizeToAvoidBottomInset,
     super.key,
   });
 
@@ -76,6 +78,9 @@ class M3ETimePickerDialog extends StatefulWidget {
 
   /// insetPadding.
   final EdgeInsets insetPadding;
+
+  /// When null, uses dialog theme `resizeToAvoidBottomInset`.
+  final bool? resizeToAvoidBottomInset;
 
   @override
   State<M3ETimePickerDialog> createState() => _M3ETimePickerDialogState();
@@ -213,13 +218,13 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           orientation == Orientation.landscape &&
           (_entryMode.value == M3ETimePickerEntryMode.input ||
               _entryMode.value == M3ETimePickerEntryMode.inputOnly),
-      entryModeButton: resolved.entryModeButton,
     );
     final Widget actions = M3ETimePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
+      entryModeButton: resolved.entryModeButton,
     );
     final double textScaleFactor =
         MediaQuery.textScalerOf(context)
@@ -239,8 +244,9 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           : M3ETimePickerConstants.dialDialogBodyHeight +
                 dialogPadding.vertical,
     );
-    return Padding(
+    return M3EDialogInset(
       padding: widget.insetPadding,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       child: Material(
         color: timeTheme.backgroundColor(theme.colorScheme),
         elevation: timeTheme.elevation,
@@ -302,7 +308,7 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
         return (
           picker: _buildDialPicker(),
           entryModeButton: M3ETimePickerEntryModeButton(
-            icon: M3EIcons.edit_outlined,
+            icon: M3EIcons.keyboard_outlined,
             tooltip: localizations.inputTimeModeButtonLabel,
             onPressed: _handleEntryModeToggle,
           ),
@@ -328,7 +334,6 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
                 minuteLabelText: widget.minuteLabelText,
                 use24HourFormat: widget.alwaysUse24HourFormat,
                 emptyInitialInput: widget.emptyInitialInput,
-                autofocus: true,
               ),
             ),
           ),
@@ -348,6 +353,7 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
       value: _selectedTime.value,
       onChanged: _handleTimeChanged,
       use24HourFormat: widget.alwaysUse24HourFormat,
+      orientation: widget.orientation ?? MediaQuery.orientationOf(context),
       expandToFit: true,
     );
   }

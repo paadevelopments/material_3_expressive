@@ -2,6 +2,10 @@
 
 ### Added
 
+* `M3EDialogInset` — pads dialogs with screen margin and optional keyboard
+  view insets (Material Dialog behavior).
+* `M3EDialogTheme.resizeToAvoidBottomInset` (default true),
+  `insetAnimationDuration`, and `insetAnimationCurve`.
 * `M3ECheckbox` optional `label`, `boxSize`, `hitSize`, `checkedChild`,
   `uncheckedChild`, and `checkIconPadding` (default right inset for optical
   centering of the built-in check), with a spatial-spring pulse on value
@@ -40,6 +44,19 @@
   scale-only (does not move layout). Short pulls cancel without `onRefresh`.
 * `M3ECard` outlined variant defaults to a transparent fill (border only);
   list surfaces that use `M3ECard` inherit this unless an explicit color is set.
+* Time dial minutes: drag selects any 0–59; tap snaps to nearest ×5; interstitial
+  selector dot when between labels (Material `_Dial` behavior).
+* Time AM/PM control uses Material portrait / landscape / input sizes and sits
+  beside dial/input hour–minute fields (not a button row below input).
+* Date range input fields are side-by-side (8dp gap), matching Material.
+* Date, date-range, and time picker entry-mode toggles sit at the bottom-left
+  of the dialog actions row (Material time-picker placement).
+* Date and time entry-mode icons use `keyboard_outlined` (calendar/clock when
+  returning from input).
+* Time picker manual entry no longer autofocuses the hour field.
+* `M3EDialogInset` + `M3EDialogTheme.resizeToAvoidBottomInset` (default true)
+  shift dialogs above the keyboard; opt out via theme or
+  `resizeToAvoidBottomInset: false` on `M3EDialog.show` / date / time pickers.
 
 ### Changed
 
@@ -52,6 +69,8 @@
   defaults to spinner height + 16. Scale/fade/downward reveal lags until pad
   reaches `2 × indicatorPadding`, then fills through full visibility.
   `onRefresh` runs only when fully revealed and the pointer is released.
+* `M3ETimePickerTheme` period sizes align with Material (`periodPortraitSize`
+  52×80, `periodLandscapeSize` 216×38, `periodInputSize` 52×72).
 
 ## 1.0.8
 

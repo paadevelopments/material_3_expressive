@@ -42,6 +42,7 @@ abstract final class M3EDatePicker {
     String? restorationId,
     ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
     EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+    bool? resizeToAvoidBottomInset,
   }) {
     final DateTime? resolvedInitialDate = initialDate == null
         ? null
@@ -62,27 +63,26 @@ abstract final class M3EDatePicker {
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrap(
           M3EComponentTheme(
-            builder: (BuildContext context) => Center(
-              child: M3EDatePickerDialog(
-                initialDate: resolvedInitialDate,
-                firstDate: resolvedFirstDate,
-                lastDate: resolvedLastDate,
-                currentDate: currentDate,
-                initialEntryMode: initialEntryMode,
-                initialCalendarMode: initialCalendarMode,
-                selectableDayPredicate: selectableDayPredicate,
-                helpText: helpText,
-                cancelText: cancelText,
-                confirmText: confirmText,
-                errorFormatText: errorFormatText,
-                errorInvalidText: errorInvalidText,
-                fieldHintText: fieldHintText,
-                fieldLabelText: fieldLabelText,
-                keyboardType: keyboardType,
-                restorationId: restorationId,
-                onDatePickerModeChange: onDatePickerModeChange,
-                insetPadding: insetPadding,
-              ),
+            builder: (BuildContext context) => M3EDatePickerDialog(
+              initialDate: resolvedInitialDate,
+              firstDate: resolvedFirstDate,
+              lastDate: resolvedLastDate,
+              currentDate: currentDate,
+              initialEntryMode: initialEntryMode,
+              initialCalendarMode: initialCalendarMode,
+              selectableDayPredicate: selectableDayPredicate,
+              helpText: helpText,
+              cancelText: cancelText,
+              confirmText: confirmText,
+              errorFormatText: errorFormatText,
+              errorInvalidText: errorInvalidText,
+              fieldHintText: fieldHintText,
+              fieldLabelText: fieldLabelText,
+              keyboardType: keyboardType,
+              restorationId: restorationId,
+              onDatePickerModeChange: onDatePickerModeChange,
+              insetPadding: insetPadding,
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
             ),
           ),
         );
@@ -129,6 +129,7 @@ abstract final class M3EDatePicker {
     String? restorationId,
     ValueChanged<M3EDatePickerEntryMode>? onDatePickerModeChange,
     EdgeInsets insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+    bool? resizeToAvoidBottomInset,
   }) {
     final DateTime? resolvedInitialStartDate = initialStartDate == null
         ? null
@@ -152,28 +153,27 @@ abstract final class M3EDatePicker {
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrap(
           M3EComponentTheme(
-            builder: (BuildContext context) => Center(
-              child: M3EDateRangePickerDialog(
-                initialStartDate: resolvedInitialStartDate,
-                initialEndDate: resolvedInitialEndDate,
-                firstDate: resolvedFirstDate,
-                lastDate: resolvedLastDate,
-                currentDate: currentDate,
-                initialEntryMode: initialEntryMode,
-                selectableDayPredicate: selectableDayPredicate,
-                helpText: helpText,
-                cancelText: cancelText,
-                confirmText: confirmText,
-                errorFormatText: errorFormatText,
-                errorInvalidText: errorInvalidText,
-                fieldStartHintText: fieldStartHintText,
-                fieldEndHintText: fieldEndHintText,
-                fieldStartLabelText: fieldStartLabelText,
-                fieldEndLabelText: fieldEndLabelText,
-                restorationId: restorationId,
-                onDatePickerModeChange: onDatePickerModeChange,
-                insetPadding: insetPadding,
-              ),
+            builder: (BuildContext context) => M3EDateRangePickerDialog(
+              initialStartDate: resolvedInitialStartDate,
+              initialEndDate: resolvedInitialEndDate,
+              firstDate: resolvedFirstDate,
+              lastDate: resolvedLastDate,
+              currentDate: currentDate,
+              initialEntryMode: initialEntryMode,
+              selectableDayPredicate: selectableDayPredicate,
+              helpText: helpText,
+              cancelText: cancelText,
+              confirmText: confirmText,
+              errorFormatText: errorFormatText,
+              errorInvalidText: errorInvalidText,
+              fieldStartHintText: fieldStartHintText,
+              fieldEndHintText: fieldEndHintText,
+              fieldStartLabelText: fieldStartLabelText,
+              fieldEndLabelText: fieldEndLabelText,
+              restorationId: restorationId,
+              onDatePickerModeChange: onDatePickerModeChange,
+              insetPadding: insetPadding,
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
             ),
           ),
         );

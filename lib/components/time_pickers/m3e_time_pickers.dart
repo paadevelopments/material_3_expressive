@@ -36,6 +36,7 @@ abstract final class M3ETimePicker {
     String? restorationId,
     ValueChanged<M3ETimePickerEntryMode>? onTimePickerModeChange,
     EdgeInsets insetPadding = M3ETimePickerConstants.defaultInsetPadding,
+    bool? resizeToAvoidBottomInset,
   }) {
     final M3ETime normalized = M3ETimePickerUtils.clampTime(initialTime);
 
@@ -52,23 +53,22 @@ abstract final class M3ETimePicker {
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrap(
           M3EComponentTheme(
-            builder: (BuildContext context) => Center(
-              child: M3ETimePickerDialog(
-                initialTime: normalized,
-                initialEntryMode: initialEntryMode,
-                helpText: helpText,
-                cancelText: cancelText,
-                confirmText: confirmText,
-                errorInvalidText: errorInvalidText,
-                hourLabelText: hourLabelText,
-                minuteLabelText: minuteLabelText,
-                orientation: orientation,
-                alwaysUse24HourFormat: alwaysUse24HourFormat,
-                emptyInitialInput: emptyInitialInput,
-                restorationId: restorationId,
-                onTimePickerModeChange: onTimePickerModeChange,
-                insetPadding: insetPadding,
-              ),
+            builder: (BuildContext context) => M3ETimePickerDialog(
+              initialTime: normalized,
+              initialEntryMode: initialEntryMode,
+              helpText: helpText,
+              cancelText: cancelText,
+              confirmText: confirmText,
+              errorInvalidText: errorInvalidText,
+              hourLabelText: hourLabelText,
+              minuteLabelText: minuteLabelText,
+              orientation: orientation,
+              alwaysUse24HourFormat: alwaysUse24HourFormat,
+              emptyInitialInput: emptyInitialInput,
+              restorationId: restorationId,
+              onTimePickerModeChange: onTimePickerModeChange,
+              insetPadding: insetPadding,
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
             ),
           ),
         );

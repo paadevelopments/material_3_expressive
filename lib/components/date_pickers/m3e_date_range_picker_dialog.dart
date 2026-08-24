@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
+import '../dialogs/components/m3e_dialog_inset.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_calendar_date_range_picker.dart';
 import 'components/m3e_date_picker_actions.dart';
@@ -35,6 +36,7 @@ class M3EDateRangePickerDialog extends StatefulWidget {
     this.restorationId,
     this.onDatePickerModeChange,
     this.insetPadding = M3EDatePickerConstants.defaultInsetPadding,
+    this.resizeToAvoidBottomInset,
     super.key,
   });
 
@@ -95,6 +97,9 @@ class M3EDateRangePickerDialog extends StatefulWidget {
 
   /// insetPadding.
   final EdgeInsets insetPadding;
+
+  /// When null, uses dialog theme `resizeToAvoidBottomInset`.
+  final bool? resizeToAvoidBottomInset;
 
   @override
   State<M3EDateRangePickerDialog> createState() =>
@@ -246,16 +251,17 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
           orientation == Orientation.landscape &&
           (_entryMode.value == M3EDatePickerEntryMode.input ||
               _entryMode.value == M3EDatePickerEntryMode.inputOnly),
-      entryModeButton: resolved.entryModeButton,
     );
     final Widget actions = M3EDatePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
+      entryModeButton: resolved.entryModeButton,
     );
-    return Padding(
+    return M3EDialogInset(
       padding: widget.insetPadding,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       child: Material(
         color: dateTheme.backgroundColor(theme.colorScheme),
         elevation: dateTheme.elevation,
@@ -322,7 +328,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
             currentDate: currentDate,
           ),
           entryModeButton: M3EDatePickerEntryModeButton(
-            icon: M3EIcons.edit_outlined,
+            icon: M3EIcons.keyboard_outlined,
             tooltip: localizations.inputDateModeButtonLabel,
             onPressed: _handleEntryModeToggle,
           ),

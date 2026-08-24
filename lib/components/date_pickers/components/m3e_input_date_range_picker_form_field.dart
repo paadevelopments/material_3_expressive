@@ -68,33 +68,38 @@ class M3EInputDateRangePickerFormField extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       context,
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        M3EInputDatePickerFormField(
-          firstDate: firstDate,
-          lastDate: lastDate,
-          initialDate: initialStartDate,
-          onDateSaved: onStartDateSaved,
-          selectableDayPredicate: selectableDayPredicate,
-          errorFormatText: errorFormatText,
-          errorInvalidText: errorInvalidText,
-          fieldHintText: fieldStartHintText,
-          fieldLabelText:
-              fieldStartLabelText ?? localizations.dateRangeStartLabel,
-          autofocus: true,
+        Expanded(
+          child: M3EInputDatePickerFormField(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            initialDate: initialStartDate,
+            onDateSaved: onStartDateSaved,
+            selectableDayPredicate: selectableDayPredicate,
+            errorFormatText: errorFormatText,
+            errorInvalidText: errorInvalidText,
+            fieldHintText: fieldStartHintText,
+            fieldLabelText:
+                fieldStartLabelText ?? localizations.dateRangeStartLabel,
+            autofocus: true,
+          ),
         ),
-        const SizedBox(height: 16),
-        M3EInputDatePickerFormField(
-          firstDate: firstDate,
-          lastDate: lastDate,
-          initialDate: initialEndDate,
-          onDateSaved: onEndDateSaved,
-          selectableDayPredicate: selectableDayPredicate,
-          errorFormatText: errorFormatText,
-          errorInvalidText: errorInvalidText,
-          fieldHintText: fieldEndHintText,
-          fieldLabelText: fieldEndLabelText ?? localizations.dateRangeEndLabel,
+        const SizedBox(width: 8),
+        Expanded(
+          child: M3EInputDatePickerFormField(
+            firstDate: firstDate,
+            lastDate: lastDate,
+            initialDate: initialEndDate,
+            onDateSaved: onEndDateSaved,
+            selectableDayPredicate: selectableDayPredicate,
+            errorFormatText: errorFormatText,
+            errorInvalidText: errorInvalidText,
+            fieldHintText: fieldEndHintText,
+            fieldLabelText:
+                fieldEndLabelText ?? localizations.dateRangeEndLabel,
+          ),
         ),
       ],
     );

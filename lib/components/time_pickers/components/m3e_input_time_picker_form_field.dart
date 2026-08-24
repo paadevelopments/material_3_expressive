@@ -1,10 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../buttons/enums/m3e_button_enums.dart';
-import '../../buttons/m3e_buttons.dart';
+import '../../../foundations/foundations.dart';
 import '../../text_fields/m3e_text_fields.dart';
 import '../models/m3e_time.dart';
 import '../utils/m3e_time_picker_utils.dart';
+import 'm3e_day_period_control.dart';
+
+const String _timeSeparator = ':';
 
 /// Text fields for entering a time in a picker dialog.
 class M3EInputTimePickerFormField extends StatefulWidget {
@@ -23,7 +25,6 @@ class M3EInputTimePickerFormField extends StatefulWidget {
   });
 
   /// initialTime.
-
   final M3ETime? initialTime;
 
   /// onTimeSubmitted.
@@ -172,15 +173,77 @@ class _M3EInputTimePickerFormFieldState
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       context,
     );
+    final M3EThemeData theme = M3ETheme.of(context);
+    final format = localizations.timeOfDayFormat(
+      alwaysUse24HourFormat: _use24HourFormat,
+    );
+    final periodLeading = format == TimeOfDayFormat.a_space_h_colon_mm;
+
     return FormField<void>(
       builder: (FormFieldState<void> field) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
+        final Widget period = M3EDayPeriodControl(
+          isPm: _isPm,
+          forInput: true,
+          onChanged: (bool pm) {
+            setState(() => _isPm = pm);
+            field.didChange(null);
+          },
+        );
+        final Widget fields = Expanded(
+          child: Row(
+            textDirection: TextDirection.ltr,
+            children: <Widget>[
+              Expanded(
+                child: M3ETextField(
+                  controller: _hourController,
+                  focusNode: _hourFocus,
+                  label:
+                      widget.hourLabelText ?? localizations.timePickerHourLabel,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  errorText: field.errorText,
+                  onSubmitted: (_) => _minuteFocus.requestFocus(),
+                  onChanged: (_) => field.didChange(null),
+                ),
+              ),
+              Text(
+                _timeSeparator,
+                style: theme.typeScale.displayMedium.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              Expanded(
+                child: M3ETextField(
+                  controller: _minuteController,
+                  focusNode: _minuteFocus,
+                  label:
+                      widget.minuteLabelText ??
+                      localizations.timePickerMinuteLabel,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (field.validate()) {
+                      _handleSubmitted();
+                    }
+                  },
+                  onChanged: (_) => field.didChange(null),
+                ),
+              ),
+            ],
+          ),
+        );
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            _buildHourMinuteRow(localizations, field),
-            if (!_use24HourFormat) ...<Widget>[
-              const SizedBox(height: 16),
-              _buildMeridiemRow(localizations),
+            if (!_use24HourFormat && periodLeading) ...<Widget>[
+              period,
+              SizedBox(width: theme.timePickerTheme.fieldPeriodGap),
+            ],
+            fields,
+            if (!_use24HourFormat && !periodLeading) ...<Widget>[
+              SizedBox(width: theme.timePickerTheme.fieldPeriodGap),
+              period,
             ],
           ],
         );
@@ -193,64 +256,6 @@ class _M3EInputTimePickerFormFieldState
         return _validateMinute(_minuteController.text.trim());
       },
       onSaved: (_) => _handleSaved(),
-    );
-  }
-
-  Widget _buildHourMinuteRow(
-    MaterialLocalizations localizations,
-    FormFieldState<void> field,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: M3ETextField(
-            controller: _hourController,
-            focusNode: _hourFocus,
-            label: widget.hourLabelText ?? localizations.timePickerHourLabel,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            errorText: field.errorText,
-            onSubmitted: (_) => _minuteFocus.requestFocus(),
-            onChanged: (_) => field.didChange(null),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: M3ETextField(
-            controller: _minuteController,
-            focusNode: _minuteFocus,
-            label:
-                widget.minuteLabelText ?? localizations.timePickerMinuteLabel,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) {
-              if (field.validate()) {
-                _handleSubmitted();
-              }
-            },
-            onChanged: (_) => field.didChange(null),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMeridiemRow(MaterialLocalizations localizations) {
-    return Row(
-      children: <Widget>[
-        M3EButton(
-          style: _isPm ? M3EButtonStyle.outlined : M3EButtonStyle.filled,
-          onPressed: () => setState(() => _isPm = false),
-          child: Text(localizations.anteMeridiemAbbreviation),
-        ),
-        const SizedBox(width: 8),
-        M3EButton(
-          style: _isPm ? M3EButtonStyle.filled : M3EButtonStyle.outlined,
-          onPressed: () => setState(() => _isPm = true),
-          child: Text(localizations.postMeridiemAbbreviation),
-        ),
-      ],
     );
   }
 }

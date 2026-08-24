@@ -6,8 +6,10 @@ import '../buttons/m3e_buttons.dart';
 import '../checkbox/m3e_checkbox.dart';
 import '../divider/m3e_divider.dart';
 import '../radio_button/m3e_radio_button.dart';
+import 'components/m3e_dialog_inset.dart';
 import 'styles/m3e_dialog_theme.dart';
 
+export 'components/m3e_dialog_inset.dart';
 export 'styles/m3e_dialog_theme.dart';
 
 const String _closeSemanticLabel = 'Close';
@@ -58,6 +60,7 @@ class M3EDialog extends StatelessWidget {
     BuildContext context, {
     required Widget dialog,
     bool barrierDismissible = true,
+    bool? resizeToAvoidBottomInset,
   }) {
     final M3EThemeData theme =
         M3EThemeScope.resolveOf(context) ?? M3ETheme.of(context);
@@ -71,8 +74,10 @@ class M3EDialog extends StatelessWidget {
       pageBuilder: (BuildContext context, _, _) {
         return M3EScrimSystemUi.wrap(
           M3EComponentTheme(
-            builder: (context) => Center(
-              child: Padding(padding: dialogTheme.screenMargin, child: dialog),
+            builder: (context) => M3EDialogInset(
+              padding: dialogTheme.screenMargin,
+              resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+              child: dialog,
             ),
           ),
         );
@@ -119,11 +124,13 @@ class M3EDialog extends StatelessWidget {
     String confirmLabel = _confirmLabel,
     Widget? icon,
     bool barrierDismissible = true,
+    bool? resizeToAvoidBottomInset,
   }) {
     assert(options.isNotEmpty, 'options must not be empty.');
     return show<List<String>>(
       context,
       barrierDismissible: barrierDismissible,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       dialog: _M3ESelectionDialog(
         title: title,
         options: options,
