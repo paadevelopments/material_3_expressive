@@ -34,9 +34,9 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
   /// Desktop browsers exclude mouse from [ScrollBehavior.dragDevices], so
   /// click-drag never produces drag details and pull never starts.
   ///
-  /// No custom scroll physics — nesting clamps with AlwaysScrollable caused
-  /// invalid overscroll assertions / freezes during ballistic settle.
-  /// List pad is capped via [_dragOffset] / [_contentPad] like the host.
+  /// While pulling, block leading underscroll so the only list gap is our
+  /// capped pad (matches host). Physics only rejects new underscroll from a
+  /// valid position — never when already past min (avoids ballistic assert).
   Widget _wrapWebScrollBehavior(Widget child) {
     final ScrollBehavior behavior = ScrollConfiguration.of(context);
     return ScrollConfiguration(
@@ -45,9 +45,18 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
           ...behavior.dragDevices,
           PointerDeviceKind.mouse,
         },
+        physics: _M3EWebRefreshScrollPhysics(
+          shouldClampLeading: _webShouldClampLeadingOverscroll,
+          parent: behavior.getScrollPhysics(context),
+        ),
       ),
       child: child,
     );
+  }
+
+  bool _webShouldClampLeadingOverscroll() {
+    return _status == M3ERefreshStatus.drag ||
+        _status == M3ERefreshStatus.armed;
   }
 
   /// Split list pad vs indicator listenables so the pad spring during refresh
@@ -59,10 +68,10 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         AnimatedBuilder(
           animation: _contentPadController,
           builder: (BuildContext context, Widget? _) {
-            // Always hard-cap display pad (same max as host contentDragOffset).
+            // Pad is only ever written capped in checkDragOffsetWeb / springs.
             final double maxPad = _resolvedContentDragOffset(context);
             final double pad = math.min(
-              math.max(0, _contentPad(context)),
+              math.max(0, _contentPadController.value),
               maxPad,
             );
             return NotificationListener<ScrollNotification>(
@@ -275,5 +284,37 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         elevation: 0,
       ),
     );
+  }
+}
+
+/// Blocks new leading underscroll while pulling so list gap is only our pad.
+///
+/// Only rejects movement from a valid position into underscroll. Does not run
+/// when pixels are already past min (that caused AlwaysScrollable ballistic
+/// "invalid overscroll" asserts).
+class _M3EWebRefreshScrollPhysics extends ScrollPhysics {
+  const _M3EWebRefreshScrollPhysics({
+    required this.shouldClampLeading,
+    super.parent,
+  });
+
+  final bool Function() shouldClampLeading;
+
+  @override
+  _M3EWebRefreshScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _M3EWebRefreshScrollPhysics(
+      shouldClampLeading: shouldClampLeading,
+      parent: buildParent(ancestor),
+    );
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    if (shouldClampLeading() &&
+        position.pixels >= position.minScrollExtent &&
+        value < position.minScrollExtent) {
+      return value - position.minScrollExtent;
+    }
+    return super.applyBoundaryConditions(position, value);
   }
 }

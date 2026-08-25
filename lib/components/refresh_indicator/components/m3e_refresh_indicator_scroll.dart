@@ -110,31 +110,52 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     return null;
   }
 
-  /// Web drag deltas use the same signed scrollDelta/overscroll math as the
-  /// host. Ignores retracting scrollDeltas at the leading edge (pad layout
-  /// corrections on web that cancel pull). Does not use pointer deltas (those
-  /// overshot host arming / made spacing feel uncapped).
+  /// Web: 1:1 pointer tracking (host overscroll amounts under-report on
+  /// CanvasKit). Same frame ScrollUpdate+Overscroll share one pointer sample.
+  /// Reveal/arm still use shared [_revealProgress] (delay = 2×indicatorPadding,
+  /// arm at reveal == 1).
   double? _dragDeltaFromWeb(
     ScrollNotification notification,
     AxisDirection direction,
   ) {
-    if (notification is ScrollUpdateNotification &&
-        notification.scrollDelta != null) {
-      final double? delta = _signedDragDelta(
-        direction,
-        notification.scrollDelta!,
-      );
-      if (delta != null &&
-          delta < 0 &&
-          _isAtLeadingEdge(notification.metrics)) {
-        return null;
-      }
-      return delta;
+    final DragUpdateDetails? details = switch (notification) {
+      final ScrollUpdateNotification n => n.dragDetails,
+      final OverscrollNotification n => n.dragDetails,
+      _ => null,
+    };
+    if (details != null) {
+      return _webPointerDeltaOncePerFrame(direction, details.delta);
     }
+    // Fallback when desktop omits dragDetails on overscroll.
     if (notification is OverscrollNotification) {
       return _signedDragDelta(direction, notification.overscroll);
     }
     return null;
+  }
+
+  double? _webPointerDeltaOncePerFrame(AxisDirection direction, Offset delta) {
+    // Gesture handlers run outside a frame — cannot use currentFrameTimeStamp.
+    // Lock for this event-loop turn so ScrollUpdate + Overscroll share one sample.
+    if (_webPointerDeltaLocked) {
+      return null;
+    }
+    final double? signed = _pointerDragDelta(direction, delta);
+    if (signed == null || signed == 0) {
+      return null;
+    }
+    _webPointerDeltaLocked = true;
+    scheduleMicrotask(() {
+      _webPointerDeltaLocked = false;
+    });
+    return signed;
+  }
+
+  double? _pointerDragDelta(AxisDirection direction, Offset delta) {
+    return switch (direction) {
+      AxisDirection.down => delta.dy,
+      AxisDirection.up => -delta.dy,
+      AxisDirection.left || AxisDirection.right => null,
+    };
   }
 
   double? _signedDragDelta(AxisDirection direction, double amount) {

@@ -3,7 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/gestures.dart'
+    show DragUpdateDetails, PointerDeviceKind;
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
@@ -292,6 +293,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   Widget? _webSpinnerCache;
   _WebSpinnerPhase _webSpinnerPhase = _WebSpinnerPhase.none;
   _IndicatorType? _webSpinnerType;
+
+  /// Dedupes pointer drag deltas when ScrollUpdate + Overscroll fire together.
+  bool _webPointerDeltaLocked = false;
 
   /// Indicator top inset locked when loading starts.
   double? _restingInset;
