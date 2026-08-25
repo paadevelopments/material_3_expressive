@@ -2,89 +2,45 @@ part of '../m3e_refresh_indicator.dart';
 
 /// Web-only helpers. Host (non-web) code paths must not call these.
 extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
-  /// Diagnostic console logs. Enabled when [debugTraceRefresh] is true
-  /// (any platform). Uses [print] so Flutter web does not throttle them away.
-  ///
-  /// Filter for `[M3ERefresh#` in the terminal running `flutter run` / Chrome
-  /// DevTools console.
-  void _webLog(String step, [String? detail]) {
-    if (!M3ERefreshIndicatorState.debugTraceRefresh) {
-      return;
-    }
-    final extra = detail == null ? '' : ' | $detail';
-    // Diagnostic tracing for the web freeze investigation; print is intentional.
-    // ignore: avoid_print
-    print('[M3ERefresh#${++_webLogSeq} kIsWeb=$kIsWeb] $step$extra');
-  }
-
-  /// Flutter web (CanvasKit) freezes when [_checkDragOffset] does an empty
-  /// [setState] on every overscroll after the pad/position are already at cap:
-  /// each rebuild relayouts the scrollable and repaints the morphing spinner.
-  ///
-  /// This path updates animation controllers only when values change and never
-  /// calls empty [setState].
+  /// Same pad/position math as the host checkDragOffset. Skips the host's
+  /// empty setState at the visual cap (that freezes CanvasKit); list top
+  /// spacing is still hard-capped via maxPad on both dragOffset and
+  /// the content pad controller.
   void _checkDragOffsetWeb() {
-    _webLog(
-      'checkDragOffsetWeb:enter',
-      'status=$_status dragOffset=$_dragOffset '
-          'padCtrl=${_contentPadController.value.toStringAsFixed(2)} '
-          'posCtrl=${_positionController.value.toStringAsFixed(4)}',
-    );
     assert(
       _status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed,
       'assertion failed',
     );
     final double maxPad = _resolvedContentDragOffset(context);
+    // Hard-stop list top spacing at contentDragOffset (same as host).
     final double nextPad = math.min(math.max(0, _dragOffset ?? 0), maxPad);
-    final bool padChanged =
-        (nextPad - _contentPadController.value).abs() > 1e-6;
-    if (padChanged) {
-      _webLog(
-        'checkDragOffsetWeb:pad',
-        '${nextPad.toStringAsFixed(2)} '
-            '(was ${_contentPadController.value.toStringAsFixed(2)})',
-      );
+    if ((nextPad - _contentPadController.value).abs() > 1e-6) {
       _contentPadController.value = nextPad;
-      _webLog('checkDragOffsetWeb:padApplied');
     }
 
     final double reveal = _revealProgress(context);
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
     final double target = clampDouble(reveal / limit, 0, 1);
-    final bool posChanged = (target - _positionController.value).abs() > 1e-6;
-    if (posChanged) {
-      _webLog(
-        'checkDragOffsetWeb:position',
-        'target=${target.toStringAsFixed(4)} '
-            'reveal=${reveal.toStringAsFixed(3)}',
-      );
+    if ((target - _positionController.value).abs() > 1e-6) {
       _positionController.value = target;
-      _webLog('checkDragOffsetWeb:positionApplied');
-    } else {
-      _webLog(
-        'checkDragOffsetWeb:skipSetStateAtCap',
-        'target=${target.toStringAsFixed(4)} '
-            'reveal=${reveal.toStringAsFixed(3)} '
-            '(host would setState here)',
-      );
     }
 
     if (_status == M3ERefreshStatus.drag && reveal >= 1.0) {
-      _webLog('checkDragOffsetWeb:arm');
       _status = M3ERefreshStatus.armed;
       widget.onStatusChange?.call(_status);
     } else if (_status == M3ERefreshStatus.armed && reveal < 1.0) {
-      _webLog('checkDragOffsetWeb:disarm');
       _status = M3ERefreshStatus.drag;
       widget.onStatusChange?.call(_status);
     }
-    _webLog('checkDragOffsetWeb:exit', 'status=$_status');
   }
 
   /// Desktop browsers exclude mouse from [ScrollBehavior.dragDevices], so
   /// click-drag never produces drag details and pull never starts.
+  ///
+  /// Also applies clamping physics so once list top pad is at
+  /// contentDragOffset, leading overscroll cannot open extra gap past the
+  /// host-equivalent drag cap.
   Widget _wrapWebScrollBehavior(Widget child) {
-    _webLog('wrapWebScrollBehavior');
     final ScrollBehavior behavior = ScrollConfiguration.of(context);
     return ScrollConfiguration(
       behavior: behavior.copyWith(
@@ -92,9 +48,21 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
           ...behavior.dragDevices,
           PointerDeviceKind.mouse,
         },
+        physics: _M3EWebRefreshScrollPhysics(
+          shouldClampLeading: _webShouldClampLeadingOverscroll,
+          parent: behavior.getScrollPhysics(context),
+        ),
       ),
       child: child,
     );
+  }
+
+  bool _webShouldClampLeadingOverscroll() {
+    if (_status != M3ERefreshStatus.drag && _status != M3ERefreshStatus.armed) {
+      return false;
+    }
+    final double maxPad = _resolvedContentDragOffset(context);
+    return _contentPadController.value >= maxPad - 0.5;
   }
 
   /// Split list pad vs indicator listenables so the pad spring during refresh
@@ -106,11 +74,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         AnimatedBuilder(
           animation: _contentPadController,
           builder: (BuildContext context, Widget? _) {
-            final double pad = _contentPad(context);
-            _webLog(
-              'build:webPad',
-              'pad=$pad status=$_status dragOffset=$_dragOffset',
-            );
+            // Drive list pad from the capped controller (mirrors host max).
+            final double pad = math.max(0, _contentPadController.value);
             return NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification n) =>
                   _handleScrollNotification(n),
@@ -160,7 +125,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         _contentPadController.stop(canceled: false);
       }
       _contentPadController.value = 0;
-      _webLog('webPad:snapZero');
     }
 
     _contentPadController.addListener(stopper);
@@ -192,7 +156,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
             _contentPadController.stop(canceled: false);
           }
           _contentPadController.value = 0;
-          _webLog('webDismiss:snapDone');
         }
 
         _scaleController.addListener(stopper);
@@ -237,12 +200,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
       _ => false,
     };
 
-    _webLog(
-      'indicatorWeb:build',
-      'reveal=${reveal.toStringAsFixed(3)} dragDriven=$dragDriven '
-          'status=$_status',
-    );
-
     final Widget indicatorChild;
     if (_usesMorphLoadingIndicator) {
       final _WebSpinnerPhase phase = dragDriven
@@ -257,7 +214,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         _webSpinnerType = widget._indicatorType;
         cached = _buildWebMorphSpinner(dragDriven: dragDriven);
         _webSpinnerCache = cached;
-        _webLog('indicatorWeb:cacheSpinner', 'phase=$phase');
       } else {
         cached = existing;
       }
@@ -327,5 +283,39 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
       rotationTurns: dragDriven ? 0 : null,
       elevation: 0,
     );
+  }
+}
+
+/// Clamps leading-edge overscroll once refresh list pad is at its drag cap.
+class _M3EWebRefreshScrollPhysics extends ScrollPhysics {
+  const _M3EWebRefreshScrollPhysics({
+    required this.shouldClampLeading,
+    super.parent,
+  });
+
+  final bool Function() shouldClampLeading;
+
+  @override
+  _M3EWebRefreshScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _M3EWebRefreshScrollPhysics(
+      shouldClampLeading: shouldClampLeading,
+      parent: buildParent(ancestor),
+    );
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    if (shouldClampLeading()) {
+      // Block underscroll past the leading edge (extra gap beyond list pad).
+      if (value < position.pixels &&
+          position.pixels <= position.minScrollExtent) {
+        return value - position.pixels;
+      }
+      if (value < position.minScrollExtent &&
+          position.pixels <= position.minScrollExtent) {
+        return value - position.minScrollExtent;
+      }
+    }
+    return super.applyBoundaryConditions(position, value);
   }
 }

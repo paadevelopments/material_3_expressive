@@ -273,9 +273,6 @@ class M3ERefreshIndicator extends StatefulWidget {
 /// class.
 class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     with TickerProviderStateMixin<M3ERefreshIndicator> {
-  /// Set to false to silence `[M3ERefresh#…]` console logs.
-  static bool debugTraceRefresh = true;
-
   late AnimationController _positionController;
   late AnimationController _scaleController;
   late AnimationController _contentPadController;
@@ -290,9 +287,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
-
-  /// Web diagnostics: monotonic step id for console traces.
-  int _webLogSeq = 0;
 
   /// Cached morph spinner on web (drag = frozen; refresh = auto-spin, flat).
   Widget? _webSpinnerCache;
@@ -370,11 +364,6 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     );
     _pendingRefreshFuture = Future<void>.value();
     widget.controller?.attach(show);
-    _webLog(
-      'initState',
-      'type=${widget._indicatorType} kIsWeb=$kIsWeb '
-          'debugTraceRefresh=$debugTraceRefresh',
-    );
   }
 
   @override
@@ -387,7 +376,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   void didUpdateWidget(covariant M3ERefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller?.detach();
+      oldWidget.controller?.detach(show);
       widget.controller?.attach(show);
     }
     if (oldWidget.color != widget.color) {
@@ -397,7 +386,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   @override
   void dispose() {
-    widget.controller?.detach();
+    widget.controller?.detach(show);
     _positionController.dispose();
     _scaleController.dispose();
     _contentPadController.dispose();

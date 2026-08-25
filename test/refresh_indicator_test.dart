@@ -35,6 +35,10 @@ void main() {
     'resting inset stays put while refresh runs',
     _restingInsetStableDuringRefresh,
   );
+  testWidgets(
+    'controller stays attached across keyed variant switch',
+    _controllerSurvivesKeyedVariantSwitch,
+  );
 }
 
 Future<void> _rendersChild(WidgetTester tester) async {
@@ -211,4 +215,65 @@ Future<void> _restingInsetStableDuringRefresh(WidgetTester tester) async {
 
   refreshHold.complete();
   await tester.pumpAndSettle();
+}
+
+Future<void> _controllerSurvivesKeyedVariantSwitch(WidgetTester tester) async {
+  final controller = M3ERefreshIndicatorController();
+  addTearDown(controller.dispose);
+  var refreshCount = 0;
+  var kind = 0;
+
+  await tester.pumpWidget(
+    _host(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Column(
+            children: <Widget>[
+              TextButton(
+                onPressed: () => setState(() => kind = 1 - kind),
+                child: const Text('switch'),
+              ),
+              TextButton(
+                onPressed: () => controller.show(),
+                child: const Text('trigger'),
+              ),
+              Expanded(
+                child: kind == 0
+                    ? M3ERefreshIndicator(
+                        key: const ValueKey<int>(0),
+                        controller: controller,
+                        onRefresh: () async {
+                          refreshCount++;
+                        },
+                        child: _list(),
+                      )
+                    : M3ERefreshIndicator.contained(
+                        key: const ValueKey<int>(1),
+                        controller: controller,
+                        onRefresh: () async {
+                          refreshCount++;
+                        },
+                        child: _list(),
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+
+  await tester.pumpAndSettle();
+  expect(controller.isAttached, isTrue);
+
+  await tester.tap(find.text('switch'));
+  await tester.pumpAndSettle();
+  expect(controller.isAttached, isTrue);
+
+  unawaited(controller.show());
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pumpAndSettle();
+
+  expect(refreshCount, 1);
 }

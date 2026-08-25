@@ -86,22 +86,14 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
 
   void _applyDragDelta(ScrollNotification notification) {
     final double? delta = _dragDeltaFrom(notification);
-    _webLog(
-      'applyDragDelta',
-      'delta=$delta dragOffsetBefore=$_dragOffset status=$_status',
-    );
     if (delta != null) {
       _dragOffset = _dragOffset! + delta;
     }
-    // Pad / reveal cap: further pull does not move the spinner past rest.
+    // Pad / reveal cap: further pull does not grow list spacing past max.
     final double maxPad = _resolvedContentDragOffset(context);
     if ((_dragOffset ?? 0) > maxPad) {
       _dragOffset = maxPad;
     }
-    _webLog(
-      'applyDragDelta:afterCap',
-      'dragOffset=$_dragOffset maxPad=$maxPad',
-    );
     _checkDragOffset();
   }
 
@@ -129,22 +121,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
-    final kind = notification.runtimeType.toString();
-    final hasDrag = switch (notification) {
-      ScrollStartNotification(:final DragStartDetails? dragDetails) =>
-        dragDetails != null,
-      ScrollUpdateNotification(:final DragUpdateDetails? dragDetails) =>
-        dragDetails != null,
-      OverscrollNotification(:final DragUpdateDetails? dragDetails) =>
-        dragDetails != null,
-      _ => false,
-    };
-    _webLog(
-      'scrollNotification',
-      '$kind hasDrag=$hasDrag '
-          'extentBefore=${notification.metrics.extentBefore.toStringAsFixed(1)} '
-          'status=$_status',
-    );
     if (_tryBeginDrag(notification)) {
       return false;
     }
@@ -160,12 +136,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     if (!_shouldStart(notification)) {
       return false;
     }
-    _webLog('tryBeginDrag:setState(drag)');
     setState(() {
       _status = M3ERefreshStatus.drag;
       widget.onStatusChange?.call(_status);
     });
-    _webLog('tryBeginDrag:afterSetState');
     _applyDragDelta(notification);
     return true;
   }
@@ -179,7 +153,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     if (indicatorAtTopNow == _isIndicatorAtTop) {
       return false;
     }
-    _webLog('abort:axisChanged');
     if (_status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed) {
       _dismiss(M3ERefreshStatus.canceled);
     }
@@ -192,28 +165,16 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     if (!pulling || _isAtLeadingEdge(notification.metrics)) {
       return false;
     }
-    _webLog('abort:leftLeadingEdge');
     _dismiss(M3ERefreshStatus.canceled);
     return true;
   }
 
   void _continueActiveDrag(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
-      _webLog(
-        'continue:scrollUpdate',
-        'dragDetails=${notification.dragDetails != null} '
-            'delta=${notification.scrollDelta}',
-      );
       _handleScrollUpdate(notification);
     } else if (notification is OverscrollNotification) {
-      _webLog(
-        'continue:overscroll',
-        'dragDetails=${notification.dragDetails != null} '
-            'overscroll=${notification.overscroll.toStringAsFixed(2)}',
-      );
       _handleOverscroll(notification);
     } else if (notification is ScrollEndNotification) {
-      _webLog('continue:scrollEnd');
       _handleScrollEnd();
     }
   }
@@ -225,7 +186,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     // Finger up: decide refresh vs cancel from full reveal — do not follow
     // ballistic settle.
     if (notification.dragDetails == null) {
-      _webLog('scrollUpdate:nullDragDetails -> pointerReleased');
       _onPointerReleased();
       return;
     }
@@ -237,7 +197,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     if (notification.dragDetails == null) {
-      _webLog('overscroll:nullDragDetails -> pointerReleased');
       _onPointerReleased();
       return;
     }
@@ -245,7 +204,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
   }
 
   void _handleScrollEnd() {
-    _webLog('scrollEnd:status=$_status');
     switch (_status) {
       case M3ERefreshStatus.drag:
       case M3ERefreshStatus.armed:
@@ -261,14 +219,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
 
   /// Load only when fully revealed; otherwise reverse without onRefresh.
   void _onPointerReleased() {
-    _webLog('pointerReleased:enter');
     if (_status != M3ERefreshStatus.drag && _status != M3ERefreshStatus.armed) {
-      _webLog('pointerReleased:ignored (bad status)');
       return;
     }
-    final bool full = _isFullyRevealed(context);
-    _webLog('pointerReleased:fullyRevealed=$full');
-    if (full) {
+    if (_isFullyRevealed(context)) {
       _show();
     } else {
       _dismiss(M3ERefreshStatus.canceled);
@@ -307,17 +261,14 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     _positionController.value = 0.0;
     _contentPadController.value = 0.0;
     _bubbleController.value = 1.0;
-    _webLog('start', 'direction=$direction');
     return true;
   }
 
   void _checkDragOffset() {
     if (kIsWeb) {
-      _webLog('checkDragOffset:routeWeb');
       _checkDragOffsetWeb();
       return;
     }
-    _webLog('checkDragOffset:host');
     assert(
       _status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed,
       'assertion failed',
@@ -333,11 +284,8 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
     final double target = reveal / limit;
     if (target == _positionController.value) {
-      _webLog('checkDragOffset:hostEmptySetState', 'target=$target');
       setState(() {});
-      _webLog('checkDragOffset:hostAfterSetState');
     } else {
-      _webLog('checkDragOffset:hostPosition', 'target=$target');
       _positionController.value = clampDouble(target, 0, 1);
     }
 
@@ -352,7 +300,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
   }
 
   Future<void> _dismiss(M3ERefreshStatus newMode) async {
-    _webLog('dismiss:enter', 'newMode=$newMode status=$_status');
     await Future<void>.value();
     assert(
       newMode == M3ERefreshStatus.canceled || newMode == M3ERefreshStatus.done,
@@ -374,17 +321,14 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       _status = newMode;
       widget.onStatusChange?.call(_status);
     });
-    _webLog('dismiss:animate', 'mode=$newMode');
     try {
       if (kIsWeb) {
         await _animateDismissWeb();
       } else {
         await _animateDismiss();
       }
-      _webLog('dismiss:animateDone', 'status=$_status');
-    } catch (error) {
-      // Web early-stop used to cancel tickers; never leave status stuck on done.
-      _webLog('dismiss:animateError', '$error');
+    } catch (_) {
+      // Web early-stop must not leave status stuck on done/canceled.
       if (_scaleController.isAnimating) {
         _scaleController.stop(canceled: false);
       }
@@ -407,7 +351,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       setState(() {
         _status = null;
       });
-      _webLog('dismiss:cleared');
     }
   }
 
@@ -449,7 +392,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
   }
 
   void _show() {
-    _webLog('show:enter', 'status=$_status');
     assert(_status != M3ERefreshStatus.refresh, 'assertion failed');
     assert(_status != M3ERefreshStatus.snap, 'assertion failed');
     final completer = Completer<void>();
@@ -468,10 +410,8 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       _status = M3ERefreshStatus.refresh;
       widget.onStatusChange?.call(_status);
     });
-    _webLog('show:onRefreshStart');
 
     widget.onRefresh().whenComplete(() {
-      _webLog('show:onRefreshComplete', 'status=$_status');
       if (mounted && _status == M3ERefreshStatus.refresh) {
         completer.complete();
         _dismiss(M3ERefreshStatus.done);
@@ -484,7 +424,6 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       unawaited(_springTo(_contentPadController, target: 0));
     }
     _playReleaseBubble();
-    _webLog('show:exit');
   }
 
   /// Spatial spring scale bubble at the fixed rest inset (layout unchanged).
