@@ -316,55 +316,70 @@ Future<void> _controllerShowOnDesktopPlatform(WidgetTester tester) async {
   final TargetPlatform? previous = debugDefaultTargetPlatformOverride;
   debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
   try {
-    final controller = M3ERefreshIndicatorController();
-    addTearDown(controller.dispose);
-    var refreshed = false;
-    var elevation = true;
-
-    await tester.pumpWidget(
-      _host(
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Column(
-              children: <Widget>[
-                TextButton(
-                  onPressed: () => setState(() => elevation = !elevation),
-                  child: const Text('toggle'),
-                ),
-                TextButton(
-                  onPressed: () => controller.show(),
-                  child: const Text('trigger'),
-                ),
-                Expanded(
-                  child: M3ERefreshIndicator.contained(
-                    key: ValueKey<bool>(elevation),
-                    controller: controller,
-                    elevation: elevation ? 3 : 0,
-                    onRefresh: () async {
-                      refreshed = true;
-                    },
-                    child: _list(),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('toggle'));
-    await tester.pumpAndSettle();
-    expect(controller.isAttached, isTrue);
-
-    await tester.tap(find.text('trigger'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pumpAndSettle();
-
-    expect(refreshed, isTrue);
-    expect(controller.isAttached, isTrue);
+    await _pumpDesktopControllerShowScenario(tester);
   } finally {
     debugDefaultTargetPlatformOverride = previous;
   }
+}
+
+Future<void> _pumpDesktopControllerShowScenario(WidgetTester tester) async {
+  final controller = M3ERefreshIndicatorController();
+  addTearDown(controller.dispose);
+  var refreshed = false;
+  var elevation = true;
+
+  await tester.pumpWidget(
+    _host(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return _desktopControllerShowHarness(
+            elevation: elevation,
+            controller: controller,
+            onToggleElevation: () => setState(() => elevation = !elevation),
+            onRefresh: () async {
+              refreshed = true;
+            },
+          );
+        },
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('toggle'));
+  await tester.pumpAndSettle();
+  expect(controller.isAttached, isTrue);
+
+  await tester.tap(find.text('trigger'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pumpAndSettle();
+
+  expect(refreshed, isTrue);
+  expect(controller.isAttached, isTrue);
+}
+
+Widget _desktopControllerShowHarness({
+  required bool elevation,
+  required M3ERefreshIndicatorController controller,
+  required VoidCallback onToggleElevation,
+  required Future<void> Function() onRefresh,
+}) {
+  return Column(
+    children: <Widget>[
+      TextButton(onPressed: onToggleElevation, child: const Text('toggle')),
+      TextButton(
+        onPressed: () => controller.show(),
+        child: const Text('trigger'),
+      ),
+      Expanded(
+        child: M3ERefreshIndicator.contained(
+          key: ValueKey<bool>(elevation),
+          controller: controller,
+          elevation: elevation ? 3 : 0,
+          onRefresh: onRefresh,
+          child: _list(),
+        ),
+      ),
+    ],
+  );
 }
