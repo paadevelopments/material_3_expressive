@@ -31,13 +31,9 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     }
   }
 
-  /// Desktop browsers exclude mouse from [ScrollBehavior.dragDevices], so
-  /// click-drag never produces drag details and pull never starts.
-  ///
-  /// While pulling, block leading underscroll so the only list gap is our
-  /// capped pad (matches host). Physics only rejects new underscroll from a
-  /// valid position — never when already past min (avoids ballistic assert).
-  Widget _wrapWebScrollBehavior(Widget child) {
+  /// Enables mouse drag and clamps leading underscroll while pulling so the
+  /// only list gap is our capped pad (web + native desktop).
+  Widget _wrapPointerPullScrollBehavior(Widget child) {
     final ScrollBehavior behavior = ScrollConfiguration.of(context);
     return ScrollConfiguration(
       behavior: behavior.copyWith(
@@ -45,8 +41,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
           ...behavior.dragDevices,
           PointerDeviceKind.mouse,
         },
-        physics: _M3EWebRefreshScrollPhysics(
-          shouldClampLeading: _webShouldClampLeadingOverscroll,
+        physics: _M3EPullLeadingClampScrollPhysics(
+          shouldClampLeading: _shouldClampLeadingOverscrollForPull,
           parent: behavior.getScrollPhysics(context),
         ),
       ),
@@ -54,7 +50,7 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     );
   }
 
-  bool _webShouldClampLeadingOverscroll() {
+  bool _shouldClampLeadingOverscrollForPull() {
     return _status == M3ERefreshStatus.drag ||
         _status == M3ERefreshStatus.armed;
   }
@@ -195,46 +191,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
       _ => false,
     };
 
-    final Widget indicatorChild;
-    if (_usesContainedLoadingIndicator) {
-      final _WebSpinnerPhase phase = dragDriven
-          ? _WebSpinnerPhase.drag
-          : _WebSpinnerPhase.refresh;
-      final Widget cached;
-      final Widget? existing = _webSpinnerCache;
-      if (existing == null ||
-          _webSpinnerPhase != phase ||
-          _webSpinnerType != widget._indicatorType) {
-        _webSpinnerPhase = phase;
-        _webSpinnerType = widget._indicatorType;
-        cached = RepaintBoundary(
-          child: _buildContainedLoadingIndicator(
-            key: ValueKey<String>(
-              dragDriven
-                  ? 'm3e_refresh_web_drag_spinner'
-                  : 'm3e_refresh_web_refresh_spinner',
-            ),
-            freezeMorph: dragDriven,
-          ),
-        );
-        _webSpinnerCache = cached;
-      } else {
-        cached = existing;
-      }
-      if (dragDriven) {
-        final double turns = math.max(0, _dragOffset ?? 0) / 80;
-        indicatorChild = Transform.rotate(
-          angle: turns * 2 * math.pi,
-          child: cached,
-        );
-      } else {
-        indicatorChild = cached;
-      }
-    } else {
-      _clearWebSpinnerCache();
-      indicatorChild = _buildIndicator(context, showIndeterminate);
-    }
-
     return Positioned(
       top: atTop ? widget.edgeOffset + inset : null,
       bottom: atTop ? null : widget.edgeOffset + inset,
@@ -248,12 +204,57 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
             child: Transform.scale(
               scale: reveal * bubble,
               alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-              child: indicatorChild,
+              child: _buildWebIndicatorChild(
+                context,
+                showIndeterminate,
+                dragDriven,
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildWebIndicatorChild(
+    BuildContext context,
+    bool showIndeterminate,
+    bool dragDriven,
+  ) {
+    if (!_usesContainedLoadingIndicator) {
+      _clearWebSpinnerCache();
+      return _buildIndicator(context, showIndeterminate);
+    }
+
+    final _WebSpinnerPhase phase = dragDriven
+        ? _WebSpinnerPhase.drag
+        : _WebSpinnerPhase.refresh;
+    final Widget cached;
+    final Widget? existing = _webSpinnerCache;
+    if (existing == null ||
+        _webSpinnerPhase != phase ||
+        _webSpinnerType != widget._indicatorType) {
+      _webSpinnerPhase = phase;
+      _webSpinnerType = widget._indicatorType;
+      cached = RepaintBoundary(
+        child: _buildContainedLoadingIndicator(
+          key: ValueKey<String>(
+            dragDriven
+                ? 'm3e_refresh_web_drag_spinner'
+                : 'm3e_refresh_web_refresh_spinner',
+          ),
+          freezeMorph: dragDriven,
+        ),
+      );
+      _webSpinnerCache = cached;
+    } else {
+      cached = existing;
+    }
+    if (!dragDriven) {
+      return cached;
+    }
+    final double turns = math.max(0, _dragOffset ?? 0) / 80;
+    return Transform.rotate(angle: turns * 2 * math.pi, child: cached);
   }
 
   bool get _usesContainedLoadingIndicator => switch (widget._indicatorType) {
@@ -273,8 +274,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
 /// Only rejects movement from a valid position into underscroll. Does not run
 /// when pixels are already past min (that caused AlwaysScrollable ballistic
 /// "invalid overscroll" asserts).
-class _M3EWebRefreshScrollPhysics extends ScrollPhysics {
-  const _M3EWebRefreshScrollPhysics({
+class _M3EPullLeadingClampScrollPhysics extends ScrollPhysics {
+  const _M3EPullLeadingClampScrollPhysics({
     required this.shouldClampLeading,
     super.parent,
   });
@@ -282,8 +283,8 @@ class _M3EWebRefreshScrollPhysics extends ScrollPhysics {
   final bool Function() shouldClampLeading;
 
   @override
-  _M3EWebRefreshScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _M3EWebRefreshScrollPhysics(
+  _M3EPullLeadingClampScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _M3EPullLeadingClampScrollPhysics(
       shouldClampLeading: shouldClampLeading,
       parent: buildParent(ancestor),
     );

@@ -5,12 +5,12 @@
 * Nav bar, rail, and drawer selection pills remasure on size / constraint
   changes (window resize); stale geometry cache no longer blocks morphs to
   other destinations.
-* `M3ERefreshIndicator` on Flutter web: mouse drag for pull-to-refresh; 1:1
-  pointer drag (frame-deduped) with host reveal/arm math
-  (`2 × indicatorPadding` delay, arm at full reveal); list pad hard-capped at
-  `contentDragOffset` with safe leading underscroll clamp; Opacity+scale
-  reveal; split rebuilds + `RepaintBoundary` so CanvasKit does not freeze.
-  Other platforms are unchanged.
+* `M3ERefreshIndicator` pointer-pull platforms (Flutter web and native
+  desktop): mouse drag, 1:1 pointer deltas, host reveal/arm math
+  (`2 × indicatorPadding` delay, arm at full reveal), list pad hard-capped at
+  `contentDragOffset` with safe leading underscroll clamp. Web also uses
+  Opacity+scale reveal, split rebuilds, and `RepaintBoundary` so CanvasKit
+  does not freeze. Mobile keeps classic overscroll deltas.
 * `M3ERefreshIndicator` expressive and contained kinds always use
   `M3ELoadingIndicator` **contained** variant so shell elevation works on all
   platforms (avoids morph-path `drawShadow`, which freezes CanvasKit).

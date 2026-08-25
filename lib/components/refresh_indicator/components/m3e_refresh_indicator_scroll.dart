@@ -97,8 +97,8 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
 
   double? _dragDeltaFrom(ScrollNotification notification) {
     final AxisDirection direction = notification.metrics.axisDirection;
-    if (kIsWeb) {
-      return _dragDeltaFromWeb(notification, direction);
+    if (_usePointerPullTracking) {
+      return _dragDeltaFromPointerPull(notification, direction);
     }
     if (notification is ScrollUpdateNotification &&
         notification.scrollDelta != null) {
@@ -110,11 +110,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     return null;
   }
 
-  /// Web: 1:1 pointer tracking (host overscroll amounts under-report on
-  /// CanvasKit). Same frame ScrollUpdate+Overscroll share one pointer sample.
-  /// Reveal/arm still use shared [_revealProgress] (delay = 2×indicatorPadding,
-  /// arm at reveal == 1).
-  double? _dragDeltaFromWeb(
+  /// Web / native desktop: 1:1 pointer tracking. Mobile overscroll amounts
+  /// under-report on desktop clamping physics. Dedupes ScrollUpdate+Overscroll
+  /// in the same event-loop turn. Reveal/arm still use shared [_revealProgress].
+  double? _dragDeltaFromPointerPull(
     ScrollNotification notification,
     AxisDirection direction,
   ) {
@@ -124,28 +123,26 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       _ => null,
     };
     if (details != null) {
-      return _webPointerDeltaOncePerFrame(direction, details.delta);
+      return _pointerDeltaOncePerTurn(direction, details.delta);
     }
-    // Fallback when desktop omits dragDetails on overscroll.
     if (notification is OverscrollNotification) {
       return _signedDragDelta(direction, notification.overscroll);
     }
     return null;
   }
 
-  double? _webPointerDeltaOncePerFrame(AxisDirection direction, Offset delta) {
+  double? _pointerDeltaOncePerTurn(AxisDirection direction, Offset delta) {
     // Gesture handlers run outside a frame — cannot use currentFrameTimeStamp.
-    // Lock for this event-loop turn so ScrollUpdate + Overscroll share one sample.
-    if (_webPointerDeltaLocked) {
+    if (_pointerDeltaLocked) {
       return null;
     }
     final double? signed = _pointerDragDelta(direction, delta);
     if (signed == null || signed == 0) {
       return null;
     }
-    _webPointerDeltaLocked = true;
+    _pointerDeltaLocked = true;
     scheduleMicrotask(() {
-      _webPointerDeltaLocked = false;
+      _pointerDeltaLocked = false;
     });
     return signed;
   }
@@ -233,10 +230,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     // Finger up: decide refresh vs cancel from full reveal — do not follow
-    // ballistic settle. On web, layout ScrollUpdates often lack dragDetails
-    // while the mouse is still down; wait for ScrollEnd instead.
+    // ballistic settle. Pointer-pull platforms often emit layout ScrollUpdates
+    // without dragDetails while the pointer is still down; wait for ScrollEnd.
     if (notification.dragDetails == null) {
-      if (kIsWeb) {
+      if (_usePointerPullTracking) {
         return;
       }
       _onPointerReleased();
@@ -250,9 +247,8 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     if (notification.dragDetails == null) {
-      // Web: apply overscroll amount; release on ScrollEnd (dragDetails often
-      // null on desktop while the pointer is still down).
-      if (kIsWeb) {
+      // Pointer-pull: apply overscroll amount; release on ScrollEnd.
+      if (_usePointerPullTracking) {
         _applyDragDelta(notification);
         return;
       }

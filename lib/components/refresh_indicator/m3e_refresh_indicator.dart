@@ -297,7 +297,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   _IndicatorType? _webSpinnerType;
 
   /// Dedupes pointer drag deltas when ScrollUpdate + Overscroll fire together.
-  bool _webPointerDeltaLocked = false;
+  bool _pointerDeltaLocked = false;
 
   /// Indicator top inset locked when loading starts.
   double? _restingInset;
@@ -412,23 +412,51 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     return _pendingRefreshFuture;
   }
 
+  /// Web and native desktop: mouse/trackpad pull needs 1:1 pointer deltas and
+  /// leading underscroll clamp (same pad/reveal math as mobile).
+  bool get _usePointerPullTracking {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (M3ETheme.platformOf(context)) {
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.linux => true,
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => false,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
       builder: (BuildContext context) {
-        if (kIsWeb) {
-          return _wrapWebScrollBehavior(_buildWebTree(context));
+        final Widget tree = kIsWeb
+            ? _buildWebTree(context)
+            : _buildHostTree(context);
+        if (_usePointerPullTracking) {
+          return _wrapPointerPullScrollBehavior(tree);
         }
-        return AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[
-            _positionController,
-            _scaleController,
-            _contentPadController,
-            _bubbleController,
-          ]),
-          builder: (BuildContext context, Widget? _) {
-            final double pad = _currentPad(context);
-            final Widget child = NotificationListener<ScrollNotification>(
+        return tree;
+      },
+    );
+  }
+
+  Widget _buildHostTree(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[
+        _positionController,
+        _scaleController,
+        _contentPadController,
+        _bubbleController,
+      ]),
+      builder: (BuildContext context, Widget? _) {
+        final double pad = _currentPad(context);
+        return Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification n) =>
                   _handleScrollNotification(n),
               child: NotificationListener<OverscrollIndicatorNotification>(
@@ -442,16 +470,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
                   child: widget.child,
                 ),
               ),
-            );
-
-            return Stack(
-              clipBehavior: Clip.none,
-              children: <Widget>[
-                child,
-                if (_status != null) _buildPositionedIndicator(context),
-              ],
-            );
-          },
+            ),
+            if (_status != null) _buildPositionedIndicator(context),
+          ],
         );
       },
     );
