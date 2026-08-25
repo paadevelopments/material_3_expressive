@@ -223,6 +223,27 @@ Future<void> _controllerSurvivesKeyedVariantSwitch(WidgetTester tester) async {
   var refreshCount = 0;
   var kind = 0;
 
+  Widget buildIndicator() {
+    Future<void> onRefresh() async {
+      refreshCount++;
+    }
+
+    if (kind == 0) {
+      return M3ERefreshIndicator(
+        key: const ValueKey<int>(0),
+        controller: controller,
+        onRefresh: onRefresh,
+        child: _list(),
+      );
+    }
+    return M3ERefreshIndicator.contained(
+      key: const ValueKey<int>(1),
+      controller: controller,
+      onRefresh: onRefresh,
+      child: _list(),
+    );
+  }
+
   await tester.pumpWidget(
     _host(
       StatefulBuilder(
@@ -237,25 +258,7 @@ Future<void> _controllerSurvivesKeyedVariantSwitch(WidgetTester tester) async {
                 onPressed: () => controller.show(),
                 child: const Text('trigger'),
               ),
-              Expanded(
-                child: kind == 0
-                    ? M3ERefreshIndicator(
-                        key: const ValueKey<int>(0),
-                        controller: controller,
-                        onRefresh: () async {
-                          refreshCount++;
-                        },
-                        child: _list(),
-                      )
-                    : M3ERefreshIndicator.contained(
-                        key: const ValueKey<int>(1),
-                        controller: controller,
-                        onRefresh: () async {
-                          refreshCount++;
-                        },
-                        child: _list(),
-                      ),
-              ),
+              Expanded(child: buildIndicator()),
             ],
           );
         },

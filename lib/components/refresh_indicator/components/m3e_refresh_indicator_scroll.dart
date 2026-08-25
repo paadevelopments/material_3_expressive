@@ -365,15 +365,8 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       'assertion failed',
     );
 
-    if (newMode == M3ERefreshStatus.canceled && _dragOffset != null) {
-      if (!mounted) {
-        return;
-      }
-      // Seed controllers from current pad/reveal for a continuous reverse.
-      _contentPadController.value = _currentPad(context);
-      final double reveal = _revealProgress(context);
-      final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
-      _positionController.value = clampDouble(reveal / limit, 0, 1);
+    if (!_seedDismissFromDragIfCanceled(newMode)) {
+      return;
     }
 
     setState(() {
@@ -381,36 +374,63 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       widget.onStatusChange?.call(_status);
     });
     try {
-      if (kIsWeb) {
-        await _animateDismissWeb();
-      } else {
-        await _animateDismiss();
-      }
+      await _runDismissAnimation();
     } catch (_) {
-      // Web early-stop must not leave status stuck on done/canceled.
-      if (_scaleController.isAnimating) {
-        _scaleController.stop(canceled: false);
-      }
-      if (_contentPadController.isAnimating) {
-        _contentPadController.stop(canceled: false);
-      }
-      if (_positionController.isAnimating) {
-        _positionController.stop(canceled: false);
-      }
-      _scaleController.value = 1;
-      _contentPadController.value = 0;
+      _forceStopDismissControllers();
     }
     if (mounted && _status == newMode) {
-      _dragOffset = null;
-      _isIndicatorAtTop = null;
-      _restingInset = null;
-      if (kIsWeb) {
-        _clearWebSpinnerCache();
-      }
-      setState(() {
-        _status = null;
-      });
+      _resetAfterDismiss();
     }
+  }
+
+  /// Seeds pad/position for a continuous cancel reverse. Returns false if
+  /// unmounted during cancel seed.
+  bool _seedDismissFromDragIfCanceled(M3ERefreshStatus newMode) {
+    if (newMode != M3ERefreshStatus.canceled || _dragOffset == null) {
+      return true;
+    }
+    if (!mounted) {
+      return false;
+    }
+    _contentPadController.value = _currentPad(context);
+    final double reveal = _revealProgress(context);
+    final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+    _positionController.value = clampDouble(reveal / limit, 0, 1);
+    return true;
+  }
+
+  Future<void> _runDismissAnimation() {
+    if (kIsWeb) {
+      return _animateDismissWeb();
+    }
+    return _animateDismiss();
+  }
+
+  void _forceStopDismissControllers() {
+    // Web early-stop must not leave status stuck on done/canceled.
+    if (_scaleController.isAnimating) {
+      _scaleController.stop(canceled: false);
+    }
+    if (_contentPadController.isAnimating) {
+      _contentPadController.stop(canceled: false);
+    }
+    if (_positionController.isAnimating) {
+      _positionController.stop(canceled: false);
+    }
+    _scaleController.value = 1;
+    _contentPadController.value = 0;
+  }
+
+  void _resetAfterDismiss() {
+    _dragOffset = null;
+    _isIndicatorAtTop = null;
+    _restingInset = null;
+    if (kIsWeb) {
+      _clearWebSpinnerCache();
+    }
+    setState(() {
+      _status = null;
+    });
   }
 
   Future<void> _springTo(
