@@ -304,6 +304,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late Color _effectiveValueColor;
   late Color _effectiveContainerColor;
 
+  /// Stable show callback for [M3ERefreshIndicatorController] attach/detach.
+  /// Fresh method tear-offs are never [identical], so dispose would fail to
+  /// clear and leave a disposed State's callback attached.
+  late final Future<void> Function({bool atTop}) _controllerShow;
+
   static final Animatable<double> _threeQuarterTween = Tween<double>(
     begin: 0,
     end: 0.75,
@@ -369,7 +374,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       initialValue: 1,
     );
     _pendingRefreshFuture = Future<void>.value();
-    widget.controller?.attach(show);
+    Future<void> controllerShow({bool atTop = true}) => show(atTop: atTop);
+    _controllerShow = controllerShow;
+    widget.controller?.attach(_controllerShow);
   }
 
   @override
@@ -382,8 +389,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   void didUpdateWidget(covariant M3ERefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller?.detach(show);
-      widget.controller?.attach(show);
+      oldWidget.controller?.detach(_controllerShow);
+      widget.controller?.attach(_controllerShow);
     }
     if (oldWidget.color != widget.color) {
       _setupColorTween();
@@ -392,7 +399,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   @override
   void dispose() {
-    widget.controller?.detach(show);
+    widget.controller?.detach(_controllerShow);
     _positionController.dispose();
     _scaleController.dispose();
     _contentPadController.dispose();
@@ -402,6 +409,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   /// Shows the refresh indicator and runs [M3ERefreshIndicator.onRefresh].
   Future<void> show({bool atTop = true}) {
+    if (!mounted) {
+      return Future<void>.value();
+    }
     if (_status != M3ERefreshStatus.refresh &&
         _status != M3ERefreshStatus.snap) {
       if (_status == null) {

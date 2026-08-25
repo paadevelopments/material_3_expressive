@@ -14,9 +14,10 @@
 * `M3ERefreshIndicator` expressive and contained kinds always use
   `M3ELoadingIndicator` **contained** variant so shell elevation works on all
   platforms (avoids morph-path `drawShadow`, which freezes CanvasKit).
-* `M3ERefreshIndicatorController.detach` only clears when the tear-off still
-  matches the active attachment, so keyed variant switches in the demo no
-  longer break manual `show()`.
+* `M3ERefreshIndicatorController` attach/detach uses one stable show closure
+  (fresh method tear-offs are never `identical`), so dispose clears correctly
+  and manual `show()` does not hit disposed animation controllers after keyed
+  rebuilds; keyed variant switches still keep the newer attachment.
 
 ## 1.0.9
 
