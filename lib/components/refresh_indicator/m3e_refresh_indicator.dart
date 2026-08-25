@@ -30,7 +30,9 @@ enum _WebSpinnerPhase { none, drag, refresh }
 
 /// A Material Design 3 expressive refresh indicator.
 ///
-/// Expressive and contained variants use [M3ELoadingIndicator] for the spinner.
+/// Expressive and contained refresh kinds use a [M3ELoadingIndicator] with the
+/// **contained** loading variant so shell elevation works on all platforms
+/// (including Flutter web).
 ///
 /// Call [M3ERefreshIndicatorState.show] via a [GlobalKey], or pass a
 /// [M3ERefreshIndicatorController] to trigger refresh programmatically.
@@ -425,7 +427,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
             _bubbleController,
           ]),
           builder: (BuildContext context, Widget? _) {
-            final double pad = _contentPad(context);
+            final double pad = _currentPad(context);
             final Widget child = NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification n) =>
                   _handleScrollNotification(n),

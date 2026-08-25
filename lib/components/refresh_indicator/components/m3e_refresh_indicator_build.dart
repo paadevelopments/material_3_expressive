@@ -29,9 +29,6 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     }
   }
 
-  /// List top/bottom padding while dragging or springing back.
-  double _contentPad(BuildContext context) => _currentPad(context);
-
   /// 0–1 progress after the pad passes twice the indicator padding.
   ///
   /// At 1 the spinner is fully scaled/faded and at its resting displacement.
@@ -132,13 +129,8 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
   Widget _buildIndicator(BuildContext context, bool showIndeterminate) {
     switch (widget._indicatorType) {
       case _IndicatorType.expressive:
-        return _buildLoadingIndicator(
-          variant: M3ELoadingIndicatorVariant.defaultStyle,
-        );
       case _IndicatorType.contained:
-        return _buildLoadingIndicator(
-          variant: M3ELoadingIndicatorVariant.contained,
-        );
+        return _buildContainedLoadingIndicator();
       case _IndicatorType.material:
         return _buildMaterialIndicator(context, showIndeterminate);
       case _IndicatorType.adaptive:
@@ -148,16 +140,18 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
     }
   }
 
-  Widget _buildLoadingIndicator({required M3ELoadingIndicatorVariant variant}) {
+  /// Contained loading spinner for expressive and contained refresh kinds.
+  Widget _buildContainedLoadingIndicator({Key? key, bool freezeMorph = false}) {
     return M3ELoadingIndicator(
-      variant: variant,
+      key: key,
+      variant: M3ELoadingIndicatorVariant.contained,
       color: _effectiveValueColor,
       containerColor: _effectiveContainerColor,
       polygons: widget.polygons,
       constraints: widget.indicatorConstraints,
       semanticLabel: widget.semanticsLabel,
       semanticValue: widget.semanticsValue,
-      rotationTurns: _dragRotationTurns(context),
+      rotationTurns: freezeMorph ? 0 : _dragRotationTurns(context),
       elevation: widget.elevation,
     );
   }

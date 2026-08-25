@@ -2,12 +2,12 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
+import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
 
-/// Live playground for [M3ERefreshIndicator].
+/// Live playground for [M3ERefreshIndicator.contained].
 class RefreshIndicatorPlayground extends StatefulWidget {
   /// Creates the refresh indicator playground.
   const RefreshIndicatorPlayground({super.key});
@@ -17,15 +17,16 @@ class RefreshIndicatorPlayground extends StatefulWidget {
       _RefreshIndicatorPlaygroundState();
 }
 
-enum _RefreshKind { expressive, contained }
-
 class _RefreshIndicatorPlaygroundState
     extends State<RefreshIndicatorPlayground> {
-  _RefreshKind _kind = _RefreshKind.expressive;
   M3ERefreshTriggerMode _trigger = M3ERefreshTriggerMode.onEdge;
+  bool _elevation = true;
   int _refreshCount = 0;
   final M3ERefreshIndicatorController _controller =
       M3ERefreshIndicatorController();
+
+  double get _resolvedElevation =>
+      _elevation ? M3ERefreshIndicatorTheme.kDefaultElevation : 0;
 
   @override
   void dispose() {
@@ -57,39 +58,26 @@ class _RefreshIndicatorPlaygroundState
   }
 
   Widget _buildIndicator() {
-    final Key key = ValueKey<_RefreshKind>(_kind);
-    final Widget child = _listChild();
-    return switch (_kind) {
-      _RefreshKind.expressive => M3ERefreshIndicator(
-        key: key,
-        controller: _controller,
-        onRefresh: _handleRefresh,
-        triggerMode: _trigger,
-        child: child,
-      ),
-      _RefreshKind.contained => M3ERefreshIndicator.contained(
-        key: key,
-        controller: _controller,
-        onRefresh: _handleRefresh,
-        triggerMode: _trigger,
-        child: child,
-      ),
-    };
+    return M3ERefreshIndicator.contained(
+      key: ValueKey<bool>(_elevation),
+      controller: _controller,
+      onRefresh: _handleRefresh,
+      triggerMode: _trigger,
+      elevation: _resolvedElevation,
+      child: _listChild(),
+    );
   }
 
   List<PlaySnippet> get _snippets {
-    final String ctor = switch (_kind) {
-      _RefreshKind.expressive => 'M3ERefreshIndicator',
-      _RefreshKind.contained => 'M3ERefreshIndicator.contained',
-    };
+    final String elevationLine = _elevation ? '' : '\n  elevation: 0,';
     final String sample =
         '''
 final controller = M3ERefreshIndicatorController();
 
-$ctor(
+M3ERefreshIndicator.contained(
   controller: controller,
   onRefresh: () async {},
-  triggerMode: M3ERefreshTriggerMode.${_trigger.name},
+  triggerMode: M3ERefreshTriggerMode.${_trigger.name},$elevationLine
   child: ListView(),
 );
 
@@ -130,12 +118,10 @@ await controller.show();''';
         PlayControlPanel(
           title: 'Appearance',
           children: <Widget>[
-            PlayEnumMenu<_RefreshKind>(
-              label: 'Kind',
-              value: _kind,
-              values: _RefreshKind.values,
-              labelOf: (_RefreshKind v) => v.name,
-              onChanged: (_RefreshKind v) => setState(() => _kind = v),
+            PlaySwitch(
+              label: 'Elevation',
+              value: _elevation,
+              onChanged: (bool v) => setState(() => _elevation = v),
             ),
             PlayEnumSegmented<M3ERefreshTriggerMode>(
               label: 'Trigger',

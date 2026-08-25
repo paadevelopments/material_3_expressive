@@ -175,8 +175,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     }
   }
 
-  /// Web indicator: host Opacity + scale reveal; morph elevation stays 0
-  /// (path drawShadow freezes CanvasKit). Spinner is cached in RepaintBoundary.
+  /// Web indicator: host Opacity + scale reveal; contained loading spinner
+  /// with shell elevation (cached in RepaintBoundary).
   Widget _buildPositionedIndicatorWeb(BuildContext context) {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =
@@ -196,7 +196,7 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     };
 
     final Widget indicatorChild;
-    if (_usesMorphLoadingIndicator) {
+    if (_usesContainedLoadingIndicator) {
       final _WebSpinnerPhase phase = dragDriven
           ? _WebSpinnerPhase.drag
           : _WebSpinnerPhase.refresh;
@@ -207,7 +207,16 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
           _webSpinnerType != widget._indicatorType) {
         _webSpinnerPhase = phase;
         _webSpinnerType = widget._indicatorType;
-        cached = _buildWebMorphSpinner(dragDriven: dragDriven);
+        cached = RepaintBoundary(
+          child: _buildContainedLoadingIndicator(
+            key: ValueKey<String>(
+              dragDriven
+                  ? 'm3e_refresh_web_drag_spinner'
+                  : 'm3e_refresh_web_refresh_spinner',
+            ),
+            freezeMorph: dragDriven,
+          ),
+        );
         _webSpinnerCache = cached;
       } else {
         cached = existing;
@@ -247,7 +256,7 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     );
   }
 
-  bool get _usesMorphLoadingIndicator => switch (widget._indicatorType) {
+  bool get _usesContainedLoadingIndicator => switch (widget._indicatorType) {
     _IndicatorType.expressive || _IndicatorType.contained => true,
     _ => false,
   };
@@ -256,34 +265,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     _webSpinnerCache = null;
     _webSpinnerPhase = _WebSpinnerPhase.none;
     _webSpinnerType = null;
-  }
-
-  /// Elevation 0 on web — morph drawShadow under drag transforms freezes
-  /// CanvasKit. [RepaintBoundary] keeps scale/rotate from re-painting morph.
-  Widget _buildWebMorphSpinner({required bool dragDriven}) {
-    final M3ELoadingIndicatorVariant variant =
-        widget._indicatorType == _IndicatorType.contained
-        ? M3ELoadingIndicatorVariant.contained
-        : M3ELoadingIndicatorVariant.defaultStyle;
-    return RepaintBoundary(
-      child: M3ELoadingIndicator(
-        key: ValueKey<String>(
-          dragDriven
-              ? 'm3e_refresh_web_drag_spinner'
-              : 'm3e_refresh_web_refresh_spinner',
-        ),
-        variant: variant,
-        color: _effectiveValueColor,
-        containerColor: _effectiveContainerColor,
-        polygons: widget.polygons,
-        constraints: widget.indicatorConstraints,
-        semanticLabel: widget.semanticsLabel,
-        semanticValue: widget.semanticsValue,
-        // Drag: frozen morph, outer Transform.rotate. Refresh: internal spin.
-        rotationTurns: dragDriven ? 0 : null,
-        elevation: 0,
-      ),
-    );
   }
 }
 

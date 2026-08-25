@@ -9,8 +9,11 @@
   pointer drag (frame-deduped) with host reveal/arm math
   (`2 × indicatorPadding` delay, arm at full reveal); list pad hard-capped at
   `contentDragOffset` with safe leading underscroll clamp; Opacity+scale
-  reveal and morph elevation 0; split rebuilds + `RepaintBoundary` so CanvasKit
-  does not freeze. Other platforms are unchanged.
+  reveal; split rebuilds + `RepaintBoundary` so CanvasKit does not freeze.
+  Other platforms are unchanged.
+* `M3ERefreshIndicator` expressive and contained kinds always use
+  `M3ELoadingIndicator` **contained** variant so shell elevation works on all
+  platforms (avoids morph-path `drawShadow`, which freezes CanvasKit).
 * `M3ERefreshIndicatorController.detach` only clears when the tear-off still
   matches the active attachment, so keyed variant switches in the demo no
   longer break manual `show()`.
