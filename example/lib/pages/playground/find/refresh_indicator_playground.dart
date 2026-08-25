@@ -17,7 +17,7 @@ class RefreshIndicatorPlayground extends StatefulWidget {
       _RefreshIndicatorPlaygroundState();
 }
 
-enum _RefreshKind { expressive, contained, material, adaptive, noSpinner }
+enum _RefreshKind { expressive, contained }
 
 class _RefreshIndicatorPlaygroundState
     extends State<RefreshIndicatorPlayground> {
@@ -74,27 +74,6 @@ class _RefreshIndicatorPlaygroundState
         triggerMode: _trigger,
         child: child,
       ),
-      _RefreshKind.material => M3ERefreshIndicator.material(
-        key: key,
-        controller: _controller,
-        onRefresh: _handleRefresh,
-        triggerMode: _trigger,
-        child: child,
-      ),
-      _RefreshKind.adaptive => M3ERefreshIndicator.adaptive(
-        key: key,
-        controller: _controller,
-        onRefresh: _handleRefresh,
-        triggerMode: _trigger,
-        child: child,
-      ),
-      _RefreshKind.noSpinner => M3ERefreshIndicator.noSpinner(
-        key: key,
-        controller: _controller,
-        onRefresh: _handleRefresh,
-        triggerMode: _trigger,
-        child: child,
-      ),
     };
   }
 
@@ -102,9 +81,6 @@ class _RefreshIndicatorPlaygroundState
     final String ctor = switch (_kind) {
       _RefreshKind.expressive => 'M3ERefreshIndicator',
       _RefreshKind.contained => 'M3ERefreshIndicator.contained',
-      _RefreshKind.material => 'M3ERefreshIndicator.material',
-      _RefreshKind.adaptive => 'M3ERefreshIndicator.adaptive',
-      _RefreshKind.noSpinner => 'M3ERefreshIndicator.noSpinner',
     };
     final String sample =
         '''
