@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:dynamic_color/test_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -50,7 +49,7 @@ void main() {
 Future<void> _dynamiccoloringAppliesMockedDynamicSchemes(
   WidgetTester tester,
 ) async {
-  DynamicColorTestingUtils.setMockDynamicColors(accentColor: accentGreen);
+  mockDynamicColorChannel(accentColor: accentGreen);
 
   final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
   final M3EColorScheme expected = resolvedM3eSchemeFromAccent(accentGreen);
@@ -137,7 +136,7 @@ Future<void> _dynamiccoloringAppliesMockedCorePaletteViaFromseed(
 Future<void> _dynamiccoloringAppliesMockedDynamicSchemesInDarkMode(
   WidgetTester tester,
 ) async {
-  DynamicColorTestingUtils.setMockDynamicColors(accentColor: accentGreen);
+  mockDynamicColorChannel(accentColor: accentGreen);
 
   final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
   final M3EColorScheme expected = resolvedM3eSchemeFromAccent(
@@ -171,7 +170,7 @@ Future<void> _dynamiccoloringAppliesMockedDynamicSchemesInDarkMode(
 Future<void> _dynamiccoloringHarmonizesBuiltInAndExpressiveSemantic(
   WidgetTester tester,
 ) async {
-  DynamicColorTestingUtils.setMockDynamicColors(accentColor: accentGreen);
+  mockDynamicColorChannel(accentColor: accentGreen);
 
   final rawDynamic = ColorScheme.fromSeed(seedColor: accentGreen);
   final M3EColorScheme expectedScheme = resolvedM3eSchemeFromAccent(
@@ -222,7 +221,7 @@ void _m3ecolorschemeHarmonizedShiftsCustomRolesTowardPrimary() {
 Future<void> _dynamiccoloringRefreshesWhenAppResumesAfterOsColorCh(
   WidgetTester tester,
 ) async {
-  DynamicColorTestingUtils.setMockDynamicColors(accentColor: accentGreen);
+  mockDynamicColorChannel(accentColor: accentGreen);
 
   final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
   final Color greenPrimary = resolvedM3eSchemeFromAccent(accentGreen).primary;
@@ -245,7 +244,7 @@ Future<void> _dynamiccoloringRefreshesWhenAppResumesAfterOsColorCh(
     greenPrimary,
   );
 
-  DynamicColorTestingUtils.setMockDynamicColors(accentColor: accentOrange);
+  mockDynamicColorChannel(accentColor: accentOrange);
 
   tester.binding
     ..handleAppLifecycleStateChanged(AppLifecycleState.paused)

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
+import 'package:flutter/gestures.dart'
+    show DragUpdateDetails, PointerDeviceKind;
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
@@ -19,18 +21,28 @@ export 'styles/m3e_refresh_indicator_theme.dart';
 
 part 'components/m3e_refresh_indicator_scroll.dart';
 part 'components/m3e_refresh_indicator_build.dart';
+part 'components/m3e_refresh_indicator_web.dart';
 
 enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 
+/// Web spinner cache phase (morph path must not rebuild every animation tick).
+enum _WebSpinnerPhase { none, drag, refresh }
+
 /// A Material Design 3 expressive refresh indicator.
 ///
-/// Expressive and contained variants use [M3ELoadingIndicator] for the spinner.
+/// Expressive and contained refresh kinds use a [M3ELoadingIndicator] with the
+/// **contained** loading variant so shell elevation works on all platforms
+/// (including Flutter web).
 ///
 /// Call [M3ERefreshIndicatorState.show] via a [GlobalKey], or pass a
 /// [M3ERefreshIndicatorController] to trigger refresh programmatically.
 ///
 /// Refresh runs only when the indicator is fully revealed (scale/opacity at 1)
 /// and the pointer is released. Releasing earlier cancels with a scale/fade out.
+///
+/// On Flutter web, mouse drag is enabled for the child scrollable, and drag
+/// updates avoid empty [State.setState] calls once the pull is at its visual
+/// cap (those rebuilds freeze CanvasKit). Other platforms are unchanged.
 class M3ERefreshIndicator extends StatefulWidget {
   /// const.
   const M3ERefreshIndicator({
@@ -279,10 +291,23 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   bool? _isIndicatorAtTop;
   double? _dragOffset;
 
+  /// Cached morph spinner on web (drag = frozen morph; refresh = auto-spin).
+  Widget? _webSpinnerCache;
+  _WebSpinnerPhase _webSpinnerPhase = _WebSpinnerPhase.none;
+  _IndicatorType? _webSpinnerType;
+
+  /// Dedupes pointer drag deltas when ScrollUpdate + Overscroll fire together.
+  bool _pointerDeltaLocked = false;
+
   /// Indicator top inset locked when loading starts.
   double? _restingInset;
   late Color _effectiveValueColor;
   late Color _effectiveContainerColor;
+
+  /// Stable show callback for [M3ERefreshIndicatorController] attach/detach.
+  /// Fresh method tear-offs are never [identical], so dispose would fail to
+  /// clear and leave a disposed State's callback attached.
+  late final Future<void> Function({bool atTop}) _controllerShow;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(
     begin: 0,
@@ -349,7 +374,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
       initialValue: 1,
     );
     _pendingRefreshFuture = Future<void>.value();
-    widget.controller?.attach(show);
+    Future<void> controllerShow({bool atTop = true}) => show(atTop: atTop);
+    _controllerShow = controllerShow;
+    widget.controller?.attach(_controllerShow);
   }
 
   @override
@@ -362,8 +389,8 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   void didUpdateWidget(covariant M3ERefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller?.detach();
-      widget.controller?.attach(show);
+      oldWidget.controller?.detach(_controllerShow);
+      widget.controller?.attach(_controllerShow);
     }
     if (oldWidget.color != widget.color) {
       _setupColorTween();
@@ -372,7 +399,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   @override
   void dispose() {
-    widget.controller?.detach();
+    widget.controller?.detach(_controllerShow);
     _positionController.dispose();
     _scaleController.dispose();
     _contentPadController.dispose();
@@ -382,6 +409,9 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
 
   /// Shows the refresh indicator and runs [M3ERefreshIndicator.onRefresh].
   Future<void> show({bool atTop = true}) {
+    if (!mounted) {
+      return Future<void>.value();
+    }
     if (_status != M3ERefreshStatus.refresh &&
         _status != M3ERefreshStatus.snap) {
       if (_status == null) {
@@ -392,43 +422,69 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     return _pendingRefreshFuture;
   }
 
+  /// Web and native desktop: mouse/trackpad pull needs 1:1 pointer deltas and
+  /// leading underscroll clamp (same pad/reveal math as mobile).
+  bool get _usePointerPullTracking {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (M3ETheme.platformOf(context)) {
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.linux => true,
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => false,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      builder: (BuildContext context) => AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[
-          _positionController,
-          _scaleController,
-          _contentPadController,
-          _bubbleController,
-        ]),
-        builder: (BuildContext context, Widget? _) {
-          final double pad = _contentPad(context);
-          final Widget child = NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification n) =>
-                _handleScrollNotification(n),
-            child: NotificationListener<OverscrollIndicatorNotification>(
-              onNotification: (OverscrollIndicatorNotification n) =>
-                  _handleIndicatorNotification(n),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: (_isIndicatorAtTop ?? false) ? pad : 0,
-                  bottom: _isIndicatorAtTop == false ? pad : 0,
+      builder: (BuildContext context) {
+        final Widget tree = kIsWeb
+            ? _buildWebTree(context)
+            : _buildHostTree(context);
+        if (_usePointerPullTracking) {
+          return _wrapPointerPullScrollBehavior(tree);
+        }
+        return tree;
+      },
+    );
+  }
+
+  Widget _buildHostTree(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[
+        _positionController,
+        _scaleController,
+        _contentPadController,
+        _bubbleController,
+      ]),
+      builder: (BuildContext context, Widget? _) {
+        final double pad = _currentPad(context);
+        return Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification n) =>
+                  _handleScrollNotification(n),
+              child: NotificationListener<OverscrollIndicatorNotification>(
+                onNotification: (OverscrollIndicatorNotification n) =>
+                    _handleIndicatorNotification(n),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: (_isIndicatorAtTop ?? false) ? pad : 0,
+                    bottom: _isIndicatorAtTop == false ? pad : 0,
+                  ),
+                  child: widget.child,
                 ),
-                child: widget.child,
               ),
             ),
-          );
-
-          return Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              child,
-              if (_status != null) _buildPositionedIndicator(context),
-            ],
-          );
-        },
-      ),
+            if (_status != null) _buildPositionedIndicator(context),
+          ],
+        );
+      },
     );
   }
 }

@@ -119,13 +119,24 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
       width: drawerTheme.width,
       color: drawerTheme.containerColor(scheme),
       child: SafeArea(
-        child: M3ENavSelectionIndicator(
-          selectedIndex: widget.selectedIndex,
-          targetKeys: _keys,
-          axis: Axis.vertical,
-          color: scheme.secondaryContainer,
-          onTravelingChanged: _onTravelingChanged,
-          child: list,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return M3ENavSelectionIndicator(
+              selectedIndex: widget.selectedIndex,
+              targetKeys: _keys,
+              axis: Axis.vertical,
+              color: scheme.secondaryContainer,
+              // Height/width reflow (window resize, safe-area) invalidates
+              // geometry so selection morphs don't aim at stale centers.
+              layoutToken: (
+                constraints.maxHeight,
+                constraints.maxWidth,
+                M3ESafeArea.paddingOf(context),
+              ),
+              onTravelingChanged: _onTravelingChanged,
+              child: list,
+            );
+          },
         ),
       ),
     );

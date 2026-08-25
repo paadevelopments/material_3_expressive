@@ -102,7 +102,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.9
+  material_3_expressive: ^1.0.10
 ```
 
 Then fetch it:

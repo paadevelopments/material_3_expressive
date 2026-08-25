@@ -1,3 +1,27 @@
+## 1.0.10
+
+### Fixed
+
+* Compatible with `dynamic_color` 2.x (`material_ui`): drop duplicate
+  `ColorScheme.harmonized` extension; re-export package harmonization; tests use
+  local channel mocks (`test_utils` moved to `dynamic_color_testing`).
+* Nav bar, rail, and drawer selection pills remasure on size / constraint
+  changes (window resize); stale geometry cache no longer blocks morphs to
+  other destinations.
+* `M3ERefreshIndicator` pointer-pull platforms (Flutter web and native
+  desktop): mouse drag, 1:1 pointer deltas, host reveal/arm math
+  (`2 × indicatorPadding` delay, arm at full reveal), list pad hard-capped at
+  `contentDragOffset` with safe leading underscroll clamp. Web also uses
+  Opacity+scale reveal, split rebuilds, and `RepaintBoundary` so CanvasKit
+  does not freeze. Mobile keeps classic overscroll deltas.
+* `M3ERefreshIndicator` expressive and contained kinds always use
+  `M3ELoadingIndicator` **contained** variant so shell elevation works on all
+  platforms (avoids morph-path `drawShadow`, which freezes CanvasKit).
+* `M3ERefreshIndicatorController` attach/detach uses one stable show closure
+  (fresh method tear-offs are never `identical`), so dispose clears correctly
+  and manual `show()` does not hit disposed animation controllers after keyed
+  rebuilds; keyed variant switches still keep the newer attachment.
+
 ## 1.0.9
 
 ### Added

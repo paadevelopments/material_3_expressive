@@ -89,16 +89,17 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     if (delta != null) {
       _dragOffset = _dragOffset! + delta;
     }
-    // Pad / reveal cap: further pull does not move the spinner past rest.
+    // Pad / reveal cap: further pull does not grow list spacing past max.
     final double maxPad = _resolvedContentDragOffset(context);
-    if ((_dragOffset ?? 0) > maxPad) {
-      _dragOffset = maxPad;
-    }
+    _dragOffset = math.min(math.max(0, _dragOffset ?? 0), maxPad);
     _checkDragOffset();
   }
 
   double? _dragDeltaFrom(ScrollNotification notification) {
     final AxisDirection direction = notification.metrics.axisDirection;
+    if (_usePointerPullTracking) {
+      return _dragDeltaFromPointerPull(notification, direction);
+    }
     if (notification is ScrollUpdateNotification &&
         notification.scrollDelta != null) {
       return _signedDragDelta(direction, notification.scrollDelta!);
@@ -107,6 +108,51 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return _signedDragDelta(direction, notification.overscroll);
     }
     return null;
+  }
+
+  /// Web / native desktop: 1:1 pointer tracking. Mobile overscroll amounts
+  /// under-report on desktop clamping physics. Dedupes ScrollUpdate+Overscroll
+  /// in the same event-loop turn. Reveal/arm still use shared [_revealProgress].
+  double? _dragDeltaFromPointerPull(
+    ScrollNotification notification,
+    AxisDirection direction,
+  ) {
+    final DragUpdateDetails? details = switch (notification) {
+      final ScrollUpdateNotification n => n.dragDetails,
+      final OverscrollNotification n => n.dragDetails,
+      _ => null,
+    };
+    if (details != null) {
+      return _pointerDeltaOncePerTurn(direction, details.delta);
+    }
+    if (notification is OverscrollNotification) {
+      return _signedDragDelta(direction, notification.overscroll);
+    }
+    return null;
+  }
+
+  double? _pointerDeltaOncePerTurn(AxisDirection direction, Offset delta) {
+    // Gesture handlers run outside a frame — cannot use currentFrameTimeStamp.
+    if (_pointerDeltaLocked) {
+      return null;
+    }
+    final double? signed = _pointerDragDelta(direction, delta);
+    if (signed == null || signed == 0) {
+      return null;
+    }
+    _pointerDeltaLocked = true;
+    scheduleMicrotask(() {
+      _pointerDeltaLocked = false;
+    });
+    return signed;
+  }
+
+  double? _pointerDragDelta(AxisDirection direction, Offset delta) {
+    return switch (direction) {
+      AxisDirection.down => delta.dy,
+      AxisDirection.up => -delta.dy,
+      AxisDirection.left || AxisDirection.right => null,
+    };
   }
 
   double? _signedDragDelta(AxisDirection direction, double amount) {
@@ -184,8 +230,12 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     // Finger up: decide refresh vs cancel from full reveal — do not follow
-    // ballistic settle.
+    // ballistic settle. Pointer-pull platforms often emit layout ScrollUpdates
+    // without dragDetails while the pointer is still down; wait for ScrollEnd.
     if (notification.dragDetails == null) {
+      if (_usePointerPullTracking) {
+        return;
+      }
       _onPointerReleased();
       return;
     }
@@ -197,6 +247,11 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     if (notification.dragDetails == null) {
+      // Pointer-pull: apply overscroll amount; release on ScrollEnd.
+      if (_usePointerPullTracking) {
+        _applyDragDelta(notification);
+        return;
+      }
       _onPointerReleased();
       return;
     }
@@ -265,6 +320,10 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
   }
 
   void _checkDragOffset() {
+    if (kIsWeb) {
+      _checkDragOffsetWeb();
+      return;
+    }
     assert(
       _status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed,
       'assertion failed',
@@ -302,30 +361,72 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       'assertion failed',
     );
 
-    if (newMode == M3ERefreshStatus.canceled && _dragOffset != null) {
-      if (!mounted) {
-        return;
-      }
-      // Seed controllers from current pad/reveal for a continuous reverse.
-      _contentPadController.value = _currentPad(context);
-      final double reveal = _revealProgress(context);
-      final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
-      _positionController.value = clampDouble(reveal / limit, 0, 1);
+    if (!_seedDismissFromDragIfCanceled(newMode)) {
+      return;
     }
 
     setState(() {
       _status = newMode;
       widget.onStatusChange?.call(_status);
     });
-    await _animateDismiss();
-    if (mounted && _status == newMode) {
-      _dragOffset = null;
-      _isIndicatorAtTop = null;
-      _restingInset = null;
-      setState(() {
-        _status = null;
-      });
+    try {
+      await _runDismissAnimation();
+    } catch (_) {
+      _forceStopDismissControllers();
     }
+    if (mounted && _status == newMode) {
+      _resetAfterDismiss();
+    }
+  }
+
+  /// Seeds pad/position for a continuous cancel reverse. Returns false if
+  /// unmounted during cancel seed.
+  bool _seedDismissFromDragIfCanceled(M3ERefreshStatus newMode) {
+    if (newMode != M3ERefreshStatus.canceled || _dragOffset == null) {
+      return true;
+    }
+    if (!mounted) {
+      return false;
+    }
+    _contentPadController.value = _currentPad(context);
+    final double reveal = _revealProgress(context);
+    final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
+    _positionController.value = clampDouble(reveal / limit, 0, 1);
+    return true;
+  }
+
+  Future<void> _runDismissAnimation() {
+    if (kIsWeb) {
+      return _animateDismissWeb();
+    }
+    return _animateDismiss();
+  }
+
+  void _forceStopDismissControllers() {
+    // Web early-stop must not leave status stuck on done/canceled.
+    if (_scaleController.isAnimating) {
+      _scaleController.stop(canceled: false);
+    }
+    if (_contentPadController.isAnimating) {
+      _contentPadController.stop(canceled: false);
+    }
+    if (_positionController.isAnimating) {
+      _positionController.stop(canceled: false);
+    }
+    _scaleController.value = 1;
+    _contentPadController.value = 0;
+  }
+
+  void _resetAfterDismiss() {
+    _dragOffset = null;
+    _isIndicatorAtTop = null;
+    _restingInset = null;
+    if (kIsWeb) {
+      _clearWebSpinnerCache();
+    }
+    setState(() {
+      _status = null;
+    });
   }
 
   Future<void> _springTo(
@@ -392,7 +493,11 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       }
     });
 
-    unawaited(_springTo(_contentPadController, target: 0));
+    if (kIsWeb) {
+      unawaited(_springContentPadToZeroWeb());
+    } else {
+      unawaited(_springTo(_contentPadController, target: 0));
+    }
     _playReleaseBubble();
   }
 

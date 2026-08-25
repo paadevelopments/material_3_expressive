@@ -28,7 +28,13 @@ class M3ERefreshIndicatorController extends ChangeNotifier {
   }
 
   /// Called by the refresh indicator when it unmounts or the controller changes.
-  void detach() {
-    _show = null;
+  ///
+  /// Pass the **same** function instance used in [attach] (a stored closure,
+  /// not a fresh method tear-off — those are never [identical]). Deferred
+  /// State.dispose after a keyed rebuild must not clear a newer attachment.
+  void detach(Future<void> Function({bool atTop}) show) {
+    if (identical(_show, show)) {
+      _show = null;
+    }
   }
 }

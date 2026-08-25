@@ -417,7 +417,9 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
             targetKeys: _destinationKeys,
             axis: Axis.vertical,
             color: indicatorColor,
-            layoutToken: _isExpanded,
+            // Expand flip remasures during width morph; height covers window
+            // resize when destination slots reflow (scroll / trailingAtBottom).
+            layoutToken: (_isExpanded, constraints.maxHeight),
             layoutSettleDuration: M3ENavigationRailLayout.expandDuration,
             onTravelingChanged: _onTravelingChanged,
             child: _buildDestinationsColumn(
