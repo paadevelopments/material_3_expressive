@@ -9,6 +9,11 @@ import 'models/m3e_nav_metrics.dart';
 import 'models/m3e_navigation_bar_destination.dart';
 import 'styles/m3e_navigation_bar_theme.dart';
 
+export 'enums/m3e_nav_bar_enums.dart';
+export 'models/m3e_nav_metrics.dart';
+export 'models/m3e_navigation_bar_destination.dart';
+export 'styles/m3e_navigation_bar_theme.dart';
+
 /// A Material 3 Expressive navigation bar.
 ///
 /// Pill selection uses a lead/trail spring indicator that stretches between

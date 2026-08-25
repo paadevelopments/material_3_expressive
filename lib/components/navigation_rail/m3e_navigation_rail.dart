@@ -14,6 +14,12 @@ import 'models/m3e_navigation_rail_section.dart';
 import 'res/m3e_navigation_rail_layout.dart';
 import 'styles/m3e_navigation_rail_theme.dart';
 
+export 'enums/m3e_navigation_rail_enums.dart';
+export 'models/m3e_navigation_rail_destination.dart';
+export 'models/m3e_navigation_rail_fab_slot.dart';
+export 'models/m3e_navigation_rail_section.dart';
+export 'styles/m3e_navigation_rail_theme.dart';
+
 part 'components/m3e_navigation_rail_children_mixin.dart';
 
 /// Material 3 Expressive Navigation Rail — single widget that animates between states.
