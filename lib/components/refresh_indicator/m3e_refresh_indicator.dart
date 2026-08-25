@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
@@ -19,8 +20,12 @@ export 'styles/m3e_refresh_indicator_theme.dart';
 
 part 'components/m3e_refresh_indicator_scroll.dart';
 part 'components/m3e_refresh_indicator_build.dart';
+part 'components/m3e_refresh_indicator_web.dart';
 
 enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
+
+/// Web spinner cache phase (morph path must not rebuild every animation tick).
+enum _WebSpinnerPhase { none, drag, refresh }
 
 /// A Material Design 3 expressive refresh indicator.
 ///
@@ -31,6 +36,10 @@ enum _IndicatorType { material, expressive, contained, adaptive, noSpinner }
 ///
 /// Refresh runs only when the indicator is fully revealed (scale/opacity at 1)
 /// and the pointer is released. Releasing earlier cancels with a scale/fade out.
+///
+/// On Flutter web, mouse drag is enabled for the child scrollable, and drag
+/// updates avoid empty [State.setState] calls once the pull is at its visual
+/// cap (those rebuilds freeze CanvasKit). Other platforms are unchanged.
 class M3ERefreshIndicator extends StatefulWidget {
   /// const.
   const M3ERefreshIndicator({
@@ -264,6 +273,9 @@ class M3ERefreshIndicator extends StatefulWidget {
 /// class.
 class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     with TickerProviderStateMixin<M3ERefreshIndicator> {
+  /// Set to false to silence `[M3ERefresh#…]` console logs.
+  static bool debugTraceRefresh = true;
+
   late AnimationController _positionController;
   late AnimationController _scaleController;
   late AnimationController _contentPadController;
@@ -278,6 +290,14 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
+
+  /// Web diagnostics: monotonic step id for console traces.
+  int _webLogSeq = 0;
+
+  /// Cached morph spinner on web (drag = frozen; refresh = auto-spin, flat).
+  Widget? _webSpinnerCache;
+  _WebSpinnerPhase _webSpinnerPhase = _WebSpinnerPhase.none;
+  _IndicatorType? _webSpinnerType;
 
   /// Indicator top inset locked when loading starts.
   double? _restingInset;
@@ -350,6 +370,11 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
     );
     _pendingRefreshFuture = Future<void>.value();
     widget.controller?.attach(show);
+    _webLog(
+      'initState',
+      'type=${widget._indicatorType} kIsWeb=$kIsWeb '
+          'debugTraceRefresh=$debugTraceRefresh',
+    );
   }
 
   @override
@@ -395,40 +420,45 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
-      builder: (BuildContext context) => AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[
-          _positionController,
-          _scaleController,
-          _contentPadController,
-          _bubbleController,
-        ]),
-        builder: (BuildContext context, Widget? _) {
-          final double pad = _contentPad(context);
-          final Widget child = NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification n) =>
-                _handleScrollNotification(n),
-            child: NotificationListener<OverscrollIndicatorNotification>(
-              onNotification: (OverscrollIndicatorNotification n) =>
-                  _handleIndicatorNotification(n),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: (_isIndicatorAtTop ?? false) ? pad : 0,
-                  bottom: _isIndicatorAtTop == false ? pad : 0,
+      builder: (BuildContext context) {
+        if (kIsWeb) {
+          return _wrapWebScrollBehavior(_buildWebTree(context));
+        }
+        return AnimatedBuilder(
+          animation: Listenable.merge(<Listenable>[
+            _positionController,
+            _scaleController,
+            _contentPadController,
+            _bubbleController,
+          ]),
+          builder: (BuildContext context, Widget? _) {
+            final double pad = _contentPad(context);
+            final Widget child = NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification n) =>
+                  _handleScrollNotification(n),
+              child: NotificationListener<OverscrollIndicatorNotification>(
+                onNotification: (OverscrollIndicatorNotification n) =>
+                    _handleIndicatorNotification(n),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: (_isIndicatorAtTop ?? false) ? pad : 0,
+                    bottom: _isIndicatorAtTop == false ? pad : 0,
+                  ),
+                  child: widget.child,
                 ),
-                child: widget.child,
               ),
-            ),
-          );
+            );
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              child,
-              if (_status != null) _buildPositionedIndicator(context),
-            ],
-          );
-        },
-      ),
+            return Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                child,
+                if (_status != null) _buildPositionedIndicator(context),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

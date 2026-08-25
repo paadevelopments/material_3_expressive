@@ -5,6 +5,12 @@
 * Nav bar, rail, and drawer selection pills remasure on size / constraint
   changes (window resize); stale geometry cache no longer blocks morphs to
   other destinations.
+* `M3ERefreshIndicator` on Flutter web: enable mouse drag for pull-to-refresh,
+  skip empty `setState` at the visual cap, split pad vs indicator rebuilds,
+  cache a flat morph spinner for drag and refresh, snap pad/dismiss springs
+  when settled, and avoid per-tick morph shadow / Opacity paints that freeze
+  CanvasKit (including after the first refresh completes). Other platforms
+  are unchanged.
 
 ## 1.0.9
 

@@ -93,6 +93,10 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
   }
 
   Widget _buildPositionedIndicator(BuildContext context) {
+    if (kIsWeb) {
+      return _buildPositionedIndicatorWeb(context);
+    }
+
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =
         _status == M3ERefreshStatus.refresh || _status == M3ERefreshStatus.done;
