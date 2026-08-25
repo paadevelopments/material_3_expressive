@@ -22,6 +22,9 @@ import 'styles/m3e_split_button_popup_decoration.dart';
 import 'styles/m3e_split_button_theme.dart';
 
 export '../menus/models/m3e_menu_node.dart';
+export 'enums/m3e_split_button_menu_style.dart';
+export 'enums/m3e_split_button_selection_mode.dart';
+export 'enums/m3e_split_button_trailing_alignment.dart';
 export 'models/m3e_split_button_item.dart';
 export 'styles/m3e_split_button_decoration.dart';
 export 'styles/m3e_split_button_theme.dart';
