@@ -27,6 +27,7 @@ import 'models/m3e_button_group_overflow_paging_window.dart';
 
 export 'components/m3e_toggle_button_group_scope.dart';
 export 'enums/m3e_toggle_button_group_enums.dart';
+export 'models/m3e_button_group_action.dart';
 export 'styles/m3e_toggle_button_group_theme.dart';
 
 part 'components/m3e_button_group_align.dart';
