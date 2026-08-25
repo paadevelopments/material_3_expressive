@@ -1,4 +1,12 @@
-## 1.0.10
+## 1.1.0
+
+### Documentation
+
+* README: document current public APIs for `M3ERefreshIndicator` (controller,
+  pad/reveal, elevation, contained spinner), `M3ELoadingIndicator`
+  (`elevation`, `rotationTurns`, colors), `M3ECheckbox` label/sizing options,
+  `M3EProgressIndicator` stroke overrides, and `dynamic_color` 2.x /
+  `material_ui` `^1.1.0` harmonization notes.
 
 ### Fixed
 

@@ -83,7 +83,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.0.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.1.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -96,13 +96,17 @@ Apps that still import `package:flutter/material.dart` should switch those
 imports to `package:material_ui/material_ui.dart`. Flutter **3.44.0 or newer**
 is required (`material_ui` will not resolve on older SDKs).
 
+`ColorScheme.harmonized()` / `Color.harmonizeWith()` come from
+[`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
+through this package). Prefer those APIs rather than a local duplicate.
+
 ## Installation
 
 Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.0.10
+  material_3_expressive: ^1.1.0
 ```
 
 Then fetch it:
@@ -126,7 +130,7 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 | [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures |
 | [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
-| [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`) |
+| [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`); `ColorScheme.harmonized` / `Color.harmonizeWith` (2.x, `material_ui`) |
 | [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |
 | [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`, `M3EShapeKind`, `M3EShapeClipper`, `M3EShapeContainer`) used by loading / shape-driven surfaces |
 
@@ -517,7 +521,9 @@ M3ESplitButton<String>(
 
 #### M3ECheckbox
 
-Binary and tristate checkbox.
+Binary and tristate checkbox. Optional `label`, `boxSize`, `hitSize`,
+`checkedChild` / `uncheckedChild`, and `checkIconPadding` (default optical
+inset for the built-in check). Value changes use a spatial-spring pulse.
 
 ```dart
 // in State
@@ -529,6 +535,7 @@ M3ECheckbox(
 M3ECheckbox(
   value: tristateValue,
   tristate: true,
+  label: const Text('Remember me'),
   onChanged: (v) => setState(() => tristateValue = v),
 );
 ```
@@ -1404,12 +1411,17 @@ Material 3 Expressive progress indicators with circular and linear variants,
 including Compose-style wavy forms. Null `value` runs indeterminate animation
 (classic linear: dual traveling segments with gaps; wavy linear/circular: m3e
 style travel / spin+sweep; classic circular: same rot/sweep timing as wavy,
-flat arcs with gaps).
+flat arcs with gaps). Optional `trackStrokeWidth` (and `.linear` `strokeWidth`)
+override track and value thickness.
 
 ```dart
 // Classic
 const M3EProgressIndicator.circular();
 M3EProgressIndicator.circular(value: 0.6);
+M3EProgressIndicator.circular(
+  value: 0.6,
+  trackStrokeWidth: 2,
+);
 
 const M3EProgressIndicator.linear();
 SizedBox(
@@ -1434,22 +1446,41 @@ SizedBox(
 #### M3ELoadingIndicator
 
 Expressive loading spinner. Shape morph settle uses
-`M3EMotion.expressiveSpatialDefault`.
+`M3EMotion.expressiveSpatialDefault`. Optional `elevation` (theme default `0`),
+`color` / `containerColor`, and `rotationTurns` (when set, disables auto spin
+and morph pulse so a host can drive rotation). Contained uses rounded-shell
+elevation; the default (uncontained) morph casts a path shadow.
 
 ```dart
 const M3ELoadingIndicator();
 
 const M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.contained,
+  elevation: 3,
+);
+
+// Host-driven rotation (e.g. during pull-to-refresh drag)
+M3ELoadingIndicator(
+  variant: M3ELoadingIndicatorVariant.contained,
+  rotationTurns: dragTurns,
 );
 ```
 
 #### M3ERefreshIndicator
 
-Pull-to-refresh wrapper for scrollables.
+Pull-to-refresh wrapper for scrollables. Default and `.contained` kinds always
+build a **contained** `M3ELoadingIndicator` so shell `elevation` works on all
+platforms (including Flutter web). Reveal starts after
+`2 × indicatorPadding`; arm / refresh only when fully revealed. List pad is
+capped by `contentDragOffset` (defaults to indicator height +
+`2 × indicatorPadding`). Use `M3ERefreshIndicatorController` (or a
+`GlobalKey<M3ERefreshIndicatorState>`) for programmatic `show()`.
 
 ```dart
+final controller = M3ERefreshIndicatorController();
+
 M3ERefreshIndicator(
+  controller: controller,
   onRefresh: () async {
     await Future<void>.delayed(const Duration(seconds: 2));
   },
@@ -1459,11 +1490,18 @@ M3ERefreshIndicator(
   ),
 );
 
-// Contained variant
+// Contained shell + optional elevation / pad overrides
 M3ERefreshIndicator.contained(
+  controller: controller,
+  elevation: 3,
+  indicatorPadding: 8,
+  contentDragOffset: 72,
   onRefresh: () async {},
   child: listView,
 );
+
+// Manual trigger
+await controller.show();
 ```
 
 #### M3ETooltip
