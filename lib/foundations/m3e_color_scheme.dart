@@ -2,6 +2,11 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show ColorScheme;
 
+// Re-export so ColorScheme.harmonized / Color.harmonizeWith stay available via
+// foundations without a duplicate extension (dynamic_color 2.x uses material_ui).
+export 'package:dynamic_color/dynamic_color.dart'
+    show ColorHarmonization, ColorSchemeHarmonization;
+
 /// The full set of Material 3 color roles used across expressive components.
 ///
 /// The scheme can be built from a seed color via [M3EColorScheme.fromSeed],
@@ -426,19 +431,6 @@ class M3EColorScheme {
     );
     _colorSchemeCache[this] = scheme;
     return scheme;
-  }
-}
-
-/// Same as `dynamic_color`'s ColorScheme.harmonized for `material_ui`.
-extension M3EFrameworkColorSchemeHarmonization on ColorScheme {
-  /// Shifts error roles toward [ColorScheme.primary].
-  ColorScheme harmonized() {
-    return copyWith(
-      error: error.harmonizeWith(primary),
-      onError: onError.harmonizeWith(primary),
-      errorContainer: errorContainer.harmonizeWith(primary),
-      onErrorContainer: onErrorContainer.harmonizeWith(primary),
-    );
   }
 }
 

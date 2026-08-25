@@ -2,6 +2,9 @@
 
 ### Fixed
 
+* Compatible with `dynamic_color` 2.x (`material_ui`): drop duplicate
+  `ColorScheme.harmonized` extension; re-export package harmonization; tests use
+  local channel mocks (`test_utils` moved to `dynamic_color_testing`).
 * Nav bar, rail, and drawer selection pills remasure on size / constraint
   changes (window resize); stale geometry cache no longer blocks morphs to
   other destinations.
