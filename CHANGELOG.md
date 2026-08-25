@@ -5,10 +5,12 @@
 * Nav bar, rail, and drawer selection pills remasure on size / constraint
   changes (window resize); stale geometry cache no longer blocks morphs to
   other destinations.
-* `M3ERefreshIndicator` on Flutter web: mouse drag for pull-to-refresh, capped
-  list top pad (clamping physics at `contentDragOffset`), split pad vs
-  indicator rebuilds, and a cached flat morph spinner so CanvasKit does not
-  freeze. Other platforms are unchanged.
+* `M3ERefreshIndicator` on Flutter web: mouse drag for pull-to-refresh, host-
+  matching pad/reveal/arming math (signed scroll/overscroll deltas, hard pad
+  cap at `contentDragOffset`), Opacity+scale reveal with morph elevation 0,
+  no custom scroll physics, and split pad vs indicator rebuilds with a cached
+  spinner in `RepaintBoundary` so CanvasKit does not freeze. Other platforms
+  are unchanged.
 * `M3ERefreshIndicatorController.detach` only clears when the tear-off still
   matches the active attachment, so keyed variant switches in the demo no
   longer break manual `show()`.

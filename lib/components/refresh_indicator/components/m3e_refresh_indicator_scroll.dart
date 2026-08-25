@@ -91,17 +91,45 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
     }
     // Pad / reveal cap: further pull does not grow list spacing past max.
     final double maxPad = _resolvedContentDragOffset(context);
-    if ((_dragOffset ?? 0) > maxPad) {
-      _dragOffset = maxPad;
-    }
+    _dragOffset = math.min(math.max(0, _dragOffset ?? 0), maxPad);
     _checkDragOffset();
   }
 
   double? _dragDeltaFrom(ScrollNotification notification) {
     final AxisDirection direction = notification.metrics.axisDirection;
+    if (kIsWeb) {
+      return _dragDeltaFromWeb(notification, direction);
+    }
     if (notification is ScrollUpdateNotification &&
         notification.scrollDelta != null) {
       return _signedDragDelta(direction, notification.scrollDelta!);
+    }
+    if (notification is OverscrollNotification) {
+      return _signedDragDelta(direction, notification.overscroll);
+    }
+    return null;
+  }
+
+  /// Web drag deltas use the same signed scrollDelta/overscroll math as the
+  /// host. Ignores retracting scrollDeltas at the leading edge (pad layout
+  /// corrections on web that cancel pull). Does not use pointer deltas (those
+  /// overshot host arming / made spacing feel uncapped).
+  double? _dragDeltaFromWeb(
+    ScrollNotification notification,
+    AxisDirection direction,
+  ) {
+    if (notification is ScrollUpdateNotification &&
+        notification.scrollDelta != null) {
+      final double? delta = _signedDragDelta(
+        direction,
+        notification.scrollDelta!,
+      );
+      if (delta != null &&
+          delta < 0 &&
+          _isAtLeadingEdge(notification.metrics)) {
+        return null;
+      }
+      return delta;
     }
     if (notification is OverscrollNotification) {
       return _signedDragDelta(direction, notification.overscroll);
@@ -184,8 +212,12 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     // Finger up: decide refresh vs cancel from full reveal — do not follow
-    // ballistic settle.
+    // ballistic settle. On web, layout ScrollUpdates often lack dragDetails
+    // while the mouse is still down; wait for ScrollEnd instead.
     if (notification.dragDetails == null) {
+      if (kIsWeb) {
+        return;
+      }
       _onPointerReleased();
       return;
     }
@@ -197,6 +229,12 @@ extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
       return;
     }
     if (notification.dragDetails == null) {
+      // Web: apply overscroll amount; release on ScrollEnd (dragDetails often
+      // null on desktop while the pointer is still down).
+      if (kIsWeb) {
+        _applyDragDelta(notification);
+        return;
+      }
       _onPointerReleased();
       return;
     }

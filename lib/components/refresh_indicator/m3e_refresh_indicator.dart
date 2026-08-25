@@ -288,7 +288,7 @@ class M3ERefreshIndicatorState extends State<M3ERefreshIndicator>
   bool? _isIndicatorAtTop;
   double? _dragOffset;
 
-  /// Cached morph spinner on web (drag = frozen; refresh = auto-spin, flat).
+  /// Cached morph spinner on web (drag = frozen morph; refresh = auto-spin).
   Widget? _webSpinnerCache;
   _WebSpinnerPhase _webSpinnerPhase = _WebSpinnerPhase.none;
   _IndicatorType? _webSpinnerType;

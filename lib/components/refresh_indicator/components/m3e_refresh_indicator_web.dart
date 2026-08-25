@@ -3,26 +3,23 @@ part of '../m3e_refresh_indicator.dart';
 /// Web-only helpers. Host (non-web) code paths must not call these.
 extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
   /// Same pad/position math as the host checkDragOffset. Skips the host's
-  /// empty setState at the visual cap (that freezes CanvasKit); list top
-  /// spacing is still hard-capped via maxPad on both dragOffset and
-  /// the content pad controller.
+  /// empty setState at the visual cap (that freezes CanvasKit).
   void _checkDragOffsetWeb() {
     assert(
       _status == M3ERefreshStatus.drag || _status == M3ERefreshStatus.armed,
       'assertion failed',
     );
     final double maxPad = _resolvedContentDragOffset(context);
-    // Hard-stop list top spacing at contentDragOffset (same as host).
-    final double nextPad = math.min(math.max(0, _dragOffset ?? 0), maxPad);
-    if ((nextPad - _contentPadController.value).abs() > 1e-6) {
-      _contentPadController.value = nextPad;
-    }
+    _contentPadController.value = math.min(
+      math.max(0, _dragOffset ?? 0),
+      maxPad,
+    );
 
     final double reveal = _revealProgress(context);
     final double limit = M3ERefreshIndicatorTheme.kDragSizeFactorLimit;
-    final double target = clampDouble(reveal / limit, 0, 1);
-    if ((target - _positionController.value).abs() > 1e-6) {
-      _positionController.value = target;
+    final double target = reveal / limit;
+    if (target != _positionController.value) {
+      _positionController.value = clampDouble(target, 0, 1);
     }
 
     if (_status == M3ERefreshStatus.drag && reveal >= 1.0) {
@@ -37,9 +34,9 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
   /// Desktop browsers exclude mouse from [ScrollBehavior.dragDevices], so
   /// click-drag never produces drag details and pull never starts.
   ///
-  /// Also applies clamping physics so once list top pad is at
-  /// contentDragOffset, leading overscroll cannot open extra gap past the
-  /// host-equivalent drag cap.
+  /// No custom scroll physics — nesting clamps with AlwaysScrollable caused
+  /// invalid overscroll assertions / freezes during ballistic settle.
+  /// List pad is capped via [_dragOffset] / [_contentPad] like the host.
   Widget _wrapWebScrollBehavior(Widget child) {
     final ScrollBehavior behavior = ScrollConfiguration.of(context);
     return ScrollConfiguration(
@@ -48,21 +45,9 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
           ...behavior.dragDevices,
           PointerDeviceKind.mouse,
         },
-        physics: _M3EWebRefreshScrollPhysics(
-          shouldClampLeading: _webShouldClampLeadingOverscroll,
-          parent: behavior.getScrollPhysics(context),
-        ),
       ),
       child: child,
     );
-  }
-
-  bool _webShouldClampLeadingOverscroll() {
-    if (_status != M3ERefreshStatus.drag && _status != M3ERefreshStatus.armed) {
-      return false;
-    }
-    final double maxPad = _resolvedContentDragOffset(context);
-    return _contentPadController.value >= maxPad - 0.5;
   }
 
   /// Split list pad vs indicator listenables so the pad spring during refresh
@@ -74,8 +59,12 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         AnimatedBuilder(
           animation: _contentPadController,
           builder: (BuildContext context, Widget? _) {
-            // Drive list pad from the capped controller (mirrors host max).
-            final double pad = math.max(0, _contentPadController.value);
+            // Always hard-cap display pad (same max as host contentDragOffset).
+            final double maxPad = _resolvedContentDragOffset(context);
+            final double pad = math.min(
+              math.max(0, _contentPad(context)),
+              maxPad,
+            );
             return NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification n) =>
                   _handleScrollNotification(n),
@@ -93,9 +82,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
             );
           },
         ),
-        // Reveal/inset during drag track [_positionController]; dismiss uses
-        // [_scaleController]. Do not listen to [_contentPadController] here —
-        // its spring keeps ticking near 0 for the whole [onRefresh] wait.
+        // Do not listen to [_contentPadController] here — its spring during
+        // [onRefresh] rebuilds the indicator every frame and freezes CanvasKit.
         AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[
             _positionController,
@@ -120,7 +108,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
         return;
       }
       _contentPadController.removeListener(stopper);
-      // canceled: false so animateWith's future completes (not TickerCanceled).
       if (_contentPadController.isAnimating) {
         _contentPadController.stop(canceled: false);
       }
@@ -147,7 +134,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
             return;
           }
           _scaleController.removeListener(stopper);
-          // canceled: false — default stop() aborts dismiss and leaves status=done.
           if (_scaleController.isAnimating) {
             _scaleController.stop(canceled: false);
           }
@@ -180,8 +166,8 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     }
   }
 
-  /// Web indicator: cached flat morph spinner + transforms only (no per-tick
-  /// rotationTurns updates, elevation shadows, or Opacity saveLayer).
+  /// Web indicator: host Opacity + scale reveal; morph elevation stays 0
+  /// (path drawShadow freezes CanvasKit). Spinner is cached in RepaintBoundary.
   Widget _buildPositionedIndicatorWeb(BuildContext context) {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =
@@ -231,7 +217,6 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
       indicatorChild = _buildIndicator(context, showIndeterminate);
     }
 
-    // Scale-only reveal (no Opacity saveLayer) for all web phases.
     return Positioned(
       top: atTop ? widget.edgeOffset + inset : null,
       bottom: atTop ? null : widget.edgeOffset + inset,
@@ -240,10 +225,13 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
       child: IgnorePointer(
         child: Align(
           alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-          child: Transform.scale(
-            scale: reveal * bubble,
-            alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
-            child: indicatorChild,
+          child: Opacity(
+            opacity: reveal.clamp(0.0, 1.0),
+            child: Transform.scale(
+              scale: reveal * bubble,
+              alignment: atTop ? Alignment.topCenter : Alignment.bottomCenter,
+              child: indicatorChild,
+            ),
           ),
         ),
       ),
@@ -261,61 +249,31 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
     _webSpinnerType = null;
   }
 
+  /// Elevation 0 on web — morph drawShadow under drag transforms freezes
+  /// CanvasKit. [RepaintBoundary] keeps scale/rotate from re-painting morph.
   Widget _buildWebMorphSpinner({required bool dragDriven}) {
     final M3ELoadingIndicatorVariant variant =
         widget._indicatorType == _IndicatorType.contained
         ? M3ELoadingIndicatorVariant.contained
         : M3ELoadingIndicatorVariant.defaultStyle;
-    return M3ELoadingIndicator(
-      key: ValueKey<String>(
-        dragDriven
-            ? 'm3e_refresh_web_drag_spinner'
-            : 'm3e_refresh_web_refresh_spinner',
+    return RepaintBoundary(
+      child: M3ELoadingIndicator(
+        key: ValueKey<String>(
+          dragDriven
+              ? 'm3e_refresh_web_drag_spinner'
+              : 'm3e_refresh_web_refresh_spinner',
+        ),
+        variant: variant,
+        color: _effectiveValueColor,
+        containerColor: _effectiveContainerColor,
+        polygons: widget.polygons,
+        constraints: widget.indicatorConstraints,
+        semanticLabel: widget.semanticsLabel,
+        semanticValue: widget.semanticsValue,
+        // Drag: frozen morph, outer Transform.rotate. Refresh: internal spin.
+        rotationTurns: dragDriven ? 0 : null,
+        elevation: 0,
       ),
-      variant: variant,
-      color: _effectiveValueColor,
-      containerColor: _effectiveContainerColor,
-      polygons: widget.polygons,
-      constraints: widget.indicatorConstraints,
-      semanticLabel: widget.semanticsLabel,
-      semanticValue: widget.semanticsValue,
-      // Drag: frozen morph, outer Transform.rotate. Refresh: internal spin.
-      rotationTurns: dragDriven ? 0 : null,
-      elevation: 0,
     );
-  }
-}
-
-/// Clamps leading-edge overscroll once refresh list pad is at its drag cap.
-class _M3EWebRefreshScrollPhysics extends ScrollPhysics {
-  const _M3EWebRefreshScrollPhysics({
-    required this.shouldClampLeading,
-    super.parent,
-  });
-
-  final bool Function() shouldClampLeading;
-
-  @override
-  _M3EWebRefreshScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _M3EWebRefreshScrollPhysics(
-      shouldClampLeading: shouldClampLeading,
-      parent: buildParent(ancestor),
-    );
-  }
-
-  @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
-    if (shouldClampLeading()) {
-      // Block underscroll past the leading edge (extra gap beyond list pad).
-      if (value < position.pixels &&
-          position.pixels <= position.minScrollExtent) {
-        return value - position.pixels;
-      }
-      if (value < position.minScrollExtent &&
-          position.pixels <= position.minScrollExtent) {
-        return value - position.minScrollExtent;
-      }
-    }
-    return super.applyBoundaryConditions(position, value);
   }
 }
