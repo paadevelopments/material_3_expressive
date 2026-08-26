@@ -130,7 +130,7 @@ Future<void> _m3edropdownmenuSingleSelectReplacesPriorSelection(
 Future<void> _m3edropdownmenuRebuildDoesNotFireOnSelectionChangedDuringBuild(
   WidgetTester tester,
 ) async {
-  int selectionCallCount = 0;
+  var selectionCallCount = 0;
   List<M3EDropdownItem<String>> currentItems = _items;
 
   await tester.pumpWidget(

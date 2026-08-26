@@ -1,8 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/navigation_rail/enums/m3e_navigation_rail_enums.dart';
-import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_destination.dart';
-import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_fab_slot.dart';
-import 'package:material_3_expressive/components/navigation_rail/models/m3e_navigation_rail_section.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';

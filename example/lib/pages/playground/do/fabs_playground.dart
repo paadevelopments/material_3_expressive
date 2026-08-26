@@ -1,4 +1,3 @@
-import 'package:material_3_expressive/components/floating_action_buttons/enums/m3e_fab.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 

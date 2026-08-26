@@ -2,7 +2,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../floating_action_buttons/enums/m3e_fab.dart';
 import '../../floating_action_buttons/m3e_floating_action_buttons.dart';
 import '../res/m3e_toolbar_tokens.dart';
 
