@@ -1,3 +1,20 @@
+## 1.1.1
+
+### Fixed
+
+* Export missing public enums and models from component entry files so the
+  barrel alone is enough: button style/size/shape, FAB color/size, split
+  button enums, navigation bar / rail enums and models, and
+  `M3EButtonGroupAction` from the toggle button group entry.
+* `M3EDropdownMenu`: do not fire `onSelectionChange` during
+  `didUpdateWidget` rebuilds when the selection did not actually change
+  (lifecycle / build-phase safe).
+
+### Chore
+
+* Remove redundant deep imports in library, example, and tests now covered by
+  entry / barrel exports (`unnecessary_import` / analyzer cleanup).
+
 ## 1.1.0
 
 ### Documentation
