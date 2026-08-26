@@ -13,6 +13,7 @@ import 'components/m3e_app_bar_semantics.dart';
 import 'enums/m3e_app_bar_enums.dart';
 
 export 'enums/m3e_app_bar_enums.dart';
+export 'styles/m3e_app_bar_theme.dart';
 
 /// Which app bar layout an [M3EAppBar] renders.
 enum _M3EAppBarKind { top, bottom, sliver }

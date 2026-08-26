@@ -12,6 +12,7 @@ import 'styles/m3e_progress_indicator_theme.dart';
 
 export 'enums/m3e_progress_enums.dart';
 export 'styles/m3e_progress_indicator_theme.dart';
+export 'utils/m3e_progress_indicator_utils.dart';
 
 /// Which progress indicator layout an [M3EProgressIndicator] renders.
 enum _M3EProgressKind { circular, circularWavy, linear, linearWavy }

@@ -14,6 +14,7 @@ import 'styles/m3e_icon_button_theme.dart';
 
 export 'enums/m3e_icon_button_enums.dart';
 export 'styles/m3e_icon_button_decoration.dart';
+export 'styles/m3e_icon_button_shapes.dart';
 export 'styles/m3e_icon_button_theme.dart';
 
 part 'components/m3e_icon_button_build.dart';

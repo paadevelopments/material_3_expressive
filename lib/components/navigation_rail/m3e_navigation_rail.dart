@@ -18,6 +18,7 @@ export 'enums/m3e_navigation_rail_enums.dart';
 export 'models/m3e_navigation_rail_destination.dart';
 export 'models/m3e_navigation_rail_fab_slot.dart';
 export 'models/m3e_navigation_rail_section.dart';
+export 'res/m3e_navigation_rail_layout.dart';
 export 'styles/m3e_navigation_rail_theme.dart';
 
 part 'components/m3e_navigation_rail_children_mixin.dart';

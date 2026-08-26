@@ -2,6 +2,14 @@
 
 ### Fixed
 
+* Complete public surface exports from all component entry files so
+  `import 'package:material_3_expressive/material_3_expressive.dart'` is
+  sufficient: missing themes/decorations (app bar, FAB, navigation drawer,
+  icon button shapes, button motion/overflow, split button decorations),
+  tokens/utils (slider, toolbar, carousel scroll helper, progress indicator,
+  navigation rail layout), dismissible list extension APIs, picker composables
+  (date/time form fields, headers, actions), carousel view/controller/wrapper,
+  toolbar building blocks, and button-group overflow controller.
 * Export missing public enums and models from component entry files so the
   barrel alone is enough: button style/size/shape, FAB color/size, split
   button enums, navigation bar / rail enums and models, and
