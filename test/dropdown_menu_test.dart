@@ -22,6 +22,11 @@ Widget _host(Widget child) {
 
 void main() {
   testWidgets(
+    'M3EDropdownMenu widget rebuild does not fire onSelectionChanged during build phase',
+    _m3edropdownmenuRebuildDoesNotFireOnSelectionChangedDuringBuild,
+  );
+
+  testWidgets(
     'M3EDropdownMenu renders field with hint text',
     _m3edropdownmenuRendersFieldWithHintText,
   );
@@ -120,4 +125,51 @@ Future<void> _m3edropdownmenuSingleSelectReplacesPriorSelection(
 
   expect(selected, hasLength(1));
   expect(selected.first.value, 'm3');
+}
+
+Future<void> _m3edropdownmenuRebuildDoesNotFireOnSelectionChangedDuringBuild(
+  WidgetTester tester,
+) async {
+  int selectionCallCount = 0;
+  List<M3EDropdownItem<String>> currentItems = _items;
+
+  await tester.pumpWidget(
+    StatefulBuilder(
+      builder: (context, setState) {
+        return _host(
+          Column(
+            children: [
+              M3EDropdownMenu<String>(
+                items: currentItems,
+                onSelectionChanged: (_) {
+                  selectionCallCount++;
+                  setState(() {});
+                },
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    currentItems = const [
+                      M3EDropdownItem(label: 'Item A', value: 'a'),
+                      M3EDropdownItem(label: 'Item B', value: 'b'),
+                    ];
+                  });
+                },
+                child: const Text('Update Items'),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+
+  expect(selectionCallCount, 0);
+
+  // Trigger parent rebuild with updated items -> runs didUpdateWidget
+  await tester.tap(find.text('Update Items'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(selectionCallCount, 0);
 }

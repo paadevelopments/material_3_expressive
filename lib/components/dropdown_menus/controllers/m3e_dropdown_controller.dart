@@ -141,14 +141,16 @@ class M3EDropdownController<T> extends ChangeNotifier {
   // ── Item management ──
 
   /// Replaces the entire item list, resetting the search query.
-  void setItems(List<M3EDropdownItem<T>> items) {
+  void setItems(List<M3EDropdownItem<T>> items, {bool notifySelection = false}) {
     _items
       ..clear()
       ..addAll(items);
     _searchQuery = '';
     _filteredItems = List.from(_items);
     notifyListeners();
-    onSelectionChange?.call(selectedItems);
+    if (notifySelection) {
+      onSelectionChange?.call(selectedItems);
+    }
   }
 
   /// Adds a single item. If [index] is provided, inserts at that position.
