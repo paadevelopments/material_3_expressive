@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../foundations/m3e_theme_extension.dart';
+import '../../../foundations/foundations.dart';
 import '../enums/m3e_icon_button_enums.dart';
 
 /// Theme values for `M3EIconButton`.

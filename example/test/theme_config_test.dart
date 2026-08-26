@@ -14,7 +14,7 @@ void main() {
     expect(find.text('Auto theming'), findsOneWidget);
     expect(find.text('Dynamic color'), findsOneWidget);
     expect(find.text('Seed color'), findsOneWidget);
-    expect(find.text('Type'), findsOneWidget);
+    expect(find.text('Font family'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -51,6 +51,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('App starts with Google Sans Flex', (WidgetTester tester) async {
+    await tester.pumpWidget(const ExampleApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      _typeScale(tester).bodyMedium.fontFamily,
+      ExampleThemeSettings.googleSansFlex,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Picking Flex applies the family immediately', (
     WidgetTester tester,
   ) async {
@@ -60,27 +71,7 @@ void main() {
     await tester.tap(find.text('Flex'));
     await tester.pumpAndSettle();
 
-    expect(_typeScale(tester).bodyMedium.fontFamily, 'Roboto Flex');
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('Emphasized style applies Flex variations', (
-    WidgetTester tester,
-  ) async {
-    await _openThemeConfig(tester);
-
-    await tester.ensureVisible(find.text('Flex'));
-    await tester.tap(find.text('Flex'));
-    await tester.pumpAndSettle();
-
-    await tester.ensureVisible(find.text('Emphasized'));
-    await tester.tap(find.text('Emphasized'));
-    await tester.pumpAndSettle();
-
-    expect(
-      _typeScale(tester).bodyMedium.fontVariations,
-      M3ETypeVariations.emphasized.variations,
-    );
+    expect(_typeScaleOnThemePage(tester).bodyMedium.fontFamily, 'Roboto Flex');
     expect(tester.takeException(), isNull);
   });
 }
@@ -103,5 +94,9 @@ M3EColorScheme _scheme(WidgetTester tester) {
 }
 
 M3ETypeScale _typeScale(WidgetTester tester) {
-  return M3ETheme.of(tester.element(find.text('Type'))).typeScale;
+  return M3ETheme.of(tester.element(find.byType(M3ENavigationBar))).typeScale;
+}
+
+M3ETypeScale _typeScaleOnThemePage(WidgetTester tester) {
+  return M3ETheme.of(tester.element(find.text('Font family'))).typeScale;
 }

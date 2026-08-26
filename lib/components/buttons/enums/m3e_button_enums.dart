@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EButton, M3EButtonGroup, M3EToggleButton;
 
-export 'package:material_3_expressive/foundations/m3e_haptics.dart'
+export 'package:material_3_expressive/foundations/foundations.dart'
     show M3EHapticFeedback;
 
 /// Visual styles for [M3EButton] and [M3EToggleButton].

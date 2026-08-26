@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show Colors;
 
+import '../theme/m3e_theme.dart';
 import 'm3e_state_layer.dart';
-import 'm3e_theme.dart';
 
 /// Supplies expressive splash color for Material buttons that only expose
 /// overlay color to their ink layer.

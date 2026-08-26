@@ -19,6 +19,15 @@
   `typeface`, and `variableFont`.
 * Example **Typography** playground (View tab) with live axis and conversion
   controls.
+* Export `buildM3EThemeDefaults()` and `M3EDynamicColorHost` through
+  `foundations.dart`.
+
+### Changed
+
+* **No breaking API changes** in 1.1.1 — typography additions are additive;
+  `M3EThemeData.typeScale` remains a baseline alias for components.
+* Foundations sources grouped under `lib/foundations/{color,shape,theme,type,interaction,tokens}/`;
+  the public barrel path is unchanged for consumers.
 
 ### Fixed
 

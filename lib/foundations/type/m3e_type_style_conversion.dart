@@ -28,7 +28,10 @@ extension M3ETypeScaleVariantX on M3ETypeScaleVariant {
 }
 
 /// Converts arbitrary text styles to M3 type scale variants.
-abstract final class M3ETypeStyleConversion {
+final class M3ETypeStyleConversion {
+  /// Creates a conversion helper instance.
+  const M3ETypeStyleConversion();
+
   /// Tie-break priority when font size matches multiple roles.
   ///
   /// Higher value wins on equal distance (prefers label/body over display).
@@ -51,7 +54,7 @@ abstract final class M3ETypeStyleConversion {
   };
 
   /// Nearest type role by font size; ties prefer smaller roles.
-  static M3ETypeRole nearestRole(TextStyle style) {
+  M3ETypeRole nearestRoleFor(TextStyle style) {
     final size = style.fontSize ?? 14;
     M3ETypeRole best = M3ETypeRole.bodyMedium;
     double bestDistance = double.infinity;
@@ -72,7 +75,7 @@ abstract final class M3ETypeStyleConversion {
   }
 
   /// Spec tokens for [role] and [variant].
-  static M3ETypeStyleTokens tokensFor(
+  M3ETypeStyleTokens resolveTokens(
     M3ETypeRole role,
     M3ETypeScaleVariant variant,
   ) {
@@ -88,15 +91,15 @@ abstract final class M3ETypeStyleConversion {
   }
 
   /// Converts [source] to [variant], preserving family, color, and decoration.
-  static TextStyle toVariant(
+  TextStyle toVariantFor(
     TextStyle source, {
     required M3ETypeScaleVariant variant,
     M3ETypeRole? role,
     M3ETypeStyleTokens? tokenOverrides,
     M3EVariableFontConfig? variableFont,
   }) {
-    final M3ETypeRole resolvedRole = role ?? nearestRole(source);
-    M3ETypeStyleTokens tokens = tokensFor(resolvedRole, variant);
+    final M3ETypeRole resolvedRole = role ?? nearestRoleFor(source);
+    M3ETypeStyleTokens tokens = resolveTokens(resolvedRole, variant);
     if (tokenOverrides != null) {
       tokens = tokens.copyWith(
         fontSize: tokenOverrides.fontSize,
@@ -129,5 +132,35 @@ abstract final class M3ETypeStyleConversion {
     }
 
     return result;
+  }
+
+  /// Nearest type role by font size; ties prefer smaller roles.
+  static M3ETypeRole nearestRole(TextStyle style) {
+    return const M3ETypeStyleConversion().nearestRoleFor(style);
+  }
+
+  /// Spec tokens for [role] and [variant].
+  static M3ETypeStyleTokens tokensFor(
+    M3ETypeRole role,
+    M3ETypeScaleVariant variant,
+  ) {
+    return const M3ETypeStyleConversion().resolveTokens(role, variant);
+  }
+
+  /// Converts [source] to [variant], preserving family, color, and decoration.
+  static TextStyle toVariant(
+    TextStyle source, {
+    required M3ETypeScaleVariant variant,
+    M3ETypeRole? role,
+    M3ETypeStyleTokens? tokenOverrides,
+    M3EVariableFontConfig? variableFont,
+  }) {
+    return const M3ETypeStyleConversion().toVariantFor(
+      source,
+      variant: variant,
+      role: role,
+      tokenOverrides: tokenOverrides,
+      variableFont: variableFont,
+    );
   }
 }

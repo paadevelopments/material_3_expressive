@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:motor/motor.dart';
 
-import '../../../foundations/m3e_motion.dart';
+import '../../../foundations/foundations.dart';
 import '../utils/m3e_toolbar_spring_motion.dart';
 
 /// Tracks scroll / manual exit translation for a toolbar.

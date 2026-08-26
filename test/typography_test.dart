@@ -3,6 +3,13 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  _registerApplyTests();
+  _registerScaleTests();
+  _registerVariableFontTests();
+  _registerConversionTests();
+}
+
+void _registerApplyTests() {
   test(
     'apply sets fontFamily on every role without changing size or weight',
     _applySetsFontFamilyOnEveryRole,
@@ -28,6 +35,9 @@ void main() {
     'M3EMaterialApp.fontFamily projects to the shell and Material theme',
     _m3ematerialappFontfamilyProjectsToTheShellAndMaterialT,
   );
+}
+
+void _registerScaleTests() {
   test('baseline tokens match M3 spec for bodyLarge', _baselineTokensMatchSpec);
   test(
     'emphasized scale bumps labelLarge to w700',
@@ -45,6 +55,9 @@ void main() {
     'copyWith typeScale preserves default emphasized scale',
     _copywithTypescalePreservesDefaultEmphasizedScale,
   );
+}
+
+void _registerVariableFontTests() {
   test(
     'applyVariableFont sets per-role opsz and split ROND',
     _applyvariablefontSetsPerRoleOpszAndSplitRond,
@@ -66,6 +79,9 @@ void main() {
     'brand ROND beats global ROND for headline roles',
     _brandRondBeatsGlobalForHeadline,
   );
+}
+
+void _registerConversionTests() {
   test(
     'M3ETypeStyleTokens fromTextStyle round trip',
     _tokensFromTextStyleRoundTrip,
@@ -255,9 +271,7 @@ void _axesToVariationsOmitsNulls() {
 }
 
 void _globalWghtOverrideBeatsAutoSync() {
-  const config = M3EVariableFontConfig(
-    global: M3EVariableFontAxes(wght: 600),
-  );
+  const config = M3EVariableFontConfig(global: M3EVariableFontAxes(wght: 600));
   const style = TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
   final variations = config.resolveForRole(
     M3ETypeRole.bodyLarge,

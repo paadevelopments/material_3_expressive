@@ -2,7 +2,7 @@ import 'dart:ui' show clampDouble;
 
 import 'package:flutter/widgets.dart';
 
-import '../../../foundations/m3e_theme_extension.dart';
+import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_toggle_button_group_enums.dart';
 

@@ -74,16 +74,24 @@ class ExampleThemeSettings extends ChangeNotifier {
     'Rose',
   ];
 
+  /// Family name registered for Google Sans Flex in the example app.
+  static const String googleSansFlex = 'Google Sans Flex';
+
   /// Family name registered for Roboto Flex in the example app.
   static const String robotoFlex = 'Roboto Flex';
 
   /// Family name registered for Roboto Mono in the example app.
   static const String robotoMono = 'Roboto Mono';
 
+  /// Whether [family] supports M3 Expressive variable-font axis presets.
+  static bool supportsVariableAxes(String? family) {
+    return family == googleSansFlex || family == robotoFlex;
+  }
+
   bool _autoTheming = true;
   bool _dynamicColoring = true;
   Color _seedColor = seedOptions.first;
-  String? _fontFamily;
+  String? _fontFamily = googleSansFlex;
   ExampleTypeStyle _typeStyle = ExampleTypeStyle.regular;
   M3ETypeScaleMode _typeScaleMode = M3ETypeScaleMode.static;
 
@@ -128,7 +136,8 @@ class ExampleThemeSettings extends ChangeNotifier {
       return;
     }
     _fontFamily = value;
-    if (value != robotoFlex && _typeStyle != ExampleTypeStyle.regular) {
+    if (!supportsVariableAxes(value) &&
+        _typeStyle != ExampleTypeStyle.regular) {
       _typeStyle = ExampleTypeStyle.regular;
     }
     notifyListeners();
@@ -145,7 +154,7 @@ class ExampleThemeSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// M3 Expressive axis preset. Applied only when [fontFamily] is Roboto Flex.
+  /// M3 Expressive axis preset. Applied only on variable-capable families.
   ExampleTypeStyle get typeStyle => _typeStyle;
 
   set typeStyle(ExampleTypeStyle value) {
@@ -158,7 +167,7 @@ class ExampleThemeSettings extends ChangeNotifier {
 
   /// Variable-font axis config for [M3EMaterialApp.variableFont], or null.
   M3EVariableFontConfig? get variableFont {
-    if (_fontFamily != robotoFlex ||
+    if (!supportsVariableAxes(_fontFamily) ||
         _typeScaleMode != M3ETypeScaleMode.variable) {
       return null;
     }
@@ -170,7 +179,7 @@ class ExampleThemeSettings extends ChangeNotifier {
 
   /// Variable-font axes for [M3EMaterialApp.fontVariations], or null.
   List<FontVariation>? get fontVariations {
-    if (_fontFamily != robotoFlex) {
+    if (!supportsVariableAxes(_fontFamily)) {
       return null;
     }
     if (_typeScaleMode == M3ETypeScaleMode.variable) {

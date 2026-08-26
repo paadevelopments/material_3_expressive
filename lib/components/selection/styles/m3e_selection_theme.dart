@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../foundations/m3e_color_scheme.dart';
-import '../../../foundations/m3e_theme_extension.dart';
+import '../../../foundations/foundations.dart';
 import '../../cards/enums/m3e_card_variant.dart';
 import '../../lists/styles/m3e_list_theme.dart';
 

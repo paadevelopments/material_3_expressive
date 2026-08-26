@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import 'm3e_dimensions.dart';
+import '../tokens/m3e_dimensions.dart';
 
 /// Material 3 Expressive shape (corner radius) tokens.
 ///

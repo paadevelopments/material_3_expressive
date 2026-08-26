@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../type/m3e_typography.dart';
+import '../type/m3e_variable_font_config.dart';
 import 'm3e_theme.dart';
-import 'm3e_typography.dart';
-import 'm3e_variable_font_config.dart';
 
 /// A [MaterialApp] wired to adaptive [M3ETheme] with minimal integration code.
 ///

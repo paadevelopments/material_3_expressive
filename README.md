@@ -42,15 +42,16 @@ the current controls (copy to clipboard).
 | --- | ----------- | ---------- |
 | **Do** | [`playground/do/`](example/lib/pages/playground/do/) | Buttons, FABs, FAB menu, groups, segmented & split buttons |
 | **Pick** | [`playground/pick/`](example/lib/pages/playground/pick/) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
-| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets, shapes |
+| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets, shapes, typography |
 | **Nav** | [`playground/nav/`](example/lib/pages/playground/nav/) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
 | **Find** | [`playground/find/`](example/lib/pages/playground/find/) | Badges, progress, refresh, tooltip, snackbar, inputs |
 
 The gallery shell in [`example/lib/main.dart`](example/lib/main.dart) uses
 `M3EMaterialApp` with adaptive theming, a light/dark toggle, and a palette
 action that opens [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart)
-(auto theming, dynamic color, five seed colors, font family, and M3 Expressive
-type styles on Roboto Flex).
+(auto theming, dynamic color, five seed colors, and font family — default
+**Google Sans Flex**). For type scale, variable-font axes, and style
+conversion, use the **Typography** playground under the View tab.
 
 ```bash
 cd example
@@ -278,7 +279,10 @@ final custom = tokens.toTextStyle(fontFamily: 'Roboto Flex');
 on Android 12+, accent color on desktop — with schemes generated via
 `ColorScheme.fromSeed`). Pass `fontFamily` / `fontFamilyFallback` /
 `fontVariations`, `typeScaleMode`, `typeface`, or `variableFont` to apply
-type-scale knobs at the shell:
+type-scale knobs at the shell. Use [`buildM3EThemeDefaults()`](lib/foundations/theme/m3e_theme_defaults.dart)
+to assemble a full [`M3EThemeData`](lib/foundations/theme/m3e_theme_data.dart)
+from core tokens, or [`M3EDynamicColorHost`](lib/foundations/theme/m3e_dynamic_color_host.dart)
+when you need device dynamic color outside `M3EMaterialApp`:
 
 ```dart
 M3EMaterialApp(
@@ -1655,8 +1659,9 @@ The [`example/`](example/) project is a full gallery app:
   catalog-driven gallery shell. The home app bar palette action opens
   [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart) to
   toggle auto theming and dynamic color, pick one of five seed colors when
-  dynamic color is off, and choose a font family (platform default, Roboto
-  Flex, Roboto Mono) plus M3 Expressive type styles on Flex.
+  dynamic color is off, and choose a font family (Google Sans Flex default,
+  system, Roboto Flex, or Roboto Mono). Open **View → Typography** for type
+  scale, variable-font axes, and conversion demos.
 - **Pages:** playgrounds under
   [`example/lib/pages/playground/`](example/lib/pages/playground/), grouped
   by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`).
@@ -1687,6 +1692,22 @@ Optional custom lint rules (if `klin_dart` is enabled in your environment):
 ```bash
 dart run custom_lint
 ```
+
+## Support
+
+If this package helps your project:
+
+- **Star** it on [pub.dev](https://pub.dev/packages/material_3_expressive)
+- **Star or fork** the repo on [GitHub](https://github.com/paadevelopments/material_3_expressive)
+- Share it with others building Material 3 Expressive UIs
+
+### Version 1.1.1 — API compatibility
+
+Version **1.1.1** adds typography foundations (`M3ETypography`, variable-font
+axes, style conversion) and exports `buildM3EThemeDefaults()` and
+`M3EDynamicColorHost` through the public barrel. These changes are **additive**:
+`M3EThemeData.typeScale` remains a baseline alias, and existing component code
+continues to work without migration.
 
 ## Credits
 

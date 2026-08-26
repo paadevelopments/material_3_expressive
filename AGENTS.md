@@ -69,6 +69,17 @@ lib/components/buttons/
 
 [`lib/foundations/`](lib/foundations/) holds design tokens, theming, shapes, motion, and shared interaction primitives. Key exports are wired through [`lib/foundations/foundations.dart`](lib/foundations/foundations.dart).
 
+Subfolders (import via the barrel unless you are editing foundations internals):
+
+- `color/` — color scheme and utilities
+- `shape/` — shapes, clippers, `material_new_shapes` bridge
+- `theme/` — `M3ETheme`, `M3EThemeData`, `M3EMaterialApp`, dynamic color host
+- `type/` — typography, type-style tokens, variable-font config
+- `interaction/` — motion, haptics, tappable, state layers, ink splash
+- `tokens/` — spacing, elevation, dimensions, safe area, scrim
+- `components/` — shared `M3EComponentTheme`
+- `m3e_icons.dart` — generated glyph dump (root only)
+
 Notable areas:
 
 - **Theme**: `M3ETheme`, `M3EThemeData`, `M3EThemeScope`, `M3EMaterialApp`
@@ -80,7 +91,7 @@ Notable areas:
 
 ### 2.1 Haptics (forthcoming)
 
-The package **will add** a shared haptics implementation under **foundations** (same layer as motion and `M3ETappable`), for example `lib/foundations/m3e_haptics.dart`, exported via `foundations.dart` and the public barrel when ready.
+The package **will add** a shared haptics implementation under **foundations** (same layer as motion and `M3ETappable`), for example `lib/foundations/interaction/m3e_haptics.dart`, exported via `foundations.dart` and the public barrel when ready.
 
 Rules for agents:
 
@@ -221,14 +232,14 @@ Before adding anything new, search for how similar things are already done:
 
 | What you want to do | Where to look first |
 |---------------------|---------------------|
-| Add spring / expressive animation | `motor` usage in components; [`lib/foundations/m3e_motion.dart`](lib/foundations/m3e_motion.dart); [`lib/foundations/m3e_tappable.dart`](lib/foundations/m3e_tappable.dart) |
+| Add spring / expressive animation | `motor` usage in components; [`lib/foundations/interaction/m3e_motion.dart`](lib/foundations/interaction/m3e_motion.dart); [`lib/foundations/interaction/m3e_tappable.dart`](lib/foundations/interaction/m3e_tappable.dart) |
 | Add haptics | Foundations haptics module (forthcoming); do not duplicate per component |
 | Add a theme / style parameter | Component `styles/m3e_*_theme.dart` |
 | Use another M3E component | Import its entry `m3e_*.dart` and public enums/styles/models (e.g. `date_pickers` → `buttons`, `toolbars` → `icon_buttons` / `menus`); do not import another component’s private sub-widgets or utils |
 | Add an example demo | [`example/lib/pages/`](example/lib/pages/) — follow `GallerySection` / `DemoRow` in [`example/lib/widgets/gallery_section.dart`](example/lib/widgets/gallery_section.dart) |
 | Export a new public symbol | Component entry `m3e_*.dart`, then [`lib/material_3_expressive.dart`](lib/material_3_expressive.dart) |
-| Shapes / morph polygons | [`lib/foundations/m3e_shapes.dart`](lib/foundations/m3e_shapes.dart), [`lib/foundations/m3e_material_new_shapes_bridge.dart`](lib/foundations/m3e_material_new_shapes_bridge.dart) |
-| Dynamic color from OS | [`lib/foundations/m3e_dynamic_color_host.dart`](lib/foundations/m3e_dynamic_color_host.dart) |
+| Shapes / morph polygons | [`lib/foundations/shape/m3e_shapes.dart`](lib/foundations/shape/m3e_shapes.dart), [`lib/foundations/shape/m3e_material_new_shapes_bridge.dart`](lib/foundations/shape/m3e_material_new_shapes_bridge.dart) |
+| Dynamic color from OS | [`lib/foundations/theme/m3e_dynamic_color_host.dart`](lib/foundations/theme/m3e_dynamic_color_host.dart) |
 | Split oversized files | Same component folder; prefer extracted widgets/helpers or `part` + `extension on State` over fragile cross-mixin stubs |
 
 Match existing patterns for vendored/portions: third-party attributions live in

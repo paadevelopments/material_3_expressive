@@ -6,7 +6,7 @@ import 'm3e_theme_controller.dart';
 import 'm3e_theme_data.dart';
 import 'm3e_theme_scope.dart';
 
-export 'components/m3e_component_theme.dart';
+export '../components/m3e_component_theme.dart';
 export 'm3e_resolved_theme.dart';
 export 'm3e_theme_controller.dart';
 export 'm3e_theme_data.dart';

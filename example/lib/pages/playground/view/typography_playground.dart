@@ -23,7 +23,7 @@ class _TypographyPlaygroundState extends State<TypographyPlayground> {
   M3ETypeRole _role = M3ETypeRole.headlineSmall;
   M3ETypeScaleVariant _variant = M3ETypeScaleVariant.baseline;
   String _sample = 'Material 3 Expressive';
-  String _fontFamily = ExampleThemeSettings.robotoFlex;
+  String _fontFamily = ExampleThemeSettings.googleSansFlex;
 
   bool _autoWght = true;
   bool _autoOpsz = true;
@@ -161,6 +161,7 @@ class _TypographyPlaygroundState extends State<TypographyPlayground> {
               .join(', ');
 
     return PlaygroundBody(
+      pinPreviewsByDefault: true,
       previews: <Widget>[
         PlayPreviewCard(
           label: '${_roleLabel(_role)} · ${_variantLabel(_variant)}',
@@ -235,6 +236,7 @@ final style = M3ETypeStyleConversion.toVariant(
               label: 'Font family',
               value: _fontFamily,
               values: const <String>[
+                ExampleThemeSettings.googleSansFlex,
                 ExampleThemeSettings.robotoFlex,
                 ExampleThemeSettings.robotoMono,
               ],
