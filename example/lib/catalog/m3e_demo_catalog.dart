@@ -38,6 +38,7 @@ import '../pages/playground/view/dividers_playground.dart';
 import '../pages/playground/view/lists_playground.dart';
 import '../pages/playground/view/selection_playground.dart';
 import '../pages/playground/view/shapes_playground.dart';
+import '../pages/playground/view/typography_playground.dart';
 import '../pages/playground/view/side_sheet_playground.dart';
 import 'm3e_demo_entry.dart';
 import 'm3e_demo_section.dart';
@@ -237,6 +238,14 @@ abstract final class M3EDemoCatalog {
       icon: M3EIcons.category,
       section: M3EDemoSection.viewSection,
       playgroundBuilder: (_) => const ShapesPlayground(),
+    ),
+    M3EDemoEntry(
+      id: 'typography',
+      title: 'Typography',
+      subtitle: 'Type scale, axes, and conversion',
+      icon: M3EIcons.text_fields,
+      section: M3EDemoSection.viewSection,
+      playgroundBuilder: (_) => const TypographyPlayground(),
     ),
     M3EDemoEntry(
       id: 'dialogs',

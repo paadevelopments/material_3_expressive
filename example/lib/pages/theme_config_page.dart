@@ -138,7 +138,7 @@ class ThemeConfigPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Family applies to every role. Styles use Roboto Flex axes.',
+          'Family applies to every role. Flex enables axis presets.',
           style: theme.typeScale.bodyMedium.copyWith(
             color: scheme.onSurfaceVariant,
           ),
@@ -172,14 +172,73 @@ class ThemeConfigPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Style',
+          'Token mode',
+          style: theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Variable mode uses zero tracking and per-role opsz/wght on Flex.',
+          style: theme.typeScale.bodyMedium.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            _StyleChip(
+              label: 'Static',
+              selected: settings.typeScaleMode == M3ETypeScaleMode.static,
+              onTap: () => settings.typeScaleMode = M3ETypeScaleMode.static,
+            ),
+            _StyleChip(
+              label: 'Variable',
+              selected: settings.typeScaleMode == M3ETypeScaleMode.variable,
+              onTap: () => settings.typeScaleMode = M3ETypeScaleMode.variable,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Scale preview',
+          style: theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: 8),
+        _ScalePreviewRow(
+          label: 'Headline baseline',
+          style: theme.typography.baseline.headlineSmall.copyWith(
+            color: scheme.onSurface,
+          ),
+        ),
+        _ScalePreviewRow(
+          label: 'Headline emphasized',
+          style: theme.typography.emphasized.headlineSmall.copyWith(
+            color: scheme.onSurface,
+          ),
+        ),
+        _ScalePreviewRow(
+          label: 'Label baseline',
+          style: theme.typography.baseline.labelLarge.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        _ScalePreviewRow(
+          label: 'Label emphasized',
+          style: theme.typography.emphasized.labelLarge.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Axis preset',
           style: theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
         ),
         const SizedBox(height: 4),
         Text(
           stylesEnabled
-              ? 'Emphasized, width, and roundness on Roboto Flex.'
-              : 'Pick Flex to apply M3 Expressive type styles.',
+              ? 'Graded, width, and roundness on Roboto Flex.'
+              : 'Pick Flex to apply M3 Expressive axis presets.',
           style: theme.typeScale.bodyMedium.copyWith(
             color: scheme.onSurfaceVariant,
           ),
@@ -198,6 +257,28 @@ class ThemeConfigPage extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// One baseline vs emphasized preview line.
+class _ScalePreviewRow extends StatelessWidget {
+  const _ScalePreviewRow({required this.label, required this.style});
+
+  final String label;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(label, style: style.copyWith(fontSize: 11)),
+          Text('Material 3 Expressive', style: style),
+        ],
+      ),
     );
   }
 }

@@ -30,4 +30,8 @@ export 'm3e_theme_controller.dart';
 export 'm3e_theme_data.dart';
 export 'm3e_theme_extension.dart';
 export 'm3e_theme_scope.dart';
+export 'm3e_type_style_conversion.dart';
+export 'm3e_type_style_tokens.dart';
 export 'm3e_typography.dart';
+export 'm3e_variable_font_axes.dart';
+export 'm3e_variable_font_config.dart';

@@ -6,8 +6,8 @@ enum ExampleTypeStyle {
   /// Baseline scale with no extra axes.
   regular('Regular'),
 
-  /// Weight and grade bump.
-  emphasized('Emphasized'),
+  /// Weight and grade axis bump (not the M3 emphasized type scale).
+  graded('Graded'),
 
   /// Condensed width.
   condensed('Condensed'),
@@ -29,13 +29,13 @@ enum ExampleTypeStyle {
   /// Short label shown in the theme config picker.
   final String label;
 
-  /// Roboto Flex axes for this style.
+  /// Roboto Flex axes for this style (static token mode).
   List<FontVariation> get variations {
     switch (this) {
       case ExampleTypeStyle.regular:
         return M3ETypeVariations.regular.variations;
-      case ExampleTypeStyle.emphasized:
-        return M3ETypeVariations.emphasized.variations;
+      case ExampleTypeStyle.graded:
+        return M3ETypeVariations.graded.variations;
       case ExampleTypeStyle.condensed:
         return M3ETypeVariations.condensed.variations;
       case ExampleTypeStyle.extraCondensed:
@@ -85,6 +85,7 @@ class ExampleThemeSettings extends ChangeNotifier {
   Color _seedColor = seedOptions.first;
   String? _fontFamily;
   ExampleTypeStyle _typeStyle = ExampleTypeStyle.regular;
+  M3ETypeScaleMode _typeScaleMode = M3ETypeScaleMode.static;
 
   /// Whether the theme follows the platform brightness.
   bool get autoTheming => _autoTheming;
@@ -133,7 +134,18 @@ class ExampleThemeSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// M3 Expressive type style. Applied only when [fontFamily] is Roboto Flex.
+  /// Static or variable M3 token tables.
+  M3ETypeScaleMode get typeScaleMode => _typeScaleMode;
+
+  set typeScaleMode(M3ETypeScaleMode value) {
+    if (value == _typeScaleMode) {
+      return;
+    }
+    _typeScaleMode = value;
+    notifyListeners();
+  }
+
+  /// M3 Expressive axis preset. Applied only when [fontFamily] is Roboto Flex.
   ExampleTypeStyle get typeStyle => _typeStyle;
 
   set typeStyle(ExampleTypeStyle value) {
@@ -144,9 +156,24 @@ class ExampleThemeSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Variable-font axis config for [M3EMaterialApp.variableFont], or null.
+  M3EVariableFontConfig? get variableFont {
+    if (_fontFamily != robotoFlex ||
+        _typeScaleMode != M3ETypeScaleMode.variable) {
+      return null;
+    }
+    if (_typeStyle == ExampleTypeStyle.regular) {
+      return const M3EVariableFontConfig();
+    }
+    return M3EVariableFontConfig(extraVariations: _typeStyle.variations);
+  }
+
   /// Variable-font axes for [M3EMaterialApp.fontVariations], or null.
   List<FontVariation>? get fontVariations {
     if (_fontFamily != robotoFlex) {
+      return null;
+    }
+    if (_typeScaleMode == M3ETypeScaleMode.variable) {
       return null;
     }
     return _typeStyle.variations;

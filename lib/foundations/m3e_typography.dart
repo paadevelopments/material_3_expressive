@@ -1,11 +1,36 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show TextTheme;
 
-/// The Material 3 type scale.
+import 'm3e_type_style_conversion.dart';
+import 'm3e_type_style_tokens.dart';
+import 'm3e_variable_font_config.dart';
+
+/// Whether token tables use static or variable-font tracking defaults.
+enum M3ETypeScaleMode {
+  /// Static M3 tokens with non-zero tracking on body and label roles.
+  static,
+
+  /// Variable-font tokens with zero tracking on every role.
+  variable,
+}
+
+/// Brand and plain typeface names for the M3 type scale.
+@immutable
+class M3ETypefaceConfig {
+  /// Creates brand/plain typeface names.
+  const M3ETypefaceConfig({this.brand, this.plain});
+
+  /// Typeface for display, headline, and title roles.
+  final String? brand;
+
+  /// Typeface for body and label roles.
+  final String? plain;
+}
+
+/// The Material 3 type scale (15 roles).
 ///
 /// Each role stores the font size, line height and tracking (letter spacing)
-/// published in the M3 type system. Weights follow the regular/medium split
-/// used across the baseline scale.
+/// published in the M3 type system.
 @immutable
 class M3ETypeScale {
   /// Creates a complete Material 3 type scale.
@@ -29,40 +54,54 @@ class M3ETypeScale {
 
   /// The baseline Material 3 type scale using the platform default font.
   factory M3ETypeScale.baseline() {
-    TextStyle style(
-      double size,
-      double height,
-      double tracking,
-      FontWeight weight,
-    ) {
-      return TextStyle(
-        fontSize: size,
-        height: height / size,
-        letterSpacing: tracking,
-        fontWeight: weight,
-        textBaseline: TextBaseline.alphabetic,
-        leadingDistribution: TextLeadingDistribution.even,
-      );
+    return M3ETypeScale.fromTokens(M3ETypeScaleTokens.baseline);
+  }
+
+  /// The emphasized Material 3 type scale (`md.sys.typescale.emphasized.*`).
+  factory M3ETypeScale.emphasized() {
+    return M3ETypeScale.fromTokens(M3ETypeScaleTokens.emphasized);
+  }
+
+  /// Variable-font baseline tokens (`md.sys.typescale.variable.*`).
+  factory M3ETypeScale.variableBaseline() {
+    return M3ETypeScale.fromTokens(M3ETypeScaleTokens.variableBaseline);
+  }
+
+  /// Variable-font emphasized tokens (`md.sys.typescale.variable.emphasized.*`).
+  factory M3ETypeScale.variableEmphasized() {
+    return M3ETypeScale.fromTokens(M3ETypeScaleTokens.variableEmphasized);
+  }
+
+  /// Builds a type scale from a token table.
+  factory M3ETypeScale.fromTokens(
+    Map<M3ETypeRole, M3ETypeStyleTokens> tokens, {
+    M3ETypefaceConfig? typeface,
+  }) {
+    TextStyle build(M3ETypeRole role) {
+      final String? family = typeface == null
+          ? null
+          : role.isBrandRole
+          ? typeface.brand
+          : typeface.plain;
+      return tokens[role]!.toTextStyle(fontFamily: family);
     }
 
-    const FontWeight regular = FontWeight.w400;
-    const FontWeight medium = FontWeight.w500;
     return M3ETypeScale(
-      displayLarge: style(57, 64, -0.25, regular),
-      displayMedium: style(45, 52, 0, regular),
-      displaySmall: style(36, 44, 0, regular),
-      headlineLarge: style(32, 40, 0, regular),
-      headlineMedium: style(28, 36, 0, regular),
-      headlineSmall: style(24, 32, 0, regular),
-      titleLarge: style(22, 28, 0, regular),
-      titleMedium: style(16, 24, 0.15, medium),
-      titleSmall: style(14, 20, 0.1, medium),
-      bodyLarge: style(16, 24, 0.5, regular),
-      bodyMedium: style(14, 20, 0.25, regular),
-      bodySmall: style(12, 16, 0.4, regular),
-      labelLarge: style(14, 20, 0.1, medium),
-      labelMedium: style(12, 16, 0.5, medium),
-      labelSmall: style(11, 16, 0.5, medium),
+      displayLarge: build(M3ETypeRole.displayLarge),
+      displayMedium: build(M3ETypeRole.displayMedium),
+      displaySmall: build(M3ETypeRole.displaySmall),
+      headlineLarge: build(M3ETypeRole.headlineLarge),
+      headlineMedium: build(M3ETypeRole.headlineMedium),
+      headlineSmall: build(M3ETypeRole.headlineSmall),
+      titleLarge: build(M3ETypeRole.titleLarge),
+      titleMedium: build(M3ETypeRole.titleMedium),
+      titleSmall: build(M3ETypeRole.titleSmall),
+      bodyLarge: build(M3ETypeRole.bodyLarge),
+      bodyMedium: build(M3ETypeRole.bodyMedium),
+      bodySmall: build(M3ETypeRole.bodySmall),
+      labelLarge: build(M3ETypeRole.labelLarge),
+      labelMedium: build(M3ETypeRole.labelMedium),
+      labelSmall: build(M3ETypeRole.labelSmall),
     );
   }
 
@@ -111,11 +150,53 @@ class M3ETypeScale {
   /// Smallest label role.
   final TextStyle labelSmall;
 
+  /// Every role in declaration order.
+  Iterable<TextStyle> get roles sync* {
+    for (final M3ETypeRole role in M3ETypeRole.values) {
+      yield roleStyle(role);
+    }
+  }
+
+  /// Returns the [TextStyle] for [role].
+  TextStyle roleStyle(M3ETypeRole role) {
+    switch (role) {
+      case M3ETypeRole.displayLarge:
+        return displayLarge;
+      case M3ETypeRole.displayMedium:
+        return displayMedium;
+      case M3ETypeRole.displaySmall:
+        return displaySmall;
+      case M3ETypeRole.headlineLarge:
+        return headlineLarge;
+      case M3ETypeRole.headlineMedium:
+        return headlineMedium;
+      case M3ETypeRole.headlineSmall:
+        return headlineSmall;
+      case M3ETypeRole.titleLarge:
+        return titleLarge;
+      case M3ETypeRole.titleMedium:
+        return titleMedium;
+      case M3ETypeRole.titleSmall:
+        return titleSmall;
+      case M3ETypeRole.bodyLarge:
+        return bodyLarge;
+      case M3ETypeRole.bodyMedium:
+        return bodyMedium;
+      case M3ETypeRole.bodySmall:
+        return bodySmall;
+      case M3ETypeRole.labelLarge:
+        return labelLarge;
+      case M3ETypeRole.labelMedium:
+        return labelMedium;
+      case M3ETypeRole.labelSmall:
+        return labelSmall;
+    }
+  }
+
   /// Adapts a framework [TextTheme] into an [M3ETypeScale].
   ///
   /// Each role is taken from [textTheme] when present, falling back to the
-  /// [M3ETypeScale.baseline] value otherwise. Lets the expressive foundation
-  /// inherit the typography of an ambient Material `ThemeData`.
+  /// [M3ETypeScale.baseline] value otherwise.
   factory M3ETypeScale.fromTextTheme(TextTheme textTheme) {
     final base = M3ETypeScale.baseline();
     return M3ETypeScale(
@@ -140,11 +221,7 @@ class M3ETypeScale {
   /// The per-size label font sizes used by expressive buttons.
   M3EButtonFontSize get buttonFontSize => const M3EButtonFontSize();
 
-  /// A framework [TextTheme] mirroring these roles.
-  ///
-  /// Lets components written against Material's [TextTheme] consume the
-  /// expressive type scale carried by `M3EThemeData`. Memoised per instance so
-  /// a stable theme yields a stable identity.
+  /// A framework [TextTheme] mirroring these baseline roles.
   TextTheme toTextTheme() {
     final TextTheme? cached = _textThemeCache[this];
     if (cached != null) {
@@ -175,13 +252,9 @@ class M3ETypeScale {
   M3ETypeScale withColor(Color color) => apply(color: color);
 
   /// Applies shared typography attributes to every role.
-  ///
-  /// Mirrors [TextTheme.apply] for family, fallback, package, size, color, and
-  /// decoration. [fontVariations] is the one-knob for M3 Expressive axes
-  /// (width, grade, weight, roundness). Per-role size, weight, and tracking
-  /// stay unless size factor/delta change the size.
   M3ETypeScale apply({
     String? fontFamily,
+    M3ETypefaceConfig? typeface,
     List<String>? fontFamilyFallback,
     String? package,
     double fontSizeFactor = 1.0,
@@ -192,9 +265,16 @@ class M3ETypeScale {
     TextDecorationStyle? decorationStyle,
     List<FontVariation>? fontVariations,
   }) {
-    TextStyle map(TextStyle style) {
-      return style.copyWith(
-        fontFamily: fontFamily,
+    final mapped = <M3ETypeRole, TextStyle>{};
+    for (final M3ETypeRole role in M3ETypeRole.values) {
+      final TextStyle style = roleStyle(role);
+      final String? family = typeface != null
+          ? role.isBrandRole
+                ? typeface.brand
+                : typeface.plain
+          : fontFamily;
+      mapped[role] = style.copyWith(
+        fontFamily: family,
         fontFamilyFallback: fontFamilyFallback,
         package: package,
         fontSize: style.fontSize == null
@@ -207,23 +287,168 @@ class M3ETypeScale {
         fontVariations: fontVariations,
       );
     }
+    return M3ETypeScale._fromMapped(mapped);
+  }
 
-    return M3ETypeScale(
-      displayLarge: map(displayLarge),
-      displayMedium: map(displayMedium),
-      displaySmall: map(displaySmall),
-      headlineLarge: map(headlineLarge),
-      headlineMedium: map(headlineMedium),
-      headlineSmall: map(headlineSmall),
-      titleLarge: map(titleLarge),
-      titleMedium: map(titleMedium),
-      titleSmall: map(titleSmall),
-      bodyLarge: map(bodyLarge),
-      bodyMedium: map(bodyMedium),
-      bodySmall: map(bodySmall),
-      labelLarge: map(labelLarge),
-      labelMedium: map(labelMedium),
-      labelSmall: map(labelSmall),
+  /// Applies per-role variable-font axes from [config].
+  M3ETypeScale applyVariableFont(
+    M3EVariableFontConfig config, {
+    bool isEmphasizedScale = false,
+  }) {
+    final mapped = <M3ETypeRole, TextStyle>{};
+    for (final M3ETypeRole role in M3ETypeRole.values) {
+      final TextStyle style = roleStyle(role);
+      mapped[role] = style.copyWith(
+        fontVariations: config.resolveForRole(
+          role,
+          style,
+          isEmphasizedScale: isEmphasizedScale,
+        ),
+      );
+    }
+    return M3ETypeScale._fromMapped(mapped);
+  }
+
+  /// Builds a [TextStyle] for [role] using [variant] tokens and optional overrides.
+  TextStyle styleFor(
+    M3ETypeRole role, {
+    M3ETypeScaleVariant variant = M3ETypeScaleVariant.baseline,
+    M3ETypeStyleTokens? overrides,
+    M3EVariableFontConfig? variableFont,
+  }) {
+    M3ETypeStyleTokens tokens = M3ETypeStyleConversion.tokensFor(role, variant);
+    if (overrides != null) {
+      tokens = tokens.copyWith(
+        fontSize: overrides.fontSize,
+        lineHeight: overrides.lineHeight,
+        letterSpacing: overrides.letterSpacing,
+        fontWeight: overrides.fontWeight,
+      );
+    }
+
+    final TextStyle base = roleStyle(role);
+    TextStyle result = tokens.toTextStyle(fontFamily: base.fontFamily);
+    result = result.copyWith(
+      fontFamilyFallback: base.fontFamilyFallback,
+      color: base.color,
+      decoration: base.decoration,
+      decorationColor: base.decorationColor,
+      decorationStyle: base.decorationStyle,
+    );
+
+    if (variableFont != null) {
+      result = result.copyWith(
+        fontVariations: variableFont.resolveForRole(
+          role,
+          result,
+          isEmphasizedScale: variant.isEmphasized,
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  M3ETypeScale._fromMapped(Map<M3ETypeRole, TextStyle> mapped)
+    : displayLarge = mapped[M3ETypeRole.displayLarge]!,
+      displayMedium = mapped[M3ETypeRole.displayMedium]!,
+      displaySmall = mapped[M3ETypeRole.displaySmall]!,
+      headlineLarge = mapped[M3ETypeRole.headlineLarge]!,
+      headlineMedium = mapped[M3ETypeRole.headlineMedium]!,
+      headlineSmall = mapped[M3ETypeRole.headlineSmall]!,
+      titleLarge = mapped[M3ETypeRole.titleLarge]!,
+      titleMedium = mapped[M3ETypeRole.titleMedium]!,
+      titleSmall = mapped[M3ETypeRole.titleSmall]!,
+      bodyLarge = mapped[M3ETypeRole.bodyLarge]!,
+      bodyMedium = mapped[M3ETypeRole.bodyMedium]!,
+      bodySmall = mapped[M3ETypeRole.bodySmall]!,
+      labelLarge = mapped[M3ETypeRole.labelLarge]!,
+      labelMedium = mapped[M3ETypeRole.labelMedium]!,
+      labelSmall = mapped[M3ETypeRole.labelSmall]!;
+}
+
+/// Baseline and emphasized Material 3 type scales (30 styles total).
+@immutable
+class M3ETypography {
+  /// Creates baseline and emphasized type scales.
+  const M3ETypography({required this.baseline, required this.emphasized});
+
+  /// Default M3 typography for [mode].
+  factory M3ETypography.material3({
+    M3ETypeScaleMode mode = M3ETypeScaleMode.static,
+  }) {
+    switch (mode) {
+      case M3ETypeScaleMode.static:
+        return M3ETypography(
+          baseline: M3ETypeScale.baseline(),
+          emphasized: M3ETypeScale.emphasized(),
+        );
+      case M3ETypeScaleMode.variable:
+        return M3ETypography(
+          baseline: M3ETypeScale.variableBaseline(),
+          emphasized: M3ETypeScale.variableEmphasized(),
+        );
+    }
+  }
+
+  /// Default UI type styles (`md.sys.typescale.*` or variable equivalent).
+  final M3ETypeScale baseline;
+
+  /// Emphasized type styles (`md.sys.typescale.emphasized.*`).
+  final M3ETypeScale emphasized;
+
+  /// Returns a copy with [color] applied to both scales.
+  M3ETypography withColor(Color color) => apply(color: color);
+
+  /// Applies shared typography attributes to both scales.
+  M3ETypography apply({
+    String? fontFamily,
+    M3ETypefaceConfig? typeface,
+    List<String>? fontFamilyFallback,
+    String? package,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    Color? color,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    TextDecorationStyle? decorationStyle,
+    List<FontVariation>? fontVariations,
+  }) {
+    return M3ETypography(
+      baseline: baseline.apply(
+        fontFamily: fontFamily,
+        typeface: typeface,
+        fontFamilyFallback: fontFamilyFallback,
+        package: package,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+        color: color,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontVariations: fontVariations,
+      ),
+      emphasized: emphasized.apply(
+        fontFamily: fontFamily,
+        typeface: typeface,
+        fontFamilyFallback: fontFamilyFallback,
+        package: package,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+        color: color,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontVariations: fontVariations,
+      ),
+    );
+  }
+
+  /// Applies per-role variable-font axes to both scales.
+  M3ETypography applyVariableFont(M3EVariableFontConfig config) {
+    return M3ETypography(
+      baseline: baseline.applyVariableFont(config),
+      emphasized: emphasized.applyVariableFont(config, isEmphasizedScale: true),
     );
   }
 }
@@ -235,7 +460,10 @@ enum M3ETypeVariations {
   /// No extra axes; the baseline scale weights stand.
   regular,
 
-  /// Slight weight and grade bump for emphasized type.
+  /// Weight and grade axis bump (`wght` + `GRAD`).
+  ///
+  /// Not the M3 emphasized type scale — use [M3ETypography.emphasized] for
+  /// `md.sys.typescale.emphasized.*` roles.
   emphasized,
 
   /// Condensed width (`wdth` 75).
@@ -252,6 +480,9 @@ enum M3ETypeVariations {
 
   /// Roundness on (`ROND` 100).
   round;
+
+  /// Documented alias for [emphasized] axis preset (not the emphasized scale).
+  static const M3ETypeVariations graded = emphasized;
 
   /// Variable-font axes for this preset.
   List<FontVariation> get variations {
@@ -278,8 +509,6 @@ enum M3ETypeVariations {
 }
 
 /// Per-size label font sizes for expressive buttons.
-///
-/// Mirrors the `ButtonFontSize` token from the `m3e_design` package.
 @immutable
 class M3EButtonFontSize {
   /// Creates button label sizes for each expressive size step.

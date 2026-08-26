@@ -218,47 +218,84 @@ final custom = theme.copyWith(
 Key properties on `M3EThemeData`:
 
 - `colorScheme` — `M3EColorScheme` with M3 semantic roles
-- `typeScale` — `M3ETypeScale` (display, headline, title, label, body)
+- `typography` — `M3ETypography` with baseline and emphasized scales (30 styles)
+- `typeScale` — baseline alias for `typography.baseline` (used by components)
 - `spacing`, `visualDensity`, per-component `*Theme` extensions
 
+The M3 type system has 15 baseline and 15 emphasized roles. Use emphasized
+styles for selection, actions, and editorial hierarchy:
+
+```dart
+final theme = M3ETheme.of(context);
+Text('Headline', style: theme.typography.emphasized.headlineSmall);
+```
+
 Shared typography (font family, fallback, package, size factor/delta, color,
-decoration, and variable-font axes) is a one-knob on the type scale — not a
-full `TextStyle`:
+decoration, brand/plain typefaces, and variable-font axes) is applied through
+`M3ETypography.apply` or theme `copyWith` — not a full `TextStyle`:
 
 ```dart
 final themed = M3EThemeData.light(seedColor: seed).copyWith(
-  typeScale: M3ETypeScale.baseline().apply(
+  typography: M3ETypography.material3().apply(
     fontFamily: 'Roboto Flex',
-    fontVariations: M3ETypeVariations.emphasized.variations,
+    fontVariations: M3ETypeVariations.graded.variations,
   ),
 );
 
-// Sugar: same result without building a type scale by hand
+// Sugar: same result without building typography by hand
 final alsoThemed = M3EThemeData.light(seedColor: seed).copyWith(
   fontFamily: 'Roboto Flex',
-  fontVariations: M3ETypeVariations.emphasized.variations,
+  fontVariations: M3ETypeVariations.graded.variations,
 );
+
+// Per-role variable-font axes (opsz, wght, split ROND, emphasized GRAD)
+final variable = M3EThemeData.light(seedColor: seed).copyWith(
+  fontFamily: 'Roboto Flex',
+  typeScaleMode: M3ETypeScaleMode.variable,
+  variableFont: const M3EVariableFontConfig(
+    global: M3EVariableFontAxes(wght: 500, opsz: 16),
+    brand: M3EVariableFontAxes(rond: 25),
+    body: M3EVariableFontAxes(rond: 50),
+  ),
+);
+
+// Convert any TextStyle to a spec variant
+final converted = M3ETypeStyleConversion.toVariant(
+  Theme.of(context).textTheme.bodyLarge!,
+  variant: M3ETypeScaleVariant.emphasized,
+  role: M3ETypeRole.bodyLarge,
+);
+
+// Customize token fields before building a TextStyle
+final tokens = M3ETypeStyleTokens.fromTextStyle(style).copyWith(
+  letterSpacing: 0.25,
+);
+final custom = tokens.toTextStyle(fontFamily: 'Roboto Flex');
 ```
 
 `M3EMaterialApp` additionally supports `autoTheming` (platform brightness) and
 `dynamicColoring` (OS seed color on supported platforms — Material You primary
 on Android 12+, accent color on desktop — with schemes generated via
 `ColorScheme.fromSeed`). Pass `fontFamily` / `fontFamilyFallback` /
-`fontVariations` to apply the same type-scale knobs at the shell:
+`fontVariations`, `typeScaleMode`, `typeface`, or `variableFont` to apply
+type-scale knobs at the shell:
 
 ```dart
 M3EMaterialApp(
   data: M3EThemeData.light(seedColor: seed),
   fontFamily: 'Roboto Flex',
-  fontVariations: M3ETypeVariations.wide.variations,
+  typeScaleMode: M3ETypeScaleMode.variable,
+  variableFont: const M3EVariableFontConfig(),
   home: const HomePage(),
 );
 ```
 
-`M3ETypeVariations` is an enum of Roboto Flex axes (`.variations`): regular,
-emphasized, condensed, extra condensed, wide, extra wide, and round. Static
-and mono fonts ignore axes they do not define. The shell projects the type
-scale onto `ThemeData.textTheme` and `DefaultTextStyle`.
+`M3ETypeVariations` is an enum of Roboto Flex axis presets (`.variations`):
+regular, graded (alias for the weight+grade preset formerly named emphasized),
+condensed, extra condensed, wide, extra wide, and round. This is not the M3
+emphasized type scale — use `theme.typography.emphasized` for that. Static
+and mono fonts ignore axes they do not define. The shell projects the baseline
+type scale onto `ThemeData.textTheme` and `DefaultTextStyle`.
 
 ## Components
 

@@ -43,6 +43,8 @@ class _ExampleAppState extends State<ExampleApp> {
             drawUnderSystemBars: true,
             data: M3EThemeData.light(seedColor: _settings.seedColor),
             fontFamily: _settings.fontFamily,
+            typeScaleMode: _settings.typeScaleMode,
+            variableFont: _settings.variableFont,
             fontVariations: _settings.fontVariations,
             autoTheming: _settings.autoTheming,
             dynamicColoring: _settings.dynamicColoring,

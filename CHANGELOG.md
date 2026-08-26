@@ -1,5 +1,25 @@
 ## 1.1.1
 
+### Added
+
+* M3-aligned typography foundation: `M3ETypography` pairs 15 baseline and 15
+  emphasized type scales (`md.sys.typescale.*` and `.emphasized.*`), token
+  tables for static and variable-font sets, `M3ETypefaceConfig` (brand/plain
+  families), and `M3EVariableFontConfig` for per-role `opsz`, `wght`, split
+  `ROND`, and emphasized-only `GRAD`. `M3EThemeData.typography` is the source
+  of truth; `typeScale` remains a baseline alias for components.
+* `M3EVariableFontAxes` for explicit `wght`, `opsz`, `ROND`, `wdth`, `slnt`,
+  `GRAD`, and advanced Y-axis values with global/brand/body group overrides
+  on `M3EVariableFontConfig`.
+* `M3ETypeStyleConversion` converts arbitrary `TextStyle`s to baseline,
+  emphasized, or variable token variants; `M3ETypeStyleTokens.copyWith` and
+  `fromTextStyle` customize individual token fields.
+* `M3ETypeVariations.graded` alias clarifies the weight+grade axis preset vs
+  the M3 emphasized type scale. `M3EMaterialApp` accepts `typeScaleMode`,
+  `typeface`, and `variableFont`.
+* Example **Typography** playground (View tab) with live axis and conversion
+  controls.
+
 ### Fixed
 
 * Complete public surface exports from all component entry files so

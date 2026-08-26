@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'm3e_theme.dart';
+import 'm3e_typography.dart';
+import 'm3e_variable_font_config.dart';
 
 /// A [MaterialApp] wired to adaptive [M3ETheme] with minimal integration code.
 ///
@@ -23,6 +25,9 @@ class M3EMaterialApp extends StatefulWidget {
     this.fontFamilyFallback,
     this.package,
     this.fontVariations,
+    this.typeScaleMode,
+    this.typeface,
+    this.variableFont,
     this.autoTheming,
     this.dynamicColoring,
     this.initialTheme,
@@ -80,6 +85,15 @@ class M3EMaterialApp extends StatefulWidget {
 
   /// Variable-font axes applied to [data]'s type scale when non-null.
   final List<FontVariation>? fontVariations;
+
+  /// Replaces [data]'s token tables with static or variable M3 defaults.
+  final M3ETypeScaleMode? typeScaleMode;
+
+  /// Brand/plain typeface names applied to display vs body roles.
+  final M3ETypefaceConfig? typeface;
+
+  /// Per-role variable-font axis configuration.
+  final M3EVariableFontConfig? variableFont;
 
   /// The default route widget.
   final Widget home;
@@ -341,10 +355,18 @@ class _M3EMaterialAppState extends State<M3EMaterialApp>
     );
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
 
-    final M3EThemeData data = widget.data.copyWith(
+    M3EThemeData data = widget.data;
+    if (widget.typeScaleMode != null) {
+      data = data.copyWith(
+        typography: M3ETypography.material3(mode: widget.typeScaleMode!),
+      );
+    }
+    data = data.copyWith(
       fontFamily: widget.fontFamily,
       fontFamilyFallback: widget.fontFamilyFallback,
       package: widget.package,
+      typeface: widget.typeface,
+      variableFont: widget.variableFont,
       fontVariations: widget.fontVariations,
     );
 

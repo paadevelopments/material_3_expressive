@@ -45,6 +45,7 @@ import '../components/tooltips/styles/m3e_tooltip_theme.dart';
 import 'm3e_color_scheme.dart';
 import 'm3e_spacing.dart';
 import 'm3e_typography.dart';
+import 'm3e_variable_font_config.dart';
 
 /// Immutable bundle of expressive design tokens and per-component themes.
 @immutable
@@ -52,6 +53,7 @@ class M3EThemeData {
   /// Creates an expressive theme from tokens and component themes.
   M3EThemeData({
     M3EColorScheme? colorScheme,
+    M3ETypography? typography,
     M3ETypeScale? typeScale,
     this.iconTheme = const IconThemeData(size: 24),
     this.spacing = const M3ESpacing.regular(),
@@ -101,8 +103,24 @@ class M3EThemeData {
     this.toolbarTheme = M3EToolbarTheme.defaults,
     this.tooltipTheme = M3ETooltipTheme.defaults,
   }) : colorScheme = colorScheme ?? M3EColorScheme.light(),
-       typeScale = typeScale ?? M3ETypeScale.baseline(),
+       typography = _resolveTypography(typography, typeScale),
        brightness = (colorScheme ?? M3EColorScheme.light()).brightness;
+
+  static M3ETypography _resolveTypography(
+    M3ETypography? typography,
+    M3ETypeScale? typeScale,
+  ) {
+    if (typography != null) {
+      return typography;
+    }
+    if (typeScale != null) {
+      return M3ETypography(
+        baseline: typeScale,
+        emphasized: M3ETypeScale.emphasized(),
+      );
+    }
+    return M3ETypography.material3();
+  }
 
   /// Light theme, optionally seeded from [seedColor].
   factory M3EThemeData.light({Color? seedColor}) {
@@ -130,7 +148,10 @@ class M3EThemeData {
     }
     final data = M3EThemeData(
       colorScheme: M3EColorScheme.fromColorScheme(theme.colorScheme),
-      typeScale: M3ETypeScale.fromTextTheme(theme.textTheme),
+      typography: M3ETypography(
+        baseline: M3ETypeScale.fromTextTheme(theme.textTheme),
+        emphasized: M3ETypeScale.emphasized(),
+      ),
       iconTheme: theme.iconTheme,
       visualDensity: theme.visualDensity.vertical,
       platform: theme.platform,
@@ -145,8 +166,11 @@ class M3EThemeData {
   /// Color roles for this theme.
   final M3EColorScheme colorScheme;
 
-  /// Type scale for this theme.
-  final M3ETypeScale typeScale;
+  /// Baseline and emphasized type scales for this theme.
+  final M3ETypography typography;
+
+  /// Baseline type scale for this theme (alias for `typography.baseline`).
+  M3ETypeScale get typeScale => typography.baseline;
 
   /// Default icon size/opacity/etc. When color is null, icons use
   /// [M3EColorScheme.onSurface] (including after dynamic color updates).
@@ -313,7 +337,7 @@ class M3EThemeData {
   /// swapping in a dark `M3EColorScheme` seeded from `colorScheme.primary`.
   M3EThemeData deriveDarkTemplate() {
     return M3EThemeData.dark(seedColor: colorScheme.primary).copyWith(
-      typeScale: typeScale,
+      typography: typography,
       iconTheme: iconTheme,
       spacing: spacing,
       visualDensity: visualDensity,
@@ -367,7 +391,10 @@ class M3EThemeData {
   /// Returns a copy with the given fields replaced.
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
+    M3ETypography? typography,
     M3ETypeScale? typeScale,
+    M3ETypefaceConfig? typeface,
+    M3EVariableFontConfig? variableFont,
     String? fontFamily,
     List<String>? fontFamilyFallback,
     String? package,
@@ -420,21 +447,48 @@ class M3EThemeData {
     M3EToolbarTheme? toolbarTheme,
     M3ETooltipTheme? tooltipTheme,
   }) {
-    M3ETypeScale nextScale = typeScale ?? this.typeScale;
-    if (fontFamily != null ||
+    M3ETypography nextTypography = typography ?? this.typography;
+    if (typeScale != null && typography == null) {
+      nextTypography = M3ETypography(
+        baseline: typeScale,
+        emphasized: nextTypography.emphasized,
+      );
+    }
+
+    if (variableFont != null) {
+      final M3EVariableFontConfig config = fontVariations == null
+          ? variableFont
+          : variableFont.copyWith(
+              extraVariations: <FontVariation>[
+                ...variableFont.extraVariations,
+                ...fontVariations,
+              ],
+            );
+      nextTypography = nextTypography
+          .apply(
+            fontFamily: fontFamily,
+            typeface: typeface,
+            fontFamilyFallback: fontFamilyFallback,
+            package: package,
+          )
+          .applyVariableFont(config);
+    } else if (fontFamily != null ||
+        typeface != null ||
         fontFamilyFallback != null ||
         package != null ||
         fontVariations != null) {
-      nextScale = nextScale.apply(
+      nextTypography = nextTypography.apply(
         fontFamily: fontFamily,
+        typeface: typeface,
         fontFamilyFallback: fontFamilyFallback,
         package: package,
         fontVariations: fontVariations,
       );
     }
+
     return M3EThemeData(
       colorScheme: colorScheme ?? this.colorScheme,
-      typeScale: nextScale,
+      typography: nextTypography,
       iconTheme: iconTheme ?? this.iconTheme,
       spacing: spacing ?? this.spacing,
       visualDensity: visualDensity ?? this.visualDensity,
