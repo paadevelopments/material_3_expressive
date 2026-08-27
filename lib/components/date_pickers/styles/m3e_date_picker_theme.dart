@@ -20,7 +20,7 @@ class M3EDatePickerTheme extends M3EThemeExtension<M3EDatePickerTheme> {
       vertical: 24,
     ),
     this.headerPortraitHeight = 120,
-    this.headerLandscapeWidth = 176,
+    this.headerLandscapeWidth = 152,
     this.subHeaderHeight = 52,
     this.inputHorizontalPadding = 24,
     this.actionHorizontalPadding = 8,

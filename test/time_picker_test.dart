@@ -28,6 +28,10 @@ void main() {
     _dialogLayout,
   );
   testWidgets(
+    'M3ETimePickerDialog landscape dial keeps full dial size',
+    _landscapeDialLayout,
+  );
+  testWidgets(
     'M3ETimePicker toggles to input mode without error',
     _inputModeToggle,
   );
@@ -191,6 +195,50 @@ Future<void> _dialogLayout(WidgetTester tester) async {
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
+}
+
+Future<void> _landscapeDialLayout(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(1200, 800));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: M3ETheme(
+        data: M3EThemeData.light(),
+        child: Builder(
+          builder: (BuildContext context) {
+            return M3EButton(
+              onPressed: () {
+                M3ETimePicker.show(
+                  context,
+                  initialTime: const M3ETime(hour: 11, minute: 42),
+                  helpText: 'Select time (dial dialog)',
+                );
+              },
+              child: const Text('open'),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('open'));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+
+  final Size dialSize = tester.getSize(
+    find.descendant(
+      of: find.byType(M3EDialTimePicker),
+      matching: find.byType(CustomPaint),
+    ),
+  );
+  // material_ui landscape budget is tight (216 + 64 + 256 vs 524); dial stays
+  // near full size without FittedBox scale-down of the whole column.
+  expect(dialSize.shortestSide, greaterThanOrEqualTo(240));
+  expect(dialSize.width, closeTo(dialSize.height, 1));
+  expect(find.text('Select time (dial dialog)'), findsOneWidget);
+  expect(find.text('AM'), findsOneWidget);
 }
 
 Future<void> _inputModeToggle(WidgetTester tester) async {

@@ -9,6 +9,7 @@ import 'utils/m3e_time_picker_utils.dart';
 
 export 'components/m3e_day_period_control.dart';
 export 'components/m3e_dial_time_picker.dart';
+export 'components/m3e_hour_minute_text_field.dart';
 export 'components/m3e_input_time_picker_form_field.dart';
 export 'components/m3e_time_picker_actions.dart';
 export 'components/m3e_time_picker_dialog_content.dart';

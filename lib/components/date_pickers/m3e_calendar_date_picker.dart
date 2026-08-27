@@ -158,13 +158,65 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
       builder: (BuildContext context) {
         final theme = M3ETheme.of(context);
         final dateTheme = theme.datePickerTheme;
+
+        if (widget.expandToFit) {
+          // material_ui CalendarDatePicker: picker body + mode toggle in a Stack.
+          // Year mode pads below the sub-header so the toggle overlays the top.
+          final Widget picker = switch (_mode) {
+            M3EDatePickerMode.day => M3EMonthPicker(
+              initialMonth: _displayedMonth,
+              firstDate: _firstDate,
+              lastDate: _lastDate,
+              selectedDate: _selectedDate,
+              currentDate: _currentDate,
+              onChanged: _handleDayChanged,
+              onMonthChanged: _handleMonthChanged,
+              selectableDayPredicate: widget.selectableDayPredicate,
+              expandToFit: true,
+              mode: _mode,
+              onModeChanged: _handleModeChanged,
+            ),
+            M3EDatePickerMode.year => Padding(
+              padding: const EdgeInsets.only(
+                top: M3EDatePickerConstants.subHeaderHeight,
+              ),
+              child: M3EYearPicker(
+                selectedDate: _selectedDate,
+                firstDate: _firstDate,
+                lastDate: _lastDate,
+                onChanged: _handleYearChanged,
+                selectableDayPredicate: widget.selectableDayPredicate,
+                displayedMonth: _displayedMonth,
+              ),
+            ),
+          };
+          return Stack(
+            children: <Widget>[
+              Positioned.fill(child: picker),
+              if (_mode == M3EDatePickerMode.year)
+                M3EDatePickerModeToggle(
+                  mode: _mode,
+                  monthDate: _displayedMonth,
+                  onChanged: _handleModeChanged,
+                ),
+            ],
+          );
+        }
+
         final Widget content = Column(
-          mainAxisSize: widget.expandToFit
-              ? MainAxisSize.max
-              : MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (widget.expandToFit)
-              Expanded(
+            M3EDatePickerModeToggle(
+              mode: _mode,
+              monthDate: _displayedMonth,
+              onChanged: _handleModeChanged,
+            ),
+            AnimatedSize(
+              duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
+              curve: Curves.easeIn,
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                height: _inlinePickerBodyHeight(context),
                 child: switch (_mode) {
                   M3EDatePickerMode.day => M3EMonthPicker(
                     initialMonth: _displayedMonth,
@@ -175,9 +227,6 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
                     onChanged: _handleDayChanged,
                     onMonthChanged: _handleMonthChanged,
                     selectableDayPredicate: widget.selectableDayPredicate,
-                    expandToFit: true,
-                    mode: _mode,
-                    onModeChanged: _handleModeChanged,
                   ),
                   M3EDatePickerMode.year => M3EYearPicker(
                     selectedDate: _selectedDate,
@@ -185,53 +234,13 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
                     lastDate: _lastDate,
                     onChanged: _handleYearChanged,
                     selectableDayPredicate: widget.selectableDayPredicate,
-                    mode: _mode,
-                    onModeChanged: _handleModeChanged,
                     displayedMonth: _displayedMonth,
                   ),
                 },
-              )
-            else ...<Widget>[
-              M3EDatePickerModeToggle(
-                mode: _mode,
-                monthDate: _displayedMonth,
-                onChanged: _handleModeChanged,
               ),
-              AnimatedSize(
-                duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
-                curve: Curves.easeIn,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  height: _inlinePickerBodyHeight(context),
-                  child: switch (_mode) {
-                    M3EDatePickerMode.day => M3EMonthPicker(
-                      initialMonth: _displayedMonth,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      selectedDate: _selectedDate,
-                      currentDate: _currentDate,
-                      onChanged: _handleDayChanged,
-                      onMonthChanged: _handleMonthChanged,
-                      selectableDayPredicate: widget.selectableDayPredicate,
-                    ),
-                    M3EDatePickerMode.year => M3EYearPicker(
-                      selectedDate: _selectedDate,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      onChanged: _handleYearChanged,
-                      selectableDayPredicate: widget.selectableDayPredicate,
-                      displayedMonth: _displayedMonth,
-                    ),
-                  },
-                ),
-              ),
-            ],
+            ),
           ],
         );
-
-        if (widget.expandToFit) {
-          return content;
-        }
 
         return Container(
           width: dateTheme.width,

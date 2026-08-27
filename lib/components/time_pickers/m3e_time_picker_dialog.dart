@@ -1,13 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
 import '../dialogs/components/m3e_dialog_inset.dart';
-import '../divider/m3e_divider.dart';
 import 'components/m3e_dial_time_picker.dart';
 import 'components/m3e_input_time_picker_form_field.dart';
 import 'components/m3e_time_picker_actions.dart';
-import 'components/m3e_time_picker_dialog_content.dart';
 import 'components/m3e_time_picker_header.dart';
 import 'enums/m3e_time_picker_enums.dart';
 import 'models/m3e_time.dart';
@@ -37,7 +37,6 @@ class M3ETimePickerDialog extends StatefulWidget {
   });
 
   /// initialTime.
-
   final M3ETime initialTime;
 
   /// initialEntryMode.
@@ -153,40 +152,37 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     setState(() => _selectedTime.value = M3ETimePickerUtils.clampTime(time));
   }
 
-  Widget _buildPickerBody({
-    required Widget picker,
-    required bool isInputMode,
-    required double? dialHeight,
-  }) {
-    final Widget content = M3ETimePickerDialogContent(
-      isInputMode: isInputMode,
-      child: picker,
-    );
-    return AnimatedSize(
-      duration: M3ETimePickerConstants.dialogSizeAnimationDuration,
-      curve: Curves.easeIn,
-      alignment: Alignment.topCenter,
-      child: isInputMode
-          ? content
-          : SizedBox(height: dialHeight, child: content),
-    );
-  }
-
-  Size _dialogSize(BuildContext context, Orientation orientation) {
+  Size _dialogSize(BuildContext context) {
     final bool isDial = switch (_entryMode.value) {
       M3ETimePickerEntryMode.dial || M3ETimePickerEntryMode.dialOnly => true,
       M3ETimePickerEntryMode.input || M3ETimePickerEntryMode.inputOnly => false,
     };
-    return switch ((isDial, orientation)) {
-      (true, Orientation.portrait) =>
-        M3ETimePickerConstants.dialPortraitDialogSize,
-      (false, Orientation.portrait) =>
-        M3ETimePickerConstants.inputPortraitDialogSize,
-      (true, Orientation.landscape) =>
-        M3ETimePickerConstants.dialLandscapeDialogSize,
-      (false, Orientation.landscape) =>
-        M3ETimePickerConstants.inputLandscapeDialogSize,
-    };
+    final Orientation orientation =
+        widget.orientation ?? MediaQuery.orientationOf(context);
+    if (isDial) {
+      return orientation == Orientation.portrait
+          ? M3ETimePickerConstants.dialPortraitDialogSize
+          : M3ETimePickerConstants.dialLandscapeDialogSize;
+    }
+    final bool use24Hour = M3ETimePickerUtils.use24HourFormat(
+      context,
+      alwaysUse24HourFormat: widget.alwaysUse24HourFormat,
+    );
+    final double baseWidth = M3ETimePickerConstants.inputDialogSize.width;
+    final double height = M3ETimePickerConstants.inputDialogSize.height;
+    if (use24Hour) {
+      final double periodWidth = M3ETheme.of(
+        context,
+      ).timePickerTheme.periodPortraitSize.width;
+      return Size(
+        baseWidth - periodWidth - M3ETimePickerConstants.inputDialogPeriodGap,
+        height,
+      );
+    }
+    return Size(
+      baseWidth - M3ETimePickerConstants.inputDialogWidthInset12Hour,
+      height,
+    );
   }
 
   @override
@@ -196,29 +192,20 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     final localizations = MaterialLocalizations.of(context);
     final Orientation orientation =
         widget.orientation ?? MediaQuery.orientationOf(context);
-    final String titleText = M3ETimePickerUtils.formatTime(
-      context,
-      _selectedTime.value,
-      alwaysUse24HourFormat: widget.alwaysUse24HourFormat,
-    );
+    final String dialHelp =
+        widget.helpText ?? localizations.timePickerDialHelpText;
+    final String inputHelp =
+        widget.helpText ?? localizations.timePickerInputHelpText;
     final ({Widget picker, Widget? entryModeButton}) resolved =
-        _resolvePickerAndEntryButton(localizations);
-    final String helpText = switch (_entryMode.value) {
-      M3ETimePickerEntryMode.input || M3ETimePickerEntryMode.inputOnly =>
-        widget.helpText ?? localizations.timePickerInputHelpText,
-      M3ETimePickerEntryMode.dial || M3ETimePickerEntryMode.dialOnly =>
-        widget.helpText ?? localizations.timePickerDialHelpText,
-    };
-    final Widget header = M3ETimePickerHeader(
-      helpText: helpText,
-      titleText: titleText,
-      showTitle: true,
-      orientation: orientation,
-      isShort:
-          orientation == Orientation.landscape &&
-          (_entryMode.value == M3ETimePickerEntryMode.input ||
-              _entryMode.value == M3ETimePickerEntryMode.inputOnly),
-    );
+        _resolvePickerAndEntryButton(
+          localizations: localizations,
+          orientation: orientation,
+          dialHelp: dialHelp,
+          inputHelp: inputHelp,
+        );
+    final bool isInputMode =
+        _entryMode.value == M3ETimePickerEntryMode.input ||
+        _entryMode.value == M3ETimePickerEntryMode.inputOnly;
     final Widget actions = M3ETimePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
@@ -231,82 +218,66 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
             .clamp(maxScaleFactor: M3ETimePickerConstants.maxTextScaleFactor)
             .scale(M3ETimePickerConstants.fontSizeToScale) /
         M3ETimePickerConstants.fontSizeToScale;
-    final Size dialogSize = _dialogSize(context, orientation) * textScaleFactor;
-    final bool isInputMode =
-        _entryMode.value == M3ETimePickerEntryMode.input ||
-        _entryMode.value == M3ETimePickerEntryMode.inputOnly;
-    final EdgeInsets dialogPadding = theme.dialogTheme.padding;
-    final Widget pickerBody = _buildPickerBody(
-      picker: resolved.picker,
-      isInputMode: isInputMode,
-      dialHeight: isInputMode || orientation == Orientation.landscape
-          ? null
-          : M3ETimePickerConstants.dialDialogBodyHeight +
-                dialogPadding.vertical,
-    );
+    final Size dialogSize = _dialogSize(context) * textScaleFactor;
+
     return M3EDialogInset(
-      padding: widget.insetPadding,
+      padding: EdgeInsets.only(
+        left: widget.insetPadding.left,
+        right: widget.insetPadding.right,
+        top: isInputMode ? 0 : widget.insetPadding.top,
+        bottom: isInputMode ? 0 : widget.insetPadding.bottom,
+      ),
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       child: Material(
         color: timeTheme.backgroundColor(theme.colorScheme),
         elevation: timeTheme.elevation,
         shape: RoundedRectangleBorder(borderRadius: timeTheme.dialogShape),
         clipBehavior: Clip.antiAlias,
-        child: AnimatedContainer(
-          width: dialogSize.width,
-          height: orientation == Orientation.landscape
-              ? dialogSize.height
-              : null,
-          duration: M3ETimePickerConstants.dialogSizeAnimationDuration,
-          curve: Curves.easeIn,
-          child: switch (orientation) {
-            Orientation.portrait => Column(
+        child: Padding(
+          padding: timeTheme.padding,
+          child: AnimatedContainer(
+            width: dialogSize.width,
+            duration: M3ETimePickerConstants.dialogSizeAnimationDuration,
+            curve: Curves.easeIn,
+            constraints: BoxConstraints(
+              minHeight: math.min(216, dialogSize.height),
+              maxHeight: dialogSize.height,
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                header,
-                M3EDivider(color: timeTheme.dividerColor(theme.colorScheme)),
-                pickerBody,
+                if (isInputMode)
+                  resolved.picker
+                else
+                  Flexible(child: resolved.picker),
                 actions,
               ],
             ),
-            Orientation.landscape => Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                header,
-                M3EDivider(
-                  axis: M3EDividerAxis.vertical,
-                  color: timeTheme.dividerColor(theme.colorScheme),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Expanded(
-                        child: isInputMode
-                            ? SingleChildScrollView(child: pickerBody)
-                            : pickerBody,
-                      ),
-                      actions,
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          },
+          ),
         ),
       ),
     );
   }
 
-  ({Widget picker, Widget? entryModeButton}) _resolvePickerAndEntryButton(
-    MaterialLocalizations localizations,
-  ) {
+  ({Widget picker, Widget? entryModeButton}) _resolvePickerAndEntryButton({
+    required MaterialLocalizations localizations,
+    required Orientation orientation,
+    required String dialHelp,
+    required String inputHelp,
+  }) {
     switch (_entryMode.value) {
       case M3ETimePickerEntryMode.dial:
         return (
-          picker: _buildDialPicker(),
+          picker: M3EDialTimePicker(
+            value: _selectedTime.value,
+            onChanged: _handleTimeChanged,
+            use24HourFormat: widget.alwaysUse24HourFormat,
+            orientation: orientation,
+            expandToFit: true,
+            helpText: dialHelp,
+          ),
           entryModeButton: M3ETimePickerEntryModeButton(
             icon: M3EIcons.keyboard_outlined,
             tooltip: localizations.inputTimeModeButtonLabel,
@@ -314,7 +285,17 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
           ),
         );
       case M3ETimePickerEntryMode.dialOnly:
-        return (picker: _buildDialPicker(), entryModeButton: null);
+        return (
+          picker: M3EDialTimePicker(
+            value: _selectedTime.value,
+            onChanged: _handleTimeChanged,
+            use24HourFormat: widget.alwaysUse24HourFormat,
+            orientation: orientation,
+            expandToFit: true,
+            helpText: dialHelp,
+          ),
+          entryModeButton: null,
+        );
       case M3ETimePickerEntryMode.input:
       case M3ETimePickerEntryMode.inputOnly:
         return (
@@ -327,6 +308,7 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
               },
               child: M3EInputTimePickerFormField(
                 initialTime: _selectedTime.value,
+                helpText: inputHelp,
                 onTimeSubmitted: _handleTimeChanged,
                 onTimeSaved: _handleTimeChanged,
                 errorInvalidText: widget.errorInvalidText,
@@ -346,16 +328,6 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
               : null,
         );
     }
-  }
-
-  Widget _buildDialPicker() {
-    return M3EDialTimePicker(
-      value: _selectedTime.value,
-      onChanged: _handleTimeChanged,
-      use24HourFormat: widget.alwaysUse24HourFormat,
-      orientation: widget.orientation ?? MediaQuery.orientationOf(context),
-      expandToFit: true,
-    );
   }
 }
 

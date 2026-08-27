@@ -5,7 +5,6 @@ import '../../foundations/foundations.dart';
 import '../dialogs/components/m3e_dialog_inset.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_date_picker_actions.dart';
-import 'components/m3e_date_picker_dialog_content.dart';
 import 'components/m3e_date_picker_header.dart';
 import 'components/m3e_input_date_picker_form_field.dart';
 import 'enums/m3e_date_picker_enums.dart';
@@ -112,21 +111,6 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
   final _RestorableAutovalidateMode _autovalidateMode =
       _RestorableAutovalidateMode(AutovalidateMode.disabled);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late DateTime _displayedMonth;
-  M3EDatePickerMode _calendarMode = M3EDatePickerMode.day;
-
-  @override
-  void initState() {
-    super.initState();
-    final DateTime currentDate = M3EDatePickerUtils.dateOnly(
-      widget.currentDate ?? DateTime.now(),
-    );
-    final DateTime base = widget.initialDate != null
-        ? M3EDatePickerUtils.dateOnly(widget.initialDate!)
-        : currentDate;
-    _displayedMonth = M3EDatePickerUtils.getMonth(base.year, base.month);
-    _calendarMode = widget.initialCalendarMode;
-  }
 
   @override
   String? get restorationId => widget.restorationId;
@@ -184,46 +168,43 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
     setState(() => _selectedDate.value = M3EDatePickerUtils.dateOnly(date));
   }
 
-  void _handleDisplayedMonthChanged(DateTime month) {
-    setState(() => _displayedMonth = month);
-  }
-
-  void _handleCalendarModeChanged(M3EDatePickerMode mode) {
-    setState(() => _calendarMode = mode);
-  }
-
-  double _calendarBodyHeight(BuildContext context) {
-    final int firstDayOfWeekIndex = MaterialLocalizations.of(
-      context,
-    ).firstDayOfWeekIndex;
-    if (_calendarMode == M3EDatePickerMode.year) {
-      return M3EDatePickerUtils.calendarYearViewHeight(
-        widget.firstDate,
-        widget.lastDate,
-      );
+  Widget _buildPickerBody({required Widget picker, required bool isInputMode}) {
+    if (!isInputMode) {
+      return picker;
     }
-    return M3EDatePickerUtils.calendarDayViewHeight(
-      _displayedMonth,
-      firstDayOfWeekIndex,
+    final orientation = MediaQuery.orientationOf(context);
+    final formHeight = orientation == Orientation.portrait
+        ? M3EDatePickerConstants.inputFormPortraitHeight
+        : M3EDatePickerConstants.inputFormLandscapeHeight;
+    // material_ui input form uses horizontal 24; content column already insets 16.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Flexible(
+            child: SizedBox(height: formHeight, child: picker),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildPickerBody({
-    required Widget picker,
-    required bool isInputMode,
-    required double? calendarHeight,
+  Widget _buildContentColumn({
+    required Widget pickerBody,
+    required Widget actions,
   }) {
-    final Widget content = M3EDatePickerDialogContent(
-      isInputMode: isInputMode,
-      child: picker,
-    );
-    return AnimatedSize(
-      duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
-      curve: Curves.easeIn,
-      alignment: Alignment.topCenter,
-      child: isInputMode
-          ? content
-          : SizedBox(height: calendarHeight, child: content),
+    // Inset picker + actions from dialog edges (input was flush to the top;
+    // actions sat on the bottom/side edges).
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(child: pickerBody),
+          actions,
+        ],
+      ),
     );
   }
 
@@ -267,22 +248,24 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
           lastDate: lastDate,
           currentDate: currentDate,
         );
+    final bool isInputMode =
+        _entryMode.value == M3EDatePickerEntryMode.input ||
+        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
     final Widget header = M3EDatePickerHeader(
       helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: titleText,
       showTitle: _selectedDate.value != null,
       orientation: orientation,
-      isShort:
-          orientation == Orientation.landscape &&
-          (_entryMode.value == M3EDatePickerEntryMode.input ||
-              _entryMode.value == M3EDatePickerEntryMode.inputOnly),
+      isShort: orientation == Orientation.landscape,
+      alignHelpWithSubHeader:
+          orientation == Orientation.landscape && !isInputMode,
+      entryModeButton: resolved.entryModeButton,
     );
     final Widget actions = M3EDatePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
-      entryModeButton: resolved.entryModeButton,
     );
     final double textScaleFactor =
         MediaQuery.textScalerOf(context)
@@ -290,15 +273,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
             .scale(M3EDatePickerConstants.fontSizeToScale) /
         M3EDatePickerConstants.fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final bool isInputMode =
-        _entryMode.value == M3EDatePickerEntryMode.input ||
-        _entryMode.value == M3EDatePickerEntryMode.inputOnly;
     final Widget pickerBody = _buildPickerBody(
       picker: resolved.picker,
       isInputMode: isInputMode,
-      calendarHeight: isInputMode || orientation == Orientation.landscape
-          ? null
-          : _calendarBodyHeight(context),
     );
     return M3EDialogInset(
       padding: widget.insetPadding,
@@ -310,20 +287,21 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: AnimatedContainer(
           width: dialogSize.width,
-          height: orientation == Orientation.landscape
-              ? dialogSize.height
-              : null,
+          height: dialogSize.height,
           duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
           curve: Curves.easeIn,
           child: switch (orientation) {
             Orientation.portrait => Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 header,
                 M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
-                pickerBody,
-                actions,
+                Expanded(
+                  child: _buildContentColumn(
+                    pickerBody: pickerBody,
+                    actions: actions,
+                  ),
+                ),
               ],
             ),
             Orientation.landscape => Row(
@@ -336,16 +314,9 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
                   color: dateTheme.dividerColor(theme.colorScheme),
                 ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Expanded(
-                        child: isInputMode
-                            ? SingleChildScrollView(child: pickerBody)
-                            : pickerBody,
-                      ),
-                      actions,
-                    ],
+                  child: _buildContentColumn(
+                    pickerBody: pickerBody,
+                    actions: actions,
                   ),
                 ),
               ],
@@ -371,7 +342,7 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
             currentDate: currentDate,
           ),
           entryModeButton: M3EDatePickerEntryModeButton(
-            icon: M3EIcons.keyboard_outlined,
+            icon: M3EIcons.edit_outlined,
             tooltip: localizations.inputDateModeButtonLabel,
             onPressed: _handleEntryModeToggle,
           ),
@@ -436,8 +407,6 @@ class _M3EDatePickerDialogState extends State<M3EDatePickerDialog>
       initialCalendarMode: widget.initialCalendarMode,
       selectableDayPredicate: widget.selectableDayPredicate,
       onDateChanged: _handleDateChanged,
-      onDisplayedMonthChanged: _handleDisplayedMonthChanged,
-      onCalendarModeChanged: _handleCalendarModeChanged,
       expandToFit: true,
     );
   }
