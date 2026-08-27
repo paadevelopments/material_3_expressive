@@ -1186,8 +1186,15 @@ M3ETabs(
 
 #### M3ENavigationBar
 
-Bottom navigation for compact layouts. Destinations use a click mouse cursor on
-desktop/web (same for rail and drawer).
+Bottom navigation for compact and wide layouts. With `autoLayout: true` (default),
+the bar switches to a horizontal icon+label chip group once its own width can fit
+all destinations at the fixed wide chip width (`wideDestinationWidth`, default
+`128`) — see `M3ENavBarConstants.minWideBarWidth`. Override with `wideBreakpoint`
+and/or `wideDestinationWidth`. Wide mode keeps the bar full width and only aligns
+the destination group (`alignment`: start / center / end). Destinations may be
+icon-only, label-only, or both. Destinations use a click mouse cursor on
+desktop/web (same for rail and drawer). Layout enums, theme, and
+`M3ENavBarConstants` ship with the navigation bar entry / package barrel.
 
 ```dart
 // in State
@@ -1199,6 +1206,36 @@ M3ENavigationBar(
       label: 'Search',
       badgeDot: true,
     ),
+  ],
+  selectedIndex: barIndex,
+  onDestinationSelected: (i) => setState(() => barIndex = i),
+);
+
+// Force wide layout (autoLayout off) with end-aligned chips
+M3ENavigationBar(
+  autoLayout: false,
+  layout: M3ENavBarLayout.wide,
+  alignment: M3ENavBarAlignment.end,
+  wideDestinationWidth: 128,
+  iconBehavior: M3ENavBarIconBehavior.alwaysShow,
+  labelBehavior: M3ENavBarLabelBehavior.alwaysShow,
+  destinations: const [
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(label: 'Browse'), // label-only
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.radio)), // icon-only
+  ],
+  selectedIndex: barIndex,
+  onDestinationSelected: (i) => setState(() => barIndex = i),
+);
+
+// Custom autoLayout breakpoint + chip width
+M3ENavigationBar(
+  autoLayout: true,
+  wideBreakpoint: 720,
+  wideDestinationWidth: 140,
+  destinations: const [
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Search'),
   ],
   selectedIndex: barIndex,
   onDestinationSelected: (i) => setState(() => barIndex = i),

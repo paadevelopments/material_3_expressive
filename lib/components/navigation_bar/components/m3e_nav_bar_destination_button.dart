@@ -1,17 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/navigation_bar/m3e_navigation_bar.dart'
-    show M3ENavigationBar;
-import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3ENavigationBar;
 
 import '../../../foundations/foundations.dart';
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
 import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_navigation_bar_destination.dart';
+import '../res/m3e_nav_bar_constants.dart';
 
-/// Single destination cell inside [M3ENavigationBar].
+/// Single destination cell inside the M3E navigation bar.
 ///
 /// No ink splash — selection feedback is the pill (local resting fill plus the
 /// shared liquid morph overlay while traveling).
@@ -25,6 +22,8 @@ class M3ENavBarDestinationButton extends StatelessWidget {
     required this.labelStyle,
     required this.iconSize,
     required this.labelBehavior,
+    required this.iconBehavior,
+    required this.layout,
     required this.indicatorStyle,
     required this.indicatorKey,
     required this.indicatorWidth,
@@ -33,13 +32,13 @@ class M3ENavBarDestinationButton extends StatelessWidget {
     required this.underlineColor,
     required this.indicatorColor,
     required this.onTap,
+    this.wideDestinationWidth,
     this.haptic = M3EHapticFeedback.none,
     this.showRestingPill = true,
     super.key,
   });
 
   /// destination.
-
   final M3ENavigationBarDestination destination;
 
   /// selected.
@@ -60,6 +59,12 @@ class M3ENavBarDestinationButton extends StatelessWidget {
   /// labelBehavior.
   final M3ENavBarLabelBehavior labelBehavior;
 
+  /// iconBehavior.
+  final M3ENavBarIconBehavior iconBehavior;
+
+  /// layout.
+  final M3ENavBarLayout layout;
+
   /// indicatorStyle.
   final M3ENavBarIndicatorStyle indicatorStyle;
 
@@ -71,6 +76,9 @@ class M3ENavBarDestinationButton extends StatelessWidget {
 
   /// indicatorHeight.
   final double indicatorHeight;
+
+  /// Fixed chip width in wide layout (ignored in compact).
+  final double? wideDestinationWidth;
 
   /// underlineThickness.
   final double underlineThickness;
@@ -91,67 +99,43 @@ class M3ENavBarDestinationButton extends StatelessWidget {
   final bool showRestingPill;
 
   bool get _showLabel {
-    switch (labelBehavior) {
-      case M3ENavBarLabelBehavior.alwaysShow:
-        return true;
-      case M3ENavBarLabelBehavior.onlySelected:
-        return selected;
-      case M3ENavBarLabelBehavior.alwaysHide:
-        return false;
+    if (!destination.hasLabel) {
+      return false;
     }
+    return switch (labelBehavior) {
+      M3ENavBarLabelBehavior.alwaysShow => true,
+      M3ENavBarLabelBehavior.onlySelected => selected,
+      M3ENavBarLabelBehavior.alwaysHide => false,
+    };
   }
+
+  bool get _showIcon {
+    if (!destination.hasIcon) {
+      return false;
+    }
+    return switch (iconBehavior) {
+      M3ENavBarIconBehavior.alwaysShow => true,
+      M3ENavBarIconBehavior.onlySelected => selected,
+      M3ENavBarIconBehavior.alwaysHide => false,
+    };
+  }
+
+  bool get _paintRestingPill =>
+      selected &&
+      showRestingPill &&
+      indicatorStyle == M3ENavBarIndicatorStyle.pill;
 
   @override
   Widget build(BuildContext context) {
     final Color fg = selected ? selectedColor : unselectedColor;
-    Widget icon = M3ENavIconScale(
-      selected: selected,
-      child: IconTheme.merge(
-        data: IconThemeData(color: fg, size: iconSize),
-        child: destination.buildIcon(selected: selected),
-      ),
-    );
-
-    final bool paintRestingPill =
-        selected &&
-        showRestingPill &&
-        indicatorStyle == M3ENavBarIndicatorStyle.pill;
-
-    icon = KeyedSubtree(
-      key: indicatorKey,
-      child: SizedBox(
-        width: indicatorWidth,
-        height: indicatorHeight,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: paintRestingPill ? indicatorColor : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(
-              math.min(indicatorWidth, indicatorHeight) / 2,
-            ),
-          ),
-          child: Center(child: icon),
-        ),
-      ),
-    );
-
-    if (indicatorStyle == M3ENavBarIndicatorStyle.underline && selected) {
-      icon = DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: underlineColor,
-              width: underlineThickness,
-            ),
-          ),
-        ),
-        child: icon,
-      );
-    }
+    final Widget content = layout == M3ENavBarLayout.wide
+        ? _buildWideContent(fg)
+        : _buildCompactContent(fg);
 
     return Semantics(
       button: true,
       selected: selected,
-      label: destination.semanticLabel ?? destination.label,
+      label: destination.resolvedSemanticLabel,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
@@ -160,23 +144,159 @@ class M3ENavBarDestinationButton extends StatelessWidget {
             M3EHaptics.trigger(haptic);
             onTap();
           },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              icon,
-              if (_showLabel) ...<Widget>[
-                const SizedBox(height: 4),
-                Text(
-                  destination.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: labelStyle.copyWith(color: fg),
-                ),
-              ],
-            ],
+          child: content,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactContent(Color fg) {
+    Widget? icon;
+    if (_showIcon) {
+      icon = M3ENavIconScale(
+        selected: selected,
+        child: IconTheme.merge(
+          data: IconThemeData(color: fg, size: iconSize),
+          child: destination.buildIcon(selected: selected),
+        ),
+      );
+      icon = KeyedSubtree(
+        key: indicatorKey,
+        child: SizedBox(
+          width: indicatorWidth,
+          height: indicatorHeight,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: _paintRestingPill
+                  ? indicatorColor
+                  : const Color(0x00000000),
+              borderRadius: BorderRadius.circular(
+                math.min(indicatorWidth, indicatorHeight) / 2,
+              ),
+            ),
+            child: Center(child: icon),
+          ),
+        ),
+      );
+      if (indicatorStyle == M3ENavBarIndicatorStyle.underline && selected) {
+        icon = DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: underlineColor,
+                width: underlineThickness,
+              ),
+            ),
+          ),
+          child: icon,
+        );
+      }
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        ?icon,
+        if (_showLabel) ...<Widget>[
+          if (icon != null) const SizedBox(height: 4),
+          Text(
+            destination.label!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: labelStyle.copyWith(color: fg),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildWideContent(Color fg) {
+    final List<Widget> children = _wideChipChildren(fg);
+    Widget chip = _buildWideChip(children);
+    if (indicatorStyle == M3ENavBarIndicatorStyle.underline && selected) {
+      chip = _wrapWideUnderline(chip);
+    }
+    return Center(child: chip);
+  }
+
+  List<Widget> _wideChipChildren(Color fg) {
+    final children = <Widget>[];
+    if (_showIcon) {
+      children.add(
+        M3ENavIconScale(
+          selected: selected,
+          child: IconTheme.merge(
+            data: IconThemeData(color: fg, size: iconSize),
+            child: destination.buildIcon(selected: selected),
+          ),
+        ),
+      );
+    }
+    if (_showLabel) {
+      if (children.isNotEmpty) {
+        children.add(
+          const SizedBox(width: M3ENavBarConstants.wideIconLabelGap),
+        );
+      }
+      children.add(
+        Flexible(
+          child: Text(
+            destination.label!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: labelStyle.copyWith(color: fg),
+          ),
+        ),
+      );
+    }
+    return children;
+  }
+
+  double get _wideChipHorizontalPadding {
+    // Stadium radius is height/2; horizontal padding must clear the curved
+    // caps or the icon sits in the cutout and looks clipped by the pill.
+    return math.max(
+      M3ENavBarConstants.widePillHorizontalPadding,
+      indicatorHeight / 2 + M3ENavBarConstants.widePillCapClearance,
+    );
+  }
+
+  Widget _buildWideChip(List<Widget> children) {
+    final double chipWidth =
+        wideDestinationWidth ?? M3ENavBarConstants.wideDestinationWidth;
+    return KeyedSubtree(
+      key: indicatorKey,
+      child: SizedBox(
+        width: chipWidth,
+        height: indicatorHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _paintRestingPill ? indicatorColor : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(indicatorHeight / 2),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: _wideChipHorizontalPadding,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: children,
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _wrapWideUnderline(Widget chip) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: underlineColor, width: underlineThickness),
+        ),
+      ),
+      child: chip,
     );
   }
 }

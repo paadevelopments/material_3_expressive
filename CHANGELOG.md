@@ -21,16 +21,43 @@
   controls.
 * Export `buildM3EThemeDefaults()` and `M3EDynamicColorHost` through
   `foundations.dart`.
+* `M3EHourMinuteTextField` for Material-aligned hour/minute time inputs
+  (used by the input time picker; exported from the time pickers entry).
+* `M3ENavigationBar` wide layout APIs: `autoLayout`, `layout`
+  (`M3ENavBarLayout`), `alignment` (`M3ENavBarAlignment`), `iconBehavior`
+  (`M3ENavBarIconBehavior`), optional `wideBreakpoint` and
+  `wideDestinationWidth`, plus `M3ENavBarConstants` (default chip width `128`,
+  documented 5-destination breakpoint, `minWideBarWidth`). Destinations may be
+  icon-only and/or label-only. Wide chips use a fixed width so the fluid pill
+  does not clip when icons or labels appear or disappear.
 
 ### Changed
 
-* **No breaking API changes** in 1.1.1 — typography additions are additive;
-  `M3EThemeData.typeScale` remains a baseline alias for components.
+* Typography additions are additive; `M3EThemeData.typeScale` remains a
+  baseline alias for components.
 * Foundations sources grouped under `lib/foundations/{color,shape,theme,type,interaction,tokens}/`;
   the public barrel path is unchanged for consumers.
+* Date and time pickers aligned closer to Material dialog specs: landscape
+  dialog sizing (12/24-hour), standardized content padding, unified action
+  bars, calendar/year responsive layouts (year mode toggle stacked in the
+  calendar parent), dial help-text layout, and input-time fields with labels
+  under the boxes and AM/PM top-aligned with the hour/minute row.
+* `M3EYearPicker` no longer takes `mode` / `onModeChanged` — the mode header
+  lives on the parent calendar. Call sites that passed those arguments should
+  drop them (the built-in `M3ECalendarDatePicker` already hosts the toggle).
+* `M3ENavBarConstants.wideBreakpoint` default is sized for five fixed-width
+  wide chips (`704` at the default `128` chip width) instead of a flat `600`.
+  When `wideBreakpoint` is omitted on the bar, autoLayout uses
+  `minWideBarWidth` for the current destination count and chip width.
+* README: document `M3ENavigationBar` wide-layout public surface and samples.
 
 ### Fixed
 
+* Date picker landscape/year layouts: year grid overflow and vertical stretch,
+  header alignment with calendar and actions, help text compact only in input
+  entry mode (`alignHelpWithSubHeader`).
+* Time picker landscape dial: help text no longer covered by hour/minute
+  fields; input mode field geometry matches filled Material time inputs.
 * Complete public surface exports from all component entry files so
   `import 'package:material_3_expressive/material_3_expressive.dart'` is
   sufficient: missing themes/decorations (app bar, FAB, navigation drawer,

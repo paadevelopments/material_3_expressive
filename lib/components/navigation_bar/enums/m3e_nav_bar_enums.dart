@@ -10,6 +10,39 @@ enum M3ENavBarLabelBehavior {
   alwaysHide,
 }
 
+/// Controls when destination icons are shown in the navigation bar.
+enum M3ENavBarIconBehavior {
+  /// Always show destination icons.
+  alwaysShow,
+
+  /// Show the icon only on the selected destination.
+  onlySelected,
+
+  /// Never show destination icons.
+  alwaysHide,
+}
+
+/// Destination item arrangement for the navigation bar.
+enum M3ENavBarLayout {
+  /// Vertical icon-over-label cells that expand equally.
+  compact,
+
+  /// Horizontal icon+label chips packed as a group inside a full-width bar.
+  wide,
+}
+
+/// Horizontal placement of the destination group in [M3ENavBarLayout.wide].
+enum M3ENavBarAlignment {
+  /// Pack destinations toward the start (left in LTR).
+  start,
+
+  /// Center the destination group in the bar.
+  center,
+
+  /// Pack destinations toward the end (right in LTR).
+  end,
+}
+
 /// The overall height variant of the navigation bar.
 enum M3ENavBarSize {
   /// Compact navigation bar height.
