@@ -5,7 +5,6 @@ import '../dialogs/components/m3e_dialog_inset.dart';
 import '../divider/m3e_divider.dart';
 import 'components/m3e_calendar_date_range_picker.dart';
 import 'components/m3e_date_picker_actions.dart';
-import 'components/m3e_date_picker_dialog_content.dart';
 import 'components/m3e_date_picker_header.dart';
 import 'components/m3e_input_date_range_picker_form_field.dart';
 import 'enums/m3e_date_picker_enums.dart';
@@ -228,36 +227,49 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                 )
                 .scale(M3EDatePickerConstants.fontSizeToScale) /
             M3EDatePickerConstants.fontSizeToScale);
-    final Widget pickerBody = AnimatedSize(
-      duration: M3EDatePickerConstants.dialogSizeAnimationDuration,
-      curve: Curves.easeIn,
-      alignment: Alignment.topCenter,
-      child: isInputMode || orientation == Orientation.landscape
-          ? M3EDatePickerDialogContent(
-              isInputMode: isInputMode,
-              child: resolved.picker,
-            )
-          : SizedBox(
-              height: M3EDatePickerConstants.dialogPickerBodyHeight,
-              child: resolved.picker,
+    final Widget pickerBody = isInputMode
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Flexible(
+                  child: SizedBox(
+                    height: orientation == Orientation.portrait
+                        ? M3EDatePickerConstants.inputFormPortraitHeight
+                        : M3EDatePickerConstants.inputFormLandscapeHeight,
+                    child: resolved.picker,
+                  ),
+                ),
+              ],
             ),
-    );
+          )
+        : resolved.picker;
     final Widget header = M3EDatePickerHeader(
       helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
       titleText: _headerTitle(localizations),
       showTitle: _startDate.value != null,
       orientation: orientation,
-      isShort:
-          orientation == Orientation.landscape &&
-          (_entryMode.value == M3EDatePickerEntryMode.input ||
-              _entryMode.value == M3EDatePickerEntryMode.inputOnly),
+      isShort: orientation == Orientation.landscape,
+      alignHelpWithSubHeader:
+          orientation == Orientation.landscape && !isInputMode,
+      entryModeButton: resolved.entryModeButton,
     );
     final Widget actions = M3EDatePickerActions(
       cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
       confirmText: widget.confirmText ?? localizations.okButtonLabel,
       onCancel: _handleCancel,
       onConfirm: _handleOk,
-      entryModeButton: resolved.entryModeButton,
+    );
+    final Widget content = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(child: pickerBody),
+          actions,
+        ],
+      ),
     );
     return M3EDialogInset(
       padding: widget.insetPadding,
@@ -269,18 +281,14 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: dialogSize.width,
-          height: orientation == Orientation.landscape
-              ? dialogSize.height
-              : null,
+          height: dialogSize.height,
           child: switch (orientation) {
             Orientation.portrait => Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 header,
                 M3EDivider(color: dateTheme.dividerColor(theme.colorScheme)),
-                pickerBody,
-                actions,
+                Expanded(child: content),
               ],
             ),
             Orientation.landscape => Row(
@@ -292,19 +300,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
                   axis: M3EDividerAxis.vertical,
                   color: dateTheme.dividerColor(theme.colorScheme),
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Expanded(
-                        child: isInputMode
-                            ? SingleChildScrollView(child: pickerBody)
-                            : pickerBody,
-                      ),
-                      actions,
-                    ],
-                  ),
-                ),
+                Expanded(child: content),
               ],
             ),
           },
@@ -328,7 +324,7 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
             currentDate: currentDate,
           ),
           entryModeButton: M3EDatePickerEntryModeButton(
-            icon: M3EIcons.keyboard_outlined,
+            icon: M3EIcons.edit_outlined,
             tooltip: localizations.inputDateModeButtonLabel,
             onPressed: _handleEntryModeToggle,
           ),

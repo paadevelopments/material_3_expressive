@@ -126,19 +126,18 @@ class ThemeConfigPage extends StatelessWidget {
 
   Widget _type(M3EThemeData theme, ExampleThemeSettings settings) {
     final M3EColorScheme scheme = theme.colorScheme;
-    final bool stylesEnabled =
-        settings.fontFamily == ExampleThemeSettings.robotoFlex;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Type',
+          'Font family',
           style: theme.typeScale.titleMedium.copyWith(color: scheme.onSurface),
         ),
         const SizedBox(height: 4),
         Text(
-          'Family applies to every role. Styles use Roboto Flex axes.',
+          'Applies app-wide. For type scale, axes, and conversion, open '
+          'View → Typography.',
           style: theme.typeScale.bodyMedium.copyWith(
             color: scheme.onSurfaceVariant,
           ),
@@ -148,6 +147,14 @@ class ThemeConfigPage extends StatelessWidget {
           spacing: 16,
           runSpacing: 16,
           children: <Widget>[
+            _FamilySwatch(
+              label: 'Sans',
+              family: ExampleThemeSettings.googleSansFlex,
+              selected:
+                  settings.fontFamily == ExampleThemeSettings.googleSansFlex,
+              onTap: () =>
+                  settings.fontFamily = ExampleThemeSettings.googleSansFlex,
+            ),
             _FamilySwatch(
               label: 'System',
               family: null,
@@ -168,33 +175,6 @@ class ThemeConfigPage extends StatelessWidget {
               onTap: () =>
                   settings.fontFamily = ExampleThemeSettings.robotoMono,
             ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Style',
-          style: theme.typeScale.titleSmall.copyWith(color: scheme.onSurface),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          stylesEnabled
-              ? 'Emphasized, width, and roundness on Roboto Flex.'
-              : 'Pick Flex to apply M3 Expressive type styles.',
-          style: theme.typeScale.bodyMedium.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: <Widget>[
-            for (final ExampleTypeStyle style in ExampleTypeStyle.values)
-              _StyleChip(
-                label: style.label,
-                selected: stylesEnabled && settings.typeStyle == style,
-                onTap: stylesEnabled ? () => settings.typeStyle = style : null,
-              ),
           ],
         ),
       ],
@@ -331,62 +311,6 @@ class _FamilySwatch extends StatelessWidget {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-}
-
-/// One type-style choice.
-class _StyleChip extends StatelessWidget {
-  const _StyleChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3EColorScheme scheme = theme.colorScheme;
-    final bool enabled = onTap != null;
-
-    return M3ETappable(
-      onTap: onTap,
-      enabled: enabled,
-      semanticLabel: '$label type',
-      excludeSemantics: true,
-      pressedScale: 0.96,
-      haptic: M3EHapticFeedback.light,
-      builder: (BuildContext context, M3EInteractionState state) {
-        return AnimatedContainer(
-          duration: M3EMotion.short3,
-          curve: M3EMotion.standard,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? scheme.secondaryContainer
-                : scheme.surfaceContainerHighest.withValues(
-                    alpha: enabled ? 1 : 0.38,
-                  ),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? scheme.onSurface : scheme.outlineVariant,
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: Text(
-            label,
-            style: theme.typeScale.labelLarge.copyWith(
-              color: enabled
-                  ? (selected ? scheme.onSurface : scheme.onSurfaceVariant)
-                  : scheme.onSurface.withValues(alpha: 0.38),
-            ),
-          ),
         );
       },
     );

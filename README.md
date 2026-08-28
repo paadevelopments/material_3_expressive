@@ -42,15 +42,16 @@ the current controls (copy to clipboard).
 | --- | ----------- | ---------- |
 | **Do** | [`playground/do/`](example/lib/pages/playground/do/) | Buttons, FABs, FAB menu, groups, segmented & split buttons |
 | **Pick** | [`playground/pick/`](example/lib/pages/playground/pick/) | Checkbox, radio, switch, chips, dropdown, slider (incl. wavy), pickers |
-| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets, shapes |
+| **View** | [`playground/view/`](example/lib/pages/playground/view/) | Cards, carousel, lists, selection, divider, dialogs, sheets, shapes, typography |
 | **Nav** | [`playground/nav/`](example/lib/pages/playground/nav/) | App bars (incl. search), tabs, nav bar/rail/drawer, toolbar, menu |
 | **Find** | [`playground/find/`](example/lib/pages/playground/find/) | Badges, progress, refresh, tooltip, snackbar, inputs |
 
 The gallery shell in [`example/lib/main.dart`](example/lib/main.dart) uses
 `M3EMaterialApp` with adaptive theming, a light/dark toggle, and a palette
 action that opens [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart)
-(auto theming, dynamic color, five seed colors, font family, and M3 Expressive
-type styles on Roboto Flex).
+(auto theming, dynamic color, five seed colors, and font family — default
+**Google Sans Flex**). For type scale, variable-font axes, and style
+conversion, use the **Typography** playground under the View tab.
 
 ```bash
 cd example
@@ -106,7 +107,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.1.0
+  material_3_expressive: ^1.1.1
 ```
 
 Then fetch it:
@@ -218,47 +219,87 @@ final custom = theme.copyWith(
 Key properties on `M3EThemeData`:
 
 - `colorScheme` — `M3EColorScheme` with M3 semantic roles
-- `typeScale` — `M3ETypeScale` (display, headline, title, label, body)
+- `typography` — `M3ETypography` with baseline and emphasized scales (30 styles)
+- `typeScale` — baseline alias for `typography.baseline` (used by components)
 - `spacing`, `visualDensity`, per-component `*Theme` extensions
 
+The M3 type system has 15 baseline and 15 emphasized roles. Use emphasized
+styles for selection, actions, and editorial hierarchy:
+
+```dart
+final theme = M3ETheme.of(context);
+Text('Headline', style: theme.typography.emphasized.headlineSmall);
+```
+
 Shared typography (font family, fallback, package, size factor/delta, color,
-decoration, and variable-font axes) is a one-knob on the type scale — not a
-full `TextStyle`:
+decoration, brand/plain typefaces, and variable-font axes) is applied through
+`M3ETypography.apply` or theme `copyWith` — not a full `TextStyle`:
 
 ```dart
 final themed = M3EThemeData.light(seedColor: seed).copyWith(
-  typeScale: M3ETypeScale.baseline().apply(
+  typography: M3ETypography.material3().apply(
     fontFamily: 'Roboto Flex',
-    fontVariations: M3ETypeVariations.emphasized.variations,
+    fontVariations: M3ETypeVariations.graded.variations,
   ),
 );
 
-// Sugar: same result without building a type scale by hand
+// Sugar: same result without building typography by hand
 final alsoThemed = M3EThemeData.light(seedColor: seed).copyWith(
   fontFamily: 'Roboto Flex',
-  fontVariations: M3ETypeVariations.emphasized.variations,
+  fontVariations: M3ETypeVariations.graded.variations,
 );
+
+// Per-role variable-font axes (opsz, wght, split ROND, emphasized GRAD)
+final variable = M3EThemeData.light(seedColor: seed).copyWith(
+  fontFamily: 'Roboto Flex',
+  typeScaleMode: M3ETypeScaleMode.variable,
+  variableFont: const M3EVariableFontConfig(
+    global: M3EVariableFontAxes(wght: 500, opsz: 16),
+    brand: M3EVariableFontAxes(rond: 25),
+    body: M3EVariableFontAxes(rond: 50),
+  ),
+);
+
+// Convert any TextStyle to a spec variant
+final converted = M3ETypeStyleConversion.toVariant(
+  Theme.of(context).textTheme.bodyLarge!,
+  variant: M3ETypeScaleVariant.emphasized,
+  role: M3ETypeRole.bodyLarge,
+);
+
+// Customize token fields before building a TextStyle
+final tokens = M3ETypeStyleTokens.fromTextStyle(style).copyWith(
+  letterSpacing: 0.25,
+);
+final custom = tokens.toTextStyle(fontFamily: 'Roboto Flex');
 ```
 
 `M3EMaterialApp` additionally supports `autoTheming` (platform brightness) and
 `dynamicColoring` (OS seed color on supported platforms — Material You primary
 on Android 12+, accent color on desktop — with schemes generated via
 `ColorScheme.fromSeed`). Pass `fontFamily` / `fontFamilyFallback` /
-`fontVariations` to apply the same type-scale knobs at the shell:
+`fontVariations`, `typeScaleMode`, `typeface`, or `variableFont` to apply
+type-scale knobs at the shell. Use [`buildM3EThemeDefaults()`](lib/foundations/theme/m3e_theme_defaults.dart)
+to assemble a full [`M3EThemeData`](lib/foundations/theme/m3e_theme_data.dart)
+from core tokens, or [`M3EDynamicColorHost`](lib/foundations/theme/m3e_dynamic_color_host.dart)
+when you need device dynamic color outside `M3EMaterialApp`:
 
 ```dart
 M3EMaterialApp(
   data: M3EThemeData.light(seedColor: seed),
   fontFamily: 'Roboto Flex',
-  fontVariations: M3ETypeVariations.wide.variations,
+  typeScaleMode: M3ETypeScaleMode.variable,
+  variableFont: const M3EVariableFontConfig(),
   home: const HomePage(),
 );
 ```
 
-`M3ETypeVariations` is an enum of Roboto Flex axes (`.variations`): regular,
-emphasized, condensed, extra condensed, wide, extra wide, and round. Static
-and mono fonts ignore axes they do not define. The shell projects the type
-scale onto `ThemeData.textTheme` and `DefaultTextStyle`.
+`M3ETypeVariations` is an enum of Roboto Flex axis presets (`.variations`):
+regular, graded (alias for the weight+grade preset formerly named emphasized),
+condensed, extra condensed, wide, extra wide, and round. This is not the M3
+emphasized type scale — use `theme.typography.emphasized` for that. Static
+and mono fonts ignore axes they do not define. The shell projects the baseline
+type scale onto `ThemeData.textTheme` and `DefaultTextStyle`.
 
 ## Components
 
@@ -342,20 +383,25 @@ M3EIconButton(
 #### M3EFab
 
 Floating action button in three sizes. Optional `decoration: M3EFabDecoration`
-for fill, foreground, overlay, and outline gradients.
+for fill, foreground, overlay, and outline gradients. Override resting /
+hover elevation with `elevation` / `hoverElevation` (defaults: level 3 and 4).
 
 ```dart
 M3EFab(
   icon: const Icon(M3EIcons.add),
   size: M3EFabSize.large,
   color: M3EFabColor.tertiary,
+  elevation: 3,
+  hoverElevation: 4,
   onPressed: () {},
 );
 ```
 
 #### M3EExtendedFab
 
-FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`.
+FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`, plus
+optional `elevation` / `hoverElevation` (themed extended-FAB defaults when
+omitted).
 
 ```dart
 M3EExtendedFab(
@@ -1145,8 +1191,15 @@ M3ETabs(
 
 #### M3ENavigationBar
 
-Bottom navigation for compact layouts. Destinations use a click mouse cursor on
-desktop/web (same for rail and drawer).
+Bottom navigation for compact and wide layouts. With `autoLayout: true` (default),
+the bar switches to a horizontal icon+label chip group once its own width can fit
+all destinations at the fixed wide chip width (`wideDestinationWidth`, default
+`128`) — see `M3ENavBarConstants.minWideBarWidth`. Override with `wideBreakpoint`
+and/or `wideDestinationWidth`. Wide mode keeps the bar full width and only aligns
+the destination group (`alignment`: start / center / end). Destinations may be
+icon-only, label-only, or both. Destinations use a click mouse cursor on
+desktop/web (same for rail and drawer). Layout enums, theme, and
+`M3ENavBarConstants` ship with the navigation bar entry / package barrel.
 
 ```dart
 // in State
@@ -1162,11 +1215,42 @@ M3ENavigationBar(
   selectedIndex: barIndex,
   onDestinationSelected: (i) => setState(() => barIndex = i),
 );
+
+// Force wide layout (autoLayout off) with end-aligned chips
+M3ENavigationBar(
+  autoLayout: false,
+  layout: M3ENavBarLayout.wide,
+  alignment: M3ENavBarAlignment.end,
+  wideDestinationWidth: 128,
+  iconBehavior: M3ENavBarIconBehavior.alwaysShow,
+  labelBehavior: M3ENavBarLabelBehavior.alwaysShow,
+  destinations: const [
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(label: 'Browse'), // label-only
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.radio)), // icon-only
+  ],
+  selectedIndex: barIndex,
+  onDestinationSelected: (i) => setState(() => barIndex = i),
+);
+
+// Custom autoLayout breakpoint + chip width
+M3ENavigationBar(
+  autoLayout: true,
+  wideBreakpoint: 720,
+  wideDestinationWidth: 140,
+  destinations: const [
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Search'),
+  ],
+  selectedIndex: barIndex,
+  onDestinationSelected: (i) => setState(() => barIndex = i),
+);
 ```
 
 #### M3ENavigationRail
 
-Vertical navigation for medium and expanded layouts.
+Vertical navigation for medium and expanded layouts. Customize the
+expand/collapse toggle tooltips with `expandTooltip` / `collapseTooltip`.
 
 ```dart
 // in State
@@ -1187,9 +1271,13 @@ M3ENavigationRail(
   ],
   selectedIndex: railIndex,
   onDestinationSelected: (i) => setState(() => railIndex = i),
+  expandTooltip: 'Expand',
+  collapseTooltip: 'Collapse',
   fab: M3ENavigationRailFabSlot(
     icon: const Icon(M3EIcons.add),
     label: 'Compose',
+    elevation: 3,
+    hoverElevation: 4,
     onPressed: () {},
   ),
 );
@@ -1618,8 +1706,9 @@ The [`example/`](example/) project is a full gallery app:
   catalog-driven gallery shell. The home app bar palette action opens
   [`theme_config_page.dart`](example/lib/pages/theme_config_page.dart) to
   toggle auto theming and dynamic color, pick one of five seed colors when
-  dynamic color is off, and choose a font family (platform default, Roboto
-  Flex, Roboto Mono) plus M3 Expressive type styles on Flex.
+  dynamic color is off, and choose a font family (Google Sans Flex default,
+  system, Roboto Flex, or Roboto Mono). Open **View → Typography** for type
+  scale, variable-font axes, and conversion demos.
 - **Pages:** playgrounds under
   [`example/lib/pages/playground/`](example/lib/pages/playground/), grouped
   by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`).
@@ -1650,6 +1739,22 @@ Optional custom lint rules (if `klin_dart` is enabled in your environment):
 ```bash
 dart run custom_lint
 ```
+
+## Support
+
+If this package helps your project:
+
+- **Star** it on [pub.dev](https://pub.dev/packages/material_3_expressive)
+- **Star or fork** the repo on [GitHub](https://github.com/paadevelopments/material_3_expressive)
+- Share it with others building Material 3 Expressive UIs
+
+### Version 1.1.1 — API compatibility
+
+Version **1.1.1** adds typography foundations (`M3ETypography`, variable-font
+axes, style conversion) and exports `buildM3EThemeDefaults()` and
+`M3EDynamicColorHost` through the public barrel. These changes are **additive**:
+`M3EThemeData.typeScale` remains a baseline alias, and existing component code
+continues to work without migration.
 
 ## Credits
 

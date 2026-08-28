@@ -25,6 +25,9 @@ flutter:
   assets:
     - assets/
   fonts:
+    - family: Google Sans Flex
+      fonts:
+        - asset: assets/fonts/GoogleSansFlex.ttf
     - family: Roboto Flex
       fonts:
         - asset: assets/fonts/RobotoFlex.ttf

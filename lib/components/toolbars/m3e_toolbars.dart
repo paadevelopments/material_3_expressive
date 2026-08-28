@@ -21,11 +21,20 @@ import 'styles/m3e_toolbar_theme.dart';
 import 'utils/m3e_toolbar_item_layout.dart';
 import 'utils/m3e_toolbar_spring_motion.dart';
 
+export 'components/m3e_toolbar_actions_row.dart';
+export 'components/m3e_toolbar_body.dart';
+export 'components/m3e_toolbar_expanding_actions.dart';
+export 'components/m3e_toolbar_fab_slot.dart';
+export 'components/m3e_toolbar_icon_button.dart';
+export 'components/m3e_toolbar_overflow_menu.dart';
+export 'components/m3e_toolbar_title_block.dart';
 export 'controllers/m3e_toolbar_visibility_controller.dart';
 export 'enums/m3e_toolbar_enums.dart';
 export 'm3e_toolbar_scroll_behavior.dart';
 export 'models/m3e_toolbar_item.dart';
+export 'res/m3e_toolbar_tokens.dart';
 export 'styles/m3e_toolbar_theme.dart';
+export 'utils/m3e_toolbar_item_layout.dart';
 
 part 'components/m3e_toolbar_build.dart';
 

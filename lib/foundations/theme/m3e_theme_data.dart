@@ -2,49 +2,52 @@ import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart'
     show Brightness, Color, TargetPlatform, TextTheme, ThemeData, VisualDensity;
 
-import '../components/app_bars/styles/m3e_app_bar_theme.dart';
-import '../components/badges/styles/m3e_badge_theme.dart';
-import '../components/bottom_sheets/styles/m3e_bottom_sheet_theme.dart';
-import '../components/buttons/styles/m3e_button_theme.dart';
-import '../components/cards/styles/m3e_card_theme.dart';
-import '../components/carousel/styles/m3e_carousel_theme.dart';
-import '../components/checkbox/styles/m3e_checkbox_theme.dart';
-import '../components/chips/styles/m3e_chip_theme.dart';
-import '../components/date_pickers/styles/m3e_date_picker_theme.dart';
-import '../components/dialogs/styles/m3e_dialog_theme.dart';
-import '../components/divider/styles/m3e_divider_theme.dart';
-import '../components/dropdown_menus/styles/m3e_dropdown_menu_theme.dart';
-import '../components/fab_menu/styles/m3e_fab_menu_theme.dart';
-import '../components/floating_action_buttons/styles/m3e_fab_theme.dart';
-import '../components/icon_buttons/styles/m3e_icon_button_theme.dart';
-import '../components/lists/styles/m3e_list_theme.dart';
-import '../components/loading_indicator/styles/m3e_loading_indicator_theme.dart';
-import '../components/menus/styles/m3e_menu_theme.dart';
-import '../components/navigation_bar/styles/m3e_navigation_bar_theme.dart';
-import '../components/navigation_drawer/styles/m3e_navigation_drawer_theme.dart';
-import '../components/navigation_rail/styles/m3e_navigation_rail_theme.dart';
-import '../components/progress_indicators/styles/m3e_progress_indicator_theme.dart';
-import '../components/radio_button/styles/m3e_radio_theme.dart';
-import '../components/refresh_indicator/styles/m3e_refresh_indicator_theme.dart';
-import '../components/search/styles/m3e_search_bar_theme.dart';
-import '../components/search/styles/m3e_search_view_theme.dart';
-import '../components/segmented_buttons/styles/m3e_segmented_button_theme.dart';
-import '../components/selection/styles/m3e_selection_theme.dart';
-import '../components/side_sheets/styles/m3e_side_sheet_theme.dart';
-import '../components/sliders/styles/m3e_slider_theme.dart';
-import '../components/snackbar/styles/m3e_snackbar_theme.dart';
-import '../components/split_buttons/styles/m3e_split_button_theme.dart';
-import '../components/switch_control/styles/m3e_switch_theme.dart';
-import '../components/tabs/styles/m3e_tab_theme.dart';
-import '../components/text_fields/styles/m3e_text_field_theme.dart';
-import '../components/time_pickers/styles/m3e_time_picker_theme.dart';
-import '../components/toggle_button/styles/m3e_toggle_button_theme.dart';
-import '../components/toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
-import '../components/toolbars/styles/m3e_toolbar_theme.dart';
-import '../components/tooltips/styles/m3e_tooltip_theme.dart';
-import 'm3e_color_scheme.dart';
-import 'm3e_spacing.dart';
-import 'm3e_typography.dart';
+import '../../components/app_bars/styles/m3e_app_bar_theme.dart';
+import '../../components/badges/styles/m3e_badge_theme.dart';
+import '../../components/bottom_sheets/styles/m3e_bottom_sheet_theme.dart';
+import '../../components/buttons/styles/m3e_button_theme.dart';
+import '../../components/cards/styles/m3e_card_theme.dart';
+import '../../components/carousel/styles/m3e_carousel_theme.dart';
+import '../../components/checkbox/styles/m3e_checkbox_theme.dart';
+import '../../components/chips/styles/m3e_chip_theme.dart';
+import '../../components/date_pickers/styles/m3e_date_picker_theme.dart';
+import '../../components/dialogs/styles/m3e_dialog_theme.dart';
+import '../../components/divider/styles/m3e_divider_theme.dart';
+import '../../components/dropdown_menus/styles/m3e_dropdown_menu_theme.dart';
+import '../../components/fab_menu/styles/m3e_fab_menu_theme.dart';
+import '../../components/floating_action_buttons/styles/m3e_fab_theme.dart';
+import '../../components/icon_buttons/styles/m3e_icon_button_theme.dart';
+import '../../components/lists/styles/m3e_list_theme.dart';
+import '../../components/loading_indicator/styles/m3e_loading_indicator_theme.dart';
+import '../../components/menus/styles/m3e_menu_theme.dart';
+import '../../components/navigation_bar/styles/m3e_navigation_bar_theme.dart';
+import '../../components/navigation_drawer/styles/m3e_navigation_drawer_theme.dart';
+import '../../components/navigation_rail/styles/m3e_navigation_rail_theme.dart';
+import '../../components/progress_indicators/styles/m3e_progress_indicator_theme.dart';
+import '../../components/radio_button/styles/m3e_radio_theme.dart';
+import '../../components/refresh_indicator/styles/m3e_refresh_indicator_theme.dart';
+import '../../components/search/styles/m3e_search_bar_theme.dart';
+import '../../components/search/styles/m3e_search_view_theme.dart';
+import '../../components/segmented_buttons/styles/m3e_segmented_button_theme.dart';
+import '../../components/selection/styles/m3e_selection_theme.dart';
+import '../../components/side_sheets/styles/m3e_side_sheet_theme.dart';
+import '../../components/sliders/styles/m3e_slider_theme.dart';
+import '../../components/snackbar/styles/m3e_snackbar_theme.dart';
+import '../../components/split_buttons/styles/m3e_split_button_theme.dart';
+import '../../components/switch_control/styles/m3e_switch_theme.dart';
+import '../../components/tabs/styles/m3e_tab_theme.dart';
+import '../../components/text_fields/styles/m3e_text_field_theme.dart';
+import '../../components/time_pickers/styles/m3e_time_picker_theme.dart';
+import '../../components/toggle_button/styles/m3e_toggle_button_theme.dart';
+import '../../components/toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
+import '../../components/toolbars/styles/m3e_toolbar_theme.dart';
+import '../../components/tooltips/styles/m3e_tooltip_theme.dart';
+import '../color/m3e_color_scheme.dart';
+import '../tokens/m3e_spacing.dart';
+import '../type/m3e_typography.dart';
+import '../type/m3e_variable_font_config.dart';
+
+part 'm3e_theme_data_copy_with.dart';
 
 /// Immutable bundle of expressive design tokens and per-component themes.
 @immutable
@@ -52,6 +55,7 @@ class M3EThemeData {
   /// Creates an expressive theme from tokens and component themes.
   M3EThemeData({
     M3EColorScheme? colorScheme,
+    M3ETypography? typography,
     M3ETypeScale? typeScale,
     this.iconTheme = const IconThemeData(size: 24),
     this.spacing = const M3ESpacing.regular(),
@@ -101,8 +105,24 @@ class M3EThemeData {
     this.toolbarTheme = M3EToolbarTheme.defaults,
     this.tooltipTheme = M3ETooltipTheme.defaults,
   }) : colorScheme = colorScheme ?? M3EColorScheme.light(),
-       typeScale = typeScale ?? M3ETypeScale.baseline(),
+       typography = _resolveTypography(typography, typeScale),
        brightness = (colorScheme ?? M3EColorScheme.light()).brightness;
+
+  static M3ETypography _resolveTypography(
+    M3ETypography? typography,
+    M3ETypeScale? typeScale,
+  ) {
+    if (typography != null) {
+      return typography;
+    }
+    if (typeScale != null) {
+      return M3ETypography(
+        baseline: typeScale,
+        emphasized: M3ETypeScale.emphasized(),
+      );
+    }
+    return M3ETypography.material3();
+  }
 
   /// Light theme, optionally seeded from [seedColor].
   factory M3EThemeData.light({Color? seedColor}) {
@@ -130,7 +150,10 @@ class M3EThemeData {
     }
     final data = M3EThemeData(
       colorScheme: M3EColorScheme.fromColorScheme(theme.colorScheme),
-      typeScale: M3ETypeScale.fromTextTheme(theme.textTheme),
+      typography: M3ETypography(
+        baseline: M3ETypeScale.fromTextTheme(theme.textTheme),
+        emphasized: M3ETypeScale.emphasized(),
+      ),
       iconTheme: theme.iconTheme,
       visualDensity: theme.visualDensity.vertical,
       platform: theme.platform,
@@ -145,8 +168,11 @@ class M3EThemeData {
   /// Color roles for this theme.
   final M3EColorScheme colorScheme;
 
-  /// Type scale for this theme.
-  final M3ETypeScale typeScale;
+  /// Baseline and emphasized type scales for this theme.
+  final M3ETypography typography;
+
+  /// Baseline type scale for this theme (alias for `typography.baseline`).
+  M3ETypeScale get typeScale => typography.baseline;
 
   /// Default icon size/opacity/etc. When color is null, icons use
   /// [M3EColorScheme.onSurface] (including after dynamic color updates).
@@ -311,63 +337,15 @@ class M3EThemeData {
   ///
   /// Preserves non-color tokens (type scale, spacing, component themes) while
   /// swapping in a dark `M3EColorScheme` seeded from `colorScheme.primary`.
-  M3EThemeData deriveDarkTemplate() {
-    return M3EThemeData.dark(seedColor: colorScheme.primary).copyWith(
-      typeScale: typeScale,
-      iconTheme: iconTheme,
-      spacing: spacing,
-      visualDensity: visualDensity,
-      platform: platform,
-      useMaterial3: useMaterial3,
-      splashColor: splashColor,
-      highlightColor: highlightColor,
-      appBarTheme: appBarTheme,
-      badgeTheme: badgeTheme,
-      bottomSheetTheme: bottomSheetTheme,
-      buttonTheme: buttonTheme,
-      cardTheme: cardTheme,
-      carouselTheme: carouselTheme,
-      checkboxTheme: checkboxTheme,
-      chipTheme: chipTheme,
-      datePickerTheme: datePickerTheme,
-      dialogTheme: dialogTheme,
-      dividerTheme: dividerTheme,
-      dropdownMenuTheme: dropdownMenuTheme,
-      fabTheme: fabTheme,
-      fabMenuTheme: fabMenuTheme,
-      iconButtonTheme: iconButtonTheme,
-      listTheme: listTheme,
-      loadingIndicatorTheme: loadingIndicatorTheme,
-      menuTheme: menuTheme,
-      navigationBarTheme: navigationBarTheme,
-      navigationDrawerTheme: navigationDrawerTheme,
-      navigationRailTheme: navigationRailTheme,
-      progressIndicatorTheme: progressIndicatorTheme,
-      radioTheme: radioTheme,
-      refreshIndicatorTheme: refreshIndicatorTheme,
-      searchBarTheme: searchBarTheme,
-      searchViewTheme: searchViewTheme,
-      segmentedButtonTheme: segmentedButtonTheme,
-      selectionTheme: selectionTheme,
-      sideSheetTheme: sideSheetTheme,
-      sliderTheme: sliderTheme,
-      snackBarTheme: snackBarTheme,
-      splitButtonTheme: splitButtonTheme,
-      switchTheme: switchTheme,
-      tabTheme: tabTheme,
-      textFieldTheme: textFieldTheme,
-      timePickerTheme: timePickerTheme,
-      toggleButtonTheme: toggleButtonTheme,
-      toggleButtonGroupTheme: toggleButtonGroupTheme,
-      toolbarTheme: toolbarTheme,
-      tooltipTheme: tooltipTheme,
-    );
-  }
+  M3EThemeData deriveDarkTemplate() => _m3eDeriveDarkTemplate(this);
 
   /// Returns a copy with the given fields replaced.
   M3EThemeData copyWith({
     M3EColorScheme? colorScheme,
+    M3ETypography? typography,
     M3ETypeScale? typeScale,
+    M3ETypefaceConfig? typeface,
+    M3EVariableFontConfig? variableFont,
     String? fontFamily,
     List<String>? fontFamilyFallback,
     String? package,
@@ -419,76 +397,65 @@ class M3EThemeData {
     M3EToggleButtonGroupTheme? toggleButtonGroupTheme,
     M3EToolbarTheme? toolbarTheme,
     M3ETooltipTheme? tooltipTheme,
-  }) {
-    M3ETypeScale nextScale = typeScale ?? this.typeScale;
-    if (fontFamily != null ||
-        fontFamilyFallback != null ||
-        package != null ||
-        fontVariations != null) {
-      nextScale = nextScale.apply(
-        fontFamily: fontFamily,
-        fontFamilyFallback: fontFamilyFallback,
-        package: package,
-        fontVariations: fontVariations,
-      );
-    }
-    return M3EThemeData(
-      colorScheme: colorScheme ?? this.colorScheme,
-      typeScale: nextScale,
-      iconTheme: iconTheme ?? this.iconTheme,
-      spacing: spacing ?? this.spacing,
-      visualDensity: visualDensity ?? this.visualDensity,
-      platform: platform ?? this.platform,
-      useMaterial3: useMaterial3 ?? this.useMaterial3,
-      splashColor: splashColor ?? this.splashColor,
-      highlightColor: highlightColor ?? this.highlightColor,
-      appBarTheme: appBarTheme ?? this.appBarTheme,
-      badgeTheme: badgeTheme ?? this.badgeTheme,
-      bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
-      buttonTheme: buttonTheme ?? this.buttonTheme,
-      cardTheme: cardTheme ?? this.cardTheme,
-      carouselTheme: carouselTheme ?? this.carouselTheme,
-      checkboxTheme: checkboxTheme ?? this.checkboxTheme,
-      chipTheme: chipTheme ?? this.chipTheme,
-      datePickerTheme: datePickerTheme ?? this.datePickerTheme,
-      dialogTheme: dialogTheme ?? this.dialogTheme,
-      dividerTheme: dividerTheme ?? this.dividerTheme,
-      dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
-      fabTheme: fabTheme ?? this.fabTheme,
-      fabMenuTheme: fabMenuTheme ?? this.fabMenuTheme,
-      iconButtonTheme: iconButtonTheme ?? this.iconButtonTheme,
-      listTheme: listTheme ?? this.listTheme,
-      loadingIndicatorTheme:
-          loadingIndicatorTheme ?? this.loadingIndicatorTheme,
-      menuTheme: menuTheme ?? this.menuTheme,
-      navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
-      navigationDrawerTheme:
-          navigationDrawerTheme ?? this.navigationDrawerTheme,
-      navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
-      progressIndicatorTheme:
-          progressIndicatorTheme ?? this.progressIndicatorTheme,
-      radioTheme: radioTheme ?? this.radioTheme,
-      refreshIndicatorTheme:
-          refreshIndicatorTheme ?? this.refreshIndicatorTheme,
-      searchBarTheme: searchBarTheme ?? this.searchBarTheme,
-      searchViewTheme: searchViewTheme ?? this.searchViewTheme,
-      segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
-      selectionTheme: selectionTheme ?? this.selectionTheme,
-      sideSheetTheme: sideSheetTheme ?? this.sideSheetTheme,
-      sliderTheme: sliderTheme ?? this.sliderTheme,
-      snackBarTheme: snackBarTheme ?? this.snackBarTheme,
-      splitButtonTheme: splitButtonTheme ?? this.splitButtonTheme,
-      switchTheme: switchTheme ?? this.switchTheme,
-      tabTheme: tabTheme ?? this.tabTheme,
-      textFieldTheme: textFieldTheme ?? this.textFieldTheme,
-      timePickerTheme: timePickerTheme ?? this.timePickerTheme,
-      toggleButtonTheme: toggleButtonTheme ?? this.toggleButtonTheme,
-      toggleButtonGroupTheme:
-          toggleButtonGroupTheme ?? this.toggleButtonGroupTheme,
-      toolbarTheme: toolbarTheme ?? this.toolbarTheme,
-      tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-    );
-  }
+  }) => _m3eCopyThemeData(
+    this,
+    colorScheme: colorScheme,
+    typography: typography,
+    typeScale: typeScale,
+    typeface: typeface,
+    variableFont: variableFont,
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    package: package,
+    fontVariations: fontVariations,
+    iconTheme: iconTheme,
+    spacing: spacing,
+    visualDensity: visualDensity,
+    platform: platform,
+    useMaterial3: useMaterial3,
+    splashColor: splashColor,
+    highlightColor: highlightColor,
+    appBarTheme: appBarTheme,
+    badgeTheme: badgeTheme,
+    bottomSheetTheme: bottomSheetTheme,
+    buttonTheme: buttonTheme,
+    cardTheme: cardTheme,
+    carouselTheme: carouselTheme,
+    checkboxTheme: checkboxTheme,
+    chipTheme: chipTheme,
+    datePickerTheme: datePickerTheme,
+    dialogTheme: dialogTheme,
+    dividerTheme: dividerTheme,
+    dropdownMenuTheme: dropdownMenuTheme,
+    fabTheme: fabTheme,
+    fabMenuTheme: fabMenuTheme,
+    iconButtonTheme: iconButtonTheme,
+    listTheme: listTheme,
+    loadingIndicatorTheme: loadingIndicatorTheme,
+    menuTheme: menuTheme,
+    navigationBarTheme: navigationBarTheme,
+    navigationDrawerTheme: navigationDrawerTheme,
+    navigationRailTheme: navigationRailTheme,
+    progressIndicatorTheme: progressIndicatorTheme,
+    radioTheme: radioTheme,
+    refreshIndicatorTheme: refreshIndicatorTheme,
+    searchBarTheme: searchBarTheme,
+    searchViewTheme: searchViewTheme,
+    segmentedButtonTheme: segmentedButtonTheme,
+    selectionTheme: selectionTheme,
+    sideSheetTheme: sideSheetTheme,
+    sliderTheme: sliderTheme,
+    snackBarTheme: snackBarTheme,
+    splitButtonTheme: splitButtonTheme,
+    switchTheme: switchTheme,
+    tabTheme: tabTheme,
+    textFieldTheme: textFieldTheme,
+    timePickerTheme: timePickerTheme,
+    toggleButtonTheme: toggleButtonTheme,
+    toggleButtonGroupTheme: toggleButtonGroupTheme,
+    toolbarTheme: toolbarTheme,
+    tooltipTheme: tooltipTheme,
+  );
 
   /// Projects this theme onto a Material [ThemeData].
   ThemeData toThemeData() {

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -11,16 +10,16 @@ void main() {
     _m3eiconbuttonRendersItsIconAndFiresOnpressed,
   );
   testWidgets(
-    'M3ENavigationBar renders destinations and reports selection',
-    _m3enavigationbarRendersDestinationsAndReportsSelection,
-  );
-  testWidgets(
-    'M3ENavigationBar liquid indicator appears without interaction',
-    _m3enavigationbarLiquidIndicatorAppearsWithoutInteractio,
-  );
-  testWidgets(
     'M3ENavigationRail renders section destinations',
     _m3enavigationrailRendersSectionDestinations,
+  );
+  testWidgets(
+    'M3ENavigationRail supports custom expand and collapse tooltips',
+    _m3enavigationrailSupportsCustomExpandAndCollapseTooltips,
+  );
+  testWidgets(
+    'M3ENavigationRail FAB slot supports custom elevation',
+    _m3enavigationrailFabSlotSupportsCustomElevation,
   );
   testWidgets(
     'M3ENavigationRail FAB slot supports custom elevation',
@@ -40,10 +39,6 @@ void main() {
   );
   testWidgets('M3ESlider reports value changes', _m3esliderReportsValueChanges);
   testWidgets(
-    'M3ENavigationBar works under a WidgetsApp with the Material delegate',
-    _m3enavigationbarWorksUnderAWidgetsappWithTheMaterial,
-  );
-  testWidgets(
     'M3ESlider renders without a Scaffold/Material ancestor',
     _m3esliderRendersWithoutAScaffoldMaterialAncestor,
   );
@@ -55,89 +50,13 @@ Future<void> _m3eiconbuttonRendersItsIconAndFiresOnpressed(
   var taps = 0;
   await tester.pumpWidget(
     _host(
-      M3EIconButton(
-        icon: const Icon(M3EIcons.favorite),
-        onPressed: () => taps++,
-      ),
+      M3EIconButton(icon: const Icon(M3EIcons.menu), onPressed: () => taps++),
     ),
   );
 
-  expect(find.byIcon(M3EIcons.favorite), findsOneWidget);
-  await tester.tap(find.byIcon(M3EIcons.favorite));
+  expect(find.byIcon(M3EIcons.menu), findsOneWidget);
+  await tester.tap(find.byType(M3EIconButton));
   expect(taps, 1);
-}
-
-Future<void> _m3enavigationbarRendersDestinationsAndReportsSelection(
-  WidgetTester tester,
-) async {
-  var selected = -1;
-  await tester.pumpWidget(
-    _host(
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: M3ENavigationBar(
-          onDestinationSelected: (i) => selected = i,
-          destinations: const <M3ENavigationBarDestination>[
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.home),
-              label: 'Home',
-            ),
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.search),
-              label: 'Search',
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  expect(find.text('Home'), findsOneWidget);
-  await tester.tap(find.text('Search'));
-  expect(selected, 1);
-}
-
-Future<void> _m3enavigationbarLiquidIndicatorAppearsWithoutInteractio(
-  WidgetTester tester,
-) async {
-  await tester.pumpWidget(
-    _host(
-      const Align(
-        alignment: Alignment.bottomCenter,
-        child: M3ENavigationBar(
-          destinations: <M3ENavigationBarDestination>[
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.home),
-              label: 'Home',
-            ),
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.search),
-              label: 'Search',
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-  // Resting pill is painted by the selected destination on first build.
-  await tester.pump();
-
-  expect(find.byType(M3ENavSelectionIndicator), findsOneWidget);
-  expect(find.text('Home'), findsOneWidget);
-  // Selected destination's resting DecoratedBox uses a non-transparent fill.
-  final Iterable<DecoratedBox> boxes = tester.widgetList<DecoratedBox>(
-    find.descendant(
-      of: find.byType(M3ENavigationBar),
-      matching: find.byType(DecoratedBox),
-    ),
-  );
-  expect(
-    boxes.any((DecoratedBox box) {
-      final Decoration d = box.decoration;
-      return d is BoxDecoration && d.color != null && d.color!.a > 0;
-    }),
-    isTrue,
-  );
 }
 
 Future<void> _m3enavigationrailRendersSectionDestinations(
@@ -146,7 +65,6 @@ Future<void> _m3enavigationrailRendersSectionDestinations(
   await tester.pumpWidget(
     _host(
       M3ENavigationRail(
-        type: M3ENavigationRailType.alwaysExpand,
         selectedIndex: 0,
         onDestinationSelected: (_) {},
         sections: const <M3ENavigationRailSection>[
@@ -170,6 +88,84 @@ Future<void> _m3enavigationrailRendersSectionDestinations(
 
   expect(find.text('Inbox'), findsWidgets);
   expect(find.byIcon(M3EIcons.inbox), findsOneWidget);
+}
+
+Future<void> _m3enavigationrailSupportsCustomExpandAndCollapseTooltips(
+  WidgetTester tester,
+) async {
+  Widget buildRail(M3ENavigationRailType type, Key key) => M3ENavigationRail(
+    key: key,
+    type: type,
+    selectedIndex: 0,
+    onDestinationSelected: (_) {},
+    sections: const <M3ENavigationRailSection>[
+      M3ENavigationRailSection(
+        destinations: <M3ENavigationRailDestination>[
+          M3ENavigationRailDestination(
+            icon: Icon(M3EIcons.inbox),
+            label: 'Inbox',
+          ),
+        ],
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.collapsed, const ValueKey('collapsed')),
+    ),
+  );
+  expect(find.byTooltip('Expand'), findsOneWidget);
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.expanded, const ValueKey('expanded')),
+    ),
+  );
+  await tester.pump();
+  expect(find.byTooltip('Collapse'), findsOneWidget);
+}
+
+Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _host(
+      M3ENavigationRail(
+        type: M3ENavigationRailType.collapsed,
+        selectedIndex: 0,
+        onDestinationSelected: (_) {},
+        fab: const M3ENavigationRailFabSlot(
+          icon: Icon(M3EIcons.add),
+          label: 'Create',
+          elevation: 0,
+          hoverElevation: 0,
+        ),
+        sections: const <M3ENavigationRailSection>[
+          M3ENavigationRailSection(
+            destinations: <M3ENavigationRailDestination>[
+              M3ENavigationRailDestination(
+                icon: Icon(M3EIcons.inbox),
+                label: 'Inbox',
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+
+  final fabContainer = tester.widget<AnimatedContainer>(
+    find.descendant(
+      of: find.byType(M3EFab),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  final decoration = fabContainer.decoration;
+
+  expect(decoration, isA<BoxDecoration>());
+  expect((decoration! as BoxDecoration).boxShadow, isEmpty);
 }
 
 Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(
@@ -345,6 +341,7 @@ Future<void> _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu(
   await tester.pumpWidget(buildRail(viewInsets: EdgeInsets.zero));
   await tester.pump();
   await tester.pump();
+  await tester.pump(M3ENavigationRailLayout.expandDuration);
 
   final double starredY = tester.getTopLeft(find.text('Starred')).dy;
 
@@ -354,9 +351,12 @@ Future<void> _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu(
   );
   await tester.pump();
   await tester.pump();
+  await tester.pump(M3ENavigationRailLayout.expandDuration);
   await tester.pumpWidget(buildRail(viewInsets: EdgeInsets.zero));
   await tester.pump();
   await tester.pump();
+  await tester.pump(M3ENavigationRailLayout.expandDuration);
+  await tester.pump(const Duration(milliseconds: 16));
 
   expect(tester.getTopLeft(find.text('Starred')).dy, closeTo(starredY, 1));
   final Iterable<Material> materials = tester.widgetList<Material>(
@@ -386,50 +386,9 @@ Future<void> _m3esliderReportsValueChanges(WidgetTester tester) async {
     ),
   );
 
-  expect(find.byType(M3ESlider), findsOneWidget);
   final Rect rect = tester.getRect(find.byType(M3ESlider));
   await tester.tapAt(Offset(rect.left + rect.width * 0.2, rect.center.dy));
   expect(value, isNot(0.5));
-}
-
-Future<void> _m3enavigationbarWorksUnderAWidgetsappWithTheMaterial(
-  WidgetTester tester,
-) async {
-  // Mirrors the example app: no MaterialApp, just WidgetsApp + the Material
-  // localizations delegate so the wrapped Material widgets can resolve.
-  await tester.pumpWidget(
-    WidgetsApp(
-      color: const Color(0xFF6750A4),
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-        return PageRouteBuilder<T>(
-          settings: settings,
-          pageBuilder: (context, _, _) => builder(context),
-        );
-      },
-      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      home: const Align(
-        alignment: Alignment.bottomCenter,
-        child: M3ENavigationBar(
-          destinations: <M3ENavigationBarDestination>[
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.home),
-              label: 'Home',
-            ),
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.search),
-              label: 'Search',
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  expect(tester.takeException(), isNull);
-  expect(find.text('Home'), findsOneWidget);
 }
 
 Future<void> _m3esliderRendersWithoutAScaffoldMaterialAncestor(

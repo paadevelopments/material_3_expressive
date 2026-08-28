@@ -26,7 +26,10 @@ export 'enums/m3e_split_button_menu_style.dart';
 export 'enums/m3e_split_button_selection_mode.dart';
 export 'enums/m3e_split_button_trailing_alignment.dart';
 export 'models/m3e_split_button_item.dart';
+export 'styles/m3e_split_button_bottom_sheet_decoration.dart';
+export 'styles/m3e_split_button_checkbox_style.dart';
 export 'styles/m3e_split_button_decoration.dart';
+export 'styles/m3e_split_button_popup_decoration.dart';
 export 'styles/m3e_split_button_theme.dart';
 
 part 'components/m3e_split_button_widgets.dart';

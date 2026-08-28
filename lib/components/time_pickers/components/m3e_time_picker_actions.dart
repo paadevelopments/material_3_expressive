@@ -33,15 +33,9 @@ class M3ETimePickerActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dialogTheme = M3ETheme.of(context).dialogTheme;
-    final EdgeInsets padding = dialogTheme.padding;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        padding.left,
-        0,
-        padding.right,
-        padding.bottom,
-      ),
+      padding: EdgeInsetsDirectional.only(top: dialogTheme.actionGap),
       child: Row(
         children: <Widget>[
           ?entryModeButton,

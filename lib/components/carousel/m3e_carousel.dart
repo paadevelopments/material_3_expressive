@@ -9,9 +9,12 @@ import 'models/m3e_carousel_change_details.dart';
 import 'styles/m3e_carousel_theme.dart';
 import 'utils/m3e_carousel_scroll_helper.dart';
 
+export 'components/m3e_carousel_view.dart';
+export 'components/m3e_carousel_wrapper.dart';
 export 'enums/m3e_carousel_type.dart';
 export 'models/m3e_carousel_change_details.dart';
 export 'styles/m3e_carousel_theme.dart';
+export 'utils/m3e_carousel_scroll_helper.dart';
 
 /// Creates a Material Design carousel.
 ///

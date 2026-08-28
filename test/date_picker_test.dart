@@ -33,6 +33,10 @@ void main() {
     'M3EDatePickerDialog portrait layout has no overflow',
     _dialogLayout,
   );
+  testWidgets(
+    'M3EDatePickerDialog landscape calendar and input have no overflow',
+    _landscapeDialogLayout,
+  );
 }
 
 Future<void> _calendarSelectsDay(WidgetTester tester) async {
@@ -269,4 +273,47 @@ Future<void> _dialogLayout(WidgetTester tester) async {
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
+}
+
+Future<void> _landscapeDialogLayout(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(1200, 800));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: M3ETheme(
+        data: M3EThemeData.light(),
+        child: Builder(
+          builder: (BuildContext context) {
+            return M3EButton(
+              onPressed: () {
+                M3EDatePicker.show(
+                  context,
+                  initialDate: DateTime(2026, 8, 27),
+                  firstDate: DateTime(2026),
+                  lastDate: DateTime(2027),
+                  helpText: 'Select date (calendar dialog)',
+                );
+              },
+              child: const Text('open'),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('open'));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+  expect(find.text('Select date (calendar dialog)'), findsOneWidget);
+
+  final Size headerSize = tester.getSize(find.byType(M3EDatePickerHeader));
+  expect(headerSize.width, closeTo(152, 1));
+  expect(tester.takeException(), isNull);
+
+  await tester.tap(find.byTooltip('Switch to input'));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+  expect(find.byType(M3EDatePickerHeader), findsOneWidget);
 }

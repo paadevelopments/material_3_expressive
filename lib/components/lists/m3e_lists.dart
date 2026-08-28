@@ -19,11 +19,14 @@ export 'components/m3e_card_list_item.dart'
 export 'components/m3e_expandable_data.dart';
 export 'components/m3e_expandable_item.dart';
 export 'components/m3e_list_item_scope.dart';
+export 'controllers/m3e_dismissible_card_controller.dart';
 export 'enums/m3e_expandable_enums.dart';
 export 'enums/m3e_list_enums.dart';
+export 'models/m3e_dismissible_slot.dart';
 export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_expandable_style.dart';
 export 'styles/m3e_list_theme.dart';
+export 'utils/m3e_measure_size.dart';
 
 part 'components/m3e_dismissible_list_widgets.dart';
 

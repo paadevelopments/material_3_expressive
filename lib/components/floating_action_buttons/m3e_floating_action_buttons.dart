@@ -8,6 +8,7 @@ import 'styles/m3e_fab_theme.dart';
 
 export 'enums/m3e_fab.dart';
 export 'styles/m3e_fab_decoration.dart';
+export 'styles/m3e_fab_theme.dart';
 
 /// A Material 3 Expressive floating action button.
 ///

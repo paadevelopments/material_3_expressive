@@ -28,7 +28,12 @@ export 'models/m3e_slider_dot_builder.dart';
 export 'models/m3e_slider_range.dart';
 export 'models/m3e_slider_range_labels.dart';
 export 'models/m3e_slider_track_icons.dart';
+export 'res/m3e_slider_tokens.dart';
 export 'styles/m3e_slider_theme.dart';
+export 'utils/m3e_slider_dot_geometry.dart';
+export 'utils/m3e_slider_dot_layout.dart';
+export 'utils/m3e_slider_math.dart';
+export 'utils/m3e_slider_track_paint_metrics.dart';
 
 /// A Material 3 Expressive slider.
 ///

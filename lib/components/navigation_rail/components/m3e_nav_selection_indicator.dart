@@ -450,6 +450,9 @@ class _M3ENavSelectionIndicatorState extends State<M3ENavSelectionIndicator>
   }) {
     _lead.value = geo.main;
     _trail.value = geo.main;
+    // Layout snaps must not leave a stale travel overlay (host hides resting
+    // fill while traveling when onTravelingChanged is set).
+    _setTraveling(false);
     if (!_ready) {
       setState(() => _ready = true);
     } else if (geometryChanged) {

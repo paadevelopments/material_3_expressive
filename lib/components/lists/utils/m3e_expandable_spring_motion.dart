@@ -2,7 +2,7 @@ import 'package:material_3_expressive/components/dropdown_menus/utils/m3e_dropdo
     show M3EDropdownSpringMotion;
 import 'package:motor/motor.dart';
 
-import '../../../foundations/m3e_motion.dart';
+import '../../../foundations/foundations.dart';
 
 /// Converts [M3ESpring] to a motor [SpringMotion] for expandable animations.
 ///

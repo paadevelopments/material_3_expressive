@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../../foundations/m3e_state_layer.dart';
+import '../../../foundations/foundations.dart';
 
 /// Opacity for a gradient state layer from [states].
 double m3eOverlayOpacityFor(Set<WidgetState> states) {

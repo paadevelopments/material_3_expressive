@@ -17,7 +17,10 @@ export 'enums/m3e_button_enums.dart';
 export 'models/m3e_button_measurements.dart';
 export 'res/m3e_button_constants.dart';
 export 'styles/m3e_button_decoration.dart';
+export 'styles/m3e_button_motion.dart';
 export 'styles/m3e_button_theme.dart';
+export 'styles/m3e_overflow_bottom_sheet_decoration.dart';
+export 'styles/m3e_overflow_popup_decoration.dart';
 export 'utils/m3e_button_gradient_layer.dart';
 
 part 'components/m3e_button_state.dart';

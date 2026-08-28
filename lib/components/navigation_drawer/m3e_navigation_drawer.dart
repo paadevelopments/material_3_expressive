@@ -7,6 +7,7 @@ import 'components/m3e_drawer_destination_button.dart';
 import 'models/m3e_navigation_destination.dart';
 
 export 'models/m3e_navigation_destination.dart';
+export 'styles/m3e_navigation_drawer_theme.dart';
 
 /// A Material 3 Expressive navigation drawer.
 ///

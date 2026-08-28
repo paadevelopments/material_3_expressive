@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_time_picker_enums.dart';
 import '../models/m3e_time.dart';
+import '../res/m3e_time_picker_constants.dart';
 import '../styles/m3e_time_picker_theme.dart';
 import '../utils/m3e_time_picker_utils.dart';
 import 'm3e_day_period_control.dart';
@@ -12,6 +13,7 @@ import 'm3e_time_dial_painter.dart';
 
 const String _timeSeparator = ':';
 const String _zeroPad = '0';
+const double _minInteractiveDimension = 48;
 
 /// Embeddable clock dial for choosing an hour and minute.
 class M3EDialTimePicker extends StatefulWidget {
@@ -22,6 +24,7 @@ class M3EDialTimePicker extends StatefulWidget {
     this.use24HourFormat,
     this.expandToFit = false,
     this.orientation,
+    this.helpText,
     super.key,
   });
 
@@ -39,6 +42,9 @@ class M3EDialTimePicker extends StatefulWidget {
 
   /// Forces dial header layout; defaults to [MediaQuery] orientation.
   final Orientation? orientation;
+
+  /// Optional help label above the time fields (dialog dial mode).
+  final String? helpText;
 
   @override
   State<M3EDialTimePicker> createState() => _M3EDialTimePickerState();
@@ -69,21 +75,13 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
     final bool use24Hour = _use24HourFormat(context);
     final Orientation orientation = _orientation(context);
 
-    final Widget content = FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.topCenter,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _buildHeader(theme, localizations, use24Hour, orientation),
-          SizedBox(height: timeTheme.headerDialGap),
-          _buildDial(theme, use24Hour),
-        ],
-      ),
-    );
+    final Widget content = switch (orientation) {
+      Orientation.portrait => _buildPortrait(theme, localizations, use24Hour),
+      Orientation.landscape => _buildLandscape(theme, localizations, use24Hour),
+    };
 
     if (widget.expandToFit) {
-      return SizedBox.expand(child: content);
+      return content;
     }
 
     return M3EComponentTheme(
@@ -98,17 +96,196 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
     );
   }
 
-  Widget _buildHeader(
+  Widget _buildPortrait(
     M3EThemeData theme,
     MaterialLocalizations localizations,
     bool use24Hour,
-    Orientation orientation,
   ) {
     final timeTheme = theme.timePickerTheme;
+    final double periodHeight = timeTheme.periodPortraitSize.height;
+    final double minInteractiveVerticalPadding = math.max(
+      0,
+      2 * _minInteractiveDimension - periodHeight,
+    );
+    final dialPadding = EdgeInsets.only(
+      left: M3ETimePickerConstants.dialPortraitHorizontalPadding,
+      right: M3ETimePickerConstants.dialPortraitHorizontalPadding,
+      top:
+          M3ETimePickerConstants.dialPortraitTopPadding -
+          minInteractiveVerticalPadding / 2,
+    );
+
+    final Widget help = widget.helpText == null
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: EdgeInsets.only(
+              bottom: 20 - minInteractiveVerticalPadding / 2,
+            ),
+            child: Text(
+              widget.helpText!,
+              style: timeTheme.headerHelpStyle(
+                theme.typeScale,
+                theme.colorScheme,
+              ),
+            ),
+          );
+    final Widget fields = _buildPortraitFieldsHeader(
+      theme,
+      localizations,
+      use24Hour,
+    );
+    final Widget dial = Padding(
+      padding: dialPadding,
+      child: Center(child: _buildDial(theme, use24Hour)),
+    );
+
+    if (widget.expandToFit) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          help,
+          fields,
+          Expanded(child: dial),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        help,
+        fields,
+        SizedBox(height: timeTheme.headerDialGap),
+        dial,
+      ],
+    );
+  }
+
+  Widget _buildLandscape(
+    M3EThemeData theme,
+    MaterialLocalizations localizations,
+    bool use24Hour,
+  ) {
+    final timeTheme = theme.timePickerTheme;
+    final double periodHeight = timeTheme.periodLandscapeSize.height;
+    final double minInteractiveVerticalPadding = math.max(
+      0,
+      _minInteractiveDimension - periodHeight,
+    );
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool boundedHeight = constraints.hasBoundedHeight;
+        final Widget row = Row(
+          crossAxisAlignment: boundedHeight
+              ? CrossAxisAlignment.stretch
+              : CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              width: timeTheme.headerLandscapeWidth,
+              height: boundedHeight ? null : timeTheme.dialSize,
+              child: _buildLandscapeFieldsHeader(
+                theme,
+                localizations,
+                use24Hour,
+                minInteractiveVerticalPadding,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: M3ETimePickerConstants.dialLandscapeStartPadding,
+                ),
+                child: Center(child: _buildDial(theme, use24Hour)),
+              ),
+            ),
+          ],
+        );
+        if (boundedHeight) {
+          return row;
+        }
+        return SizedBox(height: timeTheme.dialSize, child: row);
+      },
+    );
+  }
+
+  Widget _buildPortraitFieldsHeader(
+    M3EThemeData theme,
+    MaterialLocalizations localizations,
+    bool use24Hour,
+  ) {
+    final timeTheme = theme.timePickerTheme;
+    final Widget fields = _buildHourMinuteFields(theme, localizations);
+    final Widget? period = use24Hour
+        ? null
+        : M3EDayPeriodControl(isPm: widget.value.isPm, onChanged: _setPeriod);
+
+    return Row(
+      children: <Widget>[
+        Expanded(child: fields),
+        if (period != null) ...<Widget>[
+          SizedBox(width: timeTheme.fieldPeriodGap),
+          period,
+        ],
+      ],
+    );
+  }
+
+  Widget _buildLandscapeFieldsHeader(
+    M3EThemeData theme,
+    MaterialLocalizations localizations,
+    bool use24Hour,
+    double minInteractiveVerticalPadding,
+  ) {
+    final timeTheme = theme.timePickerTheme;
+    final Widget fields = _buildHourMinuteFields(theme, localizations);
+    final Widget? period = use24Hour
+        ? null
+        : M3EDayPeriodControl(
+            isPm: widget.value.isPm,
+            onChanged: _setPeriod,
+            orientation: Orientation.landscape,
+          );
+
+    return Stack(
+      children: <Widget>[
+        if (widget.helpText != null)
+          Text(
+            widget.helpText!,
+            style: timeTheme.headerHelpStyle(
+              theme.typeScale,
+              theme.colorScheme,
+            ),
+          ),
+        // Fill the header column and center fields so help text stays visible
+        // above them (material_ui landscape dial header).
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            fields,
+            if (period != null) ...<Widget>[
+              SizedBox(
+                height: math.max(0, 16 - minInteractiveVerticalPadding / 2),
+              ),
+              period,
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHourMinuteFields(
+    M3EThemeData theme,
+    MaterialLocalizations localizations,
+  ) {
+    final bool use24Hour = _use24HourFormat(context);
     final String hourText = use24Hour
         ? widget.value.hour.toString().padLeft(2, _zeroPad)
         : widget.value.hourOf12.toString().padLeft(2, _zeroPad);
-    final Widget fields = Row(
+    return Row(
       // Hour/minutes should not swap in RTL (matches Material).
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -131,44 +308,6 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
           ),
         ),
       ],
-    );
-
-    final Widget? period = use24Hour
-        ? null
-        : M3EDayPeriodControl(
-            isPm: widget.value.isPm,
-            onChanged: _setPeriod,
-            orientation: orientation,
-          );
-
-    if (orientation == Orientation.landscape) {
-      return SizedBox(
-        width: timeTheme.dialSize,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            fields,
-            if (period != null) ...<Widget>[
-              SizedBox(height: timeTheme.fieldPeriodGap),
-              Align(alignment: Alignment.centerLeft, child: period),
-            ],
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: timeTheme.dialSize,
-      child: Row(
-        children: <Widget>[
-          Expanded(child: fields),
-          if (period != null) ...<Widget>[
-            SizedBox(width: timeTheme.fieldPeriodGap),
-            period,
-          ],
-        ],
-      ),
     );
   }
 
@@ -205,49 +344,52 @@ class _M3EDialTimePickerState extends State<M3EDialTimePicker> {
   Widget _buildDial(M3EThemeData theme, bool use24Hour) {
     final scheme = theme.colorScheme;
     final timeTheme = theme.timePickerTheme;
-    return RepaintBoundary(
-      child: SizedBox(
-        width: timeTheme.dialSize,
-        height: timeTheme.dialSize,
-        child: GestureDetector(
-          onTapDown: (TapDownDetails d) {
-            M3EHaptics.selection();
-            _handleDial(
-              d.localPosition,
-              timeTheme,
-              use24Hour,
-              roundMinutes: true,
-            );
-          },
-          onPanStart: (DragStartDetails d) {
-            _handleDial(
-              d.localPosition,
-              timeTheme,
-              use24Hour,
-              roundMinutes: false,
-            );
-          },
-          onPanUpdate: (DragUpdateDetails d) {
-            _handleDial(
-              d.localPosition,
-              timeTheme,
-              use24Hour,
-              roundMinutes: false,
-            );
-          },
-          child: CustomPaint(
-            painter: M3ETimeDialPainter(
-              labels: _dialLabels(use24Hour),
-              handAngle: _handAngle(use24Hour),
-              highlightedLabelIndex: _highlightedLabelIndex(use24Hour),
-              showSelectorDot: _showSelectorDot(),
-              dialColor: scheme.surfaceContainerHighest,
-              accentColor: scheme.primary,
-              onAccentColor: scheme.onPrimary,
-              labelColor: scheme.onSurface,
-              labelStyle: theme.typeScale.labelLarge,
-              textDirection: Directionality.of(context),
-              timeTheme: timeTheme,
+    return ExcludeSemantics(
+      child: FittedBox(
+        child: SizedBox.square(
+          dimension: timeTheme.dialSize,
+          child: RepaintBoundary(
+            child: GestureDetector(
+              onTapDown: (TapDownDetails d) {
+                M3EHaptics.selection();
+                _handleDial(
+                  d.localPosition,
+                  timeTheme,
+                  use24Hour,
+                  roundMinutes: true,
+                );
+              },
+              onPanStart: (DragStartDetails d) {
+                _handleDial(
+                  d.localPosition,
+                  timeTheme,
+                  use24Hour,
+                  roundMinutes: false,
+                );
+              },
+              onPanUpdate: (DragUpdateDetails d) {
+                _handleDial(
+                  d.localPosition,
+                  timeTheme,
+                  use24Hour,
+                  roundMinutes: false,
+                );
+              },
+              child: CustomPaint(
+                painter: M3ETimeDialPainter(
+                  labels: _dialLabels(use24Hour),
+                  handAngle: _handAngle(use24Hour),
+                  highlightedLabelIndex: _highlightedLabelIndex(use24Hour),
+                  showSelectorDot: _showSelectorDot(),
+                  dialColor: scheme.surfaceContainerHighest,
+                  accentColor: scheme.primary,
+                  onAccentColor: scheme.onPrimary,
+                  labelColor: scheme.onSurface,
+                  labelStyle: theme.typeScale.labelLarge,
+                  textDirection: Directionality.of(context),
+                  timeTheme: timeTheme,
+                ),
+              ),
             ),
           ),
         ),

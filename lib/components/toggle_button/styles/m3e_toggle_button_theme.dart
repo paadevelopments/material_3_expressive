@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../foundations/m3e_theme_extension.dart';
+import '../../../foundations/foundations.dart';
 
 /// Theme values for `M3EToggleButton`.
 @immutable

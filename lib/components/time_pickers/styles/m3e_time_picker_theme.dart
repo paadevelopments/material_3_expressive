@@ -23,7 +23,7 @@ class M3ETimePickerTheme extends M3EThemeExtension<M3ETimePickerTheme> {
     this.fieldPeriodGap = 12,
     this.headerDialGap = 24,
     this.elevation = 6,
-    this.headerLandscapeWidth = 176,
+    this.headerLandscapeWidth = 216,
   });
 
   /// defaults.

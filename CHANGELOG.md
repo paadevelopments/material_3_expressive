@@ -1,3 +1,88 @@
+## 1.1.1
+
+### Added
+
+* M3-aligned typography foundation: `M3ETypography` pairs 15 baseline and 15
+  emphasized type scales (`md.sys.typescale.*` and `.emphasized.*`), token
+  tables for static and variable-font sets, `M3ETypefaceConfig` (brand/plain
+  families), and `M3EVariableFontConfig` for per-role `opsz`, `wght`, split
+  `ROND`, and emphasized-only `GRAD`. `M3EThemeData.typography` is the source
+  of truth; `typeScale` remains a baseline alias for components.
+* `M3EVariableFontAxes` for explicit `wght`, `opsz`, `ROND`, `wdth`, `slnt`,
+  `GRAD`, and advanced Y-axis values with global/brand/body group overrides
+  on `M3EVariableFontConfig`.
+* `M3ETypeStyleConversion` converts arbitrary `TextStyle`s to baseline,
+  emphasized, or variable token variants; `M3ETypeStyleTokens.copyWith` and
+  `fromTextStyle` customize individual token fields.
+* `M3ETypeVariations.graded` alias clarifies the weight+grade axis preset vs
+  the M3 emphasized type scale. `M3EMaterialApp` accepts `typeScaleMode`,
+  `typeface`, and `variableFont`.
+* Example **Typography** playground (View tab) with live axis and conversion
+  controls.
+* Export `buildM3EThemeDefaults()` and `M3EDynamicColorHost` through
+  `foundations.dart`.
+* `M3EHourMinuteTextField` for Material-aligned hour/minute time inputs
+  (used by the input time picker; exported from the time pickers entry).
+* `M3ENavigationBar` wide layout APIs: `autoLayout`, `layout`
+  (`M3ENavBarLayout`), `alignment` (`M3ENavBarAlignment`), `iconBehavior`
+  (`M3ENavBarIconBehavior`), optional `wideBreakpoint` and
+  `wideDestinationWidth`, plus `M3ENavBarConstants` (default chip width `128`,
+  documented 5-destination breakpoint, `minWideBarWidth`). Destinations may be
+  icon-only and/or label-only. Wide chips use a fixed width so the fluid pill
+  does not clip when icons or labels appear or disappear.
+* `M3ENavigationRail` `expandTooltip` / `collapseTooltip` for the
+  expand/collapse toggle (defaults `'Expand'` / `'Collapse'`).
+* `M3EFab` and `M3EExtendedFab` optional `elevation` / `hoverElevation`
+  overrides; `M3ENavigationRailFabSlot` forwards them to the rail FAB.
+
+### Changed
+
+* Typography additions are additive; `M3EThemeData.typeScale` remains a
+  baseline alias for components.
+* Foundations sources grouped under `lib/foundations/{color,shape,theme,type,interaction,tokens}/`;
+  the public barrel path is unchanged for consumers.
+* Date and time pickers aligned closer to Material dialog specs: landscape
+  dialog sizing (12/24-hour), standardized content padding, unified action
+  bars, calendar/year responsive layouts (year mode toggle stacked in the
+  calendar parent), dial help-text layout, and input-time fields with labels
+  under the boxes and AM/PM top-aligned with the hour/minute row.
+* `M3EYearPicker` no longer takes `mode` / `onModeChanged` — the mode header
+  lives on the parent calendar. Call sites that passed those arguments should
+  drop them (the built-in `M3ECalendarDatePicker` already hosts the toggle).
+* `M3ENavBarConstants.wideBreakpoint` default is sized for five fixed-width
+  wide chips (`704` at the default `128` chip width) instead of a flat `600`.
+  When `wideBreakpoint` is omitted on the bar, autoLayout uses
+  `minWideBarWidth` for the current destination count and chip width.
+* README: document `M3ENavigationBar` wide-layout public surface and samples.
+
+### Fixed
+
+* Date picker landscape/year layouts: year grid overflow and vertical stretch,
+  header alignment with calendar and actions, help text compact only in input
+  entry mode (`alignHelpWithSubHeader`).
+* Time picker landscape dial: help text no longer covered by hour/minute
+  fields; input mode field geometry matches filled Material time inputs.
+* Complete public surface exports from all component entry files so
+  `import 'package:material_3_expressive/material_3_expressive.dart'` is
+  sufficient: missing themes/decorations (app bar, FAB, navigation drawer,
+  icon button shapes, button motion/overflow, split button decorations),
+  tokens/utils (slider, toolbar, carousel scroll helper, progress indicator,
+  navigation rail layout), dismissible list extension APIs, picker composables
+  (date/time form fields, headers, actions), carousel view/controller/wrapper,
+  toolbar building blocks, and button-group overflow controller.
+* Export missing public enums and models from component entry files so the
+  barrel alone is enough: button style/size/shape, FAB color/size, split
+  button enums, navigation bar / rail enums and models, and
+  `M3EButtonGroupAction` from the toggle button group entry.
+* `M3EDropdownMenu`: do not fire `onSelectionChange` during
+  `didUpdateWidget` rebuilds when the selection did not actually change
+  (lifecycle / build-phase safe).
+
+### Chore
+
+* Remove redundant deep imports in library, example, and tests now covered by
+  entry / barrel exports (`unnecessary_import` / analyzer cleanup).
+
 ## 1.1.0
 
 ### Documentation

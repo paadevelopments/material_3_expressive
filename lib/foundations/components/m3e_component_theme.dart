@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../m3e_theme.dart';
+import '../theme/m3e_theme.dart';
 
 /// Registers an adaptive theme dependency for a single M3E component subtree.
 ///
