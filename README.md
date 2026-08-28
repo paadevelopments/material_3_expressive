@@ -383,20 +383,25 @@ M3EIconButton(
 #### M3EFab
 
 Floating action button in three sizes. Optional `decoration: M3EFabDecoration`
-for fill, foreground, overlay, and outline gradients.
+for fill, foreground, overlay, and outline gradients. Override resting /
+hover elevation with `elevation` / `hoverElevation` (defaults: level 3 and 4).
 
 ```dart
 M3EFab(
   icon: const Icon(M3EIcons.add),
   size: M3EFabSize.large,
   color: M3EFabColor.tertiary,
+  elevation: 3,
+  hoverElevation: 4,
   onPressed: () {},
 );
 ```
 
 #### M3EExtendedFab
 
-FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`.
+FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`, plus
+optional `elevation` / `hoverElevation` (themed extended-FAB defaults when
+omitted).
 
 ```dart
 M3EExtendedFab(
@@ -1244,7 +1249,8 @@ M3ENavigationBar(
 
 #### M3ENavigationRail
 
-Vertical navigation for medium and expanded layouts.
+Vertical navigation for medium and expanded layouts. Customize the
+expand/collapse toggle tooltips with `expandTooltip` / `collapseTooltip`.
 
 ```dart
 // in State
@@ -1265,9 +1271,13 @@ M3ENavigationRail(
   ],
   selectedIndex: railIndex,
   onDestinationSelected: (i) => setState(() => railIndex = i),
+  expandTooltip: 'Expand',
+  collapseTooltip: 'Collapse',
   fab: M3ENavigationRailFabSlot(
     icon: const Icon(M3EIcons.add),
     label: 'Compose',
+    elevation: 3,
+    hoverElevation: 4,
     onPressed: () {},
   ),
 );

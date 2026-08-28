@@ -30,6 +30,10 @@
   documented 5-destination breakpoint, `minWideBarWidth`). Destinations may be
   icon-only and/or label-only. Wide chips use a fixed width so the fluid pill
   does not clip when icons or labels appear or disappear.
+* `M3ENavigationRail` `expandTooltip` / `collapseTooltip` for the
+  expand/collapse toggle (defaults `'Expand'` / `'Collapse'`).
+* `M3EFab` and `M3EExtendedFab` optional `elevation` / `hoverElevation`
+  overrides; `M3ENavigationRailFabSlot` forwards them to the rail FAB.
 
 ### Changed
 

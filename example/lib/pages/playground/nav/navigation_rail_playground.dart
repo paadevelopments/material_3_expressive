@@ -79,6 +79,8 @@ M3ENavigationRail(
   ],
   selectedIndex: $_index,
   onDestinationSelected: (int i) {},
+  expandTooltip: 'Expand',
+  collapseTooltip: 'Collapse',
   type: M3ENavigationRailType.${_type.name},
   modality: M3ENavigationRailModality.${_modality.name},
   labelBehavior: M3ENavigationRailLabelBehavior.${_labelBehavior.name},$fab
