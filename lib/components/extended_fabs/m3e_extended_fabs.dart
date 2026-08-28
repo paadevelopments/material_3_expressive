@@ -20,10 +20,16 @@ class M3EExtendedFab extends StatelessWidget {
     this.color = M3EFabColor.primary,
     this.extended = true,
     this.decoration,
+    this.elevation,
+    this.hoverElevation,
     this.focusNode,
     this.autofocus = false,
     super.key,
-  });
+  }) : assert(elevation == null || elevation >= 0.0, 'assertion failed'),
+       assert(
+         hoverElevation == null || hoverElevation >= 0.0,
+         'assertion failed',
+       );
 
   /// label.
 
@@ -43,6 +49,16 @@ class M3EExtendedFab extends StatelessWidget {
 
   /// Optional decoration for solid and gradient surfaces.
   final M3EFabDecoration? decoration;
+
+  /// Resting surface elevation.
+  ///
+  /// Defaults to the themed extended FAB elevation.
+  final double? elevation;
+
+  /// Surface elevation while hovered.
+  ///
+  /// Defaults to the themed extended FAB hover elevation.
+  final double? hoverElevation;
 
   /// focusNode.
 
@@ -110,7 +126,9 @@ class M3EExtendedFab extends StatelessWidget {
     final BorderSide? side = outline != null
         ? null
         : decoration?.side?.resolve(states);
-    final elevation = extendedTheme.elevation(hovered: state.hovered);
+    final resolvedElevation = state.hovered
+        ? hoverElevation ?? extendedTheme.elevation(hovered: true)
+        : elevation ?? extendedTheme.elevation(hovered: false);
 
     Widget content = _decorateContent(
       state: state,
@@ -138,7 +156,7 @@ class M3EExtendedFab extends StatelessWidget {
         borderRadius: borderRadius,
         border: side == null ? null : Border.fromBorderSide(side),
         boxShadow: M3EElevation.shadows(
-          elevation,
+          resolvedElevation,
           shadowColor: theme.colorScheme.shadow,
         ),
       ),

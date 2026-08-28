@@ -23,6 +23,10 @@ void main() {
     _m3enavigationrailRendersSectionDestinations,
   );
   testWidgets(
+    'M3ENavigationRail FAB slot supports custom elevation',
+    _m3enavigationrailFabSlotSupportsCustomElevation,
+  );
+  testWidgets(
     'M3ENavigationRail resting indicator tracks selection while scrolling',
     _m3enavigationrailRestingIndicatorTracksSelectionWhileS,
   );
@@ -162,6 +166,48 @@ Future<void> _m3enavigationrailRendersSectionDestinations(
 
   expect(find.text('Inbox'), findsWidgets);
   expect(find.byIcon(M3EIcons.inbox), findsOneWidget);
+}
+
+Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _host(
+      M3ENavigationRail(
+        type: M3ENavigationRailType.collapsed,
+        selectedIndex: 0,
+        onDestinationSelected: (_) {},
+        fab: const M3ENavigationRailFabSlot(
+          icon: Icon(M3EIcons.add),
+          label: 'Create',
+          elevation: 0,
+          hoverElevation: 0,
+        ),
+        sections: const <M3ENavigationRailSection>[
+          M3ENavigationRailSection(
+            destinations: <M3ENavigationRailDestination>[
+              M3ENavigationRailDestination(
+                icon: Icon(M3EIcons.inbox),
+                label: 'Inbox',
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+
+  final fabContainer = tester.widget<AnimatedContainer>(
+    find.descendant(
+      of: find.byType(M3EFab),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  final decoration = fabContainer.decoration;
+
+  expect(decoration, isA<BoxDecoration>());
+  expect((decoration! as BoxDecoration).boxShadow, isEmpty);
 }
 
 Future<void> _m3enavigationrailRestingIndicatorTracksSelectionWhileS(

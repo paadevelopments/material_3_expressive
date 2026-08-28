@@ -19,8 +19,14 @@ class M3ENavigationRailFabSlot {
     this.tooltip,
     this.color = M3EFabColor.primary,
     this.size = M3EFabSize.medium,
+    this.elevation,
+    this.hoverElevation,
     this.semanticLabel,
-  });
+  }) : assert(elevation == null || elevation >= 0.0, 'assertion failed'),
+       assert(
+         hoverElevation == null || hoverElevation >= 0.0,
+         'assertion failed',
+       );
 
   /// Icon widget shown inside the FAB (collapsed) and leading icon (expanded).
   final Widget icon;
@@ -39,6 +45,12 @@ class M3ENavigationRailFabSlot {
 
   /// Size of the FAB button.
   final M3EFabSize size;
+
+  /// Resting surface elevation for the rail FAB.
+  final double? elevation;
+
+  /// Surface elevation for the rail FAB while hovered.
+  final double? hoverElevation;
 
   /// Optional semantic label for accessibility.
   final String? semanticLabel;
