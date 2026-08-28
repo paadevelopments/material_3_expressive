@@ -42,6 +42,8 @@ class M3ENavigationRail extends StatefulWidget {
     this.trailing,
     this.trailingAtBottom = true,
     this.background,
+    this.expandTooltip = 'Expand',
+    this.collapseTooltip = 'Collapse',
   });
 
   /// type.
@@ -89,6 +91,12 @@ class M3ENavigationRail extends StatefulWidget {
 
   /// background.
   final Color? background;
+
+  /// Tooltip shown for the button that expands the rail.
+  final String expandTooltip;
+
+  /// Tooltip shown for the button that collapses the rail.
+  final String collapseTooltip;
 
   @override
   State<M3ENavigationRail> createState() => _M3ENavigationRailState();
@@ -357,7 +365,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final isExpanded = _isExpanded;
     final Widget button = M3EIconButton(
       icon: Icon(isExpanded ? M3EIcons.menu_open : M3EIcons.menu),
-      tooltip: isExpanded ? 'Collapse' : 'Expand',
+      tooltip: isExpanded ? widget.collapseTooltip : widget.expandTooltip,
       onPressed: () => _setExpanded(!isExpanded),
       suppressInk: _suppressInk,
     );
