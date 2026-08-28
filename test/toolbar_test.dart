@@ -2,18 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget _host({required Widget child, EdgeInsets padding = EdgeInsets.zero}) {
+Widget _host({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: MediaQuery(
-      // padding zeroed (edge-to-edge); viewPadding still carries system insets.
-      data: MediaQueryData(viewPadding: padding),
-      child: M3ETheme(
-        data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
-        child: Center(child: child),
-      ),
+    child: M3ETheme(
+      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+      child: Center(child: child),
     ),
   );
+}
+
+void _setViewPadding(WidgetTester tester, EdgeInsets padding) {
+  final double dpr = tester.view.devicePixelRatio;
+  tester.view.viewPadding = FakeViewPadding(
+    left: padding.left * dpr,
+    top: padding.top * dpr,
+    right: padding.right * dpr,
+    bottom: padding.bottom * dpr,
+  );
+  addTearDown(tester.view.reset);
 }
 
 List<M3EToolbarItem> _actions() => <M3EToolbarItem>[
@@ -137,11 +144,9 @@ Future<void> _verticalFloatingUsesCrossAxisWidth(WidgetTester tester) async {
 Future<void> _floatingSafeareaPadsOutsideThePillOnOneEdge(
   WidgetTester tester,
 ) async {
+  _setViewPadding(tester, const EdgeInsets.fromLTRB(10, 20, 30, 40));
   await tester.pumpWidget(
-    _host(
-      padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
-      child: M3EToolbar(safeArea: true, actions: _actions()),
-    ),
+    _host(child: M3EToolbar(safeArea: true, actions: _actions())),
   );
 
   final Size materialSize = tester.getSize(
@@ -175,9 +180,9 @@ Future<void> _floatingSafeareaPadsOutsideThePillOnOneEdge(
 Future<void> _floatingSafeareaTopPadsOnlyTopOutsidePill(
   WidgetTester tester,
 ) async {
+  _setViewPadding(tester, const EdgeInsets.fromLTRB(10, 20, 30, 40));
   await tester.pumpWidget(
     _host(
-      padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
       child: M3EToolbar(
         safeArea: true,
         dockEdge: M3EToolbarDockEdge.top,
@@ -303,9 +308,9 @@ Future<void> _floatingTitleGetsOpticalStartInset(WidgetTester tester) async {
 }
 
 Future<void> _dockedBottomSafeareaPadsOnlyBottom(WidgetTester tester) async {
+  _setViewPadding(tester, const EdgeInsets.fromLTRB(10, 20, 30, 40));
   await tester.pumpWidget(
     _host(
-      padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
       child: const SizedBox(
         width: 300,
         child: M3EToolbar.docked(
@@ -324,9 +329,9 @@ Future<void> _dockedBottomSafeareaPadsOnlyBottom(WidgetTester tester) async {
 }
 
 Future<void> _dockedTopSafeareaPadsOnlyTop(WidgetTester tester) async {
+  _setViewPadding(tester, const EdgeInsets.fromLTRB(10, 20, 30, 40));
   await tester.pumpWidget(
     _host(
-      padding: const EdgeInsets.fromLTRB(10, 20, 30, 40),
       child: const SizedBox(
         width: 300,
         child: M3EToolbar.docked(
@@ -347,9 +352,9 @@ Future<void> _dockedTopSafeareaPadsOnlyTop(WidgetTester tester) async {
 Future<void> _dockedWithTitleLaysOutWithoutFlexOverflow(
   WidgetTester tester,
 ) async {
+  _setViewPadding(tester, const EdgeInsets.only(top: 44));
   await tester.pumpWidget(
     _host(
-      padding: const EdgeInsets.only(top: 44),
       child: const SizedBox(
         width: 280,
         child: M3EToolbar.docked(
