@@ -23,6 +23,10 @@ void main() {
     _m3enavigationrailRendersSectionDestinations,
   );
   testWidgets(
+    'M3ENavigationRail supports custom expand and collapse tooltips',
+    _m3enavigationrailSupportsCustomExpandAndCollapseTooltips,
+  );
+  testWidgets(
     'M3ENavigationRail resting indicator tracks selection while scrolling',
     _m3enavigationrailRestingIndicatorTracksSelectionWhileS,
   );
@@ -186,6 +190,44 @@ Future<void> _m3enavigationrailRendersSectionDestinations(
 
   expect(find.text('Inbox'), findsWidgets);
   expect(find.byIcon(M3EIcons.inbox), findsOneWidget);
+}
+
+Future<void> _m3enavigationrailSupportsCustomExpandAndCollapseTooltips(
+  WidgetTester tester,
+) async {
+  Widget buildRail(M3ENavigationRailType type, Key key) => M3ENavigationRail(
+    key: key,
+    type: type,
+    expandTooltip: '展开',
+    collapseTooltip: '折叠',
+    selectedIndex: 0,
+    onDestinationSelected: (_) {},
+    sections: const <M3ENavigationRailSection>[
+      M3ENavigationRailSection(
+        destinations: <M3ENavigationRailDestination>[
+          M3ENavigationRailDestination(
+            icon: Icon(M3EIcons.inbox),
+            label: 'Inbox',
+          ),
+        ],
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.collapsed, const ValueKey('collapsed')),
+    ),
+  );
+  expect(find.byTooltip('展开'), findsOneWidget);
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.expanded, const ValueKey('expanded')),
+    ),
+  );
+  await tester.pump();
+  expect(find.byTooltip('折叠'), findsOneWidget);
 }
 
 Future<void> _m3enavigationrailRestingIndicatorTracksSelectionWhileS(
