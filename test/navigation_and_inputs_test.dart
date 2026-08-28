@@ -22,6 +22,14 @@ void main() {
     _m3enavigationrailFabSlotSupportsCustomElevation,
   );
   testWidgets(
+    'M3ENavigationRail FAB slot supports custom elevation',
+    _m3enavigationrailFabSlotSupportsCustomElevation,
+  );
+  testWidgets(
+    'M3ENavigationRail supports custom expand and collapse tooltips',
+    _m3enavigationrailSupportsCustomExpandAndCollapseTooltips,
+  );
+  testWidgets(
     'M3ENavigationRail resting indicator tracks selection while scrolling',
     _m3enavigationrailRestingIndicatorTracksSelectionWhileS,
   );
@@ -158,6 +166,86 @@ Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(
 
   expect(decoration, isA<BoxDecoration>());
   expect((decoration! as BoxDecoration).boxShadow, isEmpty);
+}
+
+Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _host(
+      M3ENavigationRail(
+        type: M3ENavigationRailType.collapsed,
+        selectedIndex: 0,
+        onDestinationSelected: (_) {},
+        fab: const M3ENavigationRailFabSlot(
+          icon: Icon(M3EIcons.add),
+          label: 'Create',
+          elevation: 0,
+          hoverElevation: 0,
+        ),
+        sections: const <M3ENavigationRailSection>[
+          M3ENavigationRailSection(
+            destinations: <M3ENavigationRailDestination>[
+              M3ENavigationRailDestination(
+                icon: Icon(M3EIcons.inbox),
+                label: 'Inbox',
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+
+  final fabContainer = tester.widget<AnimatedContainer>(
+    find.descendant(
+      of: find.byType(M3EFab),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  final decoration = fabContainer.decoration;
+
+  expect(decoration, isA<BoxDecoration>());
+  expect((decoration! as BoxDecoration).boxShadow, isEmpty);
+}
+
+Future<void> _m3enavigationrailSupportsCustomExpandAndCollapseTooltips(
+  WidgetTester tester,
+) async {
+  Widget buildRail(M3ENavigationRailType type, Key key) => M3ENavigationRail(
+    key: key,
+    type: type,
+    expandTooltip: 'Expand',
+    collapseTooltip: 'Collapse',
+    selectedIndex: 0,
+    onDestinationSelected: (_) {},
+    sections: const <M3ENavigationRailSection>[
+      M3ENavigationRailSection(
+        destinations: <M3ENavigationRailDestination>[
+          M3ENavigationRailDestination(
+            icon: Icon(M3EIcons.inbox),
+            label: 'Inbox',
+          ),
+        ],
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.collapsed, const ValueKey('collapsed')),
+    ),
+  );
+  expect(find.byTooltip('Expand'), findsOneWidget);
+
+  await tester.pumpWidget(
+    _host(
+      buildRail(M3ENavigationRailType.expanded, const ValueKey('expanded')),
+    ),
+  );
+  await tester.pump();
+  expect(find.byTooltip('Collapse'), findsOneWidget);
 }
 
 Future<void> _m3enavigationrailRestingIndicatorTracksSelectionWhileS(
