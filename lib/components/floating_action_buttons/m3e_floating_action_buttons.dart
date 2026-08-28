@@ -24,11 +24,17 @@ class M3EFab extends StatelessWidget {
     this.color = M3EFabColor.primary,
     this.cornerRadius,
     this.decoration,
+    this.elevation,
+    this.hoverElevation,
     this.tooltip,
     this.focusNode,
     this.autofocus = false,
     super.key,
-  });
+  }) : assert(elevation == null || elevation >= 0.0, 'assertion failed'),
+       assert(
+         hoverElevation == null || hoverElevation >= 0.0,
+         'assertion failed',
+       );
 
   /// icon.
 
@@ -48,6 +54,16 @@ class M3EFab extends StatelessWidget {
 
   /// Optional decoration for solid and gradient surfaces.
   final M3EFabDecoration? decoration;
+
+  /// Resting surface elevation.
+  ///
+  /// Defaults to [M3EElevation.level3].
+  final double? elevation;
+
+  /// Surface elevation while hovered.
+  ///
+  /// Defaults to [M3EElevation.level4].
+  final double? hoverElevation;
 
   /// tooltip.
   final String? tooltip;
@@ -119,7 +135,9 @@ class M3EFab extends StatelessWidget {
     final BorderSide? side = outline != null
         ? null
         : decoration?.side?.resolve(states);
-    final elevation = state.hovered ? M3EElevation.level4 : M3EElevation.level3;
+    final resolvedElevation = state.hovered
+        ? hoverElevation ?? M3EElevation.level4
+        : elevation ?? M3EElevation.level3;
 
     Widget content = _decorateContent(
       state: state,
@@ -150,7 +168,7 @@ class M3EFab extends StatelessWidget {
         borderRadius: borderRadius,
         border: side == null ? null : Border.fromBorderSide(side),
         boxShadow: M3EElevation.shadows(
-          elevation,
+          resolvedElevation,
           shadowColor: theme.colorScheme.shadow,
         ),
       ),
