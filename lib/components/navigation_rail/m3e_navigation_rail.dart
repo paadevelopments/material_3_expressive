@@ -391,6 +391,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               icon: fab.icon,
               onPressed: fab.onPressed,
               color: fab.color,
+              elevation: fab.elevation,
+              hoverElevation: fab.hoverElevation,
             )
           : M3EFab(
               icon: fab.icon,
@@ -398,6 +400,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
               tooltip: fab.tooltip,
               color: fab.color,
               size: fab.size,
+              elevation: fab.elevation,
+              hoverElevation: fab.hoverElevation,
             ),
     );
   }
