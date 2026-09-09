@@ -1,3 +1,11 @@
+## 1.1.3
+
+### Added
+
+### Fixed
+
+### Changed
+
 ## 1.1.2
 
 ### Added
