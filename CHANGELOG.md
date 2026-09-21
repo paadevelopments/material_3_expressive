@@ -1,10 +1,8 @@
 ## 1.1.3
 
-### Added
-
-### Fixed
-
 ### Changed
+
+* Bump `material_ui` to `^1.3.0`.
 
 ## 1.1.2
 

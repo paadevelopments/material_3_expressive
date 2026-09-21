@@ -84,7 +84,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.1.1`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.3.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -101,38 +101,11 @@ is required (`material_ui` will not resolve on older SDKs).
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.2
+## What's new in 1.1.3
 
-Summary of public API and behavior updates since 1.1.1 (details in
-[`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Keyboard focus rings** — actionable controls show an outset ring for
-  keyboard focus. Configure via `M3EThemeData.focusRingTheme` /
-  `keyboardFocusIndicators` (see [Quick start](#quick-start)).
-- **List selection & reorder** — `M3ECardList`, dismissible lists, and
-  expandable header rows accept `selection` / `reorder` (and related
-  callbacks / state). Nested expandable sublists keep their own list APIs.
-  Theme tokens: `M3EListSelectionState`, `M3EListReorderState`,
-  `M3EListSelectionMode` / `M3EListSelectionTrigger`.
-- **Dismissible swipe actions** — optional `leadingActionsBuilder` /
-  `trailingActionsBuilder` reveal icon actions (`M3EListSwipeAction`) with
-  preview snap; full swipe still dismisses when a side has no actions.
-- **Expandable nested lists** — `M3EExpandableData.expanded` uses
-  `M3EExpandableExpanded.list(child)` or `.content(child)` (replaces a plain
-  `body` widget). Nested card lists can set `embedded: true` for inner radii.
-- **Configurable spatial springs** — component themes expose `M3ESpring`
-  fields (switch, FAB menu, nav rail, checkbox, slider, icon button, toolbar,
-  list card radius / dismissible, refresh settle, …). Defaults match prior
-  hard-coded motion.
-- **Dropdown** — optional `limit` caps multi-select count (`null` = unlimited).
-  `openMotion` / `closeMotion` are optional; when null they resolve from
-  `M3EDropdownMenuTheme.openSpring` / `closeSpring`.
-- **Toolbar FAB** — `fabExpandsToolbar: false` keeps a fixed baseline FAB
-  that only runs `onFabPressed` (pill stays open).
-- **Button group overflow** — `M3EOverflowStrategy`,
-  `M3ENoOverflowStrategy`, and `M3EScrollOverflowStrategy` are exported for
-  `M3EButtonGroup.overflowStrategy`.
-- **Deps** — `material_ui` `^1.1.1`; date picker overflow / wrap fixes.
+- **Deps** — `material_ui` `^1.3.0`.
 
 ## Installation
 
