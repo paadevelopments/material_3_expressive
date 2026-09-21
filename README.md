@@ -31,7 +31,7 @@ Runtime dependencies are intentionally small — see
 Try the live gallery on the web:
 [paadevelopments.github.io/material_3_expressive](https://paadevelopments.github.io/material_3_expressive/).
 
-An interactive gallery demonstrating **all 45 widgets** also lives in the
+An interactive gallery demonstrating **all 44 widgets** also lives in the
 [`example/`](example/) directory (same build as the live demo). It groups
 components the same way as the official Material 3 catalog, with a live
 playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/).
@@ -60,7 +60,7 @@ flutter run
 
 ## Features
 
-- **45 widgets** across 40 component modules, covering Actions, Selection,
+- **44 widgets** across 39 component modules, covering Actions, Selection,
   Containment, Navigation, and Feedback (communication + text input).
 - **Direct component API** — construct each `M3E*` widget directly; enums and
   models are exported from a single library import. Action surfaces accept
@@ -110,7 +110,11 @@ Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 - **Buttons** — `M3EButton` size/color/shape defaults match M3E specs (XS
   padding/gap, outline widths by size, outlined roles, disabled opacity,
   shape spring 1400/0.9, press overlay + `InkSparkle`, single-line labels
-  with 200% text allowance).
+  with 200% text allowance). **Breaking:** selection lives on `M3EButton`
+  (`isSelected` / `selectedIcon` / `selectedLabel`); `M3EToggleButton` is
+  removed (no toggle text).
+- **Button groups** — module moved to `button_group`; theme is
+  `buttonGroupTheme`. Actions use `selected*` / `isSelected`.
 - **Icon buttons** — `M3EIconButton` tokens match M3E specs (radii, outline
   widths, toggle/default color roles, spring 1400/0.9, press overlay +
   `InkSparkle`, focus-ring chrome). **Breaking:** default variant is
@@ -510,26 +514,21 @@ M3EButtonGroup(
 );
 ```
 
-#### M3EToggleButton
+#### Button selection
 
-Toggle with round-to-square shape morphing. Optional
-`decoration: M3EToggleButtonDecoration(...)` for the same gradient fields as
-`M3EButtonDecoration`. `M3EButtonGroup` / `M3EToggleButtonGroup` accept a
-group-level `decoration` and per-action `M3EButtonGroupAction.decoration`.
+Set `M3EButton.isSelected` to enable caller-controlled selection with
+round-to-square (or square-to-round) shape morphing. `selectedIcon` and
+`selectedLabel` replace their unselected counterparts. Selection is not
+available for `M3EButtonStyle.text`. `M3EButtonGroup` accepts a group-level
+`M3EButtonDecoration` and per-action `M3EButtonGroupAction.decoration`.
 
 ```dart
 // in State
-M3EToggleButton.filled(
+M3EButton.filled(
   icon: const Icon(M3EIcons.favorite_border),
-  checkedIcon: const Icon(M3EIcons.favorite),
-  checked: isFavorite,
-  onCheckedChange: (v) => setState(() => isFavorite = v),
-);
-
-M3EToggleButton.text(
-  label: const Text('Bold'),
-  checked: isBold,
-  onCheckedChange: (v) => setState(() => isBold = v),
+  selectedIcon: const Icon(M3EIcons.favorite),
+  isSelected: isFavorite,
+  onPressed: () => setState(() => isFavorite = !isFavorite),
 );
 ```
 
@@ -1849,7 +1848,7 @@ implementations. Thanks to the original authors:
 
 | Author | Components | Source |
 | ------ | ---------- | ------ |
-| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, toggle button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
+| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
 | [Mudit Purohit](https://github.com/Mudit200408) | Dropdown menus | [m3e_dropdown_menu](https://github.com/Mudit200408/m3e_dropdown_menu) |
 | [Mudit Purohit](https://github.com/Mudit200408) | Expandable lists | [m3e_expandable](https://github.com/Mudit200408/m3e_expandable) |
 | [Emily](https://github.com/EmilyMoonstone) | Icon buttons | [icon_button_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e) |

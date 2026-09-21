@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EMotion, M3EToggleButton;
+    show M3EButton, M3EMotion;
 import 'package:motor/motor.dart';
 
-/// Spring-based motion configuration for [M3EButton] and [M3EToggleButton].
+/// Spring-based motion configuration for [M3EButton].
 @immutable
 class M3EButtonMotion {
   /// stiffness.

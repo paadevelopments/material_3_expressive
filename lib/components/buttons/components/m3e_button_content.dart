@@ -4,8 +4,14 @@ part of '../m3e_buttons.dart';
 extension _M3EButtonContent on _M3EButtonState {
   Widget _buildContent(BuildContext context) {
     final m = _measurements;
-    final baseInternalPadding = EdgeInsets.symmetric(horizontal: m.hPadding);
-    final shapes = _resolveShapes(m);
+    final baseInternalPadding = EdgeInsets.symmetric(
+      horizontal: _usesSelection && !_hasSelectionLabel
+          ? m.hPadding / 2
+          : m.hPadding,
+    );
+    final shapes = _usesSelection
+        ? _resolveSelectionShapes(m)
+        : _resolveShapes(m);
     final baseStyle = _buildBaseStyle();
 
     return wrapWithPointerPressTracking(
@@ -36,6 +42,8 @@ extension _M3EButtonContent on _M3EButtonState {
     BorderRadius defaultShape,
     BorderRadius pressedShape,
     BorderRadius hoveredShape,
+    bool freezeLeft,
+    bool freezeRight,
   })
   _resolveShapes(M3EButtonMeasurements m) {
     final fullyRound = BorderRadius.circular(m.height / 2);
@@ -64,6 +72,8 @@ extension _M3EButtonContent on _M3EButtonState {
       defaultShape: defaultShape,
       pressedShape: pressedShape,
       hoveredShape: hoveredShape,
+      freezeLeft: false,
+      freezeRight: false,
     );
   }
 
@@ -75,6 +85,8 @@ extension _M3EButtonContent on _M3EButtonState {
       BorderRadius defaultShape,
       BorderRadius pressedShape,
       BorderRadius hoveredShape,
+      bool freezeLeft,
+      bool freezeRight,
     })
     shapes,
     required bool isPressed,
@@ -96,6 +108,10 @@ extension _M3EButtonContent on _M3EButtonState {
         internalTop: baseInternalPadding.top,
         internalBottom: baseInternalPadding.bottom,
         targetRadius: targetRadius,
+        freezeTopLeft: widget.isGroupConnected && shapes.freezeLeft,
+        freezeBottomLeft: widget.isGroupConnected && shapes.freezeLeft,
+        freezeTopRight: widget.isGroupConnected && shapes.freezeRight,
+        freezeBottomRight: widget.isGroupConnected && shapes.freezeRight,
         builder: (animatedInternal, animatedRadius) {
           final buttonCore = _buildButtonCore(
             m,
@@ -130,7 +146,17 @@ extension _M3EButtonContent on _M3EButtonState {
     EdgeInsets internalPadding,
     BorderRadius animatedRadius,
   ) {
-    Widget child = widget.child ?? const SizedBox.shrink();
+    Widget child = _usesSelection
+        ? _buildSelectionContent(m)
+        : widget.icon != null && widget.label != null
+        ? _M3EButtonIconLayout(
+            icon: widget.icon!,
+            label: widget.label!,
+            size: widget.size,
+            iconAlignment:
+                widget.decoration?.iconAlignment ?? IconAlignment.start,
+          )
+        : widget.child ?? const SizedBox.shrink();
     if (widget.semanticLabel != null) {
       child = ExcludeSemantics(child: child);
     }
@@ -251,10 +277,14 @@ extension _M3EButtonContent on _M3EButtonState {
 
   Widget _wrapButtonChrome(Widget button) {
     final dec = widget.decoration;
-    Color inkSplashColor = _buttonTheme.foreground(_scheme, widget.style);
+    Color inkSplashColor = _selectionForegroundColor();
     if (dec?.foregroundColor != null) {
       inkSplashColor =
-          dec!.foregroundColor!.resolve(const <WidgetState>{}) ??
+          dec!.foregroundColor!.resolve(
+            _isSelected
+                ? const <WidgetState>{WidgetState.selected}
+                : const <WidgetState>{},
+          ) ??
           inkSplashColor;
     }
 
@@ -264,6 +294,9 @@ extension _M3EButtonContent on _M3EButtonState {
     }
     if (widget.semanticLabel != null) {
       result = Semantics(label: widget.semanticLabel, child: result);
+    }
+    if (_usesSelection) {
+      result = Semantics(selected: _isSelected, child: result);
     }
     return result;
   }

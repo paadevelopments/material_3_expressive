@@ -114,8 +114,8 @@ Rules for agents:
 
 | Kind | Convention |
 |------|------------|
-| Files | `m3e_` prefix + snake_case (e.g. `m3e_toggle_button_group.dart`) |
-| Classes | `M3E` prefix + PascalCase (e.g. `M3EToggleButtonGroup`) |
+| Files | `m3e_` prefix + snake_case (e.g. `m3e_button_group.dart`) |
+| Classes | `M3E` prefix + PascalCase (e.g. `M3EButtonGroup`) |
 | One class per file | Except private `State` classes and everything under `foundations/` |
 
 ---

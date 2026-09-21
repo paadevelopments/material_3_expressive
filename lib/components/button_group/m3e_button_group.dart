@@ -8,42 +8,35 @@ import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
-import '../buttons/components/m3e_overflow_strategy.dart';
-import '../buttons/enums/m3e_button_enums.dart';
-import '../buttons/res/m3e_button_constants.dart';
-import '../buttons/styles/m3e_button_decoration.dart';
-import '../buttons/styles/m3e_button_motion.dart';
-import '../buttons/styles/m3e_overflow_bottom_sheet_decoration.dart';
-import '../buttons/styles/m3e_overflow_popup_decoration.dart';
+import '../buttons/m3e_buttons.dart';
 import '../menus/m3e_menus.dart';
-import '../toggle_button/m3e_toggle_button.dart';
-import 'components/m3e_toggle_button_group_item_scope.dart';
-import 'components/m3e_toggle_button_group_provider.dart';
-import 'components/m3e_toggle_button_group_scope.dart';
+import 'components/m3e_button_group_item_scope.dart';
+import 'components/m3e_button_group_provider.dart';
+import 'components/m3e_button_group_scope.dart';
 import 'controllers/m3e_button_group_overflow_controller.dart';
-import 'enums/m3e_toggle_button_group_enums.dart';
+import 'enums/m3e_button_group_enums.dart';
 import 'models/m3e_button_group_action.dart';
 import 'models/m3e_button_group_overflow_paging_window.dart';
 
 export '../buttons/components/m3e_no_overflow_strategy.dart';
 export '../buttons/components/m3e_overflow_strategy.dart';
 export '../buttons/components/m3e_scroll_overflow_strategy.dart';
-export 'components/m3e_toggle_button_group_scope.dart';
+export 'components/m3e_button_group_scope.dart';
 export 'controllers/m3e_button_group_overflow_controller.dart';
-export 'enums/m3e_toggle_button_group_enums.dart';
+export 'enums/m3e_button_group_enums.dart';
 export 'models/m3e_button_group_action.dart';
 export 'models/m3e_button_group_overflow_paging_window.dart';
-export 'styles/m3e_toggle_button_group_theme.dart';
+export 'styles/m3e_button_group_theme.dart';
 
 part 'components/m3e_button_group_align.dart';
 part 'components/m3e_button_group_parent_data.dart';
-part 'components/m3e_toggle_button_group_collaborators.dart';
-part 'components/m3e_toggle_button_group_overflow_presenter.dart';
-part 'components/m3e_toggle_button_group_render.dart';
-part 'components/m3e_toggle_button_group_measurement.dart';
-part 'components/m3e_toggle_button_group_layout.dart';
-part 'components/m3e_toggle_button_group_scroll.dart';
-part 'components/m3e_toggle_button_group_build.dart';
+part 'components/m3e_button_group_collaborators.dart';
+part 'components/m3e_button_group_overflow_presenter.dart';
+part 'components/m3e_button_group_render.dart';
+part 'components/m3e_button_group_measurement.dart';
+part 'components/m3e_button_group_layout.dart';
+part 'components/m3e_button_group_scroll.dart';
+part 'components/m3e_button_group_build.dart';
 
 // ---------------------------------------------------------------------------
 // M3EButtonGroupAction
@@ -59,7 +52,7 @@ class _MoveFocusIntent extends Intent {
 // M3EButtonGroup
 // ---------------------------------------------------------------------------
 
-/// A horizontal (or vertical) row of [M3EToggleButton]s with optional
+/// A horizontal (or vertical) row of selectable [M3EButton]s with optional
 /// neighbor-squish animation and connected-group shape morphing.
 class M3EButtonGroup extends StatefulWidget {
   /// const.
@@ -143,7 +136,7 @@ class M3EButtonGroup extends StatefulWidget {
   final bool enableFeedback;
 
   /// final.
-  final M3EToggleButtonDecoration? decoration;
+  final M3EButtonDecoration? decoration;
 
   /// final.
   final String? semanticLabel;
@@ -180,15 +173,15 @@ class M3EButtonGroup extends StatefulWidget {
 // ---------------------------------------------------------------------------
 
 class _M3EButtonGroupState extends State<M3EButtonGroup>
-    with SingleTickerProviderStateMixin, _ToggleGroupOverflowPresenterMixin {
+    with SingleTickerProviderStateMixin, _ButtonGroupOverflowPresenterMixin {
   late List<WidgetStatesController> _controllers;
   late List<FocusNode?> _focusNodes;
   late int _layoutSignature;
   late int _focusNodeSignature;
   late final M3EButtonGroupOverflowController _overflowController;
   late final ScrollController _scrollOverflowController;
-  late final _ToggleGroupPressCoordinator _pressCoordinator;
-  late final _ToggleGroupMeasurementOrchestrator _measurement;
+  late final _ButtonGroupPressCoordinator _pressCoordinator;
+  late final _ButtonGroupMeasurementOrchestrator _measurement;
   int? _lastOverflowSelectionIndex;
 
   final ValueNotifier<int?> _focusedIndexNotifier = ValueNotifier<int?>(null);
@@ -200,13 +193,13 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   int _focusedIndex = 0;
 
-  List<GlobalKey> get _uncheckedKeys => _measurement.uncheckedKeys;
-  List<GlobalKey> get _checkedKeys => _measurement.checkedKeys;
+  List<GlobalKey> get _unselectedKeys => _measurement.unselectedKeys;
+  List<GlobalKey> get _selectedKeys => _measurement.selectedKeys;
 
-  List<double?> get _measuredUncheckedWidths =>
-      _measurement.measuredUncheckedWidths;
-  List<double?> get _measuredCheckedWidths =>
-      _measurement.measuredCheckedWidths;
+  List<double?> get _measuredUnselectedWidths =>
+      _measurement.measuredUnselectedWidths;
+  List<double?> get _measuredSelectedWidths =>
+      _measurement.measuredSelectedWidths;
 
   bool get _hasAnyLabel => _measurement.hasAnyLabel;
   set _hasAnyLabel(bool value) => _measurement.hasAnyLabel = value;
@@ -218,7 +211,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       !widget._connected &&
       widget.neighborSquish;
 
-  late List<M3EToggleButtonDecoration> _cachedDecorations;
+  late List<M3EButtonDecoration> _cachedDecorations;
 
   @override
   void initState() {
@@ -286,7 +279,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   }
 
   @override
-  bool _isToggleActionSelected(int index) {
-    return _resolveToggleActionSelected(index);
+  bool _isActionSelected(int index) {
+    return _resolveActionSelected(index);
   }
 }

@@ -1,13 +1,13 @@
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EToggleButton;
+    show M3EButton;
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../enums/m3e_button_enums.dart';
 import '../styles/m3e_button_motion.dart';
 
-/// Shared lifecycle infrastructure for [M3EButton] and [M3EToggleButton].
+/// Shared lifecycle infrastructure for [M3EButton].
 mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   /// buttonSize.
   M3EButtonSize get buttonSize;

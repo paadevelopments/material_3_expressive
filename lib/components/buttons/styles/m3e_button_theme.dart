@@ -16,6 +16,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     this.dividerHeight = 24,
     this.connectedInnerRadius = 8,
     this.connectedPressedInnerRadius = 4,
+    this.labelSlideDistance = 10,
     this.shapeSpring = M3EMotion.spatialFast,
   });
 
@@ -41,6 +42,9 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
 
   /// connectedPressedInnerRadius.
   final double connectedPressedInnerRadius;
+
+  /// Horizontal distance used by selection label transitions.
+  final double labelSlideDistance;
 
   /// Spatial spring for press/release corner morph (stiffness 1400 / damping 0.9).
   final M3ESpring shapeSpring;
@@ -246,6 +250,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     double? dividerHeight,
     double? connectedInnerRadius,
     double? connectedPressedInnerRadius,
+    double? labelSlideDistance,
     M3ESpring? shapeSpring,
   }) {
     return M3EButtonTheme(
@@ -256,6 +261,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
       connectedPressedInnerRadius:
           connectedPressedInnerRadius ?? this.connectedPressedInnerRadius,
+      labelSlideDistance: labelSlideDistance ?? this.labelSlideDistance,
       shapeSpring: shapeSpring ?? this.shapeSpring,
     );
   }
@@ -278,6 +284,11 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       connectedPressedInnerRadius: _lerpDouble(
         connectedPressedInnerRadius,
         other.connectedPressedInnerRadius,
+        t,
+      )!,
+      labelSlideDistance: _lerpDouble(
+        labelSlideDistance,
+        other.labelSlideDistance,
         t,
       )!,
       shapeSpring: t < 0.5 ? shapeSpring : other.shapeSpring,

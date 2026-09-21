@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/toggle_button_group/m3e_toggle_button_group.dart'
+import 'package:material_3_expressive/components/button_group/m3e_button_group.dart'
     show M3EButtonGroup;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EButtonGroup;
 
 import '../../buttons/enums/m3e_button_enums.dart';
-import '../enums/m3e_toggle_button_group_enums.dart';
+import '../enums/m3e_button_group_enums.dart';
 
 // ---------------------------------------------------------------------------
 // M3EButtonGroupScope
@@ -13,8 +13,8 @@ import '../enums/m3e_toggle_button_group_enums.dart';
 
 /// Provides group-level configuration to every descendant button.
 ///
-/// [M3EButtonGroup] and [M3EButtonGroup] insert this widget at their
-/// root. Individual buttons call [M3EButtonGroupScope.maybeOf] to read the
+/// [M3EButtonGroup] inserts this widget at its root. Individual buttons call
+/// [M3EButtonGroupScope.maybeOf] to read the
 /// group's [type], [shape], [size], [density], and [direction] so they can
 /// adapt their appearance without needing explicit props drilled through every
 /// layer.

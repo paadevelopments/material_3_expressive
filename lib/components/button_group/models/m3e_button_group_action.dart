@@ -1,20 +1,18 @@
-import 'package:material_3_expressive/components/toggle_button_group/m3e_toggle_button_group.dart'
-    show M3EButtonGroup;
-import 'package:material_3_expressive/material_3_expressive.dart'
+import 'package:material_3_expressive/components/button_group/m3e_button_group.dart'
     show M3EButtonGroup;
 import 'package:material_ui/material_ui.dart';
 
 import '../../buttons/styles/m3e_button_decoration.dart';
 
-/// Declarative description of a single toggle button inside [M3EButtonGroup].
+/// Declarative description of a single selectable button in [M3EButtonGroup].
 class M3EButtonGroupAction {
   /// M3EButtonGroupAction.
   const M3EButtonGroupAction({
     this.icon,
-    this.checkedIcon,
+    this.selectedIcon,
     this.label,
-    this.checkedLabel,
-    this.checked,
+    this.selectedLabel,
+    this.isSelected,
     this.enabled = true,
     this.decoration,
     this.width,
@@ -33,23 +31,23 @@ class M3EButtonGroupAction {
 
   final Widget? icon;
 
-  /// checkedIcon.
-  final Widget? checkedIcon;
+  /// Icon displayed when selected.
+  final Widget? selectedIcon;
 
   /// label.
   final Widget? label;
 
-  /// checkedLabel.
-  final Widget? checkedLabel;
+  /// Label displayed when selected.
+  final Widget? selectedLabel;
 
-  /// checked.
-  final bool? checked;
+  /// Selection state used when the group is not controlled.
+  final bool? isSelected;
 
   /// enabled.
   final bool enabled;
 
   /// decoration.
-  final M3EToggleButtonDecoration? decoration;
+  final M3EButtonDecoration? decoration;
 
   /// width.
   final double? width;

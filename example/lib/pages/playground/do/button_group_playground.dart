@@ -8,7 +8,7 @@ import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
 
-/// Live playground for [M3EButtonGroup] and [M3EToggleButton].
+/// Live playground for [M3EButtonGroup] and selectable [M3EButton]s.
 class ButtonGroupPlayground extends StatefulWidget {
   /// Creates the button group playground.
   const ButtonGroupPlayground({super.key});
@@ -24,7 +24,7 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
   M3EButtonStyle _style = M3EButtonStyle.filled;
   bool _neighborSquish = true;
   int _selectedIndex = 0;
-  bool _toggleChecked = false;
+  bool _buttonSelected = false;
 
   static const List<M3EButtonSize> _sizes = <M3EButtonSize>[
     M3EButtonSize.xs,
@@ -64,15 +64,15 @@ M3EButtonGroup(
 );''',
       ),
       PlaySnippet(
-        label: 'Toggle button',
+        label: 'Selectable button',
         code:
             '''
 $kPlaySnippetImport
-M3EToggleButton(
-  checked: $_toggleChecked,
-  onCheckedChange: (bool value) {},
+M3EButton(
+  isSelected: $_buttonSelected,
+  onPressed: () {},
   icon: const Icon(M3EIcons.star),
-  checkedIcon: const Icon(M3EIcons.star),
+  selectedIcon: const Icon(M3EIcons.star),
   label: const Text('Star'),
   style: M3EButtonStyle.${_style.name},
   size: M3EButtonSize.${_size.name},
@@ -142,32 +142,32 @@ M3EToggleButton(
           ),
         ),
         PlayPreviewCard(
-          label: 'Toggle button',
-          child: M3EToggleButton(
-            checked: _toggleChecked,
-            onCheckedChange: (bool value) {
-              setState(() => _toggleChecked = value);
+          label: 'Selectable button',
+          child: M3EButton(
+            isSelected: _buttonSelected,
+            onPressed: () {
+              setState(() => _buttonSelected = !_buttonSelected);
             },
             icon: const Icon(M3EIcons.star),
-            checkedIcon: const Icon(M3EIcons.star),
+            selectedIcon: const Icon(M3EIcons.star),
             label: const Text('Star'),
             style: _style,
             size: _size,
           ),
         ),
         PlayPreviewCard(
-          label: 'Toggle gradient fill',
-          child: M3EToggleButton(
-            checked: _toggleChecked,
-            onCheckedChange: (bool value) {
-              setState(() => _toggleChecked = value);
+          label: 'Selection gradient fill',
+          child: M3EButton(
+            isSelected: _buttonSelected,
+            onPressed: () {
+              setState(() => _buttonSelected = !_buttonSelected);
             },
             icon: const Icon(M3EIcons.favorite_border),
-            checkedIcon: const Icon(M3EIcons.favorite),
+            selectedIcon: const Icon(M3EIcons.favorite),
             label: const Text('Favorite'),
             style: M3EButtonStyle.filled,
             size: _size,
-            decoration: M3EToggleButtonDecoration(
+            decoration: M3EButtonDecoration(
               backgroundGradient: WidgetStateProperty.all(
                 const LinearGradient(
                   colors: <Color>[Color(0xFFB3261E), Color(0xFFE46962)],

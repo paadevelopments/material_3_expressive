@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 /// A widget that controls how a child of a [M3EButtonGroup] aligns itself
 /// along the cross axis.

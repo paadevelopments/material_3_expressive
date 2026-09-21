@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 /// Overflow and linear layout helpers for [_M3EButtonGroupState].
 extension _M3EButtonGroupLayout on _M3EButtonGroupState {
@@ -150,11 +150,8 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       isLast: true,
       onPressed: () =>
           _onCustomOverflowPressed(context, strategy, visibleCount),
-      checked:
-          _selectedToggleActionInRange(
-            visibleCount,
-            widget.actions.length - 1,
-          ) !=
+      isSelected:
+          _selectedActionInRange(visibleCount, widget.actions.length - 1) !=
           null,
     );
 
@@ -183,7 +180,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     M3EOverflowStrategy strategy,
     int visibleCount,
   ) async {
-    final selectedAction = _selectedToggleActionInRange(
+    final selectedAction = _selectedActionInRange(
       visibleCount,
       widget.actions.length - 1,
     );
@@ -214,7 +211,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       for (var i = 0; i < count; i++)
         _repaintButton(
           KeyedSubtree(
-            key: ValueKey('toggle-item-$i'),
+            key: ValueKey('button-item-$i'),
             child: M3EButtonGroupItemScope(
               index: i,
               count: count,
@@ -336,7 +333,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       visibleItems.add(
         _repaintButton(
           KeyedSubtree(
-            key: ValueKey('toggle-menu-item-$i'),
+            key: ValueKey('button-menu-item-$i'),
             child: M3EButtonGroupItemScope(
               index: i,
               count: visibleScopeCount,
@@ -428,7 +425,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       visibleItems.add(
         _repaintButton(
           KeyedSubtree(
-            key: const ValueKey('toggle-paging-back'),
+            key: const ValueKey('button-paging-back'),
             child: _buildOverflowTrigger(
               context,
               targetIndex: 0,
@@ -457,7 +454,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       visibleItems.add(
         _repaintButton(
           KeyedSubtree(
-            key: const ValueKey('toggle-paging-forward'),
+            key: const ValueKey('button-paging-forward'),
             child: _buildOverflowTrigger(
               context,
               targetIndex: pagingWindow.end + 1,
@@ -489,7 +486,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       visibleItems.add(
         _repaintButton(
           KeyedSubtree(
-            key: ValueKey('toggle-paging-item-$i'),
+            key: ValueKey('button-paging-item-$i'),
             child: M3EButtonGroupItemScope(
               index: index++,
               count: _pagingScopeCount(pagingWindow),
@@ -520,9 +517,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
           focusedIndex: focusedIndex,
           beforeIndex: beforeIndex,
           spacing: spacing,
-          connectedGap: M3ETheme.of(
-            context,
-          ).toggleButtonGroupTheme.connectedGap,
+          connectedGap: M3ETheme.of(context).buttonGroupTheme.connectedGap,
           focusRingOutset: M3EFocusRing.outsetOf(context),
         );
 
@@ -541,9 +536,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
   }
 
   double _separatorMainExtent(double spacing) {
-    final connectedGap = M3ETheme.of(
-      context,
-    ).toggleButtonGroupTheme.connectedGap;
+    final connectedGap = M3ETheme.of(context).buttonGroupTheme.connectedGap;
     return M3EButtonGroupOverflowController.roundConsumed(
       widget._connected ? connectedGap : spacing,
     );
@@ -552,7 +545,7 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
   bool _allOverflowExtentsMeasured() {
     for (var i = 0; i < widget.actions.length; i++) {
       final action = widget.actions[i];
-      if (action.label != null || action.checkedLabel != null) {
+      if (action.label != null || action.selectedLabel != null) {
         if (!_isMeasured(i)) {
           return false;
         }
@@ -652,16 +645,17 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     required VoidCallback onPressed,
   }) {
     return KeyedSubtree(
-      key: ValueKey('toggle-overflow-$start-$end-$isFirst-$isLast'),
+      key: ValueKey('button-overflow-$start-$end-$isFirst-$isLast'),
       child: M3EButtonGroupItemScope(
         index: isLast ? M3EButtonConstants.kOverflowTriggerScopeIndex : 0,
         count: 1,
-        child: M3EToggleButton(
+        child: M3EButton(
           icon: icon,
-          checked: _selectedToggleActionInRange(start, end) != null,
-          onCheckedChange: (_) => onPressed(),
+          isSelected: _selectedActionInRange(start, end) != null,
+          onPressed: onPressed,
           style: widget.style,
           size: _mapSize(widget.size),
+          shape: widget.shape,
           decoration: widget.decoration,
           isGroupConnected: widget._connected,
           isFirstInGroup: isFirst,

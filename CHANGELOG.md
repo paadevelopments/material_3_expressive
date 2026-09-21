@@ -2,6 +2,16 @@
 
 ### Changed
 
+* **Breaking — buttons:** fold toggle selection into `M3EButton` via
+  caller-controlled `isSelected`, `selectedIcon`, and `selectedLabel`;
+  `M3EToggleButton`, `M3EToggleButtonDecoration`, and
+  `M3EToggleButtonTheme` are removed. Toggle text buttons are no longer
+  supported.
+* **Breaking — button groups:** rename the component module from
+  `toggle_button_group` to `button_group`; group actions now use
+  `isSelected`, `selectedIcon`, and `selectedLabel`, and group decoration uses
+  `M3EButtonDecoration`. Theme access moves from `toggleButtonGroupTheme` to
+  `buttonGroupTheme`.
 * Bump `material_ui` to `^1.3.0`.
 * Raise Flutter SDK constraint to `>=3.47.0` (FVM pin `3.47.0`) for
   `material_ui` `1.3.0` compatibility.

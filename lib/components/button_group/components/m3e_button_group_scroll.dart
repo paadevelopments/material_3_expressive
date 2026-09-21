@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 /// Scroll-overflow helpers for [_M3EButtonGroupState].
 extension _M3EButtonGroupScroll on _M3EButtonGroupState {
@@ -61,16 +61,16 @@ extension _M3EButtonGroupScroll on _M3EButtonGroupState {
     if (action.width != null) {
       return M3EButtonGroupOverflowController.roundConsumed(action.width!);
     }
-    if (index >= _measuredUncheckedWidths.length) {
+    if (index >= _measuredUnselectedWidths.length) {
       return M3EButtonGroupOverflowController.roundConsumed(
         _iconOnlyNaturalSizeCache,
       );
     }
-    final uncheckedWidth =
-        _measuredUncheckedWidths[index] ?? _iconOnlyNaturalSizeCache;
-    final checkedWidth = _measuredCheckedWidths[index] ?? uncheckedWidth;
+    final unselectedWidth =
+        _measuredUnselectedWidths[index] ?? _iconOnlyNaturalSizeCache;
+    final selectedWidth = _measuredSelectedWidths[index] ?? unselectedWidth;
     return M3EButtonGroupOverflowController.roundConsumed(
-      math.max(uncheckedWidth, checkedWidth),
+      math.max(unselectedWidth, selectedWidth),
     );
   }
 }

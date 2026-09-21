@@ -1,11 +1,9 @@
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EButtonGroup, M3EToggleButton;
+    show M3EButton;
 import 'package:material_ui/material_ui.dart';
 
 import '../enums/m3e_button_enums.dart';
 import 'm3e_button_motion.dart';
-
-part 'm3e_toggle_button_decoration.dart';
 
 /// Styling overrides for [M3EButton].
 @immutable
@@ -107,6 +105,15 @@ class M3EButtonDecoration {
   /// pressedRadius.
   final double? pressedRadius;
 
+  /// selectedRadius.
+  final double? selectedRadius;
+
+  /// unselectedRadius.
+  final double? unselectedRadius;
+
+  /// connectedInnerRadius.
+  final double? connectedInnerRadius;
+
   /// M3EButtonDecoration.
 
   const M3EButtonDecoration({
@@ -142,6 +149,9 @@ class M3EButtonDecoration {
     this.borderRadius,
     this.hoveredRadius,
     this.pressedRadius,
+    this.selectedRadius,
+    this.unselectedRadius,
+    this.connectedInnerRadius,
   });
 
   /// styleFrom.
@@ -151,6 +161,8 @@ class M3EButtonDecoration {
     Color? backgroundColor,
     Color? disabledForegroundColor,
     Color? disabledBackgroundColor,
+    Color? selectedForegroundColor,
+    Color? selectedBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? overlayColor,
@@ -182,16 +194,31 @@ class M3EButtonDecoration {
     double? borderRadius,
     double? hoveredRadius,
     double? pressedRadius,
+    double? selectedRadius,
+    double? unselectedRadius,
+    double? connectedInnerRadius,
   }) {
     final WidgetStateProperty<Color?>? backgroundColorProp =
-        (backgroundColor == null && disabledBackgroundColor == null)
+        (backgroundColor == null &&
+            disabledBackgroundColor == null &&
+            selectedBackgroundColor == null)
         ? null
-        : _StyleFromColorProperty(backgroundColor, disabledBackgroundColor);
+        : _StyleFromColorProperty(
+            backgroundColor,
+            disabledBackgroundColor,
+            selectedBackgroundColor,
+          );
 
     final WidgetStateProperty<Color?>? foregroundColorProp =
-        (foregroundColor == null && disabledForegroundColor == null)
+        (foregroundColor == null &&
+            disabledForegroundColor == null &&
+            selectedForegroundColor == null)
         ? null
-        : _StyleFromColorProperty(foregroundColor, disabledForegroundColor);
+        : _StyleFromColorProperty(
+            foregroundColor,
+            disabledForegroundColor,
+            selectedForegroundColor,
+          );
 
     final WidgetStateProperty<Color?>? shadowColorProp = shadowColor == null
         ? null
@@ -248,6 +275,9 @@ class M3EButtonDecoration {
       borderRadius: borderRadius,
       hoveredRadius: hoveredRadius,
       pressedRadius: pressedRadius,
+      selectedRadius: selectedRadius,
+      unselectedRadius: unselectedRadius,
+      connectedInnerRadius: connectedInnerRadius,
     );
   }
 
@@ -286,6 +316,9 @@ class M3EButtonDecoration {
     double? borderRadius,
     double? hoveredRadius,
     double? pressedRadius,
+    double? selectedRadius,
+    double? unselectedRadius,
+    double? connectedInnerRadius,
   }) {
     return M3EButtonDecoration(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -320,6 +353,9 @@ class M3EButtonDecoration {
       borderRadius: borderRadius ?? this.borderRadius,
       hoveredRadius: hoveredRadius ?? this.hoveredRadius,
       pressedRadius: pressedRadius ?? this.pressedRadius,
+      selectedRadius: selectedRadius ?? this.selectedRadius,
+      unselectedRadius: unselectedRadius ?? this.unselectedRadius,
+      connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
     );
   }
 
@@ -358,7 +394,10 @@ class M3EButtonDecoration {
           haptic == other.haptic &&
           borderRadius == other.borderRadius &&
           hoveredRadius == other.hoveredRadius &&
-          pressedRadius == other.pressedRadius;
+          pressedRadius == other.pressedRadius &&
+          selectedRadius == other.selectedRadius &&
+          unselectedRadius == other.unselectedRadius &&
+          connectedInnerRadius == other.connectedInnerRadius;
 
   @override
   int get hashCode => Object.hashAll([
@@ -394,19 +433,30 @@ class M3EButtonDecoration {
     borderRadius,
     hoveredRadius,
     pressedRadius,
+    selectedRadius,
+    unselectedRadius,
+    connectedInnerRadius,
   ]);
 }
 
 @immutable
 class _StyleFromColorProperty implements WidgetStateProperty<Color?> {
-  const _StyleFromColorProperty(this.color, this.disabledColor);
+  const _StyleFromColorProperty(
+    this.color,
+    this.disabledColor,
+    this.selectedColor,
+  );
   final Color? color;
   final Color? disabledColor;
+  final Color? selectedColor;
 
   @override
   Color? resolve(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return disabledColor;
+    }
+    if (states.contains(WidgetState.selected)) {
+      return selectedColor ?? color;
     }
     return color;
   }

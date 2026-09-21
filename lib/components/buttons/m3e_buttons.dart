@@ -6,6 +6,7 @@ import 'package:material_3_expressive/components/buttons/styles/m3e_button_motio
 import 'package:material_3_expressive/components/buttons/styles/m3e_button_theme.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:motor/motor.dart';
 
 import 'components/m3e_base_button_state.dart';
 import 'components/m3e_radius_and_padding_motion.dart';
@@ -28,6 +29,8 @@ export 'utils/m3e_button_gradient_layer.dart';
 part 'components/m3e_button_state.dart';
 part 'components/m3e_button_style.dart';
 part 'components/m3e_button_content.dart';
+part 'components/m3e_button_selection_content.dart';
+part 'components/m3e_button_selection_shape.dart';
 
 const Alignment _kAlignmentCenter = Alignment.center;
 const VisualDensity _kVisualDensityStandard = VisualDensity.standard;
@@ -42,10 +45,18 @@ class M3EButton extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.child,
+    this.icon,
+    this.label,
+    this.selectedIcon,
+    this.selectedLabel,
+    this.isSelected,
     this.style = M3EButtonStyle.filled,
     this.size = M3EButtonSize.sm,
     this.shape = M3EButtonShape.round,
     this.enabled = true,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
     this.statesController,
     this.decoration,
     this.focusNode,
@@ -66,10 +77,16 @@ class M3EButton extends StatefulWidget {
     required VoidCallback? onPressed,
     required Widget icon,
     required Widget label,
+    Widget? selectedIcon,
+    Widget? selectedLabel,
+    bool? isSelected,
     M3EButtonStyle style = M3EButtonStyle.filled,
     M3EButtonSize size = M3EButtonSize.sm,
     M3EButtonShape shape = M3EButtonShape.round,
     bool enabled = true,
+    bool isGroupConnected = false,
+    bool isFirstInGroup = true,
+    bool isLastInGroup = true,
     WidgetStatesController? statesController,
     M3EButtonDecoration? decoration,
     FocusNode? focusNode,
@@ -90,6 +107,9 @@ class M3EButton extends StatefulWidget {
       size: size,
       shape: shape,
       enabled: enabled,
+      isGroupConnected: isGroupConnected,
+      isFirstInGroup: isFirstInGroup,
+      isLastInGroup: isLastInGroup,
       statesController: statesController,
       decoration: decoration,
       focusNode: focusNode,
@@ -102,12 +122,11 @@ class M3EButton extends StatefulWidget {
       onHover: onHover,
       enableFeedback: enableFeedback,
       splashFactory: splashFactory,
-      child: _M3EButtonIconLayout(
-        icon: icon,
-        label: label,
-        size: size,
-        iconAlignment: decoration?.iconAlignment ?? IconAlignment.start,
-      ),
+      icon: icon,
+      label: label,
+      selectedIcon: selectedIcon,
+      selectedLabel: selectedLabel,
+      isSelected: isSelected,
     );
   }
 
@@ -116,9 +135,17 @@ class M3EButton extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.child,
+    this.icon,
+    this.label,
+    this.selectedIcon,
+    this.selectedLabel,
+    this.isSelected,
     this.size = M3EButtonSize.sm,
     this.shape = M3EButtonShape.round,
     this.enabled = true,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
     this.statesController,
     this.decoration,
     this.focusNode,
@@ -138,9 +165,17 @@ class M3EButton extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.child,
+    this.icon,
+    this.label,
+    this.selectedIcon,
+    this.selectedLabel,
+    this.isSelected,
     this.size = M3EButtonSize.sm,
     this.shape = M3EButtonShape.round,
     this.enabled = true,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
     this.statesController,
     this.decoration,
     this.focusNode,
@@ -160,9 +195,17 @@ class M3EButton extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.child,
+    this.icon,
+    this.label,
+    this.selectedIcon,
+    this.selectedLabel,
+    this.isSelected,
     this.size = M3EButtonSize.sm,
     this.shape = M3EButtonShape.round,
     this.enabled = true,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
     this.statesController,
     this.decoration,
     this.focusNode,
@@ -182,9 +225,17 @@ class M3EButton extends StatefulWidget {
     super.key,
     required this.onPressed,
     this.child,
+    this.icon,
+    this.label,
+    this.selectedIcon,
+    this.selectedLabel,
+    this.isSelected,
     this.size = M3EButtonSize.sm,
     this.shape = M3EButtonShape.round,
     this.enabled = true,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
     this.statesController,
     this.decoration,
     this.focusNode,
@@ -219,13 +270,36 @@ class M3EButton extends StatefulWidget {
     this.onHover,
     this.enableFeedback = _kDefaultEnableFeedback,
     this.splashFactory,
-  }) : style = M3EButtonStyle.text;
+  }) : icon = null,
+       label = null,
+       selectedIcon = null,
+       selectedLabel = null,
+       isSelected = null,
+       isGroupConnected = false,
+       isFirstInGroup = true,
+       isLastInGroup = true,
+       style = M3EButtonStyle.text;
 
   /// Callback invoked when the button is pressed. Null disables the button.
   final VoidCallback? onPressed;
 
   /// The child content of the button.
   final Widget? child;
+
+  /// Icon displayed by selection-capable buttons.
+  final Widget? icon;
+
+  /// Label displayed by selection-capable buttons.
+  final Widget? label;
+
+  /// Icon displayed when [isSelected] is true. Falls back to [icon].
+  final Widget? selectedIcon;
+
+  /// Label displayed when [isSelected] is true. Falls back to [label].
+  final Widget? selectedLabel;
+
+  /// Selection state. Null keeps default, non-toggle button behavior.
+  final bool? isSelected;
 
   /// Visual style of the button.
   ///
@@ -244,6 +318,15 @@ class M3EButton extends StatefulWidget {
 
   /// Whether the button is enabled. Defaults to true.
   final bool enabled;
+
+  /// Whether this button is part of a connected button group.
+  final bool isGroupConnected;
+
+  /// Whether this is the first button in a connected group.
+  final bool isFirstInGroup;
+
+  /// Whether this is the last button in a connected group.
+  final bool isLastInGroup;
 
   /// Optional controller for managing widget states externally.
   ///
@@ -321,6 +404,16 @@ class M3EButton extends StatefulWidget {
 
   /// decorationBorderRadius.
   double? get decorationBorderRadius => decoration?.borderRadius;
+
+  /// Radius used by the selected resting shape.
+  double? get decorationSelectedRadius => decoration?.selectedRadius;
+
+  /// Radius used by the unselected resting shape.
+  double? get decorationUnselectedRadius => decoration?.unselectedRadius;
+
+  /// Radius used on connected inner corners.
+  double? get decorationConnectedInnerRadius =>
+      decoration?.connectedInnerRadius;
 
   /// decorationOverlayColor.
   WidgetStateProperty<Color?>? get decorationOverlayColor =>

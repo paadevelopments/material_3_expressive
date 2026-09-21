@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 class _SpringMenuWrapper extends StatefulWidget {
   final Widget child;
@@ -79,8 +79,8 @@ class _MoveFocusAction extends Action<_MoveFocusIntent> {
   }
 }
 
-class _ToggleGroupFocusManager {
-  _ToggleGroupFocusManager._();
+class _ButtonGroupFocusManager {
+  _ButtonGroupFocusManager._();
 
   static List<FocusNode?> buildInternalFocusNodes(
     List<M3EButtonGroupAction> actions,
@@ -143,8 +143,8 @@ class _ToggleGroupFocusManager {
   }
 }
 
-class _ToggleGroupPressCoordinator {
-  _ToggleGroupPressCoordinator({required this._isMounted});
+class _ButtonGroupPressCoordinator {
+  _ButtonGroupPressCoordinator({required this._isMounted});
 
   final bool Function() _isMounted;
 
@@ -227,31 +227,31 @@ class _ToggleGroupPressCoordinator {
   }
 }
 
-class _ToggleGroupMeasurementOrchestrator {
+class _ButtonGroupMeasurementOrchestrator {
   int generation = 0;
   bool hasAnyLabel = false;
 
-  List<GlobalKey> uncheckedKeys = <GlobalKey>[];
-  List<GlobalKey> checkedKeys = <GlobalKey>[];
-  List<double?> measuredUncheckedWidths = <double?>[];
-  List<double?> measuredCheckedWidths = <double?>[];
+  List<GlobalKey> unselectedKeys = <GlobalKey>[];
+  List<GlobalKey> selectedKeys = <GlobalKey>[];
+  List<double?> measuredUnselectedWidths = <double?>[];
+  List<double?> measuredSelectedWidths = <double?>[];
 
-  List<WidgetStatesController>? _measurerUncheckedControllers;
-  List<WidgetStatesController>? _measurerCheckedControllers;
+  List<WidgetStatesController>? _measurerUnselectedControllers;
+  List<WidgetStatesController>? _measurerSelectedControllers;
 
   void initMeasurementState({
     required int actionCount,
     required M3EButtonGroupOverflowController overflowController,
   }) {
-    uncheckedKeys = List.generate(actionCount, (_) => GlobalKey());
-    checkedKeys = List.generate(actionCount, (_) => GlobalKey());
+    unselectedKeys = List.generate(actionCount, (_) => GlobalKey());
+    selectedKeys = List.generate(actionCount, (_) => GlobalKey());
 
     // Same count: keep last-known widths so interim frames do not collapse
     // labeled buttons to the icon-only fallback while remotion runs.
-    if (measuredUncheckedWidths.length != actionCount ||
-        measuredCheckedWidths.length != actionCount) {
-      measuredUncheckedWidths = List.filled(actionCount, null);
-      measuredCheckedWidths = List.filled(actionCount, null);
+    if (measuredUnselectedWidths.length != actionCount ||
+        measuredSelectedWidths.length != actionCount) {
+      measuredUnselectedWidths = List.filled(actionCount, null);
+      measuredSelectedWidths = List.filled(actionCount, null);
     }
 
     // Remotion may produce new extents; remeasure before treating as stable.
@@ -262,39 +262,39 @@ class _ToggleGroupMeasurementOrchestrator {
   }
 
   void initMeasurerControllers(int actionCount) {
-    _measurerUncheckedControllers = List.generate(
+    _measurerUnselectedControllers = List.generate(
       actionCount,
       (_) => WidgetStatesController(),
     );
-    _measurerCheckedControllers = List.generate(
+    _measurerSelectedControllers = List.generate(
       actionCount,
       (_) => WidgetStatesController(),
     );
   }
 
   void disposeMeasurerControllers() {
-    if (_measurerUncheckedControllers != null) {
-      for (final c in _measurerUncheckedControllers!) {
+    if (_measurerUnselectedControllers != null) {
+      for (final c in _measurerUnselectedControllers!) {
         c.dispose();
       }
-      _measurerUncheckedControllers = null;
+      _measurerUnselectedControllers = null;
     }
-    if (_measurerCheckedControllers != null) {
-      for (final c in _measurerCheckedControllers!) {
+    if (_measurerSelectedControllers != null) {
+      for (final c in _measurerSelectedControllers!) {
         c.dispose();
       }
-      _measurerCheckedControllers = null;
+      _measurerSelectedControllers = null;
     }
   }
 
   bool isMeasured(int index) {
-    return measuredUncheckedWidths[index] != null &&
-        measuredCheckedWidths[index] != null;
+    return measuredUnselectedWidths[index] != null &&
+        measuredSelectedWidths[index] != null;
   }
 }
 
-class _ToggleGroupKeyboardConfig {
-  _ToggleGroupKeyboardConfig._();
+class _ButtonGroupKeyboardConfig {
+  _ButtonGroupKeyboardConfig._();
 
   static Map<ShortcutActivator, Intent> arrowKeyShortcuts({
     required Axis direction,

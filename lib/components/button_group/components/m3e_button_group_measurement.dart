@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 /// Measurement, focus, and signature helpers for [_M3EButtonGroupState].
 extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
@@ -14,12 +14,12 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       return true;
     }
     for (final action in widget.actions) {
-      if (action.checked != null) {
+      if (action.isSelected != null) {
         throw FlutterError(
-          'M3EButtonGroup: Do not set action.checked when the group uses '
+          'M3EButtonGroup: Do not set action.isSelected when the group uses '
           'onSelectedIndexChanged or onSelectedIndicesChanged.\n'
           'Use selectedIndex / selectedIndices on the group instead. '
-          'Mixing per-action checked state with group-controlled selection '
+          'Mixing per-action selection with group-controlled selection '
           'produces undefined behavior.',
         );
       }
@@ -28,8 +28,8 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   void _bootstrapState() {
-    _measurement = _ToggleGroupMeasurementOrchestrator();
-    _pressCoordinator = _ToggleGroupPressCoordinator(isMounted: () => mounted);
+    _measurement = _ButtonGroupMeasurementOrchestrator();
+    _pressCoordinator = _ButtonGroupPressCoordinator(isMounted: () => mounted);
     _overflowController = M3EButtonGroupOverflowController();
     _scrollOverflowController = ScrollController();
     _overflowController.stableAllOverflowMeasured.addListener(
@@ -112,11 +112,11 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   bool _computeHasAnyLabel() => widget.actions.any(
-    (action) => action.label != null || action.checkedLabel != null,
+    (action) => action.label != null || action.selectedLabel != null,
   );
 
-  bool _needsDistinctCheckedMeasurement(M3EButtonGroupAction action) {
-    return action.checkedLabel != null || action.checkedIcon != null;
+  bool _needsDistinctSelectedMeasurement(M3EButtonGroupAction action) {
+    return action.selectedLabel != null || action.selectedIcon != null;
   }
 
   void _initMeasurementState() {
@@ -143,7 +143,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   void _updateDecorations() {
     _cachedDecorations = List.generate(widget.actions.length, (i) {
       final action = widget.actions[i];
-      return M3EToggleButtonDecoration(
+      return M3EButtonDecoration(
         backgroundColor:
             action.decoration?.backgroundColor ??
             widget.decoration?.backgroundColor,
@@ -163,12 +163,12 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
             action.decoration?.haptic ??
             widget.decoration?.haptic ??
             widget.haptic,
-        checkedRadius:
-            action.decoration?.checkedRadius ??
-            widget.decoration?.checkedRadius,
-        uncheckedRadius:
-            action.decoration?.uncheckedRadius ??
-            widget.decoration?.uncheckedRadius,
+        selectedRadius:
+            action.decoration?.selectedRadius ??
+            widget.decoration?.selectedRadius,
+        unselectedRadius:
+            action.decoration?.unselectedRadius ??
+            widget.decoration?.unselectedRadius,
         pressedRadius:
             action.decoration?.pressedRadius ??
             widget.decoration?.pressedRadius,
@@ -228,29 +228,29 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
 
   bool _measureLabeledButtonWidth(int index) {
     final action = widget.actions[index];
-    if (action.label == null && action.checkedLabel == null) {
+    if (action.label == null && action.selectedLabel == null) {
       return false;
     }
 
     var changed = _captureMeasuredWidth(
-      key: _uncheckedKeys[index],
-      into: _measuredUncheckedWidths,
+      key: _unselectedKeys[index],
+      into: _measuredUnselectedWidths,
       index: index,
     );
 
-    if (!_needsDistinctCheckedMeasurement(action)) {
+    if (!_needsDistinctSelectedMeasurement(action)) {
       final resolved =
-          _measuredUncheckedWidths[index] ?? _iconOnlyNaturalSizeCache;
-      if (_measuredCheckedWidths[index] != resolved) {
-        _measuredCheckedWidths[index] = resolved;
+          _measuredUnselectedWidths[index] ?? _iconOnlyNaturalSizeCache;
+      if (_measuredSelectedWidths[index] != resolved) {
+        _measuredSelectedWidths[index] = resolved;
         changed = true;
       }
       return changed;
     }
 
     return _captureMeasuredWidth(
-          key: _checkedKeys[index],
-          into: _measuredCheckedWidths,
+          key: _selectedKeys[index],
+          into: _measuredSelectedWidths,
           index: index,
         ) ||
         changed;
@@ -306,20 +306,20 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   Widget _buildOffstageMeasurerItem(int index) {
     final action = widget.actions[index];
 
-    if (!_needsDistinctCheckedMeasurement(action)) {
-      return M3EToggleButton(
-        key: _uncheckedKeys[index],
+    if (!_needsDistinctSelectedMeasurement(action)) {
+      return M3EButton(
+        key: _unselectedKeys[index],
+        onPressed: () {},
         style: widget.style,
         size: _mapSize(widget.size, actionWidth: action.width),
         decoration: widget.decoration,
         icon: action.icon,
         label: action.label,
-        checked: false,
-        checkedIcon: action.checkedIcon,
-        checkedLabel: action.checkedLabel,
+        isSelected: false,
+        selectedIcon: action.selectedIcon,
+        selectedLabel: action.selectedLabel,
         enabled: action.enabled,
         enableFeedback: action.enableFeedback ?? widget.enableFeedback,
-        onCheckedChange: (_) {},
       );
     }
 
@@ -327,33 +327,33 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        M3EToggleButton(
-          key: _uncheckedKeys[index],
+        M3EButton(
+          key: _unselectedKeys[index],
+          onPressed: () {},
           style: widget.style,
           size: _mapSize(widget.size, actionWidth: action.width),
           decoration: widget.decoration,
           icon: action.icon,
           label: action.label,
-          checked: false,
-          checkedIcon: action.checkedIcon,
-          checkedLabel: action.checkedLabel,
+          isSelected: false,
+          selectedIcon: action.selectedIcon,
+          selectedLabel: action.selectedLabel,
           enabled: action.enabled,
           enableFeedback: action.enableFeedback ?? widget.enableFeedback,
-          onCheckedChange: (_) {},
         ),
-        M3EToggleButton(
-          key: _checkedKeys[index],
+        M3EButton(
+          key: _selectedKeys[index],
+          onPressed: () {},
           style: widget.style,
           size: _mapSize(widget.size, actionWidth: action.width),
           decoration: widget.decoration,
           icon: action.icon,
-          label: action.checkedLabel ?? action.label,
-          checked: true,
-          checkedIcon: action.checkedIcon,
-          checkedLabel: action.checkedLabel,
+          label: action.selectedLabel ?? action.label,
+          isSelected: true,
+          selectedIcon: action.selectedIcon,
+          selectedLabel: action.selectedLabel,
           enabled: action.enabled,
           enableFeedback: action.enableFeedback ?? widget.enableFeedback,
-          onCheckedChange: (_) {},
         ),
       ],
     );
@@ -367,17 +367,17 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   void _initFocusNodes() {
-    _focusNodes = _ToggleGroupFocusManager.buildInternalFocusNodes(
+    _focusNodes = _ButtonGroupFocusManager.buildInternalFocusNodes(
       widget.actions,
     );
   }
 
   void _disposeFocusNodes() {
-    _ToggleGroupFocusManager.disposeInternalFocusNodes(_focusNodes);
+    _ButtonGroupFocusManager.disposeInternalFocusNodes(_focusNodes);
   }
 
   int _computeFocusNodeSignature(List<M3EButtonGroupAction> actions) {
-    return _ToggleGroupFocusManager.computeFocusNodeSignature(actions);
+    return _ButtonGroupFocusManager.computeFocusNodeSignature(actions);
   }
 
   int _computeLayoutSignature(M3EButtonGroup group) {
@@ -411,9 +411,9 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
     // measured widths. Size comes from content / explicit width.
     return Object.hash(
       _widgetContentHash(action.icon),
-      _widgetContentHash(action.checkedIcon),
+      _widgetContentHash(action.selectedIcon),
       _widgetContentHash(action.label),
-      _widgetContentHash(action.checkedLabel),
+      _widgetContentHash(action.selectedLabel),
       action.enabled,
       action.width,
     );
@@ -476,7 +476,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   void _focusNextButton(int currentIndex, int direction) {
-    final nextIndex = _ToggleGroupFocusManager.nextEnabledIndex(
+    final nextIndex = _ButtonGroupFocusManager.nextEnabledIndex(
       widget.actions,
       currentIndex: currentIndex,
       direction: direction,
@@ -532,7 +532,7 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
   }
 
   Map<ShortcutActivator, Intent> get _arrowKeyShortcuts {
-    return _ToggleGroupKeyboardConfig.arrowKeyShortcuts(
+    return _ButtonGroupKeyboardConfig.arrowKeyShortcuts(
       direction: widget.direction,
       isRtl: _isRtl,
     );
@@ -552,20 +552,20 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       return action.width!;
     }
 
-    if (index >= _measuredUncheckedWidths.length) {
+    if (index >= _measuredUnselectedWidths.length) {
       return _iconOnlyNaturalSizeCache;
     }
 
-    final uncheckedWidth =
-        _measuredUncheckedWidths[index] ?? _iconOnlyNaturalSizeCache;
-    final checkedWidth = _measuredCheckedWidths[index] ?? uncheckedWidth;
+    final unselectedWidth =
+        _measuredUnselectedWidths[index] ?? _iconOnlyNaturalSizeCache;
+    final selectedWidth = _measuredSelectedWidths[index] ?? unselectedWidth;
 
-    if (!widget._connected && _needsDistinctCheckedMeasurement(action)) {
-      return math.max(uncheckedWidth, checkedWidth);
+    if (!widget._connected && _needsDistinctSelectedMeasurement(action)) {
+      return math.max(unselectedWidth, selectedWidth);
     }
 
-    final bool checked = _isToggleActionSelected(index);
+    final bool selected = _isActionSelected(index);
 
-    return checked ? checkedWidth : uncheckedWidth;
+    return selected ? selectedWidth : unselectedWidth;
   }
 }

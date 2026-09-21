@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
-import '../enums/m3e_toggle_button_group_enums.dart';
+import '../enums/m3e_button_group_enums.dart';
 
 /// Resolved layout measurements for a button group.
 @immutable
@@ -29,10 +29,9 @@ class M3EButtonGroupMetrics {
 
 /// Theme values for `M3EButtonGroup`.
 @immutable
-class M3EToggleButtonGroupTheme
-    extends M3EThemeExtension<M3EToggleButtonGroupTheme> {
-  /// M3EToggleButtonGroupTheme.
-  const M3EToggleButtonGroupTheme({
+class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
+  /// M3EButtonGroupTheme.
+  const M3EButtonGroupTheme({
     this.standardSpacing = 8,
     this.connectedGap = 2,
     this.dividerThickness = 1,
@@ -44,7 +43,7 @@ class M3EToggleButtonGroupTheme
 
   /// defaults.
 
-  static const M3EToggleButtonGroupTheme defaults = M3EToggleButtonGroupTheme();
+  static const M3EButtonGroupTheme defaults = M3EButtonGroupTheme();
 
   /// standardSpacing.
 
@@ -251,7 +250,7 @@ class M3EToggleButtonGroupTheme
   };
 
   @override
-  M3EToggleButtonGroupTheme copyWith({
+  M3EButtonGroupTheme copyWith({
     double? standardSpacing,
     double? connectedGap,
     double? dividerThickness,
@@ -260,7 +259,7 @@ class M3EToggleButtonGroupTheme
     double? expandedRatio,
     double? fullRoundRadius,
   }) {
-    return M3EToggleButtonGroupTheme(
+    return M3EButtonGroupTheme(
       standardSpacing: standardSpacing ?? this.standardSpacing,
       connectedGap: connectedGap ?? this.connectedGap,
       dividerThickness: dividerThickness ?? this.dividerThickness,
@@ -273,11 +272,11 @@ class M3EToggleButtonGroupTheme
   }
 
   @override
-  M3EToggleButtonGroupTheme lerp(M3EToggleButtonGroupTheme? other, double t) {
-    if (other is! M3EToggleButtonGroupTheme) {
+  M3EButtonGroupTheme lerp(M3EButtonGroupTheme? other, double t) {
+    if (other is! M3EButtonGroupTheme) {
       return this;
     }
-    return M3EToggleButtonGroupTheme(
+    return M3EButtonGroupTheme(
       standardSpacing: _lerpDouble(standardSpacing, other.standardSpacing, t)!,
       connectedGap: _lerpDouble(connectedGap, other.connectedGap, t)!,
       dividerThickness: _lerpDouble(

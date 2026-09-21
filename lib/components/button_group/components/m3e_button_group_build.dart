@@ -1,9 +1,9 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 /// Build and selection helpers for [_M3EButtonGroupState].
 extension _M3EButtonGroupBuild on _M3EButtonGroupState {
   Widget _buildGroup(BuildContext context) {
-    final groupTheme = M3ETheme.of(context).toggleButtonGroupTheme;
+    final groupTheme = M3ETheme.of(context).buttonGroupTheme;
     final metrics = groupTheme.metricsFor(
       widget.size,
       widget.density,
@@ -70,7 +70,7 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       return;
     }
 
-    final isCurrentlySelected = _isToggleActionSelected(index);
+    final isCurrentlySelected = _isActionSelected(index);
 
     if (widget.onSelectedIndicesChanged != null) {
       final current = widget.selectedIndices ?? <int>{};
@@ -93,22 +93,22 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     }
   }
 
-  bool _resolveToggleActionSelected(int index) {
+  bool _resolveActionSelected(int index) {
     if (widget.selectedIndices != null) {
       return widget.selectedIndices!.contains(index);
     }
     if (widget.onSelectedIndexChanged != null || widget.selectedIndex != null) {
       return widget.selectedIndex == index;
     }
-    return widget.actions[index].checked ?? false;
+    return widget.actions[index].isSelected ?? false;
   }
 
-  M3EButtonGroupAction? _selectedToggleActionInRange(int start, int end) {
+  M3EButtonGroupAction? _selectedActionInRange(int start, int end) {
     if (start < 0 || end >= widget.actions.length || start > end) {
       return null;
     }
     for (var i = start; i <= end; i++) {
-      if (_isToggleActionSelected(i)) {
+      if (_isActionSelected(i)) {
         return widget.actions[i];
       }
     }
@@ -129,38 +129,42 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     bool isLast,
   ) {
     final action = widget.actions[index];
-    final bool checked = _isToggleActionSelected(index);
-    final button = _buildToggleButtonWidget(
+    final bool selected = _isActionSelected(index);
+    final button = _buildButtonWidget(
       action: action,
       index: index,
-      checked: checked,
+      selected: selected,
       isVisualFirst: _isRtl ? isLast : isFirst,
       isVisualLast: _isRtl ? isFirst : isLast,
     );
     return _maybeWrapButtonWidthMotion(
       action: action,
       index: index,
-      checked: checked,
+      selected: selected,
       button: button,
     );
   }
 
-  Widget _buildToggleButtonWidget({
+  Widget _buildButtonWidget({
     required M3EButtonGroupAction action,
     required int index,
-    required bool checked,
+    required bool selected,
     required bool isVisualFirst,
     required bool isVisualLast,
   }) {
-    return M3EToggleButton(
+    return M3EButton(
       icon: action.icon,
-      checkedIcon: action.checkedIcon,
+      selectedIcon: action.selectedIcon,
       label: action.label,
-      checkedLabel: action.checkedLabel,
-      checked: checked,
+      selectedLabel: action.selectedLabel,
+      isSelected: selected,
+      onPressed: action.enabled
+          ? () => _onSelectionChange(index, !selected)
+          : null,
       enabled: action.enabled,
       style: widget.style,
       size: _mapSize(widget.size, actionWidth: action.width),
+      shape: widget.shape,
       isGroupConnected: widget._connected,
       isFirstInGroup: isVisualFirst,
       isLastInGroup: isVisualLast,
@@ -177,38 +181,39 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       },
       semanticLabel: action.semanticLabel,
       tooltip: action.tooltip,
-      onCheckedChange: (val) => _onToggleCheckedChange(index, val),
     );
   }
 
-  void _onToggleCheckedChange(int index, bool val) {
+  void _onSelectionChange(int index, bool selected) {
     if (widget.onSelectedIndicesChanged != null) {
       final current = widget.selectedIndices ?? <int>{};
-      final next = val ? {...current, index} : ({...current}..remove(index));
+      final next = selected
+          ? {...current, index}
+          : ({...current}..remove(index));
       widget.onSelectedIndicesChanged!.call(next);
       return;
     }
     if (widget.onSelectedIndexChanged != null) {
-      widget.onSelectedIndexChanged!.call(val ? index : null);
+      widget.onSelectedIndexChanged!.call(selected ? index : null);
     }
   }
 
   Widget _maybeWrapButtonWidthMotion({
     required M3EButtonGroupAction action,
     required int index,
-    required bool checked,
+    required bool selected,
     required Widget button,
   }) {
     if (widget._connected ||
         action.width != null ||
-        !_needsDistinctCheckedMeasurement(action) ||
-        index >= _measuredUncheckedWidths.length) {
+        !_needsDistinctSelectedMeasurement(action) ||
+        index >= _measuredUnselectedWidths.length) {
       return button;
     }
 
-    final uncheckedWidth =
-        _measuredUncheckedWidths[index] ?? _iconOnlyNaturalSizeCache;
-    final checkedWidth = _measuredCheckedWidths[index] ?? uncheckedWidth;
+    final unselectedWidth =
+        _measuredUnselectedWidths[index] ?? _iconOnlyNaturalSizeCache;
+    final selectedWidth = _measuredSelectedWidths[index] ?? unselectedWidth;
     final motion =
         (action.decoration?.motion ??
                 widget.decoration?.motion ??
@@ -217,13 +222,14 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
 
     return SingleMotionBuilder(
       motion: motion,
-      value: checked ? 1.0 : 0.0,
+      value: selected ? 1.0 : 0.0,
       builder: (context, progress, child) {
-        final isShrinkingCollapse = !checked && checkedWidth > uncheckedWidth;
+        final isShrinkingCollapse =
+            !selected && selectedWidth > unselectedWidth;
         final p = isShrinkingCollapse
             ? progress.clamp(-0.45, 1.0)
             : progress.clamp(0.0, 1.0);
-        final width = uncheckedWidth + ((checkedWidth - uncheckedWidth) * p);
+        final width = unselectedWidth + ((selectedWidth - unselectedWidth) * p);
         return SizedBox(width: width, child: child);
       },
       child: button,

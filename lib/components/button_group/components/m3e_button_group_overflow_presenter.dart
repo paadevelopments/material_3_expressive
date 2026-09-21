@@ -1,8 +1,8 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
-mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
+mixin _ButtonGroupOverflowPresenterMixin on State<M3EButtonGroup> {
   void _handleOverflowActionSelection(int index);
-  bool _isToggleActionSelected(int index);
+  bool _isActionSelected(int index);
 
   Future<void> _openOverflowMenu(
     BuildContext context,
@@ -50,7 +50,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
         M3EMenuWidget(
           value: i,
           enabled: widget.actions[i].enabled,
-          selected: _isToggleActionSelected(i),
+          selected: _isActionSelected(i),
           semanticLabel:
               widget.actions[i].semanticLabel ?? widget.actions[i].tooltip,
           child: Row(
@@ -199,7 +199,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     double selectedR,
   ) {
     final action = widget.actions[actionIndex];
-    final selected = _isToggleActionSelected(actionIndex);
+    final selected = _isActionSelected(actionIndex);
 
     final isFirst = listIndex == 0;
     final isLast = listIndex == total - 1;
@@ -317,7 +317,7 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
     M3EColorScheme cs,
   ) {
     final action = widget.actions[actionIndex];
-    final selected = _isToggleActionSelected(actionIndex);
+    final selected = _isActionSelected(actionIndex);
 
     final itemRadius = dec.selectedBorderRadius ?? dec.outerRadius;
 
@@ -390,17 +390,19 @@ mixin _ToggleGroupOverflowPresenterMixin on State<M3EButtonGroup> {
 
   Widget _overflowMenuLeading(int index) {
     final action = widget.actions[index];
-    final Widget? icon = _isToggleActionSelected(index)
-        ? (action.checkedIcon ?? action.icon)
+    final Widget? icon = _isActionSelected(index)
+        ? (action.selectedIcon ?? action.icon)
         : action.icon;
     return icon ?? const SizedBox.shrink();
   }
 
   Widget _overflowMenuTitle(int index) {
     final action = widget.actions[index];
-    if (_isToggleActionSelected(index)) {
-      return action.checkedLabel ?? action.label ?? Text('Option ${index + 1}');
+    if (_isActionSelected(index)) {
+      return action.selectedLabel ??
+          action.label ??
+          Text('Option ${index + 1}');
     }
-    return action.label ?? action.checkedLabel ?? Text('Option ${index + 1}');
+    return action.label ?? action.selectedLabel ?? Text('Option ${index + 1}');
   }
 }

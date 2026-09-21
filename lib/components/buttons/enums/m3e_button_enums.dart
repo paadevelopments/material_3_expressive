@@ -1,15 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EButtonGroup, M3EToggleButton;
+    show M3EButton, M3EButtonGroup;
 
 export 'package:material_3_expressive/foundations/foundations.dart'
     show M3EHapticFeedback;
 
-/// Visual styles for [M3EButton] and [M3EToggleButton].
+/// Visual styles for [M3EButton].
 ///
 /// See also:
 /// - [M3EButton] for the standard button widget
-/// - [M3EToggleButton] for the toggle button widget
 enum M3EButtonStyle {
   /// Solid background, high prominence.
   filled,
@@ -48,11 +47,10 @@ enum M3EButtonShape {
 ///
 /// Heights: xs=32dp, sm=40dp, md=56dp, lg=96dp, xl=136dp.
 ///
-/// Used by [M3EButton], [M3EToggleButton], and [M3EButtonGroup].
+/// Used by [M3EButton] and [M3EButtonGroup].
 ///
 /// See also:
 /// - [M3EButton] for the standard button widget
-/// - [M3EToggleButton] for the toggle button widget
 /// - [M3EButtonGroup] for the connected toggle button group
 @immutable
 class M3EButtonSize {

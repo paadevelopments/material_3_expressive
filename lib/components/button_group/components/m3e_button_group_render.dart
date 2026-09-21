@@ -1,4 +1,4 @@
-part of '../m3e_toggle_button_group.dart';
+part of '../m3e_button_group.dart';
 
 class _ButtonGroupRenderObjectWidget extends MultiChildRenderObjectWidget {
   const _ButtonGroupRenderObjectWidget({
