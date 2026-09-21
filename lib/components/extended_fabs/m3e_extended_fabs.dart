@@ -75,9 +75,10 @@ class M3EExtendedFab extends StatelessWidget {
     final fabTheme = theme.fabTheme;
     final extendedTheme = fabTheme.extended;
     final metrics = fabTheme.resolve(
-      size: M3EFabSize.medium,
+      size: M3EFabSize.regular,
       color: color,
       scheme: theme.colorScheme,
+      enabled: _enabled,
     );
     final borderRadius = M3EShapes.resolve(extendedTheme.cornerRadius);
     final border = RoundedRectangleBorder(borderRadius: borderRadius);

@@ -426,9 +426,37 @@ M3EIconButton(
 
 #### M3EFab
 
-Floating action button in three sizes. Optional `decoration: M3EFabDecoration`
-for fill, foreground, overlay, and outline gradients. Override resting /
-hover elevation with `elevation` / `hoverElevation` (defaults: level 3 and 4).
+Floating action button in four sizes (`small` 40, `regular` 56, `medium` 80
+default, `large` 96). Color styles: container (`primary` / `secondary` /
+`tertiary`), filled (`primaryFilled` / `secondaryFilled` / `tertiaryFilled`),
+and baseline `surface`. Optional `decoration: M3EFabDecoration` for fill,
+foreground, overlay, and outline gradients. Override resting / hover elevation
+with `elevation` / `hoverElevation` (defaults: level 3 and 4).
+
+Use `M3EFabController` for scroll show/hide, appear morph, and optional
+container transform (`openBuilder` or `controller.open`).
+
+```dart
+final fabController = M3EFabController();
+
+M3EFabScrollVisibility(
+  controller: fabController,
+  child: Scaffold(
+    body: ListView(...),
+    floatingActionButton: M3EFab(
+      controller: fabController,
+      appear: true,
+      icon: const Icon(M3EIcons.add),
+      size: M3EFabSize.medium,
+      color: M3EFabColor.primaryFilled,
+      elevation: 3,
+      hoverElevation: 4,
+      openBuilder: (context) => const ComposePage(),
+      onPressed: () {},
+    ),
+  ),
+);
+```
 
 ```dart
 M3EFab(

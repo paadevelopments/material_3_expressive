@@ -88,12 +88,21 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     this.smallContainer = 40,
     this.smallIconSize = 24,
     this.smallRadius = 12,
-    this.mediumContainer = 56,
-    this.mediumIconSize = 24,
-    this.mediumRadius = 16,
+    this.regularContainer = 56,
+    this.regularIconSize = 24,
+    this.regularRadius = 16,
+    this.mediumContainer = 80,
+    this.mediumIconSize = 28,
+    this.mediumRadius = 20,
     this.largeContainer = 96,
     this.largeIconSize = 36,
     this.largeRadius = 28,
+    this.focusRingWidth = 3,
+    this.focusRingGap = 2,
+    this.focusRingColor,
+    this.disabledBackgroundAlpha = 0.1,
+    this.disabledForegroundAlpha = 0.38,
+    this.appearStartScale = 0.6,
     this.extended = const M3EExtendedFabTheme(),
     this.gradient,
   });
@@ -115,6 +124,15 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
   /// smallRadius.
   final double smallRadius;
 
+  /// regularContainer.
+  final double regularContainer;
+
+  /// regularIconSize.
+  final double regularIconSize;
+
+  /// regularRadius.
+  final double regularRadius;
+
   /// mediumContainer.
   final double mediumContainer;
 
@@ -133,6 +151,24 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
   /// largeRadius.
   final double largeRadius;
 
+  /// Focus ring stroke width (dp). Spec: 3.
+  final double focusRingWidth;
+
+  /// Gap between FAB edge and focus ring (dp). Spec: 2.
+  final double focusRingGap;
+
+  /// Focus ring color; defaults to [M3EColorScheme.secondary].
+  final Color? focusRingColor;
+
+  /// Disabled container alpha over on-surface.
+  final double disabledBackgroundAlpha;
+
+  /// Disabled icon alpha over on-surface.
+  final double disabledForegroundAlpha;
+
+  /// Initial scale for appear morph.
+  final double appearStartScale;
+
   /// extended.
   final M3EExtendedFabTheme extended;
 
@@ -145,9 +181,10 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     required M3EFabSize size,
     required M3EFabColor color,
     required M3EColorScheme scheme,
+    bool enabled = true,
   }) {
     final dims = _dimensions(size);
-    final palette = _palette(color, scheme);
+    final palette = _palette(color, scheme, enabled: enabled);
     return M3EFabMetrics(
       container: dims.container,
       iconSize: dims.iconSize,
@@ -157,6 +194,10 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     );
   }
 
+  /// Resolved focus ring color for [scheme].
+  Color resolveFocusRingColor(M3EColorScheme scheme) =>
+      focusRingColor ?? scheme.secondary;
+
   _FabDimensions _dimensions(M3EFabSize size) {
     switch (size) {
       case M3EFabSize.small:
@@ -164,6 +205,12 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
           container: smallContainer,
           iconSize: smallIconSize,
           radius: smallRadius,
+        );
+      case M3EFabSize.regular:
+        return _FabDimensions(
+          container: regularContainer,
+          iconSize: regularIconSize,
+          radius: regularRadius,
         );
       case M3EFabSize.medium:
         return _FabDimensions(
@@ -180,7 +227,17 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     }
   }
 
-  _FabPalette _palette(M3EFabColor color, M3EColorScheme scheme) {
+  _FabPalette _palette(
+    M3EFabColor color,
+    M3EColorScheme scheme, {
+    required bool enabled,
+  }) {
+    if (!enabled) {
+      return _FabPalette(
+        scheme.onSurface.withValues(alpha: disabledBackgroundAlpha),
+        scheme.onSurface.withValues(alpha: disabledForegroundAlpha),
+      );
+    }
     switch (color) {
       case M3EFabColor.primary:
         return _FabPalette(scheme.primaryContainer, scheme.onPrimaryContainer);
@@ -194,6 +251,12 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
           scheme.tertiaryContainer,
           scheme.onTertiaryContainer,
         );
+      case M3EFabColor.primaryFilled:
+        return _FabPalette(scheme.primary, scheme.onPrimary);
+      case M3EFabColor.secondaryFilled:
+        return _FabPalette(scheme.secondary, scheme.onSecondary);
+      case M3EFabColor.tertiaryFilled:
+        return _FabPalette(scheme.tertiary, scheme.onTertiary);
       case M3EFabColor.surface:
         return _FabPalette(scheme.surfaceContainerHigh, scheme.primary);
     }
@@ -205,12 +268,22 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
     double? smallContainer,
     double? smallIconSize,
     double? smallRadius,
+    double? regularContainer,
+    double? regularIconSize,
+    double? regularRadius,
     double? mediumContainer,
     double? mediumIconSize,
     double? mediumRadius,
     double? largeContainer,
     double? largeIconSize,
     double? largeRadius,
+    double? focusRingWidth,
+    double? focusRingGap,
+    Color? focusRingColor,
+    bool clearFocusRingColor = false,
+    double? disabledBackgroundAlpha,
+    double? disabledForegroundAlpha,
+    double? appearStartScale,
     M3EExtendedFabTheme? extended,
     Gradient? gradient,
   }) {
@@ -219,12 +292,25 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
       smallContainer: smallContainer ?? this.smallContainer,
       smallIconSize: smallIconSize ?? this.smallIconSize,
       smallRadius: smallRadius ?? this.smallRadius,
+      regularContainer: regularContainer ?? this.regularContainer,
+      regularIconSize: regularIconSize ?? this.regularIconSize,
+      regularRadius: regularRadius ?? this.regularRadius,
       mediumContainer: mediumContainer ?? this.mediumContainer,
       mediumIconSize: mediumIconSize ?? this.mediumIconSize,
       mediumRadius: mediumRadius ?? this.mediumRadius,
       largeContainer: largeContainer ?? this.largeContainer,
       largeIconSize: largeIconSize ?? this.largeIconSize,
       largeRadius: largeRadius ?? this.largeRadius,
+      focusRingWidth: focusRingWidth ?? this.focusRingWidth,
+      focusRingGap: focusRingGap ?? this.focusRingGap,
+      focusRingColor: clearFocusRingColor
+          ? null
+          : (focusRingColor ?? this.focusRingColor),
+      disabledBackgroundAlpha:
+          disabledBackgroundAlpha ?? this.disabledBackgroundAlpha,
+      disabledForegroundAlpha:
+          disabledForegroundAlpha ?? this.disabledForegroundAlpha,
+      appearStartScale: appearStartScale ?? this.appearStartScale,
       extended: extended ?? this.extended,
       gradient: gradient ?? this.gradient,
     );
@@ -240,12 +326,40 @@ class M3EFabTheme extends M3EThemeExtension<M3EFabTheme> {
       smallContainer: _lerpDouble(smallContainer, other.smallContainer, t)!,
       smallIconSize: _lerpDouble(smallIconSize, other.smallIconSize, t)!,
       smallRadius: _lerpDouble(smallRadius, other.smallRadius, t)!,
+      regularContainer: _lerpDouble(
+        regularContainer,
+        other.regularContainer,
+        t,
+      )!,
+      regularIconSize: _lerpDouble(regularIconSize, other.regularIconSize, t)!,
+      regularRadius: _lerpDouble(regularRadius, other.regularRadius, t)!,
       mediumContainer: _lerpDouble(mediumContainer, other.mediumContainer, t)!,
       mediumIconSize: _lerpDouble(mediumIconSize, other.mediumIconSize, t)!,
       mediumRadius: _lerpDouble(mediumRadius, other.mediumRadius, t)!,
       largeContainer: _lerpDouble(largeContainer, other.largeContainer, t)!,
       largeIconSize: _lerpDouble(largeIconSize, other.largeIconSize, t)!,
       largeRadius: _lerpDouble(largeRadius, other.largeRadius, t)!,
+      focusRingWidth: _lerpDouble(focusRingWidth, other.focusRingWidth, t)!,
+      focusRingGap: _lerpDouble(focusRingGap, other.focusRingGap, t)!,
+      focusRingColor:
+          Color.lerp(focusRingColor, other.focusRingColor, t) ??
+          focusRingColor ??
+          other.focusRingColor,
+      disabledBackgroundAlpha: _lerpDouble(
+        disabledBackgroundAlpha,
+        other.disabledBackgroundAlpha,
+        t,
+      )!,
+      disabledForegroundAlpha: _lerpDouble(
+        disabledForegroundAlpha,
+        other.disabledForegroundAlpha,
+        t,
+      )!,
+      appearStartScale: _lerpDouble(
+        appearStartScale,
+        other.appearStartScale,
+        t,
+      )!,
       extended: extended,
       gradient: t < 0.5 ? gradient : other.gradient,
     );

@@ -2,6 +2,13 @@
 
 ### Changed
 
+* **Breaking — FABs:** `M3EFabSize.medium` is now **80dp** / icon **28** /
+  radius **20** (was 56/24/16). Add `M3EFabSize.regular` (56/24/16) for the
+  baseline size. Default size remains `medium`. Add filled color styles
+  `primaryFilled` / `secondaryFilled` / `tertiaryFilled`; existing
+  `primary` / `secondary` / `tertiary` stay as container roles. Add
+  `M3EFabController` (scroll show/hide, appear morph, container transform),
+  focus ring **3dp** / **2dp** gap / `secondary`, and disabled muted colors.
 * **Split buttons** — align to M3E size tokens: pressed inner corners match
   hovered (8/12/12/20/20); between-space always **2dp**; optical vs centered
   trailing pads; small leading icon **20dp**; standard-motion chevron **180°**;

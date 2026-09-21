@@ -2,6 +2,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../pages/playground/do/button_group_playground.dart';
 import '../pages/playground/do/buttons_playground.dart';
+import '../pages/playground/do/extended_fabs_playground.dart';
 import '../pages/playground/do/fab_menu_playground.dart';
 import '../pages/playground/do/fabs_playground.dart';
 import '../pages/playground/do/icon_buttons_playground.dart';
@@ -83,10 +84,18 @@ abstract final class M3EDemoCatalog {
     M3EDemoEntry(
       id: 'fabs',
       title: 'FABs',
-      subtitle: 'FAB and extended FAB',
+      subtitle: 'Sizes, colors, scroll, transform',
       icon: M3EIcons.add,
       section: M3EDemoSection.doSection,
       playgroundBuilder: (_) => const FabsPlayground(),
+    ),
+    M3EDemoEntry(
+      id: 'extended_fabs',
+      title: 'Extended FABs',
+      subtitle: 'Icon + label, collapse',
+      icon: M3EIcons.edit,
+      section: M3EDemoSection.doSection,
+      playgroundBuilder: (_) => const ExtendedFabsPlayground(),
     ),
     M3EDemoEntry(
       id: 'fab_menu',

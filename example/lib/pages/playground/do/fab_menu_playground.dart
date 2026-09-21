@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_enum_menu.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
@@ -156,7 +157,7 @@ M3EFabMenu(
               labelOf: (M3EFabSize v) => v.name,
               onChanged: (M3EFabSize v) => setState(() => _size = v),
             ),
-            PlayEnumSegmented<M3EFabColor>(
+            PlayEnumMenu<M3EFabColor>(
               label: 'Color',
               value: _color,
               values: M3EFabColor.values,
