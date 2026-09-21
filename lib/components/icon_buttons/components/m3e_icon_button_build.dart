@@ -2,15 +2,26 @@ part of '../m3e_icon_buttons.dart';
 
 extension _M3EIconButtonBuild on _M3EIconButtonState {
   Widget _buildContent(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildConstrainedContent(context, constraints),
+    );
+  }
+
+  Widget _buildConstrainedContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
     final ({Size visual, Size target}) sizes = _resolveLayoutSizes(
       iconButtonTheme,
+      constraints,
     );
-    final bool selected = widget.isSelected ?? false;
+    final selected = widget.isSelected ?? false;
     // Toggle colors/shape only when [isSelected] is set (default vs toggle).
-    final bool isToggle = widget.isSelected != null;
+    final isToggle = widget.isSelected != null;
     final outlineW = iconButtonTheme.outlineWidthFor(widget.size);
     final ({Color bg, Color fg, BorderSide? side}) colors = _resolveColors(
       scheme,
@@ -46,13 +57,14 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       ),
     );
     paintedButton = _wrapPointerTracking(paintedButton);
+    final layout = widget.inflateHitTarget ? sizes.target : sizes.visual;
     return Semantics(
       button: true,
       selected: selected,
       label: widget.semanticLabel ?? widget.tooltip,
       child: SizedBox(
-        width: sizes.target.width,
-        height: sizes.target.height,
+        width: layout.width,
+        height: layout.height,
         child: Center(child: paintedButton),
       ),
     );
@@ -60,10 +72,30 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
 
   ({Size visual, Size target}) _resolveLayoutSizes(
     M3EIconButtonTheme iconButtonTheme,
+    BoxConstraints constraints,
   ) {
     final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
     final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
-    final Size visual = widget.visualSize ?? themeVisual;
+    var visual = widget.visualSize ?? themeVisual;
+    // Fill the allocated slot when the parent drives width (connected equal
+    // flex or standard neighbor-squish). Do not use unbounded max sizes from
+    // loose parents (e.g. centered scaffolding).
+    final bool fillWidth =
+        constraints.hasBoundedWidth &&
+        (widget.matchParentConstraints ||
+            widget.isGroupConnected ||
+            constraints.maxWidth < visual.width);
+    final bool fillHeight =
+        constraints.hasBoundedHeight &&
+        (widget.matchParentConstraints ||
+            widget.isGroupConnected ||
+            constraints.maxHeight < visual.height);
+    if (fillWidth) {
+      visual = Size(math.max(0, constraints.maxWidth), visual.height);
+    }
+    if (fillHeight) {
+      visual = Size(visual.width, math.max(0, constraints.maxHeight));
+    }
     return (
       visual: visual,
       target: Size(
@@ -101,14 +133,22 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         return _buildMorphButton(
           visual: visual,
           colors: colors,
-          targetRadius: M3EIconButtonShapes.effectiveRadius(
-            theme: iconButtonTheme,
-            size: widget.size,
-            baseVariant: widget.shape,
-            isToggle: isToggle,
-            isSelected: selected,
-            states: morphStates,
-          ),
+          targetRadius: widget.isGroupConnected
+              ? _connectedRadius(
+                  visual: visual,
+                  selected: selected,
+                  pressed: pressed,
+                )
+              : BorderRadius.circular(
+                  M3EIconButtonShapes.effectiveRadius(
+                    theme: iconButtonTheme,
+                    size: widget.size,
+                    baseVariant: widget.shape,
+                    isToggle: isToggle,
+                    isSelected: selected,
+                    states: morphStates,
+                  ),
+                ),
           iconSize: iconSize,
           icon: icon,
           selectedIcon: selectedIcon,
@@ -117,6 +157,36 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         );
       },
     );
+  }
+
+  BorderRadius _connectedRadius({
+    required Size visual,
+    required bool selected,
+    required bool pressed,
+  }) {
+    final groupTheme = M3ETheme.of(context).buttonGroupTheme;
+    final buttonSize = switch (widget.size) {
+      M3EIconButtonSize.xs => M3EButtonSize.xs,
+      M3EIconButtonSize.sm => M3EButtonSize.sm,
+      M3EIconButtonSize.md => M3EButtonSize.md,
+      M3EIconButtonSize.lg => M3EButtonSize.lg,
+      M3EIconButtonSize.xl => M3EButtonSize.xl,
+    };
+    if (selected) {
+      return BorderRadius.circular(
+        groupTheme.connectedSelectedInnerRadiusFor(visual.height),
+      );
+    }
+    final outer = widget.shape == M3EIconButtonShapeVariant.round
+        ? visual.height / 2
+        : groupTheme.connectedOuterSquareRadiusFor(buttonSize);
+    final inner = pressed
+        ? groupTheme.connectedPressedInnerRadiusFor(buttonSize)
+        : groupTheme.connectedInnerRadiusFor(buttonSize);
+    return BorderRadiusDirectional.horizontal(
+      start: Radius.circular(widget.isFirstInGroup ? outer : inner),
+      end: Radius.circular(widget.isLastInGroup ? outer : inner),
+    ).resolve(Directionality.of(context));
   }
 
   Widget _wrapPointerTracking(Widget child) {
@@ -251,7 +321,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
   Widget _buildMorphButton({
     required Size visual,
     required ({Color bg, Color fg, BorderSide? side}) colors,
-    required double targetRadius,
+    required BorderRadius targetRadius,
     required double iconSize,
     required Widget icon,
     required Widget? selectedIcon,
@@ -268,7 +338,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       internalRight: 0,
       internalTop: 0,
       internalBottom: 0,
-      targetRadius: BorderRadius.circular(targetRadius),
+      targetRadius: targetRadius,
       builder: (padding, animatedRadius) {
         final dec = widget.decoration;
         final fill =
@@ -300,6 +370,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             color: colors.fg,
             child: IconButton(
               focusNode: _focusNode,
+              autofocus: widget.autofocus,
               onPressed: widget.onPressed == null
                   ? null
                   : () {

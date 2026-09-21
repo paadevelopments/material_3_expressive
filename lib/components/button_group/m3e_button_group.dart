@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
@@ -21,6 +20,8 @@ import 'models/m3e_button_group_overflow_paging_window.dart';
 export '../buttons/components/m3e_no_overflow_strategy.dart';
 export '../buttons/components/m3e_overflow_strategy.dart';
 export '../buttons/components/m3e_scroll_overflow_strategy.dart';
+export 'components/m3e_button_group_item_scope.dart';
+export 'components/m3e_button_group_provider.dart';
 export 'components/m3e_button_group_scope.dart';
 export 'controllers/m3e_button_group_overflow_controller.dart';
 export 'enums/m3e_button_group_enums.dart';
@@ -38,24 +39,20 @@ part 'components/m3e_button_group_layout.dart';
 part 'components/m3e_button_group_scroll.dart';
 part 'components/m3e_button_group_build.dart';
 
-// ---------------------------------------------------------------------------
-// M3EButtonGroupAction
-// ---------------------------------------------------------------------------
-
-/// Intent for moving focus to the next button in the group.
-class _MoveFocusIntent extends Intent {
-  final int direction;
-  const _MoveFocusIntent(this.direction);
-}
-
-// ---------------------------------------------------------------------------
-// M3EButtonGroup
-// ---------------------------------------------------------------------------
-
-/// A horizontal (or vertical) row of selectable [M3EButton]s with optional
-/// neighbor-squish animation and connected-group shape morphing.
+/// A row (or column) of selectable [M3EButton]s with standard or connected
+/// layout, optional neighbour squish, and overflow handling.
+///
+/// All actions render as [M3EButton]. Use [M3EButtonGroupAction.minWidth] for
+/// icon-only resting widths. Standard groups use size-token between-space;
+/// connected groups use a 2dp gap and span their surface.
+///
+/// Selection:
+/// - Single-select (default): [selectedIndex] + [onSelectedIndexChanged]
+/// - Multi-select: set [multiSelect] to true and use [selectedIndices] +
+///   [onSelectedIndicesChanged]
+/// - [selectionRequired] prevents clearing the last selected action
 class M3EButtonGroup extends StatefulWidget {
-  /// const.
+  /// Creates a button group.
   const M3EButtonGroup({
     super.key,
     required this.actions,
@@ -70,6 +67,8 @@ class M3EButtonGroup extends StatefulWidget {
     this.selectedIndices,
     this.onSelectedIndexChanged,
     this.onSelectedIndicesChanged,
+    this.multiSelect = false,
+    this.selectionRequired = false,
     this.neighborSquish = true,
     this.expandedRatio = 0.15,
     this.haptic = M3EHapticFeedback.none,
@@ -86,80 +85,87 @@ class M3EButtonGroup extends StatefulWidget {
     this.overflowStrategy,
   });
 
-  /// final.
-
+  /// Actions rendered as group buttons.
   final List<M3EButtonGroupAction> actions;
 
-  /// final.
+  /// Standard (gapped) or connected (joined) layout.
   final M3EButtonGroupType type;
 
-  /// final.
+  /// Default corner strategy for actions (round or square).
   final M3EButtonShape shape;
 
-  /// final.
+  /// Size token applied uniformly to every action.
   final M3EButtonSize size;
 
-  /// final.
+  /// Visual style applied uniformly to every action.
   final M3EButtonStyle style;
 
-  /// final.
+  /// Density level (0…−3) that shrinks container height.
   final M3EButtonGroupDensity density;
 
-  /// final.
+  /// Optional between-space override; defaults to size / connection tokens.
   final double? spacing;
 
-  /// final.
+  /// Main layout axis.
   final Axis direction;
 
-  /// final.
+  /// Controlled single-select index; pair with [onSelectedIndexChanged].
   final int? selectedIndex;
 
-  /// final.
+  /// Controlled multi-select indices; pair with [onSelectedIndicesChanged].
   final Set<int>? selectedIndices;
 
-  /// final.
+  /// Called when single-select selection changes.
   final ValueChanged<int?>? onSelectedIndexChanged;
 
-  /// final.
+  /// Called when multi-select selection changes.
   final ValueChanged<Set<int>>? onSelectedIndicesChanged;
 
-  /// final.
+  /// When true, taps toggle membership in [selectedIndices] (multi-select).
+  ///
+  /// When false (default), selection is exclusive via [selectedIndex].
+  final bool multiSelect;
+
+  /// When true, the last selected action cannot be cleared.
+  final bool selectionRequired;
+
+  /// Whether pressing an action squishes neighbours (standard horizontal only).
   final bool neighborSquish;
 
-  /// final.
+  /// Pressed width growth ratio for neighbour squish (default 0.15).
   final double expandedRatio;
 
-  /// final.
+  /// Haptic feedback policy for presses.
   final M3EHapticFeedback haptic;
 
-  /// final.
+  /// Whether actions play platform feedback by default.
   final bool enableFeedback;
 
-  /// final.
+  /// Group-level decoration merged under each action's decoration.
   final M3EButtonDecoration? decoration;
 
-  /// final.
+  /// Semantics label for the group container (optional).
   final String? semanticLabel;
 
-  /// final.
+  /// Clip behavior for the group bounds.
   final Clip clipBehavior;
 
-  /// final.
+  /// Built-in overflow strategy when [overflowStrategy] is null.
   final M3EButtonGroupOverflow overflow;
 
-  /// final.
+  /// Icon for the overflow menu / paging trigger.
   final Widget? overflowIcon;
 
-  /// final.
+  /// Decoration for the overflow popup menu.
   final M3EOverflowPopupDecoration overflowPopupDecoration;
 
-  /// final.
+  /// Decoration for the overflow bottom sheet.
   final M3EOverflowBottomSheetDecoration overflowBottomSheetDecoration;
 
-  /// final.
+  /// Popup vs bottom sheet for [M3EButtonGroupOverflow.menu].
   final M3EButtonGroupOverflowMenuStyle overflowMenuStyle;
 
-  /// final.
+  /// Custom overflow strategy; overrides [overflow] when non-null.
   final M3EOverflowStrategy? overflowStrategy;
 
   bool get _connected => type == M3EButtonGroupType.connected;
@@ -168,12 +174,8 @@ class M3EButtonGroup extends StatefulWidget {
   State<M3EButtonGroup> createState() => _M3EButtonGroupState();
 }
 
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
 class _M3EButtonGroupState extends State<M3EButtonGroup>
-    with SingleTickerProviderStateMixin, _ButtonGroupOverflowPresenterMixin {
+    with _ButtonGroupOverflowPresenterMixin {
   late List<WidgetStatesController> _controllers;
   late List<FocusNode?> _focusNodes;
   late int _layoutSignature;
@@ -190,8 +192,6 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   int get _measurementGeneration => _measurement.generation;
   set _measurementGeneration(int value) => _measurement.generation = value;
-
-  int _focusedIndex = 0;
 
   List<GlobalKey> get _unselectedKeys => _measurement.unselectedKeys;
   List<GlobalKey> get _selectedKeys => _measurement.selectedKeys;
@@ -211,7 +211,13 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       !widget._connected &&
       widget.neighborSquish;
 
+  /// Multi-select when [M3EButtonGroup.multiSelect] is set or a multi-select
+  /// callback is used.
+  bool get _isMultiSelect =>
+      widget.multiSelect || widget.onSelectedIndicesChanged != null;
+
   late List<M3EButtonDecoration> _cachedDecorations;
+  bool _stateDisposed = false;
 
   @override
   void initState() {
@@ -223,6 +229,7 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateDecorations();
     _updateIconOnlyNaturalSizeCache();
     _scheduleMeasurementIfNeeded();
   }
@@ -236,16 +243,20 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
 
   @override
   void dispose() {
+    // Invalidate pending measurement / press frame callbacks before tearing
+    // down notifiers (State.mounted stays true until dispose returns).
+    _stateDisposed = true;
+    _measurementGeneration++;
     _overflowController.stableAllOverflowMeasured.removeListener(
       _handleOverflowChange,
     );
-    _overflowController.dispose();
-    _scrollOverflowController.dispose();
     _pressCoordinator.dispose();
-    _focusedIndexNotifier.dispose();
     _disposeControllers();
     _disposeFocusNodes();
     _disposeMeasurerControllers();
+    _overflowController.dispose();
+    _scrollOverflowController.dispose();
+    _focusedIndexNotifier.dispose();
     super.dispose();
   }
 
@@ -257,6 +268,20 @@ class _M3EButtonGroupState extends State<M3EButtonGroup>
       ..add(EnumProperty<M3EButtonShape>('shape', widget.shape))
       ..add(DiagnosticsProperty<M3EButtonSize>('size', widget.size))
       ..add(IntProperty('actionCount', widget.actions.length))
+      ..add(
+        FlagProperty(
+          'multiSelect',
+          value: widget.multiSelect,
+          ifTrue: 'multi-select',
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'selectionRequired',
+          value: widget.selectionRequired,
+          ifTrue: 'selection required',
+        ),
+      )
       ..add(EnumProperty<M3EButtonGroupOverflow>('overflow', widget.overflow))
       ..add(
         FlagProperty(

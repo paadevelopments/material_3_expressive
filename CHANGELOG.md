@@ -11,7 +11,22 @@
   `toggle_button_group` to `button_group`; group actions now use
   `isSelected`, `selectedIcon`, and `selectedLabel`, and group decoration uses
   `M3EButtonDecoration`. Theme access moves from `toggleButtonGroupTheme` to
-  `buttonGroupTheme`.
+  `buttonGroupTheme`. All actions render as `M3EButton` (icon-only, text-only,
+  or icon+label); `M3EButtonGroupItemKind` and `M3EButtonGroupAction.iconButton`
+  are removed — use `minWidth` for icon-button-like resting widths. Connected
+  groups span their surface with equal-width segments (optional
+  `buttonGroupTheme.maxWidth` cap); standard between-space follows size tokens
+  (18 / 12 / 8 / 8 / 8) and connected gap is 2dp.
+* **Breaking — button groups density:** `M3EButtonGroupDensity` is now
+  `regular` / `comfortable` / `compact` / `dense` (spec levels 0 / −1 / −2 /
+  −3). Density adjusts **container height** (−4dp per level), not between-space.
+  Hover keeps resting shape; press morphs corners / neighbour squish.
+* **Button groups** — align standard spacing and connected corner tokens per
+  size; add `selectionRequired` and `multiSelect` (with `selectedIndices` /
+  `onSelectedIndicesChanged`); use the 1400/0.9 neighbour-squish spring; keep
+  keyboard traversal on Tab order without capturing arrow keys; and keep all
+  actions at a uniform group-managed height for each size. Elevated
+  button groups remain available but are not recommended.
 * Bump `material_ui` to `^1.3.0`.
 * Raise Flutter SDK constraint to `>=3.47.0` (FVM pin `3.47.0`) for
   `material_ui` `1.3.0` compatibility.

@@ -114,7 +114,11 @@ Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
   (`isSelected` / `selectedIcon` / `selectedLabel`); `M3EToggleButton` is
   removed (no toggle text).
 - **Button groups** — module moved to `button_group`; theme is
-  `buttonGroupTheme`. Actions use `selected*` / `isSelected`.
+  `buttonGroupTheme`. Actions use `selected*` / `isSelected`; spacing and
+  connected radii follow per-size tokens. All actions are `M3EButton` (icon /
+  text / both) with optional `minWidth`. Groups support required selection,
+  surface-filling connected layout (`maxWidth` cap), and spring-driven
+  neighbour squish. Keyboard traversal is Tab-only.
 - **Icon buttons** — `M3EIconButton` tokens match M3E specs (radii, outline
   widths, toggle/default color roles, spring 1400/0.9, press overlay +
   `InkSparkle`, focus-ring chrome). **Breaking:** default variant is
@@ -487,29 +491,34 @@ M3EFabMenu(
 
 #### M3EButtonGroup
 
-Grouped icon buttons with neighbour squish or connected corner morphing.
-Optional `overflowStrategy` (`M3ENoOverflowStrategy`, `M3EScrollOverflowStrategy`,
-or a custom `M3EOverflowStrategy`).
+Standard or connected button groups. Size tokens set height and between-space;
+connected groups use a 2dp gap and fill their width. Optional density, neighbour
+squish, single/multi selection (`multiSelect`), and overflow strategies. Actions
+are always `M3EButton` — use `minWidth` for icon-only resting widths.
 
 ```dart
-// in State
+// in State — single-select
 M3EButtonGroup(
   selectedIndex: groupIndex,
-  onSelectedIndexChanged: (i) => setState(() => groupIndex = i ?? groupIndex),
+  onSelectedIndexChanged: (i) => setState(() => groupIndex = i),
+  selectionRequired: true,
   actions: const [
-    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_back)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.add)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_forward)),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_back), minWidth: 40),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.add), minWidth: 40),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_forward), minWidth: 40),
   ],
 );
 
+// multi-select
 M3EButtonGroup(
+  multiSelect: true,
+  selectedIndices: selected,
+  onSelectedIndicesChanged: (s) => setState(() => selected = s),
   type: M3EButtonGroupType.connected,
-  overflowStrategy: const M3EScrollOverflowStrategy(),
   actions: const [
-    M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_left)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_right)),
+    M3EButtonGroupAction(label: Text('Mon')),
+    M3EButtonGroupAction(label: Text('Tue')),
+    M3EButtonGroupAction(label: Text('Wed')),
   ],
 );
 ```

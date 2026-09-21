@@ -1,58 +1,54 @@
 import 'package:flutter/widgets.dart';
 
-/// Provides per-button positional data within the group.
+/// Per-action position inside a button group.
 ///
-/// Inserted by the group's layout pass around each child so that buttons can
-/// decide:
-/// - which outer corners to lock at the full-round radius (first / last)
-/// - which inner corners to animate (all middle edges)
-/// - whether to suppress the minimum-width floor when being squeezed by the
-///   neighbor-squish animation
+/// Used so buttons can lock outer corners (first / last) and adapt when
+/// neighbour-squish squeezes them.
 @immutable
 class M3EButtonGroupItemScope extends InheritedWidget {
-  /// M3EButtonGroupItemScope.
+  /// Creates an item scope for [index] within a group of [count] actions.
   const M3EButtonGroupItemScope({
     super.key,
     required super.child,
     required this.index,
     required this.count,
-    this._visualIsFirst,
-    this._visualIsLast,
+    this.visualIsFirst,
+    this.visualIsLast,
   });
 
-  final bool? _visualIsFirst;
-  final bool? _visualIsLast;
+  /// Optional visual-first override (e.g. RTL).
+  final bool? visualIsFirst;
 
-  /// Zero-based position in the group's action list.
+  /// Optional visual-last override (e.g. RTL).
+  final bool? visualIsLast;
+
+  /// Zero-based index in the group's action list.
   final int index;
 
-  /// Total number of visible buttons (excludes the overflow trigger).
+  /// Number of visible actions in this layout pass.
   final int count;
 
-  /// isFirst.
+  /// Whether this is the first visual segment.
+  bool get isFirst => visualIsFirst ?? index == 0;
 
-  bool get isFirst => _visualIsFirst ?? index == 0;
+  /// Whether this is the last visual segment.
+  bool get isLast => visualIsLast ?? index == count - 1;
 
-  /// isLast.
-  bool get isLast => _visualIsLast ?? index == count - 1;
-
-  /// isOnly.
+  /// Whether this is the only action in the group.
   bool get isOnly => count == 1;
 
-  /// maybeOf.
-
+  /// Nearest item scope, or null outside a group item.
   static M3EButtonGroupItemScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<M3EButtonGroupItemScope>();
 
-  /// of.
-
+  /// Nearest item scope; throws if none is found.
   static M3EButtonGroupItemScope of(BuildContext context) {
     final scope = maybeOf(context);
-    assert(scope != null, '''
-M3EButtonGroupItemScope.of() called but no M3EButtonGroupItemScope ancestor was
-found. Each button in M3EButtonGroup/M3EButtonGroup is automatically
-wrapped in one — this error means you are calling of() from outside a group.
-''');
+    assert(
+      scope != null,
+      'M3EButtonGroupItemScope.of() called with no item scope ancestor.\n'
+      'Each action in M3EButtonGroup is wrapped automatically.',
+    );
     return scope!;
   }
 
@@ -60,6 +56,6 @@ wrapped in one — this error means you are calling of() from outside a group.
   bool updateShouldNotify(M3EButtonGroupItemScope old) =>
       index != old.index ||
       count != old.count ||
-      _visualIsFirst != old._visualIsFirst ||
-      _visualIsLast != old._visualIsLast;
+      visualIsFirst != old.visualIsFirst ||
+      visualIsLast != old.visualIsLast;
 }

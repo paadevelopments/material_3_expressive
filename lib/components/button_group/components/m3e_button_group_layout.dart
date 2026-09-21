@@ -211,7 +211,19 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
       for (var i = 0; i < count; i++)
         _repaintButton(
           KeyedSubtree(
-            key: ValueKey('button-item-$i'),
+            // Remount when layout inputs change so springs / Material button
+            // style caches cannot keep a stale resting width.
+            key: ValueKey<int>(
+              Object.hash(
+                i,
+                widget.size.name,
+                widget.density.name,
+                widget.actions[i].minWidth,
+                widget.actions[i].width,
+                widget.type,
+                widget.shape,
+              ),
+            ),
             child: M3EButtonGroupItemScope(
               index: i,
               count: count,
@@ -222,7 +234,28 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     ];
 
     if (!_supportsAnimatedSquish) {
-      return _axisFlex(_interleaveWithGaps(context, children, spacing));
+      final interleaved = _interleaveWithGaps(context, children, spacing);
+      // Spec: connected groups span their surface and grow segment widths.
+      if (widget._connected &&
+          widget.direction == Axis.horizontal &&
+          maxMain.isFinite) {
+        final fillWidth = M3ETheme.of(context).buttonGroupTheme.maxWidth != null
+            ? math.min(maxMain, M3ETheme.of(context).buttonGroupTheme.maxWidth!)
+            : maxMain;
+        return SizedBox(
+          width: fillWidth,
+          child: Row(
+            children: [
+              for (var i = 0; i < interleaved.length; i++)
+                if (i.isEven)
+                  Expanded(child: interleaved[i])
+                else
+                  interleaved[i],
+            ],
+          ),
+        );
+      }
+      return _axisFlex(interleaved);
     }
     return _buildSquishAnimatedLayout(children, spacing);
   }
@@ -243,13 +276,13 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
   }
 
   Widget _buildSquishAnimatedLayout(List<Widget> children, double spacing) {
+    final spring = M3ETheme.of(context).buttonGroupTheme.neighborSquishSpring;
     return ValueListenableBuilder<int?>(
       valueListenable: _pressCoordinator.pressedIndexNotifier,
       builder: (context, pressedIndex, _) {
         return SingleMotionBuilder(
-          motion:
-              widget.decoration?.motion?.toMotion() ??
-              M3EButtonMotion.standard.toMotion(),
+          motion: const MaterialSpringMotion.expressiveSpatialDefault()
+              .copyWith(stiffness: spring.stiffness, damping: spring.damping),
           value: pressedIndex != null ? 1.0 : 0.0,
           builder: (context, animValue, _) {
             _pressCoordinator.onAnimationProgress(animValue);
@@ -512,34 +545,28 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     return ValueListenableBuilder<int?>(
       valueListenable: _focusedIndexNotifier,
       builder: (context, focusedIndex, _) {
+        // [spacing] is already size-token between-space (standard) or 2dp
+        // (connected) from metricsFor. Focus rings only expand connected gaps.
         final gap = _FocusRingGapRenderer.resolveGap(
           connected: widget._connected,
           focusedIndex: focusedIndex,
           beforeIndex: beforeIndex,
           spacing: spacing,
-          connectedGap: M3ETheme.of(context).buttonGroupTheme.connectedGap,
           focusRingOutset: M3EFocusRing.outsetOf(context),
         );
-
-        final double width = widget.direction == Axis.horizontal ? gap : 0;
-        final double height = widget.direction == Axis.vertical ? gap : 0;
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOutCubic,
-          width: widget.direction == Axis.horizontal ? null : width,
-          height: widget.direction == Axis.vertical ? null : height,
-          constraints: BoxConstraints(minWidth: width, minHeight: height),
+          width: widget.direction == Axis.horizontal ? gap : 0,
+          height: widget.direction == Axis.vertical ? gap : 0,
         );
       },
     );
   }
 
   double _separatorMainExtent(double spacing) {
-    final connectedGap = M3ETheme.of(context).buttonGroupTheme.connectedGap;
-    return M3EButtonGroupOverflowController.roundConsumed(
-      widget._connected ? connectedGap : spacing,
-    );
+    return M3EButtonGroupOverflowController.roundConsumed(spacing);
   }
 
   bool _allOverflowExtentsMeasured() {
@@ -562,7 +589,11 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     }
     final buttonTheme = M3ETheme.of(context).buttonTheme;
     final measurements = buttonTheme.measurements(
-      _mapSize(widget.size, actionWidth: widget.actions[index].width),
+      _mapSize(
+        widget.size,
+        actionWidth: widget.actions[index].width,
+        iconOnly: widget.actions[index].isIconOnly,
+      ),
     );
     return M3EButtonGroupOverflowController.roundConsumed(measurements.height);
   }
@@ -644,24 +675,34 @@ extension _M3EButtonGroupLayout on _M3EButtonGroupState {
     required bool isLast,
     required VoidCallback onPressed,
   }) {
+    final groupTheme = M3ETheme.of(context).buttonGroupTheme;
+    final segmentHeight = groupTheme.containerHeightFor(
+      widget.size,
+      density: widget.density,
+    );
     return KeyedSubtree(
       key: ValueKey('button-overflow-$start-$end-$isFirst-$isLast'),
       child: M3EButtonGroupItemScope(
         index: isLast ? M3EButtonConstants.kOverflowTriggerScopeIndex : 0,
         count: 1,
-        child: M3EButton(
-          icon: icon,
-          isSelected: _selectedActionInRange(start, end) != null,
-          onPressed: onPressed,
-          style: widget.style,
-          size: _mapSize(widget.size),
-          shape: widget.shape,
-          decoration: widget.decoration,
-          isGroupConnected: widget._connected,
-          isFirstInGroup: isFirst,
-          isLastInGroup: isLast,
-          semanticLabel: semanticLabel,
-          enableFeedback: widget.enableFeedback,
+        child: SizedBox(
+          height: segmentHeight,
+          child: M3EButton(
+            icon: icon,
+            isSelected: _selectedActionInRange(start, end) != null,
+            onPressed: onPressed,
+            style: widget.style,
+            size: _mapSize(widget.size),
+            shape: widget.shape,
+            decoration:
+                widget.decoration ??
+                M3EButtonDecoration(minimumSize: Size(0, segmentHeight)),
+            isGroupConnected: widget._connected,
+            isFirstInGroup: isFirst,
+            isLastInGroup: isLast,
+            semanticLabel: semanticLabel,
+            enableFeedback: widget.enableFeedback,
+          ),
         ),
       ),
     );

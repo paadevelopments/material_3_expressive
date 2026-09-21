@@ -1,29 +1,15 @@
 import 'package:flutter/widgets.dart';
-import 'package:material_3_expressive/components/button_group/m3e_button_group.dart'
-    show M3EButtonGroup;
-import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButtonGroup;
 
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_button_group_enums.dart';
 
-// ---------------------------------------------------------------------------
-// M3EButtonGroupScope
-// ---------------------------------------------------------------------------
-
-/// Provides group-level configuration to every descendant button.
+/// Ambient group configuration for descendant buttons.
 ///
-/// [M3EButtonGroup] inserts this widget at its root. Individual buttons call
-/// [M3EButtonGroupScope.maybeOf] to read the
-/// group's [type], [shape], [size], [density], and [direction] so they can
-/// adapt their appearance without needing explicit props drilled through every
-/// layer.
-///
-/// This is the Flutter equivalent of Compose's `ButtonGroupScope` — an
-/// implicit ambient context rather than an explicit parameter cascade.
+/// Inserted by `M3EButtonGroup`. Descendants read [maybeOf] / [of] for
+/// [type], [shape], [size], [density], and [direction].
 @immutable
 class M3EButtonGroupScope extends InheritedWidget {
-  /// M3EButtonGroupScope.
+  /// Creates a scope with the group's shared configuration.
   const M3EButtonGroupScope({
     super.key,
     required super.child,
@@ -34,41 +20,36 @@ class M3EButtonGroupScope extends InheritedWidget {
     required this.direction,
   });
 
-  /// type.
-
+  /// Visual connection variant of the enclosing group.
   final M3EButtonGroupType type;
 
-  /// shape.
+  /// Default corner strategy for actions in the group.
   final M3EButtonShape shape;
 
-  /// size.
+  /// Size token applied to every action.
   final M3EButtonSize size;
 
-  /// density.
+  /// Density level applied to container height.
   final M3EButtonGroupDensity density;
 
-  /// Primary layout axis of the group.
+  /// Main layout axis of the group.
   final Axis direction;
 
-  /// Convenience getter; avoids importing the enum at call sites.
+  /// Whether [type] is [M3EButtonGroupType.connected].
   bool get isConnected => type == M3EButtonGroupType.connected;
 
-  /// Returns null when there is no [M3EButtonGroupScope] ancestor.
+  /// Nearest scope, or null if this context is outside a group.
   static M3EButtonGroupScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<M3EButtonGroupScope>();
 
-  /// Returns the nearest [M3EButtonGroupScope].
-  ///
-  /// Throws a [FlutterError] with a useful message when no scope is found,
-  /// rather than a null-deref crash.
+  /// Nearest scope; throws if none is found.
   static M3EButtonGroupScope of(BuildContext context) {
     final scope = maybeOf(context);
-    assert(scope != null, '''
-M3EButtonGroupScope.of() called but no M3EButtonGroupScope was found in the
-widget tree above this context.
-
-Make sure the button is a descendant of M3EButtonGroup or M3EButtonGroup.
-''');
+    assert(
+      scope != null,
+      'M3EButtonGroupScope.of() called with no M3EButtonGroupScope ancestor.\n'
+      'Ensure the widget is a descendant of M3EButtonGroup.',
+    );
     return scope!;
   }
 

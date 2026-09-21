@@ -9,8 +9,7 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       widget.density,
       isConnected: widget._connected,
     );
-    final spacing =
-        widget.spacing ?? (widget._connected ? 0.0 : metrics.spacing);
+    final spacing = widget.spacing ?? metrics.spacing;
     _isRtl = Directionality.of(context) == TextDirection.rtl;
 
     Widget group = M3EButtonGroupProvider(
@@ -26,32 +25,50 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     );
 
     if (_hasAnyLabel) {
-      group = Stack(
+      // Measure selected/unselected extents without participating in layout.
+      // A Stack + Positioned measurer can pin the group width across size
+      // changes; OverflowBox in a zero-height slot avoids that.
+      group = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           group,
-          Positioned.fill(
-            child: Opacity(opacity: 0, child: _buildOffstageMeasurer(context)),
+          SizedBox.shrink(
+            child: OverflowBox(
+              alignment: Alignment.topLeft,
+              minWidth: 0,
+              maxWidth: double.infinity,
+              minHeight: 0,
+              maxHeight: double.infinity,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0,
+                  child: _buildOffstageMeasurer(context),
+                ),
+              ),
+            ),
           ),
         ],
       );
     }
 
-    Widget result = Shortcuts(
-      shortcuts: _arrowKeyShortcuts,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          _MoveFocusIntent: _MoveFocusAction(_focusNextButtonFromFocused),
-        },
-        child: FocusTraversalGroup(
-          policy: WidgetOrderTraversalPolicy(),
-          child: Semantics(
-            container: true,
-            label: widget.semanticLabel,
-            child: group,
-          ),
-        ),
+    Widget result = FocusTraversalGroup(
+      policy: _M3EButtonGroupTabTraversalPolicy(),
+      child: Semantics(
+        container: true,
+        label: widget.semanticLabel,
+        child: group,
       ),
     );
+
+    if (widget._connected && groupTheme.maxWidth != null) {
+      result = ConstrainedBox(
+        constraints: widget.direction == Axis.horizontal
+            ? BoxConstraints(maxWidth: groupTheme.maxWidth!)
+            : BoxConstraints(maxHeight: groupTheme.maxWidth!),
+        child: result,
+      );
+    }
 
     if (widget.clipBehavior != Clip.none) {
       result = ClipRRect(
@@ -72,17 +89,23 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
 
     final isCurrentlySelected = _isActionSelected(index);
 
-    if (widget.onSelectedIndicesChanged != null) {
+    if (_isMultiSelect) {
       final current = widget.selectedIndices ?? <int>{};
       final next = isCurrentlySelected
           ? ({...current}..remove(index))
           : {...current, index};
+      if (widget.selectionRequired && next.isEmpty) {
+        return;
+      }
       _lastOverflowSelectionIndex = index;
-      widget.onSelectedIndicesChanged!.call(next);
+      widget.onSelectedIndicesChanged?.call(next);
       return;
     }
 
     final nextSelectedIndex = isCurrentlySelected ? null : index;
+    if (widget.selectionRequired && nextSelectedIndex == null) {
+      return;
+    }
     final isNowSelected = nextSelectedIndex == index;
 
     _lastOverflowSelectionIndex = index;
@@ -94,8 +117,8 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
   }
 
   bool _resolveActionSelected(int index) {
-    if (widget.selectedIndices != null) {
-      return widget.selectedIndices!.contains(index);
+    if (_isMultiSelect) {
+      return widget.selectedIndices?.contains(index) ?? false;
     }
     if (widget.onSelectedIndexChanged != null || widget.selectedIndex != null) {
       return widget.selectedIndex == index;
@@ -130,6 +153,13 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
   ) {
     final action = widget.actions[index];
     final bool selected = _isActionSelected(index);
+    final groupTheme = M3ETheme.of(context).buttonGroupTheme;
+    // Spec container heights: 32 / 40 / 56 / 96 / 136 (visual). XS/S a11y
+    // 48dp targets are enforced via minimumSize width, not visual height.
+    final segmentHeight = groupTheme.containerHeightFor(
+      widget.size,
+      density: widget.density,
+    );
     final button = _buildButtonWidget(
       action: action,
       index: index,
@@ -137,11 +167,14 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       isVisualFirst: _isRtl ? isLast : isFirst,
       isVisualLast: _isRtl ? isFirst : isLast,
     );
-    return _maybeWrapButtonWidthMotion(
-      action: action,
-      index: index,
-      selected: selected,
-      button: button,
+    return SizedBox(
+      height: segmentHeight,
+      child: _maybeWrapButtonWidthMotion(
+        action: action,
+        index: index,
+        selected: selected,
+        button: button,
+      ),
     );
   }
 
@@ -152,18 +185,27 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     required bool isVisualFirst,
     required bool isVisualLast,
   }) {
+    final autofocus =
+        action.autofocus ||
+        (!widget.actions.any((item) => item.autofocus) &&
+            index == widget.actions.indexWhere((item) => item.enabled));
+    final onPressed = action.enabled
+        ? () => _onSelectionChange(index, !selected)
+        : null;
     return M3EButton(
       icon: action.icon,
       selectedIcon: action.selectedIcon,
       label: action.label,
       selectedLabel: action.selectedLabel,
       isSelected: selected,
-      onPressed: action.enabled
-          ? () => _onSelectionChange(index, !selected)
-          : null,
+      onPressed: onPressed,
       enabled: action.enabled,
       style: widget.style,
-      size: _mapSize(widget.size, actionWidth: action.width),
+      size: _mapSize(
+        widget.size,
+        actionWidth: action.width,
+        iconOnly: action.isIconOnly,
+      ),
       shape: widget.shape,
       isGroupConnected: widget._connected,
       isFirstInGroup: isVisualFirst,
@@ -171,12 +213,9 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       decoration: _cachedDecorations[index],
       statesController: _controllers[index],
       focusNode: action.focusNode ?? _focusNodes[index],
-      autofocus: action.autofocus,
+      autofocus: autofocus,
       enableFeedback: action.enableFeedback ?? widget.enableFeedback,
       onFocusChange: (focused) {
-        if (focused) {
-          _focusedIndex = index;
-        }
         action.onFocusChange?.call(focused);
       },
       semanticLabel: action.semanticLabel,
@@ -185,15 +224,21 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
   }
 
   void _onSelectionChange(int index, bool selected) {
-    if (widget.onSelectedIndicesChanged != null) {
+    if (_isMultiSelect) {
       final current = widget.selectedIndices ?? <int>{};
       final next = selected
           ? {...current, index}
           : ({...current}..remove(index));
-      widget.onSelectedIndicesChanged!.call(next);
+      if (widget.selectionRequired && next.isEmpty) {
+        return;
+      }
+      widget.onSelectedIndicesChanged?.call(next);
       return;
     }
     if (widget.onSelectedIndexChanged != null) {
+      if (widget.selectionRequired && !selected) {
+        return;
+      }
       widget.onSelectedIndexChanged!.call(selected ? index : null);
     }
   }
@@ -211,14 +256,15 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       return button;
     }
 
-    final unselectedWidth =
-        _measuredUnselectedWidths[index] ?? _iconOnlyNaturalSizeCache;
-    final selectedWidth = _measuredSelectedWidths[index] ?? unselectedWidth;
-    final motion =
-        (action.decoration?.motion ??
-                widget.decoration?.motion ??
-                M3EButtonMotion.standard)
-            .toMotion();
+    final unselectedWidth = _measuredUnselectedWidths[index];
+    final selectedWidth = _measuredSelectedWidths[index];
+    // Intrinsic until measured (e.g. right after size/density change).
+    if (unselectedWidth == null || selectedWidth == null) {
+      return button;
+    }
+    final spring = M3ETheme.of(context).buttonGroupTheme.neighborSquishSpring;
+    final motion = const MaterialSpringMotion.expressiveSpatialDefault()
+        .copyWith(stiffness: spring.stiffness, damping: spring.damping);
 
     return SingleMotionBuilder(
       motion: motion,
@@ -236,7 +282,11 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     );
   }
 
-  M3EButtonSize _mapSize(M3EButtonSize s, {double? actionWidth}) {
+  M3EButtonSize _mapSize(
+    M3EButtonSize s, {
+    double? actionWidth,
+    bool iconOnly = false,
+  }) {
     final base = switch (s.name) {
       'xs' => M3EButtonSize.xs,
       'sm' => M3EButtonSize.sm,
@@ -245,15 +295,17 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       'xl' => M3EButtonSize.xl,
       _ => M3EButtonSize.md,
     };
-    if (actionWidth != null || s.name == 'custom') {
-      return M3EButtonSize.custom(
-        height: s.height ?? base.height,
-        hPadding: s.hPadding ?? base.hPadding,
-        iconSize: s.iconSize ?? base.iconSize,
-        iconGap: s.iconGap ?? base.iconGap,
-        width: actionWidth ?? s.width ?? base.width,
-      );
-    }
-    return base;
+    final segmentHeight = M3ETheme.of(
+      context,
+    ).buttonGroupTheme.containerHeightFor(s, density: widget.density);
+    // Preserve token [name] so group spacing / radius tables still resolve.
+    // Override height for density; zero hPadding for icon-only actions.
+    return base.copyWith(
+      height: segmentHeight,
+      hPadding: iconOnly ? 0 : (s.hPadding ?? base.hPadding),
+      iconSize: s.iconSize ?? base.iconSize,
+      iconGap: s.iconGap ?? base.iconGap,
+      width: actionWidth ?? s.width ?? base.width,
+    );
   }
 }

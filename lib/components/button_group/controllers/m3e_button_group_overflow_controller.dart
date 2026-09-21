@@ -2,13 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../models/m3e_button_group_overflow_paging_window.dart';
 
-/// Reactive controller for managing the overflow state of a button group.
-///
-/// This controller holds the state of the overflow window and measurement
-/// stability, allowing descendants to react to changes in the overflow
-/// layout.
+/// Reactive overflow / paging state for a button group.
 class M3EButtonGroupOverflowController {
-  /// Creates a reactive overflow controller.
+  /// Creates an overflow controller.
   M3EButtonGroupOverflowController({
     int windowStartIndex = 0,
     bool stableAllOverflowMeasured = false,
@@ -17,40 +13,30 @@ class M3EButtonGroupOverflowController {
          stableAllOverflowMeasured,
        );
 
-  /// The start index of the current paging window.
-  ///
-  /// When this value changes, the layout pass will recompute which items are
-  /// visible in the main group vs. the overflow menu.
+  /// Start index of the current paging window.
   final ValueNotifier<int> windowStartIndex;
 
-  /// Whether all overflow items have been measured and the state is stable.
-  ///
-  /// This is used to prevent layout jitters or "ghost" frames while the
-  /// overflow strategy is still determining the final visible counts.
+  /// Whether labeled action extents are measured and layout can stabilize.
   final ValueNotifier<bool> stableAllOverflowMeasured;
 
-  /// Disposes the notifiers.
+  /// Disposes notifiers owned by this controller.
   void dispose() {
     windowStartIndex.dispose();
     stableAllOverflowMeasured.dispose();
   }
 
-  /// roundConsumed.
-
+  /// Rounds a consumed main-axis extent up to a whole pixel.
   static double roundConsumed(double extent) => extent.ceilToDouble();
 
-  /// roundAvailable.
-
+  /// Rounds an available main-axis extent down to a whole pixel.
   static double roundAvailable(double extent) => extent.floorToDouble();
 
-  /// hasMainExtentChanged.
-
+  /// Whether [current] differs from [last] by more than half a pixel.
   static bool hasMainExtentChanged(double? last, double current) {
     return last == null || (last - current).abs() > 0.5;
   }
 
-  /// Computes the number of items that can fit in the main group before the
-  /// overflow menu trigger.
+  /// How many leading items fit before an overflow menu trigger is required.
   int computeVisibleCountForMenu({
     required double maxMain,
     required List<double> itemExtents,
@@ -79,8 +65,7 @@ class M3EButtonGroupOverflowController {
     return visibleCount;
   }
 
-  /// Computes the paging window based on the current [windowStartIndex] and
-  /// available space.
+  /// Visible paging window for [windowStartIndex] and [maxMain].
   M3EButtonGroupOverflowPagingWindow computePagingWindow({
     required double maxMain,
     required List<double> itemExtents,

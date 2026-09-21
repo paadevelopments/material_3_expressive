@@ -120,6 +120,28 @@ class M3EButtonSize {
     );
   }
 
+  /// Returns this size with selective measurement overrides.
+  ///
+  /// Keeps [name] so theme token tables (spacing, radii) still resolve.
+  M3EButtonSize copyWith({
+    double? height,
+    double? hPadding,
+    double? iconSize,
+    double? iconGap,
+    double? outlineWidth,
+    double? width,
+  }) {
+    return M3EButtonSize._(
+      name,
+      height: height ?? this.height,
+      hPadding: hPadding ?? this.hPadding,
+      iconSize: iconSize ?? this.iconSize,
+      iconGap: iconGap ?? this.iconGap,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      width: width ?? this.width,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

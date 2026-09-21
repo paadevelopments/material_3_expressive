@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show clampDouble;
 
 import 'package:flutter/widgets.dart';
@@ -6,92 +7,144 @@ import '../../../foundations/foundations.dart';
 import '../../buttons/enums/m3e_button_enums.dart';
 import '../enums/m3e_button_group_enums.dart';
 
-/// Resolved layout measurements for a button group.
+/// Resolved spacing metrics for a button group layout pass.
 @immutable
 class M3EButtonGroupMetrics {
-  /// M3EButtonGroupMetrics.
+  /// Creates metrics for between-item and run spacing.
   const M3EButtonGroupMetrics({
     required this.spacing,
     required this.runSpacing,
     required this.dividerThickness,
   });
 
-  /// spacing.
-
+  /// Main-axis gap between adjacent actions.
   final double spacing;
 
-  /// runSpacing.
+  /// Cross-axis gap when the group wraps (same as [spacing] by default).
   final double runSpacing;
 
-  /// dividerThickness.
+  /// Thickness reserved for dividers between connected segments.
   final double dividerThickness;
 }
 
-/// Theme values for `M3EButtonGroup`.
+/// Theme extension for button group tokens and helpers.
 @immutable
 class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
-  /// M3EButtonGroupTheme.
+  /// Creates a button group theme.
   const M3EButtonGroupTheme({
-    this.standardSpacing = 8,
     this.connectedGap = 2,
     this.dividerThickness = 1,
-    this.connectedInnerRadius = 6,
-    this.connectedPressedInnerRadius = 2,
     this.expandedRatio = 0.15,
     this.fullRoundRadius = 9999,
+    this.maxWidth,
+    this.neighborSquishSpring = M3EMotion.spatialFast,
+    this.standardSpacingOverride,
+    this.connectedInnerRadiusOverride,
+    this.connectedPressedInnerRadiusOverride,
+    this.connectedOuterSquareRadiusOverride,
   });
 
-  /// defaults.
-
+  /// Package defaults (spec tokens).
   static const M3EButtonGroupTheme defaults = M3EButtonGroupTheme();
 
-  /// standardSpacing.
-
-  final double standardSpacing;
-
-  /// connectedGap.
+  /// Gap between connected segments (spec: 2dp at every size).
   final double connectedGap;
 
-  /// dividerThickness.
+  /// Divider thickness between connected segments.
   final double dividerThickness;
 
-  /// connectedInnerRadius.
-  final double connectedInnerRadius;
-
-  /// connectedPressedInnerRadius.
-  final double connectedPressedInnerRadius;
-
-  /// expandedRatio.
+  /// Pressed width growth ratio for neighbour squish (spec: 15%).
   final double expandedRatio;
 
-  /// fullRoundRadius.
+  /// Sentinel radius for fully round outer corners.
   final double fullRoundRadius;
 
-  static final Map<int, BorderRadius> _connectedRadiusCache = {};
+  /// Optional max width for connected groups that expand to fill.
+  final double? maxWidth;
 
-  /// squareRadiusFor.
+  /// Spring for neighbour-squish width animation (spec: 1400 / 0.9).
+  final M3ESpring neighborSquishSpring;
 
-  double squareRadiusFor(M3EButtonSize size) => switch (size.name) {
-    'xs' => 8.0,
-    'sm' => 12.0,
-    'md' => 16.0,
-    'lg' => 24.0,
-    'xl' => 32.0,
-    _ => 16.0,
+  /// When set, forces the same standard between-space for every size.
+  final double? standardSpacingOverride;
+
+  /// When set, forces the same connected inner radius for every size.
+  final double? connectedInnerRadiusOverride;
+
+  /// When set, forces the same connected pressed inner radius for every size.
+  final double? connectedPressedInnerRadiusOverride;
+
+  /// When set, forces the same connected square outer radius for every size.
+  final double? connectedOuterSquareRadiusOverride;
+
+  static const Map<String, double> _standardSpacing = {
+    'xs': 18,
+    'sm': 12,
+    'md': 8,
+    'lg': 8,
+    'xl': 8,
   };
 
-  /// metricsFor.
+  static const Map<String, double> _connectedInner = {
+    'xs': 4,
+    'sm': 8,
+    'md': 8,
+    'lg': 16,
+    'xl': 20,
+  };
 
+  static const Map<String, double> _connectedPressedInner = {
+    'xs': 4,
+    'sm': 4,
+    'md': 4,
+    'lg': 12,
+    'xl': 16,
+  };
+
+  static const Map<String, double> _connectedOuterSquare = {
+    'xs': 4,
+    'sm': 8,
+    'md': 8,
+    'lg': 16,
+    'xl': 20,
+  };
+
+  /// Standard between-space for [size] (18 / 12 / 8 / 8 / 8).
+  double standardSpacingFor(M3EButtonSize size) =>
+      standardSpacingOverride ?? _standardSpacing[size.name] ?? 8;
+
+  /// Connected unselected inner corner radius for [size].
+  double connectedInnerRadiusFor(M3EButtonSize size) =>
+      connectedInnerRadiusOverride ?? _connectedInner[size.name] ?? 8;
+
+  /// Connected pressed inner corner radius for [size].
+  double connectedPressedInnerRadiusFor(M3EButtonSize size) =>
+      connectedPressedInnerRadiusOverride ??
+      _connectedPressedInner[size.name] ??
+      4;
+
+  /// Connected selected inner corner radius (50% of segment height).
+  double connectedSelectedInnerRadiusFor(double height) => height / 2;
+
+  /// Square connected outer corner radius for [size].
+  double connectedOuterSquareRadiusFor(M3EButtonSize size) =>
+      connectedOuterSquareRadiusOverride ??
+      _connectedOuterSquare[size.name] ??
+      8;
+
+  /// Alias of [connectedOuterSquareRadiusFor] for square outer corners.
+  double squareRadiusFor(M3EButtonSize size) =>
+      connectedOuterSquareRadiusFor(size);
+
+  /// Spacing metrics for [size] / [density] and connection mode.
+  ///
+  /// Density affects height via [containerHeightFor], not spacing.
   M3EButtonGroupMetrics metricsFor(
     M3EButtonSize size,
     M3EButtonGroupDensity density, {
     bool isConnected = false,
   }) {
-    final raw = isConnected ? connectedGap : standardSpacing;
-    final spacing = density == M3EButtonGroupDensity.compact
-        ? (raw * 0.75).floorToDouble()
-        : raw;
-
+    final spacing = isConnected ? connectedGap : standardSpacingFor(size);
     return M3EButtonGroupMetrics(
       spacing: spacing,
       runSpacing: spacing,
@@ -99,15 +152,13 @@ class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
     );
   }
 
-  /// groupRadiusFor.
-
+  /// Clip / container radius for the whole group.
   BorderRadius groupRadiusFor(M3EButtonShape shape, M3EButtonSize size) =>
       shape == M3EButtonShape.round
       ? BorderRadius.circular(fullRoundRadius)
-      : BorderRadius.circular(squareRadiusFor(size));
+      : BorderRadius.circular(connectedOuterSquareRadiusFor(size));
 
-  /// connectedRadiusFor.
-
+  /// Connected segment [BorderRadius] for position and interaction state.
   BorderRadius connectedRadiusFor({
     required M3EButtonShape shape,
     required M3EButtonSize size,
@@ -115,82 +166,43 @@ class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
     required bool isLast,
     required bool isPressed,
     required bool isSelected,
+    double? height,
   }) {
+    final segmentHeight = height ?? containerHeightFor(size);
     if (isSelected) {
-      return BorderRadius.circular(fullRoundRadius);
-    }
-
-    final int cacheKey = _computeRadiusCacheKey(
-      isFirst: isFirst,
-      isLast: isLast,
-      isPressed: isPressed,
-      isSelected: isSelected,
-      size: size,
-      shape: shape,
-    );
-
-    if (_connectedRadiusCache.containsKey(cacheKey)) {
-      return _connectedRadiusCache[cacheKey]!;
+      return BorderRadius.circular(
+        connectedSelectedInnerRadiusFor(segmentHeight),
+      );
     }
 
     final outerRad = shape == M3EButtonShape.round
         ? fullRoundRadius
-        : squareRadiusFor(size);
+        : connectedOuterSquareRadiusFor(size);
 
     final innerRad = isPressed
-        ? connectedPressedInnerRadius
-        : connectedInnerRadius;
+        ? connectedPressedInnerRadiusFor(size)
+        : connectedInnerRadiusFor(size);
 
     final tl = isFirst ? outerRad : innerRad;
     final tr = isLast ? outerRad : innerRad;
     final bl = isFirst ? outerRad : innerRad;
     final br = isLast ? outerRad : innerRad;
 
-    final result = BorderRadius.only(
+    return BorderRadius.only(
       topLeft: Radius.circular(tl),
       topRight: Radius.circular(tr),
       bottomLeft: Radius.circular(bl),
       bottomRight: Radius.circular(br),
     );
-
-    _connectedRadiusCache[cacheKey] = result;
-    return result;
   }
 
-  int _computeRadiusCacheKey({
-    required bool isFirst,
-    required bool isLast,
-    required bool isPressed,
-    required bool isSelected,
-    required M3EButtonSize size,
-    required M3EButtonShape shape,
-  }) {
-    final sizeOrdinal = switch (size.name) {
-      'xs' => 0,
-      'sm' => 1,
-      'md' => 2,
-      'lg' => 3,
-      'xl' => 4,
-      _ => 2,
-    };
-    final isSquare = shape == M3EButtonShape.square ? 1 : 0;
-    return (isFirst ? 1 : 0) |
-        ((isLast ? 1 : 0) << 1) |
-        ((isPressed ? 1 : 0) << 2) |
-        ((isSelected ? 1 : 0) << 3) |
-        (sizeOrdinal << 4) |
-        (isSquare << 7);
-  }
-
-  /// standardRadiusFor.
-
+  /// Resting radius for a standard (non-connected) action.
   BorderRadius standardRadiusFor(M3EButtonShape shape, M3EButtonSize size) =>
       shape == M3EButtonShape.round
       ? BorderRadius.circular(fullRoundRadius)
-      : BorderRadius.circular(squareRadiusFor(size));
+      : BorderRadius.circular(connectedOuterSquareRadiusFor(size));
 
-  /// widthDeltas.
-
+  /// Neighbour-squish main-axis deltas for [pressedIndex].
   List<double> widthDeltas({
     required List<double> naturalWidths,
     required int? pressedIndex,
@@ -222,52 +234,83 @@ class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
     return deltas;
   }
 
-  /// overflowTriggerExtent.
-
+  /// Preferred main-axis extent for an overflow menu / paging trigger.
   double overflowTriggerExtent(M3EButtonSize size) =>
       clampDouble(containerHeightFor(size), 40, 56);
 
-  /// containerHeightFor.
+  /// Minimum accessible target edge (48dp when visual height is smaller).
+  double minTargetFor(M3EButtonSize size) {
+    final h = containerHeightFor(size);
+    return h < 48 ? 48 : h;
+  }
 
-  double containerHeightFor(M3EButtonSize size) => switch (size.name) {
-    'xs' => 32.0,
-    'sm' => 40.0,
-    'md' => 56.0,
-    'lg' => 96.0,
-    'xl' => 136.0,
-    _ => size.height ?? 56.0,
-  };
+  /// Spec container heights (32 / 40 / 56 / 96 / 136) plus [density] adjustment.
+  double containerHeightFor(
+    M3EButtonSize size, {
+    M3EButtonGroupDensity density = M3EButtonGroupDensity.regular,
+  }) {
+    final base = switch (size) {
+      M3EButtonSize.xs => 32.0,
+      M3EButtonSize.sm => 40.0,
+      M3EButtonSize.md => 56.0,
+      M3EButtonSize.lg => 96.0,
+      M3EButtonSize.xl => 136.0,
+      _ => size.height ?? 56.0,
+    };
+    return math.max(24, base + density.heightAdjustment);
+  }
 
-  /// fallbackChildWidth.
-
-  double fallbackChildWidth(M3EButtonSize size) => switch (size.name) {
-    'xs' => 56.0,
-    'sm' => 80.0,
-    'md' => 100.0,
-    'lg' => 120.0,
-    'xl' => 140.0,
-    _ => size.width ?? 100.0,
+  /// Fallback main-axis estimate before labeled actions are measured.
+  double fallbackChildWidth(M3EButtonSize size) => switch (size) {
+    M3EButtonSize.xs => 56,
+    M3EButtonSize.sm => 80,
+    M3EButtonSize.md => 100,
+    M3EButtonSize.lg => 120,
+    M3EButtonSize.xl => 140,
+    _ => size.width ?? 100,
   };
 
   @override
   M3EButtonGroupTheme copyWith({
-    double? standardSpacing,
     double? connectedGap,
     double? dividerThickness,
-    double? connectedInnerRadius,
-    double? connectedPressedInnerRadius,
     double? expandedRatio,
     double? fullRoundRadius,
+    double? maxWidth,
+    bool clearMaxWidth = false,
+    M3ESpring? neighborSquishSpring,
+    double? standardSpacingOverride,
+    bool clearStandardSpacingOverride = false,
+    double? connectedInnerRadiusOverride,
+    bool clearConnectedInnerRadiusOverride = false,
+    double? connectedPressedInnerRadiusOverride,
+    bool clearConnectedPressedInnerRadiusOverride = false,
+    double? connectedOuterSquareRadiusOverride,
+    bool clearConnectedOuterSquareRadiusOverride = false,
   }) {
     return M3EButtonGroupTheme(
-      standardSpacing: standardSpacing ?? this.standardSpacing,
       connectedGap: connectedGap ?? this.connectedGap,
       dividerThickness: dividerThickness ?? this.dividerThickness,
-      connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
-      connectedPressedInnerRadius:
-          connectedPressedInnerRadius ?? this.connectedPressedInnerRadius,
       expandedRatio: expandedRatio ?? this.expandedRatio,
       fullRoundRadius: fullRoundRadius ?? this.fullRoundRadius,
+      maxWidth: clearMaxWidth ? null : (maxWidth ?? this.maxWidth),
+      neighborSquishSpring: neighborSquishSpring ?? this.neighborSquishSpring,
+      standardSpacingOverride: clearStandardSpacingOverride
+          ? null
+          : (standardSpacingOverride ?? this.standardSpacingOverride),
+      connectedInnerRadiusOverride: clearConnectedInnerRadiusOverride
+          ? null
+          : (connectedInnerRadiusOverride ?? this.connectedInnerRadiusOverride),
+      connectedPressedInnerRadiusOverride:
+          clearConnectedPressedInnerRadiusOverride
+          ? null
+          : (connectedPressedInnerRadiusOverride ??
+                this.connectedPressedInnerRadiusOverride),
+      connectedOuterSquareRadiusOverride:
+          clearConnectedOuterSquareRadiusOverride
+          ? null
+          : (connectedOuterSquareRadiusOverride ??
+                this.connectedOuterSquareRadiusOverride),
     );
   }
 
@@ -277,25 +320,30 @@ class M3EButtonGroupTheme extends M3EThemeExtension<M3EButtonGroupTheme> {
       return this;
     }
     return M3EButtonGroupTheme(
-      standardSpacing: _lerpDouble(standardSpacing, other.standardSpacing, t)!,
       connectedGap: _lerpDouble(connectedGap, other.connectedGap, t)!,
       dividerThickness: _lerpDouble(
         dividerThickness,
         other.dividerThickness,
         t,
       )!,
-      connectedInnerRadius: _lerpDouble(
-        connectedInnerRadius,
-        other.connectedInnerRadius,
-        t,
-      )!,
-      connectedPressedInnerRadius: _lerpDouble(
-        connectedPressedInnerRadius,
-        other.connectedPressedInnerRadius,
-        t,
-      )!,
       expandedRatio: _lerpDouble(expandedRatio, other.expandedRatio, t)!,
       fullRoundRadius: _lerpDouble(fullRoundRadius, other.fullRoundRadius, t)!,
+      maxWidth: t < 0.5 ? maxWidth : other.maxWidth,
+      neighborSquishSpring: t < 0.5
+          ? neighborSquishSpring
+          : other.neighborSquishSpring,
+      standardSpacingOverride: t < 0.5
+          ? standardSpacingOverride
+          : other.standardSpacingOverride,
+      connectedInnerRadiusOverride: t < 0.5
+          ? connectedInnerRadiusOverride
+          : other.connectedInnerRadiusOverride,
+      connectedPressedInnerRadiusOverride: t < 0.5
+          ? connectedPressedInnerRadiusOverride
+          : other.connectedPressedInnerRadiusOverride,
+      connectedOuterSquareRadiusOverride: t < 0.5
+          ? connectedOuterSquareRadiusOverride
+          : other.connectedOuterSquareRadiusOverride,
     );
   }
 

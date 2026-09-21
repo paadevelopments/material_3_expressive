@@ -1,7 +1,7 @@
 part of '../m3e_button_group.dart';
 
-/// ParentData for items inside a [M3EButtonGroup].
+/// Layout parent data for children of an [M3EButtonGroup] render object.
 class M3EButtonGroupParentData extends ContainerBoxParentData<RenderBox> {
-  /// The alignment of this child.
+  /// Optional cross-axis alignment for this child.
   CrossAxisAlignment? alignment;
 }

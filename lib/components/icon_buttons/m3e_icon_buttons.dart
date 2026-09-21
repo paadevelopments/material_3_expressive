@@ -5,6 +5,7 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_radius_and_padding_motion.dart';
+import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/utils/m3e_button_gradient_layer.dart';
 import 'enums/m3e_icon_button_enums.dart';
 import 'styles/m3e_icon_button_decoration.dart';
@@ -47,6 +48,15 @@ class M3EIconButton extends StatefulWidget {
     this.suppressInk = false,
     this.visualSize,
     this.decoration,
+    this.isGroupConnected = false,
+    this.isFirstInGroup = true,
+    this.isLastInGroup = true,
+    this.inflateHitTarget = true,
+    this.matchParentConstraints = false,
+    this.statesController,
+    this.focusNode,
+    this.autofocus = false,
+    this.onFocusChange,
   });
 
   /// icon.
@@ -102,22 +112,62 @@ class M3EIconButton extends StatefulWidget {
   /// Optional decoration for solid and gradient surfaces.
   final M3EIconButtonDecoration? decoration;
 
+  /// Whether this icon button belongs to a connected button group.
+  final bool isGroupConnected;
+
+  /// Whether this is the first visual item in its connected group.
+  final bool isFirstInGroup;
+
+  /// Whether this is the last visual item in its connected group.
+  final bool isLastInGroup;
+
+  /// When true (default), XS/S outer layout uses the 48dp target.
+  ///
+  /// Button groups set this to false so icon actions share the group's
+  /// visual height with labeled button siblings.
+  final bool inflateHitTarget;
+
+  /// When true, visual width/height track the parent's max constraints.
+  ///
+  /// Button groups enable this so icon actions expand and shrink with
+  /// neighbor-squish slot sizes (same as labeled button actions).
+  final bool matchParentConstraints;
+
+  /// Optional externally owned state controller.
+  final WidgetStatesController? statesController;
+
+  /// Optional externally owned focus node.
+  final FocusNode? focusNode;
+
+  /// Whether this icon button requests focus initially.
+  final bool autofocus;
+
+  /// Called when this icon button gains or loses focus.
+  final ValueChanged<bool>? onFocusChange;
+
   @override
   State<M3EIconButton> createState() => _M3EIconButtonState();
 }
 
 class _M3EIconButtonState extends State<M3EIconButton> {
-  late final WidgetStatesController _statesController;
+  late final WidgetStatesController _internalStatesController;
   late final ValueNotifier<bool> _isPointerDownNotifier;
   late final ValueNotifier<bool> _isHoveredNotifier;
   late final ValueNotifier<bool> _isPressedNotifier;
   late final ValueNotifier<bool> _showFocusRingNotifier;
-  final FocusNode _focusNode = FocusNode(debugLabel: 'M3EIconButton');
+  final FocusNode _internalFocusNode = FocusNode(debugLabel: 'M3EIconButton');
+
+  WidgetStatesController get _statesController =>
+      widget.statesController ?? _internalStatesController;
+
+  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _statesController = WidgetStatesController()..addListener(_onStatesChanged);
+    _internalStatesController = WidgetStatesController();
+    _statesController.addListener(_onStatesChanged);
+    _focusNode.addListener(_onFocusChanged);
     _isPointerDownNotifier = ValueNotifier(false);
     _isHoveredNotifier = ValueNotifier(false);
     _isPressedNotifier = ValueNotifier(false);
@@ -127,22 +177,44 @@ class _M3EIconButtonState extends State<M3EIconButton> {
   }
 
   @override
+  void didUpdateWidget(covariant M3EIconButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.statesController != widget.statesController) {
+      (oldWidget.statesController ?? _internalStatesController).removeListener(
+        _onStatesChanged,
+      );
+      _statesController.addListener(_onStatesChanged);
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      (oldWidget.focusNode ?? _internalFocusNode).removeListener(
+        _onFocusChanged,
+      );
+      _focusNode.addListener(_onFocusChanged);
+    }
+  }
+
+  @override
   void dispose() {
     FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
     M3EFocusInteraction.instance.removeListener(_onFocusInteractionChanged);
-    _statesController
-      ..removeListener(_onStatesChanged)
-      ..dispose();
+    _statesController.removeListener(_onStatesChanged);
+    _focusNode.removeListener(_onFocusChanged);
+    _internalStatesController.dispose();
     _isPointerDownNotifier.dispose();
     _isHoveredNotifier.dispose();
     _isPressedNotifier.dispose();
     _showFocusRingNotifier.dispose();
-    _focusNode.dispose();
+    _internalFocusNode.dispose();
     super.dispose();
   }
 
   void _onFocusInteractionChanged() {
     _syncFocusRing();
+  }
+
+  void _onFocusChanged() {
+    _syncFocusRing();
+    widget.onFocusChange?.call(_focusNode.hasFocus);
   }
 
   void _onStatesChanged() {

@@ -1,16 +1,15 @@
 part of '../m3e_button_group.dart';
 
-/// A widget that controls how a child of a [M3EButtonGroup] aligns itself
-/// along the cross axis.
+/// Sets cross-axis alignment for a child inside an [M3EButtonGroup].
 class M3EButtonGroupAlign extends ParentDataWidget<M3EButtonGroupParentData> {
-  /// Creates an alignment widget for a button group item.
+  /// Creates an alignment widget for a group child.
   const M3EButtonGroupAlign({
     super.key,
     required this.alignment,
     required super.child,
   });
 
-  /// The cross axis alignment to apply to the child.
+  /// Cross-axis alignment applied to the child.
   final CrossAxisAlignment alignment;
 
   @override

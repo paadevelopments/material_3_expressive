@@ -1,44 +1,63 @@
 /// How buttons in the group are visually connected.
 enum M3EButtonGroupType {
-  /// Independent buttons with gaps between them. Spacing is controlled by
-  /// the density parameter.
+  /// Independent buttons with size-token between-space (18 / 12 / 8 / 8 / 8).
   standard,
 
-  /// Buttons share edges with no gap. Inner corners animate on press;
-  /// outer corners of the first and last button are locked at the full-round
-  /// radius, matching the Compose `ConnectedButtonGroup` spec.
+  /// Joined segments with a 2dp gap; inner corners morph on press/selection.
   connected,
 }
 
-/// Spacing compactness between adjacent buttons.
+/// Spec density levels 0, −1, −2, −3.
+///
+/// Density shrinks container height (−4dp per level). Between-space is unchanged.
 enum M3EButtonGroupDensity {
-  /// Full token spacing.
+  /// Level 0 — full token container height.
   regular,
 
-  /// 75 % of token spacing, floored to the nearest dp.
+  /// Level −1.
+  comfortable,
+
+  /// Level −2.
   compact,
+
+  /// Level −3.
+  dense,
 }
 
-/// Controls how button groups handle overflow when wrap=false.
+/// Helpers for [M3EButtonGroupDensity].
+extension M3EButtonGroupDensityX on M3EButtonGroupDensity {
+  /// Spec density level (0, −1, −2, −3).
+  int get level => switch (this) {
+    M3EButtonGroupDensity.regular => 0,
+    M3EButtonGroupDensity.comfortable => -1,
+    M3EButtonGroupDensity.compact => -2,
+    M3EButtonGroupDensity.dense => -3,
+  };
+
+  /// Height delta in dp (−4.0 per density level).
+  double get heightAdjustment => level * 4.0;
+}
+
+/// How the group handles actions that do not fit the available main-axis space.
 enum M3EButtonGroupOverflow {
-  /// Do not handle overflow specially.
+  /// Clip / overflow without a special strategy (content may exceed bounds).
   none,
 
-  /// Allow scrolling along the main axis when constraints are bounded.
+  /// Scroll along the main axis when constraints are bounded.
   scroll,
 
-  /// Replace overflow with a functional overflow menu trigger.
+  /// Collapse trailing actions into an overflow menu trigger.
   menu,
 
-  /// Shift the visible window in-place using back/forward overflow triggers.
+  /// Shift a visible paging window with back/forward overflow triggers.
   experimentalPaging,
 }
 
-/// Style for the overflow menu.
+/// Presentation style for [M3EButtonGroupOverflow.menu].
 enum M3EButtonGroupOverflowMenuStyle {
-  /// Show overflow actions in a popup menu.
+  /// Overflow actions in a popup menu.
   popup,
 
-  /// Show overflow actions in a modal bottom sheet.
+  /// Overflow actions in a modal bottom sheet.
   bottomSheet,
 }

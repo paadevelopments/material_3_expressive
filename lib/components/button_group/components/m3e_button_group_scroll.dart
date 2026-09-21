@@ -15,6 +15,9 @@ extension _M3EButtonGroupScroll on _M3EButtonGroupState {
         if (!isBounded) {
           return core;
         }
+        if (widget._connected) {
+          return core;
+        }
         final contentFits = _scrollContentFits(maxMain, spacing);
         return SingleChildScrollView(
           key: PageStorageKey<Object>(_scrollOverflowController),
@@ -60,6 +63,18 @@ extension _M3EButtonGroupScroll on _M3EButtonGroupState {
     final action = widget.actions[index];
     if (action.width != null) {
       return M3EButtonGroupOverflowController.roundConsumed(action.width!);
+    }
+    if (action.minWidth != null) {
+      // Floor; measured content may still raise the extent below.
+      final measured = index < _measuredUnselectedWidths.length
+          ? math.max(
+              _measuredUnselectedWidths[index] ?? 0,
+              _measuredSelectedWidths[index] ?? 0,
+            )
+          : 0.0;
+      return M3EButtonGroupOverflowController.roundConsumed(
+        math.max(action.minWidth!, measured),
+      );
     }
     if (index >= _measuredUnselectedWidths.length) {
       return M3EButtonGroupOverflowController.roundConsumed(

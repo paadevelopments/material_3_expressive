@@ -199,22 +199,37 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
 
   /// squareRadius.
 
-  double squareRadius(M3EButtonSize size) => _squareRadiusTable[size] ?? 12;
+  double squareRadius(M3EButtonSize size) =>
+      _lookupByName(_squareRadiusTable, size) ?? 12;
 
   /// pressedRadius.
 
-  double pressedRadius(M3EButtonSize size) => _pressedRadiusTable[size] ?? 12;
+  double pressedRadius(M3EButtonSize size) =>
+      _lookupByName(_pressedRadiusTable, size) ?? 12;
 
   /// Intermediate hover corner radius (legacy table).
   ///
   /// `M3EButton` does not morph on hover by default; set
   /// `M3EButtonDecoration.hoveredRadius` to opt in. Toggle still reads this.
-  double hoveredRadius(M3EButtonSize size) => _hoveredRadiusTable[size] ?? 16;
+  double hoveredRadius(M3EButtonSize size) =>
+      _lookupByName(_hoveredRadiusTable, size) ?? 16;
 
   /// equalizedMinWidth.
 
   double equalizedMinWidth(M3EButtonSize size) =>
-      _equalizedMinWidthTable[size] ?? 72;
+      _lookupByName(_equalizedMinWidthTable, size) ?? 72;
+
+  static double? _lookupByName(
+    Map<M3EButtonSize, double> table,
+    M3EButtonSize size,
+  ) {
+    for (final entry in table.entries) {
+      if (entry.key.name == size.name) {
+        return entry.value;
+      }
+    }
+    return null;
+  }
 
   /// measurements.
 
@@ -224,10 +239,8 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   }) {
     final base = _tokenMeasurements(size);
     if (override == null) {
-      if (size.name == 'custom') {
-        return base.applyCustomSize(size);
-      }
-      return base;
+      // Apply field overrides from [size] (custom name or copyWith height/density).
+      return base.applyCustomSize(size);
     }
     final overrideBase = _tokenMeasurements(override);
     return overrideBase.applyCustomSize(override);

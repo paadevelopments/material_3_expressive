@@ -67,18 +67,6 @@ class _SpringMenuWrapperState extends State<_SpringMenuWrapper>
   }
 }
 
-class _MoveFocusAction extends Action<_MoveFocusIntent> {
-  _MoveFocusAction(this._onMove);
-
-  final void Function(int direction) _onMove;
-
-  @override
-  Object? invoke(_MoveFocusIntent intent) {
-    _onMove(intent.direction);
-    return null;
-  }
-}
-
 class _ButtonGroupFocusManager {
   _ButtonGroupFocusManager._();
 
@@ -108,39 +96,6 @@ class _ButtonGroupFocusManager {
     }
     return hash;
   }
-
-  static int? nextEnabledIndex(
-    List<M3EButtonGroupAction> actions, {
-    required int currentIndex,
-    required int direction,
-  }) {
-    if (actions.isEmpty) {
-      return null;
-    }
-    final start = currentIndex + direction;
-    var nextIndex = start;
-
-    while (true) {
-      nextIndex = _wrapIndex(nextIndex, actions.length);
-      if (actions[nextIndex].enabled) {
-        return nextIndex;
-      }
-      nextIndex += direction;
-      if (nextIndex == start || nextIndex == currentIndex) {
-        return null;
-      }
-    }
-  }
-
-  static int _wrapIndex(int index, int length) {
-    if (index < 0) {
-      return length - 1;
-    }
-    if (index >= length) {
-      return 0;
-    }
-    return index;
-  }
 }
 
 class _ButtonGroupPressCoordinator {
@@ -156,8 +111,14 @@ class _ButtonGroupPressCoordinator {
   double _pressProgress = 0;
   bool _isWaitingForRelease = false;
   Duration? _releaseDeadline;
+  int? _physicallyPressedIndex;
+  bool _disposed = false;
 
   void dispose() {
+    _disposed = true;
+    _isWaitingForRelease = false;
+    _releaseDeadline = null;
+    _physicallyPressedIndex = null;
     pressedIndexNotifier.dispose();
   }
 
@@ -166,6 +127,14 @@ class _ButtonGroupPressCoordinator {
   }
 
   void handlePressedStateChange({required int index, required bool isPressed}) {
+    if (_disposed) {
+      return;
+    }
+    if (isPressed) {
+      _physicallyPressedIndex = index;
+    } else if (_physicallyPressedIndex == index) {
+      _physicallyPressedIndex = null;
+    }
     if (isPressed && pressedIndexNotifier.value != index) {
       _isWaitingForRelease = false;
       _releaseDeadline = null;
@@ -176,7 +145,26 @@ class _ButtonGroupPressCoordinator {
     }
   }
 
+  void animateSelection(int index) {
+    if (_disposed || _physicallyPressedIndex != null) {
+      return;
+    }
+    _setPressedIndex(index);
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      if (_disposed || !_isMounted()) {
+        return;
+      }
+      if (_physicallyPressedIndex == null &&
+          pressedIndexNotifier.value == index) {
+        _setPressedIndex(null);
+      }
+    });
+  }
+
   void onAnimationProgress(double animValue) {
+    if (_disposed) {
+      return;
+    }
     if (animValue > 0.01 && _lastPressedIndex != null) {
       _pressProgress = animValue;
       if (_isWaitingForRelease) {
@@ -187,6 +175,9 @@ class _ButtonGroupPressCoordinator {
 
   void _scheduleReleaseCheck() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_disposed || !_isMounted()) {
+        return;
+      }
       _releaseDeadline =
           SchedulerBinding.instance.currentFrameTimeStamp +
           M3EButtonConstants.kReleaseTimeout;
@@ -195,7 +186,7 @@ class _ButtonGroupPressCoordinator {
   }
 
   void _checkRelease() {
-    if (!_isWaitingForRelease || !_isMounted()) {
+    if (_disposed || !_isWaitingForRelease || !_isMounted()) {
       return;
     }
     final timedOut =
@@ -211,19 +202,26 @@ class _ButtonGroupPressCoordinator {
   }
 
   void _setPressedIndex(int? index) {
+    if (_disposed) {
+      return;
+    }
     if (index != null) {
       _lastPressedIndex = index;
     }
     if (SchedulerBinding.instance.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (_isMounted()) {
-          pressedIndexNotifier.value = index;
+        if (_disposed || !_isMounted()) {
+          return;
         }
+        pressedIndexNotifier.value = index;
       });
-    } else {
-      pressedIndexNotifier.value = index;
+      return;
     }
+    if (!_isMounted()) {
+      return;
+    }
+    pressedIndexNotifier.value = index;
   }
 }
 
@@ -242,14 +240,18 @@ class _ButtonGroupMeasurementOrchestrator {
   void initMeasurementState({
     required int actionCount,
     required M3EButtonGroupOverflowController overflowController,
+    bool clearMeasuredWidths = false,
   }) {
     unselectedKeys = List.generate(actionCount, (_) => GlobalKey());
     selectedKeys = List.generate(actionCount, (_) => GlobalKey());
 
-    // Same count: keep last-known widths so interim frames do not collapse
-    // labeled buttons to the icon-only fallback while remotion runs.
-    if (measuredUnselectedWidths.length != actionCount ||
-        measuredSelectedWidths.length != actionCount) {
+    // Keep last-known widths across selection/content remotion so interim
+    // frames do not collapse labeled buttons. Clear on size/density so the
+    // group container can recompute intrinsic widths for the new tokens.
+    final lengthChanged =
+        measuredUnselectedWidths.length != actionCount ||
+        measuredSelectedWidths.length != actionCount;
+    if (lengthChanged || clearMeasuredWidths) {
       measuredUnselectedWidths = List.filled(actionCount, null);
       measuredSelectedWidths = List.filled(actionCount, null);
     }
@@ -293,34 +295,6 @@ class _ButtonGroupMeasurementOrchestrator {
   }
 }
 
-class _ButtonGroupKeyboardConfig {
-  _ButtonGroupKeyboardConfig._();
-
-  static Map<ShortcutActivator, Intent> arrowKeyShortcuts({
-    required Axis direction,
-    required bool isRtl,
-  }) {
-    final rtlFlip = isRtl ? -1 : 1;
-    if (direction == Axis.horizontal) {
-      return {
-        const SingleActivator(LogicalKeyboardKey.arrowRight): _MoveFocusIntent(
-          1 * rtlFlip,
-        ),
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): _MoveFocusIntent(
-          -1 * rtlFlip,
-        ),
-      };
-    }
-    return {
-      const SingleActivator(LogicalKeyboardKey.arrowDown):
-          const _MoveFocusIntent(1),
-      const SingleActivator(LogicalKeyboardKey.arrowUp): const _MoveFocusIntent(
-        -1,
-      ),
-    };
-  }
-}
-
 class _FocusRingGapRenderer {
   _FocusRingGapRenderer._();
 
@@ -329,10 +303,9 @@ class _FocusRingGapRenderer {
     required int? focusedIndex,
     required int beforeIndex,
     required double spacing,
-    required double connectedGap,
     required double focusRingOutset,
   }) {
-    var gap = connected ? connectedGap : spacing;
+    var gap = spacing;
     if (connected) {
       final isFocusedLeft = focusedIndex == beforeIndex;
       final isFocusedRight = focusedIndex == beforeIndex + 1;
@@ -341,5 +314,17 @@ class _FocusRingGapRenderer {
       }
     }
     return gap;
+  }
+}
+
+/// Tab-order traversal only (spec: Tab between items; Space/Enter activate).
+class _M3EButtonGroupTabTraversalPolicy extends WidgetOrderTraversalPolicy {
+  _M3EButtonGroupTabTraversalPolicy();
+
+  @override
+  // Spec documents Tab only; block arrow-key directional moves.
+  // ignore: must_call_super
+  bool inDirection(FocusNode currentNode, TraversalDirection direction) {
+    return false;
   }
 }
