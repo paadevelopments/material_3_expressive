@@ -18,17 +18,23 @@ class IconButtonsPlayground extends StatefulWidget {
 }
 
 class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
-  M3EIconButtonVariant _variant = M3EIconButtonVariant.standard;
+  M3EIconButtonVariant _variant = M3EIconButtonVariant.filled;
   M3EIconButtonSize _size = M3EIconButtonSize.sm;
   M3EIconButtonShapeVariant _shape = M3EIconButtonShapeVariant.round;
   M3EIconButtonWidth _width = M3EIconButtonWidth.defaultWidth;
   bool _enabled = true;
+  bool _toggle = false;
   bool _selected = false;
   bool _badge = false;
 
   List<PlaySnippet> get _snippets {
     final String pressed = _enabled ? '() {}' : 'null';
     final String badge = _badge ? '3' : 'null';
+    final String toggleArgs = _toggle
+        ? '''
+  selectedIcon: const Icon(M3EIcons.favorite),
+  isSelected: $_selected,'''
+        : '';
     return <PlaySnippet>[
       PlaySnippet(
         label: 'Icon button',
@@ -37,13 +43,11 @@ class _IconButtonsPlaygroundState extends State<IconButtonsPlayground> {
 $kPlaySnippetImport
 M3EIconButton(
   icon: const Icon(M3EIcons.favorite),
-  selectedIcon: const Icon(M3EIcons.favorite),
   onPressed: $pressed,
   variant: M3EIconButtonVariant.${_variant.name},
   size: M3EIconButtonSize.${_size.name},
   shape: M3EIconButtonShapeVariant.${_shape.name},
-  width: M3EIconButtonWidth.${_width.name},
-  isSelected: $_selected,
+  width: M3EIconButtonWidth.${_width.name},$toggleArgs
   badgeValue: $badge,
   tooltip: 'Favorite',
 );''',
@@ -59,13 +63,13 @@ M3EIconButton(
           label: 'Icon button',
           child: M3EIconButton(
             icon: const Icon(M3EIcons.favorite),
-            selectedIcon: const Icon(M3EIcons.favorite),
+            selectedIcon: _toggle ? const Icon(M3EIcons.favorite) : null,
             onPressed: _enabled ? () {} : null,
             variant: _variant,
             size: _size,
             shape: _shape,
             width: _width,
-            isSelected: _selected,
+            isSelected: _toggle ? _selected : null,
             badgeValue: _badge ? 3 : null,
             tooltip: 'Favorite',
           ),
@@ -173,10 +177,16 @@ M3EIconButton(
               onChanged: (bool v) => setState(() => _enabled = v),
             ),
             PlaySwitch(
-              label: 'Selected',
-              value: _selected,
-              onChanged: (bool v) => setState(() => _selected = v),
+              label: 'Toggle',
+              value: _toggle,
+              onChanged: (bool v) => setState(() => _toggle = v),
             ),
+            if (_toggle)
+              PlaySwitch(
+                label: 'Selected',
+                value: _selected,
+                onChanged: (bool v) => setState(() => _selected = v),
+              ),
             PlaySwitch(
               label: 'Badge',
               value: _badge,

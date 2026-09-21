@@ -190,6 +190,7 @@ class M3EDatePickerEntryModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
       icon: Icon(icon),
       tooltip: tooltip,
       onPressed: onPressed,

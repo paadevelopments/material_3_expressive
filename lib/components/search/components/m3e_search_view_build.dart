@@ -33,6 +33,7 @@ extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
         theme: theme,
         styles: styles,
         defaultLeading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: const Icon(M3EIcons.arrow_back),
           tooltip: M3ESearchConstants.backButtonTooltip,
           onPressed: () => Navigator.of(context).pop(),
@@ -40,6 +41,7 @@ extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
         defaultTrailing: <Widget>[
           if (widget.searchController.text.isNotEmpty)
             M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               icon: const Icon(M3EIcons.close),
               tooltip: M3ESearchConstants.clearButtonTooltip,
               onPressed: widget.searchController.clear,

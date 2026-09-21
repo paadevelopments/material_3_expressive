@@ -55,6 +55,7 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
       ],
       anchorBuilder: (BuildContext context, VoidCallback open) {
         return M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
           icon: icon,
           size: iconButtonSize,
           tooltip: 'More options',

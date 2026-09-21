@@ -183,6 +183,7 @@ class _M3ESelectionAppBarState extends State<M3ESelectionAppBar> {
         child: NavigationToolbar(
           middleSpacing: titleGap,
           leading: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
             icon: Icon(M3EIcons.close, color: foreground),
             onPressed: () => _clear(controller),
             tooltip: 'Clear selection',

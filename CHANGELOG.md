@@ -14,6 +14,14 @@
   motion); hover keeps resting corners (press morph only); pressed state
   layer **0.1** with default `InkSparkle`; label `maxLines` **1** (up to
   **2** at ≥200% text scale).
+* **Icon buttons** — align `M3EIconButton` to M3E size / color / shape
+  tokens: square radii **12 / 12 / 16 / 28 / 28**, pressed **8 / 8 / 12 /
+  16 / 16**; outline widths **1 / 1 / 1 / 2 / 3**; outline role
+  `outlineVariant`; full default/toggle color roles; disabled **0.1** /
+  **0.38**; shape spring **1400 / 0.9**; hover keeps resting; pressed
+  state layer **0.1** + `InkSparkle`; keyboard focus ring only (no sticky
+  focus fill). Selected toggle icons use per-size icon tokens (**20 / 24 /
+  24 / 32 / 40**). **Breaking:** default `variant` is now **`filled`**.
 
 ## 1.1.2
 

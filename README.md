@@ -111,6 +111,10 @@ Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
   padding/gap, outline widths by size, outlined roles, disabled opacity,
   shape spring 1400/0.9, press overlay + `InkSparkle`, single-line labels
   with 200% text allowance).
+- **Icon buttons** — `M3EIconButton` tokens match M3E specs (radii, outline
+  widths, toggle/default color roles, spring 1400/0.9, press overlay +
+  `InkSparkle`, focus-ring chrome). **Breaking:** default variant is
+  **`filled`**.
 
 ## Installation
 

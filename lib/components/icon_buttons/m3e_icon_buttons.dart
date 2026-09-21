@@ -35,7 +35,7 @@ class M3EIconButton extends StatefulWidget {
     this.onPressed,
     this.tooltip,
     this.semanticLabel,
-    this.variant = M3EIconButtonVariant.standard,
+    this.variant = M3EIconButtonVariant.filled,
     this.size = M3EIconButtonSize.sm,
     this.shape = M3EIconButtonShapeVariant.round,
     this.width = M3EIconButtonWidth.defaultWidth,

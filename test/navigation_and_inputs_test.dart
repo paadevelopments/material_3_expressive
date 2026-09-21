@@ -42,7 +42,11 @@ Future<void> _m3eiconbuttonRendersItsIconAndFiresOnpressed(
   var taps = 0;
   await tester.pumpWidget(
     _host(
-      M3EIconButton(icon: const Icon(M3EIcons.menu), onPressed: () => taps++),
+      M3EIconButton(
+        variant: M3EIconButtonVariant.standard,
+        icon: const Icon(M3EIcons.menu),
+        onPressed: () => taps++,
+      ),
     ),
   );
 

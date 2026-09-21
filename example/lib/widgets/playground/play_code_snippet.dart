@@ -84,6 +84,7 @@ class PlayCodeSnippet extends StatelessWidget {
                     ),
                   ),
                   M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
                     icon: const Icon(M3EIcons.content_copy),
                     tooltip: 'Copy',
                     semanticLabel: 'Copy snippet',

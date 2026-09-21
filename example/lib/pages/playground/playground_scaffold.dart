@@ -37,12 +37,14 @@ class PlaygroundScaffold extends StatelessWidget {
             M3EAppBar.top(
               titleText: title,
               leading: M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
                 icon: const Icon(M3EIcons.arrow_back),
                 tooltip: 'Back',
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               actions: <Widget>[
                 M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: Icon(
                     theme.brightness == Brightness.dark
                         ? M3EIcons.light_mode
