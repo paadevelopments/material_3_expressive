@@ -15,6 +15,7 @@ void main() {
   registerFocusRingKeyboardScrollIntoViewTests();
   registerFocusRingNavBarKeyboardActivateTests();
   registerFocusRingPointerTapOnCardTests();
+  registerFocusRingPointerOutsideClearsTests();
 }
 
 void registerFocusRingSinglePrimaryAmongButtonsTests() {
@@ -202,6 +203,59 @@ void registerFocusRingNavBarKeyboardActivateTests() {
     await tester.pumpAndSettle();
     expect(selected, anyOf(0, 1));
     expect(tester.takeException(), isNull);
+  });
+}
+
+void registerFocusRingPointerOutsideClearsTests() {
+  testWidgets('pointer tap outside segmented button clears keyboard ring', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: M3ETheme(
+          data: M3EThemeData.light(),
+          child: Scaffold(
+            body: SizedBox.expand(
+              child: Column(
+                children: <Widget>[
+                  M3ESegmentedButton<int>(
+                    selected: const <int>{0},
+                    onSelectionChanged: (_) {},
+                    segments: const <M3ESegment<int>>[
+                      M3ESegment<int>(value: 0, label: 'Day'),
+                      M3ESegment<int>(value: 1, label: 'Week'),
+                    ],
+                  ),
+                  const Expanded(child: ColoredBox(color: Color(0x00000000))),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(M3EFocusInteraction.instance.ringsAllowed, isTrue);
+    expect(
+      tester
+          .widgetList<M3EFocusRing>(find.byType(M3EFocusRing))
+          .any((M3EFocusRing r) => r.focused),
+      isTrue,
+    );
+
+    await tester.tapAt(const Offset(400, 500));
+    await tester.pump(); // deferred ring clear notify
+    await tester.pumpAndSettle();
+    expect(M3EFocusInteraction.instance.ringsAllowed, isFalse);
+    expect(
+      tester
+          .widgetList<M3EFocusRing>(find.byType(M3EFocusRing))
+          .any((M3EFocusRing r) => r.focused),
+      isFalse,
+    );
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
   });
 }
 

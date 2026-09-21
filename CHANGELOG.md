@@ -2,6 +2,12 @@
 
 ### Changed
 
+* **Segmented buttons** — align to M3E Outlined tokens: density
+  (`M3ESegmentedButtonDensity` 0/−1/−2/−3 → 40/36/32/28dp), ≥48dp target,
+  disabled outline/content opacities (0.12 / 0.38), focus ring 3dp /
+  `secondary` with 2dp gap, single-select cannot clear, multi-select allows
+  empty, a11y radio/checkbox semantics, and theme overrides for selected fill,
+  focus, and optional `maxWidth`.
 * **Breaking — buttons:** fold toggle selection into `M3EButton` via
   caller-controlled `isSelected`, `selectedIcon`, and `selectedLabel`;
   `M3EToggleButton`, `M3EToggleButtonDecoration`, and

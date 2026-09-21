@@ -543,10 +543,13 @@ M3EButton.filled(
 
 #### M3ESegmentedButton
 
-Single- or multi-select segmented control. Theme
-`M3ESegmentedButtonTheme` can set `outlineColor` / `outlineGradient`,
-`dividerColor` / `dividerGradient` (sampled across the whole group), and
-selected/unselected background and foreground colors or gradients.
+Outlined single- or multi-select control (2–5 segments). Density levels
+0/−1/−2/−3 shrink height (−4dp/step) from 40dp; touch target stays ≥48dp.
+Selected segments use `secondaryContainer` fill and an optional check that
+replaces the category icon. Theme `M3ESegmentedButtonTheme` exposes outline,
+divider, focus ring (3dp / `secondary`), disabled opacities, and color or
+gradient overrides. Large-screen width can be capped via
+`segmentedButtonTheme.maxWidth` (null = unconstrained).
 
 ```dart
 // in State — single select
@@ -562,6 +565,7 @@ M3ESegmentedButton<String>(
 // multi select
 M3ESegmentedButton<String>(
   multiSelect: true,
+  density: M3ESegmentedButtonDensity.comfortable,
   segments: const [
     M3ESegment(value: 'new', label: 'New'),
     M3ESegment(value: 'sale', label: 'Sale'),
