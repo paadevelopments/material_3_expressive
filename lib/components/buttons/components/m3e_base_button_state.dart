@@ -50,20 +50,28 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
       return child;
     }
 
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
+    return TapRegion(
+      onTapOutside: (_) {
         M3EFocusInteraction.instance.notePointerInteraction();
-        _setPointerDown(true);
-      },
-      onPointerUp: (_) {
-        if (isPointerDownNotifier.value) {
-          effectiveFocusNode.requestFocus();
+        if (effectiveFocusNode.hasPrimaryFocus) {
+          effectiveFocusNode.unfocus();
         }
-        _setPointerDown(false);
       },
-      onPointerCancel: (_) => _setPointerDown(false),
-      child: child,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) {
+          M3EFocusInteraction.instance.notePointerInteraction();
+          _setPointerDown(true);
+        },
+        onPointerUp: (_) {
+          // Do not request focus here — Material may focus for a11y, but
+          // visual focus chrome is ring-only (keyboard). Sticky post-tap
+          // focus fill is suppressed in button overlay resolution.
+          _setPointerDown(false);
+        },
+        onPointerCancel: (_) => _setPointerDown(false),
+        child: child,
+      ),
     );
   }
 
@@ -189,8 +197,7 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   /// updateSpringMotion.
 
   void updateSpringMotion() {
-    springMotion = (effectiveMotion ?? M3EButtonMotion.expressiveSpatialPress)
-        .toMotion();
+    springMotion = (effectiveMotion ?? M3EButtonMotion.shapeMorph).toMotion();
   }
 
   /// handleStatesControllerUpdate.

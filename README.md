@@ -79,7 +79,7 @@ flutter run
 
 | Tool    | Version    |
 | ------- | ---------- |
-| Flutter | `>= 3.44.0` |
+| Flutter | `>= 3.47.0` |
 | Dart    | `^3.12.0`  |
 
 ## Migrating to `material_ui`
@@ -94,7 +94,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 ```
 
 Apps that still import `package:flutter/material.dart` should switch those
-imports to `package:material_ui/material_ui.dart`. Flutter **3.44.0 or newer**
+imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
 is required (`material_ui` will not resolve on older SDKs).
 
 `ColorScheme.harmonized()` / `Color.harmonizeWith()` come from
@@ -105,7 +105,12 @@ through this package). Prefer those APIs rather than a local duplicate.
 
 Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Deps** — `material_ui` `^1.3.0`.
+- **Deps** — `material_ui` `^1.3.0`; Flutter SDK constraint `>=3.47.0`
+  (FVM `3.47.0`).
+- **Buttons** — `M3EButton` size/color/shape defaults match M3E specs (XS
+  padding/gap, outline widths by size, outlined roles, disabled opacity,
+  shape spring 1400/0.9, press overlay + `InkSparkle`, single-line labels
+  with 200% text allowance).
 
 ## Installation
 

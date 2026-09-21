@@ -54,13 +54,11 @@ extension _M3EButtonContent on _M3EButtonState {
         ? BorderRadius.circular(explicitBorderRadius)
         : BorderRadius.circular(tokenPressed);
 
-    final tokenHovered = _buttonTheme.hoveredRadius(widget.size);
-    final defaultExplicitHovered = widget.decoration?.hoveredRadius;
-    final hoveredShape = defaultExplicitHovered != null
-        ? BorderRadius.circular(defaultExplicitHovered)
-        : explicitBorderRadius != null
-        ? BorderRadius.circular(explicitBorderRadius)
-        : BorderRadius.circular(tokenHovered);
+    // Spec: hover keeps resting shape; only press morphs unless overridden.
+    final explicitHovered = widget.decoration?.hoveredRadius;
+    final hoveredShape = explicitHovered != null
+        ? BorderRadius.circular(explicitHovered)
+        : defaultShape;
 
     return (
       defaultShape: defaultShape,

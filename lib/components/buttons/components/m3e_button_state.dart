@@ -17,6 +17,8 @@ class _M3EButtonIconLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final m = M3ETheme.of(context).buttonTheme.measurements(size);
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final maxLines = textScale >= 2.0 ? 2 : 1;
     final children = <Widget>[
       RepaintBoundary(
         child: IconTheme.merge(
@@ -27,8 +29,8 @@ class _M3EButtonIconLayout extends StatelessWidget {
       SizedBox(width: m.iconGap),
       Flexible(
         child: DefaultTextStyle.merge(
-          maxLines: 2,
-          softWrap: false,
+          maxLines: maxLines,
+          softWrap: maxLines > 1,
           overflow: TextOverflow.ellipsis,
           child: label,
         ),
@@ -66,7 +68,17 @@ class _M3EButtonState extends State<M3EButton>
   FocusNode? get externalFocusNode => widget.focusNode;
 
   @override
-  M3EButtonMotion? get effectiveMotion => widget.decorationMotion;
+  M3EButtonMotion? get effectiveMotion {
+    final decorationMotion = widget.decorationMotion;
+    if (decorationMotion != null) {
+      return decorationMotion;
+    }
+    final spring = _buttonTheme.shapeSpring;
+    return M3EButtonMotion(
+      stiffness: spring.stiffness,
+      damping: spring.damping,
+    );
+  }
 
   @override
   void initState() {

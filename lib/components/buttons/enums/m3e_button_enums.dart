@@ -62,6 +62,7 @@ class M3EButtonSize {
     this.hPadding,
     this.iconSize,
     this.iconGap,
+    this.outlineWidth,
     this.width,
   });
 
@@ -79,6 +80,9 @@ class M3EButtonSize {
 
   /// Custom icon gap override.
   final double? iconGap;
+
+  /// Custom outlined stroke width override.
+  final double? outlineWidth;
 
   /// Custom width override.
   final double? width;
@@ -104,6 +108,7 @@ class M3EButtonSize {
     double? hPadding,
     double? iconSize,
     double? iconGap,
+    double? outlineWidth,
     double? width,
   }) {
     return M3EButtonSize._(
@@ -112,6 +117,7 @@ class M3EButtonSize {
       hPadding: hPadding,
       iconSize: iconSize,
       iconGap: iconGap,
+      outlineWidth: outlineWidth,
       width: width,
     );
   }
@@ -125,11 +131,19 @@ class M3EButtonSize {
           hPadding == other.hPadding &&
           iconSize == other.iconSize &&
           iconGap == other.iconGap &&
+          outlineWidth == other.outlineWidth &&
           width == other.width);
 
   @override
-  int get hashCode =>
-      Object.hash(name, height, hPadding, iconSize, iconGap, width);
+  int get hashCode => Object.hash(
+    name,
+    height,
+    hPadding,
+    iconSize,
+    iconGap,
+    outlineWidth,
+    width,
+  );
 
   @override
   String toString() => 'M3EButtonSize.$name';

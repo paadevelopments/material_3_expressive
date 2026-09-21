@@ -16,6 +16,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     this.dividerHeight = 24,
     this.connectedInnerRadius = 8,
     this.connectedPressedInnerRadius = 4,
+    this.shapeSpring = M3EMotion.spatialFast,
   });
 
   /// defaults.
@@ -41,6 +42,9 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   /// connectedPressedInnerRadius.
   final double connectedPressedInnerRadius;
 
+  /// Spatial spring for press/release corner morph (stiffness 1400 / damping 0.9).
+  final M3ESpring shapeSpring;
+
   static final Map<M3EButtonSize, double> _squareRadiusTable = {
     M3EButtonSize.xs: 12,
     M3EButtonSize.sm: 12,
@@ -57,6 +61,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     M3EButtonSize.xl: 16,
   };
 
+  /// Legacy intermediate hover radii (used by toggle; buttons keep resting).
   static final Map<M3EButtonSize, double> _hoveredRadiusTable = {
     M3EButtonSize.xs: 10,
     M3EButtonSize.sm: 10,
@@ -76,9 +81,9 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   static final Map<M3EButtonSize, M3EButtonMeasurements> _measurementsTable = {
     M3EButtonSize.xs: const M3EButtonMeasurements(
       height: 32,
-      hPadding: 16,
+      hPadding: 12,
       iconSize: 20,
-      iconGap: 8,
+      iconGap: 4,
     ),
     M3EButtonSize.sm: const M3EButtonMeasurements(
       height: 40,
@@ -97,12 +102,14 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       hPadding: 48,
       iconSize: 32,
       iconGap: 12,
+      outlineWidth: 2,
     ),
     M3EButtonSize.xl: const M3EButtonMeasurements(
       height: 136,
       hPadding: 64,
       iconSize: 40,
       iconGap: 16,
+      outlineWidth: 3,
     ),
   };
 
@@ -131,15 +138,16 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       case M3EButtonStyle.tonal:
         return scheme.onSecondaryContainer;
       case M3EButtonStyle.elevated:
-      case M3EButtonStyle.outlined:
       case M3EButtonStyle.text:
         return scheme.primary;
+      case M3EButtonStyle.outlined:
+        return scheme.onSurfaceVariant;
     }
   }
 
   /// outline.
 
-  Color outline(M3EColorScheme scheme) => scheme.outline;
+  Color outline(M3EColorScheme scheme) => scheme.outlineVariant;
 
   /// focusRingColor.
   ///
@@ -147,28 +155,38 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   Color focusRingColor(M3EColorScheme scheme) => scheme.primary;
 
   /// elevation.
-
+  ///
+  /// Matches Material 3 elevated / filled / tonal button elevation tokens
+  /// (`material_ui` defaults): elevated stays at level 1 while pressed.
   double elevation(M3EButtonStyle style, Set<WidgetState> states) {
     final hovered = states.contains(WidgetState.hovered);
     final pressed = states.contains(WidgetState.pressed);
+    final focused = states.contains(WidgetState.focused);
     final disabled = states.contains(WidgetState.disabled);
     if (disabled) {
       return 0;
     }
     switch (style) {
       case M3EButtonStyle.elevated:
-        return pressed
-            ? 0
-            : hovered
-            ? 3
-            : 1;
+        if (pressed) {
+          return 1;
+        }
+        if (hovered) {
+          return 3;
+        }
+        if (focused) {
+          return 1;
+        }
+        return 1;
       case M3EButtonStyle.filled:
       case M3EButtonStyle.tonal:
-        return pressed
-            ? 0
-            : hovered
-            ? 1
-            : 0;
+        if (pressed) {
+          return 0;
+        }
+        if (hovered) {
+          return 1;
+        }
+        return 0;
       case M3EButtonStyle.outlined:
       case M3EButtonStyle.text:
         return 0;
@@ -183,8 +201,10 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
 
   double pressedRadius(M3EButtonSize size) => _pressedRadiusTable[size] ?? 12;
 
-  /// hoveredRadius.
-
+  /// Intermediate hover corner radius (legacy table).
+  ///
+  /// `M3EButton` does not morph on hover by default; set
+  /// `M3EButtonDecoration.hoveredRadius` to opt in. Toggle still reads this.
   double hoveredRadius(M3EButtonSize size) => _hoveredRadiusTable[size] ?? 16;
 
   /// equalizedMinWidth.
@@ -226,6 +246,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
     double? dividerHeight,
     double? connectedInnerRadius,
     double? connectedPressedInnerRadius,
+    M3ESpring? shapeSpring,
   }) {
     return M3EButtonTheme(
       focusRingWidth: focusRingWidth ?? this.focusRingWidth,
@@ -235,6 +256,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
       connectedPressedInnerRadius:
           connectedPressedInnerRadius ?? this.connectedPressedInnerRadius,
+      shapeSpring: shapeSpring ?? this.shapeSpring,
     );
   }
 
@@ -258,6 +280,7 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
         other.connectedPressedInnerRadius,
         t,
       )!,
+      shapeSpring: t < 0.5 ? shapeSpring : other.shapeSpring,
     );
   }
 

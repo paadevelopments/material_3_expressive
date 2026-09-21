@@ -3,6 +3,17 @@
 ### Changed
 
 * Bump `material_ui` to `^1.3.0`.
+* Raise Flutter SDK constraint to `>=3.47.0` (FVM pin `3.47.0`) for
+  `material_ui` `1.3.0` compatibility.
+* **Buttons** — align `M3EButton` defaults to Material 3 Expressive size /
+  color / shape tokens: XS leading/trailing **12dp** and icon–label gap
+  **4dp**; outline widths **1 / 1 / 1 / 2 / 3** (XS→XL); outlined outline
+  role `outlineVariant` and label/icon `onSurfaceVariant`; disabled container
+  / outline opacity **0.1**; shape spring default stiffness **1400** /
+  damping **0.9** (`M3EButtonTheme.shapeSpring`, overridable via decoration
+  motion); hover keeps resting corners (press morph only); pressed state
+  layer **0.1** with default `InkSparkle`; label `maxLines` **1** (up to
+  **2** at ≥200% text scale).
 
 ## 1.1.2
 

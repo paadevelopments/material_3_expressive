@@ -10,10 +10,7 @@ double m3eOverlayOpacityFor(Set<WidgetState> states) {
   if (states.contains(WidgetState.pressed)) {
     return M3EStateOpacity.pressed;
   }
-  if (states.contains(WidgetState.focused) &&
-      !M3EFocusInteraction.instance.ringsAllowed) {
-    return M3EStateOpacity.focus;
-  }
+  // Focus chrome is the outset ring (keyboard); no sticky focus fill.
   if (states.contains(WidgetState.hovered)) {
     return M3EStateOpacity.hover;
   }

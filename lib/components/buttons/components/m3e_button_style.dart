@@ -125,14 +125,16 @@ extension _M3EButtonStyle on _M3EButtonState {
     if (widget.style != M3EButtonStyle.outlined) {
       return BorderSide.none;
     }
+    final width = _measurements.outlineWidth;
     if (states.contains(WidgetState.disabled)) {
       return BorderSide(
         color: _scheme.onSurface.withValues(
           alpha: M3EButtonConstants.kDisabledOutlineAlpha,
         ),
+        width: width,
       );
     }
-    return BorderSide(color: _buttonTheme.outline(_scheme));
+    return BorderSide(color: _buttonTheme.outline(_scheme), width: width);
   }
 
   MouseCursor? _resolveMouseCursor(Set<WidgetState> states) {
@@ -150,8 +152,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   Color? _resolveOverlayColor(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled) ||
-        states.contains(WidgetState.pressed)) {
+    if (states.contains(WidgetState.disabled)) {
       return null;
     }
     final dec = widget.decoration;
@@ -160,6 +161,10 @@ extension _M3EButtonStyle on _M3EButtonState {
       foreground = dec!.foregroundColor!.resolve(states);
     }
     foreground ??= _buttonTheme.foreground(_scheme, widget.style);
-    return M3EStateLayer.resolveOverlayColor(foreground, states);
+    // Keyboard focus uses the outset ring only. Ignore [WidgetState.focused]
+    // here so pointer-acquired focus does not leave a sticky fill.
+    final overlayStates = Set<WidgetState>.of(states)
+      ..remove(WidgetState.focused);
+    return M3EStateLayer.resolveOverlayColor(foreground, overlayStates);
   }
 }

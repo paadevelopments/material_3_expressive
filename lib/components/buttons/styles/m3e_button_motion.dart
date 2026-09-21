@@ -56,6 +56,12 @@ class M3EButtonMotion {
     damping: 0.55,
   );
 
+  /// M3E button shape morph (stiffness 1400 / damping 0.9).
+  static const M3EButtonMotion shapeMorph = M3EButtonMotion(
+    stiffness: 1400,
+    damping: 0.9,
+  );
+
   /// standardSpatialFast.
 
   static const M3EButtonMotion standardSpatialFast = M3EButtonMotion(
