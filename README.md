@@ -577,14 +577,15 @@ M3ESegmentedButton<String>(
 
 #### M3ESplitButton
 
-Primary action with a trailing menu. Use `items` for a flat list, or
-`m3eMenuBuilder` for a rich M3E menu tree (groups, dividers, submenus). Legacy
-`menuBuilder` still opens Flutter `showMenu`. Gradients on
-`M3ESplitButtonDecoration` span both segments; optional
-`trailingBackgroundGradient` / `trailingForegroundGradient` /
-`trailingOutlineGradient` / `trailingOverlayGradient` override the trailing
-half. `decoration.animationDuration` defaults to `Duration.zero` so the
-trailing radius morph stays on the spring.
+Primary action with a trailing menu (XS–XL; elevated / filled / tonal /
+outlined). Between-segment gap is **2dp**; pressed inner corners match hovered
+(**8 / 12 / 12 / 20 / 20**). Closed trailing uses optical pads + offset; open
+trailing centers the chevron (180° standard-motion rotate) with 50% selected
+corners. Shared button color roles; open trailing applies a state layer only
+(no toggle recolor). Use `items`, or `m3eMenuBuilder` for a rich M3E menu.
+Gradients on `M3ESplitButtonDecoration` span both segments; optional trailing
+color/gradient overrides apply to the menu half. Menu sits **4dp** from the
+control.
 
 ```dart
 M3ESplitButton<String>(

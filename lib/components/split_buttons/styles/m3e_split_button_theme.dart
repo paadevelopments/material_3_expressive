@@ -12,7 +12,7 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
   const M3ESplitButtonTheme({
     this.minTapTarget = 48,
     this.innerGap = 2,
-    this.elevatedInnerGap = 4,
+    this.elevatedInnerGap = 2,
     this.chevronOpenTurns = 0.5,
     this.trailingInnerSelectedCornerPercent = 50,
     this.popupElevation = 3,
@@ -37,7 +37,7 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
   /// innerGap.
   final double innerGap;
 
-  /// elevatedInnerGap.
+  /// elevatedInnerGap — same as [innerGap] (spec: always 2dp).
   final double elevatedInnerGap;
 
   /// chevronOpenTurns.
@@ -123,7 +123,7 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
 
   static final Map<M3EButtonSize, double> _splitIcon = {
     M3EButtonSize.xs: 20,
-    M3EButtonSize.sm: 24,
+    M3EButtonSize.sm: 20,
     M3EButtonSize.md: 24,
     M3EButtonSize.lg: 32,
     M3EButtonSize.xl: 40,
@@ -145,12 +145,13 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     M3EButtonSize.xl: 34,
   };
 
+  /// Pressed inner corner = hovered (spec size tables).
   static final Map<M3EButtonSize, double> _splitPressedRadius = {
-    M3EButtonSize.xs: 2,
-    M3EButtonSize.sm: 2,
-    M3EButtonSize.md: 2,
-    M3EButtonSize.lg: 4,
-    M3EButtonSize.xl: 6,
+    M3EButtonSize.xs: 8,
+    M3EButtonSize.sm: 12,
+    M3EButtonSize.md: 12,
+    M3EButtonSize.lg: 20,
+    M3EButtonSize.xl: 20,
   };
 
   static final Map<M3EButtonSize, double> _splitLeadingIconBlockWidth = {
@@ -185,6 +186,25 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
     M3EButtonSize.xl: 64,
   };
 
+  /// Optical trailing leading pad (closed, optically centered).
+  static final Map<M3EButtonSize, double> _splitTrailingOpticalLeading = {
+    M3EButtonSize.xs: 12,
+    M3EButtonSize.sm: 12,
+    M3EButtonSize.md: 13,
+    M3EButtonSize.lg: 26,
+    M3EButtonSize.xl: 37,
+  };
+
+  /// Optical trailing trailing pad (closed, optically centered).
+  static final Map<M3EButtonSize, double> _splitTrailingOpticalTrailing = {
+    M3EButtonSize.xs: 14,
+    M3EButtonSize.sm: 14,
+    M3EButtonSize.md: 17,
+    M3EButtonSize.lg: 32,
+    M3EButtonSize.xl: 49,
+  };
+
+  /// Centered trailing pads when menu open (and geometricCenter when closed).
   static final Map<M3EButtonSize, double> _splitTrailingLeftInnerPadding = {
     M3EButtonSize.xs: 13,
     M3EButtonSize.sm: 13,
@@ -245,7 +265,7 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
 
   /// splitIcon.
 
-  double splitIcon(M3EButtonSize size) => _splitIcon[size] ?? 24;
+  double splitIcon(M3EButtonSize size) => _splitIcon[size] ?? 20;
 
   /// splitOuterRadiusRound.
 
@@ -260,7 +280,7 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
   /// splitPressedRadius.
 
   double splitPressedRadius(M3EButtonSize size) =>
-      _splitPressedRadius[size] ?? 2;
+      _splitPressedRadius[size] ?? 12;
 
   /// splitLeadingIconBlockWidth.
 
@@ -294,15 +314,25 @@ class M3ESplitButtonTheme extends M3EThemeExtension<M3ESplitButtonTheme> {
   double splitLabelRightPadding(M3EButtonSize size) =>
       _splitLabelRightPadding[size] ?? 24;
 
-  /// splitTrailingLeftInnerPadding.
+  /// splitTrailingLeftInnerPadding — centered (open / geometric).
 
   double splitTrailingLeftInnerPadding(M3EButtonSize size) =>
       _splitTrailingLeftInnerPadding[size] ?? 13;
 
-  /// splitRightOuterPadding.
+  /// Optical trailing leading pad (closed + opticalCenter).
+
+  double splitTrailingOpticalLeading(M3EButtonSize size) =>
+      _splitTrailingOpticalLeading[size] ?? 12;
+
+  /// Optical trailing trailing pad (closed + opticalCenter).
+
+  double splitTrailingOpticalTrailing(M3EButtonSize size) =>
+      _splitTrailingOpticalTrailing[size] ?? 14;
+
+  /// splitRightOuterPadding — centered (open / geometric).
 
   double splitRightOuterPadding(M3EButtonSize size) =>
-      _splitRightOuterPadding[size] ?? 17;
+      _splitRightOuterPadding[size] ?? 13;
 
   /// splitSidePaddingSelected.
 

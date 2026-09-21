@@ -55,6 +55,7 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       minTap: minTap,
       fixedWidth: customSize?.width,
       tooltip: widget.leadingTooltip,
+      semanticLabel: widget.leadingTooltip ?? widget.label,
       child: animatedButton,
     );
   }
@@ -270,6 +271,8 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
       minTap: minTap,
       fixedWidth: customSize?.width,
       tooltip: widget.trailingTooltip,
+      semanticLabel: widget.trailingTooltip ?? 'More options',
+      expanded: _menuOpen,
       child: animatedButton,
     );
   }
@@ -281,8 +284,8 @@ extension _M3ESplitButtonSegments<T> on _M3ESplitButtonState<T> {
     required double chevronDxOffset,
   }) {
     return AnimatedRotation(
-      duration: const Duration(milliseconds: 120),
-      curve: Curves.easeOut,
+      duration: M3EMotion.short3,
+      curve: M3EMotion.standard,
       turns: chevronTargetTurns,
       child: Transform.translate(
         offset: Offset(chevronDxOffset, 0),

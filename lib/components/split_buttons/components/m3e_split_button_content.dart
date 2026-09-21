@@ -179,21 +179,32 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
           borderRadius: BorderRadius.circular(metrics.pressedRadius),
         ),
       ),
-      child: FocusTraversalGroup(
-        policy: ReadingOrderTraversalPolicy(),
-        child: IgnorePointer(
-          ignoring: !widget.enabled,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: metrics.minTap),
-            child: Row(
-              key: _splitGradientHostKey,
-              mainAxisSize: MainAxisSize.min,
-              textDirection: metrics.dir,
-              children: [
-                leading,
-                SizedBox(width: metrics.gap),
-                trailing,
-              ],
+      child: TapRegion(
+        onTapOutside: (_) {
+          M3EFocusInteraction.instance.notePointerInteraction();
+          if (effectiveFocusNode.hasFocus) {
+            effectiveFocusNode.unfocus();
+          }
+          if (_trailingFocusNode.hasFocus) {
+            _trailingFocusNode.unfocus();
+          }
+        },
+        child: FocusTraversalGroup(
+          policy: ReadingOrderTraversalPolicy(),
+          child: IgnorePointer(
+            ignoring: !widget.enabled,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: metrics.minTap),
+              child: Row(
+                key: _splitGradientHostKey,
+                mainAxisSize: MainAxisSize.min,
+                textDirection: metrics.dir,
+                children: [
+                  leading,
+                  SizedBox(width: metrics.gap),
+                  trailing,
+                ],
+              ),
             ),
           ),
         ),
@@ -218,8 +229,16 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     );
     final (leadingCont, leadingOnCont, leadingOutline, _) =
         _resolveColorsAndShapes(context, segmentEnabled: leadingEnabled);
-    final (trailingCont, trailingOnCont, trailingOutline, _) =
-        _resolveColorsAndShapes(context, segmentEnabled: trailingEnabled);
+    final (
+      trailingCont,
+      trailingOnCont,
+      trailingOutline,
+      _,
+    ) = _resolveColorsAndShapes(
+      context,
+      segmentEnabled: trailingEnabled,
+      trailing: true,
+    );
 
     final geometry = _computeSegmentGeometry(
       size: size,
@@ -288,14 +307,11 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
         radii.explicitBorderRadius ??
         trailingHeight * (_splitTheme.trailingInnerSelectedCornerPercent / 100);
 
-    final baseGap =
+    final gap =
         widget.decorationGap ??
         (widget.style == M3EButtonStyle.elevated
             ? _splitTheme.elevatedInnerGap
             : _splitTheme.innerGap);
-    final double focusRingOutset = M3EFocusRing.outsetOf(context);
-    final eitherFocused = focused || _isTrailingFocused;
-    final gap = baseGap + (eitherFocused ? focusRingOutset : 0.0);
 
     final leadingPressed = leadingEnabled && (pressed || _leadingPressed);
     final trailingPressed = trailingEnabled && _trailingPressed;
@@ -317,8 +333,11 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
       trailingSelectedRadius: trailingSelectedRadius,
       trailingHovered: trailingHovered,
       trailingPressed: trailingPressed,
+      trailingFocused: _isTrailingFocused,
       dir: dir,
     );
+
+    final leadingMorphHovered = (leadingHovered || focused) && !leadingPressed;
 
     return _M3ESplitSegmentGeometry(
       minTap: minTap,
@@ -336,7 +355,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
         dir: dir,
         outer: radii.outerRadius,
         inner: radii.innerRadius,
-        hovered: leadingHovered ? radii.hoveredInnerRadius : null,
+        hovered: leadingMorphHovered ? radii.hoveredInnerRadius : null,
         pressed: leadingPressed ? radii.pressedRadius : null,
       ),
       trailingRadius: trailing.radius,
@@ -395,6 +414,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     required double trailingSelectedRadius,
     required bool trailingHovered,
     required bool trailingPressed,
+    required bool trailingFocused,
     required TextDirection dir,
   }) {
     final bool allowCircle =
@@ -414,6 +434,9 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
       circleTrailing: circleTrailing,
     );
 
+    final trailingMorphHovered =
+        (trailingHovered || trailingFocused) && !trailingPressed && !_menuOpen;
+
     final radius = circleTrailing
         ? _CornerRadii(
             topStart: trailingSelectedRadius,
@@ -425,7 +448,7 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
             dir: dir,
             outer: outerRadius,
             inner: innerRadius,
-            hovered: trailingHovered ? hoveredInnerRadius : null,
+            hovered: trailingMorphHovered ? hoveredInnerRadius : null,
             pressed: trailingPressed ? pressedRadius : null,
             selected: _menuOpen ? trailingSelectedRadius : null,
           );
@@ -452,17 +475,25 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     required M3EButtonSize? trailingCustomSize,
     required bool circleTrailing,
   }) {
+    final useOptical =
+        !_menuOpen &&
+        widget.trailingAlignment ==
+            M3ESplitButtonTrailingAlignment.opticalCenter;
+    final double leadingPad = useOptical
+        ? _splitTheme.splitTrailingOpticalLeading(size)
+        : _splitTheme.splitTrailingButtonLeadingSpace(size);
+    final double trailingPad = useOptical
+        ? _splitTheme.splitTrailingOpticalTrailing(size)
+        : _splitTheme.splitTrailingButtonTrailingSpace(size);
+    final double openPad = _splitTheme.splitSidePaddingSelected(size);
+
     final trailingWidthUnselected =
-        (trailingCustomSize?.hPadding ??
-            _splitTheme.splitTrailingButtonLeadingSpace(size)) +
+        (trailingCustomSize?.hPadding ?? leadingPad) +
         (trailingCustomSize?.iconSize ??
             _splitTheme.splitTrailingIconSize(size)) +
-        (trailingCustomSize?.hPadding ??
-            _splitTheme.splitTrailingButtonTrailingSpace(size));
+        (trailingCustomSize?.hPadding ?? trailingPad);
     final trailingWidthSelected =
-        (trailingCustomSize?.hPadding ??
-                _splitTheme.splitSidePaddingSelected(size)) *
-            2 +
+        (trailingCustomSize?.hPadding ?? openPad) * 2 +
         (trailingCustomSize?.iconSize ??
             _splitTheme.splitTrailingIconSize(size));
 
@@ -474,17 +505,13 @@ extension _M3ESplitButtonContent<T> on _M3ESplitButtonState<T> {
     final leftPad = circleTrailing
         ? 0.0
         : (_menuOpen
-              ? (trailingCustomSize?.hPadding ??
-                    _splitTheme.splitSidePaddingSelected(size))
-              : (trailingCustomSize?.hPadding ??
-                    _splitTheme.splitTrailingButtonLeadingSpace(size)));
+              ? (trailingCustomSize?.hPadding ?? openPad)
+              : (trailingCustomSize?.hPadding ?? leadingPad));
     final rightPad = circleTrailing
         ? 0.0
         : (_menuOpen
-              ? (trailingCustomSize?.hPadding ??
-                    _splitTheme.splitSidePaddingSelected(size))
-              : (trailingCustomSize?.hPadding ??
-                    _splitTheme.splitTrailingButtonTrailingSpace(size)));
+              ? (trailingCustomSize?.hPadding ?? openPad)
+              : (trailingCustomSize?.hPadding ?? trailingPad));
 
     return (fixedWidth: fixedWidth, leftPad: leftPad, rightPad: rightPad);
   }

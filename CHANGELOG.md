@@ -2,6 +2,11 @@
 
 ### Changed
 
+* **Split buttons** — align to M3E size tokens: pressed inner corners match
+  hovered (8/12/12/20/20); between-space always **2dp**; optical vs centered
+  trailing pads; small leading icon **20dp**; standard-motion chevron **180°**;
+  trailing a11y expanded/collapsed + “More options”; shared button colors with
+  state-layer-only open trailing (no toggle recolor).
 * **Segmented buttons** — align to M3E Outlined tokens: density
   (`M3ESegmentedButtonDensity` 0/−1/−2/−3 → 40/36/32/28dp), ≥48dp target,
   disabled outline/content opacities (0.12 / 0.38), focus ring 3dp /
