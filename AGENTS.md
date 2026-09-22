@@ -260,7 +260,7 @@ Runtime dependencies and their roles:
 | `dynamic_color` | Device dynamic color (no-ops on iOS/Web; platforms declared in pubspec) |
 | `material_new_shapes` | Expressive morph polygons via foundations bridge |
 | `collection` | Utilities (e.g. carousel) |
-| `flutter` | SDK (`>=3.47.0`, Dart `^3.12.0`) |
+| `flutter` | SDK (`>=3.47.0`, Dart `^3.13.0`) |
 | `material_ui` | Official Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 
 Dev-only: `flutter_lints`, `custom_lint`, `klin_dart`, `material_color_utilities`.

@@ -2,6 +2,7 @@
 
 ### Changed
 
+* Bump `material_ui` to `^1.4.0` (Dart SDK `^3.13.0`).
 * **Breaking — FABs:** `M3EFabSize.medium` is now **80dp** / icon **28** /
   radius **20** (was 56/24/16). Add `M3EFabSize.regular` (56/24/16) for the
   baseline size. Default size remains `medium`. Add filled color styles

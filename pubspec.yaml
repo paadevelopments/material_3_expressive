@@ -23,7 +23,7 @@ platforms:
   windows:
 
 environment:
-  sdk: ^3.12.0
+  sdk: ^3.13.0
   flutter: '>=3.47.0'
 
 dependencies:
@@ -32,7 +32,7 @@ dependencies:
   flutter:
     sdk: flutter
   material_new_shapes: ^1.0.0
-  material_ui: ^1.3.0
+  material_ui: ^1.4.0
   motor: ^1.1.0
 
 dev_dependencies:
