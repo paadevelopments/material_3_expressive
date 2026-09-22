@@ -158,9 +158,9 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
       return indicator;
     }
     return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: theme.loadingIndicatorTheme.containerRadius,
-        boxShadow: M3EElevation.shadows(
+      decoration: ShapeDecoration(
+        shape: theme.loadingIndicatorTheme.containerShape,
+        shadows: M3EElevation.shadows(
           widget.elevation,
           shadowColor: theme.colorScheme.shadow,
         ),

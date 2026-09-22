@@ -4,6 +4,10 @@
 
 * **Breaking — loading indicator:** remove `elevation` (widget, theme, and
   path shadow). Refresh host elevation stays on `M3ERefreshIndicator`.
+* **Loading indicator:** instance `indicatorSize` / `containerWidth` /
+  `containerHeight`, `containerShape` (`ShapeBorder`, theme default
+  `StadiumBorder`), and `indicatorColors` (morph-interpolated; exclusive with
+  `color`). Keep legacy `containerRadius` getter.
 * Bump `material_ui` to `^1.4.0` (Dart SDK `^3.13.0`).
 * **Breaking — FAB menus:** require **2–6** items; theme paddings
   leading/trailing **24**, icon–label **8**, between items **4**, close↔items

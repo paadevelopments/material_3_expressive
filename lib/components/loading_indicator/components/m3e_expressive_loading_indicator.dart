@@ -17,6 +17,12 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// will morph between. The loading indicator expects at least two items in that list.
   final List<RoundedPolygon>? polygons;
 
+  /// Indicator colors cycled and interpolated during morphing.
+  final List<Color>? indicatorColors;
+
+  /// Size of the morphing indicator.
+  final double? indicatorSize;
+
   /// Defines minimum and maximum sizes for an [M3EExpressiveLoadingIndicator].
   /// If null, then the [ProgressIndicatorThemeData.constraints] will be used. Otherwise, defaults to a minimum width and height of 48 pixels.
   final BoxConstraints? constraints;
@@ -55,6 +61,8 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     super.key,
     super.color,
     this.polygons,
+    this.indicatorColors,
+    this.indicatorSize,
     this.constraints,
     this.globalRotationDuration,
     this.morphInterval,
@@ -105,7 +113,7 @@ class _M3EExpressiveLoadingIndicatorState
   Timer? _morphTimer;
 
   late BoxConstraints _constraints;
-  late Color _color;
+  late List<Color> _indicatorColors;
   late M3ELoadingIndicatorTheme _loadingTheme;
 
   Duration get _globalRotationDuration =>
@@ -130,15 +138,33 @@ class _M3EExpressiveLoadingIndicatorState
   double get _pulseSpringVelocity =>
       widget.pulseSpringVelocity ?? _loadingTheme.pulseSpringVelocity;
 
-  double get _activeSize => _loadingTheme.activeIndicatorSize;
+  double get _activeSize =>
+      widget.indicatorSize ?? _loadingTheme.activeIndicatorSize;
 
   bool get _manualRotation => widget.rotationTurns != null;
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      if (widget.indicatorColors != null && widget.indicatorColors!.isEmpty) {
+        throw AssertionError('indicatorColors cannot be empty');
+      }
+      return true;
+    }(), 'indicatorColors cannot be empty');
+    if (widget.indicatorColors != null && widget.indicatorColors!.isEmpty) {
+      throw ArgumentError.value(
+        widget.indicatorColors,
+        'indicatorColors',
+        'must not be empty',
+      );
+    }
     final m3eTheme = M3ETheme.of(context);
     _loadingTheme = m3eTheme.loadingIndicatorTheme;
-    _color = widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme);
+    _indicatorColors =
+        widget.indicatorColors ??
+        <Color>[
+          widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme),
+        ];
     _constraints =
         widget.constraints ??
         BoxConstraints.tightFor(
@@ -181,6 +207,9 @@ class _M3EExpressiveLoadingIndicatorState
                   final totalRotationRadians =
                       totalRotationDegrees * (math.pi / 180.0);
 
+                  final Color indicatorColor = _resolveIndicatorColor(
+                    morphProgress,
+                  );
                   final double pulseScale = _manualRotation
                       ? 1.0
                       : _pulseController.value;
@@ -196,7 +225,7 @@ class _M3EExpressiveLoadingIndicatorState
                           painter: _MorphPainter(
                             morph: _morphSequence[_currentMorphIndex],
                             progress: morphProgress,
-                            color: _color,
+                            color: indicatorColor,
                             scaleFactor: shapesScaleFactor,
                             repaint: Listenable.merge([
                               _morphController,
@@ -402,6 +431,18 @@ class _M3EExpressiveLoadingIndicatorState
     _morphTimer = Timer.periodic(_morphInterval, (_) => _startMorphCycle());
 
     _startMorphCycle();
+  }
+
+  Color _resolveIndicatorColor(double progress) {
+    if (_indicatorColors.length == 1) {
+      return _indicatorColors.first;
+    }
+
+    final int colorIndex = _currentMorphIndex % _indicatorColors.length;
+    final Color startColor = _indicatorColors[colorIndex];
+    final Color endColor =
+        _indicatorColors[(colorIndex + 1) % _indicatorColors.length];
+    return Color.lerp(startColor, endColor, progress) ?? startColor;
   }
 
   void _startMorphCycle() {

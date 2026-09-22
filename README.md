@@ -1693,15 +1693,30 @@ SizedBox(
 #### M3ELoadingIndicator
 
 Expressive loading spinner. Shape morph settle uses
-`M3EMotion.expressiveSpatialDefault`. Optional `color` / `containerColor`, and
-`rotationTurns` (when set, disables auto spin and morph pulse so a host can
-drive rotation).
+`M3EMotion.expressiveSpatialDefault`. Supports `indicatorSize`,
+`containerWidth` / `containerHeight`, `containerShape`, and
+`indicatorColors` (interpolated across morphs; mutually exclusive with
+`color`), plus `color` / `containerColor` and `rotationTurns` (when set,
+disables auto spin and morph pulse so a host can drive rotation).
 
 ```dart
 const M3ELoadingIndicator();
 
 const M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.contained,
+);
+
+M3ELoadingIndicator(
+  indicatorSize: 32,
+  containerWidth: 56,
+  containerHeight: 56,
+  containerShape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  ),
+  indicatorColors: const <Color>[
+    Color(0xff6750a4),
+    Color(0xff006a6a),
+  ],
 );
 
 // Host-driven rotation (e.g. during pull-to-refresh drag)
