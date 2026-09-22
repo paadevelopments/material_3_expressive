@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'components/m3e_expressive_loading_indicator.dart';
 import 'enums/m3e_loading_indicator_variant.dart';
+import 'styles/m3e_loading_indicator_theme.dart';
 
 export 'components/m3e_expressive_loading_indicator.dart';
 export 'enums/m3e_loading_indicator_variant.dart';
@@ -15,6 +18,10 @@ export 'styles/m3e_loading_indicator_theme.dart';
 ///    on the surface.
 ///  * [M3ELoadingIndicatorVariant.contained] draws the shape inside a filled
 ///    container, using the on-container color for the shape.
+///
+/// Spec defaults: outer **48dp**, active **38dp**, container [CircleBorder],
+/// responsive outer range **24–240dp**. Use [size] to scale both edges while
+/// preserving the 38:48 ratio.
 ///
 /// Colors:
 ///  * [color] — morphing shape (inner) color for both variants.
@@ -29,6 +36,7 @@ class M3ELoadingIndicator extends StatelessWidget {
     this.color,
     this.containerColor,
     this.indicatorColors,
+    this.size,
     this.indicatorSize,
     this.containerWidth,
     this.containerHeight,
@@ -51,6 +59,7 @@ class M3ELoadingIndicator extends StatelessWidget {
          color == null || indicatorColors == null,
          'color and indicatorColors cannot both be set',
        ),
+       assert(size == null || size > 0, 'size must be greater than zero'),
        assert(
          indicatorSize == null || indicatorSize > 0,
          'indicatorSize must be greater than zero',
@@ -62,6 +71,15 @@ class M3ELoadingIndicator extends StatelessWidget {
        assert(
          containerHeight == null || containerHeight > 0,
          'containerHeight must be greater than zero',
+       ),
+       assert(
+         size == null ||
+             (indicatorSize == null &&
+                 containerWidth == null &&
+                 containerHeight == null &&
+                 constraints == null),
+         'size cannot be combined with indicatorSize, containerWidth, '
+         'containerHeight, or constraints',
        ),
        assert(
          constraints == null ||
@@ -84,6 +102,13 @@ class M3ELoadingIndicator extends StatelessWidget {
   /// Cannot be combined with [color].
   final List<Color>? indicatorColors;
 
+  /// Outer edge length (dp). Scales container and active sizes with the
+  /// 38:48 spec ratio. Spec guidance: 24–240.
+  ///
+  /// Cannot be combined with [indicatorSize], [containerWidth],
+  /// [containerHeight], or [constraints].
+  final double? size;
+
   /// Size of the morphing indicator. Defaults to theme (38).
   final double? indicatorSize;
 
@@ -93,7 +118,7 @@ class M3ELoadingIndicator extends StatelessWidget {
   /// Height of the container. Defaults to theme (48).
   final double? containerHeight;
 
-  /// Shape of the container. Defaults to theme.
+  /// Shape of the container. Defaults to theme ([CircleBorder]).
   final ShapeBorder? containerShape;
 
   /// polygons.
@@ -157,8 +182,28 @@ class M3ELoadingIndicator extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final scheme = theme.colorScheme;
     final loadingTheme = theme.loadingIndicatorTheme;
-    final resolvedWidth = containerWidth ?? loadingTheme.containerWidth;
-    final resolvedHeight = containerHeight ?? loadingTheme.containerHeight;
+
+    final double? scaledOuter = size;
+    final double resolvedWidth =
+        scaledOuter ?? containerWidth ?? loadingTheme.containerWidth;
+    final double resolvedHeight =
+        scaledOuter ?? containerHeight ?? loadingTheme.containerHeight;
+    final double resolvedActive = scaledOuter != null
+        ? M3ELoadingIndicatorTheme.resolveActiveSize(scaledOuter)
+        : (indicatorSize ?? loadingTheme.activeIndicatorSize);
+
+    assert(() {
+      final double outer = math.max(resolvedWidth, resolvedHeight);
+      if (outer < M3ELoadingIndicatorTheme.minSize ||
+          outer > M3ELoadingIndicatorTheme.maxSize) {
+        throw FlutterError(
+          'M3ELoadingIndicator outer size $outer is outside the spec range '
+          '${M3ELoadingIndicatorTheme.minSize}–${M3ELoadingIndicatorTheme.maxSize}.',
+        );
+      }
+      return true;
+    }(), 'outer size must be within 24–240');
+
     final cons =
         constraints ??
         BoxConstraints.tightFor(width: resolvedWidth, height: resolvedHeight);
@@ -173,7 +218,7 @@ class M3ELoadingIndicator extends StatelessWidget {
     final indicator = M3EExpressiveLoadingIndicator(
       color: colors.first,
       indicatorColors: colors,
-      indicatorSize: indicatorSize ?? loadingTheme.activeIndicatorSize,
+      indicatorSize: resolvedActive,
       polygons: polygons,
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,

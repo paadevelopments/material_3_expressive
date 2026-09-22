@@ -178,7 +178,13 @@ class _M3EExpressiveLoadingIndicatorState
     return Semantics.fromProperties(
       properties: SemanticsProperties(
         label: widget.semanticsLabel,
-        value: widget.semanticsValue,
+        // Spec: progressbar. Flutter requires value/min/max for this role;
+        // indeterminate uses 0% with optional descriptive hint.
+        role: SemanticsRole.progressBar,
+        minValue: '0',
+        maxValue: '100',
+        value: _progressBarValue(widget.semanticsValue),
+        hint: _progressBarHint(widget.semanticsValue),
       ),
       child: RepaintBoundary(
         child: ConstrainedBox(
@@ -443,6 +449,36 @@ class _M3EExpressiveLoadingIndicatorState
     final Color endColor =
         _indicatorColors[(colorIndex + 1) % _indicatorColors.length];
     return Color.lerp(startColor, endColor, progress) ?? startColor;
+  }
+
+  /// Numeric / percent [semanticsValue], else indeterminate `0%`.
+  static String _progressBarValue(String? semanticsValue) {
+    if (semanticsValue == null || semanticsValue.isEmpty) {
+      return '0%';
+    }
+    if (double.tryParse(semanticsValue) != null) {
+      return semanticsValue;
+    }
+    if (semanticsValue.endsWith('%') &&
+        double.tryParse(
+              semanticsValue.substring(0, semanticsValue.length - 1),
+            ) !=
+            null) {
+      return semanticsValue;
+    }
+    return '0%';
+  }
+
+  /// Non-numeric [semanticsValue] is exposed as a hint (progressBar value
+  /// must stay numeric for Flutter debug role checks).
+  static String? _progressBarHint(String? semanticsValue) {
+    if (semanticsValue == null || semanticsValue.isEmpty) {
+      return null;
+    }
+    if (_progressBarValue(semanticsValue) == semanticsValue) {
+      return null;
+    }
+    return semanticsValue;
   }
 
   void _startMorphCycle() {

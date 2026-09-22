@@ -1692,12 +1692,13 @@ SizedBox(
 
 #### M3ELoadingIndicator
 
-Expressive loading spinner. Shape morph settle uses
-`M3EMotion.expressiveSpatialDefault`. Supports `indicatorSize`,
-`containerWidth` / `containerHeight`, `containerShape`, and
-`indicatorColors` (interpolated across morphs; mutually exclusive with
-`color`), plus `color` / `containerColor` and `rotationTurns` (when set,
-disables auto spin and morph pulse so a host can drive rotation).
+Expressive loading spinner (indeterminate). Spec defaults: outer **48dp**,
+active **38dp**, container **`CircleBorder`**, a11y role **progressbar**.
+Shape morph settle uses `M3EMotion.expressiveSpatialSlow`. Use `size` to scale
+both edges while keeping the 38:48 ratio (guidance **24–240dp**). Also supports
+`indicatorSize` / `containerWidth` / `containerHeight`, `containerShape`,
+`indicatorColors` (exclusive with `color`), `color` / `containerColor`, and
+`rotationTurns` (host-driven rotation; disables auto spin and morph pulse).
 
 ```dart
 const M3ELoadingIndicator();
@@ -1705,6 +1706,9 @@ const M3ELoadingIndicator();
 const M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.contained,
 );
+
+// Ratio-preserving scale (outer 96 → active 76)
+const M3ELoadingIndicator(size: 96);
 
 M3ELoadingIndicator(
   indicatorSize: 32,

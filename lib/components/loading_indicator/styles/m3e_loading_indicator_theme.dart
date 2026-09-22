@@ -12,7 +12,7 @@ class M3ELoadingIndicatorTheme
     this.containerWidth = 48,
     this.containerHeight = 48,
     this.activeIndicatorSize = 38,
-    this.containerShape = const StadiumBorder(),
+    this.containerShape = const CircleBorder(),
     this.globalRotationDuration = const Duration(milliseconds: 1600),
     this.morphInterval = const Duration(milliseconds: 1000),
     this.morphRotationDegrees = 45,
@@ -43,7 +43,28 @@ class M3ELoadingIndicatorTheme
   final double activeIndicatorSize;
 
   /// Shape of the loading indicator container.
+  ///
+  /// Spec default is a circle ([CircleBorder]).
   final ShapeBorder containerShape;
+
+  /// Spec minimum outer size (dp).
+  static const double minSize = 24;
+
+  /// Spec maximum outer size (dp).
+  static const double maxSize = 240;
+
+  /// Spec outer size at the default scale (dp).
+  static const double defaultOuterSize = 48;
+
+  /// Spec active / shape size at the default scale (dp).
+  static const double defaultActiveSize = 38;
+
+  /// Active-to-outer ratio (`38 / 48`) preserved when scaling via [resolveActiveSize].
+  static const double activeToOuterRatio = defaultActiveSize / defaultOuterSize;
+
+  /// Active indicator size for an outer edge of [outer], preserving the
+  /// 38:48 spec ratio.
+  static double resolveActiveSize(double outer) => outer * activeToOuterRatio;
 
   /// Full 360° continuous spin period.
   final Duration globalRotationDuration;

@@ -1,3 +1,4 @@
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -115,7 +116,59 @@ void main() {
       find.byType(M3EExpressiveLoadingIndicator),
     );
     expect(semantics.label, 'Loading');
-    expect(semantics.value, 'In progress');
+    expect(semantics.role, SemanticsRole.progressBar);
+    expect(semantics.value, '0%');
+    expect(semantics.hint, 'In progress');
+  });
+
+  testWidgets('defaults to CircleBorder container shape', (tester) async {
+    await tester.pumpWidget(_host(const M3ELoadingIndicator()));
+
+    final decoratedBox = tester.widget<DecoratedBox>(
+      find.byType(DecoratedBox).first,
+    );
+    final decoration = decoratedBox.decoration as ShapeDecoration;
+    expect(decoration.shape, isA<CircleBorder>());
+    expect(
+      M3ELoadingIndicatorTheme.defaults.containerShape,
+      isA<CircleBorder>(),
+    );
+  });
+
+  testWidgets('size scales outer and active with 38:48 ratio', (tester) async {
+    await tester.pumpWidget(_host(const M3ELoadingIndicator(size: 96)));
+
+    expect(
+      tester.getSize(find.byType(M3EExpressiveLoadingIndicator)),
+      const Size(96, 96),
+    );
+    expect(
+      tester
+          .widget<M3EExpressiveLoadingIndicator>(
+            find.byType(M3EExpressiveLoadingIndicator),
+          )
+          .indicatorSize,
+      76,
+    );
+  });
+
+  testWidgets('debug asserts outer size outside 24–240', (tester) async {
+    await tester.pumpWidget(_host(const M3ELoadingIndicator(size: 20)));
+    expect(tester.takeException(), isA<FlutterError>());
+
+    await tester.pumpWidget(_host(const M3ELoadingIndicator(size: 241)));
+    expect(tester.takeException(), isA<FlutterError>());
+  });
+
+  test('size cannot mix with independent dimensions', () {
+    expect(
+      () => M3ELoadingIndicator(size: 48, indicatorSize: 38),
+      throwsAssertionError,
+    );
+    expect(
+      () => M3ELoadingIndicator(size: 48, containerWidth: 48),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('resolves default and contained colors from theme', (
