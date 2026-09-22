@@ -3,6 +3,14 @@
 ### Changed
 
 * Bump `material_ui` to `^1.4.0` (Dart SDK `^3.13.0`).
+* **Breaking — Extended FABs:** add `M3EExtendedFabSize` (`small` 56 /
+  `medium` 80 / `large` 96; default **small**). Icon is optional; label is
+  required (no icon-only). Per-size paddings (medium leading/trailing **26**),
+  radii 16/20/28, and label type titleMedium / titleLarge / headlineSmall.
+  `M3EExtendedFabTheme` resolves via size metrics; min width **80**. Add
+  `M3EExtendedFabController` (scroll collapse/expand, appear morph, container
+  transform), focus ring **3dp** / **2dp** / `secondary`, TapRegion focus
+  clear, and disabled muted colors (shared with FAB).
 * **Breaking — FABs:** `M3EFabSize.medium` is now **80dp** / icon **28** /
   radius **20** (was 56/24/16). Add `M3EFabSize.regular` (56/24/16) for the
   baseline size. Default size remains `medium`. Add filled color styles

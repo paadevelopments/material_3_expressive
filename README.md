@@ -471,14 +471,42 @@ M3EFab(
 
 #### M3EExtendedFab
 
-FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`, plus
-optional `elevation` / `hoverElevation` (themed extended-FAB defaults when
-omitted).
+Extended FAB with a required text label and optional icon (no icon-only).
+Three sizes via `M3EExtendedFabSize`: `small` 56 (default), `medium` 80,
+`large` 96 — matching FAB container radii (16 / 20 / 28) and stepped label
+type (titleMedium / titleLarge / headlineSmall). Reuses `M3EFabColor` and
+`M3EFabDecoration`. Focus ring is 3dp / 2dp gap / `secondary`.
+
+Use `M3EExtendedFabController` for scroll expand/collapse, appear morph, and
+optional container transform (`openBuilder` or `controller.open`).
+
+```dart
+final fabController = M3EExtendedFabController();
+
+M3EExtendedFabScrollVisibility(
+  controller: fabController,
+  child: Scaffold(
+    body: ListView(...),
+    floatingActionButton: M3EExtendedFab(
+      controller: fabController,
+      appear: true,
+      label: 'Compose',
+      icon: const Icon(M3EIcons.edit),
+      size: M3EExtendedFabSize.small,
+      color: M3EFabColor.primary,
+      openBuilder: (context) => const ComposePage(),
+      onPressed: () {},
+    ),
+  ),
+);
+```
 
 ```dart
 M3EExtendedFab(
   label: 'Compose',
   icon: const Icon(M3EIcons.edit),
+  size: M3EExtendedFabSize.medium,
+  color: M3EFabColor.primaryFilled,
   onPressed: () {},
 );
 ```
