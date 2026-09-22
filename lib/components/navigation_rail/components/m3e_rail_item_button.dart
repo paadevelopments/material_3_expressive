@@ -234,7 +234,6 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
       key: expanded ? widget.indicatorKey : null,
       color: bg,
       shape: shape,
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _select(fromPointer: true),
         mouseCursor: SystemMouseCursors.click,
@@ -306,30 +305,25 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     required Color fg,
     required Widget scaledIcon,
   }) {
+    // Spec: when icon is followed by text, place the large badge at the
+    // trailing edge (after the label), not on the icon.
     return Row(
       children: [
+        scaledIcon,
+        SizedBox(width: theme.iconLabelGap),
         Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              scaledIcon,
-              SizedBox(width: theme.iconLabelGap),
-              Flexible(
-                child: Text(
-                  widget.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  semanticsLabel: widget.semanticLabel ?? widget.label,
-                  style: m3e.typeScale.labelLarge.copyWith(color: fg),
-                ),
-              ),
-            ],
+          child: Text(
+            widget.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            semanticsLabel: widget.semanticLabel ?? widget.label,
+            style: m3e.typeScale.labelLarge.copyWith(color: fg),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: theme.iconLabelGap),
-          child: M3ERailBadge(count: widget.badgeCount),
-        ),
+        if (widget.badgeCount != null) ...[
+          SizedBox(width: theme.iconLabelGap),
+          M3ERailBadge.standalone(count: widget.badgeCount),
+        ],
       ],
     );
   }
@@ -350,9 +344,9 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
         KeyedSubtree(
           key: widget.indicatorKey,
           child: M3EIconButton(
-            icon: scaledIcon,
+            // Collapsed: badge on the leading icon.
+            icon: M3ERailBadge(count: widget.badgeCount, child: scaledIcon),
             width: M3EIconButtonWidth.wide,
-            badgeValue: widget.badgeCount,
             onPressed: widget.onPressed,
             suppressInk: true,
             haptic: widget.haptic,

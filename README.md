@@ -1633,11 +1633,15 @@ M3EMenu(
 
 #### M3EBadge
 
-Notification dot or numeric badge on a child. `alignment` places the
-indicator at `topLeft`, `topCenter`, or `topRight` of the child's own box
-(default `topRight`). The badge sizes itself to cover the child plus
-indicator — no parent `SizedBox` is required. `offset` nudges away from the
-anchored edge (`dx` is ignored when centered).
+Notification **dot** (small, 6dp) or **large** badge (count / status label,
+min 16dp) on a child. Colors: **Error** / **On error**. `alignment` is
+`topLeft` (leading), `topCenter`, or `topRight` (trailing; default) and
+**mirrors in RTL**. Placement uses Compose-style offsets (small **6×6**, large
+**12×14** from the anchored corner to the badge bottom-leading). The badge
+**overlays** without expanding or shifting the child. Default `maxCount` is
+**999** (`999+`). Optional `label` is preferred over `count`. A11y: “New
+notification” (dot), “One new notification” / “{n} new notifications”
+(count).
 
 ```dart
 const M3EBadge(
@@ -1649,6 +1653,11 @@ const M3EBadge(
   count: 8,
   alignment: M3EBadgeAlignment.topLeft,
   child: Icon(M3EIcons.calendar_today, size: 28),
+);
+
+const M3EBadge(
+  label: 'New',
+  child: Icon(M3EIcons.mail, size: 28),
 );
 ```
 

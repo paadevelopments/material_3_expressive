@@ -4,15 +4,148 @@ import 'package:material_ui/material_ui.dart';
 
 const Key _contentKey = Key('badge-content');
 
+Widget _host(Widget child, {TextDirection textDirection = TextDirection.ltr}) {
+  return M3EMaterialApp(
+    data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+    home: Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        body: Align(alignment: Alignment.topLeft, child: child),
+      ),
+    ),
+  );
+}
+
 void main() {
-  testWidgets(
-    'M3EBadge anchors the indicator to the requested edge',
-    _m3ebadgeAnchorsTheIndicatorToTheRequestedEdge,
-  );
-  testWidgets(
-    'M3EBadge reserves room for the indicator',
-    _m3ebadgeReservesRoomForTheIndicator,
-  );
+  test('theme defaults match the badge spec', () {
+    const theme = M3EBadgeTheme.defaults;
+    expect(theme.dotSize, 6);
+    expect(theme.dotCornerRadius, 3);
+    expect(theme.labelMinSize, 16);
+    expect(theme.labelCornerRadius, 8);
+    expect(theme.labelHorizontalPadding, 4);
+    expect(theme.labelVerticalPadding, 0);
+    expect(theme.labelFontSize, 11);
+    expect(theme.labelFontWeight, FontWeight.w500);
+    expect(theme.labelLineHeight, 16);
+    expect(theme.labelLetterSpacing, 0.5);
+    expect(theme.smallOffset, const Offset(6, 6));
+    expect(theme.largeOffset, const Offset(12, 14));
+
+    final scheme = M3EThemeData.light().colorScheme;
+    expect(theme.containerColor(scheme), scheme.error);
+    expect(theme.labelColor(scheme), scheme.onError);
+  });
+
+  testWidgets('M3EBadge anchors the indicator to the requested edge', (
+    tester,
+  ) async {
+    await _pumpBadge(tester, M3EBadgeAlignment.topRight);
+    Rect content = tester.getRect(find.byKey(_contentKey));
+    Rect indicator = tester.getRect(find.text('3'));
+    expect(indicator.center.dx, greaterThan(content.center.dx));
+
+    await _pumpBadge(tester, M3EBadgeAlignment.topCenter);
+    content = tester.getRect(find.byKey(_contentKey));
+    indicator = tester.getRect(find.text('3'));
+    expect(indicator.center.dx, closeTo(content.center.dx, 0.5));
+
+    await _pumpBadge(tester, M3EBadgeAlignment.topLeft);
+    content = tester.getRect(find.byKey(_contentKey));
+    indicator = tester.getRect(find.text('3'));
+    expect(indicator.center.dx, lessThan(content.center.dx));
+  });
+
+  testWidgets('M3EBadge does not expand or shift the child', (tester) async {
+    await tester.pumpWidget(
+      _host(const SizedBox(key: _contentKey, width: 40, height: 40)),
+    );
+    final Rect bare = tester.getRect(find.byKey(_contentKey));
+
+    await _pumpBadge(tester, M3EBadgeAlignment.topRight);
+    final Rect badge = tester.getRect(find.byType(M3EBadge));
+    final Rect content = tester.getRect(find.byKey(_contentKey));
+
+    expect(badge.size, content.size);
+    expect(badge.size, bare.size);
+    expect(content.topLeft, bare.topLeft);
+  });
+
+  testWidgets('formats count above maxCount as max+', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          count: 1200,
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+      ),
+    );
+    expect(find.text('999+'), findsOneWidget);
+  });
+
+  testWidgets('label is preferred over count', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          count: 8,
+          label: 'New',
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+      ),
+    );
+    expect(find.text('New'), findsOneWidget);
+    expect(find.text('8'), findsNothing);
+  });
+
+  testWidgets('dot a11y announces New notification', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          showDot: true,
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('New notification'), findsOneWidget);
+  });
+
+  testWidgets('count a11y announces notification phrasing', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          count: 1,
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('One new notification'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          count: 5,
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('5 new notifications'), findsOneWidget);
+  });
+
+  testWidgets('RTL mirrors trailing placement', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const M3EBadge(
+          count: 3,
+          child: SizedBox(key: _contentKey, width: 40, height: 40),
+        ),
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    final content = tester.getRect(find.byKey(_contentKey));
+    final indicator = tester.getRect(find.text('3'));
+    // topRight is trailing; in RTL trailing is visual left.
+    expect(indicator.center.dx, lessThan(content.center.dx));
+  });
 }
 
 Future<void> _pumpBadge(
@@ -20,51 +153,13 @@ Future<void> _pumpBadge(
   M3EBadgeAlignment alignment,
 ) async {
   await tester.pumpWidget(
-    M3EMaterialApp(
-      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
-      home: Scaffold(
-        body: Align(
-          alignment: Alignment.topLeft,
-          child: M3EBadge(
-            count: 3,
-            alignment: alignment,
-            child: const SizedBox(key: _contentKey, width: 40, height: 40),
-          ),
-        ),
+    _host(
+      M3EBadge(
+        count: 3,
+        alignment: alignment,
+        child: const SizedBox(key: _contentKey, width: 40, height: 40),
       ),
     ),
   );
   await tester.pumpAndSettle();
-}
-
-Future<void> _m3ebadgeAnchorsTheIndicatorToTheRequestedEdge(
-  WidgetTester tester,
-) async {
-  await _pumpBadge(tester, M3EBadgeAlignment.topRight);
-  Rect content = tester.getRect(find.byKey(_contentKey));
-  Rect indicator = tester.getRect(find.text('3'));
-  expect(indicator.center.dx, greaterThan(content.center.dx));
-
-  await _pumpBadge(tester, M3EBadgeAlignment.topCenter);
-  content = tester.getRect(find.byKey(_contentKey));
-  indicator = tester.getRect(find.text('3'));
-  expect(indicator.center.dx, closeTo(content.center.dx, 0.5));
-
-  await _pumpBadge(tester, M3EBadgeAlignment.topLeft);
-  content = tester.getRect(find.byKey(_contentKey));
-  indicator = tester.getRect(find.text('3'));
-  expect(indicator.center.dx, lessThan(content.center.dx));
-}
-
-Future<void> _m3ebadgeReservesRoomForTheIndicator(WidgetTester tester) async {
-  await _pumpBadge(tester, M3EBadgeAlignment.topRight);
-
-  final Rect badge = tester.getRect(find.byType(M3EBadge));
-  final Rect content = tester.getRect(find.byKey(_contentKey));
-  final Rect indicator = tester.getRect(find.text('3'));
-
-  expect(badge.width, greaterThan(content.width));
-  expect(badge.height, greaterThan(content.height));
-  expect(indicator.top, greaterThanOrEqualTo(badge.top));
-  expect(indicator.right, lessThanOrEqualTo(badge.right));
 }

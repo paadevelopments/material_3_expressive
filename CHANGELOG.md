@@ -2,6 +2,14 @@
 
 ### Changed
 
+* **Breaking — badges:** colors **Error** / **On error**; small **6dp** /
+  large min **16dp** (pad 4 / radius 8); type labelSmall **11 / 500 / 16 /
+  0.5**; Compose placement `smallOffset` **6×6** / `largeOffset` **12×14**
+  (replaces `defaultOffset`); default `maxCount` **999**; optional
+  **`label`** (preferred over `count`); RTL mirrors trailing/leading; a11y
+  “New notification” / “One new notification” / “{n} new notifications”.
+  Overlay layout does **not** expand or shift the child (nav icons stay
+  aligned).
 * **Progress indicators:** track color **secondary container** (linear +
   circular); circular gap **4dp**; linear stop flush (trailing space 0) with
   **4dp** host end inset; optional **`showTrack`** (default true); a11y

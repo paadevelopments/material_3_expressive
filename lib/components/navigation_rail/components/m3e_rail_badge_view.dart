@@ -1,73 +1,121 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+
+import 'package:material_3_expressive/components/badges/m3e_badges.dart';
 
 import '../../../foundations/foundations.dart';
 
-/// Large numeric badgeValue for rail items (0..999+). One class per file.
+/// Navigation rail badge using [M3EBadge].
+///
+/// - With [child]: anchors to that widget (collapsed rail — badge on icon).
+/// - Without [child]: standalone indicator (expanded rail — after the label).
+///
+/// `count == 0` shows a small dot. Null [count] and [showDot] false hides the
+/// badge (returns [child] or [SizedBox.shrink]).
 class M3ERailBadge extends StatelessWidget {
-  /// Creates a large numeric badgeValue.
+  /// Anchors a badge to [child] (collapsed / icon placement).
   const M3ERailBadge({
     super.key,
+    required Widget this.child,
     this.count,
-    this.maxDigits = 3,
-    this.dense = false,
-  });
+    this.showDot = false,
+    this.maxCount = 999,
+  }) : assert(
+         count == null || count >= 0,
+         'count must be null or non-negative',
+       );
 
-  /// The numeric value to display in the badgeValue.
+  /// Standalone badge for expanded rail trailing placement (after the label).
+  const M3ERailBadge.standalone({
+    super.key,
+    this.count,
+    this.showDot = false,
+    this.maxCount = 999,
+  }) : child = null,
+       assert(
+         count == null || count >= 0,
+         'count must be null or non-negative',
+       );
+
+  /// Icon (or other content) the badge anchors to. Null for standalone.
+  final Widget? child;
+
+  /// Numeric count. `0` is treated as a small dot.
   final int? count;
 
-  /// Maximum digits before showing a trailing '+' (e.g. 999+).
-  final int maxDigits;
+  /// Force a small dot badge.
+  final bool showDot;
 
-  /// Whether to use a denser (smaller padding) variant.
-  final bool dense;
+  /// Cap for count formatting.
+  final int maxCount;
 
   @override
   Widget build(BuildContext context) {
-    if (count == null) {
-      return const SizedBox.shrink();
+    final bool dot = showDot || count == 0;
+    if (!dot && count == null) {
+      return child ?? const SizedBox.shrink();
     }
     final theme = M3ETheme.of(context).navigationRailTheme;
     final m3e = M3ETheme.of(context);
+    final badgeTheme = m3e.badgeTheme;
     final scheme = m3e.colorScheme;
+    final bg = theme.badgeBackground ?? badgeTheme.containerColor(scheme);
+    final fg = theme.badgeLargeLabel ?? badgeTheme.labelColor(scheme);
 
-    final Color background = theme.badgeBackground ?? scheme.primary;
-    final Color foreground = theme.badgeLargeLabel ?? scheme.onPrimary;
-
-    final text = count! > (10 * (pow10(maxDigits) - 1))
-        ? '${pow10(maxDigits) - 1}+'
-        : '$count';
-    final double pad = dense ? 2 : 4;
-    return count == 0
-        ? Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: background,
-              shape: BoxShape.circle,
-            ),
-          )
-        : Container(
-            padding: EdgeInsets.symmetric(horizontal: pad + 2, vertical: pad),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: DefaultTextStyle(
-              style: m3e.typeScale.labelSmall.copyWith(
-                color: foreground,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-              child: Text(text, maxLines: 1),
-            ),
-          );
-  }
-
-  /// Returns 10 to the power of [n].
-  static int pow10(int n) {
-    var v = 1;
-    for (var i = 0; i < n; i++) {
-      v *= 10;
+    if (child != null) {
+      return M3EBadge(
+        showDot: dot,
+        count: dot ? null : count,
+        maxCount: maxCount,
+        backgroundColor: bg,
+        foregroundColor: fg,
+        child: child!,
+      );
     }
-    return v;
+
+    // Standalone trailing indicator (expanded rail).
+    if (dot) {
+      return Semantics(
+        label: 'New notification',
+        excludeSemantics: true,
+        child: Container(
+          width: badgeTheme.dotSize,
+          height: badgeTheme.dotSize,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: badgeTheme.dotBorderRadius,
+          ),
+        ),
+      );
+    }
+    final value = count!;
+    final text = value > maxCount ? '$maxCount+' : '$value';
+    final a11y = value == 1
+        ? 'One new notification'
+        : '$value new notifications';
+    return Semantics(
+      label: a11y,
+      excludeSemantics: true,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: badgeTheme.labelHorizontalPadding,
+          vertical: badgeTheme.labelVerticalPadding,
+        ),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: badgeTheme.labelBorderRadius,
+        ),
+        constraints: BoxConstraints(
+          minWidth: badgeTheme.labelMinSize,
+          minHeight: badgeTheme.labelMinSize,
+        ),
+        alignment: Alignment.center,
+        child: DefaultTextStyle(
+          style: badgeTheme
+              .labelStyle(m3e.typeScale, scheme)
+              .copyWith(color: fg),
+          child: Text(text, textAlign: TextAlign.center),
+        ),
+      ),
+    );
   }
 }
