@@ -513,28 +513,32 @@ M3EExtendedFab(
 
 #### M3EFabMenu
 
-Speed-dial menu anchored to a FAB. The FAB morphs size (80↔56) and circle when
-opening; use `position` for left/right anchor, and optional `expandIcon` /
-`collapseIcon` (fallbacks: `icon` / `closeIcon`). Pass `decoration` for the
-trigger FAB. Menu-item fill, foreground, and outline gradients live on
-`M3EFabMenuTheme` (`itemBackgroundGradient`, `itemForegroundGradient`,
-`itemOutlineGradient` / `itemOutlineColor`, `itemBorderWidth`).
+Speed-dial style menu (2–6 items) anchored to a FAB. One menu size pairs with
+any `M3EFabSize`; the trigger morphs into a **56dp** circular close button
+(icon **20dp**). Color sets follow the FAB style: filled close + container
+items (primary / secondary / tertiary; `surface` maps to primary).
+
+Use `M3EFabMenuController` for programmatic open/close. Optional
+`M3EFabMenuItem.openBuilder` opens a container transform. When the viewport is
+short, items scroll behind the close button. Theme paddings: leading/trailing
+**24**, icon–label **8**, between items **4**, close↔items **8**.
 
 ```dart
+final menuController = M3EFabMenuController();
+
 M3EFabMenu(
+  controller: menuController,
   position: M3EFabMenuPosition.right,
+  size: M3EFabSize.medium,
+  color: M3EFabColor.primary,
   expandIcon: const Icon(M3EIcons.add),
   collapseIcon: const Icon(M3EIcons.close),
-  decoration: M3EFabDecoration(
-    backgroundGradient: WidgetStateProperty.all(
-      const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
-    ),
-  ),
   items: [
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.edit),
       label: 'Note',
       onPressed: () {},
+      openBuilder: (context) => const NotePage(),
     ),
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.schedule),

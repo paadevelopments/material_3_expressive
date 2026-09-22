@@ -15,7 +15,7 @@ void main() {
 }
 
 void registerFabMenuTabVisitsEveryItemTests() {
-  testWidgets('FAB menu Tab visits every item (not FocusScope oscillation)', (
+  testWidgets('FAB menu focuses close first then Tab visits every item', (
     WidgetTester tester,
   ) async {
     const labels = <String>['Image', 'Video', 'Audio', 'Document'];
@@ -28,39 +28,40 @@ void registerFabMenuTabVisitsEveryItemTests() {
     }
 
     final FocusScopeNode menuScope = findFabMenuScope()!;
-    final Set<FocusNode> itemNodes = menuScope.traversalDescendants
+    final List<FocusNode> focusable = menuScope.traversalDescendants
         .where((FocusNode n) => n.canRequestFocus && !n.skipTraversal)
-        .toSet();
-    expect(itemNodes, hasLength(labels.length));
+        .toList();
+    // Close + each menu item.
+    expect(focusable, hasLength(labels.length + 1));
 
-    // Opening moves focus into the menu (scope skips parent Tab traversal).
+    // Spec: initial focus remains on the close button.
     expect(
-      itemNodes.contains(FocusManager.instance.primaryFocus),
-      isTrue,
-      reason: 'Open should focus a menu item, not the trigger FAB',
+      FocusManager.instance.primaryFocus?.debugLabel,
+      'M3EFabMenuClose',
+      reason: 'Open should focus the close button first',
     );
 
-    final visited = <FocusNode>{FocusManager.instance.primaryFocus!};
-    for (var i = 0; i < labels.length + 1; i++) {
-      await pumpFocusNavTab(tester);
+    final visited = <FocusNode>{};
+    for (var i = 0; i < focusable.length + 1; i++) {
       final FocusNode? primary = FocusManager.instance.primaryFocus;
       expect(
         primary?.debugLabel,
         isNot('M3EFabMenu'),
-        reason: 'FocusScope must skipTraversal so Tab walks items',
+        reason: 'FocusScope must skipTraversal so Tab walks targets',
       );
       expect(
-        itemNodes.contains(primary),
+        focusable.contains(primary),
         isTrue,
-        reason: 'Tab should stay on menu item nodes, got $primary',
+        reason: 'Tab should stay on close/item nodes, got $primary',
       );
       visited.add(primary!);
+      await pumpFocusNavTab(tester);
     }
 
     expect(
       visited,
-      unorderedEquals(itemNodes),
-      reason: 'Tab must reach every FAB menu item node',
+      unorderedEquals(focusable),
+      reason: 'Tab must reach close and every FAB menu item',
     );
   });
 }

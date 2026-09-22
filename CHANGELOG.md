@@ -3,6 +3,14 @@
 ### Changed
 
 * Bump `material_ui` to `^1.4.0` (Dart SDK `^3.13.0`).
+* **Breaking — FAB menus:** require **2–6** items; theme paddings
+  leading/trailing **24**, icon–label **8**, between items **4**, close↔items
+  **8** (replaces `itemHorizontalPadding` / old gaps). Close button **56** /
+  icon **20**; closed size follows `M3EFabSize`. Color sets: filled close +
+  container items from `M3EFabColor` (surface→primary). Initial focus on close
+  (“Toggle menu”, expanded/collapsed); Tab walks items; Escape closes. Spring
+  exit reverse; short viewports scroll items behind close. Add
+  `M3EFabMenuController` and per-item `openBuilder` container transform.
 * **Breaking — Extended FABs:** add `M3EExtendedFabSize` (`small` 56 /
   `medium` 80 / `large` 96; default **small**). Icon is optional; label is
   required (no icon-only). Per-size paddings (medium leading/trailing **26**),
