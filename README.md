@@ -1819,7 +1819,11 @@ M3ETooltip(
 
 #### M3ESnackbar
 
-Brief feedback message — use `.show` (hosts via internal `M3ESnackbarHost`).
+Brief bottom feedback. Plain bars auto-dismiss after **4s**; bars with an
+action or close stay until dismissed. Only one snackbar is shown at a time
+(`M3ESnackbarController`). Optional close icon; action uses inverse primary
+text with InkSparkle. Heights **48** / **68**; padding start **16**, end **8**
+with trailing.
 
 ```dart
 M3ESnackbar.show(
@@ -1827,6 +1831,7 @@ M3ESnackbar.show(
   message: 'Draft saved',
   actionLabel: 'Undo',
   onAction: () {},
+  showCloseButton: true,
 );
 ```
 

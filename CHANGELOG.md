@@ -2,6 +2,11 @@
 
 ### Changed
 
+* **Snackbars:** single/two-line min heights **48** / **68**; start pad **16**,
+  end **8** with action/close; optional **close** (24 / pad 12); actionable or
+  closable bars do **not** auto-dismiss (plain default **4s**); one-at-a-time
+  via **`M3ESnackbarController`**; InkSparkle on action/close; polite live
+  region; **Esc** dismisses when focused; elevation Level 3.
 * **Tooltips:** plain min height **24** / pad **8×4**; rich pad **16/12/16/8**;
   title **on surface variant**; plain dismiss **instant** / rich **1.5s**
   after leave (themable); placement

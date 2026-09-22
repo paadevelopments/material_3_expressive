@@ -188,7 +188,12 @@ class _M3ETooltipState extends State<M3ETooltip>
       return;
     }
     if (focused) {
-      _show();
+      // Touch/tap focuses the child but must not open the tooltip; only
+      // keyboard-driven focus (traditional highlight) should.
+      if (FocusManager.instance.highlightMode ==
+          FocusHighlightMode.traditional) {
+        _show();
+      }
     } else {
       _scheduleHide();
     }
