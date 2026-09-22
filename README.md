@@ -1693,17 +1693,15 @@ SizedBox(
 #### M3ELoadingIndicator
 
 Expressive loading spinner. Shape morph settle uses
-`M3EMotion.expressiveSpatialDefault`. Optional `elevation` (theme default `0`),
-`color` / `containerColor`, and `rotationTurns` (when set, disables auto spin
-and morph pulse so a host can drive rotation). Contained uses rounded-shell
-elevation; the default (uncontained) morph casts a path shadow.
+`M3EMotion.expressiveSpatialDefault`. Optional `color` / `containerColor`, and
+`rotationTurns` (when set, disables auto spin and morph pulse so a host can
+drive rotation).
 
 ```dart
 const M3ELoadingIndicator();
 
 const M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.contained,
-  elevation: 3,
 );
 
 // Host-driven rotation (e.g. during pull-to-refresh drag)
@@ -1716,8 +1714,8 @@ M3ELoadingIndicator(
 #### M3ERefreshIndicator
 
 Pull-to-refresh wrapper for scrollables. Default and `.contained` kinds always
-build a **contained** `M3ELoadingIndicator` so shell `elevation` works on all
-platforms (including Flutter web). Reveal starts after
+build a **contained** `M3ELoadingIndicator`; optional `elevation` is applied on
+the refresh host shell (including Flutter web). Reveal starts after
 `2 × indicatorPadding`; arm / refresh only when fully revealed. List pad is
 capped by `contentDragOffset` (defaults to indicator height +
 `2 × indicatorPadding`). Use `M3ERefreshIndicatorController` (or a

@@ -30,9 +30,9 @@ enum _WebSpinnerPhase { none, drag, refresh }
 
 /// A Material Design 3 expressive refresh indicator.
 ///
-/// Expressive and contained refresh kinds use a [M3ELoadingIndicator] with the
-/// **contained** loading variant so shell elevation works on all platforms
-/// (including Flutter web).
+/// Expressive and contained refresh kinds use a contained
+/// [M3ELoadingIndicator]; elevation (when set) is applied on the refresh host
+/// shell so it works on all platforms (including Flutter web).
 ///
 /// Call [M3ERefreshIndicatorState.show] via a [GlobalKey], or pass a
 /// [M3ERefreshIndicatorController] to trigger refresh programmatically.

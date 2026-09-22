@@ -142,7 +142,8 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
 
   /// Contained loading spinner for expressive and contained refresh kinds.
   Widget _buildContainedLoadingIndicator({Key? key, bool freezeMorph = false}) {
-    return M3ELoadingIndicator(
+    final theme = M3ETheme.of(context);
+    final indicator = M3ELoadingIndicator(
       key: key,
       variant: M3ELoadingIndicatorVariant.contained,
       color: _effectiveValueColor,
@@ -152,7 +153,19 @@ extension _M3ERefreshIndicatorBuild on M3ERefreshIndicatorState {
       semanticLabel: widget.semanticsLabel,
       semanticValue: widget.semanticsValue,
       rotationTurns: freezeMorph ? 0 : _dragRotationTurns(context),
-      elevation: widget.elevation,
+    );
+    if (widget.elevation <= 0) {
+      return indicator;
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: theme.loadingIndicatorTheme.containerRadius,
+        boxShadow: M3EElevation.shadows(
+          widget.elevation,
+          shadowColor: theme.colorScheme.shadow,
+        ),
+      ),
+      child: indicator,
     );
   }
 
