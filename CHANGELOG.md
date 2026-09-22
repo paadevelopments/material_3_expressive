@@ -2,6 +2,11 @@
 
 ### Changed
 
+* **Progress indicators:** track color **secondary container** (linear +
+  circular); circular gap **4dp**; linear stop flush (trailing space 0) with
+  **4dp** host end inset; optional **`showTrack`** (default true); a11y
+  **`progressBar`** + `semanticsLabel` / `semanticsValue`; linear RTL mirror
+  (circular unchanged).
 * **Breaking — loading indicator:** remove `elevation` (widget, theme, and
   path shadow). Refresh host elevation stays on `M3ERefreshIndicator`.
 * **Loading indicator:** instance `indicatorSize` / `containerWidth` /

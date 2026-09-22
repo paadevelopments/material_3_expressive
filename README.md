@@ -1655,11 +1655,15 @@ const M3EBadge(
 #### M3EProgressIndicator
 
 Material 3 Expressive progress indicators with circular and linear variants,
-including Compose-style wavy forms. Null `value` runs indeterminate animation
-(classic linear: dual traveling segments with gaps; wavy linear/circular: m3e
-style travel / spin+sweep; classic circular: same rot/sweep timing as wavy,
-flat arcs with gaps). Optional `trackStrokeWidth` (and `.linear` `strokeWidth`)
-override track and value thickness.
+including Compose-style wavy forms. Track uses **secondary container**; active
+(+ linear stop) uses **primary**. Circular track–active gap defaults to **4dp**.
+Null `value` runs indeterminate animation (classic linear: dual traveling
+segments with gaps; wavy linear/circular: m3e style travel / spin+sweep;
+classic circular: same rot/sweep timing as wavy, flat arcs with gaps). Optional
+`trackStrokeWidth` (and `.linear` `strokeWidth`) override track and value
+thickness. Set `showTrack: false` for in-button use. Linear mirrors in RTL;
+circular does not. A11y role is **progressbar** (`semanticsLabel` /
+`semanticsValue`).
 
 ```dart
 // Classic
@@ -1675,6 +1679,9 @@ SizedBox(
   width: 200,
   child: M3EProgressIndicator.linear(value: 0.6),
 );
+
+// Hide track (e.g. inside a button)
+M3EProgressIndicator.circular(showTrack: false);
 
 // Expressive wavy (Compose CircularWavy / LinearWavy)
 const M3EProgressIndicator.circularWavy();

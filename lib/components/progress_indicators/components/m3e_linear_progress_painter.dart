@@ -23,7 +23,10 @@ class M3ELinearProgressPainter extends CustomPainter {
     required this.amplitudeFactor,
     this.animationValue = 0,
     this.inset = 4,
+    this.trailingMargin = 4,
     this.flatLayout,
+    this.showTrack = true,
+    this.textDirection = TextDirection.ltr,
   });
 
   /// Determinate progress, or null for indeterminate.
@@ -65,11 +68,20 @@ class M3ELinearProgressPainter extends CustomPainter {
   /// amplitudeFactor.
   final double amplitudeFactor;
 
-  /// inset.
+  /// Leading host edge inset.
   final double inset;
+
+  /// Trailing host edge inset. Spec: ≥4dp.
+  final double trailingMargin;
 
   /// flatLayout.
   final M3ELinearProgressLayout? flatLayout;
+
+  /// When false, omits track painting.
+  final bool showTrack;
+
+  /// Mirrors LTR geometry when [TextDirection.rtl].
+  final TextDirection textDirection;
 
   static const Curve _lineEasing = Cubic(0.3, 0, 0.8, 0.15);
 
@@ -82,27 +94,37 @@ class M3ELinearProgressPainter extends CustomPainter {
     ..strokeWidth = width
     ..isAntiAlias = true;
 
-  /// Stop diameter and center so the dot sits inside the track end with equal
-  /// padding on all sides.
+  /// Stop diameter and center so the stop's trailing edge is flush with
+  /// [contentRight] (0 trailing space beyond the stop).
   ({double diameter, double centerX}) _stopPlacement({
-    required double trackRight,
+    required double contentRight,
     required double trackStroke,
   }) {
     final double pad = math.max(1, trackStroke / 4);
     final double maxDiameter = math.max(1, trackStroke - 2 * pad);
     final double diameter = math.min(stopSize, maxDiameter);
-    final double actualPad = (trackStroke - diameter) / 2;
-    final double centerX =
-        trackRight + trackStroke / 2 - actualPad - diameter / 2;
+    final double centerX = contentRight - diameter / 2;
     return (diameter: diameter, centerX: centerX);
   }
 
+  double get _resolvedTrailing => flatLayout?.trailingMargin ?? trailingMargin;
+
   @override
   void paint(Canvas canvas, Size size) {
+    final rtl = textDirection == TextDirection.rtl;
+    if (rtl) {
+      canvas
+        ..save()
+        ..translate(size.width, 0)
+        ..scale(-1, 1);
+    }
     if (isWavy) {
       _paintWavy(canvas, size);
     } else {
       _paintFlat(canvas, size);
+    }
+    if (rtl) {
+      canvas.restore();
     }
   }
 
@@ -112,11 +134,12 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double trackStroke = trackStrokeWidth;
     final double visualGap = _visualGap(activeStroke);
     final double left = inset;
-    final double trackRight = size.width - spec.trailingMargin;
+    final double contentRight = size.width - spec.trailingMargin;
     final ({double diameter, double centerX}) stop = _stopPlacement(
-      trackRight: trackRight,
+      contentRight: contentRight,
       trackStroke: trackStroke,
     );
+    final double trackRight = contentRight;
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -151,7 +174,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       final double activeEndX = left + width * p;
       final double trackStartX = math.min(trackRight, activeEndX + visualGap);
 
-      if (trackStartX < trackRight) {
+      if (showTrack && trackStartX < trackRight) {
         canvas.drawLine(
           Offset(trackStartX, cy),
           Offset(trackRight, cy),
@@ -206,7 +229,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       canvas.drawLine(Offset(x0, cy), Offset(x1, cy), paint..color = color);
     }
 
-    if (segs.firstHead < 1.0 - gapFrac) {
+    if (showTrack && segs.firstHead < 1.0 - gapFrac) {
       final double start = segs.firstHead > 0 ? segs.firstHead + gapFrac : 0;
       drawSeg(start, 1, trackPaint, track);
     }
@@ -215,7 +238,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       drawSeg(segs.firstTail, segs.firstHead, activePaint, active);
     }
 
-    if (segs.firstTail > gapFrac) {
+    if (showTrack && segs.firstTail > gapFrac) {
       final double start = segs.secondHead > 0 ? segs.secondHead + gapFrac : 0;
       final double end = segs.firstTail < 1.0 ? segs.firstTail - gapFrac : 1.0;
       if (start < end) {
@@ -227,7 +250,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       drawSeg(segs.secondTail, segs.secondHead, activePaint, active);
     }
 
-    if (segs.secondTail > gapFrac) {
+    if (showTrack && segs.secondTail > gapFrac) {
       final double end = segs.secondTail < 1.0
           ? segs.secondTail - gapFrac
           : 1.0;
@@ -240,12 +263,12 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double trackStroke = trackStrokeWidth;
     final double visualGap = _visualGap(activeStroke);
     final double left = inset;
-    final double trailing = math.max(gap, 4);
-    final double trackRight = size.width - trailing;
+    final double contentRight = size.width - _resolvedTrailing;
     final ({double diameter, double centerX}) stop = _stopPlacement(
-      trackRight: trackRight,
+      contentRight: contentRight,
       trackStroke: trackStroke,
     );
+    final double trackRight = contentRight;
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -281,7 +304,7 @@ class M3ELinearProgressPainter extends CustomPainter {
 
     final double activeEndX = left + width * p;
     final double trackStartX = math.min(trackRight, activeEndX + visualGap);
-    if (trackStartX < trackRight) {
+    if (showTrack && trackStartX < trackRight) {
       canvas.drawLine(
         Offset(trackStartX, cy),
         Offset(trackRight, cy),
@@ -318,7 +341,7 @@ class M3ELinearProgressPainter extends CustomPainter {
     final double adjustedGap = visualGap + strokeCap;
 
     void drawTrack(double x0, double x1) {
-      if (x1 <= x0) {
+      if (!showTrack || x1 <= x0) {
         return;
       }
       canvas.drawLine(
@@ -432,6 +455,9 @@ class M3ELinearProgressPainter extends CustomPainter {
         oldDelegate.phase != phase ||
         oldDelegate.amplitudeFactor != amplitudeFactor ||
         oldDelegate.inset != inset ||
-        oldDelegate.flatLayout != flatLayout;
+        oldDelegate.trailingMargin != trailingMargin ||
+        oldDelegate.flatLayout != flatLayout ||
+        oldDelegate.showTrack != showTrack ||
+        oldDelegate.textDirection != textDirection;
   }
 }

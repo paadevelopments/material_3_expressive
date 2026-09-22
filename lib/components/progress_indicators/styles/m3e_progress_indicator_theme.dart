@@ -28,7 +28,7 @@ class M3ELinearProgressLayout {
   /// dotOffset.
   final double dotOffset;
 
-  /// trailingMargin.
+  /// Host edge inset after the track/stop. Spec: ≥4dp.
   final double trailingMargin;
 }
 
@@ -39,7 +39,7 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
   const M3ELinearProgressTheme({
     this.strokeWidth = 4,
     this.trackStrokeWidth = 4,
-    this.gapSize = 8,
+    this.gapSize = 4,
     this.stopSize = 4,
     this.waveAmplitude = 3,
     this.determinateWavelength = 40,
@@ -58,10 +58,10 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
   /// trackStrokeWidth.
   final double trackStrokeWidth;
 
-  /// gapSize.
+  /// Track–active gap. Spec: 4dp.
   final double gapSize;
 
-  /// stopSize.
+  /// Stop diameter. Spec: 4dp.
   final double stopSize;
 
   /// waveAmplitude.
@@ -92,9 +92,15 @@ class M3ELinearProgressTheme extends M3EThemeExtension<M3ELinearProgressTheme> {
           gap: 4,
           dotDiameter: 4,
           dotOffset: 2,
-          trailingMargin: 8,
+          trailingMargin: 4,
         ),
       };
+
+  /// Track color. Spec: Secondary container.
+  Color trackColor(M3EColorScheme scheme) => scheme.secondaryContainer;
+
+  /// Active / stop color. Spec: Primary.
+  Color activeColor(M3EColorScheme scheme) => scheme.primary;
 
   /// Compose wavy determinate amplitude: full mid-progress, zero near ends.
   double amplitudeForProgress(double progress) {
@@ -171,7 +177,7 @@ class M3ECircularProgressTheme
     this.wavySize = 48,
     this.defaultStrokeWidth = 4,
     this.trackStrokeWidth = 4,
-    this.gapSize = 8,
+    this.gapSize = 4,
     this.waveAmplitude = 1.6,
     this.wavelength = 15,
   });
@@ -193,7 +199,7 @@ class M3ECircularProgressTheme
   /// trackStrokeWidth.
   final double trackStrokeWidth;
 
-  /// gapSize.
+  /// Track–active gap. Spec: 4dp.
   final double gapSize;
 
   /// waveAmplitude.

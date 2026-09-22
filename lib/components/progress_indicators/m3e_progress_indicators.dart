@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
@@ -37,6 +38,9 @@ class M3EProgressIndicator extends StatefulWidget {
     this.trackStrokeWidth,
     this.color,
     this.trackColor,
+    this.showTrack = true,
+    this.semanticsLabel,
+    this.semanticsValue,
   }) : _kind = _M3EProgressKind.circular,
        linearSize = M3EProgressIndicatorSize.m,
        gapSize = null,
@@ -60,6 +64,9 @@ class M3EProgressIndicator extends StatefulWidget {
     this.amplitudeForProgress,
     this.wavelength,
     this.waveSpeed,
+    this.showTrack = true,
+    this.semanticsLabel,
+    this.semanticsValue,
   }) : _kind = _M3EProgressKind.circularWavy,
        linearSize = M3EProgressIndicatorSize.m,
        stopSize = null;
@@ -73,6 +80,9 @@ class M3EProgressIndicator extends StatefulWidget {
     this.trackStrokeWidth,
     this.color,
     this.trackColor,
+    this.showTrack = true,
+    this.semanticsLabel,
+    this.semanticsValue,
   }) : _kind = _M3EProgressKind.linear,
        size = null,
        gapSize = null,
@@ -97,6 +107,9 @@ class M3EProgressIndicator extends StatefulWidget {
     this.amplitudeForProgress,
     this.wavelength,
     this.waveSpeed,
+    this.showTrack = true,
+    this.semanticsLabel,
+    this.semanticsValue,
   }) : _kind = _M3EProgressKind.linearWavy,
        size = null;
 
@@ -140,6 +153,17 @@ class M3EProgressIndicator extends StatefulWidget {
 
   /// Wave travel speed in logical pixels per second.
   final double? waveSpeed;
+
+  /// When false, omits the track (e.g. in-button use). Spec default: true.
+  final bool showTrack;
+
+  /// Accessibility label for the progress bar.
+  final String? semanticsLabel;
+
+  /// Accessibility value. Numeric / percent strings are exposed as the
+  /// progressbar value; other strings become a hint. When null, determinate
+  /// progress uses a percent derived from [value].
+  final String? semanticsValue;
 
   @override
   State<M3EProgressIndicator> createState() => _M3EProgressIndicatorState();
@@ -310,17 +334,65 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     return themeAmplitude(value).clamp(0.0, 1.0);
   }
 
+  /// Numeric / percent [semanticsValue], else determinate % or indeterminate
+  /// `0%`.
+  String _progressBarValue(String? semanticsValue) {
+    if (semanticsValue != null && semanticsValue.isNotEmpty) {
+      if (double.tryParse(semanticsValue) != null) {
+        return semanticsValue;
+      }
+      if (semanticsValue.endsWith('%') &&
+          double.tryParse(
+                semanticsValue.substring(0, semanticsValue.length - 1),
+              ) !=
+              null) {
+        return semanticsValue;
+      }
+      return '0%';
+    }
+    final double? progress = widget.value;
+    if (progress != null) {
+      return '${(progress.clamp(0.0, 1.0) * 100).round()}%';
+    }
+    return '0%';
+  }
+
+  /// Non-numeric [semanticsValue] is exposed as a hint.
+  String? _progressBarHint(String? semanticsValue) {
+    if (semanticsValue == null || semanticsValue.isEmpty) {
+      return null;
+    }
+    if (_progressBarValue(semanticsValue) == semanticsValue) {
+      return null;
+    }
+    return semanticsValue;
+  }
+
+  Widget _withSemantics(Widget child) {
+    return Semantics.fromProperties(
+      properties: SemanticsProperties(
+        label: widget.semanticsLabel,
+        role: SemanticsRole.progressBar,
+        minValue: '0',
+        maxValue: '100',
+        value: _progressBarValue(widget.semanticsValue),
+        hint: _progressBarHint(widget.semanticsValue),
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     return M3EComponentTheme(
       builder: (BuildContext context) {
-        return switch (widget._kind) {
+        return _withSemantics(switch (widget._kind) {
           _M3EProgressKind.circular => _buildCircular(theme),
           _M3EProgressKind.circularWavy => _buildCircularWavy(theme),
           _M3EProgressKind.linear => _buildLinear(theme, wavy: false),
           _M3EProgressKind.linearWavy => _buildLinear(theme, wavy: true),
-        };
+        });
       },
     );
   }
@@ -362,6 +434,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 sweepAngle: arc.sweep,
                 gapSize: gap,
                 progress: widget.value,
+                showTrack: widget.showTrack,
               ),
             );
           },
@@ -423,6 +496,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 globalRotation: _globalRotController.value,
                 additionalRotation: _additionalRotController.value,
                 sweepFraction: sweepFraction,
+                showTrack: widget.showTrack,
               ),
             );
           },
@@ -434,8 +508,8 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
   Widget _buildLinear(M3EThemeData theme, {required bool wavy}) {
     final M3ELinearProgressTheme linear = theme.progressIndicatorTheme.linear;
     final M3EColorScheme scheme = theme.colorScheme;
-    final Color active = widget.color ?? scheme.primary;
-    final Color track = widget.trackColor ?? scheme.surfaceContainerHighest;
+    final Color active = widget.color ?? linear.activeColor(scheme);
+    final Color track = widget.trackColor ?? linear.trackColor(scheme);
     if (!wavy) {
       return _buildLinearFlat(linear: linear, active: active, track: track);
     }
@@ -454,6 +528,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
     final double trackStroke = widget.trackStrokeWidth ?? layout.trackHeight;
     final indet = widget.value == null;
     final double height = math.max(stroke, trackStroke);
+    final TextDirection textDirection = Directionality.of(context);
     return RepaintBoundary(
       child: SizedBox(
         height: height,
@@ -477,6 +552,8 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 phase: 0,
                 amplitudeFactor: 0,
                 flatLayout: layout,
+                showTrack: widget.showTrack,
+                textDirection: textDirection,
               ),
             );
           },
@@ -515,6 +592,7 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
       ),
       linear.wavyContainerHeight,
     );
+    final TextDirection textDirection = Directionality.of(context);
 
     final Listenable listenable = indeterminate
         ? Listenable.merge(<Listenable>[
@@ -547,6 +625,9 @@ class _M3EProgressIndicatorState extends State<M3EProgressIndicator>
                 wavelength: wavelength,
                 phase: _needsWavePhase ? _phase(wavelength, waveSpeed) : 0,
                 amplitudeFactor: amplitudeFactor,
+                trailingMargin: layout.trailingMargin,
+                showTrack: widget.showTrack,
+                textDirection: textDirection,
               ),
             );
           },
