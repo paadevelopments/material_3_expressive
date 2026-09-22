@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart' show Tooltip;
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../cards/m3e_cards.dart';
+import '../../tooltips/m3e_tooltips.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../enums/m3e_list_selection_enums.dart';
 import '../styles/m3e_expandable_style.dart';
@@ -27,12 +27,18 @@ part 'm3e_expandable_item_body.dart';
 
 /// M3EExpandableHeaderBuilder.
 
-typedef M3EExpandableHeaderBuilder =
-    Widget Function(BuildContext context, int index, double progress);
+typedef M3EExpandableHeaderBuilder = Widget Function(
+  BuildContext context,
+  int index,
+  double progress,
+);
 
 /// M3EExpandableBodyBuilder.
-typedef M3EExpandableBodyBuilder =
-    Widget Function(BuildContext context, int index, double progress);
+typedef M3EExpandableBodyBuilder = Widget Function(
+  BuildContext context,
+  int index,
+  double progress,
+);
 
 /// Resolved header/card tap wiring for an expandable item.
 typedef _HeaderInteraction = ({

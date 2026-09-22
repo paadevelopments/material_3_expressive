@@ -2,6 +2,12 @@
 
 ### Changed
 
+* **Tooltips:** plain min height **24** / pad **8×4**; rich pad **16/12/16/8**;
+  title **on surface variant**; plain dismiss **instant** / rich **1.5s**
+  after leave (themable); placement
+  plain **above** / rich **bottom-end** with **8dp** on-screen steps;
+  **`persistent`** rich (tap/controller); **`M3ETooltipController`**;
+  **`M3ETooltipPlacement`**; one open tooltip at a time; semantics tooltip.
 * **Breaking — badges:** colors **Error** / **On error**; small **6dp** /
   large min **16dp** (pad 4 / radius 8); type labelSmall **11 / 500 / 16 /
   0.5**; Compose placement `smallOffset` **6×6** / `largeOffset` **12×14**

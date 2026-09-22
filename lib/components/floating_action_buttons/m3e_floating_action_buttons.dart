@@ -5,6 +5,7 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../buttons/utils/m3e_button_gradient_layer.dart';
+import '../tooltips/m3e_tooltips.dart';
 import 'components/m3e_fab_container_transform.dart';
 import 'controllers/m3e_fab_controller.dart';
 import 'enums/m3e_fab.dart';
@@ -355,6 +356,11 @@ class _M3EFabState extends State<M3EFab>
         child: fab,
       ),
     );
+
+    final String? tooltip = widget.tooltip;
+    if (tooltip != null) {
+      fab = M3ETooltip(message: tooltip, child: fab);
+    }
 
     if (visibilityT <= 0.001 && _transformHandle == null) {
       fab = IgnorePointer(child: fab);

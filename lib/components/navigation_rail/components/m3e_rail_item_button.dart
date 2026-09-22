@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
+import '../../tooltips/m3e_tooltips.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
 import 'm3e_nav_icon_scale.dart';
 import 'm3e_rail_badge_view.dart';
@@ -192,9 +193,8 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     }
     final Widget withTooltip = expanded
         ? sized
-        : Tooltip(
+        : M3ETooltip(
             message: widget.semanticLabel ?? widget.label,
-            preferBelow: false,
             child: sized,
           );
     return Semantics(

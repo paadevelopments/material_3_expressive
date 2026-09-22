@@ -7,6 +7,7 @@ import '../../../foundations/foundations.dart';
 import '../buttons/components/m3e_radius_and_padding_motion.dart';
 import '../buttons/enums/m3e_button_enums.dart';
 import '../buttons/utils/m3e_button_gradient_layer.dart';
+import '../tooltips/m3e_tooltips.dart';
 import 'enums/m3e_icon_button_enums.dart';
 import 'styles/m3e_icon_button_decoration.dart';
 import 'styles/m3e_icon_button_shapes.dart';

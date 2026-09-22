@@ -58,7 +58,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     );
     paintedButton = _wrapPointerTracking(paintedButton);
     final layout = widget.inflateHitTarget ? sizes.target : sizes.visual;
-    return Semantics(
+    Widget result = Semantics(
       button: true,
       selected: selected,
       label: widget.semanticLabel ?? widget.tooltip,
@@ -68,6 +68,15 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         child: Center(child: paintedButton),
       ),
     );
+    final String? tooltip = widget.tooltip;
+    if (tooltip != null) {
+      result = M3ETooltip(
+        message: tooltip,
+        dismissDelay: Duration.zero,
+        child: result,
+      );
+    }
+    return result;
   }
 
   ({Size visual, Size target}) _resolveLayoutSizes(
@@ -381,7 +390,6 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
               iconSize: iconSize,
               selectedIcon: displaySelectedIcon,
               icon: displayIcon,
-              tooltip: widget.tooltip,
               enableFeedback: widget.haptic != M3EHapticFeedback.none
                   ? false
                   : widget.enableFeedback,
@@ -412,9 +420,8 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     required bool gradientOverlay,
   }) {
     final dec = widget.decoration;
-    final outlineFallback = M3ETheme.of(
-      context,
-    ).iconButtonTheme.outlineWidthFor(widget.size);
+    final outlineFallback = M3ETheme.of(context).iconButtonTheme
+        .outlineWidthFor(widget.size);
     return ButtonStyle(
       fixedSize: WidgetStateProperty.all(visual),
       padding: WidgetStateProperty.all(EdgeInsets.zero),

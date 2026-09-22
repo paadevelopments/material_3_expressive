@@ -1786,11 +1786,30 @@ await controller.show();
 
 #### M3ETooltip
 
-Descriptive label on hover or long-press.
+Plain (hover / focus / long-press) or rich tooltips. Plain defaults **above**
+the target; rich defaults **bottom-end**, with on-screen flip in **8dp** steps.
+Dismiss immediately after leaving by default for plain tooltips (themable);
+transient rich dismisses after **1.5s** so actions stay reachable. Rich supports optional subhead,
+up to two text-button actions, and **`persistent`** (tap / `M3ETooltipController`
+only). Colors: plain inverse surface / on inverse surface; rich surface
+container / on surface variant.
 
 ```dart
 M3ETooltip(
   message: 'Compose a new message',
+  child: M3EIconButton(
+    icon: const Icon(M3EIcons.edit),
+    onPressed: () {},
+  ),
+);
+
+M3ETooltip(
+  persistent: true,
+  richTitle: 'Compose',
+  richMessage: 'Start a new draft with expressive defaults.',
+  actions: <Widget>[
+    M3EButton.text(onPressed: () {}, child: Text('Got it')),
+  ],
   child: M3EIconButton(
     icon: const Icon(M3EIcons.edit),
     onPressed: () {},

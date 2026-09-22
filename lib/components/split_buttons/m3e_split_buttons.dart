@@ -10,6 +10,7 @@ import '../buttons/styles/m3e_button_motion.dart';
 import '../buttons/styles/m3e_button_theme.dart';
 import '../buttons/utils/m3e_button_gradient_layer.dart';
 import '../menus/m3e_menus.dart';
+import '../tooltips/m3e_tooltips.dart';
 import 'components/m3e_split_button_bottom_sheet.dart';
 import 'enums/m3e_split_button_menu_style.dart';
 import 'enums/m3e_split_button_selection_mode.dart';

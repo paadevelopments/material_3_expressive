@@ -290,7 +290,7 @@ extension _M3EButtonContent on _M3EButtonState {
 
     Widget result = M3EInkSplashTheme(color: inkSplashColor, child: button);
     if (widget.tooltip != null) {
-      result = Tooltip(message: widget.tooltip, child: result);
+      result = M3ETooltip(message: widget.tooltip, child: result);
     }
     if (widget.semanticLabel != null) {
       result = Semantics(label: widget.semanticLabel, child: result);

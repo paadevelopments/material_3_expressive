@@ -273,6 +273,6 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     if (tooltip == null) {
       return wrapped;
     }
-    return Tooltip(message: tooltip, child: wrapped);
+    return M3ETooltip(message: tooltip, child: wrapped);
   }
 }
