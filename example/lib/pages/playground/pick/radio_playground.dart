@@ -38,11 +38,16 @@ class _RadioPlaygroundState extends State<RadioPlayground> {
             '''
 $kPlaySnippetImport
 
-M3ERadio<String>(
-  value: ${playDartString(_plan)},
+M3ERadioGroup<String>(
   groupValue: ${playDartString(_plan)},
-  error: $_error,$label
+  groupLabel: 'Plan',
   onChanged: $changed,
+  child: M3ERadio<String>(
+    value: ${playDartString(_plan)},
+    groupValue: ${playDartString(_plan)},
+    error: $_error,$label
+    onChanged: $changed,
+  ),
 );''',
       ),
     ];
@@ -54,21 +59,26 @@ M3ERadio<String>(
       previews: <Widget>[
         PlayPreviewCard(
           label: 'Radio group',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              for (final String plan in _plans)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: M3ERadio<String>(
-                    value: plan,
-                    groupValue: _plan,
-                    error: _error,
-                    label: _showLabels ? Text(plan) : null,
-                    onChanged: _onChanged,
+          child: M3ERadioGroup<String>(
+            groupValue: _plan,
+            groupLabel: 'Plan',
+            onChanged: _onChanged,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                for (final String plan in _plans)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: M3ERadio<String>(
+                      value: plan,
+                      groupValue: _plan,
+                      error: _error,
+                      label: _showLabels ? Text(plan) : null,
+                      onChanged: _onChanged,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

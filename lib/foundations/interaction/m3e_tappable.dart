@@ -36,6 +36,7 @@ class M3ETappable extends StatefulWidget {
     this.semanticButton = true,
     this.semanticChecked,
     this.semanticMixed = false,
+    this.semanticInMutuallyExclusiveGroup = false,
     this.excludeSemantics = false,
     this.pressedScale = 1,
     this.spring = M3EMotion.expressiveSpatialPress,
@@ -85,6 +86,9 @@ class M3ETappable extends StatefulWidget {
   /// Tristate mixed flag. Used with [semanticChecked] for an indeterminate
   /// checkbox.
   final bool semanticMixed;
+
+  /// Marks this control as one option in a radio group.
+  final bool semanticInMutuallyExclusiveGroup;
 
   /// Whether to exclude child semantics.
   final bool excludeSemantics;
@@ -457,6 +461,7 @@ class _M3ETappableState extends State<M3ETappable>
       button: widget.semanticButton,
       checked: widget.semanticChecked,
       mixed: widget.semanticMixed,
+      inMutuallyExclusiveGroup: widget.semanticInMutuallyExclusiveGroup,
       enabled: widget.enabled,
       label: widget.semanticLabel,
       excludeSemantics: widget.excludeSemantics,

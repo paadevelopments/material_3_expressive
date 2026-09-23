@@ -2,6 +2,13 @@
 
 ### Changed
 
+* **Radio buttons:** icon **20** (stroke **2**, dot **10**); state layer **40**;
+  target **48**; unselected icon **on surface variant** (**on surface** when
+  hovered, focused, or pressed); pressed state layer swaps (selected
+  **on surface**, unselected **primary**); InkSparkle on the control; semantics
+  role radio. **`M3ERadioGroup`**: Tab / Shift+Tab enter on the selected radio
+  (or the first / last if none is selected); arrows move, select, and wrap;
+  Space does nothing when that radio is already selected.
 * **Checkboxes:** container **18** / corner **2** / icon **18**; state layer
   **40** circle; target **48**; selected outline **0**; unselected outline
   **on surface variant** (**on surface** when hovered, focused, or pressed);

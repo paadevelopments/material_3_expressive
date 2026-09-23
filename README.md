@@ -703,16 +703,24 @@ M3ECheckbox(
 
 #### M3ERadio
 
-Mutually exclusive selection within a group. Optional [label] is part of the
-tap target.
+Mutually exclusive selection. The icon is **20dp** (stroke **2**, dot **10**)
+inside a **40dp** state layer and a **48dp** target. Optional `label` (on
+surface; tapping it selects) is part of the tap target. Wrap options in
+`M3ERadioGroup` so Tab lands on the selected radio and arrows move and select,
+wrapping at the ends.
 
 ```dart
 // in State
-M3ERadio<String>(
-  value: 'pro',
+M3ERadioGroup<String>(
   groupValue: plan,
-  label: const Text('Pro'),
+  groupLabel: 'Plan',
   onChanged: (v) => setState(() => plan = v),
+  child: M3ERadio<String>(
+    value: 'pro',
+    groupValue: plan,
+    label: const Text('Pro'),
+    onChanged: (v) => setState(() => plan = v),
+  ),
 );
 ```
 
