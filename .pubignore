@@ -20,6 +20,7 @@ agent-transcripts/
 assets/
 docs/
 specs/
+example-app-web-release-build.md
 
 # Vendored custom-lint plugin. Tracked in git, omitted from the published archive.
 tools/
