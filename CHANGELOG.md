@@ -2,6 +2,13 @@
 
 ### Changed
 
+* **Checkboxes:** container **18** / corner **2** / icon **18**; state layer
+  **40** circle; target **48**; selected outline **0**; unselected outline
+  **on surface variant** (**on surface** when hovered, focused, or pressed);
+  pressed state layer swaps (unselected **primary**, selected **on surface**);
+  focus ring **secondary**, **3dp** thick, **2dp** offset; InkSparkle on the
+  control; disabled selected icon **surface**; semantics role checkbox
+  (checked / mixed). Default `checkIconPadding` is zero.
 * **Snackbars:** single/two-line min heights **48** / **68**; start pad **16**,
   end **8** with action/close; optional **close** (24 / pad 12); actionable or
   closable bars do **not** auto-dismiss (plain default **4s**); one-at-a-time

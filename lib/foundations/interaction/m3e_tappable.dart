@@ -11,8 +11,10 @@ import 'm3e_state_layer.dart';
 import 'm3e_tappable_ink_scope.dart';
 
 /// Builds the visual for a tappable surface given its interaction [state].
-typedef M3EStateWidgetBuilder =
-    Widget Function(BuildContext context, M3EInteractionState state);
+typedef M3EStateWidgetBuilder = Widget Function(
+  BuildContext context,
+  M3EInteractionState state,
+);
 
 /// A reusable interaction primitive powering expressive components.
 ///
@@ -32,6 +34,8 @@ class M3ETappable extends StatefulWidget {
     this.mouseCursor,
     this.semanticLabel,
     this.semanticButton = true,
+    this.semanticChecked,
+    this.semanticMixed = false,
     this.excludeSemantics = false,
     this.pressedScale = 1,
     this.spring = M3EMotion.expressiveSpatialPress,
@@ -73,6 +77,14 @@ class M3ETappable extends StatefulWidget {
 
   /// Whether semantics treat this as a button.
   final bool semanticButton;
+
+  /// Checked state for checkbox semantics. Null leaves the node unchecked-role
+  /// free so other components stay buttons.
+  final bool? semanticChecked;
+
+  /// Tristate mixed flag. Used with [semanticChecked] for an indeterminate
+  /// checkbox.
+  final bool semanticMixed;
 
   /// Whether to exclude child semantics.
   final bool excludeSemantics;
@@ -443,6 +455,8 @@ class _M3ETappableState extends State<M3ETappable>
     return Semantics(
       container: true,
       button: widget.semanticButton,
+      checked: widget.semanticChecked,
+      mixed: widget.semanticMixed,
       enabled: widget.enabled,
       label: widget.semanticLabel,
       excludeSemantics: widget.excludeSemantics,

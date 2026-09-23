@@ -679,9 +679,12 @@ M3ESplitButton<String>(
 
 #### M3ECheckbox
 
-Binary and tristate checkbox. Optional `label`, `boxSize`, `hitSize`,
-`checkedChild` / `uncheckedChild`, and `checkIconPadding` (default optical
-inset for the built-in check). Value changes use a spatial-spring pulse.
+Binary and tristate checkbox. The control is an **18dp** box with **2dp**
+corners and an **18dp** icon, inside a **40dp** circular state layer and a
+**48dp** target. Optional `label` (on surface; tapping it toggles), `boxSize`,
+`hitSize`, `targetSize`, `checkedChild` / `uncheckedChild`, and
+`checkIconPadding` (default none). Value changes use a spatial-spring pulse.
+Keyboard: Tab, then Space or Enter.
 
 ```dart
 // in State
