@@ -14,6 +14,7 @@ class M3ECircularProgressPainter extends CustomPainter {
     required this.sweepAngle,
     required this.gapSize,
     this.progress,
+    this.showTrack = true,
   });
 
   /// trackColor.
@@ -40,6 +41,9 @@ class M3ECircularProgressPainter extends CustomPainter {
 
   /// When non-null, paints determinate dual-gap track. Null = indeterminate.
   final double? progress;
+
+  /// When false, omits track painting.
+  final bool showTrack;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -72,7 +76,7 @@ class M3ECircularProgressPainter extends CustomPainter {
       final double trackStart = startAngle + activeSweep + appliedGap;
       final double trackSweep = tau - activeSweep - appliedGap * 2;
 
-      if (trackSweep > 0) {
+      if (showTrack && trackSweep > 0) {
         canvas.drawArc(rect, trackStart, trackSweep, false, trackPaint);
       }
       if (activeSweep > 0) {
@@ -95,7 +99,7 @@ class M3ECircularProgressPainter extends CustomPainter {
     final double trackStart = startAngle + activeSweep + appliedGap;
     final double trackSweep = tau - activeSweep - appliedGap * 2;
 
-    if (trackSweep > 0) {
+    if (showTrack && trackSweep > 0) {
       canvas.drawArc(rect, trackStart, trackSweep, false, trackPaint);
     }
     if (activeSweep > 0) {
@@ -112,7 +116,8 @@ class M3ECircularProgressPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.trackStrokeWidth != trackStrokeWidth ||
         oldDelegate.gapSize != gapSize ||
-        oldDelegate.progress != progress;
+        oldDelegate.progress != progress ||
+        oldDelegate.showTrack != showTrack;
   }
 
   /// A full turn in radians.

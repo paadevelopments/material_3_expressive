@@ -1,11 +1,9 @@
-import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../extended_fabs/m3e_extended_fabs.dart';
 import '../floating_action_buttons/m3e_floating_action_buttons.dart';
 import '../icon_buttons/m3e_icon_buttons.dart';
-import 'components/m3e_nav_selection_indicator.dart';
 import 'components/m3e_rail_item.dart';
 import 'enums/m3e_navigation_rail_enums.dart';
 import 'models/m3e_navigation_rail_destination.dart';
@@ -110,12 +108,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   final LayerLink _anchor = LayerLink();
   @override
   bool _suppressInk = false;
-  @override
-  bool _traveling = false;
 
   bool _expanded = false;
-  @override
-  List<GlobalKey> _destinationKeys = <GlobalKey>[];
 
   @override
   bool get _isExpanded => _expanded;
@@ -128,35 +122,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       widget.type == M3ENavigationRailType.collapsed ||
       widget.type == M3ENavigationRailType.expanded;
 
-  int get _destinationCount =>
-      widget.sections.fold<int>(0, (int n, s) => n + s.destinations.length);
-
-  void _ensureDestinationKeys() {
-    final int count = _destinationCount;
-    if (_destinationKeys.length == count) {
-      return;
-    }
-    _destinationKeys = List<GlobalKey>.generate(count, (_) => GlobalKey());
-  }
-
-  void _onTravelingChanged(bool traveling) {
-    if (_traveling == traveling || !mounted) {
-      return;
-    }
-    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
-    if (phase == SchedulerPhase.idle ||
-        phase == SchedulerPhase.postFrameCallbacks) {
-      setState(() => _traveling = traveling);
-      return;
-    }
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _traveling == traveling) {
-        return;
-      }
-      setState(() => _traveling = traveling);
-    });
-  }
-
   M3ENavigationRailType get _notifiedType => _expanded
       ? M3ENavigationRailType.expanded
       : M3ENavigationRailType.collapsed;
@@ -164,7 +129,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   @override
   void initState() {
     super.initState();
-    _ensureDestinationKeys();
     if (_canToggle) {
       _expanded = widget.type == M3ENavigationRailType.expanded;
     } else {
@@ -184,7 +148,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   @override
   void didUpdateWidget(covariant M3ENavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _ensureDestinationKeys();
     _syncTypeInkSuppression(oldWidget);
     _syncExpandedFromType(oldWidget);
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverlay());
@@ -308,9 +271,8 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
                 child: AnimatedContainer(
                   duration: M3ENavigationRailLayout.expandDuration,
                   curve: Curves.easeOutCubic,
-                  color: M3ETheme.of(context).colorScheme.scrim.withValues(
-                    alpha: _isExpanded ? 0.32 : 0.0,
-                  ),
+                  color: M3ETheme.of(context).colorScheme.scrim
+                      .withValues(alpha: _isExpanded ? 0.32 : 0.0),
                 ),
               ),
             ),
@@ -329,6 +291,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
   Widget _buildCollapsedPeekOverlay(BuildContext context) {
     final Widget btn = M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
       icon: const Icon(M3EIcons.menu),
       tooltip: 'Expand',
       onPressed: _canToggle ? () => _setExpanded(true) : null,
@@ -365,6 +328,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
 
     final isExpanded = _isExpanded;
     final Widget button = M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
       icon: Icon(isExpanded ? M3EIcons.menu_open : M3EIcons.menu),
       tooltip: isExpanded ? widget.collapseTooltip : widget.expandTooltip,
       onPressed: () => _setExpanded(!isExpanded),
@@ -378,15 +342,14 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
   }
 
   @override
-  Widget? _buildFab(BuildContext context) {
+  Widget? _buildFab(BuildContext context, {required bool showLabels}) {
     final fab = widget.fab;
     if (fab == null) {
       return null;
     }
-    final isExpanded = _isExpanded;
     return Padding(
       padding: M3ENavigationRailLayout.sectionPadding,
-      child: isExpanded
+      child: showLabels
           ? M3EExtendedFab(
               label: fab.label,
               icon: fab.icon,
@@ -413,11 +376,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     final width = _targetWidth(context);
     final Color containerColor =
         widget.background ?? theme.containerColorResolved(m3e.colorScheme);
-    final Color indicatorColor = theme.activeIndicatorColorResolved(
-      m3e.colorScheme,
-    );
-    _ensureDestinationKeys();
-
     return AnimatedContainer(
       duration: M3ENavigationRailLayout.expandDuration,
       curve: Curves.easeOutCubic,
@@ -425,26 +383,19 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       decoration: BoxDecoration(color: containerColor),
       child: LayoutBuilder(
         builder: (ctx, constraints) {
-          final showLabels = _isExpanded && constraints.maxWidth >= 180;
+          // Labels and the extended action appear only once the width
+          // animation has reached the expanded size. Earlier frames are
+          // still too narrow for that row.
+          final showLabels =
+              _isExpanded && constraints.maxWidth + 1 >= _targetWidth(context);
           final children = _buildChildren(ctx, showLabels: showLabels);
           final bottomTrailing =
               (widget.trailing != null && widget.trailingAtBottom)
               ? _buildTrailing(ctx)
               : null;
-          return M3ENavSelectionIndicator(
-            selectedIndex: widget.selectedIndex,
-            targetKeys: _destinationKeys,
-            axis: Axis.vertical,
-            color: indicatorColor,
-            // Expand flip remasures during width morph; height covers window
-            // resize when destination slots reflow (scroll / trailingAtBottom).
-            layoutToken: (_isExpanded, constraints.maxHeight),
-            layoutSettleDuration: M3ENavigationRailLayout.expandDuration,
-            onTravelingChanged: _onTravelingChanged,
-            child: _buildDestinationsColumn(
-              children: children,
-              bottomTrailing: bottomTrailing,
-            ),
+          return _buildDestinationsColumn(
+            children: children,
+            bottomTrailing: bottomTrailing,
           );
         },
       ),

@@ -1,13 +1,13 @@
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EToggleButton;
+    show M3EButton;
 import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../enums/m3e_button_enums.dart';
 import '../styles/m3e_button_motion.dart';
 
-/// Shared lifecycle infrastructure for [M3EButton] and [M3EToggleButton].
+/// Shared lifecycle infrastructure for [M3EButton].
 mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   /// buttonSize.
   M3EButtonSize get buttonSize;
@@ -50,21 +50,39 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
       return child;
     }
 
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
-        M3EFocusInteraction.instance.notePointerInteraction();
-        _setPointerDown(true);
-      },
-      onPointerUp: (_) {
-        if (isPointerDownNotifier.value) {
-          effectiveFocusNode.requestFocus();
-        }
-        _setPointerDown(false);
-      },
-      onPointerCancel: (_) => _setPointerDown(false),
-      child: child,
+    return TapRegion(
+      onTapOutside: _onTapOutside,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: child,
+      ),
     );
+  }
+
+  void _onTapOutside(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    if (effectiveFocusNode.hasPrimaryFocus) {
+      effectiveFocusNode.unfocus();
+    }
+  }
+
+  void _onPointerDown(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    _setPointerDown(true);
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    // Do not request focus here — Material may focus for a11y, but
+    // visual focus chrome is ring-only (keyboard). Sticky post-tap
+    // focus fill is suppressed in button overlay resolution.
+    _setPointerDown(false);
+  }
+
+  void _onPointerCancel(PointerCancelEvent _) {
+    _setPointerDown(false);
   }
 
   void _setPointerDown(bool down) {
@@ -189,8 +207,7 @@ mixin M3EBaseButtonState<T extends StatefulWidget> on State<T> {
   /// updateSpringMotion.
 
   void updateSpringMotion() {
-    springMotion = (effectiveMotion ?? M3EButtonMotion.expressiveSpatialPress)
-        .toMotion();
+    springMotion = (effectiveMotion ?? M3EButtonMotion.shapeMorph).toMotion();
   }
 
   /// handleStatesControllerUpdate.

@@ -102,6 +102,7 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
   (Color, Color, BorderSide?, double?) _resolveColorsAndShapes(
     BuildContext context, {
     required bool segmentEnabled,
+    bool trailing = false,
   }) {
     Color fgColor =
         widget.decorationForegroundColor?.resolve({}) ??
@@ -111,6 +112,11 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
         (widget.style == M3EButtonStyle.outlined
             ? Colors.transparent
             : _buttonTheme.container(_scheme, widget.style));
+
+    if (trailing) {
+      fgColor = widget.decorationTrailingForegroundColor ?? fgColor;
+      bgColor = widget.decorationTrailingBackgroundColor ?? bgColor;
+    }
 
     BorderSide? outlineSide;
     if (widget.style == M3EButtonStyle.outlined) {
@@ -243,6 +249,8 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     required double? fixedWidth,
     required String? tooltip,
     required Widget child,
+    String? semanticLabel,
+    bool? expanded,
     Key? key,
   }) {
     Widget wrapped = ConstrainedBox(
@@ -255,9 +263,16 @@ extension _M3ESplitButtonStyle<T> on _M3ESplitButtonState<T> {
     if (fixedWidth != null) {
       wrapped = SizedBox(width: fixedWidth, child: wrapped);
     }
+    wrapped = Semantics(
+      button: true,
+      label: semanticLabel,
+      expanded: expanded,
+      excludeSemantics: semanticLabel != null,
+      child: wrapped,
+    );
     if (tooltip == null) {
       return wrapped;
     }
-    return Tooltip(message: tooltip, child: wrapped);
+    return M3ETooltip(message: tooltip, child: wrapped);
   }
 }

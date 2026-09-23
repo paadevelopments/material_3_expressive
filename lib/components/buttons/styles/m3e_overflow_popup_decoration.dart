@@ -1,4 +1,4 @@
-import 'package:material_3_expressive/components/toggle_button_group/m3e_toggle_button_group.dart'
+import 'package:material_3_expressive/components/button_group/m3e_button_group.dart'
     show M3EButtonGroup;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EButtonGroup;

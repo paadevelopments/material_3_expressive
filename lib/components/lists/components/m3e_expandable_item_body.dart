@@ -425,7 +425,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
       );
     }
     if (outerTooltip != null) {
-      return Tooltip(message: outerTooltip, child: content);
+      return M3ETooltip(message: outerTooltip, child: content);
     }
     return content;
   }
@@ -595,7 +595,7 @@ extension _M3EExpandableItemInteraction on _M3EExpandableItemState {
   }) {
     var result = child;
     if (tooltip != null) {
-      result = Tooltip(message: tooltip, child: result);
+      result = M3ETooltip(message: tooltip, child: result);
     }
     if (onTap == null) {
       return Semantics(

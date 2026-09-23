@@ -18,7 +18,7 @@ class M3ENavigationRailFabSlot {
     this.onPressed,
     this.tooltip,
     this.color = M3EFabColor.primary,
-    this.size = M3EFabSize.medium,
+    this.size = M3EFabSize.regular,
     this.elevation,
     this.hoverElevation,
     this.semanticLabel,

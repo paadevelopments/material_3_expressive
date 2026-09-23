@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
@@ -21,52 +21,6 @@ class _RefreshIndicatorPlaygroundState
     extends State<RefreshIndicatorPlayground> {
   M3ERefreshTriggerMode _trigger = M3ERefreshTriggerMode.onEdge;
   bool _elevation = true;
-  int _refreshCount = 0;
-  final M3ERefreshIndicatorController _controller =
-      M3ERefreshIndicatorController();
-
-  double get _resolvedElevation =>
-      _elevation ? M3ERefreshIndicatorTheme.kDefaultElevation : 0;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleRefresh() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      setState(() => _refreshCount++);
-    }
-  }
-
-  Widget _listChild() {
-    return M3ECardList.builder(
-      itemCount: 12,
-      shrinkWrap: true,
-      physics: const AlwaysScrollableScrollPhysics(),
-      listPadding: const EdgeInsets.all(8),
-      itemBuilder: (BuildContext context, int index) {
-        return M3EListItem(
-          headline: 'Item ${index + 1}',
-          supportingText: 'Pull down to refresh',
-          leading: const Icon(M3EIcons.refresh),
-        );
-      },
-    );
-  }
-
-  Widget _buildIndicator() {
-    return M3ERefreshIndicator.contained(
-      key: ValueKey<bool>(_elevation),
-      controller: _controller,
-      onRefresh: _handleRefresh,
-      triggerMode: _trigger,
-      elevation: _resolvedElevation,
-      child: _listChild(),
-    );
-  }
 
   List<PlaySnippet> get _snippets {
     final String elevationLine = _elevation ? '' : '\n  elevation: 0,';
@@ -91,25 +45,39 @@ await controller.show();''';
     ];
   }
 
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _RefreshDemoHost(trigger: _trigger, elevation: _elevation);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'Pull to refresh (count: $_refreshCount)',
-          child: SizedBox(
-            height: 280,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: M3EShapes.radiusLarge,
-                border: Border.all(color: theme.colorScheme.outlineVariant),
+          label: 'Refresh indicator demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full list you can pull to refresh. The app bar '
+                'action starts a refresh without pulling.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-              child: ClipRRect(
-                borderRadius: M3EShapes.radiusLarge,
-                child: _buildIndicator(),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open refresh demo'),
               ),
-            ),
+            ],
           ),
         ),
       ],
@@ -132,14 +100,84 @@ await controller.show();''';
                 setState(() => _trigger = v);
               },
             ),
-            const SizedBox(height: 8),
-            M3EButton(
-              onPressed: () => _controller.show(),
-              child: const Text('Trigger refresh'),
-            ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _RefreshDemoHost extends StatefulWidget {
+  const _RefreshDemoHost({required this.trigger, required this.elevation});
+
+  final M3ERefreshTriggerMode trigger;
+  final bool elevation;
+
+  @override
+  State<_RefreshDemoHost> createState() => _RefreshDemoHostState();
+}
+
+class _RefreshDemoHostState extends State<_RefreshDemoHost> {
+  final M3ERefreshIndicatorController _controller =
+      M3ERefreshIndicatorController();
+  int _refreshCount = 0;
+
+  double get _resolvedElevation =>
+      widget.elevation ? M3ERefreshIndicatorTheme.kDefaultElevation : 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRefresh() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      setState(() => _refreshCount++);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: 'Refresh ($_refreshCount)',
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        actions: <Widget>[
+          M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
+            icon: const Icon(M3EIcons.refresh),
+            tooltip: 'Trigger refresh',
+            onPressed: () => _controller.show(),
+          ),
+        ],
+      ),
+      body: M3ERefreshIndicator.contained(
+        controller: _controller,
+        onRefresh: _handleRefresh,
+        triggerMode: widget.trigger,
+        elevation: _resolvedElevation,
+        child: M3ECardList.builder(
+          itemCount: 16,
+          physics: const AlwaysScrollableScrollPhysics(),
+          listPadding: const EdgeInsets.all(16),
+          itemBuilder: (BuildContext context, int index) {
+            return M3EListItem(
+              headline: 'Item ${index + 1}',
+              supportingText: 'Pull down to refresh',
+              leading: const Icon(M3EIcons.refresh),
+            );
+          },
+        ),
+      ),
     );
   }
 }

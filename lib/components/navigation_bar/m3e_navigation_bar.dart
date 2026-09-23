@@ -1,10 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
-import '../navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'components/m3e_nav_bar_destination_button.dart';
 import 'enums/m3e_nav_bar_enums.dart';
 import 'models/m3e_nav_metrics.dart';
@@ -20,15 +18,14 @@ export 'styles/m3e_navigation_bar_theme.dart';
 
 /// A Material 3 Expressive navigation bar.
 ///
-/// Pill selection uses a lead/trail spring indicator that stretches between
-/// destinations (spatial springs motion spec).
+/// Pill selection scales each destination's own indicator in place.
 ///
 /// When [autoLayout] is true (default), the bar switches to
 /// [M3ENavBarLayout.wide] once its own width reaches the effective breakpoint
 /// ([wideBreakpoint], or [M3ENavBarConstants.minWideBarWidth] for the current
 /// destinations and [wideDestinationWidth]). Wide mode keeps the bar full
 /// width and only aligns the destination group via [alignment]. Each wide
-/// destination uses a fixed chip width so the fluid pill never clips when
+/// destination uses a fixed chip width so the pill never clips when
 /// icons/labels appear or disappear.
 class M3ENavigationBar extends StatefulWidget {
   /// M3ENavigationBar.
@@ -124,26 +121,6 @@ class M3ENavigationBar extends StatefulWidget {
 }
 
 class _M3ENavigationBarState extends State<M3ENavigationBar> {
-  late List<GlobalKey> _keys;
-  bool _traveling = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _keys = _makeKeys(widget.destinations.length);
-  }
-
-  @override
-  void didUpdateWidget(covariant M3ENavigationBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.destinations.length != widget.destinations.length) {
-      _keys = _makeKeys(widget.destinations.length);
-    }
-  }
-
-  List<GlobalKey> _makeKeys(int count) =>
-      List<GlobalKey>.generate(count, (_) => GlobalKey());
-
   double get _resolvedWideDestinationWidth =>
       widget.wideDestinationWidth ?? M3ENavBarConstants.wideDestinationWidth;
 
@@ -153,25 +130,6 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
         widget.destinations.length,
         itemWidth: _resolvedWideDestinationWidth,
       );
-
-  void _onTravelingChanged(bool traveling) {
-    if (_traveling == traveling || !mounted) {
-      return;
-    }
-    // Indicator may notify from a motion status during build; defer rebuild.
-    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
-    if (phase == SchedulerPhase.idle ||
-        phase == SchedulerPhase.postFrameCallbacks) {
-      setState(() => _traveling = traveling);
-      return;
-    }
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _traveling == traveling) {
-        return;
-      }
-      setState(() => _traveling = traveling);
-    });
-  }
 
   M3ENavBarLayout _resolveLayout(double maxWidth) {
     if (!widget.autoLayout) {
@@ -232,8 +190,6 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
                 scheme: scheme,
                 metrics: metrics,
                 indicator: indicator,
-                bottomInset: bottomInset,
-                barWidth: constraints.maxWidth,
                 barHeight: height,
                 layout: effective,
               );
@@ -255,8 +211,6 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
     required M3EColorScheme scheme,
     required M3ENavMetrics metrics,
     required Color indicator,
-    required double bottomInset,
-    required double barWidth,
     required double barHeight,
     required M3ENavBarLayout layout,
   }) {
@@ -280,35 +234,7 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
             indicator: indicator,
           );
 
-    if (widget.indicatorStyle != M3ENavBarIndicatorStyle.pill) {
-      return destinationsRow;
-    }
-    // Remeasure whenever geometry-affecting specs change (alignment, behaviors,
-    // size, etc.) — not only width / compact↔wide.
-    return M3ENavSelectionIndicator(
-      selectedIndex: widget.selectedIndex,
-      targetKeys: _keys,
-      axis: Axis.horizontal,
-      color: indicator,
-      layoutSettleDuration: M3ENavBarConstants.layoutSettleDuration,
-      layoutToken: (
-        bottomInset,
-        barWidth,
-        layout,
-        barHeight,
-        widget.alignment,
-        widget.labelBehavior,
-        widget.iconBehavior,
-        widget.size,
-        widget.density,
-        widget.indicatorStyle,
-        widget.destinations.length,
-        _resolvedWideDestinationWidth,
-        _resolvedWideBreakpoint,
-      ),
-      onTravelingChanged: _onTravelingChanged,
-      child: destinationsRow,
-    );
+    return destinationsRow;
   }
 
   Widget _buildCompactRow({
@@ -333,13 +259,11 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
               iconBehavior: widget.iconBehavior,
               layout: M3ENavBarLayout.compact,
               indicatorStyle: widget.indicatorStyle,
-              indicatorKey: _keys[i],
               indicatorWidth: M3ENavBarConstants.compactIndicatorWidth,
               indicatorHeight: M3ENavBarConstants.indicatorHeight,
               underlineThickness: metrics.indicatorThickness,
               underlineColor: indicator,
               indicatorColor: indicator,
-              showRestingPill: !_traveling,
               onTap: () => widget.onDestinationSelected?.call(i),
             ),
           ),
@@ -382,14 +306,12 @@ class _M3ENavigationBarState extends State<M3ENavigationBar> {
               iconBehavior: widget.iconBehavior,
               layout: M3ENavBarLayout.wide,
               indicatorStyle: widget.indicatorStyle,
-              indicatorKey: _keys[i],
               indicatorWidth: M3ENavBarConstants.compactIndicatorWidth,
               indicatorHeight: widePillHeight,
               wideDestinationWidth: chipWidth,
               underlineThickness: metrics.indicatorThickness,
               underlineColor: indicator,
               indicatorColor: indicator,
-              showRestingPill: !_traveling,
               onTap: () => widget.onDestinationSelected?.call(i),
             ),
           ],

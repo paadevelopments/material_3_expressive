@@ -20,13 +20,30 @@ class _SnackbarPlaygroundState extends State<SnackbarPlayground> {
   String _message = 'Draft saved';
   String _actionLabel = 'Undo';
   bool _showAction = true;
+  bool _showClose = false;
+  bool _autoDismiss = false;
+  final M3ESnackbarController _controller = M3ESnackbarController();
+
+  bool get _actionable => _showAction || _showClose;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _show(BuildContext context) {
+    final Duration? duration = _actionable
+        ? (_autoDismiss ? const Duration(seconds: 4) : null)
+        : null;
     M3ESnackbar.show(
       context,
+      controller: _controller,
       message: _message,
       actionLabel: _showAction ? _actionLabel : null,
       onAction: _showAction ? () {} : null,
+      showCloseButton: _showClose,
+      duration: duration,
     );
   }
 
@@ -36,10 +53,14 @@ class _SnackbarPlaygroundState extends State<SnackbarPlayground> {
   actionLabel: ${playDartString(_actionLabel)},
   onAction: () {},'''
         : '';
+    final String close = _showClose ? '\n  showCloseButton: true,' : '';
+    final String durationArg = _actionable && _autoDismiss
+        ? '\n  duration: const Duration(seconds: 4),'
+        : '';
     final String widgetSample =
         '''
 M3ESnackbar(
-  message: ${playDartString(_message)},$action
+  message: ${playDartString(_message)},$action$close
 );''';
     final String showSample =
         '''
@@ -47,7 +68,8 @@ M3ESnackbar.show(
   context,
   message: ${playDartString(_message)},${_showAction ? '''
   actionLabel: ${playDartString(_actionLabel)},
-  onAction: () {},''' : ''}
+  onAction: () {},''' : ''}${_showClose ? '''
+  showCloseButton: true,''' : ''}$durationArg
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -71,13 +93,24 @@ M3ESnackbar.show(
             message: _message,
             actionLabel: _showAction ? _actionLabel : null,
             onAction: _showAction ? () {} : null,
+            showCloseButton: _showClose,
           ),
         ),
         PlayPreviewCard(
           label: 'Show overlay',
-          child: M3EButton(
-            onPressed: () => _show(context),
-            child: const Text('Show snackbar'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              M3EButton(
+                onPressed: () => _show(context),
+                child: const Text('Show snackbar'),
+              ),
+              const SizedBox(width: 8),
+              M3EButton.text(
+                onPressed: () => _controller.dismiss(),
+                child: const Text('Dismiss'),
+              ),
+            ],
           ),
         ),
       ],
@@ -101,6 +134,17 @@ M3ESnackbar.show(
                 label: 'Action label',
                 value: _actionLabel,
                 onChanged: (String v) => setState(() => _actionLabel = v),
+              ),
+            PlaySwitch(
+              label: 'Show close',
+              value: _showClose,
+              onChanged: (bool v) => setState(() => _showClose = v),
+            ),
+            if (_actionable)
+              PlaySwitch(
+                label: 'Auto-dismiss (4s)',
+                value: _autoDismiss,
+                onChanged: (bool v) => setState(() => _autoDismiss = v),
               ),
           ],
         ),

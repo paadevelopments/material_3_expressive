@@ -27,10 +27,10 @@ class M3EButtonConstants {
   static const double kDisabledForegroundAlpha = 0.38;
 
   /// Alpha value for disabled background color.
-  static const double kDisabledBackgroundAlpha = 0.12;
+  static const double kDisabledBackgroundAlpha = 0.1;
 
   /// Alpha value for disabled outline/border color.
-  static const double kDisabledOutlineAlpha = 0.12;
+  static const double kDisabledOutlineAlpha = 0.1;
 
   /// Ratio used to calculate pressed corner radius from square radius.
   static const double kPressedRadiusRatio = 0.6;

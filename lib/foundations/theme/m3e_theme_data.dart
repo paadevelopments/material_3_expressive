@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart'
 import '../../components/app_bars/styles/m3e_app_bar_theme.dart';
 import '../../components/badges/styles/m3e_badge_theme.dart';
 import '../../components/bottom_sheets/styles/m3e_bottom_sheet_theme.dart';
+import '../../components/button_group/styles/m3e_button_group_theme.dart';
 import '../../components/buttons/styles/m3e_button_theme.dart';
 import '../../components/cards/styles/m3e_card_theme.dart';
 import '../../components/carousel/styles/m3e_carousel_theme.dart';
@@ -38,8 +39,6 @@ import '../../components/switch_control/styles/m3e_switch_theme.dart';
 import '../../components/tabs/styles/m3e_tab_theme.dart';
 import '../../components/text_fields/styles/m3e_text_field_theme.dart';
 import '../../components/time_pickers/styles/m3e_time_picker_theme.dart';
-import '../../components/toggle_button/styles/m3e_toggle_button_theme.dart';
-import '../../components/toggle_button_group/styles/m3e_toggle_button_group_theme.dart';
 import '../../components/toolbars/styles/m3e_toolbar_theme.dart';
 import '../../components/tooltips/styles/m3e_tooltip_theme.dart';
 import '../color/m3e_color_scheme.dart';
@@ -103,8 +102,7 @@ class M3EThemeData {
     this.tabTheme = M3ETabTheme.defaults,
     this.textFieldTheme = M3ETextFieldTheme.defaults,
     this.timePickerTheme = M3ETimePickerTheme.defaults,
-    this.toggleButtonTheme = M3EToggleButtonTheme.defaults,
-    this.toggleButtonGroupTheme = M3EToggleButtonGroupTheme.defaults,
+    this.buttonGroupTheme = M3EButtonGroupTheme.defaults,
     this.toolbarTheme = M3EToolbarTheme.defaults,
     this.tooltipTheme = M3ETooltipTheme.defaults,
   }) : colorScheme = colorScheme ?? M3EColorScheme.light(),
@@ -328,11 +326,8 @@ class M3EThemeData {
   /// Time picker component theme.
   final M3ETimePickerTheme timePickerTheme;
 
-  /// Toggle button component theme.
-  final M3EToggleButtonTheme toggleButtonTheme;
-
-  /// Toggle button group component theme.
-  final M3EToggleButtonGroupTheme toggleButtonGroupTheme;
+  /// Button group component theme.
+  final M3EButtonGroupTheme buttonGroupTheme;
 
   /// Toolbar component theme.
   final M3EToolbarTheme toolbarTheme;
@@ -407,8 +402,7 @@ class M3EThemeData {
     M3ETabTheme? tabTheme,
     M3ETextFieldTheme? textFieldTheme,
     M3ETimePickerTheme? timePickerTheme,
-    M3EToggleButtonTheme? toggleButtonTheme,
-    M3EToggleButtonGroupTheme? toggleButtonGroupTheme,
+    M3EButtonGroupTheme? buttonGroupTheme,
     M3EToolbarTheme? toolbarTheme,
     M3ETooltipTheme? tooltipTheme,
   }) => _m3eCopyThemeData(
@@ -467,8 +461,7 @@ class M3EThemeData {
     tabTheme: tabTheme,
     textFieldTheme: textFieldTheme,
     timePickerTheme: timePickerTheme,
-    toggleButtonTheme: toggleButtonTheme,
-    toggleButtonGroupTheme: toggleButtonGroupTheme,
+    buttonGroupTheme: buttonGroupTheme,
     toolbarTheme: toolbarTheme,
     tooltipTheme: tooltipTheme,
   );

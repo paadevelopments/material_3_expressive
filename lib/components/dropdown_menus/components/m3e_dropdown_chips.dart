@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../tooltips/m3e_tooltips.dart';
 import '../models/m3e_dropdown_item.dart';
 import '../styles/m3e_dropdown_chip_style.dart';
 import '../utils/m3e_dropdown_spring_motion.dart';
@@ -208,7 +209,10 @@ class M3ESpringChipState<T> extends State<M3ESpringChip<T>>
         return M3EFocusRing(
           focused: state.focused,
           radius: chipRadius,
-          child: Tooltip(message: 'Remove ${widget.item.label}', child: body),
+          child: M3ETooltip(
+            message: 'Remove ${widget.item.label}',
+            child: body,
+          ),
         );
       },
     );

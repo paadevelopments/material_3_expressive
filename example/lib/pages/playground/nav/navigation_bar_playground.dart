@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -20,7 +20,6 @@ class NavigationBarPlayground extends StatefulWidget {
 }
 
 class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
-  int _index = 0;
   M3ENavBarLabelBehavior _labelBehavior = M3ENavBarLabelBehavior.alwaysShow;
   M3ENavBarIconBehavior _iconBehavior = M3ENavBarIconBehavior.alwaysShow;
   bool _autoLayout = false;
@@ -95,7 +94,7 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
         '''
 M3ENavigationBar(
 $destinations
-  selectedIndex: $_index,
+  selectedIndex: 0,
   onDestinationSelected: (int i) {},
   autoLayout: $_autoLayout,
   layout: M3ENavBarLayout.${_layout.name},
@@ -107,7 +106,6 @@ $destinations
   shapeFamily: M3ENavBarShapeFamily.${_shape.name},
   density: M3ENavBarDensity.${_density.name},
   indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},
-  safeArea: false,
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -117,13 +115,27 @@ $destinations
     ];
   }
 
-  Widget _framed(M3EThemeData theme, Widget child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: M3EShapes.radiusLarge,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+  void _openDemo() {
+    final List<M3ENavigationBarDestination> destinations = _destinations;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _NavigationBarDemoHost(
+            destinations: destinations,
+            autoLayout: _autoLayout,
+            layout: _layout,
+            alignment: _alignment,
+            wideDestinationWidth: _wideDestinationWidth,
+            wideBreakpoint: _customBreakpoint ? _wideBreakpoint : null,
+            labelBehavior: _labelBehavior,
+            iconBehavior: _iconBehavior,
+            size: _size,
+            shapeFamily: _shape,
+            density: _density,
+            indicatorStyle: _indicator,
+          );
+        },
       ),
-      child: ClipRRect(borderRadius: M3EShapes.radiusLarge, child: child),
     );
   }
 
@@ -133,26 +145,23 @@ $destinations
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'Navigation bar',
-          child: _framed(
-            theme,
-            M3ENavigationBar(
-              destinations: _destinations,
-              selectedIndex: _index,
-              onDestinationSelected: (int i) => setState(() => _index = i),
-              autoLayout: _autoLayout,
-              layout: _layout,
-              alignment: _alignment,
-              wideDestinationWidth: _wideDestinationWidth,
-              wideBreakpoint: _customBreakpoint ? _wideBreakpoint : null,
-              labelBehavior: _labelBehavior,
-              iconBehavior: _iconBehavior,
-              size: _size,
-              shapeFamily: _shape,
-              density: _density,
-              indicatorStyle: _indicator,
-              safeArea: false,
-            ),
+          label: 'Navigation bar demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full screen with the bar along the bottom, the way '
+                'an app uses it. Switch destinations to review the indicator.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open navigation bar demo'),
+              ),
+            ],
           ),
         ),
       ],
@@ -279,6 +288,84 @@ $destinations
           ],
         ),
       ],
+    );
+  }
+}
+
+class _NavigationBarDemoHost extends StatefulWidget {
+  const _NavigationBarDemoHost({
+    required this.destinations,
+    required this.autoLayout,
+    required this.layout,
+    required this.alignment,
+    required this.wideDestinationWidth,
+    required this.wideBreakpoint,
+    required this.labelBehavior,
+    required this.iconBehavior,
+    required this.size,
+    required this.shapeFamily,
+    required this.density,
+    required this.indicatorStyle,
+  });
+
+  final List<M3ENavigationBarDestination> destinations;
+  final bool autoLayout;
+  final M3ENavBarLayout layout;
+  final M3ENavBarAlignment alignment;
+  final double wideDestinationWidth;
+  final double? wideBreakpoint;
+  final M3ENavBarLabelBehavior labelBehavior;
+  final M3ENavBarIconBehavior iconBehavior;
+  final M3ENavBarSize size;
+  final M3ENavBarShapeFamily shapeFamily;
+  final M3ENavBarDensity density;
+  final M3ENavBarIndicatorStyle indicatorStyle;
+
+  @override
+  State<_NavigationBarDemoHost> createState() => _NavigationBarDemoHostState();
+}
+
+class _NavigationBarDemoHostState extends State<_NavigationBarDemoHost> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3ENavigationBarDestination destination = widget.destinations[_index];
+    final String title = destination.label ?? 'Destination';
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: title,
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: Center(
+        child: IconTheme(
+          data: IconThemeData(size: 48, color: theme.colorScheme.primary),
+          child: destination.buildIcon(selected: true),
+        ),
+      ),
+      bottomNavigationBar: M3ENavigationBar(
+        destinations: widget.destinations,
+        selectedIndex: _index,
+        onDestinationSelected: (int i) => setState(() => _index = i),
+        autoLayout: widget.autoLayout,
+        layout: widget.layout,
+        alignment: widget.alignment,
+        wideDestinationWidth: widget.wideDestinationWidth,
+        wideBreakpoint: widget.wideBreakpoint,
+        labelBehavior: widget.labelBehavior,
+        iconBehavior: widget.iconBehavior,
+        size: widget.size,
+        shapeFamily: widget.shapeFamily,
+        density: widget.density,
+        indicatorStyle: widget.indicatorStyle,
+      ),
     );
   }
 }

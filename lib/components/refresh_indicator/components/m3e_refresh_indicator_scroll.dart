@@ -4,9 +4,8 @@ part of '../m3e_refresh_indicator.dart';
 extension _M3ERefreshIndicatorScroll on M3ERefreshIndicatorState {
   void _setupColorTween() {
     final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
-    final M3ERefreshIndicatorTheme refreshTheme = M3ETheme.of(
-      context,
-    ).refreshIndicatorTheme;
+    final M3ERefreshIndicatorTheme refreshTheme = M3ETheme.of(context)
+        .refreshIndicatorTheme;
 
     if (widget._indicatorType == _IndicatorType.contained) {
       _effectiveValueColor =

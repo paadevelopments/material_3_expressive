@@ -42,6 +42,14 @@ void main() {
     'M3EDropdownMenu limit blocks extra multi selections',
     _m3edropdownmenuLimitBlocksExtraMultiSelections,
   );
+  testWidgets(
+    'system back closes the dropdown before the route',
+    _systemBackClosesDropdownBeforeRoute,
+  );
+  testWidgets(
+    'outside tap closes the dropdown without activating the page',
+    _outsideTapClosesDropdownWithoutActivatingPage,
+  );
 }
 
 Future<void> _m3edropdownmenuRendersFieldWithHintText(
@@ -119,7 +127,10 @@ Future<void> _m3edropdownmenuSingleSelectReplacesPriorSelection(
   expect(selected, hasLength(1));
   expect(selected.first.value, 'flutter');
 
-  await tester.tap(find.bySemanticsLabel('Choose framework'));
+  await tester.tap(
+    find.bySemanticsLabel('Choose framework'),
+    warnIfMissed: false,
+  );
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 300));
 
@@ -218,4 +229,95 @@ Future<void> _m3edropdownmenuRebuildDoesNotFireOnSelectionChangedDuringBuild(
 
   expect(tester.takeException(), isNull);
   expect(selectionCallCount, 0);
+}
+
+Future<void> _pumpDropdown(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
+Future<void> _systemBackClosesDropdownBeforeRoute(WidgetTester tester) async {
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: M3EThemeData.light(),
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return const Scaffold(
+                        body: M3EDropdownMenu<String>(
+                          items: _items,
+                          fieldStyle: M3EDropdownFieldStyle(
+                            hintText: 'Choose framework',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Root'),
+            ),
+          );
+        },
+      ),
+    ),
+  );
+  await tester.tap(find.text('Root'));
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text('Choose framework'));
+  await _pumpDropdown(tester);
+  expect(find.text('Dart'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await _pumpDropdown(tester);
+
+  expect(find.text('Dart'), findsNothing);
+  expect(find.text('Choose framework'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+
+  expect(find.text('Choose framework'), findsNothing);
+  expect(find.text('Root'), findsOneWidget);
+}
+
+Future<void> _outsideTapClosesDropdownWithoutActivatingPage(
+  WidgetTester tester,
+) async {
+  var behindTapped = false;
+
+  await tester.pumpWidget(
+    _host(
+      Column(
+        children: <Widget>[
+          TextButton(
+            onPressed: () => behindTapped = true,
+            child: const Text('Behind'),
+          ),
+          const SizedBox(height: 240),
+          const M3EDropdownMenu<String>(
+            items: _items,
+            fieldStyle: M3EDropdownFieldStyle(hintText: 'Choose framework'),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('Choose framework'));
+  await _pumpDropdown(tester);
+  expect(find.text('Dart'), findsOneWidget);
+
+  await tester.tap(find.text('Behind'), warnIfMissed: false);
+  await _pumpDropdown(tester);
+
+  expect(behindTapped, isFalse);
+  expect(find.text('Dart'), findsNothing);
+  expect(find.text('Behind'), findsOneWidget);
 }

@@ -59,12 +59,7 @@ class M3ENavigationBarDestination {
     assert(hasIcon, 'Destination has no icon');
     final base = selected && selectedIcon != null ? selectedIcon! : icon!;
     if (badgeCount != null || badgeDot) {
-      return M3ENavBadge(
-        count: badgeCount,
-        showDot: badgeDot,
-        semanticLabel: resolvedSemanticLabel,
-        child: base,
-      );
+      return M3ENavBadge(count: badgeCount, showDot: badgeDot, child: base);
     }
     return base;
   }

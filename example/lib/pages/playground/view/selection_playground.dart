@@ -48,6 +48,7 @@ M3ESelection(
     ),
     actions: <Widget>[
       M3EIconButton(
+        variant: M3EIconButtonVariant.standard,
         icon: const Icon(M3EIcons.delete),
         onPressed: () {},
       ),
@@ -296,6 +297,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
             },
             barHintText: 'Search items',
             leading: M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               icon: const Icon(M3EIcons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),
               tooltip: 'Back',
@@ -303,11 +305,13 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
           ),
           actions: <Widget>[
             M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               icon: const Icon(M3EIcons.archive),
               onPressed: () {},
               tooltip: 'Archive',
             ),
             M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
               icon: const Icon(M3EIcons.delete),
               onPressed: () {},
               tooltip: 'Delete',

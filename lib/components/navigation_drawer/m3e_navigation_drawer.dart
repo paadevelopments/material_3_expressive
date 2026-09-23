@@ -1,8 +1,6 @@
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'components/m3e_drawer_destination_button.dart';
 import 'models/m3e_navigation_destination.dart';
 
@@ -11,7 +9,7 @@ export 'styles/m3e_navigation_drawer_theme.dart';
 
 /// A Material 3 Expressive navigation drawer.
 ///
-/// Destinations use a shared liquid selection indicator (spatial springs).
+/// Each destination scales and fades its own selection fill.
 class M3ENavigationDrawer extends StatefulWidget {
   /// M3ENavigationDrawer.
   const M3ENavigationDrawer({
@@ -40,44 +38,6 @@ class M3ENavigationDrawer extends StatefulWidget {
 }
 
 class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
-  late List<GlobalKey> _keys;
-  bool _traveling = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _keys = _makeKeys(widget.destinations.length);
-  }
-
-  @override
-  void didUpdateWidget(covariant M3ENavigationDrawer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.destinations.length != widget.destinations.length) {
-      _keys = _makeKeys(widget.destinations.length);
-    }
-  }
-
-  List<GlobalKey> _makeKeys(int count) =>
-      List<GlobalKey>.generate(count, (_) => GlobalKey());
-
-  void _onTravelingChanged(bool traveling) {
-    if (_traveling == traveling || !mounted) {
-      return;
-    }
-    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
-    if (phase == SchedulerPhase.idle ||
-        phase == SchedulerPhase.postFrameCallbacks) {
-      setState(() => _traveling = traveling);
-      return;
-    }
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _traveling == traveling) {
-        return;
-      }
-      setState(() => _traveling = traveling);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(builder: _buildDrawer);
@@ -108,9 +68,6 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
           M3EDrawerDestinationButton(
             destination: widget.destinations[i],
             selected: i == widget.selectedIndex,
-            indicatorKey: _keys[i],
-            // Resting fill is local so MediaQuery churn can't snap it away.
-            showRestingFill: !_traveling,
             onTap: () => widget.onDestinationSelected(i),
           ),
       ],
@@ -119,27 +76,7 @@ class _M3ENavigationDrawerState extends State<M3ENavigationDrawer> {
     return Container(
       width: drawerTheme.width,
       color: drawerTheme.containerColor(scheme),
-      child: SafeArea(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return M3ENavSelectionIndicator(
-              selectedIndex: widget.selectedIndex,
-              targetKeys: _keys,
-              axis: Axis.vertical,
-              color: scheme.secondaryContainer,
-              // Height/width reflow (window resize, safe-area) invalidates
-              // geometry so selection morphs don't aim at stale centers.
-              layoutToken: (
-                constraints.maxHeight,
-                constraints.maxWidth,
-                M3ESafeArea.paddingOf(context),
-              ),
-              onTravelingChanged: _onTravelingChanged,
-              child: list,
-            );
-          },
-        ),
-      ),
+      child: SafeArea(child: list),
     );
   }
 }

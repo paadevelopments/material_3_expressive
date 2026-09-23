@@ -4,15 +4,16 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
+import '../../navigation_rail/components/m3e_nav_selection_indicator.dart';
 import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_navigation_bar_destination.dart';
 import '../res/m3e_nav_bar_constants.dart';
 
 /// Single destination cell inside the M3E navigation bar.
 ///
-/// No ink splash — selection feedback is the pill (local resting fill plus the
-/// shared liquid morph overlay while traveling). Keyboard focus adds the shared
-/// [M3EFocusRing] around the destination chip; Space/Enter selects.
+/// No ink splash — pill selection scales and fades on this destination.
+/// Keyboard focus adds the shared [M3EFocusRing] around the destination chip;
+/// Space/Enter selects.
 class M3ENavBarDestinationButton extends StatefulWidget {
   /// M3ENavBarDestinationButton.
   const M3ENavBarDestinationButton({
@@ -26,7 +27,6 @@ class M3ENavBarDestinationButton extends StatefulWidget {
     required this.iconBehavior,
     required this.layout,
     required this.indicatorStyle,
-    required this.indicatorKey,
     required this.indicatorWidth,
     required this.indicatorHeight,
     required this.underlineThickness,
@@ -35,7 +35,6 @@ class M3ENavBarDestinationButton extends StatefulWidget {
     required this.onTap,
     this.wideDestinationWidth,
     this.haptic = M3EHapticFeedback.none,
-    this.showRestingPill = true,
     super.key,
   });
 
@@ -69,9 +68,6 @@ class M3ENavBarDestinationButton extends StatefulWidget {
   /// indicatorStyle.
   final M3ENavBarIndicatorStyle indicatorStyle;
 
-  /// indicatorKey.
-  final GlobalKey indicatorKey;
-
   /// indicatorWidth.
   final double indicatorWidth;
 
@@ -95,9 +91,6 @@ class M3ENavBarDestinationButton extends StatefulWidget {
 
   /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
-
-  /// When false, the shared liquid overlay owns the pill (during travel).
-  final bool showRestingPill;
 
   @override
   State<M3ENavBarDestinationButton> createState() =>
@@ -131,10 +124,7 @@ class _M3ENavBarDestinationButtonState
     };
   }
 
-  bool get _paintRestingPill =>
-      widget.selected &&
-      widget.showRestingPill &&
-      widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
+  bool get _pill => widget.indicatorStyle == M3ENavBarIndicatorStyle.pill;
 
   bool get _underlined =>
       widget.indicatorStyle == M3ENavBarIndicatorStyle.underline &&
@@ -246,20 +236,16 @@ class _M3ENavBarDestinationButtonState
       );
       final double pillRadius =
           math.min(widget.indicatorWidth, widget.indicatorHeight) / 2;
-      icon = KeyedSubtree(
-        key: widget.indicatorKey,
-        child: SizedBox(
-          width: widget.indicatorWidth,
-          height: widget.indicatorHeight,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: _paintRestingPill
-                  ? widget.indicatorColor
-                  : const Color(0x00000000),
-              borderRadius: BorderRadius.circular(pillRadius),
-            ),
-            child: Center(child: icon),
-          ),
+      icon = SizedBox(
+        width: widget.indicatorWidth,
+        height: widget.indicatorHeight,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            if (_pill)
+              Positioned.fill(child: _selectionIndicator(radius: pillRadius)),
+            icon,
+          ],
         ),
       );
       if (_underlined) {
@@ -370,19 +356,16 @@ class _M3ENavBarDestinationButtonState
   Widget _buildWideChip(List<Widget> children) {
     final double chipWidth =
         widget.wideDestinationWidth ?? M3ENavBarConstants.wideDestinationWidth;
-    return KeyedSubtree(
-      key: widget.indicatorKey,
-      child: SizedBox(
-        width: chipWidth,
-        height: widget.indicatorHeight,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: _paintRestingPill
-                ? widget.indicatorColor
-                : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(widget.indicatorHeight / 2),
-          ),
-          child: Padding(
+    final double radius = widget.indicatorHeight / 2;
+    return SizedBox(
+      width: chipWidth,
+      height: widget.indicatorHeight,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          if (_pill)
+            Positioned.fill(child: _selectionIndicator(radius: radius)),
+          Padding(
             padding: EdgeInsets.symmetric(
               horizontal: _wideChipHorizontalPadding,
             ),
@@ -391,6 +374,21 @@ class _M3ENavBarDestinationButtonState
               children: children,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _selectionIndicator({required double radius}) {
+    final navTheme = M3ETheme.of(context).navigationBarTheme;
+    return M3ESelectionIndicator(
+      selected: widget.selected,
+      scaleSpring: navTheme.indicatorScaleSpring,
+      fadeSpring: navTheme.indicatorFadeSpring,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: widget.indicatorColor,
+          borderRadius: BorderRadius.circular(radius),
         ),
       ),
     );

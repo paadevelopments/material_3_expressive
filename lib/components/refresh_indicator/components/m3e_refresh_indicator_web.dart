@@ -172,7 +172,7 @@ extension _M3ERefreshIndicatorWeb on M3ERefreshIndicatorState {
   }
 
   /// Web indicator: host Opacity + scale reveal; contained loading spinner
-  /// with shell elevation (cached in RepaintBoundary).
+  /// with host elevation (cached in RepaintBoundary).
   Widget _buildPositionedIndicatorWeb(BuildContext context) {
     final bool atTop = _isIndicatorAtTop!;
     final bool showIndeterminate =

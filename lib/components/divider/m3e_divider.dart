@@ -2,39 +2,49 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import 'enums/m3e_divider_axis.dart';
+import 'enums/m3e_divider_inset.dart';
 
 export 'enums/m3e_divider_axis.dart';
+export 'enums/m3e_divider_inset.dart';
 export 'styles/m3e_divider_theme.dart';
 
 /// A Material 3 Expressive divider.
 ///
-/// A thin line that groups content in lists and containers. Supports both
-/// orientations and leading/trailing insets.
+/// A thin decorative line. [M3EDividerInset.full] spans the cross axis.
+/// [M3EDividerInset.inset] indents the leading edge. [M3EDividerInset.middle]
+/// indents both edges. [outerMargin] adds the theme's end and bottom margins.
 class M3EDivider extends StatelessWidget {
-  /// M3EDivider.
+  /// Creates a divider.
   const M3EDivider({
     this.axis = M3EDividerAxis.horizontal,
-    this.thickness = 1,
-    this.indent = 0,
-    this.endIndent = 0,
+    this.inset = M3EDividerInset.full,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.outerMargin = false,
     this.color,
     super.key,
   });
 
-  /// axis.
-
+  /// Horizontal or vertical line.
   final M3EDividerAxis axis;
 
-  /// thickness.
-  final double thickness;
+  /// Which measured inset to use when [indent] or [endIndent] is null.
+  final M3EDividerInset inset;
 
-  /// indent.
-  final double indent;
+  /// Line thickness. Null uses the theme thickness.
+  final double? thickness;
 
-  /// endIndent.
-  final double endIndent;
+  /// Leading inset along the line. Null uses [inset].
+  final double? indent;
 
-  /// color.
+  /// Trailing inset along the line. Null uses [inset].
+  final double? endIndent;
+
+  /// Whether to add the theme end and bottom margins.
+  final bool outerMargin;
+
+  /// Line color. Null uses outline variant.
   final Color? color;
 
   @override
@@ -43,34 +53,49 @@ class M3EDivider extends StatelessWidget {
   }
 
   Widget _buildDivider(BuildContext context) {
-    final dividerTheme = M3ETheme.of(context).dividerTheme;
-    final Color line =
-        color ?? dividerTheme.color(M3ETheme.of(context).colorScheme);
-    final double lineThickness = thickness;
-    if (axis == M3EDividerAxis.vertical) {
-      return Padding(
-        padding: EdgeInsets.only(top: indent, bottom: endIndent),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final double? height = constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : null;
-            return SizedBox(
-              width: lineThickness,
-              height: height,
+    final theme = M3ETheme.of(context);
+    final dividerTheme = theme.dividerTheme;
+    final Color line = color ?? dividerTheme.color(theme.colorScheme);
+    final double lineThickness = thickness ?? dividerTheme.thickness;
+    final double start = indent ?? dividerTheme.startFor(inset);
+    final double end = endIndent ?? dividerTheme.endFor(inset);
+    final EdgeInsetsGeometry padding = axis == M3EDividerAxis.vertical
+        ? EdgeInsetsDirectional.only(
+            top: start,
+            bottom: end + (outerMargin ? dividerTheme.bottomMargin : 0),
+            end: outerMargin ? dividerTheme.endMargin : 0,
+          )
+        : EdgeInsetsDirectional.only(
+            start: start,
+            end: end + (outerMargin ? dividerTheme.endMargin : 0),
+            bottom: outerMargin ? dividerTheme.bottomMargin : 0,
+          );
+
+    final Widget rule = axis == M3EDividerAxis.vertical
+        ? Padding(
+            padding: padding,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double? height = constraints.hasBoundedHeight
+                    ? constraints.maxHeight
+                    : null;
+                return SizedBox(
+                  width: lineThickness,
+                  height: height,
+                  child: ColoredBox(color: line),
+                );
+              },
+            ),
+          )
+        : Padding(
+            padding: padding,
+            child: SizedBox(
+              height: lineThickness,
+              width: double.infinity,
               child: ColoredBox(color: line),
-            );
-          },
-        ),
-      );
-    }
-    return Padding(
-      padding: EdgeInsets.only(left: indent, right: endIndent),
-      child: SizedBox(
-        height: lineThickness,
-        width: double.infinity,
-        child: ColoredBox(color: line),
-      ),
-    );
+            ),
+          );
+
+    return ExcludeSemantics(child: rule);
   }
 }

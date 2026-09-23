@@ -28,6 +28,7 @@ class ThemeConfigPage extends StatelessWidget {
               M3EAppBar.top(
                 titleText: 'Theme',
                 leading: M3EIconButton(
+                  variant: M3EIconButtonVariant.standard,
                   icon: const Icon(M3EIcons.arrow_back),
                   tooltip: 'Back',
                   onPressed: () => Navigator.of(context).maybePop(),

@@ -1,13 +1,14 @@
-import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart'
-    show M3ENavSelectionIndicator;
 import 'package:material_3_expressive/components/navigation_rail/styles/m3e_navigation_rail_theme.dart'
     show M3ENavigationRailTheme;
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/m3e_icon_buttons.dart';
+import '../../navigation_bar/m3e_navigation_bar.dart';
+import '../../tooltips/m3e_tooltips.dart';
 import '../enums/m3e_navigation_rail_enums.dart';
 import 'm3e_nav_icon_scale.dart';
+import 'm3e_nav_selection_indicator.dart';
 import 'm3e_rail_badge_view.dart';
 
 /// Internal button used by the NavigationRail item that can look like
@@ -32,8 +33,6 @@ class M3ERailItemButton extends StatefulWidget {
     this.suppressInk = false,
     this.badgeCount,
     this.heightOverride,
-    this.useLocalIndicator = true,
-    this.indicatorKey,
     this.haptic = M3EHapticFeedback.none,
   });
 
@@ -71,12 +70,6 @@ class M3ERailItemButton extends StatefulWidget {
   /// to the theme's [M3ENavigationRailTheme.itemExpandedHeight] or
   /// [M3ENavigationRailTheme.itemCollapsedHeight] depending on [expanded].
   final double? heightOverride;
-
-  /// When false, selection fill is drawn by [M3ENavSelectionIndicator] instead.
-  final bool useLocalIndicator;
-
-  /// Key for the local indicator when [useLocalIndicator] is true.
-  final GlobalKey? indicatorKey;
 
   /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
@@ -150,9 +143,7 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     final Color fg = selected
         ? theme.activeIconAndLabelColor(scheme)
         : theme.inactiveIconAndLabelColor(scheme);
-    final Color bg = widget.useLocalIndicator && expanded && selected
-        ? theme.activeIndicatorColorResolved(scheme)
-        : Colors.transparent;
+    final Color indicatorColor = theme.activeIndicatorColorResolved(scheme);
     final ShapeBorder shape = expanded
         ? (theme.indicatorShapeFull ??
               RoundedRectangleBorder(borderRadius: M3EShapes.roundSet.xs))
@@ -174,7 +165,7 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     final Widget material = _buildItemMaterial(
       theme: theme,
       expanded: expanded,
-      bg: bg,
+      indicatorColor: indicatorColor,
       shape: shape,
       fg: fg,
       content: content,
@@ -192,9 +183,8 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     }
     final Widget withTooltip = expanded
         ? sized
-        : Tooltip(
+        : M3ETooltip(
             message: widget.semanticLabel ?? widget.label,
-            preferBelow: false,
             child: sized,
           );
     return Semantics(
@@ -225,16 +215,29 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
   Widget _buildItemMaterial({
     required M3ENavigationRailTheme theme,
     required bool expanded,
-    required Color bg,
+    required Color indicatorColor,
     required ShapeBorder shape,
     required Color fg,
     required Widget content,
   }) {
+    final Widget body = Padding(
+      padding: expanded
+          ? EdgeInsetsDirectional.only(
+              start: theme.indicatorLeading,
+              end: theme.indicatorTrailing,
+            )
+          : EdgeInsets.zero,
+      child: Align(
+        alignment: expanded ? Alignment.centerLeft : Alignment.center,
+        child: IconTheme.merge(
+          data: IconThemeData(color: fg, size: theme.iconSize),
+          child: content,
+        ),
+      ),
+    );
     return Material(
-      key: expanded ? widget.indicatorKey : null,
-      color: bg,
+      color: Colors.transparent,
       shape: shape,
-      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _select(fromPointer: true),
         mouseCursor: SystemMouseCursors.click,
@@ -245,21 +248,27 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,
         overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
-        child: Padding(
-          padding: expanded
-              ? EdgeInsetsDirectional.only(
-                  start: theme.indicatorLeading,
-                  end: theme.indicatorTrailing,
-                )
-              : EdgeInsets.zero,
-          child: Align(
-            alignment: expanded ? Alignment.centerLeft : Alignment.center,
-            child: IconTheme.merge(
-              data: IconThemeData(color: fg, size: theme.iconSize),
-              child: content,
-            ),
-          ),
-        ),
+        child: expanded
+            ? Stack(
+                alignment: AlignmentDirectional.centerStart,
+                children: <Widget>[
+                  Positioned.fill(
+                    child: M3ESelectionIndicator(
+                      selected: widget.isSelected,
+                      scaleSpring: theme.indicatorScaleSpring,
+                      fadeSpring: theme.indicatorFadeSpring,
+                      child: DecoratedBox(
+                        decoration: ShapeDecoration(
+                          color: indicatorColor,
+                          shape: shape,
+                        ),
+                      ),
+                    ),
+                  ),
+                  body,
+                ],
+              )
+            : body,
       ),
     );
   }
@@ -306,15 +315,31 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
     required Color fg,
     required Widget scaledIcon,
   }) {
-    return Row(
-      children: [
-        Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    // Spec: when icon is followed by text, place the large badge at the
+    // trailing edge (after the label), not on the icon.
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final maxWidth = constraints.maxWidth;
+        final iconSlot = theme.iconSize;
+        final gap = theme.iconLabelGap;
+        final hasBadge = widget.badgeCount != null;
+        // Room for the icon, both gaps, and a large count badge.
+        final showBadge = hasBadge && maxWidth >= iconSlot + gap * 2 + 48;
+        final showLabel = maxWidth >= iconSlot + gap;
+        final iconExtent = iconSlot < maxWidth ? iconSlot : maxWidth;
+        return Row(
+          children: <Widget>[
+            if (iconExtent < iconSlot)
+              SizedBox(
+                width: iconExtent,
+                height: iconSlot,
+                child: ClipRect(child: scaledIcon),
+              )
+            else
               scaledIcon,
-              SizedBox(width: theme.iconLabelGap),
-              Flexible(
+            if (showLabel) ...<Widget>[
+              SizedBox(width: gap),
+              Expanded(
                 child: Text(
                   widget.label,
                   maxLines: 1,
@@ -324,13 +349,13 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
                 ),
               ),
             ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: theme.iconLabelGap),
-          child: M3ERailBadge(count: widget.badgeCount),
-        ),
-      ],
+            if (showBadge) ...<Widget>[
+              SizedBox(width: gap),
+              M3ERailBadge.standalone(count: widget.badgeCount),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -345,21 +370,39 @@ class _M3ERailItemButtonState extends State<M3ERailItemButton> {
         labelBehavior == M3ENavigationRailLabelBehavior.alwaysShow ||
         (widget.isSelected &&
             labelBehavior != M3ENavigationRailLabelBehavior.alwaysHide);
+    const double pillWidth = M3ENavBarConstants.compactIndicatorWidth;
+    const double pillHeight = M3ENavBarConstants.indicatorHeight;
     return Column(
       children: [
-        KeyedSubtree(
-          key: widget.indicatorKey,
-          child: M3EIconButton(
-            icon: scaledIcon,
-            width: M3EIconButtonWidth.wide,
-            badgeValue: widget.badgeCount,
-            onPressed: widget.onPressed,
-            suppressInk: true,
-            haptic: widget.haptic,
-            variant: widget.useLocalIndicator && widget.isSelected
-                ? M3EIconButtonVariant.tonal
-                : M3EIconButtonVariant.standard,
-          ),
+        Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            M3ESelectionIndicator(
+              selected: widget.isSelected,
+              scaleSpring: theme.indicatorScaleSpring,
+              fadeSpring: theme.indicatorFadeSpring,
+              child: SizedBox(
+                width: pillWidth,
+                height: pillHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.activeIndicatorColorResolved(m3e.colorScheme),
+                    borderRadius: BorderRadius.circular(pillHeight / 2),
+                  ),
+                ),
+              ),
+            ),
+            M3EIconButton(
+              // Collapsed: badge on the leading icon. The pill behind it is
+              // the selection fill, so the button stays standard.
+              icon: M3ERailBadge(count: widget.badgeCount, child: scaledIcon),
+              width: M3EIconButtonWidth.wide,
+              onPressed: widget.onPressed,
+              suppressInk: true,
+              haptic: widget.haptic,
+              variant: M3EIconButtonVariant.standard,
+            ),
+          ],
         ),
         if (showLabel)
           Flexible(

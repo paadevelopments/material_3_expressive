@@ -361,6 +361,7 @@ class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
     }
     return <Widget>[
       M3EIconButton(
+        variant: M3EIconButtonVariant.standard,
         icon: const Icon(M3EIcons.close),
         tooltip: M3ESearchConstants.clearButtonTooltip,
         onPressed: widget.controller.clear,

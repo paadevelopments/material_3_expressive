@@ -73,15 +73,16 @@ class M3ESearchController extends TextEditingController {
 }
 
 /// Signature for building the search anchor child.
-typedef M3ESearchAnchorChildBuilder =
-    Widget Function(BuildContext context, M3ESearchController controller);
+typedef M3ESearchAnchorChildBuilder = Widget Function(
+  BuildContext context,
+  M3ESearchController controller,
+);
 
 /// Signature for building search suggestions from the current query.
-typedef M3ESearchSuggestionsBuilder =
-    FutureOr<Iterable<Widget>> Function(
-      BuildContext context,
-      M3ESearchController controller,
-    );
+typedef M3ESearchSuggestionsBuilder = FutureOr<Iterable<Widget>> Function(
+  BuildContext context,
+  M3ESearchController controller,
+);
 
 /// Signature for laying out suggestion widgets in the search view.
 typedef M3ESearchViewBuilder = Widget Function(Iterable<Widget> suggestions);

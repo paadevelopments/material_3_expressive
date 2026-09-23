@@ -23,6 +23,8 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
   M3EButtonSize _size = M3EButtonSize.sm;
   M3EButtonShape _shape = M3EButtonShape.round;
   M3ESplitButtonMenuStyle _menuStyle = M3ESplitButtonMenuStyle.popup;
+  M3ESplitButtonTrailingAlignment _trailingAlignment =
+      M3ESplitButtonTrailingAlignment.opticalCenter;
   bool _enabled = true;
   String _label = 'Save';
   String? _selected;
@@ -31,6 +33,8 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
     M3EButtonSize.xs,
     M3EButtonSize.sm,
     M3EButtonSize.md,
+    M3EButtonSize.lg,
+    M3EButtonSize.xl,
   ];
 
   static const List<M3EButtonStyle> _styles = <M3EButtonStyle>[
@@ -125,6 +129,7 @@ M3ESplitButton<String>(
             style: _style,
             size: _size,
             shape: _shape,
+            trailingAlignment: _trailingAlignment,
             enabled: _enabled,
             selectedValue: _selected,
             decoration: M3ESplitButtonDecoration(menuStyle: _menuStyle),
@@ -152,6 +157,7 @@ M3ESplitButton<String>(
             style: _style,
             size: _size,
             shape: _shape,
+            trailingAlignment: _trailingAlignment,
             enabled: _enabled,
             items: null,
             onPressed: _enabled ? () {} : null,
@@ -253,6 +259,18 @@ M3ESplitButton<String>(
               labelOf: (M3ESplitButtonMenuStyle v) => v.name,
               onChanged: (M3ESplitButtonMenuStyle v) {
                 setState(() => _menuStyle = v);
+              },
+            ),
+            PlayEnumSegmented<M3ESplitButtonTrailingAlignment>(
+              label: 'Trailing align',
+              value: _trailingAlignment,
+              values: M3ESplitButtonTrailingAlignment.values,
+              labelOf: (M3ESplitButtonTrailingAlignment v) => switch (v) {
+                M3ESplitButtonTrailingAlignment.opticalCenter => 'Optical',
+                M3ESplitButtonTrailingAlignment.geometricCenter => 'Center',
+              },
+              onChanged: (M3ESplitButtonTrailingAlignment v) {
+                setState(() => _trailingAlignment = v);
               },
             ),
           ],

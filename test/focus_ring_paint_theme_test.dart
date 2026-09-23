@@ -52,9 +52,8 @@ void registerFocusRingThemeColorOverrideTests() {
           ),
           child: Builder(
             builder: (BuildContext context) {
-              final Color resolved = M3ETheme.of(
-                context,
-              ).focusRingTheme.resolveColor(M3ETheme.of(context).colorScheme);
+              final Color resolved = M3ETheme.of(context).focusRingTheme
+                  .resolveColor(M3ETheme.of(context).colorScheme);
               expect(resolved, override);
               return const SizedBox.shrink();
             },

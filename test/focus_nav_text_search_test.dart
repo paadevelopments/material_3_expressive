@@ -97,8 +97,7 @@ void registerTextFieldKeepsTextInputClientTests() {
     expect(
       tester.testTextInput.hasAnyClients,
       isTrue,
-      reason:
-          'Focus ring must not remount EditableText (client was dropped before)',
+      reason: 'Focus ring must not remount EditableText (client was dropped before)',
     );
 
     tester.testTextInput.enterText('hi');

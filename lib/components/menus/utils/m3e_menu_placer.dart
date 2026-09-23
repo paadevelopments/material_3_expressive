@@ -68,10 +68,13 @@ abstract final class M3EMenuPlacer {
       anchorRect: anchorRect,
       theme: theme,
     );
-    final approxHeight = (approximateItemCount * theme.entryHeight).clamp(
-      theme.entryHeight * 2,
-      theme.maxHeight,
-    );
+    final double itemExtent = theme.entryHeight + theme.itemGap;
+    final double lower = theme.entryHeight * 2;
+    final double upper = theme.maxHeight;
+    final double approxHeight =
+        (approximateItemCount * itemExtent + theme.verticalPadding * 2)
+            .clamp(lower < upper ? lower : 0, upper)
+            .toDouble();
     final spaceBelow = screenSize.height - anchorRect.bottom - edge;
     final spaceAbove = anchorRect.top - edge;
     final isRtl = textDirection == TextDirection.rtl;

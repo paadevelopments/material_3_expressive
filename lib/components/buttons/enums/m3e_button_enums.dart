@@ -1,15 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EButtonGroup, M3EToggleButton;
+    show M3EButton, M3EButtonGroup;
 
 export 'package:material_3_expressive/foundations/foundations.dart'
     show M3EHapticFeedback;
 
-/// Visual styles for [M3EButton] and [M3EToggleButton].
+/// Visual styles for [M3EButton].
 ///
 /// See also:
 /// - [M3EButton] for the standard button widget
-/// - [M3EToggleButton] for the toggle button widget
 enum M3EButtonStyle {
   /// Solid background, high prominence.
   filled,
@@ -48,11 +47,10 @@ enum M3EButtonShape {
 ///
 /// Heights: xs=32dp, sm=40dp, md=56dp, lg=96dp, xl=136dp.
 ///
-/// Used by [M3EButton], [M3EToggleButton], and [M3EButtonGroup].
+/// Used by [M3EButton] and [M3EButtonGroup].
 ///
 /// See also:
 /// - [M3EButton] for the standard button widget
-/// - [M3EToggleButton] for the toggle button widget
 /// - [M3EButtonGroup] for the connected toggle button group
 @immutable
 class M3EButtonSize {
@@ -62,6 +60,7 @@ class M3EButtonSize {
     this.hPadding,
     this.iconSize,
     this.iconGap,
+    this.outlineWidth,
     this.width,
   });
 
@@ -79,6 +78,9 @@ class M3EButtonSize {
 
   /// Custom icon gap override.
   final double? iconGap;
+
+  /// Custom outlined stroke width override.
+  final double? outlineWidth;
 
   /// Custom width override.
   final double? width;
@@ -104,6 +106,7 @@ class M3EButtonSize {
     double? hPadding,
     double? iconSize,
     double? iconGap,
+    double? outlineWidth,
     double? width,
   }) {
     return M3EButtonSize._(
@@ -112,7 +115,30 @@ class M3EButtonSize {
       hPadding: hPadding,
       iconSize: iconSize,
       iconGap: iconGap,
+      outlineWidth: outlineWidth,
       width: width,
+    );
+  }
+
+  /// Returns this size with selective measurement overrides.
+  ///
+  /// Keeps [name] so theme token tables (spacing, radii) still resolve.
+  M3EButtonSize copyWith({
+    double? height,
+    double? hPadding,
+    double? iconSize,
+    double? iconGap,
+    double? outlineWidth,
+    double? width,
+  }) {
+    return M3EButtonSize._(
+      name,
+      height: height ?? this.height,
+      hPadding: hPadding ?? this.hPadding,
+      iconSize: iconSize ?? this.iconSize,
+      iconGap: iconGap ?? this.iconGap,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      width: width ?? this.width,
     );
   }
 
@@ -125,11 +151,19 @@ class M3EButtonSize {
           hPadding == other.hPadding &&
           iconSize == other.iconSize &&
           iconGap == other.iconGap &&
+          outlineWidth == other.outlineWidth &&
           width == other.width);
 
   @override
-  int get hashCode =>
-      Object.hash(name, height, hPadding, iconSize, iconGap, width);
+  int get hashCode => Object.hash(
+    name,
+    height,
+    hPadding,
+    iconSize,
+    iconGap,
+    outlineWidth,
+    width,
+  );
 
   @override
   String toString() => 'M3EButtonSize.$name';

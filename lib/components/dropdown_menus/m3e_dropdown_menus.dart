@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
+import '../tooltips/m3e_tooltips.dart';
 import 'components/m3e_dropdown_chips.dart';
 import 'components/m3e_dropdown_menu_item.dart';
 import 'controllers/m3e_dropdown_controller.dart';
@@ -40,12 +41,11 @@ typedef M3EDropdownFutureRequest<T> =
     Future<List<M3EDropdownItem<T>>> Function();
 
 /// Signature for a custom item builder inside the dropdown list.
-typedef M3EDropdownItemBuilder<T> =
-    Widget Function(
-      M3EDropdownItem<T> item, {
-      required bool selected,
-      required VoidCallback onTap,
-    });
+typedef M3EDropdownItemBuilder<T> = Widget Function(
+  M3EDropdownItem<T> item, {
+  required bool selected,
+  required VoidCallback onTap,
+});
 
 /// A Material 3 Expressive dropdown menu.
 ///
@@ -308,6 +308,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   final LayerLink _layerLink = LayerLink();
   final OverlayPortalController _portalController = OverlayPortalController();
+  M3EOverlayHistory? _overlayHistory;
   final GlobalKey<FormFieldState<List<M3EDropdownItem<T>>?>> _formFieldKey =
       GlobalKey();
   final GlobalKey<M3EMoreChipsIndicatorState> _moreKey = GlobalKey();
@@ -359,6 +360,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   @override
   void dispose() {
+    _releaseOverlayHistory();
     _expandCtrl
       ..removeListener(_onExpandAnimationTick)
       ..dispose();

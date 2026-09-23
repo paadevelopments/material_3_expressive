@@ -4,8 +4,9 @@ import 'package:flutter/widgets.dart';
 
 import 'package:material_3_expressive/components/badges/m3e_badges.dart';
 
-/// M3ENavBadge.
-
+/// Navigation-bar badge wrapper around [M3EBadge].
+///
+/// Uses theme Compose placement on the icon (do not force [offset] to zero).
 class M3ENavBadge extends StatelessWidget {
   /// M3ENavBadge.
   const M3ENavBadge({
@@ -13,18 +14,17 @@ class M3ENavBadge extends StatelessWidget {
     required this.child,
     this.count,
     this.showDot = false,
-    this.maxCount = 99,
+    this.maxCount = 999,
     this.backgroundColor,
     this.foregroundColor,
     this.semanticLabel,
-    this.offset = Offset.zero,
+    this.offset,
   }) : assert(
          count == null || count >= 0,
          'count must be null or non-negative',
        );
 
   /// child.
-
   final Widget child;
 
   /// count.
@@ -45,10 +45,9 @@ class M3ENavBadge extends StatelessWidget {
   /// semanticLabel.
   final String? semanticLabel;
 
-  /// Nudge away from the icon's top-right corner.
-  ///
-  /// Defaults to none so a badge never shifts the icon inside its indicator.
-  final Offset offset;
+  /// Optional placement override. When null, [M3EBadge] uses theme
+  /// `smallOffset` / `largeOffset` so the badge sits on the icon.
+  final Offset? offset;
 
   @override
   Widget build(BuildContext context) {

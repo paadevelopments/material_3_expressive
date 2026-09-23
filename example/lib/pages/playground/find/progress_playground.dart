@@ -23,6 +23,7 @@ enum _ProgressKind { circular, circularWavy, linear, linearWavy }
 class _ProgressPlaygroundState extends State<ProgressPlayground> {
   _ProgressKind _kind = _ProgressKind.linear;
   bool _determinate = true;
+  bool _showTrack = true;
   double _value = 0.6;
   M3EProgressIndicatorSize _linearSize = M3EProgressIndicatorSize.m;
   double _strokeWidth = 8;
@@ -43,12 +44,14 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
         value: _progress,
         strokeWidth: _strokeWidth,
         trackStrokeWidth: _trackStrokeWidth,
+        showTrack: _showTrack,
       ),
       _ProgressKind.circularWavy => M3EProgressIndicator.circularWavy(
         value: _progress,
         strokeWidth: _strokeWidth,
         trackStrokeWidth: _trackStrokeWidth,
         wavelength: _wavelength,
+        showTrack: _showTrack,
       ),
       _ProgressKind.linear => SizedBox(
         width: 220,
@@ -57,6 +60,7 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
           linearSize: _linearSize,
           strokeWidth: _strokeWidth,
           trackStrokeWidth: _trackStrokeWidth,
+          showTrack: _showTrack,
         ),
       ),
       _ProgressKind.linearWavy => SizedBox(
@@ -67,6 +71,7 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
           strokeWidth: _strokeWidth,
           trackStrokeWidth: _trackStrokeWidth,
           wavelength: _wavelength,
+          showTrack: _showTrack,
         ),
       ),
     };
@@ -80,6 +85,7 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
     final String wave = _isWavy
         ? '\n  wavelength: ${_wavelength.toStringAsFixed(0)},'
         : '';
+    final String track = _showTrack ? '' : '\n  showTrack: false,';
     final String ctor = switch (_kind) {
       _ProgressKind.circular => 'circular',
       _ProgressKind.circularWavy => 'circularWavy',
@@ -91,7 +97,7 @@ class _ProgressPlaygroundState extends State<ProgressPlayground> {
 M3EProgressIndicator.$ctor(
   value: $value,$linearSize
   strokeWidth: ${_strokeWidth.toStringAsFixed(0)},
-  trackStrokeWidth: ${_trackStrokeWidth.toStringAsFixed(0)},$wave
+  trackStrokeWidth: ${_trackStrokeWidth.toStringAsFixed(0)},$wave$track
 );''';
     return <PlaySnippet>[
       PlaySnippet(label: _kind.name, code: '$kPlaySnippetImport\n$sample'),
@@ -158,6 +164,11 @@ M3EProgressIndicator.$ctor(
               label: 'Determinate',
               value: _determinate,
               onChanged: (bool v) => setState(() => _determinate = v),
+            ),
+            PlaySwitch(
+              label: 'Show track',
+              value: _showTrack,
+              onChanged: (bool v) => setState(() => _showTrack = v),
             ),
             if (_determinate)
               PlaySlider(

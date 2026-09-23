@@ -9,75 +9,80 @@ class M3ETooltipTheme extends M3EThemeExtension<M3ETooltipTheme> {
   const M3ETooltipTheme({
     this.anchorOffset = 4,
     this.plainMaxWidth = 200,
+    this.plainMinHeight = 24,
     this.plainPadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     this.richMaxWidth = 320,
-    this.richPadding = const EdgeInsets.all(16),
+    this.richPadding = const EdgeInsets.fromLTRB(16, 12, 16, 8),
     this.richTitleGap = 4,
     this.richActionsGap = 12,
     this.richElevation = M3EElevation.level2,
+    this.plainDismissDelay = Duration.zero,
+    this.richDismissDelay = const Duration(milliseconds: 1500),
+    this.placementStep = 8,
   });
 
   /// defaults.
-
   static const M3ETooltipTheme defaults = M3ETooltipTheme();
 
-  /// anchorOffset.
-
+  /// Gap between the target and the tooltip. Spec: 4dp (visual boundary).
   final double anchorOffset;
 
-  /// plainMaxWidth.
+  /// Max width for plain tooltips.
   final double plainMaxWidth;
 
-  /// plainPadding.
+  /// Min height for plain tooltips. Spec: 24dp.
+  final double plainMinHeight;
+
+  /// Plain padding. Spec-aligned: horizontal 8, vertical 4 (with [plainMinHeight]).
   final EdgeInsets plainPadding;
 
-  /// richMaxWidth.
+  /// Max width for rich tooltips.
   final double richMaxWidth;
 
-  /// richPadding.
+  /// Rich padding. Spec: top 12, bottom 8, left/right 16.
   final EdgeInsets richPadding;
 
-  /// richTitleGap.
+  /// Gap between subhead and supporting text. Spec: 4dp.
   final double richTitleGap;
 
-  /// richActionsGap.
+  /// Gap between supporting text and actions. Spec-aligned: 12dp.
   final double richActionsGap;
 
-  /// richElevation.
+  /// Rich container elevation. Spec inference: Level 2.
   final double richElevation;
 
-  /// The plainDismissDelay.
+  /// Delay after leaving the target before hiding a plain tooltip.
+  /// Default: instant ([Duration.zero]).
+  final Duration plainDismissDelay;
 
-  Duration get plainDismissDelay => M3EMotion.extraLong4;
+  /// Delay after leaving the target before hiding a transient rich tooltip.
+  /// Default: 1.5s so actions remain reachable.
+  final Duration richDismissDelay;
 
-  /// The plainBorderRadius.
+  /// Step size when shifting to stay on-screen. Spec: 8dp.
+  final double placementStep;
 
+  /// Plain corner radius. Spec: Extra small (4dp).
   BorderRadius get plainBorderRadius => M3EShapes.radiusExtraSmall;
 
-  /// The richBorderRadius.
-
+  /// Rich corner radius. Spec: Medium (12dp).
   BorderRadius get richBorderRadius => M3EShapes.radiusMedium;
 
-  /// plainContainerColor.
-
+  /// Plain container. Spec: Inverse surface.
   Color plainContainerColor(M3EColorScheme scheme) => scheme.inverseSurface;
 
-  /// plainMessageStyle.
-
+  /// Plain supporting text. Spec: Inverse on surface / bodySmall metrics.
   TextStyle plainMessageStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodySmall.copyWith(color: scheme.onInverseSurface);
 
-  /// richContainerColor.
-
+  /// Rich container. Spec: Surface container.
   Color richContainerColor(M3EColorScheme scheme) => scheme.surfaceContainer;
 
-  /// richTitleStyle.
-
+  /// Rich subhead. Spec: On surface variant / titleSmall metrics.
   TextStyle richTitleStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.titleSmall.copyWith(color: scheme.onSurface);
+      type.titleSmall.copyWith(color: scheme.onSurfaceVariant);
 
-  /// richBodyStyle.
-
+  /// Rich supporting text. Spec: On surface variant / bodyMedium metrics.
   TextStyle richBodyStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyMedium.copyWith(color: scheme.onSurfaceVariant);
 
@@ -85,22 +90,30 @@ class M3ETooltipTheme extends M3EThemeExtension<M3ETooltipTheme> {
   M3ETooltipTheme copyWith({
     double? anchorOffset,
     double? plainMaxWidth,
+    double? plainMinHeight,
     EdgeInsets? plainPadding,
     double? richMaxWidth,
     EdgeInsets? richPadding,
     double? richTitleGap,
     double? richActionsGap,
     double? richElevation,
+    Duration? plainDismissDelay,
+    Duration? richDismissDelay,
+    double? placementStep,
   }) {
     return M3ETooltipTheme(
       anchorOffset: anchorOffset ?? this.anchorOffset,
       plainMaxWidth: plainMaxWidth ?? this.plainMaxWidth,
+      plainMinHeight: plainMinHeight ?? this.plainMinHeight,
       plainPadding: plainPadding ?? this.plainPadding,
       richMaxWidth: richMaxWidth ?? this.richMaxWidth,
       richPadding: richPadding ?? this.richPadding,
       richTitleGap: richTitleGap ?? this.richTitleGap,
       richActionsGap: richActionsGap ?? this.richActionsGap,
       richElevation: richElevation ?? this.richElevation,
+      plainDismissDelay: plainDismissDelay ?? this.plainDismissDelay,
+      richDismissDelay: richDismissDelay ?? this.richDismissDelay,
+      placementStep: placementStep ?? this.placementStep,
     );
   }
 
@@ -112,12 +125,16 @@ class M3ETooltipTheme extends M3EThemeExtension<M3ETooltipTheme> {
     return M3ETooltipTheme(
       anchorOffset: _lerpDouble(anchorOffset, other.anchorOffset, t)!,
       plainMaxWidth: _lerpDouble(plainMaxWidth, other.plainMaxWidth, t)!,
+      plainMinHeight: _lerpDouble(plainMinHeight, other.plainMinHeight, t)!,
       plainPadding: EdgeInsets.lerp(plainPadding, other.plainPadding, t)!,
       richMaxWidth: _lerpDouble(richMaxWidth, other.richMaxWidth, t)!,
       richPadding: EdgeInsets.lerp(richPadding, other.richPadding, t)!,
       richTitleGap: _lerpDouble(richTitleGap, other.richTitleGap, t)!,
       richActionsGap: _lerpDouble(richActionsGap, other.richActionsGap, t)!,
       richElevation: _lerpDouble(richElevation, other.richElevation, t)!,
+      plainDismissDelay: t < 0.5 ? plainDismissDelay : other.plainDismissDelay,
+      richDismissDelay: t < 0.5 ? richDismissDelay : other.richDismissDelay,
+      placementStep: _lerpDouble(placementStep, other.placementStep, t)!,
     );
   }
 

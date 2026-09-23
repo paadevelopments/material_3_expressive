@@ -37,3 +37,6 @@ migrate_working_dir/
 
 # Cursor IDE (local rules, plans, agent state)
 .cursor/
+
+# Generated component spec docs (session artifacts)
+specs/

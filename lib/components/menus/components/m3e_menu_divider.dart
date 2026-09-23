@@ -13,14 +13,15 @@ class M3EMenuDividerWidget extends StatelessWidget {
     final theme = M3ETheme.of(context);
     final menuTheme = theme.menuTheme;
     final style = M3EMenuStyleScope.styleOf(context);
+    final Color color = menuTheme.dividerColor(theme.colorScheme, style);
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: 4,
-        horizontal: menuTheme.entryHorizontalPadding,
+        vertical: menuTheme.dividerVerticalPadding,
+        horizontal: menuTheme.stateLayerInset,
       ),
-      child: Container(
-        height: 1,
-        color: menuTheme.dividerColor(theme.colorScheme, style),
+      child: SizedBox(
+        height: menuTheme.dividerThickness,
+        child: ColoredBox(color: color),
       ),
     );
   }

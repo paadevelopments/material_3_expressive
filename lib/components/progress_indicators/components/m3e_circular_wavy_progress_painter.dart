@@ -19,6 +19,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     this.globalRotation = 0,
     this.additionalRotation = 0,
     this.sweepFraction = 0.5,
+    this.showTrack = true,
   });
 
   /// Null means indeterminate.
@@ -59,6 +60,9 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
 
   /// Indeterminate active sweep as a fraction of the full circle.
   final double sweepFraction;
+
+  /// When false, omits track painting.
+  final bool showTrack;
 
   /// Minimum indeterminate sweep as a fraction of the full circle.
   static const double minSweep = 0.10;
@@ -147,7 +151,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     final double appliedGap = math.min(progressSweep, gapAngle);
     final double trackSweep = tau - progressSweep - appliedGap * 2;
 
-    if (trackSweep > 0) {
+    if (showTrack && trackSweep > 0) {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle + progressSweep + appliedGap,
@@ -200,7 +204,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
     }
     final double appliedGap = math.min(activeSweep, gapAngle);
     final double trackSweep = tau - activeSweep - appliedGap * 2;
-    if (trackSweep > 0) {
+    if (showTrack && trackSweep > 0) {
       // Determinate track stays a flat arc (amplitude 0 via wavy helper).
       _drawWavy(
         canvas,
@@ -303,6 +307,7 @@ class M3ECircularWavyProgressPainter extends CustomPainter {
         oldDelegate.phase != phase ||
         oldDelegate.globalRotation != globalRotation ||
         oldDelegate.additionalRotation != additionalRotation ||
-        oldDelegate.sweepFraction != sweepFraction;
+        oldDelegate.sweepFraction != sweepFraction ||
+        oldDelegate.showTrack != showTrack;
   }
 }

@@ -9,21 +9,28 @@ import '../enums/m3e_icon_button_enums.dart';
 class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
   /// M3EIconButtonTheme.
   const M3EIconButtonTheme({
-    this.outlineWidth = 1,
+    this.outlineWidth,
     this.morphDuration = const Duration(milliseconds: 120),
     this.morphCurve = Curves.easeOut,
     this.filledBackgroundGradient,
     this.tonalBackgroundGradient,
-    this.morphSpring = M3EMotion.expressiveSpatialPress,
+    this.morphSpring = M3EMotion.spatialFast,
   });
 
   /// defaults.
 
   static const M3EIconButtonTheme defaults = M3EIconButtonTheme();
 
-  /// outlineWidth.
+  /// Disabled container opacity (spec 0.1).
+  static const double disabledContainerAlpha = 0.1;
 
-  final double outlineWidth;
+  /// Disabled icon opacity (spec 0.38).
+  static const double disabledForegroundAlpha = 0.38;
+
+  /// Optional flat outline width override for all sizes.
+  ///
+  /// When null, [outlineWidthFor] uses per-size tokens (1 / 1 / 1 / 2 / 3).
+  final double? outlineWidth;
 
   /// morphDuration.
   final Duration morphDuration;
@@ -37,7 +44,7 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
   /// Optional gradient for tonal icon buttons.
   final Gradient? tonalBackgroundGradient;
 
-  /// Shape / padding morph spring.
+  /// Shape morph spring (stiffness 1400 / damping 0.9).
   final M3ESpring morphSpring;
 
   static const Map<M3EIconButtonSize, double> _icon = {
@@ -113,28 +120,27 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
   };
 
   static const Map<M3EIconButtonSize, double> _radiusRestSquare = {
-    M3EIconButtonSize.xs: 8,
-    M3EIconButtonSize.sm: 10,
-    M3EIconButtonSize.md: 14,
-    M3EIconButtonSize.lg: 24,
-    M3EIconButtonSize.xl: 34,
-  };
-
-  static const Map<M3EIconButtonSize, double> _radiusPressed = {
-    M3EIconButtonSize.xs: 6,
-    M3EIconButtonSize.sm: 8,
-    M3EIconButtonSize.md: 11,
-    M3EIconButtonSize.lg: 19,
-    M3EIconButtonSize.xl: 27,
-  };
-
-  /// Between resting and pressed — used for hover morph (matches button spirit).
-  static const Map<M3EIconButtonSize, double> _radiusHovered = {
-    M3EIconButtonSize.xs: 10,
+    M3EIconButtonSize.xs: 12,
     M3EIconButtonSize.sm: 12,
     M3EIconButtonSize.md: 16,
     M3EIconButtonSize.lg: 28,
-    M3EIconButtonSize.xl: 40,
+    M3EIconButtonSize.xl: 28,
+  };
+
+  static const Map<M3EIconButtonSize, double> _radiusPressed = {
+    M3EIconButtonSize.xs: 8,
+    M3EIconButtonSize.sm: 8,
+    M3EIconButtonSize.md: 12,
+    M3EIconButtonSize.lg: 16,
+    M3EIconButtonSize.xl: 16,
+  };
+
+  static const Map<M3EIconButtonSize, double> _outlineWidth = {
+    M3EIconButtonSize.xs: 1,
+    M3EIconButtonSize.sm: 1,
+    M3EIconButtonSize.md: 1,
+    M3EIconButtonSize.lg: 2,
+    M3EIconButtonSize.xl: 3,
   };
 
   /// iconSize.
@@ -163,13 +169,17 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
 
   double radiusPressed(M3EIconButtonSize size) => _radiusPressed[size]!;
 
-  /// radiusHovered.
+  /// Hover keeps the resting shape; returns resting round for API compatibility.
+  double radiusHovered(M3EIconButtonSize size) => radiusRestRound(size);
 
-  double radiusHovered(M3EIconButtonSize size) => _radiusHovered[size]!;
+  /// Outline stroke width for [size] (or [outlineWidth] when set).
+  double outlineWidthFor(M3EIconButtonSize size) =>
+      outlineWidth ?? _outlineWidth[size]!;
 
   @override
   M3EIconButtonTheme copyWith({
     double? outlineWidth,
+    bool clearOutlineWidth = false,
     Duration? morphDuration,
     Curve? morphCurve,
     Gradient? filledBackgroundGradient,
@@ -177,7 +187,9 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
     M3ESpring? morphSpring,
   }) {
     return M3EIconButtonTheme(
-      outlineWidth: outlineWidth ?? this.outlineWidth,
+      outlineWidth: clearOutlineWidth
+          ? null
+          : (outlineWidth ?? this.outlineWidth),
       morphDuration: morphDuration ?? this.morphDuration,
       morphCurve: morphCurve ?? this.morphCurve,
       filledBackgroundGradient:
@@ -194,7 +206,7 @@ class M3EIconButtonTheme extends M3EThemeExtension<M3EIconButtonTheme> {
       return this;
     }
     return M3EIconButtonTheme(
-      outlineWidth: _lerpDouble(outlineWidth, other.outlineWidth, t)!,
+      outlineWidth: t < 0.5 ? outlineWidth : other.outlineWidth,
       morphDuration: Duration(
         milliseconds: _lerpDouble(
           morphDuration.inMilliseconds.toDouble(),

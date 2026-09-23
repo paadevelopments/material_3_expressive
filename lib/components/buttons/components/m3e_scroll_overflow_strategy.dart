@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../toggle_button_group/models/m3e_button_group_action.dart';
+import '../../button_group/models/m3e_button_group_action.dart';
 import '../enums/m3e_button_enums.dart';
 import '../styles/m3e_button_decoration.dart';
 import 'm3e_overflow_strategy.dart';
@@ -22,7 +22,7 @@ class M3EScrollOverflowStrategy extends M3EOverflowStrategy {
     required Axis direction,
     required M3EButtonStyle style,
     required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
+    required M3EButtonDecoration? decoration,
     required bool connected,
     required bool isRtl,
     required Widget Function(
@@ -51,12 +51,12 @@ class M3EScrollOverflowStrategy extends M3EOverflowStrategy {
     required int hiddenCount,
     required M3EButtonStyle style,
     required M3EButtonSize size,
-    required M3EToggleButtonDecoration? decoration,
+    required M3EButtonDecoration? decoration,
     required bool connected,
     required bool isFirst,
     required bool isLast,
     required VoidCallback onPressed,
-    required bool checked,
+    required bool isSelected,
   }) => null;
 
   @override

@@ -182,6 +182,7 @@ class _PreviewSection extends StatelessWidget {
                 // Pin is chrome — keep it out of the demo Tab sequence.
                 ExcludeFocus(
                   child: M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
                     icon: Icon(
                       pinned ? M3EIcons.push_pin : M3EIcons.push_pin_outlined,
                     ),

@@ -17,6 +17,12 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// will morph between. The loading indicator expects at least two items in that list.
   final List<RoundedPolygon>? polygons;
 
+  /// Indicator colors cycled and interpolated during morphing.
+  final List<Color>? indicatorColors;
+
+  /// Size of the morphing indicator.
+  final double? indicatorSize;
+
   /// Defines minimum and maximum sizes for an [M3EExpressiveLoadingIndicator].
   /// If null, then the [ProgressIndicatorThemeData.constraints] will be used. Otherwise, defaults to a minimum width and height of 48 pixels.
   final BoxConstraints? constraints;
@@ -49,18 +55,14 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
   /// turns, where `1.0` is 360°) drives rotation instead.
   final double? rotationTurns;
 
-  /// Elevation shadow cast by the morphing polygon path (`0` = none).
-  final double elevation;
-
-  /// Shadow color for [elevation]. Defaults to black when null.
-  final Color? shadowColor;
-
   /// M3EExpressiveLoadingIndicator.
 
   const M3EExpressiveLoadingIndicator({
     super.key,
     super.color,
     this.polygons,
+    this.indicatorColors,
+    this.indicatorSize,
     this.constraints,
     this.globalRotationDuration,
     this.morphInterval,
@@ -71,15 +73,12 @@ class M3EExpressiveLoadingIndicator extends ProgressIndicator {
     this.pulseSpring,
     this.pulseSpringVelocity,
     this.rotationTurns,
-    this.elevation = 0,
-    this.shadowColor,
     super.semanticsLabel,
     super.semanticsValue,
   }) : assert(
          !(polygons != null) || polygons.length > 1,
          'polygons must contain more than one shape when provided',
-       ),
-       assert(elevation >= 0.0, 'assertion failed');
+       );
 
   @override
   State<M3EExpressiveLoadingIndicator> createState() =>
@@ -114,7 +113,7 @@ class _M3EExpressiveLoadingIndicatorState
   Timer? _morphTimer;
 
   late BoxConstraints _constraints;
-  late Color _color;
+  late List<Color> _indicatorColors;
   late M3ELoadingIndicatorTheme _loadingTheme;
 
   Duration get _globalRotationDuration =>
@@ -139,15 +138,37 @@ class _M3EExpressiveLoadingIndicatorState
   double get _pulseSpringVelocity =>
       widget.pulseSpringVelocity ?? _loadingTheme.pulseSpringVelocity;
 
-  double get _activeSize => _loadingTheme.activeIndicatorSize;
+  double get _activeSize =>
+      widget.indicatorSize ?? _loadingTheme.activeIndicatorSize;
 
   bool get _manualRotation => widget.rotationTurns != null;
 
+  void _rejectEmptyIndicatorColors() {
+    assert(() {
+      if (widget.indicatorColors != null && widget.indicatorColors!.isEmpty) {
+        throw AssertionError('indicatorColors cannot be empty');
+      }
+      return true;
+    }(), 'indicatorColors cannot be empty');
+    if (widget.indicatorColors != null && widget.indicatorColors!.isEmpty) {
+      throw ArgumentError.value(
+        widget.indicatorColors,
+        'indicatorColors',
+        'must not be empty',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _rejectEmptyIndicatorColors();
     final m3eTheme = M3ETheme.of(context);
     _loadingTheme = m3eTheme.loadingIndicatorTheme;
-    _color = widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme);
+    _indicatorColors =
+        widget.indicatorColors ??
+        <Color>[
+          widget.color ?? _loadingTheme.activeColor(m3eTheme.colorScheme),
+        ];
     _constraints =
         widget.constraints ??
         BoxConstraints.tightFor(
@@ -161,7 +182,13 @@ class _M3EExpressiveLoadingIndicatorState
     return Semantics.fromProperties(
       properties: SemanticsProperties(
         label: widget.semanticsLabel,
-        value: widget.semanticsValue,
+        // Spec: progressbar. Flutter requires value/min/max for this role;
+        // indeterminate uses 0% with optional descriptive hint.
+        role: SemanticsRole.progressBar,
+        minValue: '0',
+        maxValue: '100',
+        value: _progressBarValue(widget.semanticsValue),
+        hint: _progressBarHint(widget.semanticsValue),
       ),
       child: RepaintBoundary(
         child: ConstrainedBox(
@@ -190,6 +217,9 @@ class _M3EExpressiveLoadingIndicatorState
                   final totalRotationRadians =
                       totalRotationDegrees * (math.pi / 180.0);
 
+                  final Color indicatorColor = _resolveIndicatorColor(
+                    morphProgress,
+                  );
                   final double pulseScale = _manualRotation
                       ? 1.0
                       : _pulseController.value;
@@ -205,10 +235,8 @@ class _M3EExpressiveLoadingIndicatorState
                           painter: _MorphPainter(
                             morph: _morphSequence[_currentMorphIndex],
                             progress: morphProgress,
-                            color: _color,
+                            color: indicatorColor,
                             scaleFactor: shapesScaleFactor,
-                            elevation: widget.elevation,
-                            shadowColor: widget.shadowColor,
                             repaint: Listenable.merge([
                               _morphController,
                               _globalRotationController,
@@ -415,6 +443,48 @@ class _M3EExpressiveLoadingIndicatorState
     _startMorphCycle();
   }
 
+  Color _resolveIndicatorColor(double progress) {
+    if (_indicatorColors.length == 1) {
+      return _indicatorColors.first;
+    }
+
+    final int colorIndex = _currentMorphIndex % _indicatorColors.length;
+    final Color startColor = _indicatorColors[colorIndex];
+    final Color endColor =
+        _indicatorColors[(colorIndex + 1) % _indicatorColors.length];
+    return Color.lerp(startColor, endColor, progress) ?? startColor;
+  }
+
+  /// Numeric / percent [semanticsValue], else indeterminate `0%`.
+  static String _progressBarValue(String? semanticsValue) {
+    if (semanticsValue == null || semanticsValue.isEmpty) {
+      return '0%';
+    }
+    if (double.tryParse(semanticsValue) != null) {
+      return semanticsValue;
+    }
+    if (semanticsValue.endsWith('%') &&
+        double.tryParse(
+              semanticsValue.substring(0, semanticsValue.length - 1),
+            ) !=
+            null) {
+      return semanticsValue;
+    }
+    return '0%';
+  }
+
+  /// Non-numeric [semanticsValue] is exposed as a hint (progressBar value
+  /// must stay numeric for Flutter debug role checks).
+  static String? _progressBarHint(String? semanticsValue) {
+    if (semanticsValue == null || semanticsValue.isEmpty) {
+      return null;
+    }
+    if (_progressBarValue(semanticsValue) == semanticsValue) {
+      return null;
+    }
+    return semanticsValue;
+  }
+
   void _startMorphCycle() {
     if (!mounted || _manualRotation) {
       return;
@@ -464,16 +534,11 @@ class _MorphPainter extends CustomPainter {
   /// the size height x the scale factor)
   final double scaleFactor;
 
-  final double elevation;
-  final Color? shadowColor;
-
   _MorphPainter({
     required this.morph,
     required this.progress,
     required this.color,
     this.scaleFactor = 1.0,
-    this.elevation = 0,
-    this.shadowColor,
     super.repaint,
   });
 
@@ -481,15 +546,6 @@ class _MorphPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = morph.toPath(progress: progress);
     final processedPath = _processPath(path, size);
-    if (elevation > 0) {
-      // Follows the morphing polygon (and parent rotate/scale transforms).
-      canvas.drawShadow(
-        processedPath,
-        shadowColor ?? const Color(0xFF000000),
-        elevation,
-        true,
-      );
-    }
     canvas.drawPath(
       processedPath,
       Paint()
@@ -503,9 +559,7 @@ class _MorphPainter extends CustomPainter {
     return oldDelegate.morph != morph ||
         oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.scaleFactor != scaleFactor ||
-        oldDelegate.elevation != elevation ||
-        oldDelegate.shadowColor != shadowColor;
+        oldDelegate.scaleFactor != scaleFactor;
   }
 
   /// Process a given path to scale it and center it inside the given size.

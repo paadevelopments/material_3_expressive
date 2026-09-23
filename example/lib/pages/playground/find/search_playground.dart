@@ -102,6 +102,7 @@ M3ESearchBar(
                   expandOnFocus: _expandOnFocus,
                   trailing: <Widget>[
                     M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
                       icon: const Icon(M3EIcons.close),
                       onPressed: _barController.clear,
                     ),

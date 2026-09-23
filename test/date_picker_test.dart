@@ -11,6 +11,12 @@ Widget _host(Widget child) {
   );
 }
 
+Finder _tooltip(String message) {
+  return find.byWidgetPredicate(
+    (Widget widget) => widget is M3ETooltip && widget.message == message,
+  );
+}
+
 void main() {
   testWidgets('M3ECalendarDatePicker selects a day', _calendarSelectsDay);
   testWidgets(
@@ -312,7 +318,7 @@ Future<void> _landscapeDialogLayout(WidgetTester tester) async {
   expect(headerSize.width, closeTo(152, 1));
   expect(tester.takeException(), isNull);
 
-  await tester.tap(find.byTooltip('Switch to input'));
+  await tester.tap(_tooltip('Switch to input'));
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
   expect(find.byType(M3EDatePickerHeader), findsOneWidget);

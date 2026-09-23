@@ -10,15 +10,24 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     this.trackWidth = 52,
     this.trackHeight = 32,
     this.trackPadding = 4,
-    this.thumbSizePressed = 32,
+    this.thumbSizePressed = 28,
     this.thumbSizeSelected = 24,
     this.thumbSizeUnselected = 16,
-    this.stateLayerSize = 48,
+    this.thumbSizeWithIcon = 24,
+    this.stateLayerSize = 40,
+    this.targetSize = 48,
     this.iconSize = 16,
     this.borderWidth = 2,
     this.disabledTrackOpacity = 0.12,
     this.disabledThumbOpacity = 0.38,
+    this.disabledSelectedHandleOpacity = 1,
     this.disabledOutlineOpacity = 0.12,
+    this.hoverStateLayerOpacity = 0.08,
+    this.focusStateLayerOpacity = 0.1,
+    this.pressedStateLayerOpacity = 0.1,
+    this.focusIndicatorThickness = 3,
+    this.focusIndicatorOffset = 2,
+    this.focusIndicatorColor,
     this.positionSpring = const M3ESpring(stiffness: 380, damping: 0.55),
     this.sizeSpring = const M3ESpring(stiffness: 380, damping: 0.7),
   });
@@ -34,7 +43,9 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   /// trackHeight.
   final double trackHeight;
 
-  /// trackPadding.
+  /// Inset that keeps the 24dp handle inside the track.
+  ///
+  /// The 28dp pressed handle then stops 2dp short of the track edge.
   final double trackPadding;
 
   /// thumbSizePressed.
@@ -46,8 +57,14 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   /// thumbSizeUnselected.
   final double thumbSizeUnselected;
 
-  /// Diameter of the thumb-centered hover/focus/press state layer.
+  /// Handle size when the current state shows an icon.
+  final double thumbSizeWithIcon;
+
+  /// Diameter of the handle-centered hover/focus/press state layer.
   final double stateLayerSize;
+
+  /// Minimum control slot. The track stays centered inside it.
+  final double targetSize;
 
   /// iconSize.
   final double iconSize;
@@ -58,11 +75,32 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   /// disabledTrackOpacity.
   final double disabledTrackOpacity;
 
-  /// disabledThumbOpacity.
+  /// Opacity for the disabled unselected handle and disabled icons.
   final double disabledThumbOpacity;
+
+  /// Opacity for the disabled selected handle.
+  final double disabledSelectedHandleOpacity;
 
   /// disabledOutlineOpacity.
   final double disabledOutlineOpacity;
+
+  /// Hover state-layer opacity.
+  final double hoverStateLayerOpacity;
+
+  /// Focus state-layer opacity.
+  final double focusStateLayerOpacity;
+
+  /// Pressed state-layer opacity.
+  final double pressedStateLayerOpacity;
+
+  /// Keyboard focus-ring stroke width.
+  final double focusIndicatorThickness;
+
+  /// Gap between the state layer and the focus ring.
+  final double focusIndicatorOffset;
+
+  /// Focus-ring color. Null resolves to [M3EColorScheme.secondary].
+  final Color? focusIndicatorColor;
 
   /// Thumb position spring (overshoot toward resting side).
   final M3ESpring positionSpring;
@@ -72,11 +110,36 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
 
   /// thumbSize.
 
-  double thumbSize({required bool pressed, required bool grown}) {
+  double thumbSize({
+    required bool pressed,
+    required bool grown,
+    bool hasIcon = false,
+  }) {
     if (pressed) {
       return thumbSizePressed;
     }
+    if (hasIcon) {
+      return thumbSizeWithIcon;
+    }
     return grown ? thumbSizeSelected : thumbSizeUnselected;
+  }
+
+  /// Focus-ring color for [scheme].
+  Color resolveFocusIndicatorColor(M3EColorScheme scheme) =>
+      focusIndicatorColor ?? scheme.secondary;
+
+  /// Opacity for the active hover, focus, or pressed state layer.
+  double stateLayerOpacity(M3EInteractionState state) {
+    if (state.pressed) {
+      return pressedStateLayerOpacity;
+    }
+    if (state.focused) {
+      return focusStateLayerOpacity;
+    }
+    if (state.hovered) {
+      return hoverStateLayerOpacity;
+    }
+    return 0;
   }
 
   /// trackColor.
@@ -96,14 +159,28 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   }
 
   /// thumbColor.
-
+  ///
+  /// Hover, focus, and press use primary container when selected and
+  /// on surface variant when not.
   Color thumbColor(
     M3EColorScheme scheme, {
     required bool enabled,
     required bool value,
+    bool hovered = false,
+    bool focused = false,
+    bool pressed = false,
   }) {
     if (!enabled) {
+      if (value) {
+        return M3EColorUtils.withOpacity(
+          scheme.surface,
+          disabledSelectedHandleOpacity,
+        );
+      }
       return M3EColorUtils.withOpacity(scheme.onSurface, disabledThumbOpacity);
+    }
+    if (hovered || focused || pressed) {
+      return value ? scheme.primaryContainer : scheme.onSurfaceVariant;
     }
     return value ? scheme.onPrimary : scheme.outline;
   }
@@ -121,9 +198,22 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
   }
 
   /// iconColor.
-
-  Color iconColor(M3EColorScheme scheme, {required bool value}) =>
-      value ? scheme.onPrimaryContainer : scheme.surfaceContainerHighest;
+  ///
+  /// Selected icons use primary. Disabled icons use on surface or
+  /// surface container highest at [disabledThumbOpacity].
+  Color iconColor(
+    M3EColorScheme scheme, {
+    required bool value,
+    bool enabled = true,
+  }) {
+    if (!enabled) {
+      return M3EColorUtils.withOpacity(
+        value ? scheme.onSurface : scheme.surfaceContainerHighest,
+        disabledThumbOpacity,
+      );
+    }
+    return value ? scheme.primary : scheme.surfaceContainerHighest;
+  }
 
   /// stateLayerColor.
 
@@ -138,12 +228,22 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     double? thumbSizePressed,
     double? thumbSizeSelected,
     double? thumbSizeUnselected,
+    double? thumbSizeWithIcon,
     double? stateLayerSize,
+    double? targetSize,
     double? iconSize,
     double? borderWidth,
     double? disabledTrackOpacity,
     double? disabledThumbOpacity,
+    double? disabledSelectedHandleOpacity,
     double? disabledOutlineOpacity,
+    double? hoverStateLayerOpacity,
+    double? focusStateLayerOpacity,
+    double? pressedStateLayerOpacity,
+    double? focusIndicatorThickness,
+    double? focusIndicatorOffset,
+    Color? focusIndicatorColor,
+    bool clearFocusIndicatorColor = false,
     M3ESpring? positionSpring,
     M3ESpring? sizeSpring,
   }) {
@@ -154,13 +254,29 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
       thumbSizePressed: thumbSizePressed ?? this.thumbSizePressed,
       thumbSizeSelected: thumbSizeSelected ?? this.thumbSizeSelected,
       thumbSizeUnselected: thumbSizeUnselected ?? this.thumbSizeUnselected,
+      thumbSizeWithIcon: thumbSizeWithIcon ?? this.thumbSizeWithIcon,
       stateLayerSize: stateLayerSize ?? this.stateLayerSize,
+      targetSize: targetSize ?? this.targetSize,
       iconSize: iconSize ?? this.iconSize,
       borderWidth: borderWidth ?? this.borderWidth,
       disabledTrackOpacity: disabledTrackOpacity ?? this.disabledTrackOpacity,
       disabledThumbOpacity: disabledThumbOpacity ?? this.disabledThumbOpacity,
+      disabledSelectedHandleOpacity:
+          disabledSelectedHandleOpacity ?? this.disabledSelectedHandleOpacity,
       disabledOutlineOpacity:
           disabledOutlineOpacity ?? this.disabledOutlineOpacity,
+      hoverStateLayerOpacity:
+          hoverStateLayerOpacity ?? this.hoverStateLayerOpacity,
+      focusStateLayerOpacity:
+          focusStateLayerOpacity ?? this.focusStateLayerOpacity,
+      pressedStateLayerOpacity:
+          pressedStateLayerOpacity ?? this.pressedStateLayerOpacity,
+      focusIndicatorThickness:
+          focusIndicatorThickness ?? this.focusIndicatorThickness,
+      focusIndicatorOffset: focusIndicatorOffset ?? this.focusIndicatorOffset,
+      focusIndicatorColor: clearFocusIndicatorColor
+          ? null
+          : (focusIndicatorColor ?? this.focusIndicatorColor),
       positionSpring: positionSpring ?? this.positionSpring,
       sizeSpring: sizeSpring ?? this.sizeSpring,
     );
@@ -171,43 +287,93 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     if (other is! M3ESwitchTheme) {
       return this;
     }
-    return M3ESwitchTheme(
-      trackWidth: _lerpDouble(trackWidth, other.trackWidth, t)!,
-      trackHeight: _lerpDouble(trackHeight, other.trackHeight, t)!,
-      trackPadding: _lerpDouble(trackPadding, other.trackPadding, t)!,
+    return _lerpSwitchLayout(other, t);
+  }
+
+  M3ESwitchTheme _lerpSwitchLayout(M3ESwitchTheme other, double t) {
+    return _lerpSwitchFeedback(other, t).copyWith(
+      trackWidth: _lerpDouble(trackWidth, other.trackWidth, t),
+      trackHeight: _lerpDouble(trackHeight, other.trackHeight, t),
+      trackPadding: _lerpDouble(trackPadding, other.trackPadding, t),
       thumbSizePressed: _lerpDouble(
         thumbSizePressed,
         other.thumbSizePressed,
         t,
-      )!,
+      ),
       thumbSizeSelected: _lerpDouble(
         thumbSizeSelected,
         other.thumbSizeSelected,
         t,
-      )!,
+      ),
       thumbSizeUnselected: _lerpDouble(
         thumbSizeUnselected,
         other.thumbSizeUnselected,
         t,
-      )!,
-      stateLayerSize: _lerpDouble(stateLayerSize, other.stateLayerSize, t)!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
+      ),
+      thumbSizeWithIcon: _lerpDouble(
+        thumbSizeWithIcon,
+        other.thumbSizeWithIcon,
+        t,
+      ),
+      stateLayerSize: _lerpDouble(stateLayerSize, other.stateLayerSize, t),
+      targetSize: _lerpDouble(targetSize, other.targetSize, t),
+      iconSize: _lerpDouble(iconSize, other.iconSize, t),
+    );
+  }
+
+  M3ESwitchTheme _lerpSwitchFeedback(M3ESwitchTheme other, double t) {
+    return copyWith(
+      borderWidth: _lerpDouble(borderWidth, other.borderWidth, t),
       disabledTrackOpacity: _lerpDouble(
         disabledTrackOpacity,
         other.disabledTrackOpacity,
         t,
-      )!,
+      ),
       disabledThumbOpacity: _lerpDouble(
         disabledThumbOpacity,
         other.disabledThumbOpacity,
         t,
-      )!,
+      ),
+      disabledSelectedHandleOpacity: _lerpDouble(
+        disabledSelectedHandleOpacity,
+        other.disabledSelectedHandleOpacity,
+        t,
+      ),
       disabledOutlineOpacity: _lerpDouble(
         disabledOutlineOpacity,
         other.disabledOutlineOpacity,
         t,
-      )!,
+      ),
+      hoverStateLayerOpacity: _lerpDouble(
+        hoverStateLayerOpacity,
+        other.hoverStateLayerOpacity,
+        t,
+      ),
+      focusStateLayerOpacity: _lerpDouble(
+        focusStateLayerOpacity,
+        other.focusStateLayerOpacity,
+        t,
+      ),
+      pressedStateLayerOpacity: _lerpDouble(
+        pressedStateLayerOpacity,
+        other.pressedStateLayerOpacity,
+        t,
+      ),
+      focusIndicatorThickness: _lerpDouble(
+        focusIndicatorThickness,
+        other.focusIndicatorThickness,
+        t,
+      ),
+      focusIndicatorOffset: _lerpDouble(
+        focusIndicatorOffset,
+        other.focusIndicatorOffset,
+        t,
+      ),
+      focusIndicatorColor: Color.lerp(
+        focusIndicatorColor,
+        other.focusIndicatorColor,
+        t,
+      ),
       positionSpring: t < 0.5 ? positionSpring : other.positionSpring,
       sizeSpring: t < 0.5 ? sizeSpring : other.sizeSpring,
     );

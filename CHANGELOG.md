@@ -1,3 +1,165 @@
+## 1.1.3
+
+### Changed
+
+* **Menus:** vertical and baseline only (`M3EMenuVariant`,
+  `M3EMenuSelectionMode`). Vertical row **48**, item radius **12**, group
+  padding **4**, **4** between items, group gap **2**. Opening focuses the
+  first enabled item. Up/Down move, Left/Right open or close a submenu,
+  letters typeahead, Escape closes, Enter or Space activates. Multi-select
+  stays open.
+* **Toolbars:** floating `alignment` places the pill; `screenOffset` (theme
+  default **16**) insets it on every side. Docked toolbars ignore both.
+* **Overlays:** `M3EOverlayHistory` closes an open menu, dropdown, split
+  popup, or FAB menu on the next back before the route pops.
+* **Navigation:** selection pills on the bar, rail, and drawer scale in place
+  (spatial spring, width 0.4 to 1) and fade with the effects spring. The
+  indicator no longer stretches between destinations.
+* **Dividers:** thickness **1**, color **outline variant**; full-width, inset
+  (**16** / **0**), and middle inset (**16** / **16**). End margin **8**,
+  bottom margin **8**, and supporting-text gap **4** are theme tokens and stay
+  off unless `outerMargin` is set (the text gap is applied by the caller).
+  Decorative, so the line is excluded from semantics.
+* **Chips:** height **32**, radius **8**, text padding **16**; assist label
+  **on surface** and leading icon **primary**; stroke **outline variant**;
+  filter and input selected container **secondary container**; focus ring
+  **secondary**, **3dp**, **2dp** offset; InkSparkle; remove target **48**
+  (own Tab stop when the chip also acts) and minimum width **88**; elevated
+  level **1**, dragged level **4**. **`M3EChipGroup`**: arrows move focus;
+  Backspace or Delete removes a focused input chip.
+* **Switches:** track **52×32**; handle **16** off / **24** on or with an icon /
+  **28** pressed; state layer **40**; target **48**; selected icon **primary**;
+  hover, focus, and press handle **primary container** / **on surface variant**;
+  disabled selected handle **surface**; focus ring on the handle (**secondary**,
+  **3dp**, **2dp** offset); InkSparkle on the handle; drag past the midpoint
+  toggles; semantics role switch.
+* **Radio buttons:** icon **20** (stroke **2**, dot **10**); state layer **40**;
+  target **48**; unselected icon **on surface variant** (**on surface** when
+  hovered, focused, or pressed); pressed state layer swaps (selected
+  **on surface**, unselected **primary**); InkSparkle on the control; semantics
+  role radio. **`M3ERadioGroup`**: Tab / Shift+Tab enter on the selected radio
+  (or the first / last if none is selected); arrows move, select, and wrap;
+  Space does nothing when that radio is already selected.
+* **Checkboxes:** container **18** / corner **2** / icon **18**; state layer
+  **40** circle; target **48**; selected outline **0**; unselected outline
+  **on surface variant** (**on surface** when hovered, focused, or pressed);
+  pressed state layer swaps (unselected **primary**, selected **on surface**);
+  focus ring **secondary**, **3dp** thick, **2dp** offset; InkSparkle on the
+  control; disabled selected icon **surface**; semantics role checkbox
+  (checked / mixed). Default `checkIconPadding` is zero.
+* **Snackbars:** single/two-line min heights **48** / **68**; start pad **16**,
+  end **8** with action/close; optional **close** (24 / pad 12); actionable or
+  closable bars do **not** auto-dismiss (plain default **4s**); one-at-a-time
+  via **`M3ESnackbarController`**; InkSparkle on action/close; polite live
+  region; **Esc** dismisses when focused; elevation Level 3.
+* **Tooltips:** plain min height **24** / pad **8×4**; rich pad **16/12/16/8**;
+  title **on surface variant**; plain dismiss **instant** / rich **1.5s**
+  after leave (themable); placement
+  plain **above** / rich **bottom-end** with **8dp** on-screen steps;
+  **`persistent`** rich (tap/controller); **`M3ETooltipController`**;
+  **`M3ETooltipPlacement`**; one open tooltip at a time; semantics tooltip.
+* **Breaking — badges:** colors **Error** / **On error**; small **6dp** /
+  large min **16dp** (pad 4 / radius 8); type labelSmall **11 / 500 / 16 /
+  0.5**; Compose placement `smallOffset` **6×6** / `largeOffset` **12×14**
+  (replaces `defaultOffset`); default `maxCount` **999**; optional
+  **`label`** (preferred over `count`); RTL mirrors trailing/leading; a11y
+  “New notification” / “One new notification” / “{n} new notifications”.
+  Overlay layout does **not** expand or shift the child (nav icons stay
+  aligned).
+* **Progress indicators:** track color **secondary container** (linear +
+  circular); circular gap **4dp**; linear stop flush (trailing space 0) with
+  **4dp** host end inset; optional **`showTrack`** (default true); a11y
+  **`progressBar`** + `semanticsLabel` / `semanticsValue`; linear RTL mirror
+  (circular unchanged).
+* **Breaking — loading indicator:** remove `elevation` (widget, theme, and
+  path shadow). Refresh host elevation stays on `M3ERefreshIndicator`.
+* **Loading indicator:** instance `indicatorSize` / `containerWidth` /
+  `containerHeight`, `containerShape` (`ShapeBorder`, theme default
+  **`CircleBorder`**), `indicatorColors` (morph-interpolated; exclusive with
+  `color`), and ratio-preserving **`size`** (outer; active = size × 38/48;
+  debug assert outside **24–240**). A11y role **`progressBar`**. Keep legacy
+  `containerRadius` getter.
+* Bump `material_ui` to `^1.4.0` (Dart SDK `^3.13.0`).
+* **Breaking — FAB menus:** require **2–6** items; theme paddings
+  leading/trailing **24**, icon–label **8**, between items **4**, close↔items
+  **8** (replaces `itemHorizontalPadding` / old gaps). Close button **56** /
+  icon **20**; closed size follows `M3EFabSize`. Color sets: filled close +
+  container items from `M3EFabColor` (surface→primary). Initial focus on close
+  (“Toggle menu”, expanded/collapsed); Tab walks items; Escape closes. Spring
+  exit reverse; short viewports scroll items behind close. Add
+  `M3EFabMenuController` and per-item `openBuilder` container transform.
+* **Breaking — Extended FABs:** add `M3EExtendedFabSize` (`small` 56 /
+  `medium` 80 / `large` 96; default **small**). Icon is optional; label is
+  required (no icon-only). Per-size paddings (medium leading/trailing **26**),
+  radii 16/20/28, and label type titleMedium / titleLarge / headlineSmall.
+  `M3EExtendedFabTheme` resolves via size metrics; min width **80**. Add
+  `M3EExtendedFabController` (scroll collapse/expand, appear morph, container
+  transform), focus ring **3dp** / **2dp** / `secondary`, TapRegion focus
+  clear, and disabled muted colors (shared with FAB).
+* **Breaking — FABs:** `M3EFabSize.medium` is now **80dp** / icon **28** /
+  radius **20** (was 56/24/16). Add `M3EFabSize.regular` (56/24/16) for the
+  baseline size. Default size remains `medium`. Add filled color styles
+  `primaryFilled` / `secondaryFilled` / `tertiaryFilled`; existing
+  `primary` / `secondary` / `tertiary` stay as container roles. Add
+  `M3EFabController` (scroll show/hide, appear morph, container transform),
+  focus ring **3dp** / **2dp** gap / `secondary`, and disabled muted colors.
+* **Split buttons** — align to M3E size tokens: pressed inner corners match
+  hovered (8/12/12/20/20); between-space always **2dp**; optical vs centered
+  trailing pads; small leading icon **20dp**; standard-motion chevron **180°**;
+  trailing a11y expanded/collapsed + “More options”; shared button colors with
+  state-layer-only open trailing (no toggle recolor).
+* **Segmented buttons** — align to M3E Outlined tokens: density
+  (`M3ESegmentedButtonDensity` 0/−1/−2/−3 → 40/36/32/28dp), ≥48dp target,
+  disabled outline/content opacities (0.12 / 0.38), focus ring 3dp /
+  `secondary` with 2dp gap, single-select cannot clear, multi-select allows
+  empty, a11y radio/checkbox semantics, and theme overrides for selected fill,
+  focus, and optional `maxWidth`.
+* **Breaking — buttons:** fold toggle selection into `M3EButton` via
+  caller-controlled `isSelected`, `selectedIcon`, and `selectedLabel`;
+  `M3EToggleButton`, `M3EToggleButtonDecoration`, and
+  `M3EToggleButtonTheme` are removed. Toggle text buttons are no longer
+  supported.
+* **Breaking — button groups:** rename the component module from
+  `toggle_button_group` to `button_group`; group actions now use
+  `isSelected`, `selectedIcon`, and `selectedLabel`, and group decoration uses
+  `M3EButtonDecoration`. Theme access moves from `toggleButtonGroupTheme` to
+  `buttonGroupTheme`. All actions render as `M3EButton` (icon-only, text-only,
+  or icon+label); `M3EButtonGroupItemKind` and `M3EButtonGroupAction.iconButton`
+  are removed — use `minWidth` for icon-button-like resting widths. Connected
+  groups span their surface with equal-width segments (optional
+  `buttonGroupTheme.maxWidth` cap); standard between-space follows size tokens
+  (18 / 12 / 8 / 8 / 8) and connected gap is 2dp.
+* **Breaking — button groups density:** `M3EButtonGroupDensity` is now
+  `regular` / `comfortable` / `compact` / `dense` (spec levels 0 / −1 / −2 /
+  −3). Density adjusts **container height** (−4dp per level), not between-space.
+  Hover keeps resting shape; press morphs corners / neighbour squish.
+* **Button groups** — align standard spacing and connected corner tokens per
+  size; add `selectionRequired` and `multiSelect` (with `selectedIndices` /
+  `onSelectedIndicesChanged`); use the 1400/0.9 neighbour-squish spring; keep
+  keyboard traversal on Tab order without capturing arrow keys; and keep all
+  actions at a uniform group-managed height for each size. Elevated
+  button groups remain available but are not recommended.
+* Bump `material_ui` to `^1.3.0`.
+* Raise Flutter SDK constraint to `>=3.47.0` (FVM pin `3.47.0`) for
+  `material_ui` `1.3.0` compatibility.
+* **Buttons** — align `M3EButton` defaults to Material 3 Expressive size /
+  color / shape tokens: XS leading/trailing **12dp** and icon–label gap
+  **4dp**; outline widths **1 / 1 / 1 / 2 / 3** (XS→XL); outlined outline
+  role `outlineVariant` and label/icon `onSurfaceVariant`; disabled container
+  / outline opacity **0.1**; shape spring default stiffness **1400** /
+  damping **0.9** (`M3EButtonTheme.shapeSpring`, overridable via decoration
+  motion); hover keeps resting corners (press morph only); pressed state
+  layer **0.1** with default `InkSparkle`; label `maxLines` **1** (up to
+  **2** at ≥200% text scale).
+* **Icon buttons** — align `M3EIconButton` to M3E size / color / shape
+  tokens: square radii **12 / 12 / 16 / 28 / 28**, pressed **8 / 8 / 12 /
+  16 / 16**; outline widths **1 / 1 / 1 / 2 / 3**; outline role
+  `outlineVariant`; full default/toggle color roles; disabled **0.1** /
+  **0.38**; shape spring **1400 / 0.9**; hover keeps resting; pressed
+  state layer **0.1** + `InkSparkle`; keyboard focus ring only (no sticky
+  focus fill). Selected toggle icons use per-size icon tokens (**20 / 24 /
+  24 / 32 / 40**). **Breaking:** default `variant` is now **`filled`**.
+
 ## 1.1.2
 
 ### Added

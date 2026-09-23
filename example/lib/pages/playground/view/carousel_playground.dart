@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -24,7 +24,6 @@ class _CarouselPlaygroundState extends State<CarouselPlayground> {
   bool _isExtended = false;
   bool _freeScroll = false;
   bool _showTitles = true;
-  int _focalIndex = 1;
 
   static const List<({String image, String title})> _images =
       <({String image, String title})>[
@@ -60,35 +59,46 @@ M3ECarousel(
     ];
   }
 
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _CarouselDemoHost(
+            type: _type,
+            alignment: _alignment,
+            axis: _axis,
+            isExtended: _isExtended,
+            freeScroll: _freeScroll,
+            showTitles: _showTitles,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool vertical = _axis == Axis.vertical;
+    final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'Carousel',
-          child: SizedBox(
-            height: vertical ? 320 : 200,
-            width: vertical ? 200 : null,
-            child: M3ECarousel(
-              key: ValueKey<Object>('$_type-$_axis-$_alignment-$_isExtended'),
-              axis: _axis,
-              type: _type,
-              isExtended: _isExtended,
-              freeScroll: _freeScroll,
-              heroAlignment: _alignment,
-              onChange: (M3ECarouselChangeDetails details) {
-                setState(() => _focalIndex = details.focalIndex);
-              },
-              children: <Widget>[
-                for (int i = 0; i < _images.length; i++)
-                  _CarouselImage(
-                    asset: _images[i].image,
-                    title: _images[i].title,
-                    showTitle: _showTitles && i == _focalIndex,
-                  ),
-              ],
-            ),
+          label: 'Carousel demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full screen so the carousel can scroll at its real '
+                'size. Titles follow the focused item.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open carousel demo'),
+              ),
+            ],
           ),
         ),
       ],
@@ -138,6 +148,81 @@ M3ECarousel(
           ],
         ),
       ],
+    );
+  }
+}
+
+class _CarouselDemoHost extends StatefulWidget {
+  const _CarouselDemoHost({
+    required this.type,
+    required this.alignment,
+    required this.axis,
+    required this.isExtended,
+    required this.freeScroll,
+    required this.showTitles,
+  });
+
+  final M3ECarouselType type;
+  final M3ECarouselHeroAlignment alignment;
+  final Axis axis;
+  final bool isExtended;
+  final bool freeScroll;
+  final bool showTitles;
+
+  @override
+  State<_CarouselDemoHost> createState() => _CarouselDemoHostState();
+}
+
+class _CarouselDemoHostState extends State<_CarouselDemoHost> {
+  int _focalIndex = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final String title = _CarouselPlaygroundState._images[_focalIndex].title;
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: title,
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            height: widget.axis == Axis.vertical ? 320 : 200,
+            width: widget.axis == Axis.vertical ? 200 : double.infinity,
+            child: M3ECarousel(
+              axis: widget.axis,
+              type: widget.type,
+              isExtended: widget.isExtended,
+              freeScroll: widget.freeScroll,
+              heroAlignment: widget.alignment,
+              onChange: (M3ECarouselChangeDetails details) {
+                setState(() => _focalIndex = details.focalIndex);
+              },
+              children: <Widget>[
+                for (
+                  int i = 0;
+                  i < _CarouselPlaygroundState._images.length;
+                  i++
+                )
+                  _CarouselImage(
+                    asset: _CarouselPlaygroundState._images[i].image,
+                    title: _CarouselPlaygroundState._images[i].title,
+                    showTitle: widget.showTitles && i == _focalIndex,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

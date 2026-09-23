@@ -48,8 +48,7 @@ M3EThemeData _m3eDeriveDarkTemplate(M3EThemeData source) {
     tabTheme: source.tabTheme,
     textFieldTheme: source.textFieldTheme,
     timePickerTheme: source.timePickerTheme,
-    toggleButtonTheme: source.toggleButtonTheme,
-    toggleButtonGroupTheme: source.toggleButtonGroupTheme,
+    buttonGroupTheme: source.buttonGroupTheme,
     toolbarTheme: source.toolbarTheme,
     tooltipTheme: source.tooltipTheme,
   );
@@ -111,8 +110,7 @@ M3EThemeData _m3eCopyThemeData(
   M3ETabTheme? tabTheme,
   M3ETextFieldTheme? textFieldTheme,
   M3ETimePickerTheme? timePickerTheme,
-  M3EToggleButtonTheme? toggleButtonTheme,
-  M3EToggleButtonGroupTheme? toggleButtonGroupTheme,
+  M3EButtonGroupTheme? buttonGroupTheme,
   M3EToolbarTheme? toolbarTheme,
   M3ETooltipTheme? tooltipTheme,
 }) {
@@ -181,9 +179,7 @@ M3EThemeData _m3eCopyThemeData(
     tabTheme: tabTheme ?? source.tabTheme,
     textFieldTheme: textFieldTheme ?? source.textFieldTheme,
     timePickerTheme: timePickerTheme ?? source.timePickerTheme,
-    toggleButtonTheme: toggleButtonTheme ?? source.toggleButtonTheme,
-    toggleButtonGroupTheme:
-        toggleButtonGroupTheme ?? source.toggleButtonGroupTheme,
+    buttonGroupTheme: buttonGroupTheme ?? source.buttonGroupTheme,
     toolbarTheme: toolbarTheme ?? source.toolbarTheme,
     tooltipTheme: tooltipTheme ?? source.tooltipTheme,
   );

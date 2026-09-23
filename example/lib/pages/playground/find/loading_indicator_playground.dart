@@ -20,14 +20,18 @@ class LoadingIndicatorPlayground extends StatefulWidget {
 class _LoadingIndicatorPlaygroundState
     extends State<LoadingIndicatorPlayground> {
   M3ELoadingIndicatorVariant _variant = M3ELoadingIndicatorVariant.defaultStyle;
-  double _elevation = 0;
+  double _size = 48;
+  bool _multicolor = false;
 
   List<PlaySnippet> get _snippets {
+    final String colorsLine = _multicolor
+        ? '\n  indicatorColors: const [Color(0xff6750a4), Color(0xff006a6a)],'
+        : '';
     final String sample =
         '''
 M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.${_variant.name},
-  elevation: ${_elevation.toStringAsFixed(0)},
+  size: ${_size.toStringAsFixed(0)},$colorsLine
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -46,7 +50,10 @@ M3ELoadingIndicator(
           child: Center(
             child: M3ELoadingIndicator(
               variant: _variant,
-              elevation: _elevation,
+              size: _size,
+              indicatorColors: _multicolor
+                  ? const <Color>[Color(0xff6750a4), Color(0xff006a6a)]
+                  : null,
             ),
           ),
         ),
@@ -57,10 +64,18 @@ M3ELoadingIndicator(
             runSpacing: 16,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
-              M3ELoadingIndicator(elevation: _elevation),
+              M3ELoadingIndicator(
+                size: _size,
+                indicatorColors: _multicolor
+                    ? const <Color>[Color(0xff6750a4), Color(0xff006a6a)]
+                    : null,
+              ),
               M3ELoadingIndicator(
                 variant: M3ELoadingIndicatorVariant.contained,
-                elevation: _elevation,
+                size: _size,
+                indicatorColors: _multicolor
+                    ? const <Color>[Color(0xff6750a4), Color(0xff006a6a)]
+                    : null,
               ),
             ],
           ),
@@ -81,12 +96,19 @@ M3ELoadingIndicator(
               },
             ),
             PlaySlider(
-              label: 'Elevation',
-              value: _elevation,
-              min: 0,
-              max: 12,
-              divisions: 12,
-              onChanged: (double v) => setState(() => _elevation = v),
+              label: 'Size (outer, 24–240)',
+              value: _size,
+              min: M3ELoadingIndicatorTheme.minSize,
+              max: M3ELoadingIndicatorTheme.maxSize,
+              divisions: 54,
+              onChanged: (double v) => setState(() => _size = v),
+            ),
+            PlayEnumSegmented<bool>(
+              label: 'Multicolor',
+              value: _multicolor,
+              values: const <bool>[false, true],
+              labelOf: (bool value) => value ? 'On' : 'Off',
+              onChanged: (bool value) => setState(() => _multicolor = value),
             ),
           ],
         ),

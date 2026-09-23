@@ -114,8 +114,8 @@ Rules for agents:
 
 | Kind | Convention |
 |------|------------|
-| Files | `m3e_` prefix + snake_case (e.g. `m3e_toggle_button_group.dart`) |
-| Classes | `M3E` prefix + PascalCase (e.g. `M3EToggleButtonGroup`) |
+| Files | `m3e_` prefix + snake_case (e.g. `m3e_button_group.dart`) |
+| Classes | `M3E` prefix + PascalCase (e.g. `M3EButtonGroup`) |
 | One class per file | Except private `State` classes and everything under `foundations/` |
 
 ---
@@ -260,7 +260,7 @@ Runtime dependencies and their roles:
 | `dynamic_color` | Device dynamic color (no-ops on iOS/Web; platforms declared in pubspec) |
 | `material_new_shapes` | Expressive morph polygons via foundations bridge |
 | `collection` | Utilities (e.g. carousel) |
-| `flutter` | SDK (`>=3.44.0`, Dart `^3.12.0`) |
+| `flutter` | SDK (`>=3.47.0`, Dart `^3.13.0`) |
 | `material_ui` | Official Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 
 Dev-only: `flutter_lints`, `custom_lint`, `klin_dart`, `material_color_utilities`.

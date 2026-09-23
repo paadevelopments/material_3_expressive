@@ -17,6 +17,8 @@ class M3ENavigationDrawerTheme
     this.destinationVerticalPadding = 2,
     this.destinationInnerHorizontalPadding = 16,
     this.iconLabelGap = 12,
+    this.indicatorScaleSpring = M3EMotion.expressiveSpatialDefault,
+    this.indicatorFadeSpring = M3EMotion.effectsFast,
   });
 
   /// defaults.
@@ -50,6 +52,12 @@ class M3ENavigationDrawerTheme
 
   /// iconLabelGap.
   final double iconLabelGap;
+
+  /// Spatial spring for the selection indicator width scale.
+  final M3ESpring indicatorScaleSpring;
+
+  /// Effects spring for the selection indicator fade.
+  final M3ESpring indicatorFadeSpring;
 
   /// containerColor.
 
@@ -86,6 +94,8 @@ class M3ENavigationDrawerTheme
     double? destinationVerticalPadding,
     double? destinationInnerHorizontalPadding,
     double? iconLabelGap,
+    M3ESpring? indicatorScaleSpring,
+    M3ESpring? indicatorFadeSpring,
   }) {
     return M3ENavigationDrawerTheme(
       width: width ?? this.width,
@@ -103,6 +113,8 @@ class M3ENavigationDrawerTheme
           destinationInnerHorizontalPadding ??
           this.destinationInnerHorizontalPadding,
       iconLabelGap: iconLabelGap ?? this.iconLabelGap,
+      indicatorScaleSpring: indicatorScaleSpring ?? this.indicatorScaleSpring,
+      indicatorFadeSpring: indicatorFadeSpring ?? this.indicatorFadeSpring,
     );
   }
 
@@ -145,6 +157,12 @@ class M3ENavigationDrawerTheme
         t,
       )!,
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
+      indicatorScaleSpring: t < 0.5
+          ? indicatorScaleSpring
+          : other.indicatorScaleSpring,
+      indicatorFadeSpring: t < 0.5
+          ? indicatorFadeSpring
+          : other.indicatorFadeSpring,
     );
   }
 

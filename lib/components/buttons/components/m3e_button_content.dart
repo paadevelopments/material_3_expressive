@@ -4,8 +4,14 @@ part of '../m3e_buttons.dart';
 extension _M3EButtonContent on _M3EButtonState {
   Widget _buildContent(BuildContext context) {
     final m = _measurements;
-    final baseInternalPadding = EdgeInsets.symmetric(horizontal: m.hPadding);
-    final shapes = _resolveShapes(m);
+    final baseInternalPadding = EdgeInsets.symmetric(
+      horizontal: _usesSelection && !_hasSelectionLabel
+          ? m.hPadding / 2
+          : m.hPadding,
+    );
+    final shapes = _usesSelection
+        ? _resolveSelectionShapes(m)
+        : _resolveShapes(m);
     final baseStyle = _buildBaseStyle();
 
     return wrapWithPointerPressTracking(
@@ -36,6 +42,8 @@ extension _M3EButtonContent on _M3EButtonState {
     BorderRadius defaultShape,
     BorderRadius pressedShape,
     BorderRadius hoveredShape,
+    bool freezeLeft,
+    bool freezeRight,
   })
   _resolveShapes(M3EButtonMeasurements m) {
     final fullyRound = BorderRadius.circular(m.height / 2);
@@ -54,19 +62,41 @@ extension _M3EButtonContent on _M3EButtonState {
         ? BorderRadius.circular(explicitBorderRadius)
         : BorderRadius.circular(tokenPressed);
 
-    final tokenHovered = _buttonTheme.hoveredRadius(widget.size);
-    final defaultExplicitHovered = widget.decoration?.hoveredRadius;
-    final hoveredShape = defaultExplicitHovered != null
-        ? BorderRadius.circular(defaultExplicitHovered)
-        : explicitBorderRadius != null
-        ? BorderRadius.circular(explicitBorderRadius)
-        : BorderRadius.circular(tokenHovered);
+    // Spec: hover keeps resting shape; only press morphs unless overridden.
+    final explicitHovered = widget.decoration?.hoveredRadius;
+    final hoveredShape = explicitHovered != null
+        ? BorderRadius.circular(explicitHovered)
+        : defaultShape;
 
     return (
       defaultShape: defaultShape,
       pressedShape: pressedShape,
       hoveredShape: hoveredShape,
+      freezeLeft: false,
+      freezeRight: false,
     );
+  }
+
+  BorderRadius _targetShape({
+    required bool effectivelyEnabled,
+    required bool isPressed,
+    required bool isHovered,
+    required ({
+      BorderRadius defaultShape,
+      BorderRadius pressedShape,
+      BorderRadius hoveredShape,
+      bool freezeLeft,
+      bool freezeRight,
+    })
+    shapes,
+  }) {
+    if (effectivelyEnabled && isPressed) {
+      return shapes.pressedShape;
+    }
+    if (effectivelyEnabled && isHovered) {
+      return shapes.hoveredShape;
+    }
+    return shapes.defaultShape;
   }
 
   Widget _buildAnimatedCore({
@@ -77,6 +107,8 @@ extension _M3EButtonContent on _M3EButtonState {
       BorderRadius defaultShape,
       BorderRadius pressedShape,
       BorderRadius hoveredShape,
+      bool freezeLeft,
+      bool freezeRight,
     })
     shapes,
     required bool isPressed,
@@ -84,11 +116,12 @@ extension _M3EButtonContent on _M3EButtonState {
     required bool isFocused,
   }) {
     final effectivelyEnabled = widget.enabled && widget.onPressed != null;
-    final targetRadius = (effectivelyEnabled && isPressed)
-        ? shapes.pressedShape
-        : (effectivelyEnabled && isHovered)
-        ? shapes.hoveredShape
-        : shapes.defaultShape;
+    final targetRadius = _targetShape(
+      effectivelyEnabled: effectivelyEnabled,
+      isPressed: isPressed,
+      isHovered: isHovered,
+      shapes: shapes,
+    );
 
     Widget core = RepaintBoundary(
       child: M3ERadiusAndPaddingMotion(
@@ -98,6 +131,10 @@ extension _M3EButtonContent on _M3EButtonState {
         internalTop: baseInternalPadding.top,
         internalBottom: baseInternalPadding.bottom,
         targetRadius: targetRadius,
+        freezeTopLeft: widget.isGroupConnected && shapes.freezeLeft,
+        freezeBottomLeft: widget.isGroupConnected && shapes.freezeLeft,
+        freezeTopRight: widget.isGroupConnected && shapes.freezeRight,
+        freezeBottomRight: widget.isGroupConnected && shapes.freezeRight,
         builder: (animatedInternal, animatedRadius) {
           final buttonCore = _buildButtonCore(
             m,
@@ -132,7 +169,17 @@ extension _M3EButtonContent on _M3EButtonState {
     EdgeInsets internalPadding,
     BorderRadius animatedRadius,
   ) {
-    Widget child = widget.child ?? const SizedBox.shrink();
+    Widget child = _usesSelection
+        ? _buildSelectionContent(m)
+        : widget.icon != null && widget.label != null
+        ? _M3EButtonIconLayout(
+            icon: widget.icon!,
+            label: widget.label!,
+            size: widget.size,
+            iconAlignment:
+                widget.decoration?.iconAlignment ?? IconAlignment.start,
+          )
+        : widget.child ?? const SizedBox.shrink();
     if (widget.semanticLabel != null) {
       child = ExcludeSemantics(child: child);
     }
@@ -177,6 +224,9 @@ extension _M3EButtonContent on _M3EButtonState {
     }
     return () {
       M3EHaptics.trigger(widget.decoration?.haptic ?? M3EHapticFeedback.none);
+      // Pointer taps hide rings in the press listener. Take focus here so the
+      // next Tab continues from this button without painting a ring.
+      effectiveFocusNode.requestFocus();
       widget.onPressed?.call();
     };
   }
@@ -253,19 +303,26 @@ extension _M3EButtonContent on _M3EButtonState {
 
   Widget _wrapButtonChrome(Widget button) {
     final dec = widget.decoration;
-    Color inkSplashColor = _buttonTheme.foreground(_scheme, widget.style);
+    Color inkSplashColor = _selectionForegroundColor();
     if (dec?.foregroundColor != null) {
       inkSplashColor =
-          dec!.foregroundColor!.resolve(const <WidgetState>{}) ??
+          dec!.foregroundColor!.resolve(
+            _isSelected
+                ? const <WidgetState>{WidgetState.selected}
+                : const <WidgetState>{},
+          ) ??
           inkSplashColor;
     }
 
     Widget result = M3EInkSplashTheme(color: inkSplashColor, child: button);
     if (widget.tooltip != null) {
-      result = Tooltip(message: widget.tooltip, child: result);
+      result = M3ETooltip(message: widget.tooltip, child: result);
     }
     if (widget.semanticLabel != null) {
       result = Semantics(label: widget.semanticLabel, child: result);
+    }
+    if (_usesSelection) {
+      result = Semantics(selected: _isSelected, child: result);
     }
     return result;
   }

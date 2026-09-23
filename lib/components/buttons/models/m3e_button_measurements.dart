@@ -11,6 +11,7 @@ class M3EButtonMeasurements {
     required this.hPadding,
     required this.iconSize,
     required this.iconGap,
+    this.outlineWidth = 1,
   });
 
   /// height.
@@ -25,6 +26,9 @@ class M3EButtonMeasurements {
   /// iconGap.
   final double iconGap;
 
+  /// Outline stroke width for outlined buttons (dp).
+  final double outlineWidth;
+
   /// applyCustomSize.
 
   M3EButtonMeasurements applyCustomSize(M3EButtonSize? custom) {
@@ -36,6 +40,7 @@ class M3EButtonMeasurements {
       hPadding: custom.hPadding ?? hPadding,
       iconSize: custom.iconSize ?? iconSize,
       iconGap: custom.iconGap ?? iconGap,
+      outlineWidth: custom.outlineWidth ?? outlineWidth,
     );
   }
 }

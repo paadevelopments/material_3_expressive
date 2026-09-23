@@ -2,29 +2,42 @@ part of '../m3e_icon_buttons.dart';
 
 extension _M3EIconButtonBuild on _M3EIconButtonState {
   Widget _buildContent(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildConstrainedContent(context, constraints),
+    );
+  }
+
+  Widget _buildConstrainedContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
     final theme = M3ETheme.of(context);
     final iconButtonTheme = theme.iconButtonTheme;
     final scheme = theme.colorScheme;
     final ({Size visual, Size target}) sizes = _resolveLayoutSizes(
       iconButtonTheme,
+      constraints,
     );
-    final bool selected = widget.isSelected ?? false;
-    final bool isToggle =
-        widget.isSelected != null || widget.selectedIcon != null;
+    final selected = widget.isSelected ?? false;
+    // Toggle colors/shape only when [isSelected] is set (default vs toggle).
+    final isToggle = widget.isSelected != null;
+    final outlineW = iconButtonTheme.outlineWidthFor(widget.size);
     final ({Color bg, Color fg, BorderSide? side}) colors = _resolveColors(
       scheme,
-      selected,
-      iconButtonTheme.outlineWidth,
+      selected: selected,
+      isToggle: isToggle,
+      outlineWidth: outlineW,
     );
-    final Widget innerIcon = IconTheme.merge(
-      data: IconThemeData(
-        size: iconButtonTheme.iconSize(widget.size),
-        color: colors.fg,
-      ),
-      child: (selected && widget.selectedIcon != null)
-          ? widget.selectedIcon!
-          : widget.icon,
+    final iconSize = iconButtonTheme.iconSize(widget.size);
+    final iconTheme = IconThemeData(size: iconSize, color: colors.fg);
+    final Widget themedIcon = IconTheme.merge(
+      data: iconTheme,
+      child: widget.icon,
     );
+    final Widget? themedSelectedIcon = widget.selectedIcon == null
+        ? null
+        : IconTheme.merge(data: iconTheme, child: widget.selectedIcon!);
     Widget paintedButton = SizedBox(
       width: sizes.visual.width,
       height: sizes.visual.height,
@@ -37,29 +50,61 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
           colors: colors,
           isToggle: isToggle,
           selected: selected,
-          innerIcon: innerIcon,
+          iconSize: iconSize,
+          icon: themedIcon,
+          selectedIcon: themedSelectedIcon,
         ),
       ),
     );
-    paintedButton = _wrapPointerDown(paintedButton);
-    return Semantics(
+    paintedButton = _wrapPointerTracking(paintedButton);
+    final layout = widget.inflateHitTarget ? sizes.target : sizes.visual;
+    Widget result = Semantics(
       button: true,
       selected: selected,
       label: widget.semanticLabel ?? widget.tooltip,
       child: SizedBox(
-        width: sizes.target.width,
-        height: sizes.target.height,
+        width: layout.width,
+        height: layout.height,
         child: Center(child: paintedButton),
       ),
     );
+    final String? tooltip = widget.tooltip;
+    if (tooltip != null) {
+      result = M3ETooltip(
+        message: tooltip,
+        dismissDelay: Duration.zero,
+        child: result,
+      );
+    }
+    return result;
   }
 
   ({Size visual, Size target}) _resolveLayoutSizes(
     M3EIconButtonTheme iconButtonTheme,
+    BoxConstraints constraints,
   ) {
     final Size themeVisual = iconButtonTheme.visual(widget.size, widget.width);
     final Size themeTarget = iconButtonTheme.target(widget.size, widget.width);
-    final Size visual = widget.visualSize ?? themeVisual;
+    var visual = widget.visualSize ?? themeVisual;
+    // Fill the allocated slot when the parent drives width (connected equal
+    // flex or standard neighbor-squish). Do not use unbounded max sizes from
+    // loose parents (e.g. centered scaffolding).
+    final bool fillWidth =
+        constraints.hasBoundedWidth &&
+        (widget.matchParentConstraints ||
+            widget.isGroupConnected ||
+            constraints.maxWidth < visual.width);
+    final bool fillHeight =
+        constraints.hasBoundedHeight &&
+        (widget.matchParentConstraints ||
+            widget.isGroupConnected ||
+            constraints.maxHeight < visual.height);
+    if (fillWidth) {
+      visual = Size(math.max(0, constraints.maxWidth), visual.height);
+    }
+    if (fillHeight) {
+      visual = Size(visual.width, math.max(0, constraints.maxHeight));
+    }
     return (
       visual: visual,
       target: Size(
@@ -75,7 +120,9 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     required ({Color bg, Color fg, BorderSide? side}) colors,
     required bool isToggle,
     required bool selected,
-    required Widget innerIcon,
+    required double iconSize,
+    required Widget icon,
+    required Widget? selectedIcon,
   }) {
     return ListenableBuilder(
       listenable: Listenable.merge(<Listenable>[
@@ -95,15 +142,25 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         return _buildMorphButton(
           visual: visual,
           colors: colors,
-          targetRadius: M3EIconButtonShapes.effectiveRadius(
-            theme: iconButtonTheme,
-            size: widget.size,
-            baseVariant: widget.shape,
-            isToggle: isToggle,
-            isSelected: selected,
-            states: morphStates,
-          ),
-          innerIcon: innerIcon,
+          targetRadius: widget.isGroupConnected
+              ? _connectedRadius(
+                  visual: visual,
+                  selected: selected,
+                  pressed: pressed,
+                )
+              : BorderRadius.circular(
+                  M3EIconButtonShapes.effectiveRadius(
+                    theme: iconButtonTheme,
+                    size: widget.size,
+                    baseVariant: widget.shape,
+                    isToggle: isToggle,
+                    isSelected: selected,
+                    states: morphStates,
+                  ),
+                ),
+          iconSize: iconSize,
+          icon: icon,
+          selectedIcon: selectedIcon,
           morphStates: morphStates,
           showFocusRing: _showFocusRingNotifier.value,
         );
@@ -111,89 +168,214 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     );
   }
 
-  Widget _wrapPointerDown(Widget child) {
+  BorderRadius _connectedRadius({
+    required Size visual,
+    required bool selected,
+    required bool pressed,
+  }) {
+    final groupTheme = M3ETheme.of(context).buttonGroupTheme;
+    final buttonSize = switch (widget.size) {
+      M3EIconButtonSize.xs => M3EButtonSize.xs,
+      M3EIconButtonSize.sm => M3EButtonSize.sm,
+      M3EIconButtonSize.md => M3EButtonSize.md,
+      M3EIconButtonSize.lg => M3EButtonSize.lg,
+      M3EIconButtonSize.xl => M3EButtonSize.xl,
+    };
+    if (selected) {
+      return BorderRadius.circular(
+        groupTheme.connectedSelectedInnerRadiusFor(visual.height),
+      );
+    }
+    final outer = widget.shape == M3EIconButtonShapeVariant.round
+        ? visual.height / 2
+        : groupTheme.connectedOuterSquareRadiusFor(buttonSize);
+    final inner = pressed
+        ? groupTheme.connectedPressedInnerRadiusFor(buttonSize)
+        : groupTheme.connectedInnerRadiusFor(buttonSize);
+    return BorderRadiusDirectional.horizontal(
+      start: Radius.circular(widget.isFirstInGroup ? outer : inner),
+      end: Radius.circular(widget.isLastInGroup ? outer : inner),
+    ).resolve(Directionality.of(context));
+  }
+
+  Widget _wrapPointerTracking(Widget child) {
     if (widget.onPressed == null) {
       return child;
     }
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
-        M3EFocusInteraction.instance.notePointerInteraction();
-        _setPointerDown(true);
-      },
-      onPointerUp: (_) {
-        if (_isPointerDownNotifier.value) {
-          _focusNode.requestFocus();
-        }
-        _setPointerDown(false);
-      },
-      onPointerCancel: (_) => _setPointerDown(false),
-      child: child,
+    return TapRegion(
+      onTapOutside: _onTapOutside,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: child,
+      ),
     );
   }
 
+  void _onTapOutside(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    if (_focusNode.hasPrimaryFocus) {
+      _focusNode.unfocus();
+    }
+  }
+
+  void _onPointerDown(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    _setPointerDown(true);
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _setPointerDown(false);
+  }
+
+  void _onPointerCancel(PointerCancelEvent _) {
+    _setPointerDown(false);
+  }
+
   ({Color bg, Color fg, BorderSide? side}) _resolveColors(
-    M3EColorScheme scheme,
-    bool selected,
-    double outlineWidth,
-  ) {
+    M3EColorScheme scheme, {
+    required bool selected,
+    required bool isToggle,
+    required double outlineWidth,
+  }) {
     final ({Color bg, Color fg, BorderSide? side}) defaults = _variantColors(
       scheme,
-      selected,
-      outlineWidth,
+      selected: selected,
+      isToggle: isToggle,
+      outlineWidth: outlineWidth,
     );
     final dec = widget.decoration;
+    final disabled = widget.onPressed == null;
     final states = <WidgetState>{
-      if (widget.onPressed == null) WidgetState.disabled,
+      if (disabled) WidgetState.disabled,
       if (selected) WidgetState.selected,
     };
     final useFgGradient = dec?.foregroundGradient != null;
     final paintInnerOutline = dec?.outlineGradient != null || dec?.side != null;
-    return (
-      bg: dec?.backgroundColor?.resolve(states) ?? defaults.bg,
-      fg: useFgGradient
-          ? m3eGradientForegroundSourceColor
-          : (dec?.foregroundColor?.resolve(states) ?? defaults.fg),
-      side: paintInnerOutline
-          ? null
-          : (dec?.side?.resolve(states) ?? defaults.side),
-    );
+
+    var bg = dec?.backgroundColor?.resolve(states) ?? defaults.bg;
+    var fg = useFgGradient
+        ? m3eGradientForegroundSourceColor
+        : (dec?.foregroundColor?.resolve(states) ?? defaults.fg);
+    var side = paintInnerOutline
+        ? null
+        : (dec?.side?.resolve(states) ?? defaults.side);
+
+    if (disabled) {
+      final onSurface = scheme.onSurface;
+      final isTransparent =
+          widget.variant == M3EIconButtonVariant.standard ||
+          (widget.variant == M3EIconButtonVariant.outlined &&
+              !(isToggle && selected));
+      bg = isTransparent
+          ? Colors.transparent
+          : onSurface.withValues(
+              alpha: M3EIconButtonTheme.disabledContainerAlpha,
+            );
+      if (!useFgGradient) {
+        fg = onSurface.withValues(
+          alpha: M3EIconButtonTheme.disabledForegroundAlpha,
+        );
+      }
+      if (side != null && !paintInnerOutline) {
+        side = BorderSide(
+          color: onSurface.withValues(
+            alpha: M3EIconButtonTheme.disabledContainerAlpha,
+          ),
+          width: side.width,
+        );
+      }
+    }
+
+    return (bg: bg, fg: fg, side: side);
   }
 
   ({Color bg, Color fg, BorderSide? side}) _variantColors(
-    M3EColorScheme scheme,
-    bool selected,
-    double outlineWidth,
-  ) {
+    M3EColorScheme scheme, {
+    required bool selected,
+    required bool isToggle,
+    required double outlineWidth,
+  }) {
     switch (widget.variant) {
       case M3EIconButtonVariant.standard:
         return (
           bg: Colors.transparent,
-          fg: selected ? scheme.primary : scheme.onSurfaceVariant,
+          fg: (isToggle && selected) ? scheme.primary : scheme.onSurfaceVariant,
           side: null,
         );
       case M3EIconButtonVariant.filled:
-        return (bg: scheme.primary, fg: scheme.onPrimary, side: null);
+        return _filledColors(scheme, isToggle: isToggle, selected: selected);
       case M3EIconButtonVariant.tonal:
-        return (
-          bg: scheme.secondaryContainer,
-          fg: scheme.onSecondaryContainer,
-          side: null,
-        );
+        return _tonalColors(scheme, isToggle: isToggle, selected: selected);
       case M3EIconButtonVariant.outlined:
-        return (
-          bg: Colors.transparent,
-          fg: scheme.primary,
-          side: BorderSide(color: scheme.outline, width: outlineWidth),
+        return _outlinedColors(
+          scheme,
+          isToggle: isToggle,
+          selected: selected,
+          outlineWidth: outlineWidth,
         );
     }
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _filledColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+  }) {
+    if (isToggle && !selected) {
+      return (
+        bg: scheme.surfaceContainer,
+        fg: scheme.onSurfaceVariant,
+        side: null,
+      );
+    }
+    return (bg: scheme.primary, fg: scheme.onPrimary, side: null);
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _tonalColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+  }) {
+    if (isToggle && selected) {
+      return (bg: scheme.secondary, fg: scheme.onSecondary, side: null);
+    }
+    return (
+      bg: scheme.secondaryContainer,
+      fg: scheme.onSecondaryContainer,
+      side: null,
+    );
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _outlinedColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+    required double outlineWidth,
+  }) {
+    if (isToggle && selected) {
+      return (
+        bg: scheme.inverseSurface,
+        fg: scheme.onInverseSurface,
+        side: null,
+      );
+    }
+    return (
+      bg: Colors.transparent,
+      fg: scheme.onSurfaceVariant,
+      side: BorderSide(color: scheme.outlineVariant, width: outlineWidth),
+    );
   }
 
   Widget _buildMorphButton({
     required Size visual,
     required ({Color bg, Color fg, BorderSide? side}) colors,
-    required double targetRadius,
-    required Widget innerIcon,
+    required BorderRadius targetRadius,
+    required double iconSize,
+    required Widget icon,
+    required Widget? selectedIcon,
     required Set<WidgetState> morphStates,
     required bool showFocusRing,
   }) {
@@ -207,7 +389,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       internalRight: 0,
       internalTop: 0,
       internalBottom: 0,
-      targetRadius: BorderRadius.circular(targetRadius),
+      targetRadius: targetRadius,
       builder: (padding, animatedRadius) {
         final dec = widget.decoration;
         final fill =
@@ -215,14 +397,22 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             _themeGradientForVariant(M3ETheme.of(context).iconButtonTheme);
         final useGradient = fill != null;
         final gradientOverlay = m3eUsesGradientOverlay(dec?.overlayGradient);
-        var icon = innerIcon;
+        var displayIcon = icon;
+        var displaySelectedIcon = selectedIcon;
         final fgGradient = dec?.foregroundGradient?.resolve(morphStates);
         if (fgGradient != null) {
-          icon = m3eGradientForegroundLayer(
+          displayIcon = m3eGradientForegroundLayer(
             clipRadius: animatedRadius,
             gradient: fgGradient,
-            child: icon,
+            child: displayIcon,
           );
+          if (displaySelectedIcon != null) {
+            displaySelectedIcon = m3eGradientForegroundLayer(
+              clipRadius: animatedRadius,
+              gradient: fgGradient,
+              child: displaySelectedIcon,
+            );
+          }
         }
         return M3EFocusRing(
           focused: showFocusRing,
@@ -231,6 +421,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
             color: colors.fg,
             child: IconButton(
               focusNode: _focusNode,
+              autofocus: widget.autofocus,
               onPressed: widget.onPressed == null
                   ? null
                   : () {
@@ -238,9 +429,9 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
                       widget.onPressed!();
                     },
               isSelected: widget.isSelected,
-              selectedIcon: widget.selectedIcon,
-              icon: icon,
-              tooltip: widget.tooltip,
+              iconSize: iconSize,
+              selectedIcon: displaySelectedIcon,
+              icon: displayIcon,
               enableFeedback: widget.haptic != M3EHapticFeedback.none
                   ? false
                   : widget.enableFeedback,
@@ -249,6 +440,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
                 visual: visual,
                 colors: colors,
                 animatedRadius: animatedRadius,
+                iconSize: iconSize,
                 fill: fill,
                 useGradient: useGradient,
                 gradientOverlay: gradientOverlay,
@@ -264,14 +456,18 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     required Size visual,
     required ({Color bg, Color fg, BorderSide? side}) colors,
     required BorderRadius animatedRadius,
+    required double iconSize,
     required Gradient? fill,
     required bool useGradient,
     required bool gradientOverlay,
   }) {
     final dec = widget.decoration;
+    final outlineFallback = M3ETheme.of(context).iconButtonTheme
+        .outlineWidthFor(widget.size);
     return ButtonStyle(
       fixedSize: WidgetStateProperty.all(visual),
       padding: WidgetStateProperty.all(EdgeInsets.zero),
+      iconSize: WidgetStateProperty.all(iconSize),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(borderRadius: animatedRadius),
       ),
@@ -286,7 +482,7 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
         overlayGradient: dec?.overlayGradient,
         outlineGradient: dec?.outlineGradient,
         outlineSide: dec?.side,
-        outlineFallbackWidth: M3ETheme.of(context).iconButtonTheme.outlineWidth,
+        outlineFallbackWidth: outlineFallback,
       ),
       foregroundColor: WidgetStateProperty.resolveWith((_) => colors.fg),
       side: WidgetStateProperty.resolveWith((_) => colors.side),
@@ -296,7 +492,18 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       overlayColor: widget.suppressInk || gradientOverlay
           ? WidgetStateProperty.all(Colors.transparent)
           : (dec?.overlayColor ??
-                M3EStateLayer.overlayColorHoverFocus(colors.fg)),
+                WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return null;
+                  }
+                  // Keyboard focus uses the outset ring only.
+                  final overlayStates = Set<WidgetState>.of(states)
+                    ..remove(WidgetState.focused);
+                  return M3EStateLayer.resolveOverlayColor(
+                    colors.fg,
+                    overlayStates,
+                  );
+                })),
       mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.disabled) || widget.onPressed == null) {
           return SystemMouseCursors.basic;

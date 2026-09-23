@@ -26,6 +26,7 @@ class PlayTextField extends StatefulWidget {
 
 class _PlayTextFieldState extends State<PlayTextField> {
   late final TextEditingController _controller;
+  bool _updatingFromParent = false;
 
   @override
   void initState() {
@@ -37,10 +38,13 @@ class _PlayTextFieldState extends State<PlayTextField> {
   void didUpdateWidget(PlayTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != _controller.text) {
+      // Avoid notifying M3ETextField → onChanged → parent setState during build.
+      _updatingFromParent = true;
       _controller.value = TextEditingValue(
         text: widget.value,
         selection: TextSelection.collapsed(offset: widget.value.length),
       );
+      _updatingFromParent = false;
     }
   }
 
@@ -48,6 +52,13 @@ class _PlayTextFieldState extends State<PlayTextField> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onChanged(String value) {
+    if (_updatingFromParent) {
+      return;
+    }
+    widget.onChanged(value);
   }
 
   @override
@@ -58,7 +69,7 @@ class _PlayTextFieldState extends State<PlayTextField> {
         label: widget.label,
         variant: M3ETextFieldVariant.outlined,
         controller: _controller,
-        onChanged: widget.onChanged,
+        onChanged: _onChanged,
       ),
     );
   }

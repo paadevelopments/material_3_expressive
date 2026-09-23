@@ -1,11 +1,9 @@
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EButtonGroup, M3EToggleButton;
+    show M3EButton;
 import 'package:material_ui/material_ui.dart';
 
 import '../enums/m3e_button_enums.dart';
 import 'm3e_button_motion.dart';
-
-part 'm3e_toggle_button_decoration.dart';
 
 /// Styling overrides for [M3EButton].
 @immutable
@@ -107,6 +105,15 @@ class M3EButtonDecoration {
   /// pressedRadius.
   final double? pressedRadius;
 
+  /// selectedRadius.
+  final double? selectedRadius;
+
+  /// unselectedRadius.
+  final double? unselectedRadius;
+
+  /// connectedInnerRadius.
+  final double? connectedInnerRadius;
+
   /// M3EButtonDecoration.
 
   const M3EButtonDecoration({
@@ -142,6 +149,9 @@ class M3EButtonDecoration {
     this.borderRadius,
     this.hoveredRadius,
     this.pressedRadius,
+    this.selectedRadius,
+    this.unselectedRadius,
+    this.connectedInnerRadius,
   });
 
   /// styleFrom.
@@ -151,6 +161,8 @@ class M3EButtonDecoration {
     Color? backgroundColor,
     Color? disabledForegroundColor,
     Color? disabledBackgroundColor,
+    Color? selectedForegroundColor,
+    Color? selectedBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? overlayColor,
@@ -182,48 +194,35 @@ class M3EButtonDecoration {
     double? borderRadius,
     double? hoveredRadius,
     double? pressedRadius,
+    double? selectedRadius,
+    double? unselectedRadius,
+    double? connectedInnerRadius,
   }) {
-    final WidgetStateProperty<Color?>? backgroundColorProp =
-        (backgroundColor == null && disabledBackgroundColor == null)
-        ? null
-        : _StyleFromColorProperty(backgroundColor, disabledBackgroundColor);
-
-    final WidgetStateProperty<Color?>? foregroundColorProp =
-        (foregroundColor == null && disabledForegroundColor == null)
-        ? null
-        : _StyleFromColorProperty(foregroundColor, disabledForegroundColor);
-
-    final WidgetStateProperty<Color?>? shadowColorProp = shadowColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(shadowColor);
-    final WidgetStateProperty<Color?>? surfaceTintColorProp =
-        surfaceTintColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(surfaceTintColor);
-    final WidgetStateProperty<Color?>? overlayColorProp = overlayColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(overlayColor);
-    final WidgetStateProperty<double?>? elevationProp = elevation == null
-        ? null
-        : WidgetStatePropertyAll<double?>(elevation);
-    final WidgetStateProperty<BorderSide?>? sideProp = side == null
-        ? null
-        : WidgetStatePropertyAll<BorderSide?>(side);
-
-    final WidgetStateProperty<MouseCursor?>? mouseCursorProp =
-        (enabledMouseCursor == null && disabledMouseCursor == null)
-        ? null
-        : _StyleFromCursorProperty(enabledMouseCursor, disabledMouseCursor);
+    final _StyleFromColors colors = _styleFromColors(
+      backgroundColor: backgroundColor,
+      disabledBackgroundColor: disabledBackgroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      foregroundColor: foregroundColor,
+      disabledForegroundColor: disabledForegroundColor,
+      selectedForegroundColor: selectedForegroundColor,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      overlayColor: overlayColor,
+      elevation: elevation,
+      side: side,
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
+    );
 
     return M3EButtonDecoration(
-      backgroundColor: backgroundColorProp,
-      foregroundColor: foregroundColorProp,
-      shadowColor: shadowColorProp,
-      surfaceTintColor: surfaceTintColorProp,
-      overlayColor: overlayColorProp,
-      elevation: elevationProp,
-      side: sideProp,
-      mouseCursor: mouseCursorProp,
+      backgroundColor: colors.backgroundColor,
+      foregroundColor: colors.foregroundColor,
+      shadowColor: colors.shadowColor,
+      surfaceTintColor: colors.surfaceTintColor,
+      overlayColor: colors.overlayColor,
+      elevation: colors.elevation,
+      side: colors.side,
+      mouseCursor: colors.mouseCursor,
       iconSize: iconSize,
       iconAlignment: iconAlignment,
       textStyle: textStyle,
@@ -248,6 +247,9 @@ class M3EButtonDecoration {
       borderRadius: borderRadius,
       hoveredRadius: hoveredRadius,
       pressedRadius: pressedRadius,
+      selectedRadius: selectedRadius,
+      unselectedRadius: unselectedRadius,
+      connectedInnerRadius: connectedInnerRadius,
     );
   }
 
@@ -286,6 +288,9 @@ class M3EButtonDecoration {
     double? borderRadius,
     double? hoveredRadius,
     double? pressedRadius,
+    double? selectedRadius,
+    double? unselectedRadius,
+    double? connectedInnerRadius,
   }) {
     return M3EButtonDecoration(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -320,6 +325,9 @@ class M3EButtonDecoration {
       borderRadius: borderRadius ?? this.borderRadius,
       hoveredRadius: hoveredRadius ?? this.hoveredRadius,
       pressedRadius: pressedRadius ?? this.pressedRadius,
+      selectedRadius: selectedRadius ?? this.selectedRadius,
+      unselectedRadius: unselectedRadius ?? this.unselectedRadius,
+      connectedInnerRadius: connectedInnerRadius ?? this.connectedInnerRadius,
     );
   }
 
@@ -358,7 +366,10 @@ class M3EButtonDecoration {
           haptic == other.haptic &&
           borderRadius == other.borderRadius &&
           hoveredRadius == other.hoveredRadius &&
-          pressedRadius == other.pressedRadius;
+          pressedRadius == other.pressedRadius &&
+          selectedRadius == other.selectedRadius &&
+          unselectedRadius == other.unselectedRadius &&
+          connectedInnerRadius == other.connectedInnerRadius;
 
   @override
   int get hashCode => Object.hashAll([
@@ -394,19 +405,30 @@ class M3EButtonDecoration {
     borderRadius,
     hoveredRadius,
     pressedRadius,
+    selectedRadius,
+    unselectedRadius,
+    connectedInnerRadius,
   ]);
 }
 
 @immutable
 class _StyleFromColorProperty implements WidgetStateProperty<Color?> {
-  const _StyleFromColorProperty(this.color, this.disabledColor);
+  const _StyleFromColorProperty(
+    this.color,
+    this.disabledColor,
+    this.selectedColor,
+  );
   final Color? color;
   final Color? disabledColor;
+  final Color? selectedColor;
 
   @override
   Color? resolve(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return disabledColor;
+    }
+    if (states.contains(WidgetState.selected)) {
+      return selectedColor ?? color;
     }
     return color;
   }
@@ -425,4 +447,70 @@ class _StyleFromCursorProperty implements WidgetStateProperty<MouseCursor?> {
     }
     return enabledCursor;
   }
+}
+
+typedef _StyleFromColors = ({
+  WidgetStateProperty<Color?>? backgroundColor,
+  WidgetStateProperty<Color?>? foregroundColor,
+  WidgetStateProperty<Color?>? shadowColor,
+  WidgetStateProperty<Color?>? surfaceTintColor,
+  WidgetStateProperty<Color?>? overlayColor,
+  WidgetStateProperty<double?>? elevation,
+  WidgetStateProperty<BorderSide?>? side,
+  WidgetStateProperty<MouseCursor?>? mouseCursor,
+});
+
+_StyleFromColors _styleFromColors({
+  Color? backgroundColor,
+  Color? disabledBackgroundColor,
+  Color? selectedBackgroundColor,
+  Color? foregroundColor,
+  Color? disabledForegroundColor,
+  Color? selectedForegroundColor,
+  Color? shadowColor,
+  Color? surfaceTintColor,
+  Color? overlayColor,
+  double? elevation,
+  BorderSide? side,
+  MouseCursor? enabledMouseCursor,
+  MouseCursor? disabledMouseCursor,
+}) {
+  return (
+    backgroundColor:
+        (backgroundColor == null &&
+            disabledBackgroundColor == null &&
+            selectedBackgroundColor == null)
+        ? null
+        : _StyleFromColorProperty(
+            backgroundColor,
+            disabledBackgroundColor,
+            selectedBackgroundColor,
+          ),
+    foregroundColor:
+        (foregroundColor == null &&
+            disabledForegroundColor == null &&
+            selectedForegroundColor == null)
+        ? null
+        : _StyleFromColorProperty(
+            foregroundColor,
+            disabledForegroundColor,
+            selectedForegroundColor,
+          ),
+    shadowColor: shadowColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(shadowColor),
+    surfaceTintColor: surfaceTintColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(surfaceTintColor),
+    overlayColor: overlayColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(overlayColor),
+    elevation: elevation == null
+        ? null
+        : WidgetStatePropertyAll<double?>(elevation),
+    side: side == null ? null : WidgetStatePropertyAll<BorderSide?>(side),
+    mouseCursor: (enabledMouseCursor == null && disabledMouseCursor == null)
+        ? null
+        : _StyleFromCursorProperty(enabledMouseCursor, disabledMouseCursor),
+  );
 }

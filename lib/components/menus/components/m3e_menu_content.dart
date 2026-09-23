@@ -11,8 +11,10 @@ import 'm3e_menu_style_scope.dart';
 typedef M3EMenuSelectCallback = void Function(Object? value);
 
 /// Callback to open a cascading submenu from an item rect.
-typedef M3EMenuOpenSubmenuCallback =
-    void Function(Rect anchorRect, List<M3EMenuNode> children);
+typedef M3EMenuOpenSubmenuCallback = void Function(
+  Rect anchorRect,
+  List<M3EMenuNode> children,
+);
 
 /// Renders a tree of [M3EMenuNode]s inside one elevated menu surface.
 class M3EMenuContent extends StatelessWidget {
@@ -84,8 +86,22 @@ class M3EMenuContent extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+      children: _withGaps(children, menuTheme),
     );
+  }
+
+  List<Widget> _withGaps(List<Widget> children, M3EMenuTheme menuTheme) {
+    if (menuTheme.itemGap <= 0 || children.length < 2) {
+      return children;
+    }
+    final gapped = <Widget>[];
+    for (var i = 0; i < children.length; i++) {
+      if (i > 0) {
+        gapped.add(SizedBox(height: menuTheme.itemGap));
+      }
+      gapped.add(children[i]);
+    }
+    return gapped;
   }
 
   Widget _sectionLabel(
@@ -95,17 +111,26 @@ class M3EMenuContent extends StatelessWidget {
   ) {
     final theme = M3ETheme.of(context);
     final style = M3EMenuStyleScope.styleOf(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: menuTheme.groupLabelHorizontalPadding,
-        vertical: menuTheme.groupLabelVerticalPadding,
-      ),
-      child: Text(
-        label,
-        style: menuTheme.groupLabelStyle(
-          theme.typeScale,
-          theme.colorScheme,
-          style,
+    return SizedBox(
+      height: menuTheme.groupLabelHeight,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal:
+              menuTheme.stateLayerInset + menuTheme.groupLabelHorizontalPadding,
+          vertical: menuTheme.groupLabelVerticalPadding,
+        ),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            label,
+            style: menuTheme.groupLabelStyle(
+              theme.typeScale,
+              theme.colorScheme,
+              style,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
     );
@@ -169,7 +194,6 @@ class M3EMenuContent extends StatelessWidget {
       child: M3EMenuNodeBuilders.entry(
         entry,
         autofocus: requestFocus && entry.enabled,
-        closeOnSelect: closeOnSelect,
         onSelect: onSelect,
       ),
     );
@@ -210,7 +234,6 @@ class M3EMenuContent extends StatelessWidget {
       child: M3EMenuNodeBuilders.toggleable(
         item,
         autofocus: requestFocus && item.enabled,
-        closeOnSelect: closeOnSelect,
         menuTheme: menuTheme,
         onSelect: onSelect,
       ),
@@ -251,9 +274,12 @@ class M3EMenuContent extends StatelessWidget {
         context,
         item,
         autofocus: requestFocus && item.enabled,
-        closeOnSelect: closeOnSelect,
         menuTheme: menuTheme,
-        onSelect: onSelect,
+        onSelect: (Object? value) {
+          if (closeOnSelect || value != null) {
+            onSelect(value);
+          }
+        },
       ),
     );
   }

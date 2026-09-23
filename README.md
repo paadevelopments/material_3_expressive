@@ -31,7 +31,7 @@ Runtime dependencies are intentionally small — see
 Try the live gallery on the web:
 [paadevelopments.github.io/material_3_expressive](https://paadevelopments.github.io/material_3_expressive/).
 
-An interactive gallery demonstrating **all 45 widgets** also lives in the
+An interactive gallery demonstrating **all 44 widgets** also lives in the
 [`example/`](example/) directory (same build as the live demo). It groups
 components the same way as the official Material 3 catalog, with a live
 playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/).
@@ -60,13 +60,13 @@ flutter run
 
 ## Features
 
-- **45 widgets** across 40 component modules, covering Actions, Selection,
+- **44 widgets** across 39 component modules, covering Actions, Selection,
   Containment, Navigation, and Feedback (communication + text input).
 - **Direct component API** — construct each `M3E*` widget directly; enums and
   models are exported from a single library import. Action surfaces accept
   optional gradient decorations (fill, foreground, overlay, outline).
 - **Expressive motion & interaction** — spring physics (via [`motor`](https://pub.dev/packages/motor)),
-  shape morphing, liquid selection indicators, shared haptics (`M3EHaptics`), and
+  shape morphing, per-destination selection indicators, shared haptics (`M3EHaptics`), and
   proper state layers on every interactive surface.
 - **Design token foundations** — color schemes, typography, motion, shapes
   (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
@@ -79,12 +79,12 @@ flutter run
 
 | Tool    | Version    |
 | ------- | ---------- |
-| Flutter | `>= 3.44.0` |
-| Dart    | `^3.12.0`  |
+| Flutter | `>= 3.47.0` |
+| Dart    | `^3.13.0`  |
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.1.1`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.4.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -94,45 +94,55 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 ```
 
 Apps that still import `package:flutter/material.dart` should switch those
-imports to `package:material_ui/material_ui.dart`. Flutter **3.44.0 or newer**
-is required (`material_ui` will not resolve on older SDKs).
+imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
+(Dart **3.13.0+**) is required (`material_ui` will not resolve on older SDKs).
 
 `ColorScheme.harmonized()` / `Color.harmonizeWith()` come from
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.2
+## What's new in 1.1.3
 
-Summary of public API and behavior updates since 1.1.1 (details in
-[`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Keyboard focus rings** — actionable controls show an outset ring for
-  keyboard focus. Configure via `M3EThemeData.focusRingTheme` /
-  `keyboardFocusIndicators` (see [Quick start](#quick-start)).
-- **List selection & reorder** — `M3ECardList`, dismissible lists, and
-  expandable header rows accept `selection` / `reorder` (and related
-  callbacks / state). Nested expandable sublists keep their own list APIs.
-  Theme tokens: `M3EListSelectionState`, `M3EListReorderState`,
-  `M3EListSelectionMode` / `M3EListSelectionTrigger`.
-- **Dismissible swipe actions** — optional `leadingActionsBuilder` /
-  `trailingActionsBuilder` reveal icon actions (`M3EListSwipeAction`) with
-  preview snap; full swipe still dismisses when a side has no actions.
-- **Expandable nested lists** — `M3EExpandableData.expanded` uses
-  `M3EExpandableExpanded.list(child)` or `.content(child)` (replaces a plain
-  `body` widget). Nested card lists can set `embedded: true` for inner radii.
-- **Configurable spatial springs** — component themes expose `M3ESpring`
-  fields (switch, FAB menu, nav rail, checkbox, slider, icon button, toolbar,
-  list card radius / dismissible, refresh settle, …). Defaults match prior
-  hard-coded motion.
-- **Dropdown** — optional `limit` caps multi-select count (`null` = unlimited).
-  `openMotion` / `closeMotion` are optional; when null they resolve from
-  `M3EDropdownMenuTheme.openSpring` / `closeSpring`.
-- **Toolbar FAB** — `fabExpandsToolbar: false` keeps a fixed baseline FAB
-  that only runs `onFabPressed` (pill stays open).
-- **Button group overflow** — `M3EOverflowStrategy`,
-  `M3ENoOverflowStrategy`, and `M3EScrollOverflowStrategy` are exported for
-  `M3EButtonGroup.overflowStrategy`.
-- **Deps** — `material_ui` `^1.1.1`; date picker overflow / wrap fixes.
+- **Deps** — `material_ui` `^1.4.0`; Flutter `>=3.47.0` (Dart `^3.13.0`).
+- **Breaking — buttons** — spec size, color, and shape tokens. Selection is
+  `isSelected` / `selectedIcon` / `selectedLabel`. `M3EToggleButton` is removed.
+- **Breaking — button groups** — module is `button_group` (`buttonGroupTheme`).
+  Density is `regular` / `comfortable` / `compact` / `dense`. Tab moves focus;
+  arrows are not captured.
+- **Breaking — icon buttons** — spec radii, outlines, and color roles. Default
+  variant is **`filled`**.
+- **Breaking — FABs** — `medium` is **80dp**. `regular` is the old **56dp**
+  size. Filled color styles and `M3EFabController`.
+- **Breaking — extended FABs** — `M3EExtendedFabSize` (`small` default).
+  Label required. `M3EExtendedFabController`.
+- **Breaking — FAB menus** — **2–6** items, `M3EFabMenuController`, per-item
+  container transform. Tab walks items; Escape closes.
+- **Segmented buttons** — outlined spec tokens, density heights, focus ring.
+- **Split buttons** — spec size tokens; open state is a state layer, not a
+  recolor.
+- **Checkboxes, radios, switches, chips** — spec sizes, colors, focus rings,
+  and `InkSparkle`. Radio groups and chip groups add arrow-key focus.
+- **Dividers** — **1dp** outline-variant line. Outer margins stay off unless
+  `outerMargin` is set.
+- **Navigation** — bar, rail, and drawer pills scale in place. They no longer
+  travel between destinations.
+- **Menus** — vertical and baseline (`M3EMenuVariant`). Multi-select stays
+  open (`M3EMenuSelectionMode`).
+- **Toolbars** — floating `alignment` and `screenOffset` (default **16**).
+  Docked ignores both.
+- **Overlays** — back closes an open menu, dropdown, split popup, or FAB menu
+  before leaving the page.
+- **Snackbars and tooltips** — spec padding, timing, and controllers. Escape
+  dismisses a focused snackbar.
+- **Breaking — badges** — error colors, **6dp** dot, **16dp** large badge.
+  `label` preferred over `count`. `smallOffset` / `largeOffset` replace
+  `defaultOffset`.
+- **Progress** — secondary-container track, circular gap **4dp**, optional
+  `showTrack`.
+- **Breaking — loading indicator** — `elevation` removed. `size`,
+  `containerShape`, and `indicatorColors` added.
 
 ## Installation
 
@@ -140,7 +150,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.1.2
+  material_3_expressive: ^1.1.3
 ```
 
 Then fetch it:
@@ -165,7 +175,7 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 | [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`); `ColorScheme.harmonized` / `Color.harmonizeWith` (2.x, `material_ui`) |
-| [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |
+| [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and selection indicators |
 | [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`, `M3EShapeKind`, `M3EShapeClipper`, `M3EShapeContainer`) used by loading / shape-driven surfaces |
 
 Dev-only: [`flutter_lints`](https://pub.dev/packages/flutter_lints), [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html), and [`custom_lint`](https://pub.dev/packages/custom_lint).
@@ -380,10 +390,9 @@ needed.
 
 #### M3EButton
 
-Five color variants with shape morphing on press. Optional
-`M3EButtonDecoration` gradients: `backgroundGradient`, `foregroundGradient`
-(text/icons), `overlayGradient` (state layer), and `outlineGradient` (stroke
-width still comes from `side`).
+Text button aligned with the Material 3 Expressive spec: five sizes, press
+shape morph, and `InkSparkle`. Selection uses `isSelected`, `selectedIcon`,
+and `selectedLabel`.
 
 ```dart
 M3EButton(
@@ -410,13 +419,12 @@ M3EButton(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3EIconButton
 
-Icon-only actions; supports toggle selection. Optional `visualSize` overrides
-the painted control size while hit target follows theme rules. Hover and press
-morph container radius (theme `radiusHovered` / press tokens). Pass
-`decoration: M3EIconButtonDecoration(...)` for fill, foreground, overlay, and
-outline gradients (same fields as `M3EButtonDecoration`).
+Icon-only button aligned with the Material 3 Expressive spec. Default variant
+is `filled`. Toggle with `isSelected` and `selectedIcon`.
 
 ```dart
 M3EIconButton(
@@ -434,11 +442,35 @@ M3EIconButton(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3EFab
 
-Floating action button in three sizes. Optional `decoration: M3EFabDecoration`
-for fill, foreground, overlay, and outline gradients. Override resting /
-hover elevation with `elevation` / `hoverElevation` (defaults: level 3 and 4).
+Floating action button aligned with the Material 3 Expressive spec. Sizes:
+`small` 40, `regular` 56, `medium` 80 (default), `large` 96. `M3EFabController`
+handles scroll, appear, and container transform.
+
+```dart
+final fabController = M3EFabController();
+
+M3EFabScrollVisibility(
+  controller: fabController,
+  child: Scaffold(
+    body: ListView(...),
+    floatingActionButton: M3EFab(
+      controller: fabController,
+      appear: true,
+      icon: const Icon(M3EIcons.add),
+      size: M3EFabSize.medium,
+      color: M3EFabColor.primaryFilled,
+      elevation: 3,
+      hoverElevation: 4,
+      openBuilder: (context) => const ComposePage(),
+      onPressed: () {},
+    ),
+  ),
+);
+```
 
 ```dart
 M3EFab(
@@ -451,44 +483,68 @@ M3EFab(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3EExtendedFab
 
-FAB with a text label. Accepts the same `M3EFabDecoration` as `M3EFab`, plus
-optional `elevation` / `hoverElevation` (themed extended-FAB defaults when
-omitted).
+Extended FAB aligned with the Material 3 Expressive spec. Label is required.
+Sizes are `small` 56 (default), `medium` 80, and `large` 96.
+`M3EExtendedFabController` handles scroll, appear, and container transform.
+
+```dart
+final fabController = M3EExtendedFabController();
+
+M3EExtendedFabScrollVisibility(
+  controller: fabController,
+  child: Scaffold(
+    body: ListView(...),
+    floatingActionButton: M3EExtendedFab(
+      controller: fabController,
+      appear: true,
+      label: 'Compose',
+      icon: const Icon(M3EIcons.edit),
+      size: M3EExtendedFabSize.small,
+      color: M3EFabColor.primary,
+      openBuilder: (context) => const ComposePage(),
+      onPressed: () {},
+    ),
+  ),
+);
+```
 
 ```dart
 M3EExtendedFab(
   label: 'Compose',
   icon: const Icon(M3EIcons.edit),
+  size: M3EExtendedFabSize.medium,
+  color: M3EFabColor.primaryFilled,
   onPressed: () {},
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3EFabMenu
 
-Speed-dial menu anchored to a FAB. The FAB morphs size (80↔56) and circle when
-opening; use `position` for left/right anchor, and optional `expandIcon` /
-`collapseIcon` (fallbacks: `icon` / `closeIcon`). Pass `decoration` for the
-trigger FAB. Menu-item fill, foreground, and outline gradients live on
-`M3EFabMenuTheme` (`itemBackgroundGradient`, `itemForegroundGradient`,
-`itemOutlineGradient` / `itemOutlineColor`, `itemBorderWidth`).
+Speed-dial menu of 2–6 items, aligned with the Material 3 Expressive spec.
+The trigger becomes a 56dp close button. Back closes the menu before the route.
 
 ```dart
+final menuController = M3EFabMenuController();
+
 M3EFabMenu(
+  controller: menuController,
   position: M3EFabMenuPosition.right,
+  size: M3EFabSize.medium,
+  color: M3EFabColor.primary,
   expandIcon: const Icon(M3EIcons.add),
   collapseIcon: const Icon(M3EIcons.close),
-  decoration: M3EFabDecoration(
-    backgroundGradient: WidgetStateProperty.all(
-      const LinearGradient(colors: [Color(0xFF6750A4), Color(0xFF9A82DB)]),
-    ),
-  ),
   items: [
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.edit),
       label: 'Note',
       onPressed: () {},
+      openBuilder: (context) => const NotePage(),
     ),
     M3EFabMenuItem(
       icon: const Icon(M3EIcons.schedule),
@@ -499,64 +555,67 @@ M3EFabMenu(
 );
 ```
 
+Keyboard: Tab walks items. Escape closes.
+
 #### M3EButtonGroup
 
-Grouped icon buttons with neighbour squish or connected corner morphing.
-Optional `overflowStrategy` (`M3ENoOverflowStrategy`, `M3EScrollOverflowStrategy`,
-or a custom `M3EOverflowStrategy`).
+Connected or standard groups aligned with the Material 3 Expressive spec.
+Actions are `M3EButton`. Density changes height, not the gap.
 
 ```dart
-// in State
+// in State — single-select
 M3EButtonGroup(
   selectedIndex: groupIndex,
-  onSelectedIndexChanged: (i) => setState(() => groupIndex = i ?? groupIndex),
+  onSelectedIndexChanged: (i) => setState(() => groupIndex = i),
+  selectionRequired: true,
   actions: const [
-    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_back)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.add)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_forward)),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_back), minWidth: 40),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.add), minWidth: 40),
+    M3EButtonGroupAction(icon: Icon(M3EIcons.arrow_forward), minWidth: 40),
   ],
 );
 
+// multi-select
 M3EButtonGroup(
+  multiSelect: true,
+  selectedIndices: selected,
+  onSelectedIndicesChanged: (s) => setState(() => selected = s),
   type: M3EButtonGroupType.connected,
-  overflowStrategy: const M3EScrollOverflowStrategy(),
   actions: const [
-    M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_left)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.menu)),
-    M3EButtonGroupAction(icon: Icon(M3EIcons.chevron_right)),
+    M3EButtonGroupAction(label: Text('Mon')),
+    M3EButtonGroupAction(label: Text('Tue')),
+    M3EButtonGroupAction(label: Text('Wed')),
   ],
 );
 ```
 
-#### M3EToggleButton
+Keyboard: Tab, then Space or Enter. Arrows are not captured.
 
-Toggle with round-to-square shape morphing. Optional
-`decoration: M3EToggleButtonDecoration(...)` for the same gradient fields as
-`M3EButtonDecoration`. `M3EButtonGroup` / `M3EToggleButtonGroup` accept a
-group-level `decoration` and per-action `M3EButtonGroupAction.decoration`.
+#### Button selection
+
+Set `M3EButton.isSelected` to enable caller-controlled selection with
+round-to-square (or square-to-round) shape morphing. `selectedIcon` and
+`selectedLabel` replace their unselected counterparts. Selection is not
+available for `M3EButtonStyle.text`. `M3EButtonGroup` accepts a group-level
+`M3EButtonDecoration` and per-action `M3EButtonGroupAction.decoration`.
 
 ```dart
 // in State
-M3EToggleButton.filled(
+M3EButton.filled(
   icon: const Icon(M3EIcons.favorite_border),
-  checkedIcon: const Icon(M3EIcons.favorite),
-  checked: isFavorite,
-  onCheckedChange: (v) => setState(() => isFavorite = v),
-);
-
-M3EToggleButton.text(
-  label: const Text('Bold'),
-  checked: isBold,
-  onCheckedChange: (v) => setState(() => isBold = v),
+  selectedIcon: const Icon(M3EIcons.favorite),
+  isSelected: isFavorite,
+  onPressed: () => setState(() => isFavorite = !isFavorite),
 );
 ```
+
+Keyboard: Tab, then Space or Enter.
 
 #### M3ESegmentedButton
 
-Single- or multi-select segmented control. Theme
-`M3ESegmentedButtonTheme` can set `outlineColor` / `outlineGradient`,
-`dividerColor` / `dividerGradient` (sampled across the whole group), and
-selected/unselected background and foreground colors or gradients.
+Outlined single- or multi-select control, aligned with the Material 3
+Expressive spec. Two to five segments. Density lowers the height; the target
+stays at least 48.
 
 ```dart
 // in State — single select
@@ -572,6 +631,7 @@ M3ESegmentedButton<String>(
 // multi select
 M3ESegmentedButton<String>(
   multiSelect: true,
+  density: M3ESegmentedButtonDensity.comfortable,
   segments: const [
     M3ESegment(value: 'new', label: 'New'),
     M3ESegment(value: 'sale', label: 'Sale'),
@@ -581,16 +641,12 @@ M3ESegmentedButton<String>(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3ESplitButton
 
-Primary action with a trailing menu. Use `items` for a flat list, or
-`m3eMenuBuilder` for a rich M3E menu tree (groups, dividers, submenus). Legacy
-`menuBuilder` still opens Flutter `showMenu`. Gradients on
-`M3ESplitButtonDecoration` span both segments; optional
-`trailingBackgroundGradient` / `trailingForegroundGradient` /
-`trailingOutlineGradient` / `trailingOverlayGradient` override the trailing
-half. `decoration.animationDuration` defaults to `Duration.zero` so the
-trailing radius morph stays on the spring.
+Primary action plus a menu, aligned with the Material 3 Expressive spec.
+The gap between the two segments is 2. Back closes the popup before the route.
 
 ```dart
 M3ESplitButton<String>(
@@ -616,6 +672,8 @@ M3ESplitButton<String>(
 );
 ```
 
+Keyboard: Tab, then Space or Enter. Escape closes the menu.
+
 ---
 
 ### Selection
@@ -624,9 +682,9 @@ M3ESplitButton<String>(
 
 #### M3ECheckbox
 
-Binary and tristate checkbox. Optional `label`, `boxSize`, `hitSize`,
-`checkedChild` / `uncheckedChild`, and `checkIconPadding` (default optical
-inset for the built-in check). Value changes use a spatial-spring pulse.
+Checkbox aligned with the Material 3 Expressive spec: 18dp box, 2dp corners,
+40dp state layer, 48dp target. Optional label. `checkIconPadding` defaults to
+none.
 
 ```dart
 // in State
@@ -643,27 +701,34 @@ M3ECheckbox(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3ERadio
 
-Mutually exclusive selection within a group. Optional [label] is part of the
-tap target.
+Radio aligned with the Material 3 Expressive spec: 20dp icon, 40dp state
+layer, 48dp target. Put options in `M3ERadioGroup` for arrow-key selection.
 
 ```dart
 // in State
-M3ERadio<String>(
-  value: 'pro',
+M3ERadioGroup<String>(
   groupValue: plan,
-  label: const Text('Pro'),
+  groupLabel: 'Plan',
   onChanged: (v) => setState(() => plan = v),
+  child: M3ERadio<String>(
+    value: 'pro',
+    groupValue: plan,
+    label: const Text('Pro'),
+    onChanged: (v) => setState(() => plan = v),
+  ),
 );
 ```
 
+Keyboard: Tab or Shift+Tab enters the selected radio. Arrows move, select, and wrap.
+
 #### M3ESwitch
 
-On/off toggle with optional selected icon. Hover/focus/press paints a
-thumb-centered translucent state layer (`stateLayerSize`, default 48 via theme).
-Pressed thumb expands to the track edges (`thumbSizePressed` defaults to
-`trackHeight`).
+Switch aligned with the Material 3 Expressive spec. Track is 52×32. The handle
+is 16 off, 24 on or with an icon, and 28 pressed. Drag past the midpoint toggles.
 
 ```dart
 // in State
@@ -680,9 +745,12 @@ M3ESwitch(
 );
 ```
 
+Keyboard: Tab, then Space or Enter.
+
 #### M3EChip
 
-Assist, filter, input, and suggestion chip types.
+Chips aligned with the Material 3 Expressive spec: height 32, radius 8.
+`M3EChipGroup` moves focus with the arrow keys.
 
 ```dart
 M3EChip(
@@ -698,15 +766,29 @@ M3EChip(
   selected: chips.contains('flutter'),
   onPressed: () => toggleChip('flutter'),
 );
+
+M3EChipGroup(
+  child: Wrap(
+    spacing: 8,
+    children: [
+      M3EChip(
+        label: 'Dart',
+        type: M3EChipType.input,
+        avatar: const Icon(M3EIcons.person),
+        onPressed: () {},
+        onDeleted: () {},
+      ),
+    ],
+  ),
+);
 ```
+
+Keyboard: arrows move focus. Backspace or Delete removes a focused input chip.
 
 #### M3EDropdownMenu
 
-Static list, multi-select, search, and async loading. When search is enabled,
-the in-panel field defaults to `surface` fill and the panel container radius.
-Optional `limit` caps how many items can be selected in multi-select (`null` =
-unlimited). Optional `openMotion` / `closeMotion` override theme
-`M3EDropdownMenuTheme.openSpring` / `closeSpring` (null → theme).
+Dropdown for one value, many values, search, or async items. Back closes the
+panel before the route.
 
 ```dart
 // Single select
@@ -744,13 +826,12 @@ M3EDropdownMenu<String>.future(
 );
 ```
 
+Keyboard: Enter or Space opens. Escape closes. Arrows move inside the panel.
+
 #### M3ESlider
 
-Compose Material 3 expressive slider — standard, centered, wavy, vertical, and
-range. Optional `trackThickness`, `cornerRadius`, `thumbLength`, `dotSize`,
-`dotSpacing`, and `dotBuilder` customize track, thumb, and stop/tick markers.
-`cornerRadius` defaults to theme `trackCornerRadius` (8) and is not derived
-from track thickness. Tap outside the slider clears focus.
+Slider for a value or a range, including centered, wavy, and vertical.
+Stops use `divisions`.
 
 ```dart
 // in State
@@ -821,9 +902,12 @@ SizedBox(
 );
 ```
 
+Keyboard: arrows step. Page Up and Page Down jump. Home and End go to the ends.
+
 #### M3EDatePicker
 
-Dialog and inline calendar date pickers.
+Dialog and inline calendar for one date or a range. Month paging uses the
+arrow keys.
 
 ```dart
 // Inline calendar
@@ -850,9 +934,11 @@ final range = await M3EDatePicker.showRange(
 );
 ```
 
+Keyboard: arrows change month. Enter moves focus.
+
 #### M3ETimePicker
 
-Dialog and dial-style time picker.
+Dialog and dial for a time of day.
 
 ```dart
 // Dialog
@@ -867,6 +953,8 @@ M3EDialTimePicker(
   onChanged: (v) => setState(() => time = v),
 );
 ```
+
+Keyboard: Enter moves focus.
 
 ---
 
@@ -929,10 +1017,8 @@ M3EListItem(
 
 #### M3ECardList
 
-Vertically stacked cards with dynamic corner rounding. Pass
-`variant: M3ECardVariant.outlined` (or `border`) for outlined cards.
-Enable list-owned `selection` / `reorder`, or nest with `embedded: true`
-(all rows use inner radii).
+A column of cards whose outer corners are larger than the inner ones.
+Turn on `selection` or `reorder`, or nest one with `embedded: true`.
 
 ```dart
 M3ECardList(
@@ -971,17 +1057,8 @@ M3ECardList.builder(
 
 #### M3ESelection
 
-Multi-select host: optional [M3ESelectionController], [M3ESelectionAppBar]
-(idle header → contextual bar + select-all; `idle` is any [Widget]), and any
-list [body] ([M3ECardList], [M3EDismissibleList], …). Selected rows pick up
-`selectedColor` (or `M3ESelectionTheme.highlightColor`, default
-`secondaryContainer`) automatically — no `colorBuilder` required for the
-highlight. Prefer list-owned `selection: true` on the body when you want
-built-in flip / double-tap triggers; otherwise use `borderRadiusBuilder` for
-selected-item corner morph, gestures (`onTap` / `onLongPress`), and
-[M3ESelectionLeading] on each item. Wrap with [PopScope] so system back clears
-selection first. Prefer
-`listPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)`.
+Multi-select host with an optional app bar and any list as the body. Back
+clears the selection before leaving the page.
 
 ```dart
 final selection = M3ESelectionController();
@@ -1126,10 +1203,13 @@ CustomScrollView(
 
 #### M3EDivider
 
-Horizontal and vertical dividers.
+Divider aligned with the Material 3 Expressive spec: a 1dp outline-variant
+line. Full width unless `inset` or `outerMargin` is set.
 
 ```dart
 const M3EDivider();
+
+const M3EDivider(inset: M3EDividerInset.inset);
 
 Row(
   children: [
@@ -1295,15 +1375,8 @@ M3ETabs(
 
 #### M3ENavigationBar
 
-Bottom navigation for compact and wide layouts. With `autoLayout: true` (default),
-the bar switches to a horizontal icon+label chip group once its own width can fit
-all destinations at the fixed wide chip width (`wideDestinationWidth`, default
-`128`) — see `M3ENavBarConstants.minWideBarWidth`. Override with `wideBreakpoint`
-and/or `wideDestinationWidth`. Wide mode keeps the bar full width and only aligns
-the destination group (`alignment`: start / center / end). Destinations may be
-icon-only, label-only, or both. Destinations use a click mouse cursor on
-desktop/web (same for rail and drawer). Layout enums, theme, and
-`M3ENavBarConstants` ship with the navigation bar entry / package barrel.
+Bottom navigation aligned with the Material 3 Expressive spec. The selected
+pill scales in place. Wide layout is a row of icon and label chips.
 
 ```dart
 // in State
@@ -1353,8 +1426,8 @@ M3ENavigationBar(
 
 #### M3ENavigationRail
 
-Vertical navigation for medium and expanded layouts. Customize the
-expand/collapse toggle tooltips with `expandTooltip` / `collapseTooltip`.
+Vertical navigation aligned with the Material 3 Expressive spec. The selected
+pill scales in place. Collapsed pills match the navigation bar.
 
 ```dart
 // in State
@@ -1389,7 +1462,8 @@ M3ENavigationRail(
 
 #### M3ENavigationDrawer
 
-Modal navigation drawer.
+Modal drawer aligned with the Material 3 Expressive spec. The selected pill
+scales in place.
 
 ```dart
 // in State
@@ -1410,16 +1484,8 @@ M3ENavigationDrawer(
 
 #### M3EToolbar
 
-Compose Material 3 expressive floating and docked toolbars. Floating toolbars
-own expand/collapse when one action sets `isExpandTrigger` (`expanded` is the
-initial state; the adjacent FAB stays visible and does not toggle expansion).
-Optional `visibilityController` / `scrollBehavior` enable scroll-exit or manual
-show/hide. Set `onActiveIndexChanged` for toolbar-managed action selection
-(labeled actions animate width). Use `fabExpandIcon` / `fabCollapseIcon` when a
-FAB morphs with the pill. Set `fabExpandsToolbar: false` for a fixed small FAB
-that only runs `onFabPressed` (pill stays open). Set `pillActiveSpring: false`
-to keep a fixed pill width for labeled selection (widest label + icon-only
-neighbors) while action labels still morph.
+Floating or docked toolbar. Floating placement uses `alignment`. `screenOffset`
+(default 16) keeps the pill off the screen edge. Docked ignores both.
 
 ```dart
 // Floating (default) — pill, wrap-content
@@ -1533,9 +1599,9 @@ M3EToolbar.docked(
 
 #### M3EMenu
 
-Anchored dropdown menu. Top-level `M3EMenuGroup`s each render as an elevated
-surface with a gap between them; dividers stay inside a surface. Opening the
-menu focuses the popup without pre-highlighting the first item.
+Menu aligned with the Material 3 Expressive spec. Variants are vertical and
+baseline. Opening focuses the first enabled item. Multi-select stays open.
+Back closes a submenu, then the menu, before the route.
 
 ```dart
 M3EMenu(
@@ -1570,6 +1636,9 @@ M3EMenu(
 );
 ```
 
+Keyboard: Up and Down move. Left and Right open or close a submenu. Letters
+jump. Escape closes. Enter or Space activates.
+
 ---
 
 ### Feedback
@@ -1578,11 +1647,8 @@ M3EMenu(
 
 #### M3EBadge
 
-Notification dot or numeric badge on a child. `alignment` places the
-indicator at `topLeft`, `topCenter`, or `topRight` of the child's own box
-(default `topRight`). The badge sizes itself to cover the child plus
-indicator — no parent `SizedBox` is required. `offset` nudges away from the
-anchored edge (`dx` is ignored when centered).
+Badge aligned with the Material 3 Expressive spec. A 6dp dot or a large label
+(min 16dp) in error colors. It overlays the child without shifting it.
 
 ```dart
 const M3EBadge(
@@ -1595,16 +1661,18 @@ const M3EBadge(
   alignment: M3EBadgeAlignment.topLeft,
   child: Icon(M3EIcons.calendar_today, size: 28),
 );
+
+const M3EBadge(
+  label: 'New',
+  child: Icon(M3EIcons.mail, size: 28),
+);
 ```
 
 #### M3EProgressIndicator
 
-Material 3 Expressive progress indicators with circular and linear variants,
-including Compose-style wavy forms. Null `value` runs indeterminate animation
-(classic linear: dual traveling segments with gaps; wavy linear/circular: m3e
-style travel / spin+sweep; classic circular: same rot/sweep timing as wavy,
-flat arcs with gaps). Optional `trackStrokeWidth` (and `.linear` `strokeWidth`)
-override track and value thickness.
+Circular and linear progress aligned with the Material 3 Expressive spec,
+including wavy forms. The track is secondary container. Set `showTrack: false`
+to hide it.
 
 ```dart
 // Classic
@@ -1620,6 +1688,9 @@ SizedBox(
   width: 200,
   child: M3EProgressIndicator.linear(value: 0.6),
 );
+
+// Hide track (e.g. inside a button)
+M3EProgressIndicator.circular(showTrack: false);
 
 // Expressive wavy (Compose CircularWavy / LinearWavy)
 const M3EProgressIndicator.circularWavy();
@@ -1637,18 +1708,30 @@ SizedBox(
 
 #### M3ELoadingIndicator
 
-Expressive loading spinner. Shape morph settle uses
-`M3EMotion.expressiveSpatialDefault`. Optional `elevation` (theme default `0`),
-`color` / `containerColor`, and `rotationTurns` (when set, disables auto spin
-and morph pulse so a host can drive rotation). Contained uses rounded-shell
-elevation; the default (uncontained) morph casts a path shadow.
+Indeterminate loading shape aligned with the Material 3 Expressive spec.
+Default outer size is 48 and the active shape is 38. There is no elevation.
 
 ```dart
 const M3ELoadingIndicator();
 
 const M3ELoadingIndicator(
   variant: M3ELoadingIndicatorVariant.contained,
-  elevation: 3,
+);
+
+// Ratio-preserving scale (outer 96 → active 76)
+const M3ELoadingIndicator(size: 96);
+
+M3ELoadingIndicator(
+  indicatorSize: 32,
+  containerWidth: 56,
+  containerHeight: 56,
+  containerShape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  ),
+  indicatorColors: const <Color>[
+    Color(0xff6750a4),
+    Color(0xff006a6a),
+  ],
 );
 
 // Host-driven rotation (e.g. during pull-to-refresh drag)
@@ -1661,8 +1744,8 @@ M3ELoadingIndicator(
 #### M3ERefreshIndicator
 
 Pull-to-refresh wrapper for scrollables. Default and `.contained` kinds always
-build a **contained** `M3ELoadingIndicator` so shell `elevation` works on all
-platforms (including Flutter web). Reveal starts after
+build a **contained** `M3ELoadingIndicator`; optional `elevation` is applied on
+the refresh host shell (including Flutter web). Reveal starts after
 `2 × indicatorPadding`; arm / refresh only when fully revealed. List pad is
 capped by `contentDragOffset` (defaults to indicator height +
 `2 × indicatorPadding`). Use `M3ERefreshIndicatorController` (or a
@@ -1698,7 +1781,8 @@ await controller.show();
 
 #### M3ETooltip
 
-Descriptive label on hover or long-press.
+Plain or rich tooltip aligned with the Material 3 Expressive spec. Plain sits
+above the target. Rich can stay open with `persistent`.
 
 ```dart
 M3ETooltip(
@@ -1708,11 +1792,25 @@ M3ETooltip(
     onPressed: () {},
   ),
 );
+
+M3ETooltip(
+  persistent: true,
+  richTitle: 'Compose',
+  richMessage: 'Start a new draft with expressive defaults.',
+  actions: <Widget>[
+    M3EButton.text(onPressed: () {}, child: Text('Got it')),
+  ],
+  child: M3EIconButton(
+    icon: const Icon(M3EIcons.edit),
+    onPressed: () {},
+  ),
+);
 ```
 
 #### M3ESnackbar
 
-Brief feedback message — use `.show` (hosts via internal `M3ESnackbarHost`).
+Brief message aligned with the Material 3 Expressive spec. A bar with an
+action or close button stays until dismissed. Escape dismisses it when focused.
 
 ```dart
 M3ESnackbar.show(
@@ -1720,16 +1818,15 @@ M3ESnackbar.show(
   message: 'Draft saved',
   actionLabel: 'Undo',
   onAction: () {},
+  showCloseButton: true,
 );
 ```
 
+Keyboard: Escape dismisses when focused.
+
 #### M3ETextField
 
-Filled and outlined text input with floating label. The focused stroke is
-painted over the field so width/height stay stable. Height grows with
-`maxLines`. An empty label sits vertically centered; with no label, the
-value is centered. `inputFormatters` are forwarded to the inner
-`EditableText`. `M3ETextFieldVariant` and `M3ETextFieldTheme` are public.
+Filled or outlined field with a floating label. Height grows with `maxLines`.
 
 ```dart
 M3ETextField(
@@ -1748,11 +1845,8 @@ const M3ETextField(
 
 #### M3ESearchBar / M3ESearchAnchor
 
-Inline search field, or a bar that opens a full search view with suggestions.
-When embedded in toolbars or app bars, `expandOnFocus` / `expandRestPadding`
-control the horizontal inset spring on focus. Use `alignment` /
-`barAlignment` to place leading + hint + trailing while empty and unfocused
-(defaults to start; `M3EAppBar.search` defaults to `Alignment.center`).
+Search field, or a bar that opens a full search view. Escape closes the view.
+Enter or Space on the anchor opens it.
 
 ```dart
 // Inline bar
@@ -1782,6 +1876,8 @@ M3ESearchAnchor.bar(
   },
 );
 ```
+
+Keyboard: Enter or Space opens the view. Escape closes it.
 
 ---
 
@@ -1838,9 +1934,10 @@ flutter analyze
 flutter test
 ```
 
-Optional custom lint rules (if `klin_dart` is enabled in your environment):
+Custom lint rules live in `tools/klin_dart` (path dependency, omitted from the published archive):
 
 ```bash
+export PATH="$PWD/.fvm/flutter_sdk/bin:$PATH"
 dart run custom_lint
 ```
 
@@ -1867,7 +1964,7 @@ implementations. Thanks to the original authors:
 
 | Author | Components | Source |
 | ------ | ---------- | ------ |
-| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, toggle button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
+| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
 | [Mudit Purohit](https://github.com/Mudit200408) | Dropdown menus | [m3e_dropdown_menu](https://github.com/Mudit200408/m3e_dropdown_menu) |
 | [Mudit Purohit](https://github.com/Mudit200408) | Expandable lists | [m3e_expandable](https://github.com/Mudit200408/m3e_expandable) |
 | [Emily](https://github.com/EmilyMoonstone) | Icon buttons | [icon_button_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e) |

@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart'
-    show M3EButton, M3EMotion, M3EToggleButton;
+    show M3EButton, M3EMotion;
 import 'package:motor/motor.dart';
 
-/// Spring-based motion configuration for [M3EButton] and [M3EToggleButton].
+/// Spring-based motion configuration for [M3EButton].
 @immutable
 class M3EButtonMotion {
   /// stiffness.
@@ -54,6 +54,12 @@ class M3EButtonMotion {
   static const M3EButtonMotion expressiveSpatialPress = M3EButtonMotion(
     stiffness: 380,
     damping: 0.55,
+  );
+
+  /// M3E button shape morph (stiffness 1400 / damping 0.9).
+  static const M3EButtonMotion shapeMorph = M3EButtonMotion(
+    stiffness: 1400,
+    damping: 0.9,
   );
 
   /// standardSpatialFast.

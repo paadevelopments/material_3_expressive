@@ -37,8 +37,14 @@ class _ChipsPlaygroundState extends State<ChipsPlayground> {
       _enabled && _type == M3EChipType.input ? () {} : null;
 
   List<PlaySnippet> get _snippets {
-    final String leading = _showLeading
+    final String leading = _showLeading && _type != M3EChipType.input
         ? '\n  leading: const Icon(M3EIcons.edit),'
+        : '';
+    final String avatar = _type == M3EChipType.input
+        ? '\n  avatar: const Icon(M3EIcons.person),'
+        : '';
+    final String trailing = _type == M3EChipType.filter
+        ? '\n  trailing: const Icon(M3EIcons.check),'
         : '';
     final String deleted = _onDeleted != null ? '\n  onDeleted: () {},' : '';
     final String pressed = _onPressed != null ? '() {}' : 'null';
@@ -53,8 +59,37 @@ M3EChip(
   label: ${playDartString(_label)},
   type: M3EChipType.${_type.name},
   selected: $_selected,
-  elevated: $_elevated,$leading
+  elevated: $_elevated,$leading$avatar$trailing
   onPressed: $pressed,$deleted
+);''',
+      ),
+      const PlaySnippet(
+        label: 'Chip group',
+        code:
+            '''
+$kPlaySnippetImport
+
+M3EChipGroup(
+  child: Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: [
+      M3EChip(label: 'Assist', onPressed: () {}),
+      M3EChip(
+        label: 'Filter',
+        type: M3EChipType.filter,
+        trailing: Icon(M3EIcons.check),
+        onPressed: () {},
+      ),
+      M3EChip(
+        label: 'Input',
+        type: M3EChipType.input,
+        avatar: Icon(M3EIcons.person),
+        onPressed: () {},
+        onDeleted: () {},
+      ),
+    ],
+  ),
 );''',
       ),
     ];
@@ -71,30 +106,49 @@ M3EChip(
             type: _type,
             selected: _selected,
             elevated: _elevated,
-            leading: _showLeading ? const Icon(M3EIcons.edit) : null,
+            leading: _showLeading && _type != M3EChipType.input
+                ? const Icon(M3EIcons.edit)
+                : null,
+            avatar: _type == M3EChipType.input
+                ? const Icon(M3EIcons.person)
+                : null,
+            trailing: _type == M3EChipType.filter
+                ? const Icon(M3EIcons.check)
+                : null,
             onPressed: _onPressed,
             onDeleted: _onDeleted,
           ),
         ),
         PlayPreviewCard(
           label: 'All types',
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              for (final M3EChipType type in M3EChipType.values)
-                M3EChip(
-                  label: type.name,
-                  type: type,
-                  selected: type == M3EChipType.filter && _selected,
-                  elevated: _elevated,
-                  leading: _showLeading ? const Icon(M3EIcons.tag) : null,
-                  onPressed: _enabled ? () {} : null,
-                  onDeleted: type == M3EChipType.input && _enabled
-                      ? () {}
-                      : null,
-                ),
-            ],
+          child: M3EChipGroup(
+            groupLabel: 'Chips',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                for (final M3EChipType type in M3EChipType.values)
+                  M3EChip(
+                    label: type.name,
+                    type: type,
+                    selected: type == M3EChipType.filter && _selected,
+                    elevated: _elevated,
+                    leading: _showLeading && type != M3EChipType.input
+                        ? const Icon(M3EIcons.tag)
+                        : null,
+                    avatar: type == M3EChipType.input
+                        ? const Icon(M3EIcons.person)
+                        : null,
+                    trailing: type == M3EChipType.filter
+                        ? const Icon(M3EIcons.check)
+                        : null,
+                    onPressed: _enabled ? () {} : null,
+                    onDeleted: type == M3EChipType.input && _enabled
+                        ? () {}
+                        : null,
+                  ),
+              ],
+            ),
           ),
         ),
       ],

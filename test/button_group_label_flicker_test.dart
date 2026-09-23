@@ -29,14 +29,14 @@ List<M3EButtonGroupAction> _actions({
             fontSize: 12,
           ),
         ),
-        checkedLabel: Row(
+        selectedLabel: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(labels[i]),
             const Icon(Icons.check, size: 18),
           ],
         ),
-        decoration: M3EToggleButtonDecoration(
+        decoration: M3EButtonDecoration(
           backgroundColor: WidgetStateProperty.all(
             selectedIndex == i
                 ? const Color(0xFFE8DEF8)
@@ -47,11 +47,9 @@ List<M3EButtonGroupAction> _actions({
   ];
 }
 
-double _maxToggleWidth(WidgetTester tester) {
+double _maxButtonWidth(WidgetTester tester) {
   var maxWidth = 0.0;
-  for (final Element element in tester.elementList(
-    find.byType(M3EToggleButton),
-  )) {
+  for (final Element element in tester.elementList(find.byType(M3EButton))) {
     final Size size = element.size!;
     if (size.width > maxWidth) {
       maxWidth = size.width;
@@ -62,8 +60,8 @@ double _maxToggleWidth(WidgetTester tester) {
 
 void main() {
   testWidgets(
-    'checkedLabel rebuild with new actions keeps label widths across selection',
-    _checkedLabelRebuildKeepsWidths,
+    'selectedLabel rebuild with new actions keeps label widths across selection',
+    _selectedLabelRebuildKeepsWidths,
   );
 
   testWidgets(
@@ -72,7 +70,7 @@ void main() {
   );
 }
 
-Future<void> _checkedLabelRebuildKeepsWidths(WidgetTester tester) async {
+Future<void> _selectedLabelRebuildKeepsWidths(WidgetTester tester) async {
   var selectedIndex = 0;
   const labels = <String>[_everyDay, _daysPerWeek, _selectedDays];
 
@@ -86,9 +84,9 @@ Future<void> _checkedLabelRebuildKeepsWidths(WidgetTester tester) async {
           size: M3EButtonSize.xs,
           spacing: 8,
           density: M3EButtonGroupDensity.compact,
-          decoration: const M3EToggleButtonDecoration(
+          decoration: const M3EButtonDecoration(
             borderRadius: 8,
-            uncheckedRadius: 8,
+            unselectedRadius: 8,
             pressedRadius: 4,
           ),
           actions: _actions(selectedIndex: selectedIndex, labels: labels),
@@ -103,7 +101,7 @@ Future<void> _checkedLabelRebuildKeepsWidths(WidgetTester tester) async {
   await tester.pumpWidget(buildGroup());
   await tester.pumpAndSettle();
 
-  final double settledWidth = _maxToggleWidth(tester);
+  final double settledWidth = _maxButtonWidth(tester);
   expect(settledWidth, greaterThan(40));
   expect(find.text(_everyDay), findsWidgets);
 
@@ -114,12 +112,12 @@ Future<void> _checkedLabelRebuildKeepsWidths(WidgetTester tester) async {
 
   expect(find.text(_everyDay), findsWidgets);
   expect(find.text(_daysPerWeek), findsWidgets);
-  expect(_maxToggleWidth(tester), greaterThan(40));
-  expect(_maxToggleWidth(tester), closeTo(settledWidth, 24));
+  expect(_maxButtonWidth(tester), greaterThan(40));
+  expect(_maxButtonWidth(tester), closeTo(settledWidth, 24));
 
   await tester.pumpAndSettle();
   expect(find.text(_daysPerWeek), findsWidgets);
-  expect(_maxToggleWidth(tester), greaterThan(40));
+  expect(_maxButtonWidth(tester), greaterThan(40));
 }
 
 Future<void> _contentChangeKeepsInterimWidth(WidgetTester tester) async {
@@ -147,7 +145,7 @@ Future<void> _contentChangeKeepsInterimWidth(WidgetTester tester) async {
 
   await tester.pumpWidget(buildGroup());
   await tester.pumpAndSettle();
-  final double settledWidth = _maxToggleWidth(tester);
+  final double settledWidth = _maxButtonWidth(tester);
   expect(settledWidth, greaterThan(40));
 
   // Force a real layout-signature change while keeping action count.
@@ -157,9 +155,9 @@ Future<void> _contentChangeKeepsInterimWidth(WidgetTester tester) async {
   await tester.pump();
 
   // Interim frame must keep last-known widths, not icon-only (~button height).
-  expect(_maxToggleWidth(tester), greaterThan(40));
+  expect(_maxButtonWidth(tester), greaterThan(40));
   expect(find.text('Every single day'), findsWidgets);
 
   await tester.pumpAndSettle();
-  expect(_maxToggleWidth(tester), greaterThan(40));
+  expect(_maxButtonWidth(tester), greaterThan(40));
 }

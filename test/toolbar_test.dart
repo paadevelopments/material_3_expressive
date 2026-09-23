@@ -39,11 +39,11 @@ void main() {
     _verticalFloatingUsesCrossAxisWidth,
   );
   testWidgets(
-    'floating safeArea pads outside the pill on one edge',
+    'floating safeArea and screen offset pad outside the pill',
     _floatingSafeareaPadsOutsideThePillOnOneEdge,
   );
   testWidgets(
-    'floating safeArea top pads only top outside pill',
+    'floating safeArea top pads the top edge plus screen offset',
     _floatingSafeareaTopPadsOnlyTopOutsidePill,
   );
   testWidgets(
@@ -167,14 +167,17 @@ Future<void> _floatingSafeareaPadsOutsideThePillOnOneEdge(
           return false;
         }
         final EdgeInsets insets = w.padding.resolve(TextDirection.ltr);
-        return insets.bottom == 40 &&
-            insets.top == 0 &&
-            insets.left == 0 &&
-            insets.right == 0;
+        return insets.bottom == 40 + M3EToolbarTokens.screenOffset &&
+            insets.top == M3EToolbarTokens.screenOffset &&
+            insets.left == M3EToolbarTokens.screenOffset &&
+            insets.right == M3EToolbarTokens.screenOffset;
       }),
     ),
   );
-  expect(safePadding.padding.resolve(TextDirection.ltr).bottom, 40);
+  expect(
+    safePadding.padding.resolve(TextDirection.ltr).bottom,
+    40 + M3EToolbarTokens.screenOffset,
+  );
 }
 
 Future<void> _floatingSafeareaTopPadsOnlyTopOutsidePill(
@@ -209,10 +212,10 @@ Future<void> _floatingSafeareaTopPadsOnlyTopOutsidePill(
           return false;
         }
         final EdgeInsets insets = w.padding.resolve(TextDirection.ltr);
-        return insets.top == 20 &&
-            insets.bottom == 0 &&
-            insets.left == 0 &&
-            insets.right == 0;
+        return insets.top == 20 + M3EToolbarTokens.screenOffset &&
+            insets.bottom == M3EToolbarTokens.screenOffset &&
+            insets.left == M3EToolbarTokens.screenOffset &&
+            insets.right == M3EToolbarTokens.screenOffset;
       }),
     ),
     findsOneWidget,
@@ -245,7 +248,10 @@ Future<void> _floatingAlignmentPositionsPillInParent(
         .first,
   );
   expect(pill.center.dx, closeTo(parent.center.dx, 0.5));
-  expect(pill.bottom, closeTo(parent.bottom, 0.5));
+  expect(
+    pill.bottom,
+    closeTo(parent.bottom - M3EToolbarTokens.screenOffset, 0.5),
+  );
 }
 
 Future<void> _dockedIconsOnlyPinsFirstLastToPaddedEdges(
@@ -303,8 +309,12 @@ Future<void> _floatingTitleGetsOpticalStartInset(WidgetTester tester) async {
 
   final double titleLeft = tester.getTopLeft(find.text('Inbox')).dx;
   final double toolbarLeft = tester.getTopLeft(find.byType(M3EToolbar)).dx;
-  // Axis-aware start pad 12 (8 + cross optical 4) + (48 target - 24 icon) / 2 = 24
-  expect(titleLeft - toolbarLeft, closeTo(24, 0.5));
+  // Screen offset 16 + axis-aware start pad 12 (8 + cross optical 4)
+  // + (48 target - 24 icon) / 2 = 40
+  expect(
+    titleLeft - toolbarLeft,
+    closeTo(24 + M3EToolbarTokens.screenOffset, 0.5),
+  );
 }
 
 Future<void> _dockedBottomSafeareaPadsOnlyBottom(WidgetTester tester) async {

@@ -37,6 +37,7 @@ export 'styles/m3e_toolbar_theme.dart';
 export 'utils/m3e_toolbar_item_layout.dart';
 
 part 'components/m3e_toolbar_build.dart';
+part 'components/m3e_toolbar_exit_offset.dart';
 
 /// A Material 3 Expressive toolbar.
 ///
@@ -53,7 +54,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// Floating toolbar (default). Horizontal unless [axis] is vertical.
   ///
   /// When [safeArea] is true, only [dockEdge] gets an **external** [M3ESafeArea]
-  /// inset (outside the pill) — never inside [Material].
+  /// inset (outside the pill) — never inside [Material]. Floating toolbars also
+  /// inset by [screenOffset] on every side, outside the pill.
   const M3EToolbar({
     this.leading,
     this.title,
@@ -84,6 +86,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.elevation,
     this.padding,
     this.safeArea = false,
+    this.screenOffset,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     this.visibilityController,
@@ -94,7 +97,11 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
     super.key,
-  }) : placement = M3EToolbarPlacement.floating;
+  }) : assert(
+         screenOffset == null || screenOffset >= 0,
+         'screenOffset must be >= 0',
+       ),
+       placement = M3EToolbarPlacement.floating;
 
   /// Explicit floating constructor (same as default).
   const M3EToolbar.floating({
@@ -127,6 +134,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.elevation,
     this.padding,
     this.safeArea = false,
+    this.screenOffset,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     this.visibilityController,
@@ -137,7 +145,11 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
     super.key,
-  }) : placement = M3EToolbarPlacement.floating;
+  }) : assert(
+         screenOffset == null || screenOffset >= 0,
+         'screenOffset must be >= 0',
+       ),
+       placement = M3EToolbarPlacement.floating;
 
   /// Docked full-bleed bar (Compose `FlexibleBottomAppBar`).
   ///
@@ -184,7 +196,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
        onFabPressed = null,
        fabPosition = M3EToolbarFabPosition.end,
        fabExpandsToolbar = true,
-       pillActiveSpring = true;
+       pillActiveSpring = true,
+       screenOffset = null;
 
   /// placement.
   final M3EToolbarPlacement placement;
@@ -306,6 +319,13 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
 
   /// safeArea.
   final bool safeArea;
+
+  /// Space outside a floating pill, on every side, in addition to the
+  /// [safeArea] inset on [dockEdge].
+  ///
+  /// Keeps the pill off the screen edge when that edge has no system bar.
+  /// Null uses [M3EToolbarTheme.screenOffset]. Ignored when docked.
+  final double? screenOffset;
 
   /// clipBehavior.
   final Clip clipBehavior;
@@ -570,6 +590,19 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     );
   }
 
+  /// Screen-edge clearance plus the dock-edge system inset, outside the pill.
+  EdgeInsets _floatingOuterPadding(BuildContext context) {
+    final double offset =
+        widget.screenOffset ?? M3ETheme.of(context).toolbarTheme.screenOffset;
+    final EdgeInsets safe = _edgeSafeAreaInset(context);
+    return EdgeInsets.fromLTRB(
+      offset,
+      safe.top + offset,
+      offset,
+      safe.bottom + offset,
+    );
+  }
+
   double _titleOpticalStartInset(
     M3EToolbarTheme toolbarTheme,
     M3EIconButtonTheme iconButtonTheme,
@@ -679,20 +712,5 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
         child: measured,
       ),
     );
-  }
-
-  Offset _exitOffset(BuildContext context, double offset) {
-    switch (_exitDirection) {
-      case M3EToolbarExitDirection.top:
-        return Offset(0, offset);
-      case M3EToolbarExitDirection.bottom:
-        return Offset(0, -offset);
-      case M3EToolbarExitDirection.start:
-        final isRtl = Directionality.of(context) == TextDirection.rtl;
-        return Offset(isRtl ? -offset : offset, 0);
-      case M3EToolbarExitDirection.end:
-        final isRtl = Directionality.of(context) == TextDirection.rtl;
-        return Offset(isRtl ? offset : -offset, 0);
-    }
   }
 }

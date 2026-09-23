@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -33,55 +33,6 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
   bool _showSelectedIcon = true;
   String _headline = 'Wireless charging';
   String _supporting = 'On · Fast charge enabled';
-  final List<String> _order = <String>['0', '1', '2'];
-  Set<int> _expandableExpanded = <int>{0};
-
-  M3EListSelectionState get _selectionState => M3EListSelectionState(
-    mode: _singleSelect
-        ? M3EListSelectionMode.single
-        : M3EListSelectionMode.multiple,
-    selectedIcon: _showSelectedIcon ? const Icon(M3EIcons.check_circle) : null,
-    trigger: _doubleTapTrigger
-        ? M3EListSelectionTrigger.doubleTap
-        : M3EListSelectionTrigger.icon,
-  );
-
-  void _onReorder(int oldIndex, int newIndex) {
-    setState(() {
-      final String item = _order.removeAt(oldIndex);
-      _order.insert(newIndex, item);
-      _expandableExpanded = _expandableExpanded
-          .map((int i) => _remapIndexAfterMove(i, oldIndex, newIndex))
-          .toSet();
-    });
-  }
-
-  static int _remapIndexAfterMove(int index, int from, int to) {
-    if (index == from) {
-      return to;
-    }
-    if (from < to) {
-      if (index > from && index <= to) {
-        return index - 1;
-      }
-    } else if (from > to) {
-      if (index >= to && index < from) {
-        return index + 1;
-      }
-    }
-    return index;
-  }
-
-  void _onExpandableExpansionChanged(int index, {required bool isExpanded}) {
-    setState(() {
-      if (isExpanded) {
-        // Playground expandable uses single-expand (theme default).
-        _expandableExpanded = <int>{index};
-      } else {
-        _expandableExpanded = Set<int>.from(_expandableExpanded)..remove(index);
-      }
-    });
-  }
 
   void _setShowSelectedIcon(bool value) {
     setState(() {
@@ -165,56 +116,54 @@ M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  r
     ];
   }
 
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _ListDemoHost(
+            kind: _kind,
+            variant: _variant,
+            showLeading: _showLeading,
+            showTrailing: _showTrailing,
+            selection: _selection,
+            nestedSelection: _nestedSelection,
+            reorder: _reorder,
+            singleSelect: _singleSelect,
+            doubleTapTrigger: _doubleTapTrigger,
+            useSublist: _useSublist,
+            showSelectedIcon: _showSelectedIcon,
+            headline: _headline,
+            supporting: _supporting,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'List',
-          child: switch (_kind) {
-            _ListKind.item => _ItemPreview(
-              headline: _headline,
-              supporting: _supporting,
-              showLeading: _showLeading,
-              showTrailing: _showTrailing,
-            ),
-            _ListKind.cardList => _CardListPreview(
-              headline: _headline,
-              supporting: _supporting,
-              variant: _variant,
-              showLeading: _showLeading,
-              showTrailing: _showTrailing,
-              selection: _selection,
-              reorder: _reorder,
-              selectionState: _selectionState,
-              order: _order,
-              onReorder: _onReorder,
-            ),
-            _ListKind.dismissible => _DismissiblePreview(
-              headline: _headline,
-              showLeading: _showLeading,
-              selection: _selection,
-              reorder: _reorder,
-              selectionState: _selectionState,
-              order: _order,
-              onReorder: _onReorder,
-            ),
-            _ListKind.expandable => _ExpandablePreview(
-              headline: _headline,
-              supporting: _supporting,
-              showLeading: _showLeading,
-              useSublist: _useSublist,
-              selection: _selection,
-              nestedSelection: _nestedSelection,
-              reorder: _reorder,
-              selectionState: _selectionState,
-              order: _order,
-              onReorder: _onReorder,
-              nestedOrder: _order,
-              initiallyExpanded: _expandableExpanded,
-              onExpansionChanged: _onExpandableExpansionChanged,
-            ),
-          },
+          label: 'List demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full page for the selected list. Swipe, expand, '
+                'select, and reorder there.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open list demo'),
+              ),
+            ],
+          ),
         ),
       ],
       snippets: _snippets,
@@ -350,6 +299,168 @@ M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  r
             ],
           ),
       ],
+    );
+  }
+}
+
+class _ListDemoHost extends StatefulWidget {
+  const _ListDemoHost({
+    required this.kind,
+    required this.variant,
+    required this.showLeading,
+    required this.showTrailing,
+    required this.selection,
+    required this.nestedSelection,
+    required this.reorder,
+    required this.singleSelect,
+    required this.doubleTapTrigger,
+    required this.useSublist,
+    required this.showSelectedIcon,
+    required this.headline,
+    required this.supporting,
+  });
+
+  final _ListKind kind;
+  final M3ECardVariant variant;
+  final bool showLeading;
+  final bool showTrailing;
+  final bool selection;
+  final bool nestedSelection;
+  final bool reorder;
+  final bool singleSelect;
+  final bool doubleTapTrigger;
+  final bool useSublist;
+  final bool showSelectedIcon;
+  final String headline;
+  final String supporting;
+
+  @override
+  State<_ListDemoHost> createState() => _ListDemoHostState();
+}
+
+class _ListDemoHostState extends State<_ListDemoHost> {
+  static const EdgeInsets _listPadding = EdgeInsets.all(16);
+
+  final List<String> _order = <String>['0', '1', '2', '3', '4'];
+  Set<int> _expanded = <int>{0};
+
+  M3EListSelectionState get _selectionState => M3EListSelectionState(
+    mode: widget.singleSelect
+        ? M3EListSelectionMode.single
+        : M3EListSelectionMode.multiple,
+    selectedIcon: widget.showSelectedIcon
+        ? const Icon(M3EIcons.check_circle)
+        : null,
+    trigger: widget.doubleTapTrigger
+        ? M3EListSelectionTrigger.doubleTap
+        : M3EListSelectionTrigger.icon,
+  );
+
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      final String item = _order.removeAt(oldIndex);
+      _order.insert(newIndex, item);
+      _expanded = _expanded
+          .map((int i) => _remapIndexAfterMove(i, oldIndex, newIndex))
+          .toSet();
+    });
+  }
+
+  static int _remapIndexAfterMove(int index, int from, int to) {
+    if (index == from) {
+      return to;
+    }
+    if (from < to) {
+      if (index > from && index <= to) {
+        return index - 1;
+      }
+    } else if (from > to) {
+      if (index >= to && index < from) {
+        return index + 1;
+      }
+    }
+    return index;
+  }
+
+  void _onExpansionChanged(int index, {required bool isExpanded}) {
+    setState(() {
+      if (isExpanded) {
+        _expanded = <int>{index};
+      } else {
+        _expanded = Set<int>.from(_expanded)..remove(index);
+      }
+    });
+  }
+
+  Widget _list() {
+    return switch (widget.kind) {
+      _ListKind.item => Column(
+        spacing: M3EListCardListTheme.defaultGap,
+        children: <Widget>[
+          for (int i = 0; i < 5; i++)
+            _ItemPreview(
+              headline: '${widget.headline} ${i + 1}',
+              supporting: widget.supporting,
+              showLeading: widget.showLeading,
+              showTrailing: widget.showTrailing,
+            ),
+        ],
+      ),
+      _ListKind.cardList => _CardListPreview(
+        headline: widget.headline,
+        supporting: widget.supporting,
+        variant: widget.variant,
+        showLeading: widget.showLeading,
+        showTrailing: widget.showTrailing,
+        selection: widget.selection,
+        reorder: widget.reorder,
+        selectionState: _selectionState,
+        order: _order,
+        onReorder: _onReorder,
+      ),
+      _ListKind.dismissible => _DismissiblePreview(
+        headline: widget.headline,
+        showLeading: widget.showLeading,
+        selection: widget.selection,
+        reorder: widget.reorder,
+        selectionState: _selectionState,
+        order: _order,
+        onReorder: _onReorder,
+      ),
+      _ListKind.expandable => _ExpandablePreview(
+        headline: widget.headline,
+        supporting: widget.supporting,
+        showLeading: widget.showLeading,
+        useSublist: widget.useSublist,
+        selection: widget.selection,
+        nestedSelection: widget.nestedSelection,
+        reorder: widget.reorder,
+        selectionState: _selectionState,
+        order: _order,
+        onReorder: _onReorder,
+        nestedOrder: _order,
+        initiallyExpanded: _expanded,
+        onExpansionChanged: _onExpansionChanged,
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final Widget list = _list();
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: widget.kind.name,
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: SingleChildScrollView(padding: _listPadding, child: list),
     );
   }
 }

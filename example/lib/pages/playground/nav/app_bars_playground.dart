@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -26,157 +26,8 @@ class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
   M3EAppBarShapeFamily _shape = M3EAppBarShapeFamily.square;
   M3EAppBarVariant _variant = M3EAppBarVariant.medium;
   bool _centerTitle = false;
-  bool _safeArea = false;
+  bool _safeArea = true;
   String _title = 'Inbox';
-
-  final M3ESearchController _searchController = M3ESearchController();
-
-  static const List<String> _suggestions = <String>[
-    'Inbox',
-    'Starred',
-    'Sent',
-    'Drafts',
-  ];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Widget _framed(M3EThemeData theme, Widget child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: M3EShapes.radiusLarge,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: ClipRRect(borderRadius: M3EShapes.radiusLarge, child: child),
-    );
-  }
-
-  Widget _icon(IconData icon) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Center(child: Icon(icon, size: 24)),
-    );
-  }
-
-  Iterable<Widget> _buildSuggestions(
-    BuildContext context,
-    M3ESearchController controller,
-  ) {
-    final String query = controller.text.trim().toLowerCase();
-    final Iterable<String> matches = query.isEmpty
-        ? _suggestions
-        : _suggestions.where((String n) => n.toLowerCase().contains(query));
-    return matches.map(
-      (String name) => GestureDetector(
-        onTap: () => controller.closeView(name),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text(name),
-        ),
-      ),
-    );
-  }
-
-  Widget _topPreview(M3EThemeData theme) {
-    return _framed(
-      theme,
-      M3EAppBar.top(
-        titleText: _title,
-        centerTitle: _centerTitle,
-        density: _density,
-        shapeFamily: _shape,
-        safeArea: _safeArea,
-        leading: _icon(M3EIcons.menu),
-        actions: <Widget>[_icon(M3EIcons.search)],
-      ),
-    );
-  }
-
-  Widget _searchPreview(M3EThemeData theme) {
-    return _framed(
-      theme,
-      M3EAppBar.search(
-        searchController: _searchController,
-        barHintText: 'Search mail',
-        density: _density,
-        shapeFamily: _shape,
-        centerTitle: _centerTitle,
-        safeArea: _safeArea,
-        leading: _icon(M3EIcons.menu),
-        actions: <Widget>[_icon(M3EIcons.account_circle)],
-        suggestionsBuilder: _buildSuggestions,
-      ),
-    );
-  }
-
-  Widget _bottomPreview(M3EThemeData theme) {
-    return _framed(
-      theme,
-      M3EAppBar.bottom(
-        safeArea: _safeArea,
-        actions: <Widget>[
-          _icon(M3EIcons.menu),
-          _icon(M3EIcons.search),
-          _icon(M3EIcons.edit),
-        ],
-        floatingActionButton: M3EFab(
-          icon: const Icon(M3EIcons.add),
-          size: M3EFabSize.small,
-          onPressed: () {},
-        ),
-      ),
-    );
-  }
-
-  Widget _sliverPreview(M3EThemeData theme) {
-    return _framed(
-      theme,
-      SizedBox(
-        height: 180,
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: <Widget>[
-            M3EAppBar.sliver(
-              titleText: _title,
-              centerTitle: _centerTitle,
-              density: _density,
-              shapeFamily: _shape,
-              variant: _variant,
-              actions: <Widget>[_icon(M3EIcons.search)],
-            ),
-            SliverList.list(
-              children: <Widget>[
-                for (int i = 0; i < 4; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Text(
-                      'Item ${i + 1}',
-                      style: theme.typeScale.bodyMedium,
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _preview(M3EThemeData theme) {
-    return switch (_kind) {
-      _AppBarKind.top => _topPreview(theme),
-      _AppBarKind.search => _searchPreview(theme),
-      _AppBarKind.bottom => _bottomPreview(theme),
-      _AppBarKind.sliver => _sliverPreview(theme),
-    };
-  }
 
   List<PlaySnippet> get _snippets {
     final String sample = switch (_kind) {
@@ -234,12 +85,49 @@ M3EAppBar.sliver(
     ];
   }
 
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _AppBarDemoHost(
+            kind: _kind,
+            density: _density,
+            shape: _shape,
+            variant: _variant,
+            centerTitle: _centerTitle,
+            safeArea: _safeArea,
+            title: _title,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
-        PlayPreviewCard(label: _kind.name, child: _preview(theme)),
+        PlayPreviewCard(
+          label: 'App bar demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full screen for the selected app bar, with a page '
+                'under it. Scroll the sliver variant to review its size.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open app bar demo'),
+              ),
+            ],
+          ),
+        ),
       ],
       snippets: _snippets,
       controls: <Widget>[
@@ -305,5 +193,180 @@ M3EAppBar.sliver(
         ),
       ],
     );
+  }
+}
+
+class _AppBarDemoHost extends StatefulWidget {
+  const _AppBarDemoHost({
+    required this.kind,
+    required this.density,
+    required this.shape,
+    required this.variant,
+    required this.centerTitle,
+    required this.safeArea,
+    required this.title,
+  });
+
+  final _AppBarKind kind;
+  final M3EAppBarDensity density;
+  final M3EAppBarShapeFamily shape;
+  final M3EAppBarVariant variant;
+  final bool centerTitle;
+  final bool safeArea;
+  final String title;
+
+  @override
+  State<_AppBarDemoHost> createState() => _AppBarDemoHostState();
+}
+
+class _AppBarDemoHostState extends State<_AppBarDemoHost> {
+  final M3ESearchController _searchController = M3ESearchController();
+
+  static const List<String> _suggestions = <String>[
+    'Inbox',
+    'Starred',
+    'Sent',
+    'Drafts',
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Widget _backButton() {
+    return M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
+      icon: const Icon(M3EIcons.arrow_back),
+      tooltip: 'Back',
+      onPressed: () => Navigator.of(context).maybePop(),
+    );
+  }
+
+  Widget _action(IconData icon) {
+    return M3EIconButton(
+      variant: M3EIconButtonVariant.standard,
+      icon: Icon(icon),
+      onPressed: () {},
+    );
+  }
+
+  Iterable<Widget> _buildSuggestions(
+    BuildContext context,
+    M3ESearchController controller,
+  ) {
+    final String query = controller.text.trim().toLowerCase();
+    final Iterable<String> matches = query.isEmpty
+        ? _suggestions
+        : _suggestions.where((String n) => n.toLowerCase().contains(query));
+    return matches.map(
+      (String name) => GestureDetector(
+        onTap: () => controller.closeView(name),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(name),
+        ),
+      ),
+    );
+  }
+
+  Widget _page() {
+    return M3ECardList.builder(
+      itemCount: 16,
+      listPadding: const EdgeInsets.all(16),
+      itemBuilder: (BuildContext context, int index) {
+        return M3EListItem(
+          headline: 'Message ${index + 1}',
+          supportingText: widget.title,
+          leading: const Icon(M3EIcons.mail),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final Widget page = _page();
+    return switch (widget.kind) {
+      _AppBarKind.top => Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: M3EAppBar.top(
+          titleText: widget.title,
+          centerTitle: widget.centerTitle,
+          density: widget.density,
+          shapeFamily: widget.shape,
+          safeArea: widget.safeArea,
+          leading: _backButton(),
+          actions: <Widget>[_action(M3EIcons.search)],
+        ),
+        body: page,
+      ),
+      _AppBarKind.search => Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: M3EAppBar.search(
+          searchController: _searchController,
+          barHintText: 'Search mail',
+          density: widget.density,
+          shapeFamily: widget.shape,
+          centerTitle: widget.centerTitle,
+          safeArea: widget.safeArea,
+          leading: _backButton(),
+          actions: <Widget>[_action(M3EIcons.account_circle)],
+          suggestionsBuilder: _buildSuggestions,
+        ),
+        body: page,
+      ),
+      _AppBarKind.bottom => Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: M3EAppBar.top(titleText: widget.title, leading: _backButton()),
+        body: page,
+        bottomNavigationBar: M3EAppBar.bottom(
+          safeArea: widget.safeArea,
+          actions: <Widget>[
+            _action(M3EIcons.menu),
+            _action(M3EIcons.search),
+            _action(M3EIcons.edit),
+          ],
+          floatingActionButton: M3EFab(
+            icon: const Icon(M3EIcons.add),
+            size: M3EFabSize.small,
+            onPressed: () {},
+          ),
+        ),
+      ),
+      _AppBarKind.sliver => Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            M3EAppBar.sliver(
+              titleText: widget.title,
+              centerTitle: widget.centerTitle,
+              density: widget.density,
+              shapeFamily: widget.shape,
+              variant: widget.variant,
+              leading: _backButton(),
+              actions: <Widget>[_action(M3EIcons.search)],
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverToBoxAdapter(
+                child: M3ECardList(
+                  itemCount: 24,
+                  itemBuilder: (BuildContext context, int index) {
+                    return M3EListItem(
+                      headline: 'Message ${index + 1}',
+                      supportingText: widget.title,
+                      leading: const Icon(M3EIcons.mail),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    };
   }
 }

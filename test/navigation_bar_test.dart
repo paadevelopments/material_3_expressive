@@ -11,8 +11,8 @@ void main() {
     _m3enavigationbarRendersDestinationsAndReportsSelection,
   );
   testWidgets(
-    'M3ENavigationBar liquid indicator appears without interaction',
-    _m3enavigationbarLiquidIndicatorAppearsWithoutInteractio,
+    'M3ENavigationBar selection indicator scales in place',
+    _m3enavigationbarSelectionIndicatorScalesInPlace,
   );
   testWidgets(
     'M3ENavigationBar works under a WidgetsApp with the Material delegate',
@@ -74,47 +74,74 @@ Future<void> _m3enavigationbarRendersDestinationsAndReportsSelection(
   expect(selected, 1);
 }
 
-Future<void> _m3enavigationbarLiquidIndicatorAppearsWithoutInteractio(
+double _indicatorScaleX(WidgetTester tester, M3ESelectionIndicator indicator) {
+  final Transform transform = tester.widget<Transform>(
+    find.descendant(
+      of: find.byWidget(indicator),
+      matching: find.byType(Transform),
+    ),
+  );
+  return transform.transform.storage[0];
+}
+
+double _indicatorOpacity(WidgetTester tester, M3ESelectionIndicator indicator) {
+  final Opacity opacity = tester.widget<Opacity>(
+    find.descendant(
+      of: find.byWidget(indicator),
+      matching: find.byType(Opacity),
+    ),
+  );
+  return opacity.opacity;
+}
+
+Future<void> _m3enavigationbarSelectionIndicatorScalesInPlace(
   WidgetTester tester,
 ) async {
+  var index = 0;
   await tester.pumpWidget(
     _host(
-      const Align(
-        alignment: Alignment.bottomCenter,
-        child: M3ENavigationBar(
-          destinations: <M3ENavigationBarDestination>[
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.home),
-              label: 'Home',
-            ),
-            M3ENavigationBarDestination(
-              icon: Icon(M3EIcons.search),
-              label: 'Search',
-            ),
-          ],
-        ),
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return M3ENavigationBar(
+            selectedIndex: index,
+            onDestinationSelected: (int i) => setState(() => index = i),
+            destinations: const <M3ENavigationBarDestination>[
+              M3ENavigationBarDestination(
+                icon: Icon(M3EIcons.home),
+                label: 'Home',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(M3EIcons.search),
+                label: 'Search',
+              ),
+            ],
+          );
+        },
       ),
     ),
   );
-  // Resting pill is painted by the selected destination on first build.
   await tester.pump();
 
-  expect(find.byType(M3ENavSelectionIndicator), findsOneWidget);
-  expect(find.text('Home'), findsOneWidget);
-  // Selected destination's resting DecoratedBox uses a non-transparent fill.
-  final Iterable<DecoratedBox> boxes = tester.widgetList<DecoratedBox>(
-    find.descendant(
-      of: find.byType(M3ENavigationBar),
-      matching: find.byType(DecoratedBox),
-    ),
-  );
-  expect(
-    boxes.any((DecoratedBox box) {
-      final Decoration d = box.decoration;
-      return d is BoxDecoration && d.color != null && d.color!.a > 0;
-    }),
-    isTrue,
-  );
+  List<M3ESelectionIndicator> indicators = tester
+      .widgetList<M3ESelectionIndicator>(find.byType(M3ESelectionIndicator))
+      .toList();
+  expect(indicators, hasLength(2));
+  expect(_indicatorScaleX(tester, indicators[0]), 1);
+  expect(_indicatorOpacity(tester, indicators[0]), 1);
+  expect(_indicatorScaleX(tester, indicators[1]), 0);
+  expect(_indicatorOpacity(tester, indicators[1]), 0);
+
+  await tester.tap(find.text('Search'));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 32));
+
+  indicators = tester
+      .widgetList<M3ESelectionIndicator>(find.byType(M3ESelectionIndicator))
+      .toList();
+  final double incoming = _indicatorScaleX(tester, indicators[1]);
+  expect(incoming, greaterThan(0.4));
+  expect(incoming, lessThan(1));
+  expect(_indicatorOpacity(tester, indicators[0]), lessThan(1));
 }
 
 Future<void> _m3enavigationbarWorksUnderAWidgetsappWithTheMaterial(
@@ -184,7 +211,7 @@ Future<void> _m3enavigationbarAutolayoutUsesWideAtWideBreakpoint(
 
   expect(find.text('Home'), findsOneWidget);
   expect(find.text('Search'), findsOneWidget);
-  expect(find.byType(M3ENavSelectionIndicator), findsOneWidget);
+  expect(find.byType(M3ESelectionIndicator), findsWidgets);
 
   // Below the computed breakpoint, autoLayout stays compact.
   await tester.pumpWidget(

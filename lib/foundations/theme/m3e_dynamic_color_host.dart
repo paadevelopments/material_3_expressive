@@ -6,8 +6,10 @@ import 'package:material_ui/material_ui.dart'
     show Brightness, Color, ColorScheme;
 
 /// Builds a subtree from device light and dark dynamic [ColorScheme]s.
-typedef M3EDynamicColorBuilder =
-    Widget Function(ColorScheme? lightDynamic, ColorScheme? darkDynamic);
+typedef M3EDynamicColorBuilder = Widget Function(
+  ColorScheme? lightDynamic,
+  ColorScheme? darkDynamic,
+);
 
 /// Fetches device dynamic colors and refreshes them when the app resumes.
 ///

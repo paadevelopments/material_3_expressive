@@ -20,9 +20,14 @@ class MenuPlayground extends StatefulWidget {
 class _MenuPlaygroundState extends State<MenuPlayground> {
   M3EMenuColorStyle _colorStyle = M3EMenuColorStyle.standard;
   M3EMenuAnchorPosition _position = M3EMenuAnchorPosition.bottomStart;
+  M3EMenuVariant _variant = M3EMenuVariant.vertical;
+  M3EMenuSelectionMode _selectionMode = M3EMenuSelectionMode.single;
   bool _closeOnSelect = true;
   String _selected = 'Inbox';
+  final Set<String> _multi = <String>{'Inbox'};
   bool _starred = true;
+
+  bool get _isMulti => _selectionMode == M3EMenuSelectionMode.multi;
 
   List<M3EMenuNode> get _children {
     return <M3EMenuNode>[
@@ -32,13 +37,13 @@ class _MenuPlaygroundState extends State<MenuPlayground> {
           M3EMenuSelectable(
             label: 'Inbox',
             value: 'Inbox',
-            selected: _selected == 'Inbox',
+            selected: _isSelected('Inbox'),
             leading: const Icon(M3EIcons.inbox),
           ),
           M3EMenuSelectable(
             label: 'Sent',
             value: 'Sent',
-            selected: _selected == 'Sent',
+            selected: _isSelected('Sent'),
             leading: const Icon(M3EIcons.send),
           ),
         ],
@@ -71,10 +76,34 @@ class _MenuPlaygroundState extends State<MenuPlayground> {
     ];
   }
 
+  bool _isSelected(String value) {
+    if (_isMulti) {
+      return _multi.contains(value);
+    }
+    return _selected == value;
+  }
+
+  void _onSelected(Object? value) {
+    if (value is! String) {
+      return;
+    }
+    setState(() {
+      if (_isMulti) {
+        if (!_multi.add(value)) {
+          _multi.remove(value);
+        }
+      } else {
+        _selected = value;
+      }
+    });
+  }
+
   List<PlaySnippet> get _snippets {
     final String sample =
         '''
 M3EMenu(
+  variant: M3EMenuVariant.${_variant.name},
+  selectionMode: M3EMenuSelectionMode.${_selectionMode.name},
   position: M3EMenuAnchorPosition.${_position.name},
   colorStyle: M3EMenuColorStyle.${_colorStyle.name},
   closeOnSelect: $_closeOnSelect,
@@ -92,7 +121,7 @@ M3EMenu(
     M3EMenuSelectable(
       label: 'Inbox',
       value: 'Inbox',
-      selected: ${_selected == 'Inbox'},
+      selected: ${_isSelected('Inbox')},
     ),
     M3EMenuToggleable(
       label: 'Starred',
@@ -115,22 +144,50 @@ M3EMenu(
           child: M3EMenu(
             position: _position,
             colorStyle: _colorStyle,
+            variant: _variant,
+            selectionMode: _selectionMode,
             closeOnSelect: _closeOnSelect,
             selectedValue: _selected,
-            onSelected: (Object? value) {
-              if (value is String) {
-                setState(() => _selected = value);
-              }
-            },
+            onSelected: _onSelected,
             anchorBuilder: (BuildContext context, VoidCallback open) {
               return M3EButton.icon(
                 style: M3EButtonStyle.tonal,
                 icon: const Icon(M3EIcons.more_vert),
-                label: Text(_selected),
+                label: Text(_isMulti ? _multi.join(', ') : _selected),
                 onPressed: open,
               );
             },
             children: _children,
+          ),
+        ),
+        PlayPreviewCard(
+          label: 'Baseline',
+          child: M3EMenu(
+            variant: M3EMenuVariant.baseline,
+            anchorBuilder: (BuildContext context, VoidCallback open) {
+              return M3EButton.tonal(
+                onPressed: open,
+                child: const Text('Baseline'),
+              );
+            },
+            children: const <M3EMenuNode>[
+              M3EMenuEntry(
+                label: 'Cut',
+                leading: Icon(M3EIcons.content_cut),
+                trailingText: '⌘X',
+              ),
+              M3EMenuEntry(
+                label: 'Copy',
+                leading: Icon(M3EIcons.content_copy),
+                trailingText: '⌘C',
+              ),
+              M3EMenuDivider(),
+              M3EMenuEntry(
+                label: 'Paste',
+                leading: Icon(M3EIcons.content_paste),
+                trailingText: '⌘V',
+              ),
+            ],
           ),
         ),
       ],
@@ -139,6 +196,13 @@ M3EMenu(
         PlayControlPanel(
           title: 'Appearance',
           children: <Widget>[
+            PlayEnumMenu<M3EMenuVariant>(
+              label: 'Variant',
+              value: _variant,
+              values: M3EMenuVariant.values,
+              labelOf: (M3EMenuVariant v) => v.name,
+              onChanged: (M3EMenuVariant v) => setState(() => _variant = v),
+            ),
             PlayEnumSegmented<M3EMenuColorStyle>(
               label: 'Color',
               value: _colorStyle,
@@ -160,6 +224,15 @@ M3EMenu(
               labelOf: (M3EMenuAnchorPosition v) => v.name,
               onChanged: (M3EMenuAnchorPosition v) {
                 setState(() => _position = v);
+              },
+            ),
+            PlayEnumSegmented<M3EMenuSelectionMode>(
+              label: 'Selection',
+              value: _selectionMode,
+              values: M3EMenuSelectionMode.values,
+              labelOf: (M3EMenuSelectionMode v) => v.name,
+              onChanged: (M3EMenuSelectionMode v) {
+                setState(() => _selectionMode = v);
               },
             ),
             PlaySwitch(

@@ -21,9 +21,8 @@ class M3ESliderValueIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle style = M3ETheme.of(
-      context,
-    ).typeScale.labelLarge.copyWith(color: colors.valueIndicatorLabel);
+    final TextStyle style = M3ETheme.of(context).typeScale.labelLarge
+        .copyWith(color: colors.valueIndicatorLabel);
 
     return DecoratedBox(
       decoration: BoxDecoration(

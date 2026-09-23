@@ -6,23 +6,21 @@ import 'package:material_3_expressive/material_3_expressive.dart'
 
 import '../../../foundations/foundations.dart';
 import '../../navigation_rail/components/m3e_nav_icon_scale.dart';
+import '../../navigation_rail/components/m3e_nav_selection_indicator.dart';
 import '../models/m3e_navigation_destination.dart';
 import '../styles/m3e_navigation_drawer_theme.dart';
 
 /// Single destination row in [M3ENavigationDrawer].
 ///
-/// Resting selection fill is local; the shared liquid overlay paints while
-/// traveling between destinations. Keyboard focus adds the shared
-/// [M3EFocusRing] around the destination row; Space/Enter selects.
+/// The selection fill scales and fades in place. Keyboard focus adds the
+/// shared [M3EFocusRing] around the destination row; Space/Enter selects.
 class M3EDrawerDestinationButton extends StatefulWidget {
   /// M3EDrawerDestinationButton.
   const M3EDrawerDestinationButton({
     required this.destination,
     required this.selected,
     required this.onTap,
-    required this.indicatorKey,
     this.haptic = M3EHapticFeedback.none,
-    this.showRestingFill = true,
     super.key,
   });
 
@@ -36,14 +34,8 @@ class M3EDrawerDestinationButton extends StatefulWidget {
   /// onTap.
   final VoidCallback onTap;
 
-  /// indicatorKey.
-  final GlobalKey indicatorKey;
-
   /// Haptic intensity on tap. Defaults to [M3EHapticFeedback.none].
   final M3EHapticFeedback haptic;
-
-  /// When false, the shared liquid overlay owns the pill (during travel).
-  final bool showRestingFill;
 
   @override
   State<M3EDrawerDestinationButton> createState() =>
@@ -115,9 +107,10 @@ class _M3EDrawerDestinationButtonState
       selected: selected,
     );
     final ShapeBorder border = drawerTheme.destinationShape();
-    final Color fill = selected && widget.showRestingFill
-        ? drawerTheme.destinationBackgroundColor(scheme, selected: true)
-        : const Color(0x00000000);
+    final Color fill = drawerTheme.destinationBackgroundColor(
+      scheme,
+      selected: true,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -157,14 +150,26 @@ class _M3EDrawerDestinationButtonState
               child: M3EFocusRing(
                 focused: _focused,
                 radius: _ringRadius(border, drawerTheme),
-                child: KeyedSubtree(
-                  key: widget.indicatorKey,
-                  child: SizedBox(
-                    height: drawerTheme.destinationHeight,
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: ShapeDecoration(shape: border, color: fill),
-                      child: Padding(
+                child: SizedBox(
+                  height: drawerTheme.destinationHeight,
+                  width: double.infinity,
+                  child: Stack(
+                    alignment: AlignmentDirectional.centerStart,
+                    children: <Widget>[
+                      Positioned.fill(
+                        child: M3ESelectionIndicator(
+                          selected: selected,
+                          scaleSpring: drawerTheme.indicatorScaleSpring,
+                          fadeSpring: drawerTheme.indicatorFadeSpring,
+                          child: DecoratedBox(
+                            decoration: ShapeDecoration(
+                              shape: border,
+                              color: fill,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal:
                               drawerTheme.destinationInnerHorizontalPadding,
@@ -205,7 +210,7 @@ class _M3EDrawerDestinationButtonState
                           ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),

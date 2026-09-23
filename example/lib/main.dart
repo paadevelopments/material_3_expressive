@@ -108,6 +108,7 @@ class _GalleryShellState extends State<_GalleryShell> {
                     titleText: 'Material 3 Expressive',
                     actions: <Widget>[
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         icon: const Icon(M3EIcons.palette),
                         tooltip: 'Theme settings',
                         onPressed: () {
@@ -120,6 +121,7 @@ class _GalleryShellState extends State<_GalleryShell> {
                         },
                       ),
                       M3EIconButton(
+                        variant: M3EIconButtonVariant.standard,
                         icon: Icon(
                           theme.brightness == Brightness.dark
                               ? M3EIcons.light_mode
@@ -129,9 +131,8 @@ class _GalleryShellState extends State<_GalleryShell> {
                         onPressed: () {
                           M3ETheme.controllerOf(context)?.toggleBrightness(
                             fallback: theme.brightness,
-                            autoTheming: ExampleThemeScope.of(
-                              context,
-                            ).autoTheming,
+                            autoTheming: ExampleThemeScope.of(context)
+                                .autoTheming,
                           );
                         },
                       ),

@@ -109,7 +109,7 @@ extension _M3EDropdownMenuField<T> on _M3EDropdownMenuState<T> {
   ) {
     final iconSize = m3eTheme.resolvedIconTheme.size ?? 18;
     final ringRadius = BorderRadius.circular(iconSize);
-    return Tooltip(
+    return M3ETooltip(
       message: 'Clear selection',
       child: M3ETappable(
         semanticLabel: 'Clear all selections',

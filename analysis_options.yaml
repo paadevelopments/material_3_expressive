@@ -21,6 +21,13 @@ analyzer:
     - "README.md"
     # Generated Material Icons glyph registry (~52k lines); not practical to split.
     - "lib/foundations/m3e_icons.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
   plugins:
     - custom_lint

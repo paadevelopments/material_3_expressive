@@ -136,9 +136,8 @@ class _M3ECalendarDatePickerState extends State<M3ECalendarDatePicker> {
   }
 
   double _inlinePickerBodyHeight(BuildContext context) {
-    final int firstDayOfWeekIndex = MaterialLocalizations.of(
-      context,
-    ).firstDayOfWeekIndex;
+    final int firstDayOfWeekIndex = MaterialLocalizations.of(context)
+        .firstDayOfWeekIndex;
     return switch (_mode) {
       M3EDatePickerMode.day => M3EDatePickerUtils.calendarDayViewHeight(
         _displayedMonth,
