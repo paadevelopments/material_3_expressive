@@ -3,10 +3,8 @@ part of '../m3e_navigation_rail.dart';
 mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
   bool get _isExpanded;
   bool get _suppressInk;
-  bool get _traveling;
-  List<GlobalKey> get _destinationKeys;
   Widget _buildMenuButton(BuildContext context, {required Alignment alignment});
-  Widget? _buildFab(BuildContext context);
+  Widget? _buildFab(BuildContext context, {required bool showLabels});
   Widget? _buildTrailing(BuildContext context) {
     final tr = widget.trailing;
     if (tr == null) {
@@ -35,11 +33,13 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
         alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
       ),
     ];
-    final fabWidget = _buildFab(context);
+    final fabWidget = _buildFab(context, showLabels: showLabels);
     if (fabWidget != null) {
       children.add(fabWidget);
     }
-    if (isExpanded) {
+    // Stay on the collapsed item layout until the width animation has room
+    // for the label row. Switching immediately overflows the still-narrow rail.
+    if (showLabels) {
       children.addAll(_buildExpandedDestinations(context, theme));
     } else {
       children.addAll(_buildCollapsedDestinations(theme));
@@ -79,8 +79,6 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
               expanded: true,
               labelBehavior: widget.labelBehavior,
               suppressInk: _suppressInk,
-              useLocalIndicator: !_traveling,
-              indicatorKey: _destinationKeys[index],
             ),
           ),
         );
@@ -104,8 +102,6 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
             expanded: false,
             labelBehavior: widget.labelBehavior,
             suppressInk: _suppressInk,
-            useLocalIndicator: !_traveling,
-            indicatorKey: _destinationKeys[i],
           ),
         ),
     ];

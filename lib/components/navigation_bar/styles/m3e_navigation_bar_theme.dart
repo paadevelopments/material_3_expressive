@@ -15,6 +15,8 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
     this.indicatorThickness = 3,
     this.compactHeightReduction = 4,
     this.compactIndicatorReduction = 1,
+    this.indicatorScaleSpring = M3EMotion.expressiveSpatialDefault,
+    this.indicatorFadeSpring = M3EMotion.effectsFast,
   });
 
   /// defaults.
@@ -39,6 +41,12 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
 
   /// compactIndicatorReduction.
   final double compactIndicatorReduction;
+
+  /// Spatial spring for the selection indicator width scale.
+  final M3ESpring indicatorScaleSpring;
+
+  /// Effects spring for the selection indicator fade.
+  final M3ESpring indicatorFadeSpring;
 
   /// metrics.
 
@@ -114,6 +122,8 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
     double? indicatorThickness,
     double? compactHeightReduction,
     double? compactIndicatorReduction,
+    M3ESpring? indicatorScaleSpring,
+    M3ESpring? indicatorFadeSpring,
   }) {
     return M3ENavigationBarTheme(
       heightSmall: heightSmall ?? this.heightSmall,
@@ -124,6 +134,8 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
           compactHeightReduction ?? this.compactHeightReduction,
       compactIndicatorReduction:
           compactIndicatorReduction ?? this.compactIndicatorReduction,
+      indicatorScaleSpring: indicatorScaleSpring ?? this.indicatorScaleSpring,
+      indicatorFadeSpring: indicatorFadeSpring ?? this.indicatorFadeSpring,
     );
   }
 
@@ -151,6 +163,12 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
         other.compactIndicatorReduction,
         t,
       )!,
+      indicatorScaleSpring: t < 0.5
+          ? indicatorScaleSpring
+          : other.indicatorScaleSpring,
+      indicatorFadeSpring: t < 0.5
+          ? indicatorFadeSpring
+          : other.indicatorFadeSpring,
     );
   }
 

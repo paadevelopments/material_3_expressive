@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_menu.dart';
@@ -18,7 +18,6 @@ class NavigationRailPlayground extends StatefulWidget {
 }
 
 class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
-  int _index = 0;
   M3ENavigationRailType _type = M3ENavigationRailType.expanded;
   final M3ENavigationRailModality _modality =
       M3ENavigationRailModality.standard;
@@ -77,7 +76,7 @@ M3ENavigationRail(
       ],
     ),
   ],
-  selectedIndex: $_index,
+  selectedIndex: 0,
   onDestinationSelected: (int i) {},
   expandTooltip: 'Expand',
   collapseTooltip: 'Collapse',
@@ -93,13 +92,19 @@ M3ENavigationRail(
     ];
   }
 
-  Widget _framed(M3EThemeData theme, Widget child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: M3EShapes.radiusLarge,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _NavigationRailDemoHost(
+            sections: _sections,
+            type: _type,
+            modality: _modality,
+            labelBehavior: _labelBehavior,
+            showFab: _showFab,
+          );
+        },
       ),
-      child: ClipRRect(borderRadius: M3EShapes.radiusLarge, child: child),
     );
   }
 
@@ -109,27 +114,24 @@ M3ENavigationRail(
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'Navigation rail',
-          child: SizedBox(
-            height: 320,
-            child: _framed(
-              theme,
-              M3ENavigationRail(
-                sections: _sections,
-                selectedIndex: _index,
-                onDestinationSelected: (int i) => setState(() => _index = i),
-                type: _type,
-                modality: _modality,
-                labelBehavior: _labelBehavior,
-                fab: _showFab
-                    ? M3ENavigationRailFabSlot(
-                        icon: const Icon(M3EIcons.add),
-                        label: 'Compose',
-                        onPressed: () {},
-                      )
-                    : null,
+          label: 'Navigation rail demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a full screen with the rail beside the page, the way '
+                'an app uses it. Expand it and switch destinations to review '
+                'the indicator.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open navigation rail demo'),
+              ),
+            ],
           ),
         ),
       ],
@@ -164,6 +166,91 @@ M3ENavigationRail(
           ],
         ),
       ],
+    );
+  }
+}
+
+class _NavigationRailDemoHost extends StatefulWidget {
+  const _NavigationRailDemoHost({
+    required this.sections,
+    required this.type,
+    required this.modality,
+    required this.labelBehavior,
+    required this.showFab,
+  });
+
+  final List<M3ENavigationRailSection> sections;
+  final M3ENavigationRailType type;
+  final M3ENavigationRailModality modality;
+  final M3ENavigationRailLabelBehavior labelBehavior;
+  final bool showFab;
+
+  @override
+  State<_NavigationRailDemoHost> createState() =>
+      _NavigationRailDemoHostState();
+}
+
+class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
+  int _index = 0;
+
+  M3ENavigationRailDestination get _destination {
+    return widget.sections
+        .expand((M3ENavigationRailSection section) => section.destinations)
+        .elementAt(_index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3ENavigationRailDestination destination = _destination;
+    return ColoredBox(
+      color: theme.colorScheme.surface,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          M3ENavigationRail(
+            sections: widget.sections,
+            selectedIndex: _index,
+            onDestinationSelected: (int i) => setState(() => _index = i),
+            type: widget.type,
+            modality: widget.modality,
+            labelBehavior: widget.labelBehavior,
+            fab: widget.showFab
+                ? M3ENavigationRailFabSlot(
+                    icon: const Icon(M3EIcons.add),
+                    label: 'Compose',
+                    onPressed: () {},
+                  )
+                : null,
+          ),
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                M3EAppBar.top(
+                  titleText: destination.label,
+                  leading: M3EIconButton(
+                    variant: M3EIconButtonVariant.standard,
+                    icon: const Icon(M3EIcons.arrow_back),
+                    tooltip: 'Back',
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: IconTheme(
+                      data: IconThemeData(
+                        size: 48,
+                        color: theme.colorScheme.primary,
+                      ),
+                      child: destination.icon,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

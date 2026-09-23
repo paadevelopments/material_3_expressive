@@ -16,8 +16,6 @@ class M3ERailItem extends StatelessWidget {
     required this.expanded,
     required this.labelBehavior,
     this.suppressInk = false,
-    this.useLocalIndicator = true,
-    this.indicatorKey,
   });
 
   /// Destination data driving this item.
@@ -38,12 +36,6 @@ class M3ERailItem extends StatelessWidget {
   /// When true, disables splash/hover/highlight effects to prevent flicker during transitions.
   final bool suppressInk;
 
-  /// When false, selection fill is drawn by the shared liquid indicator.
-  final bool useLocalIndicator;
-
-  /// Key for the shared selection indicator target.
-  final GlobalKey? indicatorKey;
-
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context).navigationRailTheme;
@@ -62,8 +54,6 @@ class M3ERailItem extends StatelessWidget {
       semanticLabel: destination.semanticLabel,
       suppressInk: suppressInk,
       badgeCount: destination.badgeCount,
-      useLocalIndicator: useLocalIndicator,
-      indicatorKey: indicatorKey,
     );
 
     Widget core;

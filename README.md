@@ -66,7 +66,7 @@ flutter run
   models are exported from a single library import. Action surfaces accept
   optional gradient decorations (fill, foreground, overlay, outline).
 - **Expressive motion & interaction** — spring physics (via [`motor`](https://pub.dev/packages/motor)),
-  shape morphing, liquid selection indicators, shared haptics (`M3EHaptics`), and
+  shape morphing, per-destination selection indicators, shared haptics (`M3EHaptics`), and
   proper state layers on every interactive surface.
 - **Design token foundations** — color schemes, typography, motion, shapes
   (including [`material_new_shapes`](https://pub.dev/packages/material_new_shapes)
@@ -155,7 +155,7 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 | [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`); `ColorScheme.harmonized` / `Color.harmonizeWith` (2.x, `material_ui`) |
-| [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and liquid selection indicators |
+| [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and selection indicators |
 | [`material_new_shapes`](https://pub.dev/packages/material_new_shapes) | Expressive `RoundedPolygon` morph shapes (`M3EMaterialNewShapes`, `M3EShapeKind`, `M3EShapeClipper`, `M3EShapeContainer`) used by loading / shape-driven surfaces |
 
 Dev-only: [`flutter_lints`](https://pub.dev/packages/flutter_lints), [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html), and [`custom_lint`](https://pub.dev/packages/custom_lint).

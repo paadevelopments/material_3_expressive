@@ -30,6 +30,8 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     this.indicatorShapeFull,
     this.indicatorLeadSpring = const M3ESpring(stiffness: 380, damping: 0.45),
     this.indicatorTrailSpring = const M3ESpring(stiffness: 380, damping: 0.55),
+    this.indicatorScaleSpring = M3EMotion.expressiveSpatialDefault,
+    this.indicatorFadeSpring = M3EMotion.effectsFast,
     this.iconScaleSpring = const M3ESpring(stiffness: 380, damping: 0.5),
   });
 
@@ -102,11 +104,17 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
   /// indicatorShapeFull.
   final ShapeBorder? indicatorShapeFull;
 
-  /// Lead edge of the selection indicator travel morph.
+  /// Retained theme field. Selection no longer travels, so this spring is unused.
   final M3ESpring indicatorLeadSpring;
 
-  /// Trail edge of the selection indicator travel morph.
+  /// Retained theme field. Selection no longer travels, so this spring is unused.
   final M3ESpring indicatorTrailSpring;
+
+  /// Spatial spring for the selection indicator width scale.
+  final M3ESpring indicatorScaleSpring;
+
+  /// Effects spring for the selection indicator fade.
+  final M3ESpring indicatorFadeSpring;
 
   /// Icon scale pop on newly selected items.
   final M3ESpring iconScaleSpring;
@@ -158,6 +166,8 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     ShapeBorder? indicatorShapeFull,
     M3ESpring? indicatorLeadSpring,
     M3ESpring? indicatorTrailSpring,
+    M3ESpring? indicatorScaleSpring,
+    M3ESpring? indicatorFadeSpring,
     M3ESpring? iconScaleSpring,
   }) {
     return M3ENavigationRailTheme(
@@ -188,6 +198,8 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
       indicatorShapeFull: indicatorShapeFull ?? this.indicatorShapeFull,
       indicatorLeadSpring: indicatorLeadSpring ?? this.indicatorLeadSpring,
       indicatorTrailSpring: indicatorTrailSpring ?? this.indicatorTrailSpring,
+      indicatorScaleSpring: indicatorScaleSpring ?? this.indicatorScaleSpring,
+      indicatorFadeSpring: indicatorFadeSpring ?? this.indicatorFadeSpring,
       iconScaleSpring: iconScaleSpring ?? this.iconScaleSpring,
     );
   }
@@ -253,6 +265,12 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
       indicatorTrailSpring: t < 0.5
           ? indicatorTrailSpring
           : other.indicatorTrailSpring,
+      indicatorScaleSpring: t < 0.5
+          ? indicatorScaleSpring
+          : other.indicatorScaleSpring,
+      indicatorFadeSpring: t < 0.5
+          ? indicatorFadeSpring
+          : other.indicatorFadeSpring,
       iconScaleSpring: t < 0.5 ? iconScaleSpring : other.iconScaleSpring,
     );
   }

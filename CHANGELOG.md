@@ -2,6 +2,9 @@
 
 ### Changed
 
+* **Navigation:** selection pills on the bar, rail, and drawer scale in place
+  (spatial spring, width 0.4 to 1) and fade with the effects spring. The
+  indicator no longer stretches between destinations.
 * **Dividers:** thickness **1**, color **outline variant**; full-width, inset
   (**16** / **0**), and middle inset (**16** / **16**). End margin **8**,
   bottom margin **8**, and supporting-text gap **4** are theme tokens and stay

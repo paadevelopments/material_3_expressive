@@ -1,8 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
+
+bool _railHasSelectionFill(WidgetTester tester) {
+  return tester
+      .widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(M3ENavigationRail),
+          matching: find.byType(DecoratedBox),
+        ),
+      )
+      .any((DecoratedBox box) {
+        final Decoration decoration = box.decoration;
+        return decoration is ShapeDecoration &&
+            decoration.color != null &&
+            decoration.color!.a > 0;
+      });
+}
 
 void main() {
   testWidgets(
@@ -22,12 +39,20 @@ void main() {
     _m3enavigationrailFabSlotSupportsCustomElevation,
   );
   testWidgets(
-    'M3ENavigationRail resting indicator tracks selection while scrolling',
+    'M3ENavigationRail indicator scrolls with its destination',
     _m3enavigationrailRestingIndicatorTracksSelectionWhileS,
   );
   testWidgets(
     'M3ENavigationRail indicator stays on selection after MediaQuery churn',
     _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu,
+  );
+  testWidgets(
+    'nav selection content is centered and the collapsed rail pill matches the bar',
+    _navSelectionContentIsCentered,
+  );
+  testWidgets(
+    'M3ENavigationRail expand does not overflow the destination row',
+    _m3enavigationrailExpandDoesNotOverflow,
   );
   testWidgets('M3ESlider reports value changes', _m3esliderReportsValueChanges);
   testWidgets(
@@ -200,18 +225,9 @@ Future<void> _m3enavigationrailRestingIndicatorTracksSelectionWhileS(
   await tester.pump();
   await tester.pump();
 
-  // Resting fill is local on the destination, so it scrolls with the row.
+  // The indicator is part of the destination, so it scrolls with the row.
   expect(tester.getTopLeft(selectedLabel).dy, lessThan(before));
-  final Iterable<Material> materials = tester.widgetList<Material>(
-    find.descendant(
-      of: find.byType(M3ENavigationRail),
-      matching: find.byType(Material),
-    ),
-  );
-  expect(
-    materials.any((Material m) => m.color != null && m.color!.a > 0),
-    isTrue,
-  );
+  expect(_railHasSelectionFill(tester), isTrue);
 }
 
 Future<void> _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu(
@@ -275,16 +291,139 @@ Future<void> _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu(
   await tester.pump(const Duration(milliseconds: 16));
 
   expect(tester.getTopLeft(find.text('Starred')).dy, closeTo(starredY, 1));
-  final Iterable<Material> materials = tester.widgetList<Material>(
-    find.descendant(
-      of: find.byType(M3ENavigationRail),
-      matching: find.byType(Material),
+  expect(_railHasSelectionFill(tester), isTrue);
+}
+
+void _ignoreIndex(int index) {}
+
+Rect _selectedIndicatorRect(WidgetTester tester, Finder scope) {
+  final Finder indicator = find.descendant(
+    of: scope,
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is M3ESelectionIndicator && widget.selected,
     ),
   );
-  expect(
-    materials.any((Material m) => m.color != null && m.color!.a > 0),
-    isTrue,
+  final Finder fill = find.descendant(
+    of: indicator,
+    matching: find.byType(DecoratedBox),
   );
+  return tester.getRect(fill);
+}
+
+Future<void> _navSelectionContentIsCentered(WidgetTester tester) async {
+  const destinations = <M3ENavigationRailDestination>[
+    M3ENavigationRailDestination(icon: Icon(M3EIcons.inbox), label: 'Inbox'),
+    M3ENavigationRailDestination(icon: Icon(M3EIcons.send), label: 'Sent'),
+  ];
+
+  await tester.pumpWidget(
+    _host(
+      const M3ENavigationRail(
+        type: M3ENavigationRailType.alwaysExpand,
+        selectedIndex: 0,
+        onDestinationSelected: _ignoreIndex,
+        sections: <M3ENavigationRailSection>[
+          M3ENavigationRailSection(destinations: destinations),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+  final Rect railLabel = tester.getRect(find.text('Inbox'));
+  final Rect railPill = _selectedIndicatorRect(
+    tester,
+    find.byType(M3ENavigationRail),
+  );
+  expect(railLabel.center.dy, closeTo(railPill.center.dy, 1));
+
+  await tester.pumpWidget(
+    _host(
+      M3ENavigationDrawer(
+        selectedIndex: 0,
+        onDestinationSelected: _ignoreIndex,
+        destinations: const <M3ENavigationDestination>[
+          M3ENavigationDestination(icon: Icon(M3EIcons.inbox), label: 'Inbox'),
+          M3ENavigationDestination(icon: Icon(M3EIcons.send), label: 'Sent'),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+  final Rect drawerLabel = tester.getRect(find.text('Inbox'));
+  final Rect drawerPill = _selectedIndicatorRect(
+    tester,
+    find.byType(M3ENavigationDrawer),
+  );
+  expect(drawerLabel.center.dy, closeTo(drawerPill.center.dy, 1));
+
+  await tester.pumpWidget(
+    _host(
+      const M3ENavigationRail(
+        type: M3ENavigationRailType.alwaysCollapse,
+        selectedIndex: 0,
+        onDestinationSelected: _ignoreIndex,
+        sections: <M3ENavigationRailSection>[
+          M3ENavigationRailSection(destinations: destinations),
+        ],
+      ),
+    ),
+  );
+  await tester.pump();
+  final Rect collapsedPill = _selectedIndicatorRect(
+    tester,
+    find.byType(M3ENavigationRail),
+  );
+  expect(collapsedPill.width, M3ENavBarConstants.compactIndicatorWidth);
+  expect(collapsedPill.height, M3ENavBarConstants.indicatorHeight);
+}
+
+Future<void> _m3enavigationrailExpandDoesNotOverflow(
+  WidgetTester tester,
+) async {
+  const sections = <M3ENavigationRailSection>[
+    M3ENavigationRailSection(
+      destinations: <M3ENavigationRailDestination>[
+        M3ENavigationRailDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+        M3ENavigationRailDestination(
+          icon: Icon(M3EIcons.calendar_today),
+          label: 'Agenda',
+          badgeCount: 3,
+        ),
+      ],
+    ),
+  ];
+  const fab = M3ENavigationRailFabSlot(
+    icon: Icon(M3EIcons.add),
+    label: 'Compose',
+  );
+
+  Widget rail(M3ENavigationRailType type) {
+    return M3ENavigationRail(
+      type: type,
+      selectedIndex: 1,
+      onDestinationSelected: _ignoreIndex,
+      sections: sections,
+      fab: fab,
+    );
+  }
+
+  await tester.pumpWidget(_host(rail(M3ENavigationRailType.collapsed)));
+  await tester.pump();
+  await tester.tap(find.byIcon(M3EIcons.menu));
+  await tester.pump();
+  expect(tester.takeException(), isNull);
+
+  const step = Duration(milliseconds: 40);
+  var elapsed = Duration.zero;
+  while (elapsed < M3ENavigationRailLayout.expandDuration) {
+    await tester.pump(step);
+    elapsed += step;
+    expect(tester.takeException(), isNull);
+  }
+  await tester.pump(M3ENavigationRailLayout.expandDuration);
+  expect(tester.takeException(), isNull);
+  expect(find.text('Agenda'), findsOneWidget);
+  expect(find.text('Compose'), findsOneWidget);
 }
 
 Future<void> _m3esliderReportsValueChanges(WidgetTester tester) async {
