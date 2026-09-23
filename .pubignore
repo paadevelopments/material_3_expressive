@@ -16,6 +16,7 @@ pubspec.lock
 # Agent / misc
 agent-transcripts/
 *.ips
+AGENTS.md
 
 assets/
 docs/
