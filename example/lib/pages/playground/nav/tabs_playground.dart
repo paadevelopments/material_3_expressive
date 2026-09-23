@@ -1,5 +1,5 @@
-import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
@@ -19,24 +19,6 @@ class TabsPlayground extends StatefulWidget {
 class _TabsPlaygroundState extends State<TabsPlayground> {
   M3ETabsVariant _variant = M3ETabsVariant.primary;
   bool _showIcons = false;
-  int _selected = 0;
-
-  List<M3ETab> get _tabs {
-    return <M3ETab>[
-      M3ETab(
-        label: 'Overview',
-        icon: _showIcons ? const Icon(M3EIcons.home) : null,
-      ),
-      M3ETab(
-        label: 'Specs',
-        icon: _showIcons ? const Icon(M3EIcons.tune) : null,
-      ),
-      M3ETab(
-        label: 'Reviews',
-        icon: _showIcons ? const Icon(M3EIcons.star_outline) : null,
-      ),
-    ];
-  }
 
   List<PlaySnippet> get _snippets {
     final String tabs = _showIcons
@@ -56,7 +38,7 @@ class _TabsPlaygroundState extends State<TabsPlayground> {
         '''
 M3ETabs(
   variant: M3ETabsVariant.${_variant.name},
-  selectedIndex: $_selected,
+  selectedIndex: 0,
   onTabSelected: (int i) {},
 $tabs
 );''';
@@ -65,17 +47,39 @@ $tabs
     ];
   }
 
+  void _openDemo() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return _TabsDemoHost(variant: _variant, showIcons: _showIcons);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
-          label: 'Tabs',
-          child: M3ETabs(
-            variant: _variant,
-            selectedIndex: _selected,
-            onTabSelected: (int i) => setState(() => _selected = i),
-            tabs: _tabs,
+          label: 'Tabs demo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Opens a page with the tab bar under the app bar and a view '
+                'for each tab.',
+                style: theme.typeScale.bodyMedium.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              M3EButton(
+                onPressed: _openDemo,
+                child: const Text('Open tabs demo'),
+              ),
+            ],
           ),
         ),
       ],
@@ -99,6 +103,75 @@ $tabs
           ],
         ),
       ],
+    );
+  }
+}
+
+class _TabsDemoHost extends StatefulWidget {
+  const _TabsDemoHost({required this.variant, required this.showIcons});
+
+  final M3ETabsVariant variant;
+  final bool showIcons;
+
+  @override
+  State<_TabsDemoHost> createState() => _TabsDemoHostState();
+}
+
+class _TabsDemoHostState extends State<_TabsDemoHost> {
+  int _selected = 0;
+
+  static const List<({String label, IconData icon})> _pages =
+      <({String label, IconData icon})>[
+        (label: 'Overview', icon: M3EIcons.home),
+        (label: 'Specs', icon: M3EIcons.tune),
+        (label: 'Reviews', icon: M3EIcons.star_outline),
+      ];
+
+  List<M3ETab> get _tabs {
+    return <M3ETab>[
+      for (final ({String label, IconData icon}) page in _pages)
+        M3ETab(
+          label: page.label,
+          icon: widget.showIcons ? Icon(page.icon) : null,
+        ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final ({String label, IconData icon}) page = _pages[_selected];
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: page.label,
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          M3ETabs(
+            variant: widget.variant,
+            selectedIndex: _selected,
+            onTabSelected: (int i) => setState(() => _selected = i),
+            tabs: _tabs,
+          ),
+          Expanded(
+            child: Center(
+              child: Icon(
+                page.icon,
+                size: 48,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

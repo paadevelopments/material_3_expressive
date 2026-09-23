@@ -358,10 +358,8 @@ extension _M3EToolbarBuild on _M3EToolbarState {
     if (_hasFab) {
       bar = _withFab(bar, style);
     }
-    if (_floating && widget.safeArea) {
-      bar = Padding(padding: _edgeSafeAreaInset(context), child: bar);
-    }
     if (_floating) {
+      bar = Padding(padding: _floatingOuterPadding(context), child: bar);
       bar = Align(alignment: widget.alignment, child: bar);
     }
     bar = _wrapVisibility(bar);

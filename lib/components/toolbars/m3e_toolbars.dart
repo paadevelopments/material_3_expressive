@@ -53,7 +53,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// Floating toolbar (default). Horizontal unless [axis] is vertical.
   ///
   /// When [safeArea] is true, only [dockEdge] gets an **external** [M3ESafeArea]
-  /// inset (outside the pill) — never inside [Material].
+  /// inset (outside the pill) — never inside [Material]. Floating toolbars also
+  /// inset by [screenOffset] on every side, outside the pill.
   const M3EToolbar({
     this.leading,
     this.title,
@@ -84,6 +85,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.elevation,
     this.padding,
     this.safeArea = false,
+    this.screenOffset,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     this.visibilityController,
@@ -94,7 +96,11 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
     super.key,
-  }) : placement = M3EToolbarPlacement.floating;
+  }) : assert(
+         screenOffset == null || screenOffset >= 0,
+         'screenOffset must be >= 0',
+       ),
+       placement = M3EToolbarPlacement.floating;
 
   /// Explicit floating constructor (same as default).
   const M3EToolbar.floating({
@@ -127,6 +133,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.elevation,
     this.padding,
     this.safeArea = false,
+    this.screenOffset,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
     this.visibilityController,
@@ -137,7 +144,11 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
     super.key,
-  }) : placement = M3EToolbarPlacement.floating;
+  }) : assert(
+         screenOffset == null || screenOffset >= 0,
+         'screenOffset must be >= 0',
+       ),
+       placement = M3EToolbarPlacement.floating;
 
   /// Docked full-bleed bar (Compose `FlexibleBottomAppBar`).
   ///
@@ -184,7 +195,8 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
        onFabPressed = null,
        fabPosition = M3EToolbarFabPosition.end,
        fabExpandsToolbar = true,
-       pillActiveSpring = true;
+       pillActiveSpring = true,
+       screenOffset = null;
 
   /// placement.
   final M3EToolbarPlacement placement;
@@ -306,6 +318,13 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
 
   /// safeArea.
   final bool safeArea;
+
+  /// Space outside a floating pill, on every side, in addition to the
+  /// [safeArea] inset on [dockEdge].
+  ///
+  /// Keeps the pill off the screen edge when that edge has no system bar.
+  /// Null uses [M3EToolbarTheme.screenOffset]. Ignored when docked.
+  final double? screenOffset;
 
   /// clipBehavior.
   final Clip clipBehavior;
@@ -567,6 +586,19 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     return EdgeInsets.only(
       top: widget.dockEdge == M3EToolbarDockEdge.top ? mq.top : 0,
       bottom: widget.dockEdge == M3EToolbarDockEdge.bottom ? mq.bottom : 0,
+    );
+  }
+
+  /// Screen-edge clearance plus the dock-edge system inset, outside the pill.
+  EdgeInsets _floatingOuterPadding(BuildContext context) {
+    final double offset =
+        widget.screenOffset ?? M3ETheme.of(context).toolbarTheme.screenOffset;
+    final EdgeInsets safe = _edgeSafeAreaInset(context);
+    return EdgeInsets.fromLTRB(
+      offset,
+      safe.top + offset,
+      offset,
+      safe.bottom + offset,
     );
   }
 
