@@ -726,10 +726,11 @@ M3ERadioGroup<String>(
 
 #### M3ESwitch
 
-On/off toggle with optional selected icon. Hover/focus/press paints a
-thumb-centered translucent state layer (`stateLayerSize`, default 48 via theme).
-Pressed thumb expands to the track edges (`thumbSizePressed` defaults to
-`trackHeight`).
+On/off toggle with optional icons. Track **52×32**; handle **16** off,
+**24** on or with an icon, **28** pressed. Hover/focus/press paints a
+handle-centered state layer (`stateLayerSize`, default **40**) inside a
+**48** target. Focus ring is **secondary**, **3dp** thick, **2dp** off that
+circle. Drag past the midpoint toggles; Space or Enter toggles when focused.
 
 ```dart
 // in State

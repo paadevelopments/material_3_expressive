@@ -2,6 +2,12 @@
 
 ### Changed
 
+* **Switches:** track **52×32**; handle **16** off / **24** on or with an icon /
+  **28** pressed; state layer **40**; target **48**; selected icon **primary**;
+  hover, focus, and press handle **primary container** / **on surface variant**;
+  disabled selected handle **surface**; focus ring on the handle (**secondary**,
+  **3dp**, **2dp** offset); InkSparkle on the handle; drag past the midpoint
+  toggles; semantics role switch.
 * **Radio buttons:** icon **20** (stroke **2**, dot **10**); state layer **40**;
   target **48**; unselected icon **on surface variant** (**on surface** when
   hovered, focused, or pressed); pressed state layer swaps (selected

@@ -36,6 +36,7 @@ class M3ETappable extends StatefulWidget {
     this.semanticButton = true,
     this.semanticChecked,
     this.semanticMixed = false,
+    this.semanticToggled,
     this.semanticInMutuallyExclusiveGroup = false,
     this.excludeSemantics = false,
     this.pressedScale = 1,
@@ -86,6 +87,10 @@ class M3ETappable extends StatefulWidget {
   /// Tristate mixed flag. Used with [semanticChecked] for an indeterminate
   /// checkbox.
   final bool semanticMixed;
+
+  /// On/off state for switch semantics. Null leaves the node free of the
+  /// toggle role so other components stay buttons or checkboxes.
+  final bool? semanticToggled;
 
   /// Marks this control as one option in a radio group.
   final bool semanticInMutuallyExclusiveGroup;
@@ -461,6 +466,7 @@ class _M3ETappableState extends State<M3ETappable>
       button: widget.semanticButton,
       checked: widget.semanticChecked,
       mixed: widget.semanticMixed,
+      toggled: widget.semanticToggled,
       inMutuallyExclusiveGroup: widget.semanticInMutuallyExclusiveGroup,
       enabled: widget.enabled,
       label: widget.semanticLabel,
