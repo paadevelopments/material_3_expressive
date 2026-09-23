@@ -77,6 +77,28 @@ extension _M3EButtonContent on _M3EButtonState {
     );
   }
 
+  BorderRadius _targetShape({
+    required bool effectivelyEnabled,
+    required bool isPressed,
+    required bool isHovered,
+    required ({
+      BorderRadius defaultShape,
+      BorderRadius pressedShape,
+      BorderRadius hoveredShape,
+      bool freezeLeft,
+      bool freezeRight,
+    })
+    shapes,
+  }) {
+    if (effectivelyEnabled && isPressed) {
+      return shapes.pressedShape;
+    }
+    if (effectivelyEnabled && isHovered) {
+      return shapes.hoveredShape;
+    }
+    return shapes.defaultShape;
+  }
+
   Widget _buildAnimatedCore({
     required M3EButtonMeasurements m,
     required ButtonStyle baseStyle,
@@ -94,11 +116,12 @@ extension _M3EButtonContent on _M3EButtonState {
     required bool isFocused,
   }) {
     final effectivelyEnabled = widget.enabled && widget.onPressed != null;
-    final targetRadius = (effectivelyEnabled && isPressed)
-        ? shapes.pressedShape
-        : (effectivelyEnabled && isHovered)
-        ? shapes.hoveredShape
-        : shapes.defaultShape;
+    final targetRadius = _targetShape(
+      effectivelyEnabled: effectivelyEnabled,
+      isPressed: isPressed,
+      isHovered: isHovered,
+      shapes: shapes,
+    );
 
     Widget core = RepaintBoundary(
       child: M3ERadiusAndPaddingMotion(
@@ -201,6 +224,9 @@ extension _M3EButtonContent on _M3EButtonState {
     }
     return () {
       M3EHaptics.trigger(widget.decoration?.haptic ?? M3EHapticFeedback.none);
+      // Pointer taps hide rings in the press listener. Take focus here so the
+      // next Tab continues from this button without painting a ring.
+      effectiveFocusNode.requestFocus();
       widget.onPressed?.call();
     };
   }

@@ -49,6 +49,23 @@ extension _M3EButtonSelectionShape on _M3EButtonState {
       );
     }
 
+    return _connectedSelectionShapes(
+      measurements: measurements,
+      explicit: explicit,
+    );
+  }
+
+  ({
+    BorderRadius defaultShape,
+    BorderRadius pressedShape,
+    BorderRadius hoveredShape,
+    bool freezeLeft,
+    bool freezeRight,
+  })
+  _connectedSelectionShapes({
+    required M3EButtonMeasurements measurements,
+    required double? explicit,
+  }) {
     final groupTheme = M3ETheme.of(context).buttonGroupTheme;
     final outerRadius =
         explicit ??

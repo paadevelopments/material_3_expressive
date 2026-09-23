@@ -113,120 +113,199 @@ class M3ESnackbar extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double maxBarWidth = constraints.maxWidth.isFinite
-            ? constraints.maxWidth.clamp(0, snackTheme.maxWidth)
-            : snackTheme.maxWidth;
-        // Fits inside the 48dp single-line bar (container minus vertical pad).
-        final double inlineControlHeight =
-            (snackTheme.singleLineMinHeight - snackTheme.verticalPadding * 2)
-                .clamp(0, snackTheme.singleLineMinHeight);
-        // 12dp on each side of the 24dp icon. Spec: padding around close icon.
-        final double closeWidth =
-            snackTheme.closePadding * 2 + snackTheme.closeIconSize;
-        final double textMaxWidth = _textMaxWidth(
+        return _layoutSnackBar(
+          context,
+          constraints,
+          theme: theme,
+          scheme: scheme,
           snackTheme: snackTheme,
-          maxBarWidth: maxBarWidth,
-          padding: padding,
+          direction: direction,
           hasAction: hasAction,
-          actionBelow: false,
-          closeVisualSize: showCloseButton ? closeWidth : 0,
-        );
-        final TextStyle messageStyle = snackTheme.messageStyle(
-          theme.typeScale,
-          scheme,
-        );
-        final bool multiLine =
-            _messageLineCount(
-              message: message,
-              style: messageStyle,
-              maxWidth: textMaxWidth,
-              textDirection: direction,
-            ) >
-            1;
-        final bool actionBelow =
-            hasAction &&
-            (multiLine ||
-                actionLabel!.length > snackTheme.longActionLabelThreshold);
-        final double minHeight = multiLine || actionBelow
-            ? snackTheme.twoLineMinHeight
-            : snackTheme.singleLineMinHeight;
-
-        final Widget messageText = Text(
-          message,
-          style: messageStyle,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        );
-
-        final Widget? action = hasAction
-            ? _buildAction(
-                context,
-                theme,
-                snackTheme,
-                scheme,
-                height: actionBelow ? null : inlineControlHeight,
-              )
-            : null;
-        final Widget? close = showCloseButton
-            ? _buildClose(
-                context,
-                snackTheme,
-                scheme,
-                height: inlineControlHeight,
-                width: closeWidth,
-              )
-            : null;
-
-        final Widget body = actionBelow
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(child: messageText),
-                      ?close,
-                    ],
-                  ),
-                  SizedBox(height: snackTheme.actionGap),
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: action,
-                  ),
-                ],
-              )
-            : Row(
-                children: <Widget>[
-                  Expanded(child: messageText),
-                  if (action != null) ...<Widget>[
-                    SizedBox(width: snackTheme.actionGap),
-                    action,
-                  ],
-                  ?close,
-                ],
-              );
-
-        return Semantics(
-          liveRegion: true,
-          container: true,
-          child: Container(
-            constraints: BoxConstraints(
-              minHeight: minHeight,
-              maxWidth: snackTheme.maxWidth,
-            ),
-            padding: padding,
-            decoration: BoxDecoration(
-              color: snackTheme.containerColor(scheme),
-              borderRadius: snackTheme.borderRadius,
-              boxShadow: M3EElevation.shadows(
-                snackTheme.elevation,
-                shadowColor: scheme.shadow,
-              ),
-            ),
-            child: body,
-          ),
+          padding: padding,
         );
       },
+    );
+  }
+
+  Widget _layoutSnackBar(
+    BuildContext context,
+    BoxConstraints constraints, {
+    required M3EThemeData theme,
+    required M3EColorScheme scheme,
+    required M3ESnackbarTheme snackTheme,
+    required TextDirection direction,
+    required bool hasAction,
+    required EdgeInsets padding,
+  }) {
+    final double maxBarWidth = constraints.maxWidth.isFinite
+        ? constraints.maxWidth.clamp(0, snackTheme.maxWidth)
+        : snackTheme.maxWidth;
+    final double inlineControlHeight =
+        (snackTheme.singleLineMinHeight - snackTheme.verticalPadding * 2).clamp(
+          0,
+          snackTheme.singleLineMinHeight,
+        );
+    final double closeWidth =
+        snackTheme.closePadding * 2 + snackTheme.closeIconSize;
+    final TextStyle messageStyle = snackTheme.messageStyle(
+      theme.typeScale,
+      scheme,
+    );
+    final bool actionBelow = _actionBelow(
+      snackTheme: snackTheme,
+      messageStyle: messageStyle,
+      direction: direction,
+      maxBarWidth: maxBarWidth,
+      padding: padding,
+      hasAction: hasAction,
+      closeWidth: closeWidth,
+    );
+    final bool multiLine =
+        _messageLineCount(
+          message: message,
+          style: messageStyle,
+          maxWidth: _textMaxWidth(
+            snackTheme: snackTheme,
+            maxBarWidth: maxBarWidth,
+            padding: padding,
+            hasAction: hasAction,
+            actionBelow: false,
+            closeVisualSize: showCloseButton ? closeWidth : 0,
+          ),
+          textDirection: direction,
+        ) >
+        1;
+    final double minHeight = multiLine || actionBelow
+        ? snackTheme.twoLineMinHeight
+        : snackTheme.singleLineMinHeight;
+    return _snackContainer(
+      context,
+      snackTheme: snackTheme,
+      scheme: scheme,
+      theme: theme,
+      padding: padding,
+      minHeight: minHeight,
+      inlineControlHeight: inlineControlHeight,
+      closeWidth: closeWidth,
+      messageStyle: messageStyle,
+      hasAction: hasAction,
+      actionBelow: actionBelow,
+    );
+  }
+
+  bool _actionBelow({
+    required M3ESnackbarTheme snackTheme,
+    required TextStyle messageStyle,
+    required TextDirection direction,
+    required double maxBarWidth,
+    required EdgeInsets padding,
+    required bool hasAction,
+    required double closeWidth,
+  }) {
+    if (!hasAction) {
+      return false;
+    }
+    final bool multiLine =
+        _messageLineCount(
+          message: message,
+          style: messageStyle,
+          maxWidth: _textMaxWidth(
+            snackTheme: snackTheme,
+            maxBarWidth: maxBarWidth,
+            padding: padding,
+            hasAction: hasAction,
+            actionBelow: false,
+            closeVisualSize: showCloseButton ? closeWidth : 0,
+          ),
+          textDirection: direction,
+        ) >
+        1;
+    return multiLine ||
+        actionLabel!.length > snackTheme.longActionLabelThreshold;
+  }
+
+  Widget _snackContainer(
+    BuildContext context, {
+    required M3EThemeData theme,
+    required M3EColorScheme scheme,
+    required M3ESnackbarTheme snackTheme,
+    required EdgeInsets padding,
+    required double minHeight,
+    required double inlineControlHeight,
+    required double closeWidth,
+    required TextStyle messageStyle,
+    required bool hasAction,
+    required bool actionBelow,
+  }) {
+    final Widget messageText = Text(
+      message,
+      style: messageStyle,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+    final Widget? action = hasAction
+        ? _buildAction(
+            context,
+            theme,
+            snackTheme,
+            scheme,
+            height: actionBelow ? null : inlineControlHeight,
+          )
+        : null;
+    final Widget? close = showCloseButton
+        ? _buildClose(
+            context,
+            snackTheme,
+            scheme,
+            height: inlineControlHeight,
+            width: closeWidth,
+          )
+        : null;
+    final Widget body = actionBelow
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(child: messageText),
+                  ?close,
+                ],
+              ),
+              SizedBox(height: snackTheme.actionGap),
+              Align(alignment: AlignmentDirectional.centerEnd, child: action),
+            ],
+          )
+        : Row(
+            children: <Widget>[
+              Expanded(child: messageText),
+              if (action != null) ...<Widget>[
+                SizedBox(width: snackTheme.actionGap),
+                action,
+              ],
+              ?close,
+            ],
+          );
+
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: minHeight,
+          maxWidth: snackTheme.maxWidth,
+        ),
+        padding: padding,
+        decoration: BoxDecoration(
+          color: snackTheme.containerColor(scheme),
+          borderRadius: snackTheme.borderRadius,
+          boxShadow: M3EElevation.shadows(
+            snackTheme.elevation,
+            shadowColor: scheme.shadow,
+          ),
+        ),
+        child: body,
+      ),
     );
   }
 

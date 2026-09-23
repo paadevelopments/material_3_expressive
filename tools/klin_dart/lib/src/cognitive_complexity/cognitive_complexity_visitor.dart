@@ -4,12 +4,19 @@ import 'package:klin_dart/src/cognitive_complexity/config.dart';
 
 /// AST visitor that collects method declarations and calculates complexity.
 class MethodVisitor extends RecursiveAstVisitor<void> {
+  /// Scores keyed by declaration name.
   final Map<String, MethodComplexityMetrics> methodMetrics = {};
 
+  /// Method currently being walked.
   MethodDeclaration? currentMethod;
+
+  /// Function currently being walked.
   FunctionDeclaration? currentFunction;
+
+  /// Nesting depth of the current walk.
   int currentNestingLevel = 0;
 
+  /// Creates an empty visitor.
   MethodVisitor();
 
   @override
@@ -30,11 +37,10 @@ class MethodVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitFunctionDeclaration(FunctionDeclaration node) {
-    final metrics = MethodComplexityMetrics(
-      node.name.toString(),
-      'function',
-      node.name,
-    )..numberOfParameters = node.functionExpression.parameters?.parameters.length ?? 0;
+    final metrics =
+        MethodComplexityMetrics(node.name.toString(), 'function', node.name)
+          ..numberOfParameters =
+              node.functionExpression.parameters?.parameters.length ?? 0;
 
     methodMetrics[node.name.toString()] = metrics;
     currentFunction = node;
@@ -141,13 +147,16 @@ class MethodVisitor extends RecursiveAstVisitor<void> {
 
   /// Increment complexity for the current method/function
   void _incrementComplexity(int amount) {
-    final key = currentMethod?.name.toString() ?? currentFunction?.name.toString();
+    final key =
+        currentMethod?.name.toString() ?? currentFunction?.name.toString();
     if (key != null) {
       final metrics = methodMetrics[key]!;
-      metrics.cognitiveComplexity += amount;
-      if (currentNestingLevel > metrics.nestingLevel) {
-        metrics.nestingLevel = currentNestingLevel;
-      }
+      final nesting = currentNestingLevel > metrics.nestingLevel
+          ? currentNestingLevel
+          : metrics.nestingLevel;
+      metrics
+        ..cognitiveComplexity += amount
+        ..nestingLevel = nesting;
     }
   }
 

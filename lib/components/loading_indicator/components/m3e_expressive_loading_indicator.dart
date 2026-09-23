@@ -143,8 +143,7 @@ class _M3EExpressiveLoadingIndicatorState
 
   bool get _manualRotation => widget.rotationTurns != null;
 
-  @override
-  Widget build(BuildContext context) {
+  void _rejectEmptyIndicatorColors() {
     assert(() {
       if (widget.indicatorColors != null && widget.indicatorColors!.isEmpty) {
         throw AssertionError('indicatorColors cannot be empty');
@@ -158,6 +157,11 @@ class _M3EExpressiveLoadingIndicatorState
         'must not be empty',
       );
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _rejectEmptyIndicatorColors();
     final m3eTheme = M3ETheme.of(context);
     _loadingTheme = m3eTheme.loadingIndicatorTheme;
     _indicatorColors =

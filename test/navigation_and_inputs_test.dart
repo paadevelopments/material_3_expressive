@@ -5,6 +5,12 @@ import 'package:material_ui/material_ui.dart';
 
 Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
 
+Finder _tooltip(String message) {
+  return find.byWidgetPredicate(
+    (Widget widget) => widget is M3ETooltip && widget.message == message,
+  );
+}
+
 bool _railHasSelectionFill(WidgetTester tester) {
   return tester
       .widgetList<DecoratedBox>(
@@ -136,7 +142,7 @@ Future<void> _m3enavigationrailSupportsCustomExpandAndCollapseTooltips(
       buildRail(M3ENavigationRailType.collapsed, const ValueKey('collapsed')),
     ),
   );
-  expect(find.byTooltip('Expand'), findsOneWidget);
+  expect(_tooltip('Expand'), findsOneWidget);
 
   await tester.pumpWidget(
     _host(
@@ -144,7 +150,7 @@ Future<void> _m3enavigationrailSupportsCustomExpandAndCollapseTooltips(
     ),
   );
   await tester.pump();
-  expect(find.byTooltip('Collapse'), findsOneWidget);
+  expect(_tooltip('Collapse'), findsOneWidget);
 }
 
 Future<void> _m3enavigationrailFabSlotSupportsCustomElevation(

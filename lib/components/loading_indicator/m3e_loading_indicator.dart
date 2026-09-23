@@ -166,6 +166,16 @@ class M3ELoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _rejectEmptyIndicatorColors();
+    final theme = M3ETheme.of(context);
+    final scheme = theme.colorScheme;
+    final loadingTheme = theme.loadingIndicatorTheme;
+    final resolved = _resolvedSizes(loadingTheme);
+    _rejectOuterSize(resolved.width, resolved.height);
+    return _buildIndicator(theme, scheme, loadingTheme, resolved);
+  }
+
+  void _rejectEmptyIndicatorColors() {
     assert(() {
       if (indicatorColors != null && indicatorColors!.isEmpty) {
         throw AssertionError('indicatorColors cannot be empty');
@@ -179,10 +189,11 @@ class M3ELoadingIndicator extends StatelessWidget {
         'must not be empty',
       );
     }
-    final theme = M3ETheme.of(context);
-    final scheme = theme.colorScheme;
-    final loadingTheme = theme.loadingIndicatorTheme;
+  }
 
+  ({double width, double height, double active}) _resolvedSizes(
+    M3ELoadingIndicatorTheme loadingTheme,
+  ) {
     final double? scaledOuter = size;
     final double resolvedWidth =
         scaledOuter ?? containerWidth ?? loadingTheme.containerWidth;
@@ -191,7 +202,14 @@ class M3ELoadingIndicator extends StatelessWidget {
     final double resolvedActive = scaledOuter != null
         ? M3ELoadingIndicatorTheme.resolveActiveSize(scaledOuter)
         : (indicatorSize ?? loadingTheme.activeIndicatorSize);
+    return (
+      width: resolvedWidth,
+      height: resolvedHeight,
+      active: resolvedActive,
+    );
+  }
 
+  void _rejectOuterSize(double resolvedWidth, double resolvedHeight) {
     assert(() {
       final double outer = math.max(resolvedWidth, resolvedHeight);
       if (outer < M3ELoadingIndicatorTheme.minSize ||
@@ -203,22 +221,26 @@ class M3ELoadingIndicator extends StatelessWidget {
       }
       return true;
     }(), 'outer size must be within 24–240');
+  }
 
+  Widget _buildIndicator(
+    M3EThemeData theme,
+    M3EColorScheme scheme,
+    M3ELoadingIndicatorTheme loadingTheme,
+    ({double width, double height, double active}) resolved,
+  ) {
     final cons =
         constraints ??
-        BoxConstraints.tightFor(width: resolvedWidth, height: resolvedHeight);
-
+        BoxConstraints.tightFor(width: resolved.width, height: resolved.height);
     final colors =
         indicatorColors ??
         <Color>[color ?? loadingTheme.resolveActiveColor(scheme, variant)];
-
     final containerBg =
         containerColor ?? loadingTheme.resolveContainerColor(scheme, variant);
-
     final indicator = M3EExpressiveLoadingIndicator(
       color: colors.first,
       indicatorColors: colors,
-      indicatorSize: resolvedActive,
+      indicatorSize: resolved.active,
       polygons: polygons,
       semanticsLabel: semanticLabel,
       semanticsValue: semanticValue,

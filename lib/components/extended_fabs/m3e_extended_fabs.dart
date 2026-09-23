@@ -430,59 +430,26 @@ class _M3EExtendedFabState extends State<M3EExtendedFab>
     final collapsedWidth = sizeMetrics.height;
     final minExtendedWidth = extendedTheme.minWidth;
 
-    Widget content = _decorateContent(
-      state: state,
-      states: states,
-      fg: fg,
+    return _composeExtendedSurface(
+      theme: theme,
+      extendedTheme: extendedTheme,
+      sizeMetrics: sizeMetrics,
       borderRadius: borderRadius,
       border: border,
-      child: Padding(
-        padding: EdgeInsetsDirectional.only(start: padStart, end: padEnd),
-        child: _buildContent(
-          theme: theme,
-          sizeMetrics: sizeMetrics,
-          foreground: fg,
-          extendedT: extendedT,
-          hasIcon: hasIcon,
-        ),
-      ),
-    );
-
-    Widget surface = ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: lerpDouble(collapsedWidth, minExtendedWidth, extendedT)!,
-        minHeight: sizeMetrics.height,
-        maxHeight: sizeMetrics.height,
-      ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: fill == null ? solidBg : null,
-          gradient: fill,
-          borderRadius: borderRadius,
-          border: side == null ? null : Border.fromBorderSide(side),
-          boxShadow: M3EElevation.shadows(
-            resolvedElevation,
-            shadowColor: theme.colorScheme.shadow,
-          ),
-        ),
-        child: content,
-      ),
-    );
-    if (outline != null) {
-      surface = m3eGradientOutlineLayer(
-        clipRadius: borderRadius,
-        gradient: outline,
-        width: m3eOutlineWidth(widget.decoration?.side?.resolve(states)),
-        child: surface,
-      );
-    }
-    return M3EFocusRing(
-      focused: state.focused,
-      radius: borderRadius,
-      width: extendedTheme.focusRingWidth,
-      gap: extendedTheme.focusRingGap,
-      color: extendedTheme.resolveFocusRingColor(theme.colorScheme),
-      child: surface,
+      extendedT: extendedT,
+      state: state,
+      states: states,
+      fill: fill,
+      solidBg: solidBg,
+      fg: fg,
+      outline: outline,
+      side: side,
+      resolvedElevation: resolvedElevation,
+      hasIcon: hasIcon,
+      padStart: padStart,
+      padEnd: padEnd,
+      collapsedWidth: collapsedWidth,
+      minExtendedWidth: minExtendedWidth,
     );
   }
 
@@ -570,6 +537,85 @@ class _M3EExtendedFabState extends State<M3EExtendedFab>
     return SizedBox(
       height: sizeMetrics.height,
       child: Row(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+}
+
+extension _M3EExtendedFabSurface on _M3EExtendedFabState {
+  Widget _composeExtendedSurface({
+    required M3EThemeData theme,
+    required M3EExtendedFabTheme extendedTheme,
+    required M3EExtendedFabMetrics sizeMetrics,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required double extendedT,
+    required M3EInteractionState state,
+    required Set<WidgetState> states,
+    required Gradient? fill,
+    required Color? solidBg,
+    required Color fg,
+    required Gradient? outline,
+    required BorderSide? side,
+    required double resolvedElevation,
+    required bool hasIcon,
+    required double padStart,
+    required double padEnd,
+    required double collapsedWidth,
+    required double minExtendedWidth,
+  }) {
+    Widget content = _decorateContent(
+      state: state,
+      states: states,
+      fg: fg,
+      borderRadius: borderRadius,
+      border: border,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(start: padStart, end: padEnd),
+        child: _buildContent(
+          theme: theme,
+          sizeMetrics: sizeMetrics,
+          foreground: fg,
+          extendedT: extendedT,
+          hasIcon: hasIcon,
+        ),
+      ),
+    );
+
+    Widget surface = ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: lerpDouble(collapsedWidth, minExtendedWidth, extendedT)!,
+        minHeight: sizeMetrics.height,
+        maxHeight: sizeMetrics.height,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: fill == null ? solidBg : null,
+          gradient: fill,
+          borderRadius: borderRadius,
+          border: side == null ? null : Border.fromBorderSide(side),
+          boxShadow: M3EElevation.shadows(
+            resolvedElevation,
+            shadowColor: theme.colorScheme.shadow,
+          ),
+        ),
+        child: content,
+      ),
+    );
+    if (outline != null) {
+      surface = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outline,
+        width: m3eOutlineWidth(widget.decoration?.side?.resolve(states)),
+        child: surface,
+      );
+    }
+    return M3EFocusRing(
+      focused: state.focused,
+      radius: borderRadius,
+      width: extendedTheme.focusRingWidth,
+      gap: extendedTheme.focusRingGap,
+      color: extendedTheme.resolveFocusRingColor(theme.colorScheme),
+      child: surface,
     );
   }
 }

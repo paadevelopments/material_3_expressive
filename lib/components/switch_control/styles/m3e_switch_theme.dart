@@ -287,79 +287,88 @@ class M3ESwitchTheme extends M3EThemeExtension<M3ESwitchTheme> {
     if (other is! M3ESwitchTheme) {
       return this;
     }
-    return M3ESwitchTheme(
-      trackWidth: _lerpDouble(trackWidth, other.trackWidth, t)!,
-      trackHeight: _lerpDouble(trackHeight, other.trackHeight, t)!,
-      trackPadding: _lerpDouble(trackPadding, other.trackPadding, t)!,
+    return _lerpSwitchLayout(other, t);
+  }
+
+  M3ESwitchTheme _lerpSwitchLayout(M3ESwitchTheme other, double t) {
+    return _lerpSwitchFeedback(other, t).copyWith(
+      trackWidth: _lerpDouble(trackWidth, other.trackWidth, t),
+      trackHeight: _lerpDouble(trackHeight, other.trackHeight, t),
+      trackPadding: _lerpDouble(trackPadding, other.trackPadding, t),
       thumbSizePressed: _lerpDouble(
         thumbSizePressed,
         other.thumbSizePressed,
         t,
-      )!,
+      ),
       thumbSizeSelected: _lerpDouble(
         thumbSizeSelected,
         other.thumbSizeSelected,
         t,
-      )!,
+      ),
       thumbSizeUnselected: _lerpDouble(
         thumbSizeUnselected,
         other.thumbSizeUnselected,
         t,
-      )!,
+      ),
       thumbSizeWithIcon: _lerpDouble(
         thumbSizeWithIcon,
         other.thumbSizeWithIcon,
         t,
-      )!,
-      stateLayerSize: _lerpDouble(stateLayerSize, other.stateLayerSize, t)!,
-      targetSize: _lerpDouble(targetSize, other.targetSize, t)!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      borderWidth: _lerpDouble(borderWidth, other.borderWidth, t)!,
+      ),
+      stateLayerSize: _lerpDouble(stateLayerSize, other.stateLayerSize, t),
+      targetSize: _lerpDouble(targetSize, other.targetSize, t),
+      iconSize: _lerpDouble(iconSize, other.iconSize, t),
+    );
+  }
+
+  M3ESwitchTheme _lerpSwitchFeedback(M3ESwitchTheme other, double t) {
+    return copyWith(
+      borderWidth: _lerpDouble(borderWidth, other.borderWidth, t),
       disabledTrackOpacity: _lerpDouble(
         disabledTrackOpacity,
         other.disabledTrackOpacity,
         t,
-      )!,
+      ),
       disabledThumbOpacity: _lerpDouble(
         disabledThumbOpacity,
         other.disabledThumbOpacity,
         t,
-      )!,
+      ),
       disabledSelectedHandleOpacity: _lerpDouble(
         disabledSelectedHandleOpacity,
         other.disabledSelectedHandleOpacity,
         t,
-      )!,
+      ),
       disabledOutlineOpacity: _lerpDouble(
         disabledOutlineOpacity,
         other.disabledOutlineOpacity,
         t,
-      )!,
+      ),
       hoverStateLayerOpacity: _lerpDouble(
         hoverStateLayerOpacity,
         other.hoverStateLayerOpacity,
         t,
-      )!,
+      ),
       focusStateLayerOpacity: _lerpDouble(
         focusStateLayerOpacity,
         other.focusStateLayerOpacity,
         t,
-      )!,
+      ),
       pressedStateLayerOpacity: _lerpDouble(
         pressedStateLayerOpacity,
         other.pressedStateLayerOpacity,
         t,
-      )!,
+      ),
       focusIndicatorThickness: _lerpDouble(
         focusIndicatorThickness,
         other.focusIndicatorThickness,
         t,
-      )!,
+      ),
       focusIndicatorOffset: _lerpDouble(
         focusIndicatorOffset,
         other.focusIndicatorOffset,
         t,
-      )!,
+      ),
       focusIndicatorColor: Color.lerp(
         focusIndicatorColor,
         other.focusIndicatorColor,

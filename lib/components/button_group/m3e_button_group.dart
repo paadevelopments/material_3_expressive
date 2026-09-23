@@ -16,6 +16,7 @@ import 'controllers/m3e_button_group_overflow_controller.dart';
 import 'enums/m3e_button_group_enums.dart';
 import 'models/m3e_button_group_action.dart';
 import 'models/m3e_button_group_overflow_paging_window.dart';
+import 'styles/m3e_button_group_theme.dart';
 
 export '../buttons/components/m3e_no_overflow_strategy.dart';
 export '../buttons/components/m3e_overflow_strategy.dart';
@@ -35,7 +36,9 @@ part 'components/m3e_button_group_collaborators.dart';
 part 'components/m3e_button_group_overflow_presenter.dart';
 part 'components/m3e_button_group_render.dart';
 part 'components/m3e_button_group_measurement.dart';
+part 'components/m3e_button_group_action_radii.dart';
 part 'components/m3e_button_group_layout.dart';
+part 'components/m3e_button_group_overflow_button.dart';
 part 'components/m3e_button_group_scroll.dart';
 part 'components/m3e_button_group_build.dart';
 

@@ -74,17 +74,24 @@ extension _M3EDropdownMenuPanel<T> on _M3EDropdownMenuState<T> {
     }
   }
 
+  bool _toggleFromInside(RenderBox renderBox, PointerDownEvent event) {
+    final Offset localPosition = renderBox.globalToLocal(event.position);
+    if (!renderBox.paintBounds.contains(localPosition)) {
+      return false;
+    }
+    // The barrier is opaque, so the field does not receive this tap.
+    if (_controller.isOpen) {
+      _close();
+    } else if (_portalController.isShowing) {
+      _open();
+    }
+    return true;
+  }
+
   void _handleOutsideTap(PointerDownEvent event) {
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox != null && renderBox.attached) {
-      final localPosition = renderBox.globalToLocal(event.position);
-      if (renderBox.paintBounds.contains(localPosition)) {
-        // The barrier is opaque, so the field does not receive this tap.
-        if (_controller.isOpen) {
-          _close();
-        } else if (_portalController.isShowing) {
-          _open();
-        }
+      if (_toggleFromInside(renderBox, event)) {
         return;
       }
     }

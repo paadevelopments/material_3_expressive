@@ -384,7 +384,11 @@ class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
     if (other is! M3EChipTheme) {
       return this;
     }
-    return M3EChipTheme(
+    return _lerpChipLayout(other, t);
+  }
+
+  M3EChipTheme _lerpChipLayout(M3EChipTheme other, double t) {
+    return _lerpChipFeedback(other, t).copyWith(
       height: _lerpDouble(height, other.height, t),
       iconSize: _lerpDouble(iconSize, other.iconSize, t),
       cornerRadius: _lerpDouble(cornerRadius, other.cornerRadius, t),
@@ -416,6 +420,11 @@ class M3EChipTheme extends M3EThemeExtension<M3EChipTheme> {
       ),
       avatarSize: _lerpDouble(avatarSize, other.avatarSize, t),
       avatarRadius: _lerpDouble(avatarRadius, other.avatarRadius, t),
+    );
+  }
+
+  M3EChipTheme _lerpChipFeedback(M3EChipTheme other, double t) {
+    return copyWith(
       iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t),
       outlineWidth: _lerpDouble(outlineWidth, other.outlineWidth, t),
       disabledContainerOpacity: _lerpDouble(

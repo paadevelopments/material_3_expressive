@@ -248,58 +248,12 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
               semanticButton: false,
               semanticToggled: widget.value,
               builder: (BuildContext context, M3EInteractionState state) {
-                final trackRadius = M3EShapes.resolve(
-                  switchTheme.trackHeight / 2,
-                );
-                final Widget track = AnimatedContainer(
-                  duration: M3EMotion.short3,
-                  width: switchTheme.trackWidth,
-                  height: switchTheme.trackHeight,
-                  padding: EdgeInsets.all(switchTheme.trackPadding),
-                  decoration: BoxDecoration(
-                    color: switchTheme.trackColor(
-                      scheme,
-                      enabled: _enabled,
-                      value: widget.value,
-                    ),
-                    borderRadius: trackRadius,
-                    border: widget.value
-                        ? null
-                        : Border.all(
-                            color: switchTheme.outlineColor(
-                              scheme,
-                              enabled: _enabled,
-                            ),
-                            width: switchTheme.borderWidth,
-                          ),
-                  ),
-                  child: AnimatedBuilder(
-                    animation: Listenable.merge(<Listenable>[
-                      _positionCtrl,
-                      _sizeCtrl,
-                    ]),
-                    builder: (BuildContext context, Widget? child) {
-                      return _buildThumb(switchTheme, scheme, state);
-                    },
-                  ),
-                );
-
-                return SizedBox(
-                  width: slotWidth,
-                  height: slotHeight,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onHorizontalDragStart: _enabled
-                        ? (_) => _onDragStart()
-                        : null,
-                    onHorizontalDragUpdate: _enabled
-                        ? (DragUpdateDetails details) =>
-                              _onDragUpdate(details, switchTheme)
-                        : null,
-                    onHorizontalDragEnd: _enabled ? (_) => _onDragEnd() : null,
-                    onHorizontalDragCancel: _enabled ? _onDragEnd : null,
-                    child: Center(child: track),
-                  ),
+                return _switchControl(
+                  switchTheme,
+                  scheme,
+                  state,
+                  slotWidth,
+                  slotHeight,
                 );
               },
             );
@@ -307,6 +261,72 @@ class _M3ESwitchState extends State<M3ESwitch> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  Widget _switchControl(
+    M3ESwitchTheme switchTheme,
+    M3EColorScheme scheme,
+    M3EInteractionState state,
+    double slotWidth,
+    double slotHeight,
+  ) {
+    final trackRadius = M3EShapes.resolve(switchTheme.trackHeight / 2);
+    final Widget track = AnimatedContainer(
+      duration: M3EMotion.short3,
+      width: switchTheme.trackWidth,
+      height: switchTheme.trackHeight,
+      padding: EdgeInsets.all(switchTheme.trackPadding),
+      decoration: BoxDecoration(
+        color: switchTheme.trackColor(
+          scheme,
+          enabled: _enabled,
+          value: widget.value,
+        ),
+        borderRadius: trackRadius,
+        border: _trackBorder(switchTheme, scheme),
+      ),
+      child: AnimatedBuilder(
+        animation: Listenable.merge(<Listenable>[_positionCtrl, _sizeCtrl]),
+        builder: (BuildContext context, Widget? child) {
+          return _buildThumb(switchTheme, scheme, state);
+        },
+      ),
+    );
+
+    return SizedBox(
+      width: slotWidth,
+      height: slotHeight,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragStart: _enabled ? _startDrag : null,
+        onHorizontalDragUpdate: _enabled ? _updateDrag : null,
+        onHorizontalDragEnd: _enabled ? _endDrag : null,
+        onHorizontalDragCancel: _enabled ? _onDragEnd : null,
+        child: Center(child: track),
+      ),
+    );
+  }
+
+  Border? _trackBorder(M3ESwitchTheme switchTheme, M3EColorScheme scheme) {
+    if (widget.value) {
+      return null;
+    }
+    return Border.all(
+      color: switchTheme.outlineColor(scheme, enabled: _enabled),
+      width: switchTheme.borderWidth,
+    );
+  }
+
+  void _startDrag(DragStartDetails _) {
+    _onDragStart();
+  }
+
+  void _updateDrag(DragUpdateDetails details) {
+    _onDragUpdate(details, M3ETheme.of(context).switchTheme);
+  }
+
+  void _endDrag(DragEndDetails _) {
+    _onDragEnd();
   }
 
   Widget _buildThumb(

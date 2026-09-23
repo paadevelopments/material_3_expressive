@@ -216,14 +216,14 @@ class _M3EChipState extends State<M3EChip> {
     );
 
     return TapRegion(
-      onTapOutside: (_) => _clearFocusFromPointer(),
+      onTapOutside: _onTapOutside,
       child: Listener(
         behavior: HitTestBehavior.translucent,
-        onPointerUp: (_) => _scheduleClearFocusFromPointer(),
+        onPointerUp: _onPointerUp,
         child: GestureDetector(
-          onPanStart: _enabled ? (_) => _setDragged(true) : null,
-          onPanEnd: _enabled ? (_) => _setDragged(false) : null,
-          onPanCancel: _enabled ? () => _setDragged(false) : null,
+          onPanStart: _enabled ? _onPanStart : null,
+          onPanEnd: _enabled ? _onPanEnd : null,
+          onPanCancel: _enabled ? _onPanCancel : null,
           child: M3EComponentTheme(
             builder: (BuildContext context) {
               return Stack(
@@ -353,6 +353,55 @@ class _M3EChipState extends State<M3EChip> {
       dragged: state.dragged,
     );
     final shadows = M3EElevation.shadows(elevation, shadowColor: scheme.shadow);
+    final Widget surface = _chipMaterial(
+      chipTheme: chipTheme,
+      scheme: scheme,
+      state: state,
+      stateLayer: stateLayer,
+      shape: shape,
+      labelColor: labelColor,
+      leadingColor: leadingColor,
+      trailingColor: trailingColor,
+      theme: theme,
+      hasAvatar: hasAvatar,
+      hasLeading: hasLeading,
+      hasTrailing: hasTrailing,
+      radius: radius,
+      opacity: opacity,
+    );
+
+    return M3EFocusRing(
+      focused: state.focused,
+      radius: radius,
+      color: chipTheme.resolveFocusIndicatorColor(scheme),
+      width: chipTheme.focusIndicatorThickness,
+      gap: chipTheme.focusIndicatorOffset,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: shadows.isEmpty ? null : shadows,
+        ),
+        child: surface,
+      ),
+    );
+  }
+
+  Widget _chipMaterial({
+    required M3EThemeData theme,
+    required M3EChipTheme chipTheme,
+    required M3EColorScheme scheme,
+    required M3EInteractionState state,
+    required Color stateLayer,
+    required Color labelColor,
+    required Color leadingColor,
+    required Color trailingColor,
+    required ShapeBorder shape,
+    required bool hasAvatar,
+    required bool hasLeading,
+    required bool hasTrailing,
+    required BorderRadius radius,
+    required double opacity,
+  }) {
     final Widget content = Container(
       height: chipTheme.height,
       constraints: BoxConstraints(
@@ -383,7 +432,7 @@ class _M3EChipState extends State<M3EChip> {
         ),
       ),
     );
-    final Widget surface = Material(
+    return Material(
       color: chipTheme.containerColor(
         scheme,
         enabled: _enabled,
@@ -402,21 +451,6 @@ class _M3EChipState extends State<M3EChip> {
               child: content,
             )
           : content,
-    );
-
-    return M3EFocusRing(
-      focused: state.focused,
-      radius: radius,
-      color: chipTheme.resolveFocusIndicatorColor(scheme),
-      width: chipTheme.focusIndicatorThickness,
-      gap: chipTheme.focusIndicatorOffset,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: shadows.isEmpty ? null : shadows,
-        ),
-        child: surface,
-      ),
     );
   }
 
@@ -513,5 +547,27 @@ class _M3EChipState extends State<M3EChip> {
         child: child,
       ),
     );
+  }
+}
+
+extension _M3EChipPointer on _M3EChipState {
+  void _onTapOutside(PointerDownEvent _) {
+    _clearFocusFromPointer();
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _scheduleClearFocusFromPointer();
+  }
+
+  void _onPanStart(DragStartDetails _) {
+    _setDragged(true);
+  }
+
+  void _onPanEnd(DragEndDetails _) {
+    _setDragged(false);
+  }
+
+  void _onPanCancel() {
+    _setDragged(false);
   }
 }

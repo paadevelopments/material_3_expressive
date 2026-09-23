@@ -175,41 +175,13 @@ class _M3ESegmentedButtonState<T> extends State<M3ESegmentedButton<T>> {
     final pad = (layoutHeight - visualHeight) / 2;
     final groupEnabled = widget.enabled;
 
-    final Color outlineColor = segmentedButtonTheme.outline(
-      scheme,
-      enabled: groupEnabled,
-    );
-    final Gradient? outlineGradient = segmentedButtonTheme.outlineGradient;
-
-    Widget visualBand = ClipRRect(
+    final Widget visualBand = _visualBand(
+      segmentedButtonTheme: segmentedButtonTheme,
+      scheme: scheme,
+      visualHeight: visualHeight,
       borderRadius: borderRadius,
-      child: Row(
-        key: _rowKey,
-        mainAxisSize: MainAxisSize.min,
-        children: _buildSegmentFills(context, segmentedButtonTheme),
-      ),
+      groupEnabled: groupEnabled,
     );
-    visualBand = Container(
-      height: visualHeight,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: outlineGradient == null
-            ? Border.all(
-                color: outlineColor,
-                width: segmentedButtonTheme.borderWidth,
-              )
-            : null,
-      ),
-      child: visualBand,
-    );
-    if (outlineGradient != null && groupEnabled) {
-      visualBand = m3eGradientOutlineLayer(
-        clipRadius: borderRadius,
-        gradient: outlineGradient,
-        width: segmentedButtonTheme.borderWidth,
-        child: visualBand,
-      );
-    }
 
     Widget ring = SizedBox(
       height: layoutHeight,
@@ -260,6 +232,50 @@ class _M3ESegmentedButtonState<T> extends State<M3ESegmentedButton<T>> {
       label: widget.semanticLabel,
       child: TapRegion(onTapOutside: _onTapOutside, child: ring),
     );
+  }
+
+  Widget _visualBand({
+    required M3ESegmentedButtonTheme segmentedButtonTheme,
+    required M3EColorScheme scheme,
+    required double visualHeight,
+    required BorderRadius borderRadius,
+    required bool groupEnabled,
+  }) {
+    final Color outlineColor = segmentedButtonTheme.outline(
+      scheme,
+      enabled: groupEnabled,
+    );
+    final Gradient? outlineGradient = segmentedButtonTheme.outlineGradient;
+    Widget visualBand = ClipRRect(
+      borderRadius: borderRadius,
+      child: Row(
+        key: _rowKey,
+        mainAxisSize: MainAxisSize.min,
+        children: _buildSegmentFills(context, segmentedButtonTheme),
+      ),
+    );
+    visualBand = Container(
+      height: visualHeight,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: outlineGradient == null
+            ? Border.all(
+                color: outlineColor,
+                width: segmentedButtonTheme.borderWidth,
+              )
+            : null,
+      ),
+      child: visualBand,
+    );
+    if (outlineGradient != null && groupEnabled) {
+      visualBand = m3eGradientOutlineLayer(
+        clipRadius: borderRadius,
+        gradient: outlineGradient,
+        width: segmentedButtonTheme.borderWidth,
+        child: visualBand,
+      );
+    }
+    return visualBand;
   }
 
   /// Selected fills and dividers (non-interactive paint layer).

@@ -402,6 +402,40 @@ class _M3EFabState extends State<M3EFab>
         ? widget.hoverElevation ?? M3EElevation.level4
         : widget.elevation ?? M3EElevation.level3;
 
+    return _composeFabSurface(
+      theme: theme,
+      fabTheme: fabTheme,
+      metrics: metrics,
+      borderRadius: borderRadius,
+      border: border,
+      radiusDuration: radiusDuration,
+      state: state,
+      states: states,
+      fill: fill,
+      solidBg: solidBg,
+      fg: fg,
+      outline: outline,
+      side: side,
+      resolvedElevation: resolvedElevation,
+    );
+  }
+
+  Widget _composeFabSurface({
+    required M3EThemeData theme,
+    required M3EFabTheme fabTheme,
+    required M3EFabMetrics metrics,
+    required BorderRadius borderRadius,
+    required ShapeBorder border,
+    required Duration radiusDuration,
+    required M3EInteractionState state,
+    required Set<WidgetState> states,
+    required Gradient? fill,
+    required Color? solidBg,
+    required Color fg,
+    required Gradient? outline,
+    required BorderSide? side,
+    required double resolvedElevation,
+  }) {
     Widget content = _decorateContent(
       state: state,
       states: states,

@@ -198,59 +198,31 @@ class M3EButtonDecoration {
     double? unselectedRadius,
     double? connectedInnerRadius,
   }) {
-    final WidgetStateProperty<Color?>? backgroundColorProp =
-        (backgroundColor == null &&
-            disabledBackgroundColor == null &&
-            selectedBackgroundColor == null)
-        ? null
-        : _StyleFromColorProperty(
-            backgroundColor,
-            disabledBackgroundColor,
-            selectedBackgroundColor,
-          );
-
-    final WidgetStateProperty<Color?>? foregroundColorProp =
-        (foregroundColor == null &&
-            disabledForegroundColor == null &&
-            selectedForegroundColor == null)
-        ? null
-        : _StyleFromColorProperty(
-            foregroundColor,
-            disabledForegroundColor,
-            selectedForegroundColor,
-          );
-
-    final WidgetStateProperty<Color?>? shadowColorProp = shadowColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(shadowColor);
-    final WidgetStateProperty<Color?>? surfaceTintColorProp =
-        surfaceTintColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(surfaceTintColor);
-    final WidgetStateProperty<Color?>? overlayColorProp = overlayColor == null
-        ? null
-        : WidgetStatePropertyAll<Color?>(overlayColor);
-    final WidgetStateProperty<double?>? elevationProp = elevation == null
-        ? null
-        : WidgetStatePropertyAll<double?>(elevation);
-    final WidgetStateProperty<BorderSide?>? sideProp = side == null
-        ? null
-        : WidgetStatePropertyAll<BorderSide?>(side);
-
-    final WidgetStateProperty<MouseCursor?>? mouseCursorProp =
-        (enabledMouseCursor == null && disabledMouseCursor == null)
-        ? null
-        : _StyleFromCursorProperty(enabledMouseCursor, disabledMouseCursor);
+    final _StyleFromColors colors = _styleFromColors(
+      backgroundColor: backgroundColor,
+      disabledBackgroundColor: disabledBackgroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      foregroundColor: foregroundColor,
+      disabledForegroundColor: disabledForegroundColor,
+      selectedForegroundColor: selectedForegroundColor,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      overlayColor: overlayColor,
+      elevation: elevation,
+      side: side,
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
+    );
 
     return M3EButtonDecoration(
-      backgroundColor: backgroundColorProp,
-      foregroundColor: foregroundColorProp,
-      shadowColor: shadowColorProp,
-      surfaceTintColor: surfaceTintColorProp,
-      overlayColor: overlayColorProp,
-      elevation: elevationProp,
-      side: sideProp,
-      mouseCursor: mouseCursorProp,
+      backgroundColor: colors.backgroundColor,
+      foregroundColor: colors.foregroundColor,
+      shadowColor: colors.shadowColor,
+      surfaceTintColor: colors.surfaceTintColor,
+      overlayColor: colors.overlayColor,
+      elevation: colors.elevation,
+      side: colors.side,
+      mouseCursor: colors.mouseCursor,
       iconSize: iconSize,
       iconAlignment: iconAlignment,
       textStyle: textStyle,
@@ -475,4 +447,70 @@ class _StyleFromCursorProperty implements WidgetStateProperty<MouseCursor?> {
     }
     return enabledCursor;
   }
+}
+
+typedef _StyleFromColors = ({
+  WidgetStateProperty<Color?>? backgroundColor,
+  WidgetStateProperty<Color?>? foregroundColor,
+  WidgetStateProperty<Color?>? shadowColor,
+  WidgetStateProperty<Color?>? surfaceTintColor,
+  WidgetStateProperty<Color?>? overlayColor,
+  WidgetStateProperty<double?>? elevation,
+  WidgetStateProperty<BorderSide?>? side,
+  WidgetStateProperty<MouseCursor?>? mouseCursor,
+});
+
+_StyleFromColors _styleFromColors({
+  Color? backgroundColor,
+  Color? disabledBackgroundColor,
+  Color? selectedBackgroundColor,
+  Color? foregroundColor,
+  Color? disabledForegroundColor,
+  Color? selectedForegroundColor,
+  Color? shadowColor,
+  Color? surfaceTintColor,
+  Color? overlayColor,
+  double? elevation,
+  BorderSide? side,
+  MouseCursor? enabledMouseCursor,
+  MouseCursor? disabledMouseCursor,
+}) {
+  return (
+    backgroundColor:
+        (backgroundColor == null &&
+            disabledBackgroundColor == null &&
+            selectedBackgroundColor == null)
+        ? null
+        : _StyleFromColorProperty(
+            backgroundColor,
+            disabledBackgroundColor,
+            selectedBackgroundColor,
+          ),
+    foregroundColor:
+        (foregroundColor == null &&
+            disabledForegroundColor == null &&
+            selectedForegroundColor == null)
+        ? null
+        : _StyleFromColorProperty(
+            foregroundColor,
+            disabledForegroundColor,
+            selectedForegroundColor,
+          ),
+    shadowColor: shadowColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(shadowColor),
+    surfaceTintColor: surfaceTintColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(surfaceTintColor),
+    overlayColor: overlayColor == null
+        ? null
+        : WidgetStatePropertyAll<Color?>(overlayColor),
+    elevation: elevation == null
+        ? null
+        : WidgetStatePropertyAll<double?>(elevation),
+    side: side == null ? null : WidgetStatePropertyAll<BorderSide?>(side),
+    mouseCursor: (enabledMouseCursor == null && disabledMouseCursor == null)
+        ? null
+        : _StyleFromCursorProperty(enabledMouseCursor, disabledMouseCursor),
+  );
 }

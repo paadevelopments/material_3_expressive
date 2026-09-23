@@ -25,33 +25,42 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
     );
 
     if (_hasAnyLabel) {
-      // Measure selected/unselected extents without participating in layout.
-      // A Stack + Positioned measurer can pin the group width across size
-      // changes; OverflowBox in a zero-height slot avoids that.
-      group = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          group,
-          SizedBox.shrink(
-            child: OverflowBox(
-              alignment: Alignment.topLeft,
-              minWidth: 0,
-              maxWidth: double.infinity,
-              minHeight: 0,
-              maxHeight: double.infinity,
-              child: IgnorePointer(
-                child: Opacity(
-                  opacity: 0,
-                  child: _buildOffstageMeasurer(context),
-                ),
+      group = _withOffstageMeasurer(context, group);
+    }
+
+    return _frameGroup(context, groupTheme, group);
+  }
+
+  Widget _withOffstageMeasurer(BuildContext context, Widget group) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        group,
+        SizedBox.shrink(
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            minWidth: 0,
+            maxWidth: double.infinity,
+            minHeight: 0,
+            maxHeight: double.infinity,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0,
+                child: _buildOffstageMeasurer(context),
               ),
             ),
           ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
+  }
 
+  Widget _frameGroup(
+    BuildContext context,
+    M3EButtonGroupTheme groupTheme,
+    Widget group,
+  ) {
     Widget result = FocusTraversalGroup(
       policy: _M3EButtonGroupTabTraversalPolicy(),
       child: Semantics(

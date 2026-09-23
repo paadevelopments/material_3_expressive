@@ -136,6 +136,34 @@ class M3EMenuItem extends StatelessWidget {
     required Color iconForeground,
     required bool focused,
   }) {
+    final Color background = _entryBackground(
+      menuTheme: menuTheme,
+      palette: palette,
+      focused: focused,
+    );
+    return Container(
+      constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
+      padding: EdgeInsets.symmetric(
+        horizontal: menuTheme.entryHorizontalPadding,
+        vertical: menuTheme.entryVerticalPadding,
+      ),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: background, borderRadius: radius),
+      child: _entryRow(
+        context,
+        menuTheme: menuTheme,
+        scheme: scheme,
+        style: style,
+        iconForeground: iconForeground,
+      ),
+    );
+  }
+
+  Color _entryBackground({
+    required M3EMenuTheme menuTheme,
+    required M3EMenuColors palette,
+    required bool focused,
+  }) {
     Color background = selected
         ? palette.selectedContainer
         : const Color(0x00000000);
@@ -151,8 +179,16 @@ class M3EMenuItem extends StatelessWidget {
         background,
       );
     }
+    return background;
+  }
 
-    final Widget labelBlock = Column(
+  Widget _labelBlock(
+    BuildContext context, {
+    required M3EMenuTheme menuTheme,
+    required M3EColorScheme scheme,
+    required M3EMenuColorStyle style,
+  }) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -185,8 +221,16 @@ class M3EMenuItem extends StatelessWidget {
           ),
       ],
     );
+  }
 
-    final Widget row = Row(
+  Widget _entryRow(
+    BuildContext context, {
+    required M3EMenuTheme menuTheme,
+    required M3EColorScheme scheme,
+    required M3EMenuColorStyle style,
+    required Color iconForeground,
+  }) {
+    return Row(
       children: <Widget>[
         if (leading != null) ...<Widget>[
           IconTheme.merge(
@@ -198,7 +242,14 @@ class M3EMenuItem extends StatelessWidget {
           ),
           SizedBox(width: menuTheme.iconGap),
         ],
-        Expanded(child: labelBlock),
+        Expanded(
+          child: _labelBlock(
+            context,
+            menuTheme: menuTheme,
+            scheme: scheme,
+            style: style,
+          ),
+        ),
         if (badge != null) ...<Widget>[
           SizedBox(width: menuTheme.iconGap),
           badge!,
@@ -227,17 +278,6 @@ class M3EMenuItem extends StatelessWidget {
           ),
         ],
       ],
-    );
-
-    return Container(
-      constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
-      padding: EdgeInsets.symmetric(
-        horizontal: menuTheme.entryHorizontalPadding,
-        vertical: menuTheme.entryVerticalPadding,
-      ),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: background, borderRadius: radius),
-      child: row,
     );
   }
 }

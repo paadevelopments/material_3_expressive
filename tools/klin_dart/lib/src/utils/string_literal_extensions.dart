@@ -70,12 +70,14 @@ extension StringLiteralContextExtensions on StringLiteral {
       token.type == TokenType.EQ_EQ || token.type == TokenType.BANG_EQ;
 
   bool _isInsideLogicContext(AstNode node) =>
-      node.thisOrAncestorMatching((n) =>
-          n is IfStatement ||
-          n is ConditionalExpression ||
-          n is WhileStatement ||
-          n is SwitchExpression ||
-          n is SwitchStatement) !=
+      node.thisOrAncestorMatching(
+        (n) =>
+            n is IfStatement ||
+            n is ConditionalExpression ||
+            n is WhileStatement ||
+            n is SwitchExpression ||
+            n is SwitchStatement,
+      ) !=
       null;
 
   bool _isDomainVariable(Expression expression) {
@@ -94,14 +96,7 @@ extension StringLiteralContextExtensions on StringLiteral {
 
   bool _shouldUseEnumInstead(MethodInvocation method) {
     final name = method.methodName.name.toLowerCase();
-    const riskyMethods = [
-      'check',
-      'update',
-      'change',
-      'set',
-      'compare',
-      'is',
-    ];
+    const riskyMethods = ['check', 'update', 'change', 'set', 'compare', 'is'];
     return riskyMethods.any((r) => name.contains(r));
   }
 }

@@ -1,8 +1,9 @@
+import 'package:analyzer/error/error.dart' hide LintCode;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
-import 'package:analyzer/error/error.dart' as error;
 import 'package:klin_dart/src/cognitive_complexity/cognitive_complexity_visitor.dart';
 
+/// Reports methods whose cognitive complexity exceeds the configured bands.
 class CognitiveComplexityRule extends DartLintRule {
   static const _lintName = 'cognitive_complexity';
 
@@ -15,20 +16,22 @@ class CognitiveComplexityRule extends DartLintRule {
   /// Complexity score at or above which an error is reported.
   final int highThreshold;
 
+  /// Reads `medium_threshold` and `high_threshold` from [config].
   CognitiveComplexityRule({Map<String, Object?>? config})
-      : mediumThreshold = int.tryParse(config?['medium_threshold']?.toString() ?? '') ?? _defaultMediumThreshold,
-        highThreshold = int.tryParse(config?['high_threshold']?.toString() ?? '') ?? _defaultHighThreshold,
-        super(
-          code: LintCode(
-            name: _lintName,
-            problemMessage: "",
-          ),
-        );
+    : mediumThreshold =
+          int.tryParse(config?['medium_threshold']?.toString() ?? '') ??
+          _defaultMediumThreshold,
+      highThreshold =
+          int.tryParse(config?['high_threshold']?.toString() ?? '') ??
+          _defaultHighThreshold,
+      super(
+        code: const LintCode(name: _lintName, problemMessage: ''),
+      );
 
   @override
   void run(
     CustomLintResolver resolver,
-    ErrorReporter reporter,
+    DiagnosticReporter reporter,
     CustomLintContext context,
   ) {
     context.registry.addCompilationUnit((node) {
@@ -49,8 +52,8 @@ class CognitiveComplexityRule extends DartLintRule {
               problemMessage: metrics.riskAssessment,
               uniqueName: '${_lintName}_${metrics.name}',
               errorSeverity: complexity >= highThreshold
-                  ? error.ErrorSeverity.ERROR
-                  : error.ErrorSeverity.WARNING,
+                  ? DiagnosticSeverity.ERROR
+                  : DiagnosticSeverity.WARNING,
             ),
           );
         }

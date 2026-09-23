@@ -1,36 +1,29 @@
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:klin_dart/src/utils/constants.dart';
 
-/// Extensions for widget-related checks on ClassElement2
-extension WidgetClassChecks on ClassElement2 {
-  /// Checks if this class is a widget
+/// Widget checks for a [ClassElement].
+extension WidgetClassChecks on ClassElement {
+  /// Whether this class behaves as a Flutter widget.
   bool isWidget() {
-    // Direct check for core Flutter widgets
     if (isFlutterWidgetByName()) {
       return true;
     }
-
-    // Check if it has a build method that returns a widget type
     if (hasBuildMethod()) {
       return true;
     }
-
-    // Check if it has a createState method (StatefulWidget)
     if (hasCreateStateMethod()) {
       return true;
     }
 
-    // Check superclass
-    final supertype = this.supertype;
-    if (supertype != null && supertype.element3 is ClassElement2) {
-      return (supertype.element3 as ClassElement2).isWidget();
+    final superElement = supertype?.element;
+    if (superElement is ClassElement) {
+      return superElement.isWidget();
     }
-
     return false;
   }
 
-  /// Checks if this class is a Flutter widget by name
+  /// Whether the class name is a known Flutter widget base type.
   bool isFlutterWidgetByName() {
     final widgetBaseClasses = [
       'StatelessWidget',
@@ -49,41 +42,44 @@ extension WidgetClassChecks on ClassElement2 {
       'ConsumerStatefulWidget',
     ];
 
-    if (widgetBaseClasses.contains(name3)) {
-      final libraryPath = library2.uri.toString();
+    if (widgetBaseClasses.contains(name)) {
+      final libraryPath = library.uri.toString();
       return libraryPath.contains(Constants.flutter);
     }
-
     return false;
   }
 
-  /// Checks if this class has a build method that takes a BuildContext
+  /// Whether this class declares a `build` method that takes a `BuildContext`.
   bool hasBuildMethod() {
-    return methods2.any((method) =>
-        method.name3 == Constants.build &&
-        method.formalParameters[0].type
-            .getDisplayString()
-            .contains(Constants.buildContext));
+    return methods.any((method) {
+      final parameters = method.formalParameters;
+      if (parameters.isEmpty || method.name != Constants.build) {
+        return false;
+      }
+      return parameters.first.type.getDisplayString().contains(
+        Constants.buildContext,
+      );
+    });
   }
 
-  /// Checks if this class has a createState method that returns a State with a build method
+  /// Whether `createState` returns a state class that has a `build` method.
   bool hasCreateStateMethod() {
-    return methods2.any(
-      (method) =>
-          method.name3 == Constants.createState &&
-          method.returnType.element3 is ClassElement2 &&
-          (method.returnType.element3 as ClassElement2).hasBuildMethod(),
-    );
+    return methods.any((method) {
+      final returnElement = method.returnType.element;
+      return method.name == Constants.createState &&
+          returnElement is ClassElement &&
+          returnElement.hasBuildMethod();
+    });
   }
 }
 
-/// Extensions for widget-related checks on DartType
+/// Widget checks for a [DartType].
 extension WidgetTypeChecks on DartType {
-  /// Checks if this type is a widget type
+  /// Whether this type is a widget class.
   bool isWidget() {
-    final element = element3;
-    if (element is ClassElement2) {
-      return element.isWidget();
+    final typeElement = element;
+    if (typeElement is ClassElement) {
+      return typeElement.isWidget();
     }
     return false;
   }

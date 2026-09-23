@@ -9,6 +9,8 @@ import '../enums/m3e_menu_color_style.dart';
 import '../enums/m3e_menu_item_shape.dart';
 import '../enums/m3e_menu_variant.dart';
 
+part 'm3e_menu_theme_values.dart';
+
 /// Resolved colors for one [M3EMenuColorStyle].
 @immutable
 class M3EMenuColors {
@@ -315,32 +317,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   M3EMenuColors colors(
     M3EColorScheme scheme, [
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  ]) {
-    switch (style) {
-      case M3EMenuColorStyle.standard:
-        return M3EMenuColors(
-          container: backgroundColor ?? scheme.surfaceContainerLow,
-          content: scheme.onSurface,
-          iconContent: scheme.onSurfaceVariant,
-          supportingContent: scheme.onSurfaceVariant,
-          selectedContainer: scheme.tertiaryContainer,
-          selectedContent: scheme.onTertiaryContainer,
-          stateLayer: scheme.onSurface,
-          divider: scheme.outlineVariant,
-        );
-      case M3EMenuColorStyle.vibrant:
-        return M3EMenuColors(
-          container: backgroundColor ?? scheme.tertiaryContainer,
-          content: scheme.onTertiaryContainer,
-          iconContent: scheme.onTertiaryContainer,
-          supportingContent: scheme.onTertiaryContainer,
-          selectedContainer: scheme.tertiary,
-          selectedContent: scheme.onTertiary,
-          stateLayer: scheme.onTertiaryContainer,
-          divider: scheme.onTertiaryContainer.withValues(alpha: 0.24),
-        );
-    }
-  }
+  ]) => _menuThemeColors(this, scheme, style);
 
   /// containerColor.
 
@@ -578,95 +555,6 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     if (other is! M3EMenuTheme) {
       return this;
     }
-    return M3EMenuTheme(
-      minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
-      maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,
-      maxHeight: _lerpDouble(maxHeight, other.maxHeight, t)!,
-      verticalPadding: _lerpDouble(verticalPadding, other.verticalPadding, t)!,
-      contentHorizontalPadding: _lerpDouble(
-        contentHorizontalPadding,
-        other.contentHorizontalPadding,
-        t,
-      )!,
-      anchorOffset: _lerpDouble(anchorOffset, other.anchorOffset, t)!,
-      entryHeight: _lerpDouble(entryHeight, other.entryHeight, t)!,
-      entryHorizontalPadding: _lerpDouble(
-        entryHorizontalPadding,
-        other.entryHorizontalPadding,
-        t,
-      )!,
-      entryVerticalPadding: _lerpDouble(
-        entryVerticalPadding,
-        other.entryVerticalPadding,
-        t,
-      )!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
-      groupSpacing: _lerpDouble(groupSpacing, other.groupSpacing, t)!,
-      sectionGap: _lerpDouble(sectionGap, other.sectionGap, t)!,
-      groupLabelHorizontalPadding: _lerpDouble(
-        groupLabelHorizontalPadding,
-        other.groupLabelHorizontalPadding,
-        t,
-      )!,
-      groupLabelVerticalPadding: _lerpDouble(
-        groupLabelVerticalPadding,
-        other.groupLabelVerticalPadding,
-        t,
-      )!,
-      groupLabelHeight: _lerpDouble(
-        groupLabelHeight,
-        other.groupLabelHeight,
-        t,
-      )!,
-      elevation: _lerpDouble(elevation, other.elevation, t)!,
-      disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
-      scrimAlpha: _lerpDouble(scrimAlpha, other.scrimAlpha, t)!,
-      screenEdgePadding: _lerpDouble(
-        screenEdgePadding,
-        other.screenEdgePadding,
-        t,
-      )!,
-      containerRadius: _lerpDouble(containerRadius, other.containerRadius, t)!,
-      containerBottomRadius: _lerpDouble(
-        containerBottomRadius,
-        other.containerBottomRadius,
-        t,
-      )!,
-      itemRadius: _lerpDouble(itemRadius, other.itemRadius, t)!,
-      stateLayerInset: _lerpDouble(stateLayerInset, other.stateLayerInset, t)!,
-      focusIndicatorWidth: _lerpDouble(
-        focusIndicatorWidth,
-        other.focusIndicatorWidth,
-        t,
-      )!,
-      focusIndicatorOffset: _lerpDouble(
-        focusIndicatorOffset,
-        other.focusIndicatorOffset,
-        t,
-      )!,
-      focusIndicatorColor: Color.lerp(
-        focusIndicatorColor,
-        other.focusIndicatorColor,
-        t,
-      ),
-      backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t),
-      openMotion: t < 0.5 ? openMotion : other.openMotion,
-      closeMotion: t < 0.5 ? closeMotion : other.closeMotion,
-      openInstantly: t < 0.5 ? openInstantly : other.openInstantly,
-      itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
-      dividerThickness: _lerpDouble(
-        dividerThickness,
-        other.dividerThickness,
-        t,
-      )!,
-      dividerVerticalPadding: _lerpDouble(
-        dividerVerticalPadding,
-        other.dividerVerticalPadding,
-        t,
-      )!,
-    );
+    return _lerpMenuTheme(this, other, t);
   }
-
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
 }

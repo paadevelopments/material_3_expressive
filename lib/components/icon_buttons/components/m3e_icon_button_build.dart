@@ -203,23 +203,35 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
       return child;
     }
     return TapRegion(
-      onTapOutside: (_) {
-        M3EFocusInteraction.instance.notePointerInteraction();
-        if (_focusNode.hasPrimaryFocus) {
-          _focusNode.unfocus();
-        }
-      },
+      onTapOutside: _onTapOutside,
       child: Listener(
         behavior: HitTestBehavior.translucent,
-        onPointerDown: (_) {
-          M3EFocusInteraction.instance.notePointerInteraction();
-          _setPointerDown(true);
-        },
-        onPointerUp: (_) => _setPointerDown(false),
-        onPointerCancel: (_) => _setPointerDown(false),
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
         child: child,
       ),
     );
+  }
+
+  void _onTapOutside(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    if (_focusNode.hasPrimaryFocus) {
+      _focusNode.unfocus();
+    }
+  }
+
+  void _onPointerDown(PointerDownEvent _) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    _setPointerDown(true);
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _setPointerDown(false);
+  }
+
+  void _onPointerCancel(PointerCancelEvent _) {
+    _setPointerDown(false);
   }
 
   ({Color bg, Color fg, BorderSide? side}) _resolveColors(
@@ -294,37 +306,67 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
           side: null,
         );
       case M3EIconButtonVariant.filled:
-        if (isToggle && !selected) {
-          return (
-            bg: scheme.surfaceContainer,
-            fg: scheme.onSurfaceVariant,
-            side: null,
-          );
-        }
-        return (bg: scheme.primary, fg: scheme.onPrimary, side: null);
+        return _filledColors(scheme, isToggle: isToggle, selected: selected);
       case M3EIconButtonVariant.tonal:
-        if (isToggle && selected) {
-          return (bg: scheme.secondary, fg: scheme.onSecondary, side: null);
-        }
-        return (
-          bg: scheme.secondaryContainer,
-          fg: scheme.onSecondaryContainer,
-          side: null,
-        );
+        return _tonalColors(scheme, isToggle: isToggle, selected: selected);
       case M3EIconButtonVariant.outlined:
-        if (isToggle && selected) {
-          return (
-            bg: scheme.inverseSurface,
-            fg: scheme.onInverseSurface,
-            side: null,
-          );
-        }
-        return (
-          bg: Colors.transparent,
-          fg: scheme.onSurfaceVariant,
-          side: BorderSide(color: scheme.outlineVariant, width: outlineWidth),
+        return _outlinedColors(
+          scheme,
+          isToggle: isToggle,
+          selected: selected,
+          outlineWidth: outlineWidth,
         );
     }
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _filledColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+  }) {
+    if (isToggle && !selected) {
+      return (
+        bg: scheme.surfaceContainer,
+        fg: scheme.onSurfaceVariant,
+        side: null,
+      );
+    }
+    return (bg: scheme.primary, fg: scheme.onPrimary, side: null);
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _tonalColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+  }) {
+    if (isToggle && selected) {
+      return (bg: scheme.secondary, fg: scheme.onSecondary, side: null);
+    }
+    return (
+      bg: scheme.secondaryContainer,
+      fg: scheme.onSecondaryContainer,
+      side: null,
+    );
+  }
+
+  ({Color bg, Color fg, BorderSide? side}) _outlinedColors(
+    M3EColorScheme scheme, {
+    required bool isToggle,
+    required bool selected,
+    required double outlineWidth,
+  }) {
+    if (isToggle && selected) {
+      return (
+        bg: scheme.inverseSurface,
+        fg: scheme.onInverseSurface,
+        side: null,
+      );
+    }
+    return (
+      bg: Colors.transparent,
+      fg: scheme.onSurfaceVariant,
+      side: BorderSide(color: scheme.outlineVariant, width: outlineWidth),
+    );
   }
 
   Widget _buildMorphButton({

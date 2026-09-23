@@ -169,13 +169,20 @@ Future<void> _m3esearchanchorBarOpensViewOnTapWithoutTyping(
   expect(find.text('Result for '), findsOneWidget);
 
   // View search bar is editable and focused; anchor bar stays unfocused.
-  final Iterable<M3ESearchBar> bars = tester.widgetList<M3ESearchBar>(
-    find.byType(M3ESearchBar),
+  // Focus is requested after the open transition, not via autoFocus, so the
+  // soft keyboard attaches once.
+  final Finder viewBar = find.byWidgetPredicate(
+    (Widget widget) => widget is M3ESearchBar && !widget.readOnly,
   );
-  final M3ESearchBar viewBar = bars.firstWhere(
-    (M3ESearchBar bar) => !bar.readOnly,
+  expect(
+    tester
+        .widget<EditableText>(
+          find.descendant(of: viewBar, matching: find.byType(EditableText)),
+        )
+        .focusNode
+        .hasFocus,
+    isTrue,
   );
-  expect(viewBar.autoFocus, isTrue);
 }
 
 Future<void> _fullScreenBackClosesViewWithoutReopening(

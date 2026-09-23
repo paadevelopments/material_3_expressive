@@ -149,6 +149,14 @@ class _M3ERadioState<T> extends State<M3ERadio<T>> {
     widget.onChanged!(widget.value);
   }
 
+  void _onTapOutside(PointerDownEvent _) {
+    _clearFocusFromPointer();
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _scheduleClearFocusFromPointer();
+  }
+
   void _clearFocusFromPointer() {
     M3EFocusInteraction.instance.notePointerInteraction();
     if (_focusNode.hasFocus) {
@@ -174,10 +182,10 @@ class _M3ERadioState<T> extends State<M3ERadio<T>> {
     final double slot = math.max(radioTheme.targetSize, hitSize);
 
     return TapRegion(
-      onTapOutside: (_) => _clearFocusFromPointer(),
+      onTapOutside: _onTapOutside,
       child: Listener(
         behavior: HitTestBehavior.translucent,
-        onPointerUp: (_) => _scheduleClearFocusFromPointer(),
+        onPointerUp: _onPointerUp,
         child: M3EComponentTheme(
           builder: (BuildContext context) => M3ETappable(
             onTap: _enabled ? _handleTap : null,

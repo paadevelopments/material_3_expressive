@@ -178,101 +178,102 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
       density: widget.density,
     );
     final minimumTarget = groupTheme.minTargetFor(widget.size);
-    _cachedDecorations = List.generate(widget.actions.length, (i) {
-      final action = widget.actions[i];
-      final requestedMinimum =
-          action.decoration?.minimumSize ?? widget.decoration?.minimumSize;
-      // Uniform visual height per size token (+ density step).
-      // Connected XS/S also require 48dp min width (spec target area).
-      final restingMinWidth =
-          action.minWidth ?? (action.isIconOnly ? segmentHeight : null) ?? 0;
-      final uniformMinimum = Size(
-        math.max(
-          math.max(requestedMinimum?.width ?? 0, restingMinWidth),
-          widget._connected ? minimumTarget : 0,
-        ),
-        math.max(requestedMinimum?.height ?? 0, segmentHeight),
-      );
-      return M3EButtonDecoration(
-        backgroundColor:
-            action.decoration?.backgroundColor ??
-            widget.decoration?.backgroundColor,
-        foregroundColor:
-            action.decoration?.foregroundColor ??
-            widget.decoration?.foregroundColor,
-        side: action.decoration?.side ?? widget.decoration?.side,
-        overlayColor:
-            action.decoration?.overlayColor ?? widget.decoration?.overlayColor,
-        surfaceTintColor:
-            action.decoration?.surfaceTintColor ??
-            widget.decoration?.surfaceTintColor,
-        minimumSize: uniformMinimum,
-        fixedSize: action.decoration?.fixedSize ?? widget.decoration?.fixedSize,
-        maximumSize:
-            action.decoration?.maximumSize ?? widget.decoration?.maximumSize,
-        tapTargetSize:
-            action.decoration?.tapTargetSize ??
-            widget.decoration?.tapTargetSize ??
-            MaterialTapTargetSize.shrinkWrap,
-        // Height already density-adjusted; keep Material density neutral.
-        visualDensity:
-            action.decoration?.visualDensity ??
-            widget.decoration?.visualDensity ??
-            VisualDensity.standard,
-        mouseCursor:
-            action.decoration?.mouseCursor ?? widget.decoration?.mouseCursor,
-        motion: action.decoration?.motion ?? widget.decoration?.motion,
-        haptic:
-            action.decoration?.haptic ??
-            widget.decoration?.haptic ??
-            widget.haptic,
-        selectedRadius:
-            action.decoration?.selectedRadius ??
-            widget.decoration?.selectedRadius ??
-            (widget._connected
-                ? groupTheme.connectedSelectedInnerRadiusFor(segmentHeight)
-                : null),
-        unselectedRadius:
-            action.decoration?.unselectedRadius ??
-            widget.decoration?.unselectedRadius ??
-            (widget._connected
-                ? groupTheme.connectedInnerRadiusFor(widget.size)
-                : null),
-        pressedRadius:
-            action.decoration?.pressedRadius ??
-            widget.decoration?.pressedRadius ??
-            (widget._connected
-                ? groupTheme.connectedPressedInnerRadiusFor(widget.size)
-                : null),
-        hoveredRadius:
-            action.decoration?.hoveredRadius ??
-            widget.decoration?.hoveredRadius,
-        connectedInnerRadius:
-            action.decoration?.connectedInnerRadius ??
-            widget.decoration?.connectedInnerRadius ??
-            (widget._connected
-                ? groupTheme.connectedInnerRadiusFor(widget.size)
-                : null),
-        backgroundGradient:
-            action.decoration?.backgroundGradient ??
-            widget.decoration?.backgroundGradient,
-        foregroundGradient:
-            action.decoration?.foregroundGradient ??
-            widget.decoration?.foregroundGradient,
-        overlayGradient:
-            action.decoration?.overlayGradient ??
-            widget.decoration?.overlayGradient,
-        outlineGradient:
-            action.decoration?.outlineGradient ??
-            widget.decoration?.outlineGradient,
-        backgroundBuilder:
-            action.decoration?.backgroundBuilder ??
-            widget.decoration?.backgroundBuilder,
-        foregroundBuilder:
-            action.decoration?.foregroundBuilder ??
-            widget.decoration?.foregroundBuilder,
-      );
-    });
+    _cachedDecorations = List.generate(
+      widget.actions.length,
+      (index) => _decorationAt(index, groupTheme, segmentHeight, minimumTarget),
+    );
+  }
+
+  M3EButtonDecoration _decorationAt(
+    int index,
+    M3EButtonGroupTheme groupTheme,
+    double segmentHeight,
+    double minimumTarget,
+  ) {
+    final action = widget.actions[index];
+    final uniformMinimum = _uniformActionMinimum(
+      action,
+      segmentHeight,
+      minimumTarget,
+    );
+    final actionDecoration = action.decoration;
+    final groupDecoration = widget.decoration;
+    final connected = widget._connected;
+    final radii = _actionRadii(
+      actionDecoration,
+      groupDecoration,
+      groupTheme,
+      segmentHeight,
+      connected,
+    );
+    return M3EButtonDecoration(
+      backgroundColor:
+          actionDecoration?.backgroundColor ?? groupDecoration?.backgroundColor,
+      foregroundColor:
+          actionDecoration?.foregroundColor ?? groupDecoration?.foregroundColor,
+      side: actionDecoration?.side ?? groupDecoration?.side,
+      overlayColor:
+          actionDecoration?.overlayColor ?? groupDecoration?.overlayColor,
+      surfaceTintColor:
+          actionDecoration?.surfaceTintColor ??
+          groupDecoration?.surfaceTintColor,
+      minimumSize: uniformMinimum,
+      fixedSize: actionDecoration?.fixedSize ?? groupDecoration?.fixedSize,
+      maximumSize:
+          actionDecoration?.maximumSize ?? groupDecoration?.maximumSize,
+      tapTargetSize:
+          actionDecoration?.tapTargetSize ??
+          groupDecoration?.tapTargetSize ??
+          MaterialTapTargetSize.shrinkWrap,
+      visualDensity:
+          actionDecoration?.visualDensity ??
+          groupDecoration?.visualDensity ??
+          VisualDensity.standard,
+      mouseCursor:
+          actionDecoration?.mouseCursor ?? groupDecoration?.mouseCursor,
+      motion: actionDecoration?.motion ?? groupDecoration?.motion,
+      haptic:
+          actionDecoration?.haptic ?? groupDecoration?.haptic ?? widget.haptic,
+      selectedRadius: radii.selected,
+      unselectedRadius: radii.unselected,
+      pressedRadius: radii.pressed,
+      hoveredRadius: radii.hovered,
+      connectedInnerRadius: radii.connectedInner,
+      backgroundGradient:
+          actionDecoration?.backgroundGradient ??
+          groupDecoration?.backgroundGradient,
+      foregroundGradient:
+          actionDecoration?.foregroundGradient ??
+          groupDecoration?.foregroundGradient,
+      overlayGradient:
+          actionDecoration?.overlayGradient ?? groupDecoration?.overlayGradient,
+      outlineGradient:
+          actionDecoration?.outlineGradient ?? groupDecoration?.outlineGradient,
+      backgroundBuilder:
+          actionDecoration?.backgroundBuilder ??
+          groupDecoration?.backgroundBuilder,
+      foregroundBuilder:
+          actionDecoration?.foregroundBuilder ??
+          groupDecoration?.foregroundBuilder,
+    );
+  }
+
+  Size _uniformActionMinimum(
+    M3EButtonGroupAction action,
+    double segmentHeight,
+    double minimumTarget,
+  ) {
+    final requestedMinimum =
+        action.decoration?.minimumSize ?? widget.decoration?.minimumSize;
+    final restingMinWidth =
+        action.minWidth ?? (action.isIconOnly ? segmentHeight : null) ?? 0;
+    return Size(
+      math.max(
+        math.max(requestedMinimum?.width ?? 0, restingMinWidth),
+        widget._connected ? minimumTarget : 0,
+      ),
+      math.max(requestedMinimum?.height ?? 0, segmentHeight),
+    );
   }
 
   void _updateIconOnlyNaturalSizeCache() {
@@ -287,6 +288,18 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
     if (_stateDisposed || !mounted || generation != _measurementGeneration) {
       return;
     }
+    final scan = _scanLabeledButtonWidths();
+    if (_stateDisposed || !mounted || generation != _measurementGeneration) {
+      return;
+    }
+    if (scan.pending && attempt < 5) {
+      _scheduleButtonWidthMeasure(generation, attempt);
+      return;
+    }
+    _publishButtonWidthMeasure(scan.anyChanged);
+  }
+
+  ({bool anyChanged, bool pending}) _scanLabeledButtonWidths() {
     var anyChanged = false;
     var pending = false;
     for (var i = 0; i < widget.actions.length; i++) {
@@ -301,19 +314,18 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
         pending = true;
       }
     }
-    if (_stateDisposed || !mounted || generation != _measurementGeneration) {
-      return;
-    }
-    if (pending && attempt < 5) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_stateDisposed &&
-            mounted &&
-            generation == _measurementGeneration) {
-          _measureButtonWidths(generation, attempt: attempt + 1);
-        }
-      });
-      return;
-    }
+    return (anyChanged: anyChanged, pending: pending);
+  }
+
+  void _scheduleButtonWidthMeasure(int generation, int attempt) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_stateDisposed && mounted && generation == _measurementGeneration) {
+        _measureButtonWidths(generation, attempt: attempt + 1);
+      }
+    });
+  }
+
+  void _publishButtonWidthMeasure(bool anyChanged) {
     if (!anyChanged) {
       if (_allOverflowExtentsMeasured()) {
         _overflowController.stableAllOverflowMeasured.value = true;

@@ -37,6 +37,7 @@ export 'styles/m3e_toolbar_theme.dart';
 export 'utils/m3e_toolbar_item_layout.dart';
 
 part 'components/m3e_toolbar_build.dart';
+part 'components/m3e_toolbar_exit_offset.dart';
 
 /// A Material 3 Expressive toolbar.
 ///
@@ -711,20 +712,5 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
         child: measured,
       ),
     );
-  }
-
-  Offset _exitOffset(BuildContext context, double offset) {
-    switch (_exitDirection) {
-      case M3EToolbarExitDirection.top:
-        return Offset(0, offset);
-      case M3EToolbarExitDirection.bottom:
-        return Offset(0, -offset);
-      case M3EToolbarExitDirection.start:
-        final isRtl = Directionality.of(context) == TextDirection.rtl;
-        return Offset(isRtl ? -offset : offset, 0);
-      case M3EToolbarExitDirection.end:
-        final isRtl = Directionality.of(context) == TextDirection.rtl;
-        return Offset(isRtl ? offset : -offset, 0);
-    }
   }
 }

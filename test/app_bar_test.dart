@@ -173,7 +173,15 @@ Future<void> _m3eappbarSearchFillsTitleSlotAndOpensTheSearchView(
     ),
   );
 
-  expect(find.text('Search'), findsOneWidget);
+  expect(
+    find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Text &&
+          widget.data == 'Search' &&
+          widget.overflow == TextOverflow.ellipsis,
+    ),
+    findsOneWidget,
+  );
   expect(find.byIcon(M3EIcons.menu), findsOneWidget);
   expect(find.byIcon(M3EIcons.tune), findsOneWidget);
 

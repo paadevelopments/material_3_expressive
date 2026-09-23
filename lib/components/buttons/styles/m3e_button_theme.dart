@@ -165,23 +165,13 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
   double elevation(M3EButtonStyle style, Set<WidgetState> states) {
     final hovered = states.contains(WidgetState.hovered);
     final pressed = states.contains(WidgetState.pressed);
-    final focused = states.contains(WidgetState.focused);
     final disabled = states.contains(WidgetState.disabled);
     if (disabled) {
       return 0;
     }
     switch (style) {
       case M3EButtonStyle.elevated:
-        if (pressed) {
-          return 1;
-        }
-        if (hovered) {
-          return 3;
-        }
-        if (focused) {
-          return 1;
-        }
-        return 1;
+        return _elevatedElevation(pressed: pressed, hovered: hovered);
       case M3EButtonStyle.filled:
       case M3EButtonStyle.tonal:
         if (pressed) {
@@ -195,6 +185,16 @@ class M3EButtonTheme extends M3EThemeExtension<M3EButtonTheme> {
       case M3EButtonStyle.text:
         return 0;
     }
+  }
+
+  double _elevatedElevation({required bool pressed, required bool hovered}) {
+    if (pressed) {
+      return 1;
+    }
+    if (hovered) {
+      return 3;
+    }
+    return 1;
   }
 
   /// squareRadius.

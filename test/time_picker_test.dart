@@ -11,6 +11,12 @@ Widget _host(Widget child) {
   );
 }
 
+Finder _tooltip(String message) {
+  return find.byWidgetPredicate(
+    (Widget widget) => widget is M3ETooltip && widget.message == message,
+  );
+}
+
 void main() {
   testWidgets(
     'M3EDialTimePicker scales down without overflow on narrow width',
@@ -268,7 +274,7 @@ Future<void> _inputModeToggle(WidgetTester tester) async {
 
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
-  await tester.tap(find.byTooltip('Switch to text input mode'));
+  await tester.tap(_tooltip('Switch to text input mode'));
   await tester.pumpAndSettle();
 
   expect(tester.takeException(), isNull);
