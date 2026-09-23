@@ -288,7 +288,6 @@ void main() {
           M3EButtonGroup(
             size: size,
             overflow: M3EButtonGroupOverflow.none,
-            neighborSquish: true,
             selectedIndex: 0,
             onSelectedIndexChanged: (_) {},
             actions: const <M3EButtonGroupAction>[
@@ -340,7 +339,6 @@ void main() {
           _host(
             M3EButtonGroup(
               overflow: M3EButtonGroupOverflow.none,
-              neighborSquish: true,
               selectedIndex: 0,
               onSelectedIndexChanged: (_) {},
               actions: <M3EButtonGroupAction>[

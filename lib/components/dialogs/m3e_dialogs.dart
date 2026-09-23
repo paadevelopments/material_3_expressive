@@ -386,9 +386,9 @@ class _M3ESelectionDialogState extends State<_M3ESelectionDialog> {
         ),
         M3EButton(
           onPressed: _hasSelection
-              ? () => Navigator.of(
-                  context,
-                ).pop(List<String>.unmodifiable(_selected.toList()))
+              ? () =>
+                    Navigator.of(context)
+                        .pop(List<String>.unmodifiable(_selected.toList()))
               : null,
           child: Text(widget.confirmLabel),
         ),

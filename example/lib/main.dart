@@ -131,9 +131,8 @@ class _GalleryShellState extends State<_GalleryShell> {
                         onPressed: () {
                           M3ETheme.controllerOf(context)?.toggleBrightness(
                             fallback: theme.brightness,
-                            autoTheming: ExampleThemeScope.of(
-                              context,
-                            ).autoTheming,
+                            autoTheming: ExampleThemeScope.of(context)
+                                .autoTheming,
                           );
                         },
                       ),

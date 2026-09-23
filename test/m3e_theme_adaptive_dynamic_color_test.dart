@@ -267,9 +267,8 @@ Future<void> _dynamiccoloringPrefersCorePalettePrimaryAsSeedOverAc(
     accentColor: accentOrange,
   );
 
-  final Color expectedPrimary = resolvedM3eSchemeFromAccent(
-    mock.primarySeed,
-  ).primary;
+  final Color expectedPrimary = resolvedM3eSchemeFromAccent(mock.primarySeed)
+      .primary;
   final Color accentPrimary = resolvedM3eSchemeFromAccent(accentOrange).primary;
 
   final base = M3EThemeData.light(seedColor: const Color(0xFF6750A4));
@@ -301,9 +300,8 @@ Future<void> _dynamiccoloringRefreshesFromCorePalettePrimaryOnResum(
 
   mockDynamicColorChannel(corePaletteList: greenMock.list);
 
-  final Color greenPrimary = resolvedM3eSchemeFromAccent(
-    greenMock.primarySeed,
-  ).primary;
+  final Color greenPrimary = resolvedM3eSchemeFromAccent(greenMock.primarySeed)
+      .primary;
   final Color orangePrimary = resolvedM3eSchemeFromAccent(
     orangeMock.primarySeed,
   ).primary;

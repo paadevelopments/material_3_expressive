@@ -2,6 +2,16 @@
 
 ### Changed
 
+* **Menus:** vertical and baseline only (`M3EMenuVariant`,
+  `M3EMenuSelectionMode`). Vertical row **48**, item radius **12**, group
+  padding **4**, **4** between items, group gap **2**. Opening focuses the
+  first enabled item. Up/Down move, Left/Right open or close a submenu,
+  letters typeahead, Escape closes, Enter or Space activates. Multi-select
+  stays open.
+* **Toolbars:** floating `alignment` places the pill; `screenOffset` (theme
+  default **16**) insets it on every side. Docked toolbars ignore both.
+* **Overlays:** `M3EOverlayHistory` closes an open menu, dropdown, split
+  popup, or FAB menu on the next back before the route pops.
 * **Navigation:** selection pills on the bar, rail, and drawer scale in place
   (spatial spring, width 0.4 to 1) and fade with the effects spring. The
   indicator no longer stretches between destinations.

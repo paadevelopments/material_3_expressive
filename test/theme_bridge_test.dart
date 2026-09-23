@@ -132,9 +132,8 @@ void _explicitIconthemeColorIsPreservedAcrossSchemeChanges() {
 Future<void> _m3eresolvedthemeProjectsTextIconColorOntoMaterialThem(
   WidgetTester tester,
 ) async {
-  final tokens = M3EThemeData.light(
-    seedColor: const Color(0xFFB3261E),
-  ).copyWith(iconTheme: const IconThemeData(size: 28));
+  final tokens = M3EThemeData.light(seedColor: const Color(0xFFB3261E))
+      .copyWith(iconTheme: const IconThemeData(size: 28));
   final stale = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00695C)),

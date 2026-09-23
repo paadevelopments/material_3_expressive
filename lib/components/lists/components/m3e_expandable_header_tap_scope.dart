@@ -39,9 +39,8 @@ class M3EExpandableHeaderTapTarget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final VoidCallback? onTap = M3EExpandableHeaderTapScope.maybeOf(
-      context,
-    )?.onTap;
+    final VoidCallback? onTap = M3EExpandableHeaderTapScope.maybeOf(context)
+        ?.onTap;
     if (onTap == null) {
       return child;
     }

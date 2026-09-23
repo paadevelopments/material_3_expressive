@@ -463,9 +463,8 @@ Future<void> _m3esearchbarthemeOverridesContainerColor(
   const custom = Color(0xFFFF00FF);
   await tester.pumpWidget(
     M3EMaterialApp(
-      data: M3EThemeData.light(
-        seedColor: const Color(0xFF6750A4),
-      ).copyWith(searchBarTheme: M3ESearchBarTheme.defaults),
+      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4))
+          .copyWith(searchBarTheme: M3ESearchBarTheme.defaults),
       home: const Scaffold(
         body: Center(
           child: SizedBox(

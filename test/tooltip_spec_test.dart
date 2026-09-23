@@ -220,7 +220,7 @@ void main() {
     }
 
     int countTraversableIn(Finder host) {
-      final Set<FocusNode> traversable = <FocusNode>{};
+      final traversable = <FocusNode>{};
       final Rect hostRect = tester.getRect(host);
       void collect(FocusNode node) {
         final BuildContext? ctx = node.context;
@@ -233,9 +233,7 @@ void main() {
             }
           }
         }
-        for (final FocusNode child in node.children) {
-          collect(child);
-        }
+        node.children.forEach(collect);
       }
 
       collect(FocusScope.of(tester.element(host)));
@@ -252,7 +250,9 @@ void main() {
     expect(withTips, greaterThanOrEqualTo(2));
   });
 
-  testWidgets('transient rich dismisses after richDismissDelay', (tester) async {
+  testWidgets('transient rich dismisses after richDismissDelay', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _host(
         const M3ETooltip(

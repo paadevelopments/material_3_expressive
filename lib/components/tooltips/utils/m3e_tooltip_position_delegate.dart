@@ -43,13 +43,10 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final List<M3ETooltipPlacement> order = <M3ETooltipPlacement>[
-      preferred,
-      ..._fallbacks(preferred),
-    ];
+    final order = <M3ETooltipPlacement>[preferred, ..._fallbacks(preferred)];
     Offset? best;
     var bestScore = double.infinity;
-    for (final M3ETooltipPlacement placement in order) {
+    for (final placement in order) {
       final Offset pos = _clampStepped(_raw(placement, childSize), childSize);
       final double score = _overflowArea(pos, childSize);
       if (score < bestScore) {
@@ -89,7 +86,7 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 
   Offset _raw(M3ETooltipPlacement placement, Size childSize) {
-    final bool rtl = textDirection == TextDirection.rtl;
+    final rtl = textDirection == TextDirection.rtl;
     switch (placement) {
       case M3ETooltipPlacement.above:
         return Offset(
@@ -104,7 +101,7 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
       case M3ETooltipPlacement.bottomEnd:
       case M3ETooltipPlacement.bottomStart:
         // Trailing/leading relative to text direction.
-        final bool trailing = placement == M3ETooltipPlacement.bottomEnd;
+        final trailing = placement == M3ETooltipPlacement.bottomEnd;
         final bool alignToVisualEnd = trailing ^ rtl;
         final double left = alignToVisualEnd
             ? target.right - childSize.width
@@ -114,8 +111,8 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 
   Offset _clampStepped(Offset pos, Size childSize) {
-    final double maxX = math.max(0.0, overlaySize.width - childSize.width);
-    final double maxY = math.max(0.0, overlaySize.height - childSize.height);
+    final double maxX = math.max(0, overlaySize.width - childSize.width);
+    final double maxY = math.max(0, overlaySize.height - childSize.height);
     var dx = pos.dx;
     var dy = pos.dy;
 

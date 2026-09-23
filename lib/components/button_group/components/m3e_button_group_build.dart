@@ -295,9 +295,8 @@ extension _M3EButtonGroupBuild on _M3EButtonGroupState {
       'xl' => M3EButtonSize.xl,
       _ => M3EButtonSize.md,
     };
-    final segmentHeight = M3ETheme.of(
-      context,
-    ).buttonGroupTheme.containerHeightFor(s, density: widget.density);
+    final segmentHeight = M3ETheme.of(context).buttonGroupTheme
+        .containerHeightFor(s, density: widget.density);
     // Preserve token [name] so group spacing / radius tables still resolve.
     // Override height for density; zero hPadding for icon-only actions.
     return base.copyWith(

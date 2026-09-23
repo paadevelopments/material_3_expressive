@@ -315,12 +315,10 @@ class M3ERenderButtonGroup extends RenderBox
       final c = children[i];
       final mainSize = sizes[i];
       final childConstraints = isHorizontal
-          ? BoxConstraints.tightFor(
-              width: mainSize,
-            ).copyWith(minHeight: 0, maxHeight: constraints.maxHeight)
-          : BoxConstraints.tightFor(
-              height: mainSize,
-            ).copyWith(minWidth: 0, maxWidth: constraints.maxWidth);
+          ? BoxConstraints.tightFor(width: mainSize)
+                .copyWith(minHeight: 0, maxHeight: constraints.maxHeight)
+          : BoxConstraints.tightFor(height: mainSize)
+                .copyWith(minWidth: 0, maxWidth: constraints.maxWidth);
       c.layout(childConstraints, parentUsesSize: true);
       maxCross = math.max(
         maxCross,

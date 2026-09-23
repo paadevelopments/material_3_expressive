@@ -171,9 +171,10 @@ class _M3ETimePickerDialogState extends State<M3ETimePickerDialog>
     final double baseWidth = M3ETimePickerConstants.inputDialogSize.width;
     final double height = M3ETimePickerConstants.inputDialogSize.height;
     if (use24Hour) {
-      final double periodWidth = M3ETheme.of(
-        context,
-      ).timePickerTheme.periodPortraitSize.width;
+      final double periodWidth = M3ETheme.of(context)
+          .timePickerTheme
+          .periodPortraitSize
+          .width;
       return Size(
         baseWidth - periodWidth - M3ETimePickerConstants.inputDialogPeriodGap,
         height,

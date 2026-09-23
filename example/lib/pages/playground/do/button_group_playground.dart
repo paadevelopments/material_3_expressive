@@ -55,9 +55,9 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
   };
 
   double _iconWidthFor(BuildContext context, M3EIconButtonWidth widthToken) {
-    return M3ETheme.of(
-      context,
-    ).iconButtonTheme.visual(_iconSizeForGroup, widthToken).width;
+    return M3ETheme.of(context).iconButtonTheme
+        .visual(_iconSizeForGroup, widthToken)
+        .width;
   }
 
   /// Mixed resting widths: first=narrow, middle=control, last=wide.
@@ -88,9 +88,8 @@ class _ButtonGroupPlaygroundState extends State<ButtonGroupPlayground> {
   }
 
   double _containerHeight(BuildContext context) {
-    return M3ETheme.of(
-      context,
-    ).buttonGroupTheme.containerHeightFor(_size, density: _density);
+    return M3ETheme.of(context).buttonGroupTheme
+        .containerHeightFor(_size, density: _density);
   }
 
   List<M3EButtonGroupAction> _actions(BuildContext context) {

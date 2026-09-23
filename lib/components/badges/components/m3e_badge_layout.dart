@@ -65,12 +65,10 @@ class RenderM3EBadgeLayout extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, M3EBadgeLayoutParentData> {
   /// Creates a badge layout render object.
   RenderM3EBadgeLayout({
-    required M3EBadgeAlignment alignment,
-    required Offset offset,
-    required TextDirection textDirection,
-  }) : _alignment = alignment,
-       _offset = offset,
-       _textDirection = textDirection;
+    required this._alignment,
+    required this._offset,
+    required this._textDirection,
+  });
 
   M3EBadgeAlignment _alignment;
   Offset _offset;

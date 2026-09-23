@@ -119,9 +119,9 @@ mixin _ButtonGroupOverflowPresenterMixin on State<M3EButtonGroup> {
                       Padding(
                         padding: dec.titlePadding,
                         child: DefaultTextStyle.merge(
-                          style: M3ETheme.of(
-                            sheetContext,
-                          ).textTheme.titleMedium,
+                          style: M3ETheme.of(sheetContext)
+                              .textTheme
+                              .titleMedium,
                           child: dec.title!,
                         ),
                       ),

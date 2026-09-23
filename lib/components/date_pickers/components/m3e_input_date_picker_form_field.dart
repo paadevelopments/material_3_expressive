@@ -124,9 +124,8 @@ class _M3EInputDatePickerFormFieldState
 
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
-      final String text = MaterialLocalizations.of(
-        context,
-      ).formatCompactDate(_selectedDate!);
+      final String text = MaterialLocalizations.of(context)
+          .formatCompactDate(_selectedDate!);
       var value = TextEditingValue(text: text);
       if (widget.autofocus && !_autoSelected) {
         value = value.copyWith(

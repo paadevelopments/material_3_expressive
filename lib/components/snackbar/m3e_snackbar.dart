@@ -67,23 +67,21 @@ class M3ESnackbar extends StatelessWidget {
         (actionLabel != null && actionLabel.isNotEmpty) || showCloseButton;
     final Duration? resolvedDuration =
         duration ?? (actionable ? null : theme.snackBarTheme.defaultDuration);
-    final M3ESnackbarController resolved =
-        controller ?? M3ESnackbar.defaultController;
-
-    resolved.present(
+    final Widget snackbar = M3EComponentTheme(
+      builder: (BuildContext context) {
+        return M3ESnackbar(
+          message: message,
+          actionLabel: actionLabel,
+          onAction: onAction,
+          showCloseButton: showCloseButton,
+          onClose: onClose,
+        );
+      },
+    );
+    (controller ?? M3ESnackbar.defaultController).present(
       context,
       duration: resolvedDuration,
-      child: M3EComponentTheme(
-        builder: (BuildContext context) {
-          return M3ESnackbar(
-            message: message,
-            actionLabel: actionLabel,
-            onAction: onAction,
-            showCloseButton: showCloseButton,
-            onClose: onClose,
-          );
-        },
-      ),
+      child: snackbar,
     );
   }
 
@@ -185,28 +183,26 @@ class M3ESnackbar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Expanded(child: messageText),
-                      if (close != null) close,
+                      ?close,
                     ],
                   ),
                   SizedBox(height: snackTheme.actionGap),
                   Align(
                     alignment: AlignmentDirectional.centerEnd,
-                    child: action!,
+                    child: action,
                   ),
                 ],
               )
             : Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(child: messageText),
                   if (action != null) ...<Widget>[
                     SizedBox(width: snackTheme.actionGap),
                     action,
                   ],
-                  if (close != null) close,
+                  ?close,
                 ],
               );
 
@@ -259,7 +255,7 @@ class M3ESnackbar extends StatelessWidget {
     required double maxWidth,
     required TextDirection textDirection,
   }) {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: TextSpan(text: message, style: style),
       textDirection: textDirection,
       maxLines: 2,

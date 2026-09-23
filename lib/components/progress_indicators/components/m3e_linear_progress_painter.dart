@@ -139,7 +139,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       contentRight: contentRight,
       trackStroke: trackStroke,
     );
-    final double trackRight = contentRight;
+    final trackRight = contentRight;
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);
@@ -268,7 +268,7 @@ class M3ELinearProgressPainter extends CustomPainter {
       contentRight: contentRight,
       trackStroke: trackStroke,
     );
-    final double trackRight = contentRight;
+    final trackRight = contentRight;
     final double width = math.max(0, trackRight - left);
     final double cy = size.height / 2;
     final double p = (value ?? 0).clamp(0.0, 1.0);

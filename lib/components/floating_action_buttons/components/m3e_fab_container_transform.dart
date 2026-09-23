@@ -26,7 +26,7 @@ class M3EFabContainerTransformHandle<T extends Object?> {
 
 /// Opens a Material container-transform style route from a FAB origin rect.
 ///
-/// Pushes onto the same navigator as [context] so the back stack stays
+/// Pushes onto the same navigator as `context` so the back stack stays
 /// coherent. Destinations can also call [M3EFabContainerTransformScope.closeOf].
 class M3EFabContainerTransform {
   M3EFabContainerTransform._();

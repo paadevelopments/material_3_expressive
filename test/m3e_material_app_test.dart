@@ -141,9 +141,8 @@ Future<void> _m3ematerialappToggleViaControllerofUpdatesBrightness(
         builder: (BuildContext context) {
           return M3EButton(
             onPressed: () {
-              M3ETheme.controllerOf(
-                context,
-              )?.toggleBrightness(autoTheming: true);
+              M3ETheme.controllerOf(context)
+                  ?.toggleBrightness(autoTheming: true);
             },
             child: const Text('Toggle'),
           );
@@ -264,9 +263,8 @@ Future<void> _m3ematerialappUpdatesOverlayStyleAfterBrightnessToggle(
         builder: (BuildContext context) {
           return M3EButton(
             onPressed: () {
-              M3ETheme.controllerOf(
-                context,
-              )?.toggleBrightness(autoTheming: true);
+              M3ETheme.controllerOf(context)
+                  ?.toggleBrightness(autoTheming: true);
             },
             child: const Text('Toggle'),
           );

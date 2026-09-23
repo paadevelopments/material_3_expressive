@@ -638,9 +638,8 @@ extension _M3EButtonGroupMeasurement on _M3EButtonGroupState {
 
     final restingFloor =
         action.minWidth ?? (action.isIconOnly ? _iconOnlyNaturalSizeCache : 0);
-    final fallback = M3ETheme.of(
-      context,
-    ).buttonGroupTheme.fallbackChildWidth(widget.size);
+    final fallback = M3ETheme.of(context).buttonGroupTheme
+        .fallbackChildWidth(widget.size);
 
     if (index >= _measuredUnselectedWidths.length) {
       return math.max(restingFloor, fallback);

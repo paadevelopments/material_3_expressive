@@ -387,8 +387,7 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
           // animation has reached the expanded size. Earlier frames are
           // still too narrow for that row.
           final showLabels =
-              _isExpanded &&
-              constraints.maxWidth + 1 >= _targetWidth(context);
+              _isExpanded && constraints.maxWidth + 1 >= _targetWidth(context);
           final children = _buildChildren(ctx, showLabels: showLabels);
           final bottomTrailing =
               (widget.trailing != null && widget.trailingAtBottom)

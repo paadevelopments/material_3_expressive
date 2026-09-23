@@ -128,9 +128,7 @@ class _M3ETooltipState extends State<M3ETooltip>
       return;
     }
     _timer?.cancel();
-    for (final _M3ETooltipState other in List<_M3ETooltipState>.of(
-      _openTooltips,
-    )) {
+    for (final other in List<_M3ETooltipState>.of(_openTooltips)) {
       if (!identical(other, this)) {
         other._hide();
       }
@@ -249,11 +247,10 @@ class _M3ETooltipState extends State<M3ETooltip>
   Widget _buildOverlay(BuildContext context) {
     final theme = M3ETheme.of(context);
     final tooltipTheme = theme.tooltipTheme;
-    final RenderBox? targetBox =
+    final targetBox =
         _targetKey.currentContext?.findRenderObject() as RenderBox?;
     final OverlayState? overlay = Overlay.maybeOf(context);
-    final RenderBox? overlayBox =
-        overlay?.context.findRenderObject() as RenderBox?;
+    final overlayBox = overlay?.context.findRenderObject() as RenderBox?;
 
     final Widget bubble = MouseRegion(
       onEnter: (_) => _cancelHide(),

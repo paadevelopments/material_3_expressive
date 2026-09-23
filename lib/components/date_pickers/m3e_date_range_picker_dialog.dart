@@ -152,9 +152,8 @@ class _M3EDateRangePickerDialogState extends State<M3EDateRangePickerDialog>
     if (_startDate.value == null) {
       return;
     }
-    Navigator.of(
-      context,
-    ).pop(M3EDateRange(start: _startDate.value!, end: _endDate.value));
+    Navigator.of(context)
+        .pop(M3EDateRange(start: _startDate.value!, end: _endDate.value));
   }
 
   void _handleCancel() {

@@ -190,10 +190,7 @@ Future<void> _autothemingUpdatesIconButtonPaintedColorWhenPlatform(
           child: M3ETheme(
             data: base,
             autoTheming: true,
-            child: const M3EIconButton(
-              icon: Icon(Icons.add),
-              variant: M3EIconButtonVariant.filled,
-            ),
+            child: const M3EIconButton(icon: Icon(Icons.add)),
           ),
         ),
       ),
