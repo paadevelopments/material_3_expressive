@@ -7,6 +7,7 @@ import '../styles/m3e_menu_theme.dart';
 import '../utils/m3e_menu_overlay_rect.dart';
 import 'm3e_menu_content.dart';
 import 'm3e_menu_item.dart';
+import 'm3e_menu_key_registration.dart';
 import 'm3e_menu_style_scope.dart';
 
 /// Builds leaf [M3EMenuNode] widgets for [M3EMenuContent].
@@ -17,28 +18,32 @@ abstract final class M3EMenuNodeBuilders {
   static Widget entry(
     M3EMenuEntry entry, {
     required bool autofocus,
-    required bool closeOnSelect,
     required M3EMenuSelectCallback onSelect,
   }) {
-    return M3EMenuItem(
+    return M3EMenuKeyRegistration(
       label: entry.label,
-      leading: entry.leading,
-      trailing: entry.trailing,
-      trailingText: entry.trailingText,
-      badge: entry.badge,
-      supportingText: entry.supportingText,
       enabled: entry.enabled,
-      isDestructive: entry.isDestructive,
-      shape: entry.shape,
-      autofocus: autofocus,
-      onTap: entry.enabled
-          ? () {
-              entry.onPressed?.call();
-              if (closeOnSelect) {
-                onSelect(entry.value);
-              }
-            }
-          : null,
+      builder: (FocusNode node) {
+        return M3EMenuItem(
+          label: entry.label,
+          leading: entry.leading,
+          trailing: entry.trailing,
+          trailingText: entry.trailingText,
+          badge: entry.badge,
+          supportingText: entry.supportingText,
+          enabled: entry.enabled,
+          isDestructive: entry.isDestructive,
+          shape: entry.shape,
+          autofocus: autofocus,
+          focusNode: node,
+          onTap: entry.enabled
+              ? () {
+                  entry.onPressed?.call();
+                  onSelect(entry.value);
+                }
+              : null,
+        );
+      },
     );
   }
 
@@ -50,27 +55,34 @@ abstract final class M3EMenuNodeBuilders {
     required M3EMenuTheme menuTheme,
     required M3EMenuSelectCallback onSelect,
   }) {
-    return M3EMenuItem(
+    return M3EMenuKeyRegistration(
       label: item.label,
-      leading:
-          item.leading ??
-          (selected
-              ? Icon(M3EIcons.check_rounded, size: menuTheme.iconSize * 0.9)
-              : null),
-      trailing: item.trailing,
-      trailingText: item.trailingText,
-      badge: item.badge,
-      supportingText: item.supportingText,
       enabled: item.enabled,
-      selected: selected,
-      shape: item.shape,
-      autofocus: autofocus,
-      onTap: item.enabled
-          ? () {
-              item.onPressed?.call();
-              onSelect(item.value);
-            }
-          : null,
+      builder: (FocusNode node) {
+        return M3EMenuItem(
+          label: item.label,
+          leading:
+              item.leading ??
+              (selected
+                  ? Icon(M3EIcons.check_rounded, size: menuTheme.iconSize * 0.9)
+                  : null),
+          trailing: item.trailing,
+          trailingText: item.trailingText,
+          badge: item.badge,
+          supportingText: item.supportingText,
+          enabled: item.enabled,
+          selected: selected,
+          shape: item.shape,
+          autofocus: autofocus,
+          focusNode: node,
+          onTap: item.enabled
+              ? () {
+                  item.onPressed?.call();
+                  onSelect(item.value);
+                }
+              : null,
+        );
+      },
     );
   }
 
@@ -78,37 +90,41 @@ abstract final class M3EMenuNodeBuilders {
   static Widget toggleable(
     M3EMenuToggleable item, {
     required bool autofocus,
-    required bool closeOnSelect,
     required M3EMenuTheme menuTheme,
     required M3EMenuSelectCallback onSelect,
   }) {
-    return M3EMenuItem(
+    return M3EMenuKeyRegistration(
       label: item.label,
-      leading:
-          item.leading ??
-          Icon(
-            item.checked
-                ? M3EIcons.check_box_rounded
-                : M3EIcons.check_box_outline_blank_rounded,
-            size: menuTheme.iconSize,
-          ),
-      trailing: item.trailing,
-      trailingText: item.trailingText,
-      badge: item.badge,
-      supportingText: item.supportingText,
       enabled: item.enabled,
-      selected: item.checked,
-      shape: item.shape,
-      autofocus: autofocus,
-      onTap: item.enabled
-          ? () {
-              final next = !item.checked;
-              item.onChanged?.call(next);
-              if (closeOnSelect) {
-                onSelect(next);
-              }
-            }
-          : null,
+      builder: (FocusNode node) {
+        return M3EMenuItem(
+          label: item.label,
+          leading:
+              item.leading ??
+              Icon(
+                item.checked
+                    ? M3EIcons.check_box_rounded
+                    : M3EIcons.check_box_outline_blank_rounded,
+                size: menuTheme.iconSize,
+              ),
+          trailing: item.trailing,
+          trailingText: item.trailingText,
+          badge: item.badge,
+          supportingText: item.supportingText,
+          enabled: item.enabled,
+          selected: item.checked,
+          shape: item.shape,
+          autofocus: autofocus,
+          focusNode: node,
+          onTap: item.enabled
+              ? () {
+                  final next = !item.checked;
+                  item.onChanged?.call(next);
+                  onSelect(next);
+                }
+              : null,
+        );
+      },
     );
   }
 
@@ -121,26 +137,34 @@ abstract final class M3EMenuNodeBuilders {
   }) {
     return Builder(
       builder: (BuildContext itemContext) {
-        return M3EMenuItem(
+        void open() {
+          final Rect? rect = m3eOverlayRectFor(itemContext);
+          if (rect == null || onOpenSubmenu == null) {
+            return;
+          }
+          onOpenSubmenu(rect, item.children);
+        }
+
+        return M3EMenuKeyRegistration(
           label: item.label,
-          leading: item.leading,
-          badge: item.badge,
-          trailing: Icon(
-            M3EIcons.arrow_right_rounded,
-            size: menuTheme.iconSize,
-          ),
           enabled: item.enabled,
-          shape: item.shape,
-          autofocus: autofocus,
-          onTap: item.enabled && onOpenSubmenu != null
-              ? () {
-                  final Rect? rect = m3eOverlayRectFor(itemContext);
-                  if (rect == null) {
-                    return;
-                  }
-                  onOpenSubmenu(rect, item.children);
-                }
-              : null,
+          onOpenSubmenu: item.enabled ? open : null,
+          builder: (FocusNode node) {
+            return M3EMenuItem(
+              label: item.label,
+              leading: item.leading,
+              badge: item.badge,
+              trailing: Icon(
+                M3EIcons.arrow_right_rounded,
+                size: menuTheme.iconSize,
+              ),
+              enabled: item.enabled,
+              shape: item.shape,
+              autofocus: autofocus,
+              focusNode: node,
+              onTap: item.enabled && onOpenSubmenu != null ? open : null,
+            );
+          },
         );
       },
     );
@@ -151,7 +175,6 @@ abstract final class M3EMenuNodeBuilders {
     BuildContext context,
     M3EMenuWidget item, {
     required bool autofocus,
-    required bool closeOnSelect,
     required M3EMenuTheme menuTheme,
     required M3EMenuSelectCallback onSelect,
   }) {
@@ -159,42 +182,54 @@ abstract final class M3EMenuNodeBuilders {
     final style = M3EMenuStyleScope.styleOf(context);
     final palette =
         M3EMenuStyleScope.colorsOf(context) ?? menuTheme.colors(scheme, style);
-    final radius = menuTheme.itemShape(item.shape);
-    final background = item.selected
-        ? palette.selectedContainer
-        : const Color(0x00000000);
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: menuTheme.itemGap / 2),
-      child: M3ETappable(
-        enabled: item.enabled,
-        autofocus: autofocus,
-        semanticLabel: item.semanticLabel,
-        onTap: item.enabled
-            ? () {
-                item.onPressed?.call();
-                if (closeOnSelect || item.value != null) {
-                  onSelect(item.value);
-                }
-              }
-            : null,
-        builder: (BuildContext context, M3EInteractionState state) {
-          return M3EFocusRing(
-            focused: state.focused,
-            radius: radius,
-            child: _customWidgetBody(
-              context,
-              item,
-              menuTheme: menuTheme,
-              scheme: scheme,
-              style: style,
-              palette: palette,
-              radius: radius,
-              background: background,
-              state: state,
-            ),
-          );
-        },
-      ),
+    final radius = menuTheme.itemBorderRadius;
+    return M3EMenuKeyRegistration(
+      label: item.semanticLabel ?? 'menu item',
+      enabled: item.enabled,
+      builder: (FocusNode node) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: menuTheme.stateLayerInset),
+          child: M3ETappable(
+            enabled: item.enabled,
+            autofocus: autofocus,
+            focusNode: node,
+            semanticLabel: item.semanticLabel,
+            materialInk: true,
+            onTap: item.enabled
+                ? () {
+                    item.onPressed?.call();
+                    onSelect(item.value);
+                  }
+                : null,
+            builder: (BuildContext context, M3EInteractionState state) {
+              return M3EFocusRing(
+                focused: state.focused,
+                radius: radius,
+                width: menuTheme.focusIndicatorWidth,
+                gap: menuTheme.focusIndicatorOffset,
+                color: menuTheme.focusRingColor(scheme),
+                child: M3EStateLayerOverlay(
+                  state: state,
+                  color: item.selected
+                      ? palette.selectedContent
+                      : palette.stateLayer,
+                  shape: RoundedRectangleBorder(borderRadius: radius),
+                  child: _customWidgetBody(
+                    context,
+                    item,
+                    menuTheme: menuTheme,
+                    scheme: scheme,
+                    style: style,
+                    palette: palette,
+                    radius: radius,
+                    state: state,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -206,22 +241,30 @@ abstract final class M3EMenuNodeBuilders {
     required M3EMenuColorStyle style,
     required M3EMenuColors palette,
     required BorderRadius radius,
-    required Color background,
     required M3EInteractionState state,
   }) {
+    Color background = item.selected
+        ? palette.selectedContainer
+        : const Color(0x00000000);
+    if (item.selected && !item.enabled) {
+      background = background.withValues(alpha: menuTheme.disabledOpacity);
+    }
+    if (state.focused) {
+      final Color layer = item.selected
+          ? palette.selectedContent
+          : palette.stateLayer;
+      background = Color.alphaBlend(
+        layer.withValues(alpha: M3EStateOpacity.focus),
+        background,
+      );
+    }
     return Container(
       constraints: BoxConstraints(minHeight: menuTheme.entryHeight),
       padding: EdgeInsets.symmetric(
         horizontal: menuTheme.entryHorizontalPadding,
-        vertical: 10,
+        vertical: menuTheme.entryVerticalPadding,
       ),
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          palette.stateLayer.withValues(alpha: state.opacity),
-          background,
-        ),
-        borderRadius: radius,
-      ),
+      decoration: BoxDecoration(color: background, borderRadius: radius),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -231,6 +274,9 @@ abstract final class M3EMenuNodeBuilders {
                   scheme,
                   enabled: item.enabled,
                   selected: item.selected,
+                  hovered: state.hovered,
+                  focused: state.focused,
+                  pressed: state.pressed,
                   style: style,
                 ),
                 size: menuTheme.iconSize,
@@ -257,6 +303,9 @@ abstract final class M3EMenuNodeBuilders {
                   scheme,
                   enabled: item.enabled,
                   selected: true,
+                  hovered: state.hovered,
+                  focused: state.focused,
+                  pressed: state.pressed,
                   style: style,
                 ),
               ),

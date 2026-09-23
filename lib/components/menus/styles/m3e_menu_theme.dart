@@ -7,6 +7,7 @@ import 'package:material_3_expressive/material_3_expressive.dart'
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_menu_color_style.dart';
 import '../enums/m3e_menu_item_shape.dart';
+import '../enums/m3e_menu_variant.dart';
 
 /// Resolved colors for one [M3EMenuColorStyle].
 @immutable
@@ -74,7 +75,11 @@ class M3EMenuColors {
   );
 }
 
-/// Theme values for `M3EMenu` (Compose `MenuDefaults` expressive tokens).
+/// Theme values for `M3EMenu`.
+///
+/// Field defaults match the expressive vertical menu. [baselineMetrics] is the
+/// baseline form. [metricsFor] returns this theme for [M3EMenuVariant.vertical]
+/// and [baselineMetrics] for [M3EMenuVariant.baseline].
 @immutable
 class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// M3EMenuTheme.
@@ -82,32 +87,68 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     this.minWidth = 112,
     this.maxWidth = 280,
     this.maxHeight = 320,
-    this.verticalPadding = 8,
-    this.contentHorizontalPadding = 8,
+    this.verticalPadding = 4,
+    this.contentHorizontalPadding = 0,
     this.anchorOffset = 4,
     this.entryHeight = 48,
-    this.entryHorizontalPadding = 12,
-    this.iconSize = 24,
-    this.iconGap = 12,
-    this.groupSpacing = 8,
-    this.sectionGap = 8,
-    this.groupLabelHorizontalPadding = 12,
-    this.groupLabelVerticalPadding = 8,
+    this.entryHorizontalPadding = 8,
+    this.entryVerticalPadding = 0,
+    this.iconSize = 20,
+    this.iconGap = 8,
+    this.groupSpacing = 2,
+    this.sectionGap = 2,
+    this.groupLabelHorizontalPadding = 8,
+    this.groupLabelVerticalPadding = 0,
+    this.groupLabelHeight = 32,
     this.elevation = M3EElevation.level2,
     this.disabledOpacity = 0.38,
     this.scrimAlpha = 0.0,
     this.screenEdgePadding = 12,
     this.containerRadius = 16,
+    this.containerBottomRadius = 12,
     this.itemRadius = 12,
+    this.stateLayerInset = 4,
+    this.focusIndicatorWidth = 3,
+    this.focusIndicatorOffset = -3,
+    this.focusIndicatorColor,
     this.backgroundColor,
     this.openMotion = M3EMotion.expressiveSpatialDefault,
     this.closeMotion = M3EMotion.expressiveSpatialDefault,
+    this.openInstantly = false,
     this.itemGap = 4,
+    this.dividerThickness = 1,
+    this.dividerVerticalPadding = 0,
   });
 
   /// defaults.
 
   static const M3EMenuTheme defaults = M3EMenuTheme();
+
+  /// Baseline menu metrics (4dp corners, 48dp rows, 24dp icons).
+  static const M3EMenuTheme baselineMetrics = M3EMenuTheme(
+    entryHorizontalPadding: 12,
+    iconSize: 24,
+    iconGap: 12,
+    verticalPadding: 8,
+    itemGap: 0,
+    groupSpacing: 0,
+    sectionGap: 0,
+    groupLabelHorizontalPadding: 12,
+    itemRadius: 4,
+    containerRadius: 4,
+    containerBottomRadius: 4,
+    stateLayerInset: 0,
+    dividerVerticalPadding: 8,
+  );
+
+  /// Metrics for [variant]. Vertical uses this theme. Baseline uses
+  /// [baselineMetrics].
+  M3EMenuTheme metricsFor(M3EMenuVariant variant) {
+    return switch (variant) {
+      M3EMenuVariant.vertical => this,
+      M3EMenuVariant.baseline => baselineMetrics,
+    };
+  }
 
   /// minWidth.
 
@@ -119,7 +160,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// maxHeight.
   final double maxHeight;
 
-  /// verticalPadding.
+  /// Padding above and below the items inside each elevated surface.
   final double verticalPadding;
 
   /// Inset of the item column from the left/right of each elevated surface.
@@ -129,16 +170,22 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
 
   final double anchorOffset;
 
-  /// entryHeight.
+  /// Minimum row height.
   final double entryHeight;
 
-  /// entryHorizontalPadding.
+  /// Space from the item highlight edge to the icon or label.
+  ///
+  /// Combined with [stateLayerInset], this is the 12 from the container edge
+  /// to the icon on the vertical measurements diagram.
   final double entryHorizontalPadding;
+
+  /// Extra space inside [entryHeight]. The diagram row height already includes it.
+  final double entryVerticalPadding;
 
   /// iconSize.
   final double iconSize;
 
-  /// iconGap.
+  /// Space between an icon and the label, or between label and shortcut.
   final double iconGap;
 
   /// Legacy alias for spacing near groups; prefer [sectionGap] between surfaces.
@@ -151,8 +198,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
 
   final double groupLabelHorizontalPadding;
 
-  /// groupLabelVerticalPadding.
+  /// Extra vertical padding around a section label, inside [groupLabelHeight].
   final double groupLabelVerticalPadding;
+
+  /// Section label row height.
+  final double groupLabelHeight;
 
   /// elevation.
   final double elevation;
@@ -166,11 +216,26 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// screenEdgePadding.
   final double screenEdgePadding;
 
-  /// Corner radius of each elevated menu surface.
+  /// Top corner radius of each elevated menu surface.
   final double containerRadius;
 
-  /// Corner radius of the item highlight / background.
+  /// Bottom corner radius of each elevated menu surface.
+  final double containerBottomRadius;
+
+  /// Corner radius of the item highlight. Vertical menus use 12.
   final double itemRadius;
+
+  /// Horizontal inset from the surface edge to the item highlight.
+  final double stateLayerInset;
+
+  /// Focus ring stroke thickness.
+  final double focusIndicatorWidth;
+
+  /// Focus ring outline offset. Negative pulls the ring inward.
+  final double focusIndicatorOffset;
+
+  /// Focus ring color. Null resolves to [M3EColorScheme.secondary].
+  final Color? focusIndicatorColor;
 
   /// When non-null, overrides the scheme-derived menu surface color.
   final Color? backgroundColor;
@@ -181,12 +246,28 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   /// Spring for collapse — same default as [M3EDropdownMenu.closeMotion].
   final M3ESpring closeMotion;
 
-  /// Vertical space between items inside a surface.
+  /// When true, the menu opens and closes without the spatial spring.
+  final bool openInstantly;
+
+  /// Space between items inside one surface. Distinct from [sectionGap].
   final double itemGap;
+
+  /// Divider stroke thickness.
+  final double dividerThickness;
+
+  /// Space above and below a divider stroke.
+  final double dividerVerticalPadding;
 
   /// The borderRadius.
 
-  BorderRadius get borderRadius => BorderRadius.circular(containerRadius);
+  BorderRadius get borderRadius => BorderRadius.vertical(
+    top: Radius.circular(containerRadius),
+    bottom: Radius.circular(containerBottomRadius),
+  );
+
+  /// Outline of the elevated surface.
+  ShapeBorder get containerShape =>
+      RoundedRectangleBorder(borderRadius: borderRadius);
 
   /// The itemBorderRadius.
 
@@ -287,6 +368,10 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
   Color scrimColor(M3EColorScheme scheme) =>
       M3EColorUtils.withOpacity(scheme.scrim, scrimAlpha);
 
+  /// Focus ring color for [scheme].
+  Color focusRingColor(M3EColorScheme scheme) =>
+      focusIndicatorColor ?? scheme.secondary;
+
   /// entryForegroundColor.
 
   Color entryForegroundColor(
@@ -297,31 +382,50 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) {
     final palette = colors(scheme, style);
-    if (!enabled) {
-      return M3EColorUtils.withOpacity(palette.content, disabledOpacity);
-    }
+    final Color base;
     if (isDestructive) {
-      return scheme.error;
+      base = scheme.error;
+    } else if (selected) {
+      base = palette.selectedContent;
+    } else {
+      base = palette.content;
     }
-    return selected ? palette.selectedContent : palette.content;
+    if (!enabled) {
+      return M3EColorUtils.withOpacity(base, disabledOpacity);
+    }
+    return base;
   }
 
-  /// Leading / trailing icon color (callouts 1, 6, 11).
+  /// Leading / trailing icon color.
+  ///
+  /// Vibrant hover, focus, and press use [M3EColorScheme.tertiary]. Standard
+  /// icons stay on [M3EMenuColors.iconContent].
   Color entryIconForegroundColor(
     M3EColorScheme scheme, {
     required bool enabled,
     bool isDestructive = false,
     bool selected = false,
+    bool hovered = false,
+    bool focused = false,
+    bool pressed = false,
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
   }) {
     final palette = colors(scheme, style);
-    if (!enabled) {
-      return M3EColorUtils.withOpacity(palette.iconContent, disabledOpacity);
-    }
+    final Color base;
     if (isDestructive) {
-      return scheme.error;
+      base = scheme.error;
+    } else if (selected) {
+      base = palette.selectedContent;
+    } else if (style == M3EMenuColorStyle.vibrant &&
+        (hovered || focused || pressed)) {
+      base = scheme.tertiary;
+    } else {
+      base = palette.iconContent;
     }
-    return selected ? palette.selectedContent : palette.iconContent;
+    if (!enabled) {
+      return M3EColorUtils.withOpacity(base, disabledOpacity);
+    }
+    return base;
   }
 
   /// entryLabelStyle.
@@ -356,10 +460,8 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     final Color base = selected
         ? palette.selectedContent
         : palette.supportingContent;
-    return type.labelMedium.copyWith(
-      color: enabled
-          ? base
-          : M3EColorUtils.withOpacity(palette.content, disabledOpacity),
+    return type.bodySmall.copyWith(
+      color: enabled ? base : M3EColorUtils.withOpacity(base, disabledOpacity),
     );
   }
 
@@ -371,13 +473,15 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     required bool enabled,
     bool selected = false,
     M3EMenuColorStyle style = M3EMenuColorStyle.standard,
-  }) => supportingTextStyle(
-    type,
-    scheme,
-    enabled: enabled,
-    selected: selected,
-    style: style,
-  );
+  }) {
+    final palette = colors(scheme, style);
+    final Color base = selected
+        ? palette.selectedContent
+        : palette.supportingContent;
+    return type.labelLarge.copyWith(
+      color: enabled ? base : M3EColorUtils.withOpacity(base, disabledOpacity),
+    );
+  }
 
   /// groupLabelStyle.
 
@@ -398,22 +502,32 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
     double? anchorOffset,
     double? entryHeight,
     double? entryHorizontalPadding,
+    double? entryVerticalPadding,
     double? iconSize,
     double? iconGap,
     double? groupSpacing,
     double? sectionGap,
     double? groupLabelHorizontalPadding,
     double? groupLabelVerticalPadding,
+    double? groupLabelHeight,
     double? elevation,
     double? disabledOpacity,
     double? scrimAlpha,
     double? screenEdgePadding,
     double? containerRadius,
+    double? containerBottomRadius,
     double? itemRadius,
+    double? stateLayerInset,
+    double? focusIndicatorWidth,
+    double? focusIndicatorOffset,
+    Color? focusIndicatorColor,
     Color? backgroundColor,
     M3ESpring? openMotion,
     M3ESpring? closeMotion,
+    bool? openInstantly,
     double? itemGap,
+    double? dividerThickness,
+    double? dividerVerticalPadding,
   }) {
     return M3EMenuTheme(
       minWidth: minWidth ?? this.minWidth,
@@ -426,6 +540,7 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
       entryHeight: entryHeight ?? this.entryHeight,
       entryHorizontalPadding:
           entryHorizontalPadding ?? this.entryHorizontalPadding,
+      entryVerticalPadding: entryVerticalPadding ?? this.entryVerticalPadding,
       iconSize: iconSize ?? this.iconSize,
       iconGap: iconGap ?? this.iconGap,
       groupSpacing: groupSpacing ?? this.groupSpacing,
@@ -434,16 +549,27 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
           groupLabelHorizontalPadding ?? this.groupLabelHorizontalPadding,
       groupLabelVerticalPadding:
           groupLabelVerticalPadding ?? this.groupLabelVerticalPadding,
+      groupLabelHeight: groupLabelHeight ?? this.groupLabelHeight,
       elevation: elevation ?? this.elevation,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
       scrimAlpha: scrimAlpha ?? this.scrimAlpha,
       screenEdgePadding: screenEdgePadding ?? this.screenEdgePadding,
       containerRadius: containerRadius ?? this.containerRadius,
+      containerBottomRadius:
+          containerBottomRadius ?? this.containerBottomRadius,
       itemRadius: itemRadius ?? this.itemRadius,
+      stateLayerInset: stateLayerInset ?? this.stateLayerInset,
+      focusIndicatorWidth: focusIndicatorWidth ?? this.focusIndicatorWidth,
+      focusIndicatorOffset: focusIndicatorOffset ?? this.focusIndicatorOffset,
+      focusIndicatorColor: focusIndicatorColor ?? this.focusIndicatorColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       openMotion: openMotion ?? this.openMotion,
       closeMotion: closeMotion ?? this.closeMotion,
+      openInstantly: openInstantly ?? this.openInstantly,
       itemGap: itemGap ?? this.itemGap,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
+      dividerVerticalPadding:
+          dividerVerticalPadding ?? this.dividerVerticalPadding,
     );
   }
 
@@ -469,6 +595,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
         other.entryHorizontalPadding,
         t,
       )!,
+      entryVerticalPadding: _lerpDouble(
+        entryVerticalPadding,
+        other.entryVerticalPadding,
+        t,
+      )!,
       iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
       iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
       groupSpacing: _lerpDouble(groupSpacing, other.groupSpacing, t)!,
@@ -483,6 +614,11 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
         other.groupLabelVerticalPadding,
         t,
       )!,
+      groupLabelHeight: _lerpDouble(
+        groupLabelHeight,
+        other.groupLabelHeight,
+        t,
+      )!,
       elevation: _lerpDouble(elevation, other.elevation, t)!,
       disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
       scrimAlpha: _lerpDouble(scrimAlpha, other.scrimAlpha, t)!,
@@ -492,11 +628,43 @@ class M3EMenuTheme extends M3EThemeExtension<M3EMenuTheme> {
         t,
       )!,
       containerRadius: _lerpDouble(containerRadius, other.containerRadius, t)!,
+      containerBottomRadius: _lerpDouble(
+        containerBottomRadius,
+        other.containerBottomRadius,
+        t,
+      )!,
       itemRadius: _lerpDouble(itemRadius, other.itemRadius, t)!,
+      stateLayerInset: _lerpDouble(stateLayerInset, other.stateLayerInset, t)!,
+      focusIndicatorWidth: _lerpDouble(
+        focusIndicatorWidth,
+        other.focusIndicatorWidth,
+        t,
+      )!,
+      focusIndicatorOffset: _lerpDouble(
+        focusIndicatorOffset,
+        other.focusIndicatorOffset,
+        t,
+      )!,
+      focusIndicatorColor: Color.lerp(
+        focusIndicatorColor,
+        other.focusIndicatorColor,
+        t,
+      ),
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t),
       openMotion: t < 0.5 ? openMotion : other.openMotion,
       closeMotion: t < 0.5 ? closeMotion : other.closeMotion,
+      openInstantly: t < 0.5 ? openInstantly : other.openInstantly,
       itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
+      dividerThickness: _lerpDouble(
+        dividerThickness,
+        other.dividerThickness,
+        t,
+      )!,
+      dividerVerticalPadding: _lerpDouble(
+        dividerVerticalPadding,
+        other.dividerVerticalPadding,
+        t,
+      )!,
     );
   }
 
