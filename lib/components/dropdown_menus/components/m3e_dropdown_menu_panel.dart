@@ -22,7 +22,7 @@ extension _M3EDropdownMenuPanel<T> on _M3EDropdownMenuState<T> {
       children: [
         Positioned.fill(
           child: Listener(
-            behavior: HitTestBehavior.translucent,
+            behavior: HitTestBehavior.opaque,
             onPointerDown: _handleOutsideTap,
           ),
         ),
@@ -75,14 +75,16 @@ extension _M3EDropdownMenuPanel<T> on _M3EDropdownMenuState<T> {
   }
 
   void _handleOutsideTap(PointerDownEvent event) {
-    if (!_controller.isOpen) {
-      return;
-    }
-
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox != null && renderBox.attached) {
       final localPosition = renderBox.globalToLocal(event.position);
       if (renderBox.paintBounds.contains(localPosition)) {
+        // The barrier is opaque, so the field does not receive this tap.
+        if (_controller.isOpen) {
+          _close();
+        } else if (_portalController.isShowing) {
+          _open();
+        }
         return;
       }
     }

@@ -308,6 +308,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   final LayerLink _layerLink = LayerLink();
   final OverlayPortalController _portalController = OverlayPortalController();
+  M3EOverlayHistory? _overlayHistory;
   final GlobalKey<FormFieldState<List<M3EDropdownItem<T>>?>> _formFieldKey =
       GlobalKey();
   final GlobalKey<M3EMoreChipsIndicatorState> _moreKey = GlobalKey();
@@ -359,6 +360,7 @@ class _M3EDropdownMenuState<T> extends State<M3EDropdownMenu<T>>
 
   @override
   void dispose() {
+    _releaseOverlayHistory();
     _expandCtrl
       ..removeListener(_onExpandAnimationTick)
       ..dispose();

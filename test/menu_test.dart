@@ -37,6 +37,14 @@ void main() {
     'disabled menu entry is not tappable',
     _disabledMenuEntryIsNotTappable,
   );
+  testWidgets(
+    'system back closes the menu before the route',
+    _systemBackClosesMenuBeforeRoute,
+  );
+  testWidgets(
+    'system back closes a submenu before its parent menu',
+    _systemBackClosesSubmenuBeforeParent,
+  );
 }
 
 Future<void> _m3emenuOpensAndDismissesOnScrimTap(WidgetTester tester) async {
@@ -157,4 +165,101 @@ Future<void> _disabledMenuEntryIsNotTappable(WidgetTester tester) async {
 
   expect(pressed, isFalse);
   expect(find.text('Nope'), findsOneWidget);
+}
+
+Future<void> _openPushedPage(WidgetTester tester, Widget page) async {
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: M3EThemeData.light(),
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => page,
+                  ),
+                );
+              },
+              child: const Text('Root'),
+            ),
+          );
+        },
+      ),
+    ),
+  );
+  await tester.tap(find.text('Root'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _systemBackClosesMenuBeforeRoute(WidgetTester tester) async {
+  await _openPushedPage(
+    tester,
+    Scaffold(
+      body: M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: const <M3EMenuNode>[M3EMenuEntry(label: 'One')],
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
+  expect(find.text('One'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await _settleSpring(tester);
+
+  expect(find.text('One'), findsNothing);
+  expect(find.text('Open'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+
+  expect(find.text('Open'), findsNothing);
+  expect(find.text('Root'), findsOneWidget);
+}
+
+Future<void> _systemBackClosesSubmenuBeforeParent(WidgetTester tester) async {
+  await _openPushedPage(
+    tester,
+    Scaffold(
+      body: M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: const <M3EMenuNode>[
+          M3EMenuSubmenu(
+            label: 'More',
+            children: <M3EMenuNode>[M3EMenuEntry(label: 'Nested')],
+          ),
+        ],
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
+  await tester.tap(find.text('More'));
+  await _settleSpring(tester);
+  expect(find.text('Nested'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await _settleSpring(tester);
+
+  expect(find.text('Nested'), findsNothing);
+  expect(find.text('More'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await _settleSpring(tester);
+
+  expect(find.text('More'), findsNothing);
+  expect(find.text('Open'), findsOneWidget);
+
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+  expect(find.text('Root'), findsOneWidget);
 }

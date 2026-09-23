@@ -96,4 +96,76 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('More options'), findsOneWidget);
   });
+
+  testWidgets('system back closes the popup menu before the route', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return M3ETheme(
+              data: M3EThemeData.light(),
+              child: Scaffold(
+                body: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return M3ETheme(
+                            data: M3EThemeData.light(),
+                            child: Scaffold(
+                              body: Align(
+                                alignment: Alignment.topCenter,
+                                child: SizedBox(
+                                  height: 48,
+                                  child: M3ESplitButton<String>(
+                                    label: 'Save',
+                                    onPressed: () {},
+                                    onSelected: (_) {},
+                                    items: const <M3ESplitButtonItem<String>>[
+                                      M3ESplitButtonItem(
+                                        value: 'a',
+                                        child: Text('Archive'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Root'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Root'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(M3EIcons.keyboard_arrow_down));
+    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    expect(find.byType(M3EMenuPopup<String>), findsOneWidget);
+    expect(find.text('Archive'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+    expect(find.byType(M3EMenuPopup<String>), findsNothing);
+    expect(find.text('Save'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Save'), findsNothing);
+    expect(find.text('Root'), findsOneWidget);
+  });
 }

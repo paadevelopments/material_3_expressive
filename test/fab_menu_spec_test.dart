@@ -316,4 +316,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('One'), findsNothing);
   });
+
+  testWidgets('system back closes the menu before the route', (tester) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          body: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: M3EFabMenu(
+                              items: const <M3EFabMenuItem>[
+                                M3EFabMenuItem(
+                                  icon: Icon(Icons.image),
+                                  label: 'Image',
+                                ),
+                                M3EFabMenuItem(
+                                  icon: Icon(Icons.mic),
+                                  label: 'Audio',
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Root'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Root'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(M3EFab));
+    await tester.pumpAndSettle();
+    expect(find.text('Image'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Image'), findsNothing);
+    expect(find.byType(M3EFabMenu), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(M3EFabMenu), findsNothing);
+    expect(find.text('Root'), findsOneWidget);
+  });
 }

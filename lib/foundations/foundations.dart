@@ -12,6 +12,7 @@ export 'interaction/m3e_focus_ring_theme.dart';
 export 'interaction/m3e_haptics.dart';
 export 'interaction/m3e_ink_splash_theme.dart';
 export 'interaction/m3e_motion.dart';
+export 'interaction/m3e_overlay_history.dart';
 export 'interaction/m3e_state_layer.dart';
 export 'interaction/m3e_state_layer_overlay.dart';
 export 'interaction/m3e_tappable.dart';

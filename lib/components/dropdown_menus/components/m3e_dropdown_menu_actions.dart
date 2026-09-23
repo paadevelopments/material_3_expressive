@@ -20,6 +20,7 @@ extension _M3EDropdownMenuActions<T> on _M3EDropdownMenuState<T> {
     _expandCtrl.animateTo(1);
     _arrowCtrl.animateTo(math.pi);
     _portalController.show();
+    _holdOverlayHistory();
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_controller.isOpen) {
@@ -55,7 +56,18 @@ extension _M3EDropdownMenuActions<T> on _M3EDropdownMenuState<T> {
     }
   }
 
+  void _holdOverlayHistory() {
+    _overlayHistory ??= M3EOverlayHistory.register(context, onBack: _close);
+  }
+
+  void _releaseOverlayHistory() {
+    final M3EOverlayHistory? history = _overlayHistory;
+    _overlayHistory = null;
+    history?.release();
+  }
+
   void _close() {
+    _releaseOverlayHistory();
     if (!_controller.isOpen && !_portalController.isShowing) {
       return;
     }

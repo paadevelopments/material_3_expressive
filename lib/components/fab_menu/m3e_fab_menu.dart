@@ -101,6 +101,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   );
 
   bool _open = false;
+  M3EOverlayHistory? _overlayHistory;
   M3EFabContainerTransformHandle<dynamic>? _transformHandle;
 
   SpringMotion _springMotion(M3ESpring spring) =>
@@ -182,8 +183,19 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     }
   }
 
+  void _holdOverlayHistory() {
+    _overlayHistory ??= M3EOverlayHistory.register(context, onBack: _close);
+  }
+
+  void _releaseOverlayHistory() {
+    final M3EOverlayHistory? history = _overlayHistory;
+    _overlayHistory = null;
+    history?.release();
+  }
+
   @override
   void dispose() {
+    _releaseOverlayHistory();
     widget.controller?.detachClient(this);
     M3EFocusInteraction.instance.removeListener(_onFocusInteractionChanged);
     _cancelStagger();
@@ -274,6 +286,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     if (!_open) {
       return;
     }
+    _releaseOverlayHistory();
     _cancelStagger();
     // Instant hide — no reverse width morph (entry springs only).
     for (final SingleMotionController c in _itemCtrls) {
@@ -301,6 +314,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     _itemVisible = List<bool>.filled(_itemCtrls.length, false);
     _focusedItemIndex.value = null;
     setState(() => _open = true);
+    _holdOverlayHistory();
     widget.controller?.updateOpen(open: true);
     _fabShapeCtrl
       ..motion = _fabShapeMotion

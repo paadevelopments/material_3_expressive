@@ -34,6 +34,7 @@ Future<T?> showM3EMenu<T>({
   M3EMenuTheme? themeOverride,
 }) {
   final completer = Completer<T?>();
+  final ModalRoute<dynamic>? historyRoute = ModalRoute.of(context);
   late OverlayEntry entry;
   entry = OverlayEntry(
     builder: (BuildContext overlayContext) {
@@ -47,6 +48,7 @@ Future<T?> showM3EMenu<T>({
         preferredWidth: preferredWidth,
         callerFocusNode: callerFocusNode,
         themeOverride: themeOverride,
+        historyRoute: historyRoute,
         onSelected: (Object? value) => _completeOnce(completer, value as T?),
         onDismiss: () => _completeOnce(completer, null),
         onRemove: () => entry.remove(),
@@ -79,6 +81,7 @@ class M3EMenuPopup<T> extends StatefulWidget {
     this.preferredWidth,
     this.callerFocusNode,
     this.themeOverride,
+    this.historyRoute,
     super.key,
   });
 
@@ -110,6 +113,11 @@ class M3EMenuPopup<T> extends StatefulWidget {
   /// themeOverride.
   final M3EMenuTheme? themeOverride;
 
+  /// Route that owns this popup's local-history entry.
+  ///
+  /// Submenus reuse the same route so back closes from the inside out.
+  final ModalRoute<dynamic>? historyRoute;
+
   /// onSelected.
   final ValueChanged<Object?> onSelected;
 
@@ -132,6 +140,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
   late final bool _keyboardActivated;
 
   OverlayEntry? _submenuEntry;
+  M3EOverlayHistory? _overlayHistory;
 
   final FocusScopeNode _focusScopeNode = FocusScopeNode(
     debugLabel: 'M3EMenuPopup',
@@ -144,6 +153,10 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
   void initState() {
     super.initState();
     _keyboardActivated = widget.callerFocusNode?.hasFocus ?? false;
+    _overlayHistory = M3EOverlayHistory.registerRoute(
+      widget.historyRoute,
+      onBack: () => _dismiss(),
+    );
 
     // Same controller setup as [M3EDropdownMenu].
     _expandCtrl =
@@ -169,8 +182,15 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     });
   }
 
+  void _releaseOverlayHistory() {
+    final M3EOverlayHistory? history = _overlayHistory;
+    _overlayHistory = null;
+    history?.release();
+  }
+
   @override
   void dispose() {
+    _releaseOverlayHistory();
     _expandCtrl
       ..removeListener(_onExpandTick)
       ..dispose();
@@ -195,6 +215,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     if (_isDismissing) {
       return;
     }
+    _releaseOverlayHistory();
     _removeSubmenu();
     if (!_selected) {
       widget.onDismiss();
@@ -227,6 +248,7 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
           closeOnSelect: widget.closeOnSelect,
           callerFocusNode: widget.callerFocusNode,
           themeOverride: widget.themeOverride,
+          historyRoute: widget.historyRoute,
           onSelected: (Object? value) {
             _selected = true;
             widget.onSelected(value);
