@@ -1,5 +1,6 @@
 import 'dart:ui' show CheckedState;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -173,7 +174,7 @@ void main() {
       ),
     );
 
-    final checked = tester.getSemantics(find.byType(M3ECheckbox));
+    final checked = tester.getSemantics(find.byType(M3ETappable));
     expect(checked.flagsCollection.isChecked, CheckedState.isTrue);
     expect(checked.label, contains('Pickles'));
     expect(checked.flagsCollection.isButton, isFalse);
@@ -181,7 +182,60 @@ void main() {
     await tester.pumpWidget(
       _host(M3ECheckbox(value: null, tristate: true, onChanged: (_) {})),
     );
-    final mixed = tester.getSemantics(find.byType(M3ECheckbox));
+    final mixed = tester.getSemantics(find.byType(M3ETappable));
     expect(mixed.flagsCollection.isChecked, CheckedState.mixed);
   });
+
+  testWidgets('pointer tap clears the focus ring', (tester) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+        home: const Scaffold(
+          body: Column(
+            children: <Widget>[
+              M3ECheckbox(value: false, onChanged: _noop),
+              Expanded(child: SizedBox.expand()),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    M3EFocusInteraction.resetForTest();
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(() {
+      M3EFocusInteraction.resetForTest();
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.automatic;
+    });
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(_ringVisible(tester), isTrue);
+
+    await tester.tap(find.byType(M3ECheckbox));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(_ringVisible(tester), isFalse);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(_ringVisible(tester), isTrue);
+
+    await tester.tapAt(const Offset(24, 520));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(_ringVisible(tester), isFalse);
+  });
+}
+
+void _noop(bool? _) {}
+
+bool _ringVisible(WidgetTester tester) {
+  return tester
+      .widgetList<M3EFocusRing>(find.byType(M3EFocusRing))
+      .any((M3EFocusRing ring) => ring.focused);
 }

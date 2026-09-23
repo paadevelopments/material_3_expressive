@@ -103,18 +103,32 @@ class _M3ECheckboxState extends State<M3ECheckbox>
   static const double _pulseScale = 0.88;
 
   late final AnimationController _scaleController;
+  FocusNode? _ownedNode;
 
   bool get _enabled => widget.onChanged != null;
+
+  FocusNode get _focusNode => widget.focusNode ?? _ownedNode!;
 
   @override
   void initState() {
     super.initState();
+    if (widget.focusNode == null) {
+      _ownedNode = FocusNode();
+    }
     _scaleController = AnimationController.unbounded(vsync: this, value: 1);
   }
 
   @override
   void didUpdateWidget(M3ECheckbox oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      if (widget.focusNode == null) {
+        _ownedNode ??= FocusNode();
+      } else {
+        _ownedNode?.dispose();
+        _ownedNode = null;
+      }
+    }
     if (oldWidget.value != widget.value) {
       _pulse();
     }
@@ -123,7 +137,24 @@ class _M3ECheckboxState extends State<M3ECheckbox>
   @override
   void dispose() {
     _scaleController.dispose();
+    _ownedNode?.dispose();
     super.dispose();
+  }
+
+  void _clearFocusFromPointer() {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    if (_focusNode.hasFocus) {
+      _focusNode.unfocus();
+    }
+  }
+
+  void _scheduleClearFocusFromPointer() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _clearFocusFromPointer();
+    });
   }
 
   void _pulse() {
@@ -163,63 +194,70 @@ class _M3ECheckboxState extends State<M3ECheckbox>
     final bool checked = widget.value ?? false;
     final bool active = widget.value == null || checked;
 
-    return M3EComponentTheme(
-      builder: (BuildContext context) => M3ETappable(
-        onTap: _enabled ? _handleTap : null,
-        enabled: _enabled,
-        focusable: widget.focusable,
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        semanticLabel: widget.semanticLabel,
-        semanticButton: false,
-        semanticChecked: widget.value,
-        semanticMixed: widget.value == null,
-        builder: (BuildContext context, M3EInteractionState state) {
-          final Widget control = SizedBox(
-            width: slot,
-            height: slot,
-            child: Center(
-              child: M3EFocusRing(
-                focused: state.focused,
-                radius: BorderRadius.circular(hitSize / 2),
-                color: checkboxTheme.resolveFocusIndicatorColor(scheme),
-                width: checkboxTheme.focusIndicatorThickness,
-                gap: checkboxTheme.focusIndicatorOffset,
-                child: _buildControl(
-                  checkboxTheme,
-                  scheme,
-                  state,
-                  active: active,
-                  hitSize: hitSize,
-                  boxSize: boxSize,
-                  sizeScale: sizeScale,
+    return TapRegion(
+      onTapOutside: (_) => _clearFocusFromPointer(),
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerUp: (_) => _scheduleClearFocusFromPointer(),
+        child: M3EComponentTheme(
+          builder: (BuildContext context) => M3ETappable(
+            onTap: _enabled ? _handleTap : null,
+            enabled: _enabled,
+            focusable: widget.focusable,
+            focusNode: _focusNode,
+            autofocus: widget.autofocus,
+            semanticLabel: widget.semanticLabel,
+            semanticButton: false,
+            semanticChecked: widget.value,
+            semanticMixed: widget.value == null,
+            builder: (BuildContext context, M3EInteractionState state) {
+              final Widget control = SizedBox(
+                width: slot,
+                height: slot,
+                child: Center(
+                  child: M3EFocusRing(
+                    focused: state.focused,
+                    radius: BorderRadius.circular(hitSize / 2),
+                    color: checkboxTheme.resolveFocusIndicatorColor(scheme),
+                    width: checkboxTheme.focusIndicatorThickness,
+                    gap: checkboxTheme.focusIndicatorOffset,
+                    child: _buildControl(
+                      checkboxTheme,
+                      scheme,
+                      state,
+                      active: active,
+                      hitSize: hitSize,
+                      boxSize: boxSize,
+                      sizeScale: sizeScale,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
+              );
 
-          if (widget.label == null) {
-            return control;
-          }
+              if (widget.label == null) {
+                return control;
+              }
 
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              control,
-              SizedBox(width: checkboxTheme.labelGap),
-              DefaultTextStyle.merge(
-                style: theme.typeScale.bodyLarge.copyWith(
-                  color: _enabled
-                      ? scheme.onSurface
-                      : scheme.onSurface.withValues(
-                          alpha: checkboxTheme.disabledOpacity,
-                        ),
-                ),
-                child: widget.label!,
-              ),
-            ],
-          );
-        },
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  control,
+                  SizedBox(width: checkboxTheme.labelGap),
+                  DefaultTextStyle.merge(
+                    style: theme.typeScale.bodyLarge.copyWith(
+                      color: _enabled
+                          ? scheme.onSurface
+                          : scheme.onSurface.withValues(
+                              alpha: checkboxTheme.disabledOpacity,
+                            ),
+                    ),
+                    child: widget.label!,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
