@@ -1934,9 +1934,10 @@ flutter analyze
 flutter test
 ```
 
-Optional custom lint rules (if `klin_dart` is enabled in your environment):
+Custom lint rules live in `tools/klin_dart` (path dependency, omitted from the published archive):
 
 ```bash
+export PATH="$PWD/.fvm/flutter_sdk/bin:$PATH"
 dart run custom_lint
 ```
 

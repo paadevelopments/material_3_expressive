@@ -20,3 +20,6 @@ agent-transcripts/
 assets/
 docs/
 specs/
+
+# Vendored custom-lint plugin. Tracked in git, omitted from the published archive.
+tools/
