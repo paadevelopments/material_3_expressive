@@ -10,6 +10,45 @@ Widget _host(Widget child) {
 }
 
 void main() {
+  testWidgets('single-line snackbar with action stays at min height', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        M3ESnackbar(
+          message: 'Draft saved',
+          actionLabel: 'Undo',
+          onAction: () {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(M3ESnackbar)).height, 48);
+  });
+
+  testWidgets('close icon is 12dp from the action and the trailing edge', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        M3ESnackbar(
+          message: 'Draft saved',
+          actionLabel: 'Undo',
+          onAction: () {},
+          showCloseButton: true,
+        ),
+      ),
+    );
+
+    final Rect action = tester.getRect(find.byType(M3EButton));
+    final Rect icon = tester.getRect(find.byIcon(M3EIcons.close));
+    final Rect bar = tester.getRect(find.byType(M3ESnackbar));
+
+    expect(icon.left - action.right, 12);
+    expect(bar.right - icon.right, 12);
+    expect(bar.height, 48);
+  });
+
   test('theme defaults match the snackbar spec', () {
     const theme = M3ESnackbarTheme.defaults;
     expect(theme.singleLineMinHeight, 48);

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show MaterialTapTargetSize;
 
 import '../../foundations/foundations.dart';
 import '../buttons/m3e_buttons.dart';
@@ -98,12 +99,16 @@ class M3ESnackbar extends StatelessWidget {
     final TextDirection direction = Directionality.of(context);
     final bool hasAction =
         actionLabel != null && actionLabel!.trim().isNotEmpty;
-    final bool hasTrailing = hasAction || showCloseButton;
+    // Close icon carries 12dp on both sides, including the trailing inset.
+    // Action-only bars use the 8dp end padding instead.
+    final double endPadding = showCloseButton
+        ? 0
+        : (hasAction
+              ? snackTheme.endPaddingWithTrailing
+              : snackTheme.endPadding);
     final EdgeInsets padding = EdgeInsetsDirectional.only(
       start: snackTheme.startPadding,
-      end: hasTrailing
-          ? snackTheme.endPaddingWithTrailing
-          : snackTheme.endPadding,
+      end: endPadding,
       top: snackTheme.verticalPadding,
       bottom: snackTheme.verticalPadding,
     ).resolve(direction);
@@ -113,16 +118,20 @@ class M3ESnackbar extends StatelessWidget {
         final double maxBarWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth.clamp(0, snackTheme.maxWidth)
             : snackTheme.maxWidth;
-        final double trailingControlSize = theme.buttonTheme
-            .measurements(M3EButtonSize.sm)
-            .height;
+        // Fits inside the 48dp single-line bar (container minus vertical pad).
+        final double inlineControlHeight =
+            (snackTheme.singleLineMinHeight - snackTheme.verticalPadding * 2)
+                .clamp(0, snackTheme.singleLineMinHeight);
+        // 12dp on each side of the 24dp icon. Spec: padding around close icon.
+        final double closeWidth =
+            snackTheme.closePadding * 2 + snackTheme.closeIconSize;
         final double textMaxWidth = _textMaxWidth(
           snackTheme: snackTheme,
           maxBarWidth: maxBarWidth,
           padding: padding,
           hasAction: hasAction,
           actionBelow: false,
-          closeVisualSize: showCloseButton ? trailingControlSize : 0,
+          closeVisualSize: showCloseButton ? closeWidth : 0,
         );
         final TextStyle messageStyle = snackTheme.messageStyle(
           theme.typeScale,
@@ -152,10 +161,22 @@ class M3ESnackbar extends StatelessWidget {
         );
 
         final Widget? action = hasAction
-            ? _buildAction(context, theme, snackTheme, scheme)
+            ? _buildAction(
+                context,
+                theme,
+                snackTheme,
+                scheme,
+                height: actionBelow ? null : inlineControlHeight,
+              )
             : null;
         final Widget? close = showCloseButton
-            ? _buildClose(context, theme, snackTheme, scheme)
+            ? _buildClose(
+                context,
+                snackTheme,
+                scheme,
+                height: inlineControlHeight,
+                width: closeWidth,
+              )
             : null;
 
         final Widget body = actionBelow
@@ -250,14 +271,19 @@ class M3ESnackbar extends StatelessWidget {
     BuildContext context,
     M3EThemeData theme,
     M3ESnackbarTheme snackTheme,
-    M3EColorScheme scheme,
-  ) {
+    M3EColorScheme scheme, {
+    double? height,
+  }) {
     return M3EButton.text(
+      size: M3EButtonSize.xs,
       semanticLabel: actionLabel,
       decoration: M3EButtonDecoration(
         foregroundColor: WidgetStateProperty.all(scheme.inversePrimary),
         textStyle: snackTheme.actionStyle(theme.typeScale, scheme),
         padding: snackTheme.actionPadding,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: height == null ? null : Size(0, height),
+        maximumSize: height == null ? null : Size(double.infinity, height),
       ),
       onPressed: () {
         onAction?.call();
@@ -269,17 +295,14 @@ class M3ESnackbar extends StatelessWidget {
 
   Widget _buildClose(
     BuildContext context,
-    M3EThemeData theme,
     M3ESnackbarTheme snackTheme,
-    M3EColorScheme scheme,
-  ) {
-    // Match text-button (sm) height so the close control does not grow the bar.
-    final double visual = theme.buttonTheme
-        .measurements(M3EButtonSize.sm)
-        .height;
+    M3EColorScheme scheme, {
+    required double height,
+    required double width,
+  }) {
     return M3EIconButton(
       variant: M3EIconButtonVariant.standard,
-      visualSize: Size(visual, visual),
+      visualSize: Size(width, height),
       inflateHitTarget: false,
       semanticLabel: 'Dismiss',
       decoration: M3EIconButtonDecoration(
