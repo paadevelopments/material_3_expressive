@@ -2,6 +2,13 @@
 
 ### Changed
 
+* **Chips:** height **32**, radius **8**, text padding **16**; assist label
+  **on surface** and leading icon **primary**; stroke **outline variant**;
+  filter and input selected container **secondary container**; focus ring
+  **secondary**, **3dp**, **2dp** offset; InkSparkle; remove target **48**
+  (own Tab stop when the chip also acts) and minimum width **88**; elevated
+  level **1**, dragged level **4**. **`M3EChipGroup`**: arrows move focus;
+  Backspace or Delete removes a focused input chip.
 * **Switches:** track **52×32**; handle **16** off / **24** on or with an icon /
   **28** pressed; state layer **40**; target **48**; selected icon **primary**;
   hover, focus, and press handle **primary container** / **on surface variant**;

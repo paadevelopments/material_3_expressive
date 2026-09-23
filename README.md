@@ -749,7 +749,14 @@ M3ESwitch(
 
 #### M3EChip
 
-Assist, filter, input, and suggestion chip types.
+Assist, filter, input, and suggestion chips. Height **32**, corner radius **8**.
+Text padding is **16**. A leading icon uses **8** before the icon and **16**
+after the label. Input chips use **12** before the label, or **4** with a
+**24** avatar. The remove icon is **18** with a **48** target, and it is its
+own Tab stop when the chip also has a primary action (minimum width **88**).
+Focus ring is **secondary**, **3dp** thick, **2dp** offset. Elevated chips use
+level **1**; dragging uses level **4**. **`M3EChipGroup`** moves focus with
+the arrow keys. Backspace or Delete removes a focused input chip.
 
 ```dart
 M3EChip(
@@ -764,6 +771,21 @@ M3EChip(
   type: M3EChipType.filter,
   selected: chips.contains('flutter'),
   onPressed: () => toggleChip('flutter'),
+);
+
+M3EChipGroup(
+  child: Wrap(
+    spacing: 8,
+    children: [
+      M3EChip(
+        label: 'Dart',
+        type: M3EChipType.input,
+        avatar: const Icon(M3EIcons.person),
+        onPressed: () {},
+        onDeleted: () {},
+      ),
+    ],
+  ),
 );
 ```
 
