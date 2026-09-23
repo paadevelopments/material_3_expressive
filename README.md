@@ -1215,10 +1215,15 @@ CustomScrollView(
 
 #### M3EDivider
 
-Horizontal and vertical dividers.
+Decorative 1dp line in **outline variant**. Full-width by default. Inset
+indents the leading edge **16**. Middle inset indents both edges **16**.
+`outerMargin` adds the **8** end and bottom margins. Place supporting text
+`textGap` (**4**) away from the line; the divider does not insert that gap.
 
 ```dart
 const M3EDivider();
+
+const M3EDivider(inset: M3EDividerInset.inset);
 
 Row(
   children: [

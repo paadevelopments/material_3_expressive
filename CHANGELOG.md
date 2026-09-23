@@ -2,6 +2,11 @@
 
 ### Changed
 
+* **Dividers:** thickness **1**, color **outline variant**; full-width, inset
+  (**16** / **0**), and middle inset (**16** / **16**). End margin **8**,
+  bottom margin **8**, and supporting-text gap **4** are theme tokens and stay
+  off unless `outerMargin` is set (the text gap is applied by the caller).
+  Decorative, so the line is excluded from semantics.
 * **Chips:** height **32**, radius **8**, text padding **16**; assist label
   **on surface** and leading icon **primary**; stroke **outline variant**;
   filter and input selected container **secondary container**; focus ring
