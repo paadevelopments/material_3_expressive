@@ -28,7 +28,7 @@ export 'styles/m3e_selection_theme.dart';
 ///     controller: controller,
 ///     itemCount: items.length,
 ///     appBar: M3ESelectionAppBar(...),
-///     body: M3ECardList.builder(...),
+///     body: M3EList.scrollable(...),
 ///   ),
 /// )
 /// ```

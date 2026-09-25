@@ -417,7 +417,7 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
               M3EToolbarTokens.containerSize +
               MediaQuery.paddingOf(context).bottom
         : 16;
-    return M3ECardList.builder(
+    return M3EList.scrollable(
       color: M3ETheme.of(context).colorScheme.surfaceContainerHighest,
       itemCount: 16,
       listPadding: EdgeInsets.fromLTRB(16, 16, 16, bottom),

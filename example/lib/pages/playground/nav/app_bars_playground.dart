@@ -272,7 +272,7 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
   }
 
   Widget _page() {
-    return M3ECardList.builder(
+    return M3EList.scrollable(
       color: M3ETheme.of(context).colorScheme.surfaceContainerHighest,
       itemCount: 16,
       listPadding: const EdgeInsets.all(16),
@@ -353,7 +353,7 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverToBoxAdapter(
-                child: M3ECardList(
+                child: M3EList(
                   color: theme.colorScheme.surfaceContainerHighest,
                   itemCount: 24,
                   itemBuilder: (BuildContext context, int index) {

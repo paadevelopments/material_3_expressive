@@ -76,7 +76,7 @@ class ThemeConfigPage extends StatelessWidget {
       ),
     ];
 
-    return M3ECardList(
+    return M3EList(
       itemCount: rows.length,
       itemBuilder: (BuildContext context, int index) => rows[index],
     );

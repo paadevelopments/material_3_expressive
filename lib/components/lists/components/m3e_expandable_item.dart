@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../cards/enums/m3e_card_variant.dart';
 import '../../tooltips/m3e_tooltips.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../enums/m3e_list_selection_enums.dart';
@@ -22,8 +23,10 @@ import 'm3e_expandable_sublist.dart';
 import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_feature_scope.dart';
 import 'm3e_list_focus_ring.dart';
+import 'm3e_list_item_scope.dart';
 import 'm3e_list_reorder_exclude.dart';
 import 'm3e_list_row_surface.dart';
+import 'm3e_list_trailing_override.dart';
 
 part 'm3e_expandable_item_body.dart';
 
@@ -71,6 +74,7 @@ class M3EExpandableItem extends StatefulWidget {
     this.onTransform,
     this.onTransformAnchor,
     this.expanded,
+    this.nestVariant,
   });
 
   /// index.
@@ -110,6 +114,9 @@ class M3EExpandableItem extends StatefulWidget {
   /// Reports the resting row context used to measure the morph origin.
   final ValueChanged<BuildContext>? onTransformAnchor;
 
+  /// Variant a nested sublist inherits when it does not set its own.
+  final M3ECardVariant? nestVariant;
+
   @override
   State<M3EExpandableItem> createState() => _M3EExpandableItemState();
 }
@@ -119,6 +126,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   late final SingleMotionController _expandCtrl;
 
   bool _isPressed = false;
+  bool _hovered = false;
 
   /// Node of the item's single toggle target (whole card or header row).
   final FocusNode _toggleFocusNode = FocusNode();
@@ -176,6 +184,13 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   void _handleTapUp() => setState(() => _isPressed = false);
   void _handleTapCancel() => setState(() => _isPressed = false);
 
+  void _setHovered(bool value) {
+    if (_hovered == value) {
+      return;
+    }
+    setState(() => _hovered = value);
+  }
+
   void _handleCardStateChanged(M3EInteractionState state) {
     if (_isPressed == state.pressed) {
       return;
@@ -226,7 +241,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       return m3eExpandableParentRadius(
         globalPosition: calculateCardPosition(widget.index, widget.totalCount),
         outerRadius: d.outerRadius,
-        innerRadius: _isPressed ? d.pressedRadius : d.innerRadius,
+        innerRadius: d.innerRadius,
         isExpanded: widget.isExpanded,
         hasSublist: true,
       );
@@ -244,7 +259,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       return BorderRadius.circular(d.outerRadius);
     }
 
-    final effectiveInnerRadius = _isPressed ? d.pressedRadius : d.innerRadius;
+    final effectiveInnerRadius = d.innerRadius;
 
     if (isFirst) {
       return BorderRadius.vertical(

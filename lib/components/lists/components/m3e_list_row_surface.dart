@@ -24,6 +24,9 @@ class M3EListRowSurface extends StatefulWidget {
     this.onLongPress,
     this.enabled = true,
     this.selected = false,
+    this.hovered = false,
+    this.pressed = false,
+    this.focused = false,
     this.dragged = false,
     this.color,
     this.border,
@@ -60,6 +63,15 @@ class M3EListRowSurface extends StatefulWidget {
 
   /// Whether the row is selected.
   final bool selected;
+
+  /// Hover reported by a parent when this surface's card does not track it.
+  final bool hovered;
+
+  /// Press reported by a parent when this surface's card does not track it.
+  final bool pressed;
+
+  /// Focus reported by a parent when this surface's card does not track it.
+  final bool focused;
 
   /// Whether this row is the drag proxy.
   final bool dragged;
@@ -313,21 +325,23 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
     final M3EThemeData theme = M3ETheme.of(context);
     final M3EListItemTheme itemTheme = theme.listTheme.item;
     final M3EColorScheme scheme = theme.colorScheme;
-    final bool hovered = _interaction.hovered && !widget.suppressHover;
-    final bool pressed = _interaction.pressed;
+    final bool hovered =
+        (widget.hovered || _interaction.hovered) && !widget.suppressHover;
+    final bool pressed = widget.pressed || _interaction.pressed;
+    final bool radiusFocused = widget.focused || _interaction.focused;
     final bool dragged = widget.dragged || _interaction.dragged;
     final BorderRadius radius = itemTheme.radiusFor(
       resting: widget.radius,
       selected: widget.selected,
       hovered: hovered,
-      focused: _interaction.focused,
+      focused: radiusFocused,
       pressed: pressed,
       dragged: dragged,
     );
     final bool paintContainer = itemTheme.restingContainer(
       selected: widget.selected,
       hovered: hovered,
-      focused: _interaction.focused,
+      focused: radiusFocused,
       pressed: pressed,
       dragged: dragged,
     );

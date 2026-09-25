@@ -451,6 +451,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
   }) {
     final s = style;
 
+    final bool childOwnsSurface = swipeItemPaintsSurface(slotPos);
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : s.gap),
       child: Transform.translate(
@@ -460,6 +461,18 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
         ),
         child: Builder(
           builder: (BuildContext context) {
+            final Widget surface = Builder(
+              builder: (BuildContext context) => _buildForegroundCardSurface(
+                context,
+                slot: slot,
+                slotPos: slotPos,
+                layoutRadius: layoutRadius,
+                style: s,
+              ),
+            );
+            if (childOwnsSurface) {
+              return surface;
+            }
             return GestureDetector(
               onHorizontalDragStart: (_) =>
                   _onForegroundDragStart(context, slot),
@@ -467,15 +480,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
                   _onForegroundDragUpdate(context, slot, details),
               onHorizontalDragEnd: (DragEndDetails details) =>
                   _onForegroundDragEnd(context, details),
-              child: Builder(
-                builder: (BuildContext context) => _buildForegroundCardSurface(
-                  context,
-                  slot: slot,
-                  slotPos: slotPos,
-                  layoutRadius: layoutRadius,
-                  style: s,
-                ),
-              ),
+              child: surface,
             );
           },
         ),
@@ -559,6 +564,41 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
         layoutRadius;
     final selected = m3eSelectionFill(context, slotPos) != null;
     final inDragProxy = M3EListDragProxyScope.maybeOf(context) != null;
+    if (swipeItemPaintsSurface(slotPos)) {
+      return KeyedSubtree(
+        key: inDragProxy ? null : _measureKey(slot),
+        child: Listener(
+          onPointerDown: (_) => _dismissDxAcc = 0,
+          onPointerMove: (PointerMoveEvent event) {
+            if (_dragSlotRef == null) {
+              _dismissDxAcc += event.delta.dx;
+              if (_dismissDxAcc.abs() < kTouchSlop ||
+                  event.delta.dx.abs() < event.delta.dy.abs()) {
+                return;
+              }
+              _onForegroundDragStart(context, slot);
+            }
+            _onForegroundDragUpdate(
+              context,
+              slot,
+              DragUpdateDetails(
+                globalPosition: event.position,
+                localPosition: event.localPosition,
+                delta: event.delta,
+                primaryDelta: event.delta.dx,
+              ),
+            );
+          },
+          onPointerUp: (PointerUpEvent event) => _onForegroundDragEnd(
+            context,
+            DragEndDetails(primaryVelocity: event.delta.dx),
+          ),
+          onPointerCancel: (_) =>
+              _onForegroundDragEnd(context, DragEndDetails()),
+          child: _swipeOverflow(slotPos, swipeItemBuilder(context, slotPos)),
+        ),
+      );
+    }
 
     return M3ECardRadiusMotion(
       snap: _dragSlotRef != null || selected,

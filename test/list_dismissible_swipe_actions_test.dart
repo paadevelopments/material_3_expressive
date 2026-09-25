@@ -18,23 +18,27 @@ void registerDismissiblePreviewSnapTests() {
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
         home: Scaffold(
-          body: M3EDismissibleColumn(
+          body: M3EList(
             itemCount: 2,
-            onDismiss: (int index, DismissDirection direction) async => false,
-            trailingActionsBuilder: (int index) => <M3EListSwipeAction>[
-              M3EListSwipeAction(
-                icon: const Icon(M3EIcons.archive),
-                width: 56,
-                onPressed: () => archiveTaps++,
-              ),
-              const M3EListSwipeAction(
-                icon: Icon(M3EIcons.delete),
-                width: 56,
-                isPrimary: true,
-              ),
-            ],
             itemBuilder: (BuildContext context, int index) {
-              return M3EListItem(headline: 'Item $index');
+              return M3EListItem(
+                headline: 'Item $index',
+                swipe: M3EListItemSwipe(
+                  onDismiss: (DismissDirection direction) async => false,
+                  trailing: <M3EListSwipeAction>[
+                    M3EListSwipeAction(
+                      icon: const Icon(M3EIcons.archive),
+                      width: 56,
+                      onPressed: () => archiveTaps++,
+                    ),
+                    const M3EListSwipeAction(
+                      icon: Icon(M3EIcons.delete),
+                      width: 56,
+                      isPrimary: true,
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ),
@@ -98,16 +102,20 @@ void _applyListReorder(
 }
 
 Widget _reorderBlockedColumn(List<String> items, StateSetter setState) {
-  return M3EDismissibleColumn(
+  return M3EList(
     reorder: true,
     onReorder: (int oldIndex, int newIndex) {
       _applyListReorder(items, setState, oldIndex, newIndex);
     },
     itemCount: items.length,
-    onDismiss: (int index, DismissDirection direction) async => false,
-    trailingActionsBuilder: _previewSwipeActions,
     itemBuilder: (BuildContext context, int index) {
-      return M3EListItem(headline: items[index]);
+      return M3EListItem(
+        headline: items[index],
+        swipe: M3EListItemSwipe(
+          onDismiss: (DismissDirection direction) async => false,
+          trailing: _previewSwipeActions(index),
+        ),
+      );
     },
   );
 }
@@ -169,17 +177,21 @@ void registerDismissibleFullDismissTests() {
         home: Scaffold(
           body: SizedBox(
             width: 400,
-            child: M3EDismissibleColumn(
+            child: M3EList(
               itemCount: 1,
-              onDismiss: (int index, DismissDirection direction) async {
-                dismissed = true;
-                return true;
-              },
-              style: const M3EDismissibleListStyle(
+              dismissStyle: const M3EDismissibleListStyle(
                 background: ColoredBox(color: Color(0xFF00FF00)),
               ),
               itemBuilder: (BuildContext context, int index) {
-                return const M3EListItem(headline: 'Only');
+                return M3EListItem(
+                  headline: 'Only',
+                  swipe: M3EListItemSwipe(
+                    onDismiss: (DismissDirection direction) async {
+                      dismissed = true;
+                      return true;
+                    },
+                  ),
+                );
               },
             ),
           ),

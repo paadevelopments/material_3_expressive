@@ -75,7 +75,7 @@ M3EListItem(
 );''',
       _ListKind.cardList =>
         '''
-M3ECardList(
+M3EList(
   variant: M3ECardVariant.${_variant.name},$features
   itemCount: 3,
   itemBuilder: (BuildContext context, int index) {
@@ -87,31 +87,34 @@ M3ECardList(
 );''',
       _ListKind.dismissible =>
         '''
-M3EDismissibleColumn(
+M3EList(
   itemCount: 3,$selectionFeature${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
-  swipeMode: M3EListSwipeMode.${_swipeMode.name},
-  dismissEdge: M3EListSwipeEdge.${_dismissEdge.name},
-  onDismiss: (int index, DismissDirection direction) async => true,
   itemBuilder: (BuildContext context, int index) {
     return M3EListItem(
       headline: $headline,${_showLeading ? '\n      leading: const Icon(M3EIcons.schedule),' : ''}${_containerTransform ? '\n      transform: const Text(\'Full screen destination\'),' : ''}
+      swipe: M3EListItemSwipe(
+        mode: M3EListSwipeMode.${_swipeMode.name},
+        edge: M3EListSwipeEdge.${_dismissEdge.name},
+        onDismiss: (DismissDirection direction) async => true,
+      ),
     );
   },
 );''',
       _ListKind.expandable =>
         '''
-M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
-  data: <M3EExpandableData>[
-    M3EExpandableData(
-      title: $headline,
-      subtitle: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.battery_alert),' : ''}
+M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
+  itemCount: 1,
+  itemBuilder: (BuildContext context, int index) {
+    return M3EListItem(
+      headline: $headline,
+      supportingText: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.battery_alert),' : ''}
       expanded: ${_containerTransform
             ? '''M3EExpandableExpanded.transform(
         const Text('Full screen destination'),
       ),'''
             : _useSublist
             ? '''M3EExpandableExpanded.list(
-        M3ECardList(
+        M3EList(
           embedded: true,
           itemCount: 2,${_nestedSelection ? '\n          selection: true,' : ''}
           itemBuilder: (BuildContext context, int index) {
@@ -122,8 +125,8 @@ M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  r
             : '''M3EExpandableExpanded.content(
         const Text('Expanded body'),
       ),'''}
-    ),
-  ],
+    );
+  },
 );''',
     };
     return <PlaySnippet>[
@@ -680,7 +683,7 @@ class _CardListPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    return M3ECardList(
+    return M3EList(
       variant: variant,
       semanticsLabel: 'Sample list',
       selection: selection,
@@ -775,36 +778,14 @@ class _DismissiblePreviewState extends State<_DismissiblePreview> {
   }
 
   Widget _column(M3EThemeData theme) {
-    return M3EDismissibleColumn(
-      controller: _controller,
-      swipeMode: widget.swipeMode,
-      dismissEdge: widget.dismissEdge,
+    return M3EList(
+      dismissController: _controller,
       selection: widget.selection,
       reorder: widget.reorder,
       selectionState: widget.selectionState,
       onReorder: widget.reorder ? widget.onReorder : null,
       itemCount: widget.order.length,
-      onDismiss: (int index, DismissDirection direction) async => true,
-      leadingActionsBuilder: (int index) => <M3EListSwipeAction>[
-        M3EListSwipeAction(
-          icon: const Icon(M3EIcons.push_pin),
-          onPressed: () {},
-        ),
-      ],
-      trailingActionsBuilder: (int index) => <M3EListSwipeAction>[
-        M3EListSwipeAction(
-          icon: const Icon(M3EIcons.archive),
-          onPressed: () {},
-        ),
-        M3EListSwipeAction(
-          icon: const Icon(M3EIcons.delete),
-          isPrimary: true,
-          backgroundColor: theme.colorScheme.danger,
-          foregroundColor: theme.colorScheme.onError,
-          onPressed: () {},
-        ),
-      ],
-      style: M3EDismissibleListStyle(
+      dismissStyle: M3EDismissibleListStyle(
         background: ColoredBox(
           color: theme.colorScheme.success,
           child: const Center(
@@ -822,6 +803,30 @@ class _DismissiblePreviewState extends State<_DismissiblePreview> {
                   title: '${widget.headline} ${widget.order[index]}',
                 )
               : null,
+          swipe: M3EListItemSwipe(
+            mode: widget.swipeMode,
+            edge: widget.dismissEdge,
+            onDismiss: (DismissDirection direction) async => true,
+            leading: <M3EListSwipeAction>[
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.push_pin),
+                onPressed: () {},
+              ),
+            ],
+            trailing: <M3EListSwipeAction>[
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.archive),
+                onPressed: () {},
+              ),
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.delete),
+                isPrimary: true,
+                backgroundColor: theme.colorScheme.danger,
+                foregroundColor: theme.colorScheme.onError,
+                onPressed: () {},
+              ),
+            ],
+          ),
         );
       },
     );
@@ -881,7 +886,7 @@ class _ExpandablePreview extends StatelessWidget {
             )
           : useSublist && isPrimary
           ? M3EExpandableExpanded.list(
-              M3ECardList(
+              M3EList(
                 embedded: true,
                 selection: nestedSelection,
                 selectionState: selectionState,
@@ -924,17 +929,28 @@ class _ExpandablePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget list = M3EExpandableList(
-      transformController: transformController,
+    final List<M3EExpandableData> sections = <M3EExpandableData>[
+      for (final String id in order) _section(context, id),
+    ];
+    final Widget list = M3EList(
+      expandController: transformController,
       initiallyExpanded: initiallyExpanded,
       onExpansionChanged: onExpansionChanged,
       selection: selection,
       selectionState: selectionState,
       reorder: reorder,
       onReorder: reorder ? onReorder : null,
-      data: <M3EExpandableData>[
-        for (final String id in order) _section(context, id),
-      ],
+      itemCount: sections.length,
+      itemBuilder: (BuildContext context, int index) {
+        final M3EExpandableData item = sections[index];
+        return M3EListItem(
+          headline: item.title,
+          supportingText: item.subtitle,
+          leading: item.leading,
+          trailing: item.trailing,
+          expanded: item.expanded,
+        );
+      },
     );
     if (!containerTransform) {
       return list;

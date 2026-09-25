@@ -26,7 +26,7 @@ Future<void> _pumpSelection(
         itemCount: 3,
         selectedColor: selectedColor,
         appBar: const M3ESelectionAppBar(idle: SizedBox(height: 32)),
-        body: M3ECardList.builder(
+        body: M3EList.scrollable(
           itemCount: 3,
           itemBuilder: (BuildContext context, int index) =>
               M3EListItem(headline: 'Item $index'),

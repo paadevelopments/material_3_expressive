@@ -1015,38 +1015,43 @@ M3EListItem(
 );
 ```
 
-#### M3ECardList
+#### M3EList
 
-A column of cards whose outer corners are larger than the inner ones.
-Turn on `selection` or `reorder`, or nest one with `embedded: true`.
+One list. List-level fields set the variant, selection, and reorder. Each
+`M3EListItem` can opt into `swipe`, `expanded`, and `transform`. A sub-list
+expansion is its own nested `M3EList`, which inherits the parent corner join,
+fill, and variant. Use `.scrollable` for a lazy list and `.sliver` inside a
+`CustomScrollView` (slivers keep selection and do not reorder).
 
 ```dart
-M3ECardList(
+M3EList(
   variant: M3ECardVariant.outlined,
   itemCount: 3,
   onTap: (index) {},
   itemBuilder: (context, index) => M3EListItem(
     headline: 'Inbox',
     leading: const Icon(M3EIcons.schedule),
+    swipe: M3EListItemSwipe(
+      onDismiss: (direction) async => true,
+      trailing: const [
+        M3EListSwipeAction(
+          icon: Icon(M3EIcons.delete),
+          isPrimary: true,
+        ),
+      ],
+    ),
+    expanded: M3EExpandableExpanded.list(
+      M3EList(
+        embedded: true,
+        itemCount: 2,
+        itemBuilder: (context, i) => M3EListItem(headline: 'Child $i'),
+      ),
+    ),
   ),
-);
-
-// Selection + reorder (theme: M3EListTheme.selection / .reorder)
-M3ECardList(
-  selection: true,
-  reorder: true,
-  onReorder: (oldIndex, newIndex) {},
-  selectionState: const M3EListSelectionState(
-    mode: M3EListSelectionMode.multiple,
-    trigger: M3EListSelectionTrigger.icon,
-    selectedIcon: Icon(M3EIcons.check),
-  ),
-  itemCount: items.length,
-  itemBuilder: (context, index) => M3EListItem(headline: items[index]),
 );
 
 // Scrollable / lazy
-M3ECardList.builder(
+M3EList.scrollable(
   itemCount: 20,
   shrinkWrap: true,
   itemBuilder: (context, index) => M3EListItem(
@@ -1083,7 +1088,7 @@ PopScope(
         M3EIconButton(icon: Icon(M3EIcons.delete), onPressed: () {}),
       ],
     ),
-    body: M3ECardList.builder(
+    body: M3EList.scrollable(
       itemCount: items.length,
       listPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       selection: true,
@@ -1098,108 +1103,8 @@ PopScope(
 ```
 
 Advanced: wire `M3ESelectionAppBar` + a shared controller yourself (omit
-`M3ESelection`), or pass `M3EDismissibleList` as `body` for swipe + select.
+`M3ESelection`), or set `M3EListItem.swipe` for swipe + select.
 An explicit `colorBuilder` still wins over the selection highlight.
-
-#### M3EDismissibleColumn
-
-Vertically swipeable card list with expressive physics. Supports list-owned
-`selection` and `reorder` (same tokens as card list). Optional
-`leadingActionsBuilder` / `trailingActionsBuilder` reveal icon actions
-(`M3EListSwipeAction`) with preview snap; a side with no actions still
-full-dismisses.
-
-```dart
-M3EDismissibleColumn(
-  itemCount: 3,
-  selection: true,
-  reorder: true,
-  onReorder: (oldIndex, newIndex) {},
-  onDismiss: (index, direction) async => true,
-  trailingActionsBuilder: (index) => [
-    M3EListSwipeAction(
-      icon: const Icon(M3EIcons.archive),
-      onPressed: () {},
-    ),
-    const M3EListSwipeAction(
-      icon: Icon(M3EIcons.delete),
-      isPrimary: true,
-    ),
-  ],
-  onTap: (index) {},
-  itemBuilder: (context, index) => M3EListItem(
-    headline: 'Swipe to dismiss',
-    leading: const Icon(M3EIcons.schedule),
-  ),
-);
-```
-
-#### M3EDismissibleList
-
-Horizontal swipeable card list — same API as `M3EDismissibleColumn`.
-
-```dart
-SizedBox(
-  height: 120,
-  child: M3EDismissibleList(
-    itemCount: 5,
-    onDismiss: (index, direction) async => true,
-    itemBuilder: (context, index) => M3EListItem(
-      headline: 'Card $index',
-    ),
-  ),
-);
-```
-
-#### M3EExpandableList
-
-Expandable cards with expressive open/close motion. Use
-`M3EExpandableExpanded.list` for a nested list (e.g. `M3ECardList` with
-`embedded: true`) or `.content` for freeform body content. Header rows support
-list-owned `selection` / `reorder` (nested lists keep their own APIs; expanded
-rows snap-collapse for reorder). Optional `expandMotion` / `collapseMotion`
-override theme springs.
-
-```dart
-M3EExpandableList(
-  selection: true,
-  reorder: true,
-  onReorder: (oldIndex, newIndex) {},
-  data: [
-    M3EExpandableData(
-      title: 'Battery level low',
-      subtitle: 'Plug in your device.',
-      leading: const Icon(M3EIcons.battery_alert),
-      expanded: M3EExpandableExpanded.content(
-        const Text('Your battery is at 10%.'),
-      ),
-    ),
-    M3EExpandableData(
-      title: 'Nested list',
-      expanded: M3EExpandableExpanded.list(
-        M3ECardList(
-          embedded: true,
-          itemCount: 3,
-          itemBuilder: (context, i) => M3EListItem(headline: 'Child $i'),
-        ),
-      ),
-    ),
-  ],
-);
-
-// Scrollable variant for long lists
-M3EExpandableList.scrollable(
-  data: expandableItems,
-  shrinkWrap: true,
-);
-
-// Sliver variant for CustomScrollView
-CustomScrollView(
-  slivers: [
-    M3EExpandableList.sliver(data: expandableItems),
-  ],
-);
-```
 
 #### M3EDivider
 

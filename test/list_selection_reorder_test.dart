@@ -3,6 +3,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
+M3EList _dataList({
+  required List<M3EExpandableData> data,
+  bool selection = false,
+  M3EListSelectionState? selectionState,
+  ValueChanged<Set<int>>? onSelectionChanged,
+  bool reorder = false,
+  ReorderCallback? onReorder,
+  Set<int> initiallyExpanded = const <int>{},
+  M3EExpandableStyle? expandStyle,
+}) {
+  return M3EList(
+    itemCount: data.length,
+    selection: selection,
+    selectionState: selectionState,
+    onSelectionChanged: onSelectionChanged,
+    reorder: reorder,
+    onReorder: onReorder,
+    initiallyExpanded: initiallyExpanded,
+    expandStyle: expandStyle,
+    itemBuilder: (BuildContext context, int index) {
+      final M3EExpandableData item = data[index];
+      return M3EListItem(
+        headline: item.title,
+        supportingText: item.subtitle,
+        leading: item.leading,
+        trailing: item.trailing,
+        expanded: item.expanded,
+      );
+    },
+  );
+}
+
 void main() {
   testWidgets(
     'list-owned selection fills and supports single-select',
@@ -74,7 +106,7 @@ Future<void> _listOwnedSelection(WidgetTester tester) async {
   Set<int>? last;
   await _pump(
     tester,
-    M3ECardList(
+    M3EList(
       selection: true,
       selectionState: const M3EListSelectionState(
         mode: M3EListSelectionMode.single,
@@ -116,7 +148,7 @@ Future<void> _listPrefersAncestorScope(WidgetTester tester) async {
       controller: controller,
       itemCount: 3,
       appBar: const M3ESelectionAppBar(idle: SizedBox(height: 32)),
-      body: M3ECardList(
+      body: M3EList(
         selection: true,
         itemCount: 3,
         itemBuilder: (BuildContext context, int index) =>
@@ -140,7 +172,7 @@ Future<void> _cardListReorder(WidgetTester tester) async {
     tester,
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        return M3ECardList(
+        return M3EList(
           reorder: true,
           onReorder: (int oldIndex, int newIndex) {
             setState(() {
@@ -167,6 +199,13 @@ Future<void> _cardListReorder(WidgetTester tester) async {
   await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
   await gesture.moveBy(const Offset(0, 140));
   await tester.pump();
+
+  final Rect listRect = tester.getRect(find.byType(M3EList).first);
+  for (final Element element in find.byIcon(M3EIcons.drag_handle).evaluate()) {
+    final box = element.renderObject! as RenderBox;
+    expect(box.localToGlobal(Offset.zero).dx, greaterThan(listRect.center.dx));
+  }
+
   await gesture.up();
   await tester.pumpAndSettle();
 
@@ -179,13 +218,13 @@ Future<void> _cardListReorder(WidgetTester tester) async {
 Future<void> _expandableSublist(WidgetTester tester) async {
   await _pump(
     tester,
-    M3EExpandableList(
+    _dataList(
       data: <M3EExpandableData>[
         M3EExpandableData(
           title: 'Parent',
           subtitle: 'Tap to expand',
           expanded: M3EExpandableExpanded.list(
-            M3ECardList(
+            M3EList(
               embedded: true,
               itemCount: 2,
               itemBuilder: (BuildContext context, int index) {
@@ -211,7 +250,7 @@ Future<void> _expandableMainSelection(WidgetTester tester) async {
   Set<int>? last;
   await _pump(
     tester,
-    M3EExpandableList(
+    _dataList(
       selection: true,
       selectionState: const M3EListSelectionState(
         mode: M3EListSelectionMode.single,
@@ -223,7 +262,7 @@ Future<void> _expandableMainSelection(WidgetTester tester) async {
           title: 'Section 0',
           leading: const Icon(M3EIcons.inbox),
           expanded: M3EExpandableExpanded.list(
-            M3ECardList(
+            M3EList(
               embedded: true,
               itemCount: 1,
               itemBuilder: (BuildContext context, int index) {
@@ -272,7 +311,7 @@ Future<void> _expandableLeadingSelectDoesNotExpand(WidgetTester tester) async {
   Set<int>? last;
   await _pump(
     tester,
-    M3EExpandableList(
+    _dataList(
       selection: true,
       onSelectionChanged: (Set<int> s) => last = s,
       selectionState: const M3EListSelectionState(
@@ -307,8 +346,8 @@ Future<void> _expandableNestedLastClosesBottom(WidgetTester tester) async {
 
   await _pump(
     tester,
-    M3EExpandableList(
-      style: const M3EExpandableStyle(outerRadius: outer),
+    _dataList(
+      expandStyle: const M3EExpandableStyle(),
       initiallyExpanded: const <int>{1},
       data: <M3EExpandableData>[
         const M3EExpandableData(
@@ -318,9 +357,8 @@ Future<void> _expandableNestedLastClosesBottom(WidgetTester tester) async {
         M3EExpandableData(
           title: 'Last parent',
           expanded: M3EExpandableExpanded.list(
-            M3ECardList(
+            M3EList(
               embedded: true,
-              outerRadius: outer,
               itemCount: 2,
               itemBuilder: (BuildContext context, int index) {
                 return M3EListItem(headline: 'Nest $index');
@@ -400,7 +438,7 @@ Widget _nestedExpandableReorderList({
   required StateSetter setState,
   required VoidCallback onParentReorder,
 }) {
-  return M3EExpandableList(
+  return _dataList(
     reorder: true,
     initiallyExpanded: const <int>{0},
     onReorder: (int oldIndex, int newIndex) {
@@ -416,7 +454,7 @@ Widget _nestedExpandableReorderList({
           title: parents[i],
           expanded: i == 0
               ? M3EExpandableExpanded.list(
-                  M3ECardList(
+                  M3EList(
                     embedded: true,
                     reorder: true,
                     onReorder: (int oldIndex, int newIndex) {
@@ -445,7 +483,7 @@ Future<void> _expandableReorderRestores(WidgetTester tester) async {
     tester,
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        return M3EExpandableList(
+        return _dataList(
           reorder: true,
           initiallyExpanded: const <int>{0},
           onReorder: (int oldIndex, int newIndex) {
@@ -495,7 +533,7 @@ Future<void> _tapNotDelayed(WidgetTester tester) async {
   final taps = <int>[];
   await _pump(
     tester,
-    M3ECardList(
+    M3EList(
       selection: true,
       selectionState: const M3EListSelectionState(
         trigger: M3EListSelectionTrigger.doubleTap,
@@ -552,7 +590,7 @@ Future<void> _dismissibleSelection(WidgetTester tester) async {
 Widget _dismissibleSelectionColumn({
   required ValueChanged<Set<int>> onSelectionChanged,
 }) {
-  return M3EDismissibleColumn(
+  return M3EList(
     selection: true,
     selectionState: const M3EListSelectionState(
       mode: M3EListSelectionMode.single,
@@ -560,11 +598,13 @@ Widget _dismissibleSelectionColumn({
     ),
     onSelectionChanged: onSelectionChanged,
     itemCount: 2,
-    onDismiss: (int index, DismissDirection direction) async => false,
     itemBuilder: (BuildContext context, int index) {
       return M3EListItem(
         headline: 'Row $index',
         leading: const Icon(M3EIcons.schedule),
+        swipe: M3EListItemSwipe(
+          onDismiss: (DismissDirection direction) async => false,
+        ),
       );
     },
   );
@@ -578,16 +618,20 @@ Future<void> _pumpDoubleTapDismissible(
     M3EMaterialApp(
       data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
       home: Scaffold(
-        body: M3EDismissibleColumn(
+        body: M3EList(
           selection: true,
           selectionState: const M3EListSelectionState(
             trigger: M3EListSelectionTrigger.doubleTap,
           ),
           onSelectionChanged: onSelectionChanged,
           itemCount: 1,
-          onDismiss: (int index, DismissDirection direction) async => false,
           itemBuilder: (BuildContext context, int index) {
-            return const M3EListItem(headline: 'Double');
+            return M3EListItem(
+              headline: 'Double',
+              swipe: M3EListItemSwipe(
+                onDismiss: (DismissDirection direction) async => false,
+              ),
+            );
           },
         ),
       ),
@@ -602,7 +646,7 @@ Future<void> _dismissibleReorder(WidgetTester tester) async {
     tester,
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        return M3EDismissibleColumn(
+        return M3EList(
           reorder: true,
           onReorder: (int oldIndex, int newIndex) {
             setState(() {
@@ -611,10 +655,12 @@ Future<void> _dismissibleReorder(WidgetTester tester) async {
             });
           },
           itemCount: items.length,
-          onDismiss: (int index, DismissDirection direction) async => false,
           itemBuilder: (BuildContext context, int index) => M3EListItem(
             headline: items[index],
             trailing: const Icon(M3EIcons.chevron_right),
+            swipe: M3EListItemSwipe(
+              onDismiss: (DismissDirection direction) async => false,
+            ),
           ),
         );
       },
@@ -646,7 +692,7 @@ Future<void> _dismissibleReorderDismissExclusion(WidgetTester tester) async {
     tester,
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        return M3EDismissibleColumn(
+        return M3EList(
           reorder: true,
           onReorder: (int oldIndex, int newIndex) {
             setState(() {
@@ -655,13 +701,15 @@ Future<void> _dismissibleReorderDismissExclusion(WidgetTester tester) async {
             });
           },
           itemCount: items.length,
-          onDismiss: (int index, DismissDirection direction) async {
-            dismissCalls++;
-            return false;
-          },
           itemBuilder: (BuildContext context, int index) => M3EListItem(
             headline: items[index],
             trailing: const Icon(M3EIcons.chevron_right),
+            swipe: M3EListItemSwipe(
+              onDismiss: (DismissDirection direction) async {
+                dismissCalls++;
+                return false;
+              },
+            ),
           ),
         );
       },

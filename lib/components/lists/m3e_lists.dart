@@ -2,13 +2,11 @@ import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
 import '../cards/m3e_cards.dart';
-import '../selection/components/m3e_selection_scope.dart';
 import '../selection/controllers/m3e_selection_controller.dart';
 import 'components/m3e_card_list_item.dart';
-import 'components/m3e_expandable_builders.dart';
-import 'components/m3e_expandable_data.dart';
 import 'components/m3e_expandable_expanded.dart';
-import 'components/m3e_expandable_list_base.dart';
+import 'components/m3e_expandable_item.dart';
+import 'components/m3e_expandable_nest_scope.dart';
 import 'components/m3e_expandable_snap_collapse.dart';
 import 'components/m3e_list_feature_host.dart';
 import 'components/m3e_list_feature_scope.dart';
@@ -19,13 +17,16 @@ import 'components/m3e_list_keyboard.dart';
 import 'components/m3e_list_reorder_host.dart';
 import 'components/m3e_list_row_surface.dart';
 import 'components/m3e_list_swipe_overflow.dart';
+import 'components/m3e_list_trailing_override.dart';
 import 'components/m3e_list_transform_publisher.dart';
 import 'controllers/m3e_dismissible_card_controller.dart';
 import 'controllers/m3e_dismissible_list_controller.dart';
+import 'controllers/m3e_expandable_list_controller.dart';
 import 'enums/m3e_list_enums.dart';
 import 'enums/m3e_list_selection_enums.dart';
 import 'enums/m3e_list_swipe_edge.dart';
 import 'enums/m3e_list_swipe_mode.dart';
+import 'models/m3e_list_item_swipe.dart';
 import 'models/m3e_list_swipe_action.dart';
 import 'styles/m3e_dismissible_list_style.dart';
 import 'styles/m3e_expandable_style.dart';
@@ -57,6 +58,7 @@ export 'enums/m3e_list_selection_enums.dart';
 export 'enums/m3e_list_swipe_edge.dart';
 export 'enums/m3e_list_swipe_mode.dart';
 export 'models/m3e_dismissible_slot.dart';
+export 'models/m3e_list_item_swipe.dart';
 export 'models/m3e_list_swipe_action.dart';
 export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_expandable_style.dart';
@@ -65,9 +67,7 @@ export 'styles/m3e_list_selection_state.dart';
 export 'styles/m3e_list_theme.dart';
 export 'utils/m3e_measure_size.dart';
 
-part 'components/m3e_card_list_widgets.dart';
-part 'components/m3e_dismissible_list_widgets.dart';
-part 'components/m3e_expandable_list_widgets.dart';
+part 'components/m3e_list.dart';
 
 /// A Material 3 Expressive list item.
 ///
@@ -92,6 +92,8 @@ class M3EListItem extends StatelessWidget {
     this.variant,
     this.border,
     this.transform,
+    this.swipe,
+    this.expanded,
     super.key,
   });
 
@@ -140,8 +142,17 @@ class M3EListItem extends StatelessWidget {
   /// Full-screen destination. When set, activating the row morphs into it.
   ///
   /// Null keeps the row's current tap behavior. Works on a standalone item
-  /// and on any item inside a card, dismissible, or expandable list.
+  /// and on any item inside [M3EList].
   final Widget? transform;
+
+  /// Swipe actions and dismiss for this row. Null means the row does not swipe.
+  final M3EListItemSwipe? swipe;
+
+  /// In-place or full-screen expansion. Null means the row does not expand.
+  ///
+  /// [M3EExpandableExpanded.list] is a nested [M3EList]. The parent joins that
+  /// child to the group with embedded corners, surface, and variant.
+  final M3EExpandableExpanded? expanded;
 
   /// Spoken label: headline, then supporting text.
   String get spokenLabel {
@@ -367,14 +378,20 @@ class M3EListItem extends StatelessWidget {
       index: index,
       leading: leading,
     );
-    final M3EListSwipeOverflow? overflow = trailing == null
+    final M3EListTrailingOverride? trailingOverride =
+        M3EListTrailingOverride.maybeOf(context);
+    final M3EListSwipeOverflow? overflow =
+        trailingOverride == null && trailing == null
         ? M3EListSwipeOverflow.maybeOf(context)
         : null;
     Widget? resolvedTrailing = m3eResolveListTrailing(
       context: context,
       trailing: trailing,
     );
-    if (resolvedTrailing == null && overflow != null && index != null) {
+    if (trailingOverride == null &&
+        resolvedTrailing == null &&
+        overflow != null &&
+        index != null) {
       resolvedTrailing = M3EListKeyTarget(
         index: index,
         onActivate: overflow.onReveal,

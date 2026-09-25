@@ -10,7 +10,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      M3ECardList(
+      M3EList(
         itemCount: 3,
         onTap: (int index) {},
         itemBuilder: (BuildContext context, int index) {
@@ -31,6 +31,50 @@ void main() {
     await tester.pump();
 
     expect(_radius(tester, 'Row 1').topLeft.x, 16);
+  });
+
+  testWidgets('expandable header rounds on hover and keeps one trailing icon', (
+    WidgetTester tester,
+  ) async {
+    await _pump(
+      tester,
+      M3EList(
+        itemCount: 3,
+        itemBuilder: (BuildContext context, int index) {
+          return M3EListItem(
+            headline: 'Row $index',
+            trailing: const Icon(M3EIcons.star),
+            expanded: const M3EExpandableExpanded.content(Text('Body')),
+          );
+        },
+      ),
+    );
+
+    expect(find.byIcon(M3EIcons.star), findsNothing);
+    expect(find.byIcon(M3EIcons.expand_more_rounded), findsNWidgets(3));
+    final RenderBox pill = tester.renderObject<RenderBox>(
+      find
+          .ancestor(
+            of: find.byIcon(M3EIcons.expand_more_rounded).at(1),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    expect(pill.size, const Size(32, 32));
+    expect(_radius(tester, 'Row 1').topLeft.x, 4);
+
+    final TestGesture hover = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hover.addPointer(location: Offset.zero);
+    addTearDown(hover.removePointer);
+    await tester.pump();
+    await hover.moveTo(tester.getCenter(find.text('Row 1')));
+    await tester.pump();
+
+    final BorderRadius hovered = _radius(tester, 'Row 1');
+    expect(hovered.topLeft.x, 16);
+    expect(hovered.bottomLeft.x, 16);
   });
 
   testWidgets('baseline short rows stay centered and three-line rows start', (
@@ -66,7 +110,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      M3ECardList(
+      M3EList(
         itemCount: 2,
         onTap: (int index) {},
         itemBuilder: (BuildContext context, int index) {
@@ -99,14 +143,15 @@ void main() {
     final controller = M3EExpandableListController();
     await _pump(
       tester,
-      M3EExpandableList(
-        transformController: controller,
-        data: const <M3EExpandableData>[
-          M3EExpandableData(
-            title: 'Open me',
+      M3EList(
+        expandController: controller,
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) {
+          return const M3EListItem(
+            headline: 'Open me',
             expanded: M3EExpandableExpanded.transform(Text('Destination')),
-          ),
-        ],
+          );
+        },
       ),
     );
 
@@ -131,7 +176,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      M3ECardList(
+      M3EList(
         itemCount: 2,
         itemBuilder: (BuildContext context, int index) {
           return M3EListItem(
@@ -164,6 +209,100 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('From item'), findsOneWidget);
   });
+
+  testWidgets('one row can swipe, expand in place, and open a transform', (
+    WidgetTester tester,
+  ) async {
+    final dismiss = M3EDismissibleListController();
+    final expand = M3EExpandableListController();
+    await _pump(
+      tester,
+      M3EList(
+        dismissController: dismiss,
+        expandController: expand,
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) {
+          return M3EListItem(
+            headline: 'Mix',
+            swipe: M3EListItemSwipe(
+              trailing: <M3EListSwipeAction>[
+                M3EListSwipeAction(
+                  icon: const Icon(M3EIcons.archive),
+                  width: 56,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            expanded: const M3EExpandableExpanded.content(Text('In place')),
+            transform: const Text('Morphed'),
+          );
+        },
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Mix')),
+    );
+    await gesture.moveBy(const Offset(-120, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byIcon(M3EIcons.archive), findsOneWidget);
+
+    dismiss.close();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mix'));
+    await tester.pumpAndSettle();
+    expect(find.text('In place'), findsOneWidget);
+
+    expand.open(0);
+    await tester.pumpAndSettle();
+    expect(find.text('Morphed'), findsOneWidget);
+    M3ECardContainerTransformScope.closeOf(
+      tester.element(find.text('Morphed')),
+    );
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('expanded sub-list joins the parent corners and fill', (
+    WidgetTester tester,
+  ) async {
+    const fill = Color(0xFF112233);
+    await _pump(
+      tester,
+      M3EList(
+        color: fill,
+        expandStyle: const M3EExpandableStyle(),
+        initiallyExpanded: const <int>{0},
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) {
+          return const M3EListItem(
+            headline: 'Parent',
+            expanded: M3EExpandableExpanded.list(
+              M3EList(itemCount: 2, itemBuilder: _nestItem),
+            ),
+          );
+        },
+      ),
+    );
+
+    final M3ECard first = _card(tester, 'Nest 0');
+    final M3ECard last = _card(tester, 'Nest 1');
+    expect(first.borderRadius, BorderRadius.circular(4));
+    expect(
+      last.borderRadius,
+      const BorderRadius.vertical(
+        top: Radius.circular(4),
+        bottom: Radius.circular(16),
+      ),
+    );
+    expect(first.color, fill);
+    expect(last.color, fill);
+  });
+}
+
+Widget _nestItem(BuildContext context, int index) {
+  return M3EListItem(headline: 'Nest $index');
 }
 
 Future<void> _pump(WidgetTester tester, Widget home) async {
@@ -177,11 +316,15 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
 }
 
 BorderRadius _radius(WidgetTester tester, String headline) {
+  return _card(tester, headline).borderRadius!;
+}
+
+M3ECard _card(WidgetTester tester, String headline) {
   final Finder card = find.ancestor(
     of: find.text(headline),
     matching: find.byType(M3ECard),
   );
-  return tester.widget<M3ECard>(card.first).borderRadius!;
+  return tester.widget<M3ECard>(card.first);
 }
 
 Row _row(WidgetTester tester, String headline) {

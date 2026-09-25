@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../cards/enums/m3e_card_variant.dart';
+
 /// Nesting hints for a card list under an expanded expandable row.
 ///
 /// When [closeBottom] is true (parent is last / single), the nested list's
@@ -11,6 +13,7 @@ class M3EExpandableNestScope extends InheritedWidget {
     required this.outerRadius,
     required super.child,
     this.surfaceColor,
+    this.variant,
     this.rowIndex,
     super.key,
   });
@@ -23,6 +26,9 @@ class M3EExpandableNestScope extends InheritedWidget {
 
   /// Parent row fill. Nested rows use this when they do not set their own.
   final Color? surfaceColor;
+
+  /// Parent list variant. A nested list uses this when it does not set one.
+  final M3ECardVariant? variant;
 
   /// Expandable row that owns this nested list, when keyboard focus should
   /// walk from that header into the sublist.
@@ -38,6 +44,7 @@ class M3EExpandableNestScope extends InheritedWidget {
     return closeBottom != oldWidget.closeBottom ||
         outerRadius != oldWidget.outerRadius ||
         surfaceColor != oldWidget.surfaceColor ||
+        variant != oldWidget.variant ||
         rowIndex != oldWidget.rowIndex;
   }
 }

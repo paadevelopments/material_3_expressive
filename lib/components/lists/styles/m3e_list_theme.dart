@@ -921,11 +921,10 @@ class M3EListExpandableTheme {
   /// defaultIconPadding.
   static const EdgeInsets defaultIconPadding = EdgeInsets.all(8);
 
-  /// Width of the vertical pill behind the trailing expand icon.
+  /// Side length of the square behind the trailing expand icon.
   ///
-  /// Height fills the header content area. The box size is the same when
-  /// collapsed or expanded; only the fill is shown while expanded. Set to `0`
-  /// to disable the chrome entirely.
+  /// The box stays this size when collapsed or expanded; only the fill is
+  /// shown while expanded. Set to `0` to disable the chrome entirely.
   static const double defaultExpandedIconBackgroundSize = 32;
 
   /// defaultIconRotationAngle.
@@ -991,10 +990,10 @@ class M3EListExpandableTheme {
   /// iconPadding.
   final EdgeInsetsGeometry iconPadding;
 
-  /// Width of the vertical pill behind the trailing expand icon.
+  /// Side length of the square behind the trailing expand icon.
   ///
-  /// Height fills the header content area. Size is stable across expand /
-  /// collapse; only the fill toggles. Set to `0` to disable.
+  /// Size is stable across expand and collapse; only the fill toggles.
+  /// Set to `0` to disable.
   final double expandedIconBackgroundSize;
 
   /// Fill for the expanded trailing-icon chrome.

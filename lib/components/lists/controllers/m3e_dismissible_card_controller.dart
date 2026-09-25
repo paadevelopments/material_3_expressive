@@ -127,6 +127,9 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   /// Which direction a manual swipe is allowed to dismiss.
   M3EListSwipeEdge get dismissEdge => M3EListSwipeEdge.both;
 
+  /// When true, [swipeItemBuilder] already paints the row surface.
+  bool swipeItemPaintsSurface(int dataIndex) => false;
+
   /// Accumulated horizontal delta before dismiss locks (reorder-safe).
   double _dismissDxAcc = 0;
 
@@ -200,6 +203,9 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
     }
     return total += 2 * style.actionEdgePadding;
   }
+
+  /// Data index of the row currently being swiped, if any.
+  int? get activeSwipeIndex => _dataIndexForDragSlot();
 
   int? _dataIndexForDragSlot() {
     if (_dragSlotIndex < 0) {
