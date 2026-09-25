@@ -1,5 +1,9 @@
 ## 1.1.4
 
+### Changed
+
+* **Cards:** `vertical` stacks media above the text. Tab order is the card (when it is tappable), then its actions and overflow, then a revealed swipe action. Arrow keys show or hide that swipe action, and Escape closes it. Space or Enter activates the focused control. Keyboard focus keeps the secondary ring and the 10% state layer. Swipe can dismiss, reveal a leading or trailing action, or do both. A partial swipe settles open on a background action; a longer swipe or flick dismisses the card. Actions and overflow keep their own taps when the card is tappable. Outlined fill is **surface**. Content padding is **16** on every side. Media and an edge-to-edge divider sit outside that inset; a padding divider lines up with it on both sides. Heights follow the variant elevation table (elevated hover is level 2). Focus ring is **secondary**, **3dp** thick, **2dp** outside the edge. Disabled elevated and filled containers fade to **0.38**. Optional media, text, actions, overflow, dividers, one swipe action, and a card group (gap **8**, grid, staggered, list, carousel, reorder). A swipe springs the whole card off-screen or back. Reorder lifts the card, springs neighbors into the opening, then settles before the order changes. `openBuilder` runs a full-screen container transform.
+
 ## 1.1.3
 
 ### Changed
