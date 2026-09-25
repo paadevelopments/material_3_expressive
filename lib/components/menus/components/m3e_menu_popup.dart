@@ -345,12 +345,16 @@ class _M3EMenuPopupState<T> extends State<M3EMenuPopup<T>>
     }
   }
 
-  void _keepFocusInMenu() {
-    final bool inside = _targets.any(
-      (M3EMenuKeyTarget target) => target.node.hasFocus,
-    );
-    if (!inside) {
-      _focusFirstEnabled();
+  void _exitMenu({required bool forward}) {
+    final FocusNode? caller = widget.callerFocusNode;
+    _dismiss();
+    if (caller == null) {
+      return;
+    }
+    if (forward) {
+      caller.nextFocus();
+    } else {
+      caller.previousFocus();
     }
   }
 

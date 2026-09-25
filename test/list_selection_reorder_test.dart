@@ -130,8 +130,8 @@ Future<void> _listPrefersAncestorScope(WidgetTester tester) async {
   ).colorScheme;
   expect(_rowColor(tester, 'Row 2'), scheme.secondaryContainer);
   expect(controller.isSelected(2), isTrue);
-  // No selectedIcon → no flip widgets.
-  expect(find.byType(M3ESelectionFlip), findsNothing);
+  // No caller icon: multi-select still shows the built-in checkbox cue.
+  expect(find.byType(M3ESelectionFlip), findsNWidgets(3));
 }
 
 Future<void> _cardListReorder(WidgetTester tester) async {

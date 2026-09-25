@@ -6,7 +6,6 @@ import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
 import '../styles/m3e_list_reorder_state.dart';
-import '../utils/m3e_expandable_spring_motion.dart';
 import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_reorder_exclude.dart';
 import 'm3e_list_reorder_session_scope.dart';
@@ -15,7 +14,8 @@ import 'm3e_list_reorder_session_scope.dart';
 ///
 /// Layout slots stay fixed while dragging: the dragged row becomes an invisible
 /// spacer, a floating proxy follows the pointer, and neighbors spring-shift to
-/// open the destination gap (no layout-mutating placeholder widgets).
+/// open the destination gap. On drop the proxy eases into that gap, then the
+/// order changes.
 class M3EListReorderHost extends StatefulWidget {
   /// Creates a reorder host.
   const M3EListReorderHost({
@@ -87,22 +87,30 @@ class M3EListReorderHost extends StatefulWidget {
 class _M3EListReorderHostState extends State<M3EListReorderHost>
     with TickerProviderStateMixin {
   int? _dragIndex;
-  int? _insertIndex;
+  int? _targetIndex;
+  int? _dropFrom;
+  int? _dropTo;
   int? _activePointer;
   Offset? _pointerDownGlobal;
   Timer? _longPressTimer;
+  bool _settling = false;
+  PointerDeviceKind _deviceKind = PointerDeviceKind.touch;
+  VelocityTracker _velocity = VelocityTracker.withKind(PointerDeviceKind.touch);
   final ValueNotifier<bool> _sessionActive = ValueNotifier<bool>(false);
-
-  /// Finger delta from long-press start; updated without setState.
-  final ValueNotifier<double> _dragDy = ValueNotifier<double>(0);
-
+  late final SingleMotionController _lift;
+  late final SingleMotionController _settle;
   final GlobalKey _stackKey = GlobalKey();
   final Map<int, GlobalKey> _keys = <int, GlobalKey>{};
   final Map<int, SingleMotionController> _offsets =
       <int, SingleMotionController>{};
-
-  /// Cached item extent (height + gap) at drag start.
-  double _dragExtent = 56;
+  final Map<int, double> _offsetGoals = <int, double>{};
+  final List<Offset> _slotOrigins = <Offset>[];
+  Offset _pointer = Offset.zero;
+  Offset _grab = Offset.zero;
+  Offset _dragOrigin = Offset.zero;
+  Offset _settleFrom = Offset.zero;
+  Offset _settleTo = Offset.zero;
+  Size _dragSize = Size.zero;
 
   GlobalKey _keyFor(int index) => _keys.putIfAbsent(index, GlobalKey.new);
 
@@ -110,37 +118,67 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     return _offsets.putIfAbsent(
       index,
       () => SingleMotionController(
-        motion: widget.reorderState.displaceMotion.toMotion(),
+        motion: _motion(M3EMotion.expressiveSpatialDefault),
         vsync: this,
       ),
     );
+  }
+
+  SpringMotion _motion(M3ESpring spring) {
+    return const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
+      stiffness: spring.stiffness,
+      damping: spring.damping,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _lift = SingleMotionController(
+      motion: _motion(M3EMotion.effectsFast),
+      vsync: this,
+    )..addListener(_onMotion);
+    _settle = SingleMotionController(
+      motion: _motion(M3EMotion.expressiveSpatialDefault),
+      vsync: this,
+    )..addListener(_onMotion);
+  }
+
+  void _onMotion() {
+    if (!mounted) {
+      return;
+    }
+    final int? from = _dropFrom;
+    final int? to = _dropTo;
+    if (_settling && from != null && to != null && _settle.value >= 1) {
+      _finishDrag(from, to);
+      return;
+    }
+    setState(() {});
   }
 
   @override
   void dispose() {
     _longPressTimer?.cancel();
     _sessionActive.dispose();
-    _dragDy.dispose();
+    _lift.dispose();
+    _settle.dispose();
     for (final SingleMotionController c in _offsets.values) {
       c.dispose();
     }
     super.dispose();
   }
 
-  double _itemHeight(int index) {
-    final box = _keyFor(index).currentContext?.findRenderObject() as RenderBox?;
-    return box?.size.height ?? 56;
-  }
-
-  double _extent(int index) => _itemHeight(index) + widget.gap;
-
-  /// Y of item [index] relative to the stack, ignoring transforms.
-  double _slotTop(int index) {
-    var top = 0.0;
-    for (var i = 0; i < index; i++) {
-      top += _extent(i);
+  void _captureSlots(RenderBox stack) {
+    _slotOrigins.clear();
+    for (var i = 0; i < widget.itemCount; i++) {
+      final box = _keyFor(i).currentContext?.findRenderObject() as RenderBox?;
+      _slotOrigins.add(
+        box != null && box.hasSize
+            ? stack.globalToLocal(box.localToGlobal(Offset.zero))
+            : Offset.zero,
+      );
     }
-    return top;
   }
 
   void _cancelPendingLongPress() {
@@ -154,6 +192,7 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     }
     _activePointer = event.pointer;
     _pointerDownGlobal = event.position;
+    _deviceKind = event.kind;
     _cancelPendingLongPress();
     _longPressTimer = Timer(
       kLongPressTimeout,
@@ -229,7 +268,10 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
       return;
     }
     if (_dragIndex != null) {
-      _updateDrag(event.position);
+      if (!_settling) {
+        _velocity.addPosition(event.timeStamp, event.position);
+        _updateDrag(event.position);
+      }
       return;
     }
     final Offset? down = _pointerDownGlobal;
@@ -245,111 +287,155 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     _cancelPendingLongPress();
     _activePointer = null;
     _pointerDownGlobal = null;
-    if (_dragIndex != null) {
+    if (_dragIndex != null && !_settling) {
       _endDrag();
     }
   }
 
   void _startDrag(int index, Offset globalPosition) {
+    if (_settling || _dragIndex != null) {
+      return;
+    }
     if (widget.canStartDrag != null && !widget.canStartDrag!(index)) {
       return;
     }
-    _dragExtent = _extent(index);
-    _dragDy.value = 0;
-    _pointerDownGlobal = globalPosition;
+    final stack = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _keyFor(index).currentContext?.findRenderObject() as RenderBox?;
+    if (stack == null || box == null || !box.hasSize) {
+      return;
+    }
+    final Offset origin = stack.globalToLocal(box.localToGlobal(Offset.zero));
+    final Offset pointer = stack.globalToLocal(globalPosition);
+    _captureSlots(stack);
+    _dragSize = box.size;
+    _dragOrigin = origin;
+    _pointer = pointer;
+    _grab = pointer - origin;
+    _velocity = VelocityTracker.withKind(_deviceKind);
     setState(() {
       _dragIndex = index;
-      _insertIndex = index;
+      _targetIndex = index;
     });
     _sessionActive.value = true;
-    for (var i = 0; i < widget.itemCount; i++) {
-      _offsetCtrl(i)
-        ..motion = widget.reorderState.displaceMotion.toMotion()
-        ..animateTo(0);
-    }
+    M3EHaptics.trigger(M3EHapticFeedback.medium);
+    _lift
+      ..stop()
+      ..value = 0
+      ..animateTo(1);
+    _settle
+      ..stop()
+      ..value = 0;
+    _retarget(index);
   }
 
   void _updateDrag(Offset globalPosition) {
-    final int? dragIndex = _dragIndex;
-    final Offset? start = _pointerDownGlobal;
-    if (dragIndex == null || start == null) {
+    final int? from = _dragIndex;
+    if (from == null || _settling || _slotOrigins.isEmpty) {
       return;
     }
-
-    _dragDy.value = globalPosition.dy - start.dy;
-
-    // Insert index from finger Y relative to the list stack.
-    final stackBox = _stackKey.currentContext?.findRenderObject() as RenderBox?;
-    var fingerY = globalPosition.dy;
-    if (stackBox != null) {
-      fingerY = stackBox.globalToLocal(globalPosition).dy;
+    final stack = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+    if (stack == null) {
+      return;
     }
-
-    final ScrollableState? scrollable = Scrollable.maybeOf(context);
-    if (scrollable != null) {
-      fingerY += scrollable.position.pixels;
-    }
-
-    var insert = 0;
-    var acc = 0.0;
-    for (var i = 0; i < widget.itemCount; i++) {
-      final double h = _extent(i);
-      if (fingerY < acc + h / 2) {
-        break;
+    final Offset pointer = stack.globalToLocal(globalPosition);
+    final Offset center = pointer - _grab + _dragSize.center(Offset.zero);
+    var best = from;
+    var closest = double.infinity;
+    for (var i = 0; i < _slotOrigins.length; i++) {
+      final Offset slotCenter = _slotOrigins[i] + _dragSize.center(Offset.zero);
+      final double distance = (center - slotCenter).distance;
+      if (distance < closest) {
+        closest = distance;
+        best = i;
       }
-      acc += h;
-      insert++;
     }
-    insert = insert.clamp(0, widget.itemCount);
-
-    if (insert != _insertIndex) {
-      setState(() => _insertIndex = insert);
-      _updateNeighborOffsets(dragIndex, insert);
+    setState(() => _pointer = pointer);
+    if (best != _targetIndex) {
+      _targetIndex = best;
+      _retarget(from);
+      M3EHaptics.selection();
     }
   }
 
-  void _updateNeighborOffsets(int dragIndex, int insertIndex) {
-    final double dragH = _dragExtent;
-    for (var i = 0; i < widget.itemCount; i++) {
-      _offsetCtrl(i).animateTo(
-        _m3eReorderNeighborShift(
-          index: i,
-          dragIndex: dragIndex,
-          insertIndex: insertIndex,
-          dragExtent: dragH,
-        ),
-      );
+  void _retarget(int from) {
+    final int to = _targetIndex ?? from;
+    for (var i = 0; i < widget.itemCount && i < _slotOrigins.length; i++) {
+      var visual = i;
+      if (i != from && from < to && i > from && i <= to) {
+        visual = i - 1;
+      } else if (i != from && from > to && i >= to && i < from) {
+        visual = i + 1;
+      }
+      final double target = i == from
+          ? 0
+          : _slotOrigins[visual].dy - _slotOrigins[i].dy;
+      if (_offsetGoals[i] == target) {
+        continue;
+      }
+      _offsetGoals[i] = target;
+      _offsetCtrl(i)
+        ..motion = _motion(M3EMotion.expressiveSpatialDefault)
+        ..animateTo(target);
     }
   }
 
   void _endDrag() {
     final int? from = _dragIndex;
-    final int? to = _insertIndex;
-    var settledTo = from;
-    if (from != null && to != null) {
-      var newIndex = to;
-      if (newIndex > from) {
-        newIndex -= 1;
-      }
-      settledTo = newIndex;
-      if (newIndex != from) {
-        widget.onReorder(from, newIndex);
-      }
+    if (from == null || _settling) {
+      return;
     }
-    for (final SingleMotionController c in _offsets.values) {
-      c
-        ..motion = widget.reorderState.settleMotion.toMotion()
-        ..animateTo(0);
+    final int to = _targetIndex ?? from;
+    final double lift = _lift.value.clamp(0.0, 1.0);
+    _settleFrom = (_pointer - _grab) + Offset(12 * lift, 12 * lift);
+    _settleTo = to < _slotOrigins.length ? _slotOrigins[to] : _dragOrigin;
+    final Offset travel = _settleTo - _settleFrom;
+    _dropFrom = from;
+    _dropTo = to;
+    setState(() => _settling = true);
+    if (travel.distance <= 1) {
+      _finishDrag(from, to);
+      return;
     }
+    final Velocity velocity = _velocity.getVelocity();
+    final double along =
+        (velocity.pixelsPerSecond.dx * travel.dx +
+            velocity.pixelsPerSecond.dy * travel.dy) /
+        travel.distance;
+    _settle
+      ..stop()
+      ..motion = _motion(widget.reorderState.settleMotion)
+      ..value = 0
+      ..animateTo(
+        1,
+        withVelocity: (along / travel.distance).clamp(-10.0, 10.0),
+      ).whenComplete(() => _finishDrag(from, to));
+  }
+
+  void _finishDrag(int from, int to) {
+    if (!mounted || _dragIndex == null) {
+      return;
+    }
+    _settling = false;
+    _dragIndex = null;
+    _targetIndex = null;
+    _dropFrom = null;
+    _dropTo = null;
+    _settle.stop();
+    for (final SingleMotionController offset in _offsets.values) {
+      offset
+        ..stop()
+        ..value = 0;
+    }
+    _offsetGoals.clear();
+    _lift
+      ..stop()
+      ..value = 0;
     _sessionActive.value = false;
-    setState(() {
-      _dragIndex = null;
-      _insertIndex = null;
-    });
-    _dragDy.value = 0;
-    if (from != null && settledTo != null) {
-      widget.onDragSettled?.call(from, settledTo);
+    setState(() {});
+    if (from != to) {
+      widget.onReorder(from, to);
     }
+    widget.onDragSettled?.call(from, to);
   }
 
   Widget _buildSlot(BuildContext context, int index) {
@@ -392,28 +478,20 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     final scheme = theme.colorScheme;
     final listTheme = theme.listTheme;
     final M3EListReorderState rs = widget.reorderState;
-    final double slotTop = _slotTop(dragIndex);
     final Color dragColor = rs.resolvedDragColor(scheme);
     final double dragRadius = rs.resolvedDragRadius(listTheme);
+    final double lift = _lift.value.clamp(0.0, 1.0);
+    final Offset moving = (_pointer - _grab) + Offset(12 * lift, 12 * lift);
+    final Offset offset = _settling
+        ? Offset.lerp(_settleFrom, _settleTo, _settle.value.clamp(0.0, 1.0))!
+        : moving;
 
-    final double proxyHeight = (_dragExtent - widget.gap).clamp(
-      0.0,
-      double.infinity,
-    );
-
-    return ValueListenableBuilder<double>(
-      valueListenable: _dragDy,
-      builder: (BuildContext context, double dy, Widget? child) {
-        return Positioned(
-          left: 0,
-          right: 0,
-          top: slotTop + dy,
-          height: proxyHeight > 0 ? proxyHeight : null,
-          child: child!,
-        );
-      },
-      child: Transform.scale(
-        scale: rs.dragScale,
+    return Positioned(
+      left: offset.dx,
+      top: offset.dy,
+      width: _dragSize.width,
+      height: _dragSize.height,
+      child: IgnorePointer(
         child: PhysicalModel(
           color: dragColor,
           elevation: rs.dragElevation,
@@ -422,48 +500,6 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
             color: dragColor,
             radius: dragRadius,
             child: widget.itemBuilder(context, dragIndex),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDestinationHint(BuildContext context) {
-    final int? dragIndex = _dragIndex;
-    final int? insert = _insertIndex;
-    if (dragIndex == null || insert == null || insert == dragIndex) {
-      return const SizedBox.shrink();
-    }
-
-    final theme = M3ETheme.of(context);
-    final scheme = theme.colorScheme;
-    final listTheme = theme.listTheme;
-    final M3EListReorderState rs = widget.reorderState;
-
-    // Visual gap after neighbors spring-shift (original slot coordinates).
-    final double top = insert < dragIndex
-        ? _slotTop(insert)
-        : _slotTop(insert - 1);
-
-    final double height = (_dragExtent - widget.gap).clamp(
-      0.0,
-      double.infinity,
-    );
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: top,
-      height: height,
-      child: IgnorePointer(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: rs.resolvedPlaceholderColor(scheme),
-            borderRadius: BorderRadius.circular(
-              rs.resolvedPlaceholderRadius(listTheme),
-            ),
-            border: rs.placeholderBorder == null
-                ? null
-                : Border.fromBorderSide(rs.placeholderBorder!),
           ),
         ),
       ),
@@ -495,37 +531,8 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
       child: Stack(
         key: _stackKey,
         clipBehavior: Clip.none,
-        children: <Widget>[
-          // Hint behind resting rows so it cannot cut them out.
-          if (_dragIndex != null) _buildDestinationHint(context),
-          list,
-          if (_dragIndex != null) _buildProxy(context),
-        ],
+        children: <Widget>[list, if (_dragIndex != null) _buildProxy(context)],
       ),
     );
   }
-}
-
-/// Neighbor Y shift while [dragIndex] opens a gap at [insertIndex].
-double _m3eReorderNeighborShift({
-  required int index,
-  required int dragIndex,
-  required int insertIndex,
-  required double dragExtent,
-}) {
-  if (index == dragIndex) {
-    return 0;
-  }
-  if (insertIndex <= dragIndex) {
-    // Opening a gap above the dragged slot: items in [insert, drag) move down.
-    if (index >= insertIndex && index < dragIndex) {
-      return dragExtent;
-    }
-    return 0;
-  }
-  // Opening a gap below: items in (drag, insert) move up into the hole.
-  if (index > dragIndex && index < insertIndex) {
-    return -dragExtent;
-  }
-  return 0;
 }

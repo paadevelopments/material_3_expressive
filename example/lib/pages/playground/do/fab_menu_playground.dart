@@ -266,6 +266,7 @@ class _FabMenuDemoHost extends StatelessWidget {
       body: manyItems
           ? const SizedBox(height: 120)
           : M3ECardList.builder(
+              color: theme.colorScheme.surfaceContainerHighest,
               itemCount: 12,
               listPadding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
               itemBuilder: (BuildContext context, int index) {

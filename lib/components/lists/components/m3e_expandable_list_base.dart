@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../../cards/m3e_cards.dart';
 import '../../selection/components/m3e_selection_scope.dart';
 import '../../selection/controllers/m3e_selection_controller.dart';
+import '../controllers/m3e_expandable_list_controller.dart';
 import '../styles/m3e_expandable_style.dart';
 import '../styles/m3e_list_reorder_state.dart';
 import '../styles/m3e_list_selection_state.dart';
@@ -46,6 +48,9 @@ abstract class M3EExpandableListBase extends StatefulWidget {
   final void Function(int index, {required bool isExpanded})?
   onExpansionChanged;
 
+  /// Opens a [M3EExpandableExpanded.transform] row without a tap.
+  final M3EExpandableListController? transformController;
+
   /// Enables selection on main expandable rows (not nested sublists).
   final bool selection;
 
@@ -80,6 +85,7 @@ abstract class M3EExpandableListBase extends StatefulWidget {
     this.expandMotion,
     this.collapseMotion,
     this.onExpansionChanged,
+    this.transformController,
     this.selection = false,
     this.selectionController,
     this.onSelectionChanged,
@@ -94,6 +100,10 @@ abstract class M3EExpandableListBase extends StatefulWidget {
 
 mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
   late Set<int> _expandedIndices;
+
+  final Map<int, BuildContext> _transformAnchors = <int, BuildContext>{};
+
+  M3ECardContainerTransformHandle<void>? _transformHandle;
 
   /// Index that was snap-collapsed for an in-progress reorder, if any.
   int? _collapsedForReorder;
@@ -111,6 +121,67 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
   void initState() {
     super.initState();
     _expandedIndices = Set<int>.from(widget.initiallyExpanded);
+    _bindTransformController(widget.transformController);
+  }
+
+  @override
+  void didUpdateWidget(T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.transformController != widget.transformController) {
+      oldWidget.transformController?.detach();
+      _bindTransformController(widget.transformController);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.transformController?.detach();
+    super.dispose();
+  }
+
+  void _bindTransformController(M3EExpandableListController? controller) {
+    controller?.attach(open: openTransform, close: closeTransform);
+  }
+
+  /// Morphs [index] into its transform destination.
+  void openTransform(int index) {
+    final BuildContext? itemContext = _transformAnchors[index];
+    if (itemContext == null || !itemContext.mounted) {
+      return;
+    }
+    final RenderObject? object = itemContext.findRenderObject();
+    if (object is! RenderBox || !object.hasSize) {
+      return;
+    }
+    final M3EExpandableExpanded? expanded = widget.expandedBuilder?.call(index);
+    if (expanded == null || !expanded.isTransform) {
+      return;
+    }
+    final M3EThemeData theme = M3ETheme.of(itemContext);
+    final Widget destination = expanded.child;
+    final M3ECardContainerTransformHandle<void>? previous = _transformHandle;
+    _transformHandle = null;
+    previous?.close();
+    final M3ECardContainerTransformHandle<void> handle =
+        M3ECardContainerTransform.show<void>(
+          context: itemContext,
+          origin: object.localToGlobal(Offset.zero) & object.size,
+          originRadius: theme.listTheme.cardList.outerRadius,
+          originColor: theme.colorScheme.surfaceContainerHighest,
+          builder: (BuildContext context) => destination,
+        );
+    _transformHandle = handle;
+    handle.future.whenComplete(() {
+      if (identical(_transformHandle, handle)) {
+        _transformHandle = null;
+      }
+    });
+  }
+
+  /// Reverses the open container transform.
+  void closeTransform() {
+    _transformHandle?.close();
+    _transformHandle = null;
   }
 
   /// Snap-collapses [index] if expanded so reorder can measure header height.
@@ -238,9 +309,13 @@ mixin M3EExpandableStateMixin<T extends M3EExpandableListBase> on State<T> {
         haptic: effectiveStyle.haptic,
         onExpansionChanged: widget.onExpansionChanged,
       ),
+      onTransform: () => openTransform(index),
+      onTransformAnchor: (BuildContext anchor) {
+        _transformAnchors[index] = anchor;
+      },
     );
 
-    return item = M3EListItemIndex(index: index, child: item);
+    return M3EListItemIndex(index: index, child: item);
   }
 }
 

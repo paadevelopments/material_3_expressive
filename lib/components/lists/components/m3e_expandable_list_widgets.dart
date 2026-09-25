@@ -27,6 +27,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -67,6 +68,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -95,6 +97,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -135,6 +138,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -164,6 +168,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -197,6 +202,7 @@ class M3EExpandableList extends M3EExpandableListBase {
     super.expandMotion,
     super.collapseMotion,
     super.onExpansionChanged,
+    super.transformController,
     super.selection = false,
     super.selectionController,
     super.onSelectionChanged,
@@ -319,7 +325,12 @@ class _M3EExpandableListState extends State<M3EExpandableList>
     );
     return M3EComponentTheme(
       builder: (BuildContext context) {
-        final Widget list = _wrapWithFeatures(_buildExpandableLayout(context));
+        final Widget list = _wrapWithFeatures(
+          M3EListKeyboardGroup(
+            itemCount: widget.itemCount,
+            child: _buildExpandableLayout(context),
+          ),
+        );
         return M3EExpandableSnapCollapse(
           snap: snapCollapseForReorder,
           child: list,

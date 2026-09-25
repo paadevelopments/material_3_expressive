@@ -41,6 +41,7 @@ class SectionListPane extends StatelessWidget {
       padding: EdgeInsets.all(16),
       children: <Widget>[
         M3ECardList(
+          color: theme.colorScheme.surfaceContainerHighest,
           itemCount: entries.length,
           onTap: (int index) => onSelect(entries[index]),
           colorBuilder: (int index) {

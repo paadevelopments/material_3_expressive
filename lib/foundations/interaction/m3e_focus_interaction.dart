@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,6 +13,7 @@ class M3EFocusInteraction extends ChangeNotifier {
   M3EFocusInteraction._() {
     FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+    _bindPointerRoute();
     _syncFromHighlightMode(FocusManager.instance.highlightMode);
   }
 
@@ -44,6 +46,23 @@ class M3EFocusInteraction extends ChangeNotifier {
       _notifyPointerScheduled = false;
       notifyListeners();
     });
+  }
+
+  GestureBinding? _boundPointerBinding;
+
+  void _bindPointerRoute() {
+    final GestureBinding binding = GestureBinding.instance;
+    if (identical(_boundPointerBinding, binding)) {
+      return;
+    }
+    _boundPointerBinding = binding;
+    binding.pointerRouter.addGlobalRoute(_handlePointer);
+  }
+
+  void _handlePointer(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      notePointerInteraction();
+    }
   }
 
   /// Call when keyboard focus navigation becomes active (Tab / arrows).
@@ -131,6 +150,7 @@ class M3EFocusInteraction extends ChangeNotifier {
     // Re-bind key handler in case the test binding cleared handlers.
     HardwareKeyboard.instance.removeHandler(instance._handleKeyEvent);
     HardwareKeyboard.instance.addHandler(instance._handleKeyEvent);
+    instance._bindPointerRoute();
     instance.notifyListeners();
   }
 }

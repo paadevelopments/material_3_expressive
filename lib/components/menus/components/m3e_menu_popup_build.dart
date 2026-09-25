@@ -47,13 +47,13 @@ extension _M3EMenuPopupLayout<T> on _M3EMenuPopupState<T> {
     return <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(
         onInvoke: (NextFocusIntent intent) {
-          _keepFocusInMenu();
+          _exitMenu(forward: true);
           return null;
         },
       ),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(
         onInvoke: (PreviousFocusIntent intent) {
-          _keepFocusInMenu();
+          _exitMenu(forward: false);
           return null;
         },
       ),

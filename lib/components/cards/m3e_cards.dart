@@ -16,7 +16,10 @@ import 'enums/m3e_card_variant.dart';
 import 'styles/m3e_card_theme.dart';
 
 export 'components/m3e_card_container_transform.dart'
-    show M3ECardContainerTransform, M3ECardContainerTransformScope;
+    show
+        M3ECardContainerTransform,
+        M3ECardContainerTransformHandle,
+        M3ECardContainerTransformScope;
 export 'components/m3e_card_group.dart';
 export 'controllers/m3e_card_controller.dart';
 export 'enums/m3e_card_divider_span.dart';
@@ -71,6 +74,12 @@ class M3ECard extends StatefulWidget {
     this.maxHeight,
     this.surfaceKey,
     this.mouseCursor,
+    this.focusNode,
+    this.focusable = true,
+    this.skipTraversal,
+    this.showFocusRing = true,
+    this.showFocusFill = true,
+    this.trackHover = true,
     this.semanticLabel,
     this.semanticLink = false,
     this.haptic = M3EHapticFeedback.none,
@@ -183,6 +192,24 @@ class M3ECard extends StatefulWidget {
   /// Cursor used while the card is actionable.
   final MouseCursor? mouseCursor;
 
+  /// Focus node for the card action. The card owns one when this is null.
+  final FocusNode? focusNode;
+
+  /// Whether the card action can take keyboard focus.
+  final bool focusable;
+
+  /// Tab-order override. Null follows [focusable].
+  final bool? skipTraversal;
+
+  /// Draws the card focus ring. List rows turn this off and draw their own.
+  final bool showFocusRing;
+
+  /// Paints the focused state-layer fill. List rows use their inset ring instead.
+  final bool showFocusFill;
+
+  /// When false, moving the pointer does not paint the hover layer.
+  final bool trackHover;
+
   /// Screen-reader label. Defaults to the headline and supporting text.
   final String? semanticLabel;
 
@@ -255,8 +282,10 @@ class _M3ECardState extends State<M3ECard>
   bool _transformOpen = false;
   void Function([Object? result])? _closeTransform;
   late final SingleMotionController _swipeMotion;
-  final FocusNode _cardFocus = FocusNode(debugLabel: 'M3ECard');
+  FocusNode? _ownedFocus;
   final ValueNotifier<bool> _keyboardFocused = ValueNotifier<bool>(false);
+
+  FocusNode get _focusNode => widget.focusNode ?? _ownedFocus!;
 
   bool get _hasPrimaryAction =>
       widget.onPressed != null ||
@@ -282,6 +311,9 @@ class _M3ECardState extends State<M3ECard>
           _commitDismissIfOffscreen(dx);
         });
     widget.controller?.attach(this);
+    if (widget.focusNode == null) {
+      _ownedFocus = FocusNode(debugLabel: 'M3ECard');
+    }
   }
 
   @override
@@ -291,12 +323,18 @@ class _M3ECardState extends State<M3ECard>
       oldWidget.controller?.detach(this);
       widget.controller?.attach(this);
     }
+    if (widget.focusNode == null && _ownedFocus == null) {
+      _ownedFocus = FocusNode(debugLabel: 'M3ECard');
+    } else if (widget.focusNode != null && _ownedFocus != null) {
+      _ownedFocus!.dispose();
+      _ownedFocus = null;
+    }
   }
 
   @override
   void dispose() {
     _swipeMotion.dispose();
-    _cardFocus.dispose();
+    _ownedFocus?.dispose();
     _keyboardFocused.dispose();
     widget.controller?.detach(this);
     super.dispose();
@@ -537,7 +575,7 @@ class _M3ECardState extends State<M3ECard>
         ? _tappable(theme, cardTheme, group, radius, idle, dragged)
         : _buildSurface(context, theme, cardTheme, group, radius, idle);
     Widget framed = _swipeWrap(body, radius);
-    if (_actionable) {
+    if (_actionable && widget.showFocusRing) {
       framed = ValueListenableBuilder<bool>(
         valueListenable: _keyboardFocused,
         builder: (BuildContext context, bool focused, Widget? child) {
@@ -575,7 +613,7 @@ class _M3ECardState extends State<M3ECard>
       }
       _settleSwipe(0, dismiss: false);
       if (_actionable) {
-        _cardFocus.requestFocus();
+        _focusNode.requestFocus();
       }
       return KeyEventResult.handled;
     }
@@ -626,7 +664,11 @@ class _M3ECardState extends State<M3ECard>
           widget.onLongPress != null || widget.alternativeActions != null
           ? _handleLongPress
           : null,
-      focusNode: _cardFocus,
+      focusNode: _focusNode,
+      focusable: widget.focusable,
+      skipTraversal: widget.skipTraversal,
+      trackHover: widget.trackHover,
+      focusOverlay: widget.showFocusFill,
       mouseCursor: widget.mouseCursor,
       semanticLabel: _spokenLabel(),
       semanticButton: !widget.semanticLink,
@@ -830,7 +872,7 @@ class _M3ECardState extends State<M3ECard>
   ) {
     final double alpha = state.dragged
         ? M3EStateOpacity.dragged
-        : state.focused
+        : widget.showFocusFill && state.focused
         ? M3EStateOpacity.focus
         : 0;
     if (alpha == 0) {

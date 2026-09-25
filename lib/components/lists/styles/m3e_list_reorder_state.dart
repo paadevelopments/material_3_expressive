@@ -9,7 +9,7 @@ class M3EListReorderState {
   /// Creates list reorder state.
   const M3EListReorderState({
     this.showDragHandle = true,
-    this.dragElevation = 8,
+    this.dragElevation = M3EElevation.level4,
     this.dragScale = 1.02,
     this.dragRadius,
     this.dragColor,
@@ -50,7 +50,7 @@ class M3EListReorderState {
   /// Neighbor displacement spring (noticeable overshoot).
   final M3ESpring displaceMotion;
 
-  /// Snap / settle spring after drop.
+  /// Spring that eases the lifted row into its slot before the order changes.
   final M3ESpring settleMotion;
 
   /// Resolved drag radius.

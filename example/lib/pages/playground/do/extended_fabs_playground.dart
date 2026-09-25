@@ -306,6 +306,7 @@ class _ExtendedFabDemoHostState extends State<_ExtendedFabDemoHost> {
         ),
         floatingActionButtonLocation: widget.location.scaffoldLocation,
         body: M3ECardList.builder(
+          color: M3ETheme.of(context).colorScheme.surfaceContainerHighest,
           itemCount: 40,
           listPadding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
           itemBuilder: (BuildContext context, int index) {

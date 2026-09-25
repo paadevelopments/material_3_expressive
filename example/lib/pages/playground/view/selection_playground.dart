@@ -260,6 +260,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
       );
     }
     return M3ECardList.builder(
+      color: theme.colorScheme.surfaceContainerHighest,
       selection: true,
       selectionState: const M3EListSelectionState(
         selectedIcon: Icon(M3EIcons.check_circle),

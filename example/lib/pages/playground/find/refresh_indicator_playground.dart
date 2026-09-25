@@ -166,6 +166,7 @@ class _RefreshDemoHostState extends State<_RefreshDemoHost> {
         triggerMode: widget.trigger,
         elevation: _resolvedElevation,
         child: M3ECardList.builder(
+          color: theme.colorScheme.surfaceContainerHighest,
           itemCount: 16,
           physics: const AlwaysScrollableScrollPhysics(),
           listPadding: const EdgeInsets.all(16),

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../cards/enums/m3e_card_variant.dart';
+import '../enums/m3e_list_enums.dart';
 import 'm3e_list_reorder_state.dart';
 import 'm3e_list_selection_state.dart';
 
@@ -12,90 +13,542 @@ import 'm3e_list_selection_state.dart';
 class M3EListItemTheme {
   /// M3EListItemTheme.
   const M3EListItemTheme({
+    this.appearance = M3EListAppearance.expressive,
+    this.style = M3EListStyle.segmented,
     this.horizontalPadding = 16,
-    this.verticalPadding = 8,
+    this.verticalPadding = 10,
+    this.baselineVerticalPadding = 8,
     this.threeLineVerticalPadding = 12,
-    this.minHeight = 40,
-    this.iconSize = 24,
-    this.gap = 16,
+    this.minHeight = 56,
+    this.twoLineHeight = 72,
+    this.threeLineHeight = 88,
+    this.iconSize = 20,
+    this.baselineIconSize = 24,
+    this.gap = 12,
+    this.baselineGap = 16,
+    this.avatarSize = 40,
+    this.leadingImageSize = 56,
+    this.leadingImageRadius = 8,
+    this.leadingVideoWidth = 100,
+    this.leadingVideoHeight = 56,
+    this.smallLeadingVideoWidth = 100,
+    this.smallLeadingVideoHeight = 56,
+    this.largeLeadingVideoWidth = 114,
+    this.largeLeadingVideoHeight = 64,
+    this.focusIndicatorThickness = 3,
+    this.focusIndicatorInset = 3,
+    this.dividerThickness = 1,
+    this.dividerLeadingInset = 16,
+    this.dividerTrailingInset = 16,
+    this.leadingIconTopPadding = 8,
+    this.leadingIconTopPaddingTall = 12,
+    this.minTarget = 48,
+    this.selectedRadius = 16,
+    this.hoverOpacity = M3EStateOpacity.hover,
+    this.focusOpacity = M3EStateOpacity.focus,
+    this.pressedOpacity = M3EStateOpacity.pressed,
+    this.disabledStateOpacity = 0.1,
+    this.draggedStateOpacity = M3EStateOpacity.dragged,
+    this.disabledContentOpacity = M3EStateOpacity.disabledContent,
+    this.draggedElevation = M3EElevation.level2,
     this.variant = M3ECardVariant.filled,
     this.border,
+    this.containerColor,
+    this.selectedContainerColor,
+    this.labelColor,
+    this.supportingColor,
+    this.iconColorOverride,
+    this.selectedContentColor,
+    this.selectedStateIconColor,
+    this.avatarColor,
+    this.avatarLabelColor,
+    this.dividerColor,
+    this.focusIndicatorColor,
+    this.stateLayerColor,
   });
 
   /// defaults.
 
   static const M3EListItemTheme defaults = M3EListItemTheme();
 
-  /// horizontalPadding.
+  /// Expressive or baseline token set.
+  final M3EListAppearance appearance;
 
+  /// Segmented resting container, or a standard list with no rest fill.
+  final M3EListStyle style;
+
+  /// Leading and trailing inset.
   final double horizontalPadding;
 
-  /// verticalPadding.
+  /// Expressive top and bottom inset.
   final double verticalPadding;
 
-  /// threeLineVerticalPadding.
+  /// Baseline top and bottom inset for short items.
+  final double baselineVerticalPadding;
+
+  /// Baseline top and bottom inset for three-line or large-leading items.
   final double threeLineVerticalPadding;
 
-  /// minHeight.
+  /// One-line container height.
   final double minHeight;
 
-  /// iconSize.
+  /// Two-line container height.
+  final double twoLineHeight;
+
+  /// Three-line container height.
+  final double threeLineHeight;
+
+  /// Expressive leading and trailing icon size.
   final double iconSize;
 
-  /// gap.
+  /// Baseline leading and trailing icon size.
+  final double baselineIconSize;
+
+  /// Expressive gap between slots.
   final double gap;
 
-  /// Card variant for standalone list items.
+  /// Baseline gap between slots.
+  final double baselineGap;
+
+  /// Leading avatar diameter.
+  final double avatarSize;
+
+  /// Leading image width and height.
+  final double leadingImageSize;
+
+  /// Expressive leading image corner radius.
+  final double leadingImageRadius;
+
+  /// Generic leading video width.
+  final double leadingVideoWidth;
+
+  /// Generic leading video height.
+  final double leadingVideoHeight;
+
+  /// Small leading video width.
+  final double smallLeadingVideoWidth;
+
+  /// Small leading video height.
+  final double smallLeadingVideoHeight;
+
+  /// Large leading video width.
+  final double largeLeadingVideoWidth;
+
+  /// Large leading video height.
+  final double largeLeadingVideoHeight;
+
+  /// Keyboard focus ring thickness.
+  final double focusIndicatorThickness;
+
+  /// Keyboard focus ring inset (spec offset is negative).
+  final double focusIndicatorInset;
+
+  /// Divider thickness.
+  final double dividerThickness;
+
+  /// Divider leading inset.
+  final double dividerLeadingInset;
+
+  /// Divider trailing inset.
+  final double dividerTrailingInset;
+
+  /// Baseline leading-icon top inset.
+  final double leadingIconTopPadding;
+
+  /// Baseline leading-icon top inset when the item is 88 or taller.
+  final double leadingIconTopPaddingTall;
+
+  /// Minimum tap target.
+  final double minTarget;
+
+  /// Selected corner radius.
+  final double selectedRadius;
+
+  /// Hover state-layer opacity.
+  final double hoverOpacity;
+
+  /// Focus state-layer opacity.
+  final double focusOpacity;
+
+  /// Pressed state-layer opacity.
+  final double pressedOpacity;
+
+  /// Disabled state-layer opacity.
+  final double disabledStateOpacity;
+
+  /// Dragged state-layer opacity.
+  final double draggedStateOpacity;
+
+  /// Disabled content opacity.
+  final double disabledContentOpacity;
+
+  /// Dragged elevation.
+  final double draggedElevation;
+
+  /// Card variant for outlined list rows.
   final M3ECardVariant variant;
 
-  /// Optional card outline; null keeps the variant default.
+  /// Optional outline; null keeps the variant default.
   final BorderSide? border;
 
-  /// selectedColor.
+  /// Container override. Null uses [M3EColorScheme.surface].
+  final Color? containerColor;
 
-  Color selectedColor(M3EColorScheme scheme) => scheme.secondaryContainer;
+  /// Selected container override. Null uses secondary container.
+  final Color? selectedContainerColor;
+
+  /// Label override. Null uses on-surface.
+  final Color? labelColor;
+
+  /// Supporting, overline, and trailing text override.
+  final Color? supportingColor;
+
+  /// Unselected icon override. Null uses on-surface variant.
+  final Color? iconColorOverride;
+
+  /// Selected label and icon override. Null uses on-secondary container.
+  final Color? selectedContentColor;
+
+  /// Selected hover, focus, and press icon override. Null uses on-surface.
+  final Color? selectedStateIconColor;
+
+  /// Avatar container override. Null uses primary container.
+  final Color? avatarColor;
+
+  /// Avatar label override. Null uses on-primary container.
+  final Color? avatarLabelColor;
+
+  /// Divider override. Null uses outline variant.
+  final Color? dividerColor;
+
+  /// Focus ring override. Null uses secondary.
+  final Color? focusIndicatorColor;
+
+  /// State-layer override. Null uses on-surface.
+  final Color? stateLayerColor;
+
+  /// Whether this theme uses baseline tokens.
+  bool get isBaseline => appearance == M3EListAppearance.baseline;
+
+  /// Corner radius for [resting] after hover, focus, press, drag, and selection.
+  ///
+  /// Segmented rest keeps [resting] (4dp inner / 16dp outer). Active states
+  /// and a selected row use [selectedRadius]. Standard rest is square.
+  /// Baseline stays square until the row is selected.
+  BorderRadius radiusFor({
+    required BorderRadius resting,
+    required bool selected,
+    required bool hovered,
+    required bool focused,
+    required bool pressed,
+    required bool dragged,
+  }) {
+    if (isBaseline) {
+      if (selected) {
+        return BorderRadius.circular(selectedRadius);
+      }
+      return BorderRadius.zero;
+    }
+    final bool active = selected || hovered || focused || pressed || dragged;
+    if (active) {
+      return BorderRadius.circular(selectedRadius);
+    }
+    if (style == M3EListStyle.standard) {
+      return BorderRadius.zero;
+    }
+    return resting;
+  }
+
+  /// Whether a resting container is painted.
+  bool restingContainer({
+    required bool selected,
+    required bool hovered,
+    required bool focused,
+    required bool pressed,
+    required bool dragged,
+  }) {
+    if (selected || hovered || focused || pressed || dragged) {
+      return true;
+    }
+    return isBaseline || style == M3EListStyle.segmented;
+  }
+
+  /// Top and bottom inset for the current appearance.
+  double verticalPaddingFor({required bool tall, required bool largeLeading}) {
+    if (isBaseline && (tall || largeLeading)) {
+      return threeLineVerticalPadding;
+    }
+    if (isBaseline) {
+      return baselineVerticalPadding;
+    }
+    return verticalPadding;
+  }
+
+  /// Icon size for the current appearance.
+  double resolvedIconSize() => isBaseline ? baselineIconSize : iconSize;
+
+  /// Slot gap for the current appearance.
+  double resolvedGap() => isBaseline ? baselineGap : gap;
+
+  /// Container height for [lines] of text (1, 2, or 3+).
+  double heightForLines(int lines) {
+    if (lines >= 3) {
+      return threeLineHeight;
+    }
+    if (lines == 2) {
+      return twoLineHeight;
+    }
+    return minHeight;
+  }
+
+  /// Baseline leading-icon top inset.
+  double leadingIconTopFor({required bool tall}) =>
+      tall ? leadingIconTopPaddingTall : leadingIconTopPadding;
+
+  /// Resting container color.
+  Color resolveContainer(M3EColorScheme scheme) =>
+      containerColor ?? scheme.surface;
+
+  /// selectedColor.
+  Color selectedColor(M3EColorScheme scheme) =>
+      selectedContainerColor ?? scheme.secondaryContainer;
+
+  /// Disabled selected container.
+  Color disabledSelectedColor(M3EColorScheme scheme) =>
+      scheme.onSurface.withValues(alpha: disabledContentOpacity);
 
   /// iconColor.
+  Color iconColor(
+    M3EColorScheme scheme, {
+    bool selected = false,
+    bool stateIcon = false,
+    bool trailing = false,
+  }) {
+    if (selected && stateIcon) {
+      return selectedStateIconColor ?? scheme.onSurface;
+    }
+    if (selected) {
+      return selectedContentColor ?? scheme.onSecondaryContainer;
+    }
+    if (trailing) {
+      return iconColorOverride ?? scheme.onSurface;
+    }
+    return iconColorOverride ?? scheme.onSurfaceVariant;
+  }
 
-  Color iconColor(M3EColorScheme scheme) => scheme.onSurfaceVariant;
+  /// State-layer role color.
+  Color resolveStateLayer(M3EColorScheme scheme) =>
+      stateLayerColor ?? scheme.onSurface;
+
+  /// Opacity for the active interaction, including disabled.
+  double stateOpacity({
+    required bool enabled,
+    required bool hovered,
+    required bool focused,
+    required bool pressed,
+    required bool dragged,
+  }) {
+    if (!enabled) {
+      return disabledStateOpacity;
+    }
+    if (dragged) {
+      return draggedStateOpacity;
+    }
+    if (pressed) {
+      return pressedOpacity;
+    }
+    if (focused) {
+      return focusOpacity;
+    }
+    if (hovered) {
+      return hoverOpacity;
+    }
+    return 0;
+  }
+
+  /// Avatar container color.
+  Color resolveAvatar(M3EColorScheme scheme) =>
+      avatarColor ?? scheme.primaryContainer;
+
+  /// Avatar label color.
+  Color resolveAvatarLabel(M3EColorScheme scheme) =>
+      avatarLabelColor ?? scheme.onPrimaryContainer;
+
+  /// Divider color.
+  Color resolveDivider(M3EColorScheme scheme) => dividerColor ?? scheme.outline;
+
+  /// Focus ring color.
+  Color resolveFocusIndicator(M3EColorScheme scheme) =>
+      focusIndicatorColor ?? scheme.secondary;
 
   /// overlineStyle.
-
-  TextStyle overlineStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.labelSmall.copyWith(color: scheme.onSurfaceVariant);
+  TextStyle overlineStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, {
+    bool selected = false,
+  }) => type.labelSmall.copyWith(
+    color: selected
+        ? (selectedContentColor ?? scheme.onSecondaryContainer)
+        : (supportingColor ?? scheme.onSurfaceVariant),
+  );
 
   /// headlineStyle.
-
-  TextStyle headlineStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.bodyLarge.copyWith(color: scheme.onSurface);
+  TextStyle headlineStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, {
+    bool selected = false,
+  }) => type.bodyLarge.copyWith(
+    color: selected
+        ? (selectedContentColor ?? scheme.onSecondaryContainer)
+        : (labelColor ?? scheme.onSurface),
+  );
 
   /// supportingStyle.
+  TextStyle supportingStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, {
+    bool selected = false,
+  }) => type.bodyMedium.copyWith(
+    color: selected
+        ? (selectedContentColor ?? scheme.onSecondaryContainer)
+        : (supportingColor ?? scheme.onSurfaceVariant),
+  );
 
-  TextStyle supportingStyle(M3ETypeScale type, M3EColorScheme scheme) =>
-      type.bodyMedium.copyWith(color: scheme.onSurfaceVariant);
+  /// Trailing meta text.
+  TextStyle trailingStyle(
+    M3ETypeScale type,
+    M3EColorScheme scheme, {
+    bool selected = false,
+  }) => type.labelSmall.copyWith(
+    color: selected
+        ? (selectedContentColor ?? scheme.onSecondaryContainer)
+        : (supportingColor ?? scheme.onSurfaceVariant),
+  );
+
+  /// Avatar initial.
+  TextStyle avatarLabelStyle(M3ETypeScale type, M3EColorScheme scheme) =>
+      type.titleMedium.copyWith(color: resolveAvatarLabel(scheme));
 
   /// copyWith.
-
   M3EListItemTheme copyWith({
+    M3EListAppearance? appearance,
+    M3EListStyle? style,
     double? horizontalPadding,
     double? verticalPadding,
+    double? baselineVerticalPadding,
     double? threeLineVerticalPadding,
     double? minHeight,
+    double? twoLineHeight,
+    double? threeLineHeight,
     double? iconSize,
+    double? baselineIconSize,
     double? gap,
+    double? baselineGap,
+    double? avatarSize,
+    double? leadingImageSize,
+    double? leadingImageRadius,
+    double? leadingVideoWidth,
+    double? leadingVideoHeight,
+    double? smallLeadingVideoWidth,
+    double? smallLeadingVideoHeight,
+    double? largeLeadingVideoWidth,
+    double? largeLeadingVideoHeight,
+    double? focusIndicatorThickness,
+    double? focusIndicatorInset,
+    double? dividerThickness,
+    double? dividerLeadingInset,
+    double? dividerTrailingInset,
+    double? leadingIconTopPadding,
+    double? leadingIconTopPaddingTall,
+    double? minTarget,
+    double? selectedRadius,
+    double? hoverOpacity,
+    double? focusOpacity,
+    double? pressedOpacity,
+    double? disabledStateOpacity,
+    double? draggedStateOpacity,
+    double? disabledContentOpacity,
+    double? draggedElevation,
     M3ECardVariant? variant,
     BorderSide? border,
+    Color? containerColor,
+    Color? selectedContainerColor,
+    Color? labelColor,
+    Color? supportingColor,
+    Color? iconColorOverride,
+    Color? selectedContentColor,
+    Color? selectedStateIconColor,
+    Color? avatarColor,
+    Color? avatarLabelColor,
+    Color? dividerColor,
+    Color? focusIndicatorColor,
+    Color? stateLayerColor,
   }) {
     return M3EListItemTheme(
+      appearance: appearance ?? this.appearance,
+      style: style ?? this.style,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       verticalPadding: verticalPadding ?? this.verticalPadding,
+      baselineVerticalPadding:
+          baselineVerticalPadding ?? this.baselineVerticalPadding,
       threeLineVerticalPadding:
           threeLineVerticalPadding ?? this.threeLineVerticalPadding,
       minHeight: minHeight ?? this.minHeight,
+      twoLineHeight: twoLineHeight ?? this.twoLineHeight,
+      threeLineHeight: threeLineHeight ?? this.threeLineHeight,
       iconSize: iconSize ?? this.iconSize,
+      baselineIconSize: baselineIconSize ?? this.baselineIconSize,
       gap: gap ?? this.gap,
+      baselineGap: baselineGap ?? this.baselineGap,
+      avatarSize: avatarSize ?? this.avatarSize,
+      leadingImageSize: leadingImageSize ?? this.leadingImageSize,
+      leadingImageRadius: leadingImageRadius ?? this.leadingImageRadius,
+      leadingVideoWidth: leadingVideoWidth ?? this.leadingVideoWidth,
+      leadingVideoHeight: leadingVideoHeight ?? this.leadingVideoHeight,
+      smallLeadingVideoWidth:
+          smallLeadingVideoWidth ?? this.smallLeadingVideoWidth,
+      smallLeadingVideoHeight:
+          smallLeadingVideoHeight ?? this.smallLeadingVideoHeight,
+      largeLeadingVideoWidth:
+          largeLeadingVideoWidth ?? this.largeLeadingVideoWidth,
+      largeLeadingVideoHeight:
+          largeLeadingVideoHeight ?? this.largeLeadingVideoHeight,
+      focusIndicatorThickness:
+          focusIndicatorThickness ?? this.focusIndicatorThickness,
+      focusIndicatorInset: focusIndicatorInset ?? this.focusIndicatorInset,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
+      dividerLeadingInset: dividerLeadingInset ?? this.dividerLeadingInset,
+      dividerTrailingInset: dividerTrailingInset ?? this.dividerTrailingInset,
+      leadingIconTopPadding:
+          leadingIconTopPadding ?? this.leadingIconTopPadding,
+      leadingIconTopPaddingTall:
+          leadingIconTopPaddingTall ?? this.leadingIconTopPaddingTall,
+      minTarget: minTarget ?? this.minTarget,
+      selectedRadius: selectedRadius ?? this.selectedRadius,
+      hoverOpacity: hoverOpacity ?? this.hoverOpacity,
+      focusOpacity: focusOpacity ?? this.focusOpacity,
+      pressedOpacity: pressedOpacity ?? this.pressedOpacity,
+      disabledStateOpacity: disabledStateOpacity ?? this.disabledStateOpacity,
+      draggedStateOpacity: draggedStateOpacity ?? this.draggedStateOpacity,
+      disabledContentOpacity:
+          disabledContentOpacity ?? this.disabledContentOpacity,
+      draggedElevation: draggedElevation ?? this.draggedElevation,
       variant: variant ?? this.variant,
       border: border ?? this.border,
+      containerColor: containerColor ?? this.containerColor,
+      selectedContainerColor:
+          selectedContainerColor ?? this.selectedContainerColor,
+      labelColor: labelColor ?? this.labelColor,
+      supportingColor: supportingColor ?? this.supportingColor,
+      iconColorOverride: iconColorOverride ?? this.iconColorOverride,
+      selectedContentColor: selectedContentColor ?? this.selectedContentColor,
+      selectedStateIconColor:
+          selectedStateIconColor ?? this.selectedStateIconColor,
+      avatarColor: avatarColor ?? this.avatarColor,
+      avatarLabelColor: avatarLabelColor ?? this.avatarLabelColor,
+      dividerColor: dividerColor ?? this.dividerColor,
+      focusIndicatorColor: focusIndicatorColor ?? this.focusIndicatorColor,
+      stateLayerColor: stateLayerColor ?? this.stateLayerColor,
     );
   }
 }
@@ -104,16 +557,18 @@ class M3EListItemTheme {
 @immutable
 class M3EListCardListTheme {
   /// defaultOuterRadius.
-  static const double defaultOuterRadius = 24;
+  static const double defaultOuterRadius = 16;
 
   /// defaultInnerRadius.
   static const double defaultInnerRadius = 4;
 
   /// defaultGap.
-  static const double defaultGap = 4;
+  static const double defaultGap = 2;
 
   /// defaultItemPadding.
-  static const EdgeInsets defaultItemPadding = EdgeInsets.all(12);
+  ///
+  /// Zero so list items own the spec padding and rows are not padded twice.
+  static const EdgeInsets defaultItemPadding = EdgeInsets.zero;
 
   /// M3EListCardListTheme.
 
@@ -153,10 +608,14 @@ class M3EListCardListTheme {
   /// Corner-radius morph spring for card list items.
   final M3ESpring radiusSpring;
 
-  /// backgroundColor.
-
-  Color backgroundColor(M3EColorScheme scheme) =>
-      scheme.surfaceContainerHighest;
+  /// Resting fill for [variant]. Outlined stays on surface.
+  Color backgroundColor(M3EColorScheme scheme, {M3ECardVariant? variant}) {
+    return switch (variant ?? this.variant) {
+      M3ECardVariant.filled => scheme.surfaceContainerHighest,
+      M3ECardVariant.elevated => scheme.surfaceContainerLow,
+      M3ECardVariant.outlined => scheme.surface,
+    };
+  }
 
   /// copyWith.
 
@@ -353,8 +812,7 @@ class M3EListDismissibleTheme {
 
   /// backgroundColor.
 
-  Color backgroundColor(M3EColorScheme scheme) =>
-      scheme.surfaceContainerHighest;
+  Color backgroundColor(M3EColorScheme scheme) => scheme.surface;
 
   /// copyWith.
 
@@ -430,10 +888,12 @@ class M3EListExpandableTheme {
       M3EListCardListTheme.defaultInnerRadius;
 
   /// defaultHoverRadius.
-  static const double defaultHoverRadius = 10;
+  static const double defaultHoverRadius = defaultOuterRadius;
 
   /// defaultPressedRadius.
-  static const double defaultPressedRadius = 4;
+  ///
+  /// Press uses the 16dp outer radius on every corner.
+  static const double defaultPressedRadius = defaultOuterRadius;
 
   /// defaultGap.
   static const double defaultGap = M3EListCardListTheme.defaultGap;
@@ -445,8 +905,10 @@ class M3EListExpandableTheme {
   ///
   /// Matches [M3EListCardListTheme.defaultItemPadding] so expandable headers
   /// align with card / dismissible list rows.
-  static const EdgeInsets defaultHeaderPadding =
-      M3EListCardListTheme.defaultItemPadding;
+  static const EdgeInsets defaultHeaderPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 10,
+  );
 
   /// defaultBodyPadding.
   static const EdgeInsets defaultBodyPadding = EdgeInsets.fromLTRB(
@@ -537,7 +999,7 @@ class M3EListExpandableTheme {
 
   /// Fill for the expanded trailing-icon chrome.
   ///
-  /// When null, resolves to [M3EColorScheme.surfaceContainerLowest].
+  /// When null, resolves to [M3EColorScheme.surfaceContainer].
   final Color? expandedIconBackground;
 
   /// iconRotationAngle.
@@ -560,12 +1022,11 @@ class M3EListExpandableTheme {
 
   /// backgroundColor.
 
-  Color backgroundColor(M3EColorScheme scheme) =>
-      scheme.surfaceContainerHighest;
+  Color backgroundColor(M3EColorScheme scheme) => scheme.surface;
 
   /// Expanded trailing-icon chrome color.
   Color resolvedExpandedIconBackground(M3EColorScheme scheme) =>
-      expandedIconBackground ?? scheme.surfaceContainerLowest;
+      expandedIconBackground ?? scheme.surfaceContainer;
 
   /// copyWith.
 

@@ -2,50 +2,57 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../selection/components/m3e_selection_flip.dart';
+import '../components/m3e_list_drag_proxy_scope.dart';
 import '../components/m3e_list_feature_scope.dart';
 import '../enums/m3e_list_selection_enums.dart';
-import '../styles/m3e_list_selection_state.dart';
 
 /// Resolves leading widget for list selection flip (leading only).
 ///
-/// Flips between [leading] and [M3EListSelectionState.selectedIcon] when both
-/// are present and selection is enabled. Otherwise returns [leading] unchanged.
+/// Flips between [leading] and the selection icon when selection is enabled.
+/// Otherwise returns [leading] unchanged. The drag proxy shows a drag handle.
 Widget? m3eResolveListLeading({
   required BuildContext context,
   required int? index,
   required Widget? leading,
 }) {
-  if (leading == null || index == null) {
+  if (M3EListDragProxyScope.maybeOf(context) != null) {
+    return const Icon(M3EIcons.drag_handle);
+  }
+  if (index == null) {
     return leading;
   }
   final M3EListFeatureScope? scope = M3EListFeatureScope.maybeOf(context);
-  if (scope == null ||
-      !scope.selectionEnabled ||
-      !scope.selectionState.hasSelectedIcon) {
+  if (scope == null || !scope.selectionEnabled) {
+    return leading;
+  }
+  final iconTrigger =
+      scope.selectionState.trigger == M3EListSelectionTrigger.icon;
+  if (!scope.selectionState.hasSelectedIcon && !iconTrigger) {
     return leading;
   }
 
-  final Widget selectedIcon = scope.selectionState.selectedIcon!;
+  final single = scope.selectionState.mode == M3EListSelectionMode.single;
+  final Widget selectedIcon =
+      scope.selectionState.selectedIcon ??
+      Icon(single ? M3EIcons.radio_button_checked : M3EIcons.check_box);
+  final Widget child =
+      leading ??
+      Icon(
+        single
+            ? M3EIcons.radio_button_unchecked
+            : M3EIcons.check_box_outline_blank,
+      );
   final bool selected = scope.isSelected(index);
-  final VoidCallback? onIconTap =
-      scope.selectionState.trigger == M3EListSelectionTrigger.icon
+  final VoidCallback? onIconTap = iconTrigger
       ? () => scope.onToggleSelection(index)
       : null;
 
-  final theme = M3ETheme.of(context);
-  final listTheme = theme.listTheme.item;
-  return IconTheme.merge(
-    data: IconThemeData(
-      color: listTheme.iconColor(theme.colorScheme),
-      size: listTheme.iconSize,
-    ),
-    child: M3ESelectionFlip(
-      selected: selected,
-      selectedChild: selectedIcon,
-      duration: scope.selectionState.iconFlipDuration,
-      onTap: onIconTap,
-      child: leading,
-    ),
+  return M3ESelectionFlip(
+    selected: selected,
+    selectedChild: selectedIcon,
+    duration: scope.selectionState.iconFlipDuration,
+    onTap: onIconTap,
+    child: child,
   );
 }
 
@@ -54,6 +61,9 @@ Widget? m3eResolveListTrailing({
   required BuildContext context,
   required Widget? trailing,
 }) {
+  if (M3EListDragProxyScope.maybeOf(context) != null) {
+    return trailing;
+  }
   final M3EListFeatureScope? scope = M3EListFeatureScope.maybeOf(context);
   if (scope == null ||
       !scope.reorderEnabled ||
@@ -61,11 +71,5 @@ Widget? m3eResolveListTrailing({
     return trailing;
   }
 
-  final theme = M3ETheme.of(context);
-  final listTheme = theme.listTheme.item;
-  return Icon(
-    M3EIcons.drag_handle,
-    color: listTheme.iconColor(theme.colorScheme),
-    size: listTheme.iconSize,
-  );
+  return const Icon(M3EIcons.drag_handle);
 }

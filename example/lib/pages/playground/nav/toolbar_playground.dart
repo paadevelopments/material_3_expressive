@@ -418,6 +418,7 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
               MediaQuery.paddingOf(context).bottom
         : 16;
     return M3ECardList.builder(
+      color: M3ETheme.of(context).colorScheme.surfaceContainerHighest,
       itemCount: 16,
       listPadding: EdgeInsets.fromLTRB(16, 16, 16, bottom),
       itemBuilder: (BuildContext context, int index) {

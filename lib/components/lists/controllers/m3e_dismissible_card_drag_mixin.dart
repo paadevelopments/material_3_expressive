@@ -41,6 +41,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       _dragSlotRef = slot;
       _dragSlotIndex = _slots.indexOf(slot);
       _isDismissDragging = true;
+      _lockHover();
       if (!isSameSlot) {
         _dragOffset = 0.0;
         _neighbourFraction = 0.0;
@@ -73,7 +74,13 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
         : actionsFor(dataIndex, swipingRight: swipingRight);
     final hasActions = actionList.isNotEmpty;
 
-    if (hasActions) {
+    if (swipeMode == M3EListSwipeMode.dismiss &&
+        newOffset != 0 &&
+        !_edgeDismisses(newOffset > 0)) {
+      newOffset = 0;
+    }
+
+    if (hasActions && swipeMode != M3EListSwipeMode.dismiss) {
       newOffset = _applyActionRevealConstraints(newOffset, actionList);
     }
 
@@ -341,9 +348,20 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     final List<M3EListSwipeAction> actionList = dataIndex == null
         ? const <M3EListSwipeAction>[]
         : actionsFor(dataIndex, swipingRight: swipingRight);
+    final canReveal = swipeMode != M3EListSwipeMode.dismiss;
+    final bool canDismiss =
+        swipeMode != M3EListSwipeMode.reveal && _edgeDismisses(swipingRight);
 
-    if (actionList.isNotEmpty) {
+    if (canReveal && actionList.isNotEmpty) {
       final double actionsWidth = _computeActionsWidth(actionList);
+      final bool pastActions = _dragOffset.abs() > actionsWidth;
+      if (canDismiss && pastActions && _dragProgress >= 1.0) {
+        final direction = swipingRight
+            ? DismissDirection.startToEnd
+            : DismissDirection.endToStart;
+        _dismiss(_dragSlotIndex, speedMul, direction);
+        return;
+      }
       if (_dragOffset.abs() >= actionsWidth * style.actionPreviewThreshold) {
         _snapToRevealed(actionsWidth * (swipingRight ? 1.0 : -1.0), speedMul);
       } else {
@@ -352,14 +370,84 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       return;
     }
 
-    if (_dragProgress >= 1.0) {
+    if (canDismiss && _dragProgress >= 1.0) {
       final direction = swipingRight
           ? DismissDirection.startToEnd
           : DismissDirection.endToStart;
       _dismiss(_dragSlotIndex, speedMul, direction);
-    } else {
-      _springBack(speedMul);
+      return;
     }
+
+    _springBack(speedMul);
+  }
+
+  M3EDismissibleListController? _swipeController;
+
+  /// Binds [controller] so reveal and dismiss can run without a drag.
+  void bindSwipeController(M3EDismissibleListController? controller) {
+    if (identical(_swipeController, controller)) {
+      return;
+    }
+    _swipeController?.detach(_revealIndex);
+    _swipeController = controller;
+    controller?.attach(
+      reveal: _revealIndex,
+      dismiss: _dismissIndex,
+      close: () => closeActionPreview(),
+    );
+  }
+
+  /// Drops the swipe controller binding.
+  void unbindSwipeController() {
+    _swipeController?.detach(_revealIndex);
+    _swipeController = null;
+  }
+
+  bool _edgeDismisses(bool swipingRight) {
+    return switch (dismissEdge) {
+      M3EListSwipeEdge.both => true,
+      M3EListSwipeEdge.start => swipingRight,
+      M3EListSwipeEdge.end => !swipingRight,
+    };
+  }
+
+  void _revealIndex(int index, {required bool leading}) {
+    if (!_armIndex(index)) {
+      return;
+    }
+    final List<M3EListSwipeAction> actionList = actionsFor(
+      index,
+      swipingRight: leading,
+    );
+    final double width = actionList.isEmpty
+        ? 80
+        : _computeActionsWidth(actionList);
+    _snapToRevealed(width * (leading ? 1 : -1), 1);
+  }
+
+  void _dismissIndex(int index, {required bool leading}) {
+    if (!_armIndex(index)) {
+      return;
+    }
+    _dismiss(
+      _dragSlotIndex,
+      1,
+      leading ? DismissDirection.startToEnd : DismissDirection.endToStart,
+    );
+  }
+
+  bool _armIndex(int index) {
+    final List<int> visible = computeVisibleIndices();
+    if (index < 0 || index >= visible.length) {
+      return false;
+    }
+    final int slotIndex = visible[index];
+    setState(() {
+      _dragSlotRef = _slots[slotIndex];
+      _dragSlotIndex = slotIndex;
+      _isDismissDragging = false;
+    });
+    return true;
   }
 
   /// Closes an open action preview.
@@ -371,6 +459,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
   }
 
   void _snapToRevealed(double targetOffset, double speedMul) {
+    _lockHover();
     _pushCtrl?.dispose();
     _pushCtrl = null;
     _detachPush = 0.0;
@@ -430,6 +519,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       _dragSlotRef = null;
       _dragSlotIndex = -1;
       _dragOffset = 0.0;
+      _hoverLocked = false;
       _detachPush = 0.0;
       _neighbourFraction = 0.0;
       _pastThreshold = false;
@@ -453,6 +543,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
   }
 
   void _springBack(double speedMul) {
+    _lockHover();
     _pushCtrl?.dispose();
     _pushCtrl = null;
     _detachPush = 0.0;
@@ -582,6 +673,7 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       _isDismissDragging = false;
       _reEngaging = false;
       _roundnessFraction = 0.0;
+      _hoverLocked = false;
     });
   }
 

@@ -13,6 +13,9 @@ enum M3EExpandableExpandedType {
 
   /// A single freeform widget inside the expanded header body.
   content,
+
+  /// A full-screen container transform. The row stays collapsed in place.
+  transform,
 }
 
 /// Expanded content for an expandable list item.
@@ -35,6 +38,11 @@ class M3EExpandableExpanded {
     : type = M3EExpandableExpandedType.content,
       topGap = null;
 
+  /// Full-screen morph. [child] is the destination surface.
+  const M3EExpandableExpanded.transform(this.child)
+    : type = M3EExpandableExpandedType.transform,
+      topGap = null;
+
   /// Presentation kind.
   final M3EExpandableExpandedType type;
 
@@ -53,4 +61,7 @@ class M3EExpandableExpanded {
 
   /// Whether this is a freeform content expansion.
   bool get isContent => type == M3EExpandableExpandedType.content;
+
+  /// Whether a tap opens a full-screen container transform.
+  bool get isTransform => type == M3EExpandableExpandedType.transform;
 }

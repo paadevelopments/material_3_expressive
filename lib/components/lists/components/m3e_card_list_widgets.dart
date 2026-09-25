@@ -106,6 +106,9 @@ class M3ECardList extends StatelessWidget {
   /// Optional reorder state override (else [M3EListTheme.reorder]).
   final M3EListReorderState? reorderState;
 
+  /// Optional list-box description for assistive tech.
+  final String? semanticsLabel;
+
   /// When true, first/last/single cards use [innerRadius] on all corners
   /// (same as middle items). Use for nested lists under expandable headers.
   final bool embedded;
@@ -170,6 +173,7 @@ class M3ECardList extends StatelessWidget {
     this.selectionState,
     this.reorderState,
     this.embedded = false,
+    this.semanticsLabel,
   }) : assert(
          !reorder || onReorder != null,
          'onReorder is required when reorder is true',
@@ -213,6 +217,7 @@ class M3ECardList extends StatelessWidget {
     this.selectionState,
     this.reorderState,
     this.embedded = false,
+    this.semanticsLabel,
   }) : assert(
          !reorder || onReorder != null,
          'onReorder is required when reorder is true',
@@ -231,6 +236,11 @@ class M3ECardList extends StatelessWidget {
     }
 
     Widget list = _buildListBody(context);
+    list = M3EListKeyboardGroup(
+      itemCount: itemCount,
+      semanticsLabel: semanticsLabel,
+      child: list,
+    );
     list = _wrapWithFeatures(list);
     return _wrapWithMargin(list);
   }
@@ -324,14 +334,28 @@ class M3ECardList extends StatelessWidget {
   }
 
   Widget _buildIndexedItem(BuildContext context, int index, int total) {
-    final cardListTheme = M3ETheme.of(context).listTheme.cardList;
+    final M3EListItemTheme itemTheme = M3ETheme.of(context).listTheme.item;
+    final double usedOuter = _baselineOr(
+      itemTheme,
+      outerRadius,
+      M3EListCardListTheme.defaultOuterRadius,
+    );
+    final double usedInner = _baselineOr(
+      itemTheme,
+      innerRadius,
+      M3EListCardListTheme.defaultInnerRadius,
+    );
+    final double usedGap = _baselineOr(
+      itemTheme,
+      gap,
+      M3EListCardListTheme.defaultGap,
+    );
     final M3ECardPosition position = calculateCardPosition(index, total);
     final M3EListFeatureScope? features = M3EListFeatureScope.maybeOf(context);
 
-    final Widget child = M3EListItemIndex(
-      index: index,
-      child: itemBuilder(context, index),
-    );
+    final Widget built = itemBuilder(context, index);
+    final bool itemEnabled = built is! M3EListItem || built.enabled;
+    final Widget child = M3EListItemIndex(index: index, child: built);
 
     return M3EListTapBinder(
       onTap: _tapCallbackForIndex(features, index),
@@ -341,12 +365,23 @@ class M3ECardList extends StatelessWidget {
           context: context,
           index: index,
           position: position,
-          cardListTheme: cardListTheme,
+          outerRadius: usedOuter,
+          innerRadius: usedInner,
+          gap: usedGap,
+          selectedRadius: itemTheme.selectedRadius,
+          itemEnabled: itemEnabled,
           child: child,
           onPressed: onPressed,
         );
       },
     );
+  }
+
+  double _baselineOr(M3EListItemTheme theme, double value, double specDefault) {
+    if (theme.isBaseline && value == specDefault) {
+      return 0;
+    }
+    return value;
   }
 
   VoidCallback? _tapCallbackForIndex(M3EListFeatureScope? features, int index) {
@@ -371,10 +406,17 @@ class M3ECardList extends StatelessWidget {
     required BuildContext context,
     required int index,
     required M3ECardPosition position,
-    required M3EListCardListTheme cardListTheme,
+    required double outerRadius,
+    required double innerRadius,
+    required double gap,
+    required double selectedRadius,
+    required bool itemEnabled,
     required Widget child,
     required VoidCallback? onPressed,
   }) {
+    final M3EListCardListTheme cardListTheme = M3ETheme.of(context)
+        .listTheme
+        .cardList;
     // When reorder is on, long-press is owned by the reorder host.
     final void Function(int index)? longPress = reorder ? null : onLongPress;
     return M3ECardListItem(
@@ -389,9 +431,9 @@ class M3ECardList extends StatelessWidget {
           colorBuilder?.call(index) ?? m3eSelectionFill(context, index),
       resolvedBorderRadius:
           borderRadiusBuilder?.call(index, position) ??
-          m3eSelectionRadius(context, index, outerRadius: outerRadius),
+          m3eSelectionRadius(context, index, outerRadius: selectedRadius),
       padding: padding,
-      onTap: onPressed == null ? null : (_) => onPressed(),
+      onTap: !itemEnabled || onPressed == null ? null : (_) => onPressed(),
       onLongPress: longPress,
       semanticLabel: semanticLabelBuilder?.call(index),
       mouseCursor: mouseCursor,

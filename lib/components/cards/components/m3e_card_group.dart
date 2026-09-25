@@ -56,6 +56,8 @@ class _M3ECardGroupState extends State<M3ECardGroup>
   late final SingleMotionController _settle;
   int? _dragIndex;
   int? _targetIndex;
+  int? _dropFrom;
+  int? _dropTo;
   bool _settling = false;
   Offset _pointer = Offset.zero;
   Offset _grab = Offset.zero;
@@ -105,8 +107,40 @@ class _M3ECardGroupState extends State<M3ECardGroup>
   }
 
   void _onMotion() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) {
+      return;
+    }
+    final int? from = _dropFrom;
+    final int? to = _dropTo;
+    if (_settling && from != null && to != null && _settle.value >= 1) {
+      _commitReorder(from, to);
+      return;
+    }
+    setState(() {});
+  }
+
+  void _commitReorder(int from, int to) {
+    if (!mounted || _dragIndex == null) {
+      return;
+    }
+    _settling = false;
+    _dragIndex = null;
+    _targetIndex = null;
+    _dropFrom = null;
+    _dropTo = null;
+    _settle.stop();
+    for (var i = 0; i < _shiftGoals.length; i++) {
+      _shiftGoals[i] = Offset.zero;
+      _shiftX[i]
+        ..stop()
+        ..value = 0;
+      _shiftY[i]
+        ..stop()
+        ..value = 0;
+    }
+    setState(() {});
+    if (from != to) {
+      widget.onReorder?.call(from, to);
     }
   }
 
@@ -235,32 +269,11 @@ class _M3ECardGroupState extends State<M3ECardGroup>
     _settleFrom = (_pointer - _grab) + Offset(12 * lift, 12 * lift);
     _settleTo = to < _slotOrigins.length ? _slotOrigins[to] : _dragOrigin;
     final Offset travel = _settleTo - _settleFrom;
+    _dropFrom = from;
+    _dropTo = to;
     setState(() => _settling = true);
-    void finish() {
-      if (!mounted || _dragIndex == null) {
-        return;
-      }
-      for (var i = 0; i < _shiftGoals.length; i++) {
-        _shiftGoals[i] = Offset.zero;
-        _shiftX[i]
-          ..stop()
-          ..value = 0;
-        _shiftY[i]
-          ..stop()
-          ..value = 0;
-      }
-      setState(() {
-        _dragIndex = null;
-        _targetIndex = null;
-        _settling = false;
-      });
-      if (from != to) {
-        widget.onReorder?.call(from, to);
-      }
-    }
-
     if (travel.distance <= 1) {
-      finish();
+      _commitReorder(from, to);
       return;
     }
     final Velocity velocity = details.velocity;
@@ -274,7 +287,7 @@ class _M3ECardGroupState extends State<M3ECardGroup>
       ..animateTo(
         1,
         withVelocity: (along / travel.distance).clamp(-10.0, 10.0),
-      ).whenComplete(finish);
+      ).whenComplete(() => _commitReorder(from, to));
   }
 
   @override

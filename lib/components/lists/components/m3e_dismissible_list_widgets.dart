@@ -14,6 +14,9 @@ class M3EDismissibleList extends StatefulWidget {
     this.borderRadiusBuilder,
     this.leadingActionsBuilder,
     this.trailingActionsBuilder,
+    this.swipeMode = M3EListSwipeMode.both,
+    this.dismissEdge = M3EListSwipeEdge.both,
+    this.controller,
     this.style = const M3EDismissibleListStyle(),
     this.physics,
     this.scrollController,
@@ -28,6 +31,7 @@ class M3EDismissibleList extends StatefulWidget {
     this.selectionState,
     this.reorderState,
     this.embedded = false,
+    this.semanticsLabel,
     super.key,
   }) : assert(
          !reorder || onReorder != null,
@@ -62,6 +66,15 @@ class M3EDismissibleList extends StatefulWidget {
 
   /// End-to-start (LTR trailing) swipe actions for the given index.
   final List<M3EListSwipeAction> Function(int index)? trailingActionsBuilder;
+
+  /// Reveal only, dismiss only, or reveal then dismiss.
+  final M3EListSwipeMode swipeMode;
+
+  /// Which manual swipe direction can dismiss.
+  final M3EListSwipeEdge dismissEdge;
+
+  /// Reveals or dismisses a row without a pointer drag.
+  final M3EDismissibleListController? controller;
 
   /// style.
   final M3EDismissibleListStyle style;
@@ -103,7 +116,11 @@ class M3EDismissibleList extends StatefulWidget {
   final M3EListReorderState? reorderState;
 
   /// When true, all cards use inner radius (no first/last outer extremities).
+  /// When true, corner radii stay inset for a nested list.
   final bool embedded;
+
+  /// List-box description for assistive tech.
+  final String? semanticsLabel;
 
   @override
   State<M3EDismissibleList> createState() => _M3EDismissibleListState();
@@ -165,19 +182,28 @@ class _M3EDismissibleListState extends State<M3EDismissibleList>
       widget.trailingActionsBuilder;
 
   @override
+  M3EListSwipeMode get swipeMode => widget.swipeMode;
+
+  @override
+  M3EListSwipeEdge get dismissEdge => widget.dismissEdge;
+
+  @override
   void initState() {
     super.initState();
     initSlots();
+    bindSwipeController(widget.controller);
   }
 
   @override
   void didUpdateWidget(M3EDismissibleList old) {
     super.didUpdateWidget(old);
     syncSlotsIfNeeded(old.itemCount);
+    bindSwipeController(widget.controller);
   }
 
   @override
   void dispose() {
+    unbindSwipeController();
     disposeSlots();
     super.dispose();
   }
@@ -223,6 +249,11 @@ class _M3EDismissibleListState extends State<M3EDismissibleList>
       );
     }
 
+    list = M3EListKeyboardGroup(
+      itemCount: widget.itemCount,
+      semanticsLabel: widget.semanticsLabel,
+      child: list,
+    );
     if (widget.selection || widget.reorder) {
       list = M3EListFeatureHost(
         itemCount: widget.itemCount,
@@ -255,6 +286,9 @@ class M3EDismissibleColumn extends StatefulWidget {
     this.borderRadiusBuilder,
     this.leadingActionsBuilder,
     this.trailingActionsBuilder,
+    this.swipeMode = M3EListSwipeMode.both,
+    this.dismissEdge = M3EListSwipeEdge.both,
+    this.controller,
     this.style = const M3EDismissibleListStyle(),
     this.selection = false,
     this.reorder = false,
@@ -264,6 +298,7 @@ class M3EDismissibleColumn extends StatefulWidget {
     this.selectionState,
     this.reorderState,
     this.embedded = false,
+    this.semanticsLabel,
     super.key,
   }) : assert(
          !reorder || onReorder != null,
@@ -299,6 +334,15 @@ class M3EDismissibleColumn extends StatefulWidget {
   /// End-to-start (LTR trailing) swipe actions for the given index.
   final List<M3EListSwipeAction> Function(int index)? trailingActionsBuilder;
 
+  /// Reveal only, dismiss only, or reveal then dismiss.
+  final M3EListSwipeMode swipeMode;
+
+  /// Which manual swipe direction can dismiss.
+  final M3EListSwipeEdge dismissEdge;
+
+  /// Reveals or dismisses a row without a pointer drag.
+  final M3EDismissibleListController? controller;
+
   /// style.
   final M3EDismissibleListStyle style;
 
@@ -324,7 +368,11 @@ class M3EDismissibleColumn extends StatefulWidget {
   final M3EListReorderState? reorderState;
 
   /// When true, all cards use inner radius (no first/last outer extremities).
+  /// When true, corner radii stay inset for a nested list.
   final bool embedded;
+
+  /// List-box description for assistive tech.
+  final String? semanticsLabel;
 
   /// of.
 
@@ -338,6 +386,9 @@ class M3EDismissibleColumn extends StatefulWidget {
     borderRadiusBuilder,
     List<M3EListSwipeAction> Function(int index)? leadingActionsBuilder,
     List<M3EListSwipeAction> Function(int index)? trailingActionsBuilder,
+    M3EListSwipeMode swipeMode = M3EListSwipeMode.both,
+    M3EListSwipeEdge dismissEdge = M3EListSwipeEdge.both,
+    M3EDismissibleListController? controller,
     M3EDismissibleListStyle style = const M3EDismissibleListStyle(),
     bool selection = false,
     bool reorder = false,
@@ -360,6 +411,9 @@ class M3EDismissibleColumn extends StatefulWidget {
       borderRadiusBuilder: borderRadiusBuilder,
       leadingActionsBuilder: leadingActionsBuilder,
       trailingActionsBuilder: trailingActionsBuilder,
+      swipeMode: swipeMode,
+      dismissEdge: dismissEdge,
+      controller: controller,
       style: style,
       selection: selection,
       reorder: reorder,
@@ -432,19 +486,28 @@ class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
       widget.trailingActionsBuilder;
 
   @override
+  M3EListSwipeMode get swipeMode => widget.swipeMode;
+
+  @override
+  M3EListSwipeEdge get dismissEdge => widget.dismissEdge;
+
+  @override
   void initState() {
     super.initState();
     initSlots();
+    bindSwipeController(widget.controller);
   }
 
   @override
   void didUpdateWidget(M3EDismissibleColumn old) {
     super.didUpdateWidget(old);
     syncSlotsIfNeeded(old.itemCount);
+    bindSwipeController(widget.controller);
   }
 
   @override
   void dispose() {
+    unbindSwipeController();
     disposeSlots();
     super.dispose();
   }
@@ -483,6 +546,11 @@ class _M3EDismissibleColumnState extends State<M3EDismissibleColumn>
       );
     }
 
+    column = M3EListKeyboardGroup(
+      itemCount: widget.itemCount,
+      semanticsLabel: widget.semanticsLabel,
+      child: column,
+    );
     if (widget.selection || widget.reorder) {
       column = M3EListFeatureHost(
         itemCount: widget.itemCount,

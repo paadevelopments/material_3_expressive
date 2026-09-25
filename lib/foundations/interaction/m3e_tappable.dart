@@ -29,6 +29,9 @@ class M3ETappable extends StatefulWidget {
     this.onLongPress,
     this.enabled = true,
     this.focusable = true,
+    this.skipTraversal,
+    this.trackHover = true,
+    this.focusOverlay = true,
     this.focusNode,
     this.autofocus = false,
     this.mouseCursor,
@@ -64,6 +67,17 @@ class M3ETappable extends StatefulWidget {
   /// When false, pointer activation still works but Tab skips the surface
   /// (use for controls embedded in a focusable parent row).
   final bool focusable;
+
+  /// Tab-order override. Null skips traversal only when [focusable] is false.
+  final bool? skipTraversal;
+
+  /// When false, pointer motion does not paint the hover state layer.
+  final bool trackHover;
+
+  /// When false, a focused node does not paint the ink focus wash.
+  ///
+  /// List rows use the inset ring instead, including after a pointer tap.
+  final bool focusOverlay;
 
   /// Optional focus node; one is created internally when null.
   final FocusNode? focusNode;
@@ -149,6 +163,7 @@ class _M3ETappableState extends State<M3ETappable>
   void didUpdateWidget(covariant M3ETappable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.focusable != widget.focusable ||
+        oldWidget.skipTraversal != widget.skipTraversal ||
         oldWidget.focusNode != widget.focusNode) {
       _applyFocusableToNode();
     }
@@ -160,12 +175,15 @@ class _M3ETappableState extends State<M3ETappable>
       _update(_state.copyWith(hovered: false, pressed: false));
       _animateScale(1);
     }
+    if (!widget.trackHover && _state.hovered) {
+      _update(_state.copyWith(hovered: false));
+    }
   }
 
   void _applyFocusableToNode() {
     _effectiveFocusNode
       ..canRequestFocus = widget.focusable
-      ..skipTraversal = !widget.focusable;
+      ..skipTraversal = widget.skipTraversal ?? !widget.focusable;
   }
 
   @override
@@ -335,7 +353,9 @@ class _M3ETappableState extends State<M3ETappable>
         onTap: onTap,
         onLongPress: onLongPress,
         mouseCursor: _resolveCursor(interactive),
-        onHover: interactive
+        trackHover: widget.trackHover,
+        focusOverlay: widget.focusOverlay,
+        onHover: interactive && widget.trackHover
             ? (bool hovered) => _update(_state.copyWith(hovered: hovered))
             : null,
         child: content,
@@ -375,8 +395,12 @@ class _M3ETappableState extends State<M3ETappable>
     if (!widget.materialInk) {
       wrapped = MouseRegion(
         cursor: _resolveCursor(interactive),
-        onEnter: (_) => _update(_state.copyWith(hovered: true)),
-        onExit: (_) => _update(_state.copyWith(hovered: false)),
+        onEnter: widget.trackHover
+            ? (_) => _update(_state.copyWith(hovered: true))
+            : null,
+        onExit: widget.trackHover
+            ? (_) => _update(_state.copyWith(hovered: false))
+            : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onTap,
@@ -432,14 +456,24 @@ class _M3ETappableState extends State<M3ETappable>
     if (!interactive || !widget.focusable) {
       return focused;
     }
-    return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-        SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
-        SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-      },
-      child: focused,
+    return TapRegion(
+      onTapOutside: _onTapOutside,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+        },
+        child: focused,
+      ),
     );
+  }
+
+  void _onTapOutside(PointerDownEvent event) {
+    M3EFocusInteraction.instance.notePointerInteraction();
+    if (_effectiveFocusNode.hasPrimaryFocus) {
+      _effectiveFocusNode.unfocus();
+    }
   }
 
   void _activateFromKeyboard() {

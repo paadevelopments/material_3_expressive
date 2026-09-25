@@ -552,7 +552,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
             onTap: selectionTap,
             onDoubleTap: onDoubleTap,
           );
-    final VoidCallback? onPressed = _foregroundPressCallback(boundPress);
+    final VoidCallback? onPressed = _foregroundPress(boundPress);
     final suppressHover = _suppressCardHover;
     final BorderRadius radius =
         m3eSelectionRadius(context, slotPos, outerRadius: style.outerRadius) ??
@@ -590,7 +590,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     return () => features.onToggleSelection(slotPos);
   }
 
-  VoidCallback? _foregroundPressCallback(VoidCallback? boundPress) {
+  VoidCallback? _foregroundPress(VoidCallback? boundPress) {
     if (!isActionPreviewOpen && boundPress == null) {
       return null;
     }
@@ -603,6 +603,24 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     };
   }
 
+  Widget _swipeOverflow(int slotPos, Widget child) {
+    final bool leading = actionsFor(slotPos, swipingRight: true).isNotEmpty;
+    final bool trailing = actionsFor(slotPos, swipingRight: false).isNotEmpty;
+    if (!leading && !trailing) {
+      return child;
+    }
+    return M3EListSwipeOverflow(
+      onReveal: () {
+        if (isActionPreviewOpen) {
+          closeActionPreview();
+          return;
+        }
+        _revealIndex(slotPos, leading: leading && !trailing);
+      },
+      child: child,
+    );
+  }
+
   Widget _buildForegroundM3ECard(
     BuildContext context, {
     required M3EDismissibleSlot slot,
@@ -613,26 +631,41 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     required bool suppressHover,
     required VoidCallback? onPressed,
   }) {
-    return M3ECard(
-      variant: M3ECardVariant.filled,
-      surfaceKey: inDragProxy ? null : _measureKey(slot),
-      borderRadius: animatedRadius,
-      color:
-          colorBuilder?.call(slotPos) ??
-          m3eSelectionFill(context, slotPos) ??
-          style.color ??
-          M3ETheme.of(context).colorScheme.surfaceContainerHighest,
-      border: style.border,
-      animationDuration: Duration.zero,
-      width: double.infinity,
-      padding: EdgeInsets.zero,
-      enabled: !suppressHover,
-      onPressed: onPressed,
-      onLongPress: _foregroundLongPress(slotPos, suppressHover),
-      haptic: style.hapticOnTap,
-      child: Padding(
-        padding: style.padding ?? M3EListDismissibleTheme.defaultItemPadding,
-        child: M3EListItemScope(child: swipeItemBuilder(context, slotPos)),
+    final EdgeInsetsGeometry pad = style.padding ?? EdgeInsets.zero;
+    final parentPads = pad != EdgeInsets.zero;
+    return KeyedSubtree(
+      key: inDragProxy ? null : _measureKey(slot),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AbsorbPointer(
+          absorbing: suppressHover && !_isDismissDragging,
+          child: M3EListRowSurface(
+            index: slotPos,
+            radius: animatedRadius,
+            color:
+                colorBuilder?.call(slotPos) ??
+                m3eSelectionFill(context, slotPos) ??
+                style.color ??
+                M3ETheme.of(context).colorScheme.surfaceContainerHighest,
+            border: style.border,
+            onTap: onPressed,
+            onLongPress: _foregroundLongPress(slotPos, suppressHover),
+            suppressHover: suppressHover,
+            mouseCursor: SystemMouseCursors.click,
+            dragged: inDragProxy,
+            haptic: style.hapticOnTap,
+            child: Padding(
+              padding: pad,
+              child: M3EListItemScope(
+                padsChild: parentPads,
+                child: _swipeOverflow(
+                  slotPos,
+                  swipeItemBuilder(context, slotPos),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

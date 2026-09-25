@@ -12,17 +12,21 @@ import '../components/m3e_list_drag_proxy_scope.dart';
 import '../components/m3e_list_feature_scope.dart';
 import '../components/m3e_list_item_scope.dart';
 import '../components/m3e_list_reorder_session_scope.dart';
+import '../components/m3e_list_row_surface.dart';
 import '../components/m3e_list_swipe_action_button.dart';
+import '../components/m3e_list_swipe_overflow.dart';
 import '../enums/m3e_list_enums.dart';
 import '../enums/m3e_list_selection_enums.dart';
+import '../enums/m3e_list_swipe_edge.dart';
+import '../enums/m3e_list_swipe_mode.dart';
 import '../models/m3e_dismissible_slot.dart';
 import '../models/m3e_list_swipe_action.dart';
 import '../styles/m3e_dismissible_list_style.dart';
-import '../styles/m3e_list_theme.dart';
 import '../utils/m3e_list_selection_fill.dart';
+import 'm3e_dismissible_list_controller.dart';
 
-part 'm3e_dismissible_card_drag_mixin.dart';
 part 'm3e_dismissible_card_build_mixin.dart';
+part 'm3e_dismissible_card_drag_mixin.dart';
 
 const int _kVibrationThresholdMs = 60;
 const double _kMaxPreDetachRoundness = 0.6;
@@ -117,6 +121,12 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   /// The isInteractionLocked.
   bool get isInteractionLocked => _dragSlotRef != null || _collapsingCount > 0;
 
+  /// Gesture policy. Reveal never dismisses. Dismiss never settles open.
+  M3EListSwipeMode get swipeMode => M3EListSwipeMode.both;
+
+  /// Which direction a manual swipe is allowed to dismiss.
+  M3EListSwipeEdge get dismissEdge => M3EListSwipeEdge.both;
+
   /// Accumulated horizontal delta before dismiss locks (reorder-safe).
   double _dismissDxAcc = 0;
 
@@ -124,15 +134,33 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   bool get isActionPreviewOpen =>
       _dragSlotRef != null && (_pastActionThreshold || _dragOffset.abs() > 0.5);
 
+  /// Stays set through the return spring, including frames where a controller
+  /// is between ticks.
+  bool _hoverLocked = false;
+
   /// True while dismiss drag or settle springs are moving cards.
   bool get _suppressCardHover {
-    if (_isDismissDragging) {
+    if (_isDismissDragging || _hoverLocked) {
       return true;
     }
-    return _isMotionAnimating(_springCtrl) ||
-        _isMotionAnimating(_nbrCtrl) ||
-        _isMotionAnimating(_pushCtrl) ||
-        _isMotionAnimating(_roundnessCtrl);
+    return _hoverMotionActive;
+  }
+
+  bool get _hoverMotionActive =>
+      _isMotionAnimating(_springCtrl) ||
+      _isMotionAnimating(_nbrCtrl) ||
+      _isMotionAnimating(_pushCtrl) ||
+      _isMotionAnimating(_roundnessCtrl);
+
+  void _lockHover() {
+    _hoverLocked = true;
+  }
+
+  void _unlockHoverIfIdle() {
+    if (_isDismissDragging || _hoverMotionActive) {
+      return;
+    }
+    _hoverLocked = false;
   }
 
   bool _isMotionAnimating(SingleMotionController? controller) =>
@@ -144,7 +172,7 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
       return;
     }
     if (mounted) {
-      setState(() {});
+      setState(_unlockHoverIfIdle);
     }
   }
 

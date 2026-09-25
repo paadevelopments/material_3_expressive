@@ -131,7 +131,7 @@ extension _M3EExpandableItemBody on _M3EExpandableItemState {
         (!isExpanded && d.tapBodyToExpand);
     final tapCallback =
         (!isEntirelyTappable && canTapBody && !d.tapIconToToggle)
-        ? widget.onToggle
+        ? _primaryToggle
         : null;
     final bodyTooltip = tapCallback != null
         ? (isExpanded ? d.collapseTooltip : d.expandTooltip)
@@ -154,6 +154,13 @@ extension _M3EExpandableItemBody on _M3EExpandableItemState {
 
 /// Header tap resolution and card assembly for [_M3EExpandableItemState].
 extension _M3EExpandableItemHeader on _M3EExpandableItemState {
+  VoidCallback get _primaryToggle {
+    if (widget.expanded?.isTransform ?? false) {
+      return widget.onTransform ?? widget.onToggle;
+    }
+    return widget.onToggle;
+  }
+
   VoidCallback? _selectionDoubleTap() {
     final M3EListFeatureScope? features = M3EListFeatureScope.maybeOf(context);
     if (features == null ||
@@ -197,7 +204,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
         return;
       }
       if (entireCardTappable || expandOnHeader || separateLeadingSelect) {
-        widget.onToggle();
+        _primaryToggle();
       }
     };
   }
@@ -315,6 +322,12 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
                   child: M3EExpandableNestScope(
                     closeBottom: isLast,
                     outerRadius: d.outerRadius,
+                    rowIndex: widget.index,
+                    surfaceColor:
+                        d.color ??
+                        M3ETheme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                     child: widget.expanded!.child,
                   ),
                 ),
@@ -443,24 +456,26 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
         m3eSelectionFill(context, widget.index) ??
         d.color ??
         scheme.surfaceContainerHighest;
-    final Widget card = M3ECard(
-      variant: M3ECardVariant.filled,
-      borderRadius: radius,
+    final Widget card = M3EListRowSurface(
+      index: widget.index,
+      radius: radius,
       color: fill,
-      elevation: d.elevation,
       border: d.border,
-      padding: EdgeInsets.zero,
-      width: double.infinity,
-      onPressed: cardPress,
+      elevation: d.elevation,
+      onTap: cardPress,
       onStateChanged: cardHandlesTap ? _handleCardStateChanged : null,
       mouseCursor: cardHandlesTap ? SystemMouseCursors.click : null,
       child: child,
     );
     if (cardHandlesTap) {
-      // [M3ECard] owns focus ring when interactive.
       return card;
     }
-    return M3EFocusRing(focused: _focused, radius: radius, child: card);
+    return M3EListFocusRing(
+      focused: _focused,
+      radius: radius,
+      color: scheme.secondary,
+      child: card,
+    );
   }
 
   Widget _buildHeader(
@@ -481,7 +496,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (d.iconPlacement == M3EExpandableIconPlacement.left) ...[
-              _buildIcon(d, progress, widget.onToggle),
+              _buildIcon(d, progress, _primaryToggle),
               SizedBox(width: iconGap),
               Expanded(
                 child: Align(
@@ -497,7 +512,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
                 ),
               ),
               SizedBox(width: iconGap),
-              _buildIcon(d, progress, widget.onToggle),
+              _buildIcon(d, progress, _primaryToggle),
             ],
           ],
         ),
@@ -546,10 +561,10 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
     final Widget iconWidget;
     if (d.expandedIconBackgroundSize > 0) {
       final double width = d.expandedIconBackgroundSize;
-      final Color? fill = isExpanded
-          ? (d.expandedIconBackground ??
-                M3ETheme.of(context).colorScheme.surfaceContainerLowest)
-          : null;
+      final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
+      final Color fill = isExpanded
+          ? (d.expandedIconBackground ?? scheme.surfaceContainer)
+          : (d.expandedIconBackground ?? scheme.surface);
       iconWidget = ConstrainedBox(
         constraints: BoxConstraints.tightFor(width: width),
         child: DecoratedBox(

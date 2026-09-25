@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../cards/m3e_cards.dart';
 import '../../tooltips/m3e_tooltips.dart';
 import '../enums/m3e_expandable_enums.dart';
 import '../enums/m3e_list_selection_enums.dart';
@@ -20,8 +19,11 @@ import 'm3e_expandable_expanded.dart';
 import 'm3e_expandable_nest_scope.dart';
 import 'm3e_expandable_snap_collapse.dart';
 import 'm3e_expandable_sublist.dart';
+import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_feature_scope.dart';
+import 'm3e_list_focus_ring.dart';
 import 'm3e_list_reorder_exclude.dart';
+import 'm3e_list_row_surface.dart';
 
 part 'm3e_expandable_item_body.dart';
 
@@ -66,6 +68,8 @@ class M3EExpandableItem extends StatefulWidget {
     required this.expandMotion,
     required this.collapseMotion,
     required this.onToggle,
+    this.onTransform,
+    this.onTransformAnchor,
     this.expanded,
   });
 
@@ -100,6 +104,12 @@ class M3EExpandableItem extends StatefulWidget {
   /// onToggle.
   final VoidCallback onToggle;
 
+  /// Opens a container transform instead of expanding in place.
+  final VoidCallback? onTransform;
+
+  /// Reports the resting row context used to measure the morph origin.
+  final ValueChanged<BuildContext>? onTransformAnchor;
+
   @override
   State<M3EExpandableItem> createState() => _M3EExpandableItemState();
 }
@@ -127,8 +137,16 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     _expandCtrl = SingleMotionController(motion: motion, vsync: this)
       ..value = widget.isExpanded ? 1.0 : 0.0;
     _toggleFocusNode.addListener(_handleToggleFocusChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportAnchor());
     FocusManager.instance.addHighlightModeListener(_handleHighlightModeChanged);
     M3EFocusInteraction.instance.addListener(_handleToggleFocusChanged);
+  }
+
+  void _reportAnchor() {
+    if (!mounted || M3EListDragProxyScope.maybeOf(context) != null) {
+      return;
+    }
+    widget.onTransformAnchor?.call(context);
   }
 
   void _handleHighlightModeChanged(FocusHighlightMode mode) {
@@ -139,6 +157,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   void didUpdateWidget(covariant M3EExpandableItem oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    _reportAnchor();
     if (oldWidget.isExpanded != widget.isExpanded) {
       final bool snap = M3EExpandableSnapCollapse.of(context);
       if (snap) {

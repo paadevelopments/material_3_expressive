@@ -181,6 +181,41 @@ void registerExpandableSublistTabTraversalTests() {
     await tester.pumpAndSettle();
     expect(taps, <String>['nested-0', 'nested-1']);
   });
+
+  testWidgets('arrow keys walk an expanded sublist between headers', (
+    WidgetTester tester,
+  ) async {
+    final taps = <String>[];
+    await _pumpExpandedSublistForTabTraversal(tester, taps);
+
+    expect(primaryFocus?.nextFocus(), isTrue);
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0', 'nested-1']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(
+      primaryFocus?.context?.findAncestorWidgetOfExactType<M3ECardList>(),
+      isNull,
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0', 'nested-1', 'nested-1']);
+  });
 }
 
 void registerExpandableSublistSelectionPersistenceTests() {
