@@ -17,6 +17,18 @@ class M3ECarouselScrollPhysics extends ScrollPhysics {
     Tolerance tolerance,
     double velocity,
   ) {
+    final List<double>? extents = position.restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      double item = _itemFromExtents(position.pixels, extents);
+      if (velocity < -tolerance.velocity) {
+        item -= 0.5;
+      } else if (velocity > tolerance.velocity) {
+        item += 0.5;
+      }
+      final int index = item.round().clamp(0, extents.length - 1);
+      return _extentPrefix(extents, index);
+    }
+
     double fraction;
 
     if (position.itemExtent != null) {

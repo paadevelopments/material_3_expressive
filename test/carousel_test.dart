@@ -41,6 +41,8 @@ void main() {
     _textRestoresWhenScrollEnds,
   );
   testWidgets('multi-aspect items keep a gap', _multiAspectGap);
+  testWidgets('multi-aspect shrinks like uncontained', _multiAspectShrinks);
+  testWidgets('controller steps and jumps', _controllerSteps);
   testWidgets(
     'uncontained edge follows the shrink extent and does not jump on hover',
     _uncontainedInsets,
@@ -395,6 +397,97 @@ Future<void> _multiAspectGap(WidgetTester tester) async {
   final Rect first = tester.getRect(firstFrame);
   final Rect second = tester.getRect(secondFrame);
   expect(second.left - first.right, greaterThan(4));
+}
+
+Future<void> _multiAspectShrinks(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _SettleHost(
+      width: 800,
+      child: M3ECarousel(
+        type: M3ECarouselType.uncontainedMultiAspect,
+        children: <M3ECarouselItem>[
+          for (int i = 0; i < 4; i++)
+            M3ECarouselItem(
+              onTap: _enableItem,
+              aspectRatio: i.isEven ? 16 / 9 : 9 / 16,
+              image: ColoredBox(
+                key: ValueKey<int>(i),
+                color: const Color(0xFF112233),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  double widthOf(int index) {
+    return tester
+        .getSize(
+          find
+              .ancestor(
+                of: find.byKey(ValueKey<int>(index)),
+                matching: find.byType(Material),
+              )
+              .first,
+        )
+        .width;
+  }
+
+  final double restWide = widthOf(0);
+  final double restNarrow = widthOf(1);
+  expect(restWide, greaterThan(restNarrow + 20));
+
+  await tester.fling(find.byType(M3ECarousel), const Offset(-500, 0), 1200);
+  var shrank = false;
+  for (var i = 0; i < 40; i++) {
+    await tester.pump(const Duration(milliseconds: 16));
+    if (find.byKey(const ValueKey<int>(0)).evaluate().isEmpty) {
+      continue;
+    }
+    if (widthOf(0) < restWide - 8) {
+      shrank = true;
+      break;
+    }
+  }
+  expect(shrank, isTrue);
+}
+
+Future<void> _controllerSteps(WidgetTester tester) async {
+  final M3ECarouselController controller = M3ECarouselController();
+  addTearDown(controller.dispose);
+  await tester.pumpWidget(
+    _SettleHost(
+      width: 800,
+      child: M3ECarousel(
+        controller: controller,
+        type: M3ECarouselType.uncontained,
+        children: _items(6),
+      ),
+    ),
+  );
+  await tester.pump();
+  expect(controller.currentItem, 0);
+
+  final double extent = M3ECarouselTheme.defaultUncontainedItemExtent;
+  final Future<void> forward = controller.next();
+  await tester.pumpAndSettle();
+  await forward;
+  double pixels() =>
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+  expect(pixels(), closeTo(extent, 1));
+  expect(controller.currentItem, 1);
+
+  controller.jumpToItem(3);
+  await tester.pump();
+  expect(pixels(), closeTo(extent * 3, 1));
+  expect(controller.currentItem, 3);
+
+  final Future<void> back = controller.previous();
+  await tester.pumpAndSettle();
+  await back;
+  expect(controller.currentItem, 2);
+  expect(pixels(), closeTo(extent * 2, 1));
 }
 
 Future<void> _uncontainedImageFills(WidgetTester tester) async {

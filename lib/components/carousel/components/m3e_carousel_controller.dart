@@ -1,15 +1,112 @@
 part of 'm3e_carousel_view.dart';
 
-/// A controller for [M3ECarouselView].
+/// A controller for the carousel and [M3ECarouselView].
 ///
-/// Using a carousel controller helps to show the first visible item on the
-/// carousel list.
+/// [next], [previous], [animateToItem], and [jumpToItem] move by the same
+/// step as a swipe. [showAll] opens the carousel list. [currentItem] is the
+/// item that step is aiming at.
 class M3ECarouselController extends ScrollController {
   /// Creates a carousel controller.
   M3ECarouselController({this.initialItem = 0});
 
   /// The item that expands to the maximum size when first creating the [M3ECarouselView].
   final int initialItem;
+
+  int Function()? _readItem;
+  Future<void> Function(int direction)? _step;
+  Future<void> Function(
+    int index, {
+    required bool jump,
+    required Duration duration,
+    required Curve curve,
+  })?
+  _moveTo;
+  void Function()? _openAll;
+
+  /// Binds the carousel that this controller drives.
+  ///
+  /// The carousel calls this. Use [next], [previous], [animateToItem],
+  /// [jumpToItem], and [showAll] to control it.
+  void attachActions({
+    required int Function() currentItem,
+    required Future<void> Function(int direction) step,
+    required Future<void> Function(
+      int index, {
+      required bool jump,
+      required Duration duration,
+      required Curve curve,
+    })
+    moveTo,
+    required void Function() showAll,
+  }) {
+    _readItem = currentItem;
+    _step = step;
+    _moveTo = moveTo;
+    _openAll = showAll;
+  }
+
+  /// Drops the actions bound by [attachActions].
+  void detachActions() {
+    _readItem = null;
+    _step = null;
+    _moveTo = null;
+    _openAll = null;
+  }
+
+  /// Item the next swipe or [next] call continues from.
+  int get currentItem {
+    final int Function()? read = _readItem;
+    if (read != null) {
+      return read();
+    }
+    if (!hasClients || positions.length != 1) {
+      return initialItem;
+    }
+    return leadingItem;
+  }
+
+  /// Scrolls one item forward, the same way a swipe does.
+  Future<void> next() {
+    final Future<void> Function(int direction)? step = _step;
+    if (step != null) {
+      return step(1);
+    }
+    return animateToItem(currentItem + 1);
+  }
+
+  /// Scrolls one item back, the same way a swipe does.
+  Future<void> previous() {
+    final Future<void> Function(int direction)? step = _step;
+    if (step != null) {
+      return step(0);
+    }
+    return animateToItem(currentItem - 1);
+  }
+
+  /// Jumps to [index] without animating.
+  void jumpToItem(int index) {
+    final move = _moveTo;
+    if (move != null) {
+      move(index, jump: true, duration: Duration.zero, curve: Curves.linear);
+      return;
+    }
+    if (!hasClients || _carouselState == null) {
+      return;
+    }
+    final List<double>? extents = variedItemExtents;
+    if (extents != null && extents.isNotEmpty) {
+      jumpTo(_variedOffset(index, extents));
+      return;
+    }
+    final bool hasFlexWeights =
+        _carouselState!._flexWeights?.isNotEmpty ?? false;
+    jumpTo(
+      _getTargetOffset(position as _CarouselPosition, index, hasFlexWeights),
+    );
+  }
+
+  /// Opens the show-all list.
+  void showAll() => _openAll?.call();
 
   /// Main-axis extents for a multi-aspect carousel.
   ///
@@ -63,17 +160,21 @@ class M3ECarouselController extends ScrollController {
     Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.ease,
   }) async {
+    final move = _moveTo;
+    if (move != null) {
+      await move(index, jump: false, duration: duration, curve: curve);
+      return;
+    }
     if (!hasClients) {
       return;
     }
     final List<double>? extents = variedItemExtents;
     if (extents != null && extents.isNotEmpty) {
-      final int target = index.clamp(0, extents.length - 1);
-      double offset = 0;
-      for (int i = 0; i < target; i++) {
-        offset += extents[i];
-      }
-      await animateTo(offset, duration: duration, curve: curve);
+      await animateTo(
+        _variedOffset(index, extents),
+        duration: duration,
+        curve: curve,
+      );
       return;
     }
     if (_carouselState == null) {
@@ -99,6 +200,15 @@ class M3ECarouselController extends ScrollController {
           curve: curve,
         ),
     ]);
+  }
+
+  double _variedOffset(int index, List<double> extents) {
+    final int target = index.clamp(0, extents.length - 1);
+    double offset = 0;
+    for (int i = 0; i < target; i++) {
+      offset += extents[i];
+    }
+    return offset;
   }
 
   double _getTargetOffset(
@@ -187,6 +297,7 @@ class M3ECarouselController extends ScrollController {
       context: context,
       initialItem: initialItem,
       itemExtent: _carouselState!._itemExtent,
+      restingExtents: _carouselState!.widget.restingExtents,
       consumeMaxWeight: _carouselState!._consumeMaxWeight,
       flexWeights: _carouselState!._flexWeights,
       infinite: _carouselState!.widget.infinite,
@@ -203,6 +314,7 @@ class M3ECarouselController extends ScrollController {
     }
     position
       ..flexWeights = _carouselState!._flexWeights
+      ..restingExtents = _carouselState!.widget.restingExtents
       ..itemExtent = _carouselState!._itemExtent
       ..consumeMaxWeight = _carouselState!._consumeMaxWeight
       ..infinite = _carouselState!.widget.infinite

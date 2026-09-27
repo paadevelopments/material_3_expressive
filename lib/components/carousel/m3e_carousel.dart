@@ -72,7 +72,11 @@ class M3ECarousel extends StatefulWidget {
     required this.children,
   });
 
-  /// Scroll controller. The carousel creates one when this is omitted.
+  /// Scroll and action controller. The carousel creates one when this is omitted.
+  ///
+  /// Use [M3ECarouselController.next], [M3ECarouselController.previous],
+  /// [M3ECarouselController.animateToItem], [M3ECarouselController.jumpToItem],
+  /// and [M3ECarouselController.showAll].
   final M3ECarouselController? controller;
 
   /// The explicit bounded width allocation applied to the root carousel container wrapper.
@@ -168,6 +172,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
   double _stepExtent = 0;
   List<int> layoutWeight = [];
   int itemScrolled = 0;
+  List<double>? _aspectExtents;
   M3ECarouselController? _ownedController;
   final GlobalKey _trackKey = GlobalKey();
 
@@ -185,13 +190,13 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   bool _freeScroll() => widget.freeScroll ?? false;
 
-  void scrollFrame(int direction) {
+  Future<void> scrollFrame(int direction) async {
     if (!_controller.hasClients) {
       return;
     }
-    final List<double>? varied = _controller.variedItemExtents;
+    final List<double>? varied = _aspectExtents;
     if (varied != null) {
-      _scrollVaried(direction, varied);
+      await _scrollVaried(direction, varied);
       return;
     }
     final M3ECarouselTheme theme = M3ETheme.of(context).carouselTheme;
@@ -213,14 +218,14 @@ class _M3ECarouselState extends State<M3ECarousel> {
       return;
     }
     itemScrolled = step.itemScrolled;
-    _controller.animateTo(
+    await _controller.animateTo(
       step.nextScrollPosition,
       duration: Duration(milliseconds: widget.scrollAnimationDuration),
       curve: Curves.ease,
     );
   }
 
-  void _scrollVaried(int direction, List<double> extents) {
+  Future<void> _scrollVaried(int direction, List<double> extents) async {
     if (extents.isEmpty) {
       return;
     }
@@ -239,10 +244,84 @@ class _M3ECarouselState extends State<M3ECarousel> {
     for (var i = 0; i < itemScrolled; i++) {
       offset += extents[i];
     }
-    _controller.animateTo(
+    await _controller.animateTo(
       offset,
       duration: Duration(milliseconds: widget.scrollAnimationDuration),
       curve: Curves.ease,
+    );
+  }
+
+  Future<void> _moveTo(
+    int index, {
+    required bool jump,
+    required Duration duration,
+    required Curve curve,
+  }) async {
+    if (!mounted || !_controller.hasClients || widget.children.isEmpty) {
+      return;
+    }
+    final int target = _clampIndex(index);
+    itemScrolled = target;
+    final double offset = _offsetFor(target);
+    if (jump) {
+      _controller.jumpTo(offset);
+      return;
+    }
+    await _controller.animateTo(offset, duration: duration, curve: curve);
+  }
+
+  int _clampIndex(int index) {
+    final List<double>? varied = _aspectExtents;
+    if (varied != null && varied.isNotEmpty) {
+      return index.clamp(0, varied.length - 1);
+    }
+    final int limit = M3ECarouselScrollHelper.maxIndex(
+      type: layoutWeight.isEmpty ? M3ECarouselType.uncontained : widget.type,
+      heroAlignment: widget.heroAlignment,
+      isExtended: _extended(M3ETheme.of(context).carouselTheme),
+      childrenLength: widget.children.length,
+    );
+    if (limit < 0) {
+      return 0;
+    }
+    return index.clamp(0, limit);
+  }
+
+  double _offsetFor(int index) {
+    final List<double>? varied = _aspectExtents;
+    if (varied != null && varied.isNotEmpty) {
+      double offset = 0;
+      final int end = math.min(index, varied.length);
+      for (int i = 0; i < end; i++) {
+        offset += varied[i];
+      }
+      return offset;
+    }
+    final M3ECarouselTheme theme = M3ETheme.of(context).carouselTheme;
+    return M3ECarouselScrollHelper.offsetForIndex(
+      type: layoutWeight.isEmpty ? M3ECarouselType.uncontained : widget.type,
+      heroAlignment: widget.heroAlignment,
+      isExtended: _extended(theme),
+      uncontainedItemExtent: _stepExtent,
+      leadingGap: _leadingGap(theme),
+      layoutWeight: layoutWeight,
+      mainExtent: _trackMain,
+      childrenLength: widget.children.length,
+      index: index,
+    );
+  }
+
+  void _bindController(M3ECarouselController controller) {
+    controller.attachActions(
+      currentItem: () => itemScrolled,
+      step: scrollFrame,
+      moveTo: _moveTo,
+      showAll: () {
+        if (!mounted) {
+          return;
+        }
+        _openList(M3ETheme.of(context).carouselTheme);
+      },
     );
   }
 
@@ -297,6 +376,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
     if (widget.controller == null) {
       _ownedController = M3ECarouselController();
     }
+    _bindController(_controller);
     super.initState();
   }
 
@@ -304,6 +384,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
   void didUpdateWidget(covariant M3ECarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
+      (oldWidget.controller ?? _ownedController)?.detachActions();
       if (oldWidget.controller == null) {
         _ownedController?.dispose();
         _ownedController = null;
@@ -311,6 +392,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
       if (widget.controller == null) {
         _ownedController = M3ECarouselController();
       }
+      _bindController(_controller);
     }
     if (oldWidget.type != widget.type ||
         oldWidget.heroAlignment != widget.heroAlignment ||
@@ -324,6 +406,7 @@ class _M3ECarouselState extends State<M3ECarousel> {
 
   @override
   void dispose() {
+    _controller.detachActions();
     _ownedController?.dispose();
     super.dispose();
   }
@@ -399,10 +482,8 @@ class _M3ECarouselState extends State<M3ECarousel> {
               reducedMotion,
               trackMain,
             );
-            final List<double>? varied = _variedExtents(theme, container);
-            _controller
-              ..variedItemExtents = varied
-              ..variedLeadingGap = varied == null ? 0 : _leadingGap(theme);
+            final List<double>? varied = _aspectExtentsFor(theme, container);
+            _aspectExtents = varied;
             final double? itemExtent = _fixedExtent(theme, reduced, trackMain);
             _stepExtent = itemExtent ?? widget.uncontainedItemExtent;
             final bool showHeader = widget.header != null && !_fullScreen;
@@ -435,10 +516,15 @@ class _M3ECarouselState extends State<M3ECarousel> {
                     itemExtent: varied == null ? itemExtent : null,
                     itemExtents: varied,
                     leadingInset: _leadingGap(theme),
-                    shrinkExtent: widget.type == M3ECarouselType.uncontained
+                    shrinkExtent:
+                        widget.type == M3ECarouselType.uncontained ||
+                            widget.type ==
+                                M3ECarouselType.uncontainedMultiAspect
                         ? widget.uncontainedShrinkExtent
                         : 0,
-                    scaleItems: widget.type == M3ECarouselType.uncontained,
+                    scaleItems:
+                        widget.type == M3ECarouselType.uncontained ||
+                        widget.type == M3ECarouselType.uncontainedMultiAspect,
                     reducedMotion: reduced,
                     fixedPulseDelta: widget.fixedPulseDelta,
                     children: widget.children,
@@ -525,7 +611,10 @@ class _M3ECarouselState extends State<M3ECarousel> {
     return trackMain;
   }
 
-  List<double>? _variedExtents(M3ECarouselTheme theme, EdgeInsets container) {
+  List<double>? _aspectExtentsFor(
+    M3ECarouselTheme theme,
+    EdgeInsets container,
+  ) {
     if (widget.type != M3ECarouselType.uncontainedMultiAspect) {
       return null;
     }

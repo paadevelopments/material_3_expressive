@@ -149,7 +149,9 @@ class M3ECarouselWrapper extends StatefulWidget {
   /// Turns off parallax and size morphing.
   final bool reducedMotion;
 
-  /// Per-item main-axis extents. Items keep these sizes while scrolling.
+  /// Resting main-axis size of each item.
+  ///
+  /// The track shrinks these the same way an uncontained carousel does.
   final List<double>? itemExtents;
 
   /// Empty space after each item, inside a fixed extent.
@@ -173,7 +175,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   final List<LayerLink> _itemLinks = <LayerLink>[];
   final List<Size> _itemRest = <Size>[];
   bool _restRebuildScheduled = false;
-  int _variedLeading = 0;
 
   /// Per-index item boxes for pulse measuring.
   final Map<int, RenderBox> _itemBoxes = <int, RenderBox>{};
@@ -199,7 +200,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     super.initState();
     _internalController = widget.controller ?? M3ECarouselController();
     _syncFocusNodes();
-    _internalController.addListener(_handleVariedScroll);
   }
 
   @override
@@ -209,19 +209,16 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       _itemBoxes.removeWhere((int index, _) => index >= widget.children.length);
     }
     if (widget.controller != oldWidget.controller) {
-      _internalController.removeListener(_handleVariedScroll);
       if (oldWidget.controller == null) {
         _internalController.dispose();
       }
       _internalController = widget.controller ?? M3ECarouselController();
-      _internalController.addListener(_handleVariedScroll);
     }
     _syncFocusNodes();
   }
 
   @override
   void dispose() {
-    _internalController.removeListener(_handleVariedScroll);
     if (widget.controller == null) {
       _internalController.dispose();
     }
@@ -285,34 +282,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     if (mounted) {
       setState(() {});
     }
-  }
-
-  void _handleVariedScroll() {
-    final List<double>? extents = widget.itemExtents;
-    if (extents == null || extents.isEmpty || !_internalController.hasClients) {
-      return;
-    }
-    final double pixels = _internalController.position.pixels;
-    double start = 0;
-    int leading = extents.length - 1;
-    for (int i = 0; i < extents.length; i++) {
-      if (pixels < start + extents[i] / 2) {
-        leading = i;
-        break;
-      }
-      start += extents[i];
-    }
-    if (leading == _variedLeading) {
-      return;
-    }
-    _variedLeading = leading;
-    widget.onChange?.call(
-      M3ECarouselChangeDetails(
-        leadingIndex: leading,
-        focalIndex: leading,
-        itemCount: widget.children.length,
-      ),
-    );
   }
 
   void _moveFocus(int index) {
@@ -412,19 +381,6 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
       return math.max(widget.itemExtent! - paddingMain, restMain);
     }
     return math.max(restMain, 0);
-  }
-
-  EdgeInsetsGeometry? _leadingScrollPadding() {
-    if (widget.leadingInset <= 0) {
-      return null;
-    }
-    if (_vertical) {
-      return EdgeInsets.only(top: widget.leadingInset);
-    }
-    if (Directionality.of(context) == TextDirection.rtl) {
-      return EdgeInsets.only(right: widget.leadingInset);
-    }
-    return EdgeInsets.only(left: widget.leadingInset);
   }
 
   void _registerItemBox(int index, RenderBox box) {
@@ -1015,26 +971,30 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
     final ScrollPhysics? physics = widget.freeScroll
         ? null
         : const M3ECarouselStepPhysics();
-    if (widget.itemExtents != null) {
-      return ListView.builder(
+    final List<double>? extents = widget.itemExtents;
+    if (extents != null) {
+      return M3ECarouselView(
+        physics: physics,
+        padding: widget.padding,
+        backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        itemClipBehavior: Clip.none,
+        overlayColor: widget.overlayColor,
+        itemSnapping: widget.itemSnapping,
+        shrinkExtent: widget.shrinkExtent,
+        scaleItems: widget.scaleItems,
         controller: _internalController,
         scrollDirection: widget.scrollDirection,
         reverse: widget.reverse,
-        physics: physics,
-        padding: _leadingScrollPadding(),
-        clipBehavior: Clip.none,
-        itemCount: carouselChildren.length,
-        itemBuilder: (BuildContext context, int index) {
-          final double extent = widget.itemExtents![index];
-          return SizedBox(
-            width: _vertical ? null : extent,
-            height: _vertical ? extent : null,
-            child: Padding(
-              padding: _resolvedPadding,
-              child: carouselChildren[index],
-            ),
-          );
-        },
+        enableSplash: false,
+        infinite: widget.infinite,
+        leadingInset: widget.leadingInset,
+        itemExtent: extents.isEmpty ? 1 : extents.first,
+        restingExtents: extents,
+        onIndexChanged: widget.onIndexChanged,
+        onChange: widget.onChange,
+        children: carouselChildren,
       );
     }
     if (widget.flexWeights != null) {

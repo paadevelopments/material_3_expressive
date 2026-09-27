@@ -9,12 +9,16 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     required this.itemExtent,
     required this.scaleItems,
     required this.infinite,
+    this.restingExtents,
   });
 
   final double itemExtent;
   final double minExtent;
   final bool scaleItems;
   final bool infinite;
+
+  /// Per-item resting size. When set, each item shrinks from its own size.
+  final List<double>? restingExtents;
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
@@ -25,6 +29,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       maxExtent: itemExtent,
       scaleItems: scaleItems,
       infinite: infinite,
+      restingExtents: restingExtents,
     );
   }
 
@@ -37,7 +42,8 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       ..maxExtent = itemExtent
       ..minExtent = minExtent
       ..scaleItems = scaleItems
-      ..infinite = infinite;
+      ..infinite = infinite
+      ..restingExtents = restingExtents;
   }
 }
 
@@ -49,7 +55,11 @@ class _RenderSliverFixedExtentCarousel
     required this._minExtent,
     required bool scaleItems,
     required this._infinite,
-  }) : _scaleItems = scaleItems;
+    List<double>? restingExtents,
+  }) : _scaleItems = scaleItems,
+       _restingExtents = restingExtents == null
+           ? null
+           : List<double>.from(restingExtents);
 
   double get maxExtent => _maxExtent;
   double _maxExtent;
@@ -95,11 +105,27 @@ class _RenderSliverFixedExtentCarousel
     markNeedsLayout();
   }
 
+  List<double>? get restingExtents => _restingExtents;
+  List<double>? _restingExtents;
+
+  set restingExtents(List<double>? value) {
+    if (_sameExtents(_restingExtents, value)) {
+      return;
+    }
+    _restingExtents = value == null ? null : List<double>.from(value);
+    markNeedsLayout();
+  }
+
   // This implements the [itemExtentBuilder] callback.
   double _buildItemExtent(
     int index,
     SliverLayoutDimensions currentLayoutDimensions,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _variedExtent(index, extents);
+    }
+
     if (maxExtent == 0.0 || !scaleItems) {
       return maxExtent;
     }
@@ -151,6 +177,11 @@ class _RenderSliverFixedExtentCarousel
     double itemExtent,
     int index,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _variedOffset(index, extents);
+    }
+
     if (maxExtent == 0.0 || !scaleItems) {
       return maxExtent * index;
     }
@@ -181,6 +212,11 @@ class _RenderSliverFixedExtentCarousel
     )
     double itemExtent,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _leadingIndex(scrollOffset, extents);
+    }
+
     if (maxExtent == 0.0) {
       return 0;
     }
@@ -199,6 +235,11 @@ class _RenderSliverFixedExtentCarousel
     )
     double itemExtent,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _trailingIndex(scrollOffset, extents);
+    }
+
     if (maxExtent > 0.0) {
       final double actual = scrollOffset / maxExtent - 1;
       final int round = actual.round();
@@ -216,7 +257,93 @@ class _RenderSliverFixedExtentCarousel
     SliverConstraints constraints,
     double itemExtent,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      double sum = 0;
+      for (final double extent in extents) {
+        sum += extent;
+      }
+      return sum;
+    }
     return super.computeMaxScrollOffset(constraints, itemExtent);
+  }
+
+  double _variedExtent(int index, List<double> extents) {
+    if (index < 0 || index >= extents.length) {
+      return 0;
+    }
+    final double rest = extents[index];
+    if (!scaleItems) {
+      return rest;
+    }
+    final int leading = _leadingIndex(constraints.scrollOffset, extents);
+    if (index == leading) {
+      final double into =
+          constraints.scrollOffset - _extentPrefix(extents, index);
+      return math.max(rest - into, _floorFor(rest));
+    }
+    final double end =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
+    final int trailing = _trailingIndex(end, extents);
+    if (index == trailing) {
+      final double leftover = end - _extentPrefix(extents, index);
+      return clampDouble(leftover, _floorFor(rest), rest);
+    }
+    return rest;
+  }
+
+  double _variedOffset(int index, List<double> extents) {
+    if (!scaleItems || index < 0 || index >= extents.length) {
+      return _extentPrefix(extents, index);
+    }
+    final int leading = _leadingIndex(constraints.scrollOffset, extents);
+    if (index != leading) {
+      return _extentPrefix(extents, index);
+    }
+    final double rest = extents[index];
+    final double floor = _floorFor(rest);
+    final double extent = _variedExtent(index, extents);
+    if (extent <= floor) {
+      return _extentPrefix(extents, index) + (rest - floor);
+    }
+    return constraints.scrollOffset;
+  }
+
+  /// Shrink floor for one item, matching the uniform uncontained rule.
+  double _floorFor(double itemMax) {
+    if (itemMax <= 0) {
+      return 0;
+    }
+    return math.min(
+      itemMax,
+      math.max(constraints.remainingPaintExtent % itemMax, minExtent),
+    );
+  }
+
+  int _leadingIndex(double offset, List<double> extents) {
+    double start = 0;
+    for (int i = 0; i < extents.length; i++) {
+      final double next = start + extents[i];
+      if (offset < next) {
+        return i;
+      }
+      start = next;
+    }
+    return extents.length - 1;
+  }
+
+  /// Last item that has started before [end].
+  int _trailingIndex(double end, List<double> extents) {
+    double start = 0;
+    var trailing = 0;
+    for (int i = 0; i < extents.length; i++) {
+      if (start >= end) {
+        break;
+      }
+      trailing = i;
+      start += extents[i];
+    }
+    return trailing;
   }
 
   @override

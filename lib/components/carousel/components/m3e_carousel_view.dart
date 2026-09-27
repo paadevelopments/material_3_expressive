@@ -48,6 +48,7 @@ class M3ECarouselView extends StatefulWidget {
     this.onIndexChanged,
     this.onChange,
     this.leadingInset = 0,
+    this.restingExtents,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        itemBuilder = null,
@@ -81,6 +82,7 @@ class M3ECarouselView extends StatefulWidget {
     this.onChange,
     this.leadingInset = 0,
   }) : itemExtent = null,
+       restingExtents = null,
        itemBuilder = null,
        itemCount = null;
 
@@ -112,6 +114,7 @@ class M3ECarouselView extends StatefulWidget {
     this.leadingInset = 0,
   }) : consumeMaxWeight = true,
        flexWeights = null,
+       restingExtents = null,
        children = const <Widget>[];
 
   /// Creates a scrollable carousel with weighted items created on demand.
@@ -142,6 +145,7 @@ class M3ECarouselView extends StatefulWidget {
     this.physics,
     this.leadingInset = 0,
   }) : itemExtent = null,
+       restingExtents = null,
        children = const <Widget>[];
 
   /// Empty space before the first item. It scrolls away and does not
@@ -254,6 +258,9 @@ class M3ECarouselView extends StatefulWidget {
   /// is null.
   final double? itemExtent;
 
+  /// Resting size of each item. Items shrink from these sizes while scrolling.
+  final List<double>? restingExtents;
+
   /// The scrollPhysics to apply to the carousel layout.
   ///
   /// Defaults to [NeverScrollableScrollPhysics] to allow scroll control only
@@ -352,9 +359,14 @@ class _CarouselViewState extends State<M3ECarouselView> {
     if (widget.flexWeights != oldWidget.flexWeights) {
       (_controller.position as _CarouselPosition).flexWeights = _flexWeights;
     }
-    if (widget.itemExtent != oldWidget.itemExtent) {
+    if (widget.itemExtent != oldWidget.itemExtent ||
+        widget.restingExtents != oldWidget.restingExtents) {
       _itemExtent = widget.itemExtent;
-      (_controller.position as _CarouselPosition).itemExtent = _itemExtent;
+      final _CarouselPosition carouselPosition =
+          _controller.position as _CarouselPosition;
+      carouselPosition
+        ..restingExtents = widget.restingExtents
+        ..itemExtent = _itemExtent;
     }
     if (widget.consumeMaxWeight != oldWidget.consumeMaxWeight) {
       (_controller.position as _CarouselPosition).consumeMaxWeight =
@@ -571,6 +583,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
         minExtent: widget.shrinkExtent,
         scaleItems: widget.scaleItems,
         infinite: widget.infinite,
+        restingExtents: widget.restingExtents,
         delegate: delegate,
       );
     }

@@ -45,7 +45,10 @@ class _CarouselPlaygroundState extends State<CarouselPlayground> {
             '''
 $kPlaySnippetImport
 
+final M3ECarouselController controller = M3ECarouselController();
+
 M3ECarousel(
+  controller: controller,
   axis: Axis.${_axis.name},
   type: M3ECarouselType.${_type.name},
   freeScroll: $_freeScroll,
@@ -215,6 +218,13 @@ class _CarouselDemoHost extends StatefulWidget {
 
 class _CarouselDemoHostState extends State<_CarouselDemoHost> {
   int _focalIndex = 1;
+  final M3ECarouselController _controller = M3ECarouselController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Widget _carousel(String title) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -225,6 +235,7 @@ class _CarouselDemoHostState extends State<_CarouselDemoHost> {
       color: const Color(0xFFFFFFFF),
     );
     return M3ECarousel(
+      controller: _controller,
       axis: widget.type == M3ECarouselType.fullScreen
           ? Axis.vertical
           : widget.axis,
@@ -290,6 +301,20 @@ class _CarouselDemoHostState extends State<_CarouselDemoHost> {
           tooltip: 'Back',
           onPressed: () => Navigator.of(context).maybePop(),
         ),
+        actions: <Widget>[
+          M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
+            icon: const Icon(M3EIcons.arrow_back),
+            tooltip: 'Previous item',
+            onPressed: _controller.previous,
+          ),
+          M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
+            icon: const Icon(M3EIcons.arrow_forward),
+            tooltip: 'Next item',
+            onPressed: _controller.next,
+          ),
+        ],
       ),
       body: widget.type == M3ECarouselType.fullScreen
           ? _carousel(title)
