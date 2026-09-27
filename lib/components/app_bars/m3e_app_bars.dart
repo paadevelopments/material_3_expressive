@@ -714,7 +714,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       iconSize: metrics.iconSize,
       separateActions: motion.actions,
       containerColor: bg,
-      containerElevation: elevation,
       shadowColor: scheme.shadow,
       shape: appBarTheme.shape(bar.shapeFamily),
     );
@@ -761,6 +760,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
         }
         return _M3EActionOverlay(
           controller: _actionsOverlay,
+          color: bg,
           inset: safe.top,
           topPadding: appBarTheme.flexibleTopPadding,
           actionRow: appBarTheme.actionRowHeight,
@@ -772,7 +772,15 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
           iconSize: metrics.iconSize,
           leading: leading,
           actions: bar.actions,
-          child: padded,
+          child: Material(
+            color: bg,
+            elevation: elevation,
+            shadowColor: scheme.shadow,
+            surfaceTintColor: const Color(0x00000000),
+            shape: appBarTheme.shape(bar.shapeFamily),
+            clipBehavior: bar.clipBehavior,
+            child: padded,
+          ),
         );
       },
     );
@@ -1242,7 +1250,6 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
                       iconSize: metrics.iconSize,
                       separateActions: motion.actions,
                       containerColor: bg,
-                      containerElevation: elevation,
                       shadowColor: scheme.shadow,
                       shape: appBarTheme.shape(bar.shapeFamily),
                     );
@@ -1329,7 +1336,6 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
       iconSize: metrics.iconSize,
       separateActions: true,
       containerColor: bg,
-      containerElevation: elevation,
       shadowColor: scheme.shadow,
       shape: appBarTheme.shape(bar.shapeFamily),
     );
@@ -1344,10 +1350,17 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
             padding: EdgeInsets.only(top: top),
             child: Stack(
               children: <Widget>[
-                _m3eClipSliding(
-                  push: push,
-                  visual: math.max(motion.painted, push),
-                  child: body,
+                Material(
+                  color: bg,
+                  elevation: elevation,
+                  shadowColor: scheme.shadow,
+                  surfaceTintColor: const Color(0x00000000),
+                  shape: appBarTheme.shape(bar.shapeFamily),
+                  child: _m3eClipSliding(
+                    push: push,
+                    visual: math.max(motion.painted, push),
+                    child: body,
+                  ),
                 ),
                 Positioned(
                   top: appBarTheme.flexibleTopPadding,
@@ -1648,7 +1661,6 @@ class _M3EBarBody extends StatelessWidget {
     required this.iconSize,
     required this.separateActions,
     required this.containerColor,
-    required this.containerElevation,
     required this.shadowColor,
     required this.shape,
   });
@@ -1669,7 +1681,6 @@ class _M3EBarBody extends StatelessWidget {
   final double iconSize;
   final bool separateActions;
   final Color containerColor;
-  final double containerElevation;
   final Color shadowColor;
   final ShapeBorder shape;
 
@@ -1733,7 +1744,6 @@ class _M3EBarBody extends StatelessWidget {
     }
     return Material(
       color: containerColor,
-      elevation: containerElevation,
       shadowColor: shadowColor,
       surfaceTintColor: const Color(0x00000000),
       shape: shape,
@@ -1852,6 +1862,7 @@ Widget _m3eClipSliding({
 class _M3EActionOverlay extends StatelessWidget {
   const _M3EActionOverlay({
     required this.controller,
+    required this.color,
     required this.inset,
     required this.topPadding,
     required this.actionRow,
@@ -1867,6 +1878,7 @@ class _M3EActionOverlay extends StatelessWidget {
   });
 
   final OverlayPortalController controller;
+  final Color color;
   final double inset;
   final double topPadding;
   final double actionRow;
@@ -1882,29 +1894,33 @@ class _M3EActionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: controller,
-      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
-        final double dy = info.childPaintTransform.getTranslation().y;
-        return Positioned(
-          top: dy + inset + topPadding,
-          left: 0,
-          right: 0,
-          height: actionRow,
-          child: _M3EActionRow(
-            contentPadding: contentPadding,
-            actionRow: actionRow,
-            hide: hide,
-            tonal: tonal,
-            leadingColor: leadingColor,
-            trailingColor: trailingColor,
-            iconSize: iconSize,
-            leading: leading,
-            actions: actions,
-          ),
-        );
-      },
-      child: child,
+    return ColoredBox(
+      color: color,
+      child: OverlayPortal.overlayChildLayoutBuilder(
+        controller: controller,
+        overlayChildBuilder:
+            (BuildContext context, OverlayChildLayoutInfo info) {
+              final double dy = info.childPaintTransform.getTranslation().y;
+              return Positioned(
+                top: dy + inset + topPadding,
+                left: 0,
+                right: 0,
+                height: actionRow,
+                child: _M3EActionRow(
+                  contentPadding: contentPadding,
+                  actionRow: actionRow,
+                  hide: hide,
+                  tonal: tonal,
+                  leadingColor: leadingColor,
+                  trailingColor: trailingColor,
+                  iconSize: iconSize,
+                  leading: leading,
+                  actions: actions,
+                ),
+              );
+            },
+        child: child,
+      ),
     );
   }
 }

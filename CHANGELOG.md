@@ -2,13 +2,82 @@
 
 ### Changed
 
-* **Lists:** expressive defaults. One / two / three-line heights **56 / 72 / 88**. Padding **16×10**, slot gap **12**, icons **20**. `M3EListStyle.segmented` rests at **16** outer / **4** inner corners; hover, focus, press, drag, and selection use **16** all around. `M3EListStyle.standard` has no resting container. Baseline rows stay square until selected, and **56 / 72** stay middle-aligned. Leading slots: avatar **40**, image **56**, video **100×56** and **114×64**. Divider uses **outline**. Trailing icons use **on surface**. State layers: hover **0.08**, focus **0.1**, press **0.1**, drag **0.16**, disabled **0.1**, plus the inset focus ring. `M3EList` is the only list widget (`M3ECardList`, `M3EDismissibleList`, `M3EDismissibleColumn`, and `M3EExpandableList` are removed). Selection, variant, and reorder stay on the list. Swipe, expand, and `M3EListItem.transform` stay on the item. A sub-list expansion is a nested `M3EList` that inherits the parent corner join, fill, and variant. `M3EExpandableExpanded.transform` still morphs an expandable row (`M3EExpandableListController`). Tab stops on the first and last rows; arrows walk a row, then its trailing actions. A dismissible row with swipe actions and no trailing widget shows a more icon. A dragged row lifts to level **4**, shows the drag handle in the leading slot, and commits when the drag ends.
-* **App bars:** small content band is **64**, with the system inset outside that band. Flexible medium is **112** (**136** with a subtitle) and flexible large is **120** (**152** with a subtitle). Baseline medium stays **112** / **136** and baseline large is **152** / **184**. The container is **surface** at elevation **0**, and switches to **surface container** at elevation **3** when content scrolls under it. Scrolling back to the top restores both. Overlay scrollables do not clear that state. Top and search bars take the same `variant` as the sliver, default **small**. One title, subtitle, image, or search field moves inside the bar from the action row to the band below. A title with no leading control starts **16** in from the edge. `M3EAppBarHideMode.entire` slides the whole bar away. `M3EAppBarHideMode.actions` slides the container away and leaves each action floating on its own **surface container high** fill. `hideOnScroll` still means the whole bar. The search field is **56** tall, stadium **28**, elevation **0**. Its hint follows `centerTitle`, and `wrapActions` groups the pill's leading and trailing with that hint. `M3EAppBarController` (`expand`, `collapse`, `show`, `hide`, `followScroll`) drives the bar. A small bar does not rebuild on every scroll pixel. Scrollables on another route, and an idle list on desktop, do not clear the scrolled color or elevation. An auto hide slide follows the scroll and does not rebuild the page on the way down, so the bar and the body do not twitch. After a refresh replaces the list's scroll position, scrolling still updates the bar color and elevation.
-* **Carousel:** multi-browse, uncontained, uncontained multi-aspect, hero, and full-screen. Items are `M3ECarouselItem` values (`image`, optional `title` / `subtitle` / `prefixText`, `onTap`, `showScrim`, `transform`). A null `onTap` disables the item. `M3ECarouselController` steps with `next` and `previous`, moves with `animateToItem` and `jumpToItem`, and opens the list with `showAll`. Uncontained multi-aspect uses the same shrink-and-scroll motion as uncontained; each item's width still follows its aspect ratio. Dynamic text follows the item's current size on every frame of the scroll. Large slots keep the title and subtitle. Medium slots hide the title. A small slot shows `prefixText` on the subtitle line. The text stays aligned to that live size. Hero and contained horizontal insets are **16** on both sides. Uncontained tracks have no container inset. Items shrink to the shrink extent as they leave, then scroll off; the trailing item fills the leftover space and meets the edge once it reaches that extent. The item gap is the item's own padding and stays visible while the item is larger than the shrink extent. Settling does not resize the track again. Small slots stay **40–56**. Hover elevation **1**, focus ring **secondary** at **3** with a **2** offset. The ring follows the tap pulse, clears when you tap outside, and is not clipped at the track edge. InkSparkle paints on the item. Disabled content is **0.38**. A swipe advances one item unless `freeScroll` is true, which drags and snaps to the nearest item. The outgoing uncontained item scrolls fully off the leading edge. Full-screen items fill the viewport, keep that size while scrolling, parallax the image, and meet with no gap. `isExtended` applies to contained only. Tab and arrows move between items. Show all and the header arrow morph the carousel into a vertical list. An item with `transform` morphs after the tap pulse. Reduced motion turns off parallax and size changes. Pass a `M3ECarouselController` to call `animateToItem`.
-* **Tooltips:** a plain tooltip stays off its anchor and ignores the pointer, so the cursor on an icon button does not twitch between pointer and arrow.
-* **Interaction:** hover stays off while a scrollable is moving, so a fast fling does not flash the controls under the pointer.
-* **Focus rings:** a pointer tap hides the keyboard focus ring on every component until the next Tab or arrow key.
-* **Cards:** `vertical` stacks media above the text. Tab order is the card (when it is tappable), then its actions and overflow, then a revealed swipe action. Arrow keys show or hide that swipe action, and Escape closes it. Space or Enter activates the focused control. Keyboard focus keeps the secondary ring and the 10% state layer. Swipe can dismiss, reveal a leading or trailing action, or do both. A partial swipe settles open on a background action; a longer swipe or flick dismisses the card. Actions and overflow keep their own taps when the card is tappable. Outlined fill is **surface**. Content padding is **16** on every side. Media and an edge-to-edge divider sit outside that inset; a padding divider lines up with it on both sides. Heights follow the variant elevation table (elevated hover is level 2). Focus ring is **secondary**, **3dp** thick, **2dp** outside the edge. Disabled elevated and filled containers fade to **0.38**. Optional media, text, actions, overflow, dividers, one swipe action, and a card group (gap **8**, grid, staggered, list, carousel, reorder). A swipe springs the whole card off-screen or back. Reorder lifts the card, springs neighbors into the opening, then settles before the order changes. `openBuilder` runs a full-screen container transform.
+* **Lists:** expressive defaults. One / two / three-line heights **56 / 72 / 88**. Padding **16×10
+  **, slot gap **12**, icons **20**. `M3EListStyle.segmented` rests at **16** outer / **4** inner
+  corners; hover, focus, press, drag, and selection use **16** all around. `M3EListStyle.standard`
+  has no resting container. Baseline rows stay square until selected, and **56 / 72** stay
+  middle-aligned. Leading slots: avatar **40**, image **56**, video **100×56** and **114×64**.
+  Divider uses **outline**. Trailing icons use **on surface**. State layers: hover **0.08**, focus *
+  *0.1**, press **0.1**, drag **0.16**, disabled **0.1**, plus the inset focus ring. `M3EList` is
+  the only list widget (`M3ECardList`, `M3EDismissibleList`, `M3EDismissibleColumn`, and
+  `M3EExpandableList` are removed). Selection, variant, and reorder stay on the list. Swipe, expand,
+  and `M3EListItem.transform` stay on the item. A sub-list expansion is a nested `M3EList` that
+  inherits the parent corner join, fill, and variant. `M3EExpandableExpanded.transform` still morphs
+  an expandable row (`M3EExpandableListController`). Tab stops on the first and last rows; arrows
+  walk a row, then its trailing actions. A dismissible row with swipe actions and no trailing widget
+  shows a more icon. A dragged row lifts to level **4**, shows the drag handle in the leading slot,
+  and commits when the drag ends.
+* **App bars:** small content band is **64**, with the system inset outside that band. Flexible
+  medium is **112** (**136** with a subtitle) and flexible large is **120** (**152** with a
+  subtitle). Baseline medium stays **112** / **136** and baseline large is **152** / **184**. The
+  container is **surface** at elevation **0**, and switches to **surface container** at elevation *
+  *3** when content scrolls under it. Scrolling back to the top restores both. Overlay scrollables
+  do not clear that state. Top and search bars take the same `variant` as the sliver, default *
+  *small**. One title, subtitle, image, or search field moves inside the bar from the action row to
+  the band below. A title with no leading control starts **16** in from the edge.
+  `M3EAppBarHideMode.entire` slides the whole bar away. `M3EAppBarHideMode.actions` slides the
+  container away and leaves each action floating on its own **surface container high** fill.
+  `hideOnScroll` still means the whole bar. The search field is **56** tall, stadium **28**,
+  elevation **0**. Its hint follows `centerTitle`, and `wrapActions` groups the pill's leading and
+  trailing with that hint. `M3EAppBarController` (`expand`, `collapse`, `show`, `hide`,
+  `followScroll`) drives the bar. A small bar does not rebuild on every scroll pixel. Scrollables on
+  another route, and an idle list on desktop, do not clear the scrolled color or elevation. An auto
+  hide slide follows the scroll and does not rebuild the page on the way down, so the bar and the
+  body do not twitch. After a refresh replaces the list's scroll position, scrolling still updates
+  the bar color and elevation. In actions hide, the overlay uses that same scroll color with no
+  elevation, and the bar layer raises with the scroll.
+* **Carousel:** multi-browse, uncontained, uncontained multi-aspect, hero, and full-screen. Items
+  are `M3ECarouselItem` values (`image`, optional `title` / `subtitle` / `prefixText`, `onTap`,
+  `showScrim`, `transform`). A null `onTap` disables the item. `M3ECarouselController` steps with
+  `next` and `previous`, moves with `animateToItem` and `jumpToItem`, and opens the list with
+  `showAll`. Uncontained multi-aspect uses the same shrink-and-scroll motion as uncontained; each
+  item's width still follows its aspect ratio. Dynamic text follows the item's current size on every
+  frame of the scroll. Large slots keep the title and subtitle. Medium slots hide the title. A small
+  slot shows `prefixText` on the subtitle line. The text stays aligned to that live size. Hero and
+  contained horizontal insets are **16** on both sides. Uncontained tracks have no container inset.
+  Items shrink to the shrink extent as they leave, then scroll off; the trailing item fills the
+  leftover space and meets the edge once it reaches that extent. The item gap is the item's own
+  padding and stays visible while the item is larger than the shrink extent. Settling does not
+  resize the track again. Small slots stay **40–56**. Hover elevation **1**, focus ring **secondary
+  ** at **3** with a **2** offset. The ring follows the tap pulse, clears when you tap outside, and
+  is not clipped at the track edge. InkSparkle paints on the item. Disabled content is **0.38**. A
+  swipe advances one item unless `freeScroll` is true, which drags and snaps to the nearest item.
+  The outgoing uncontained item scrolls fully off the leading edge. Full-screen items fill the
+  viewport, keep that size while scrolling, parallax the image, and meet with no gap. `isExtended`
+  applies to contained only. Tab and arrows move between items. Show all and the header arrow morph
+  the carousel into a vertical list. An item with `transform` morphs after the tap pulse. Reduced
+  motion turns off parallax and size changes. Pass a `M3ECarouselController` to call
+  `animateToItem`.
+* **Tooltips:** a plain tooltip stays off its anchor and ignores the pointer, so the cursor on an
+  icon button does not twitch between pointer and arrow.
+* **Interaction:** hover stays off while a scrollable is moving, so a fast fling does not flash the
+  controls under the pointer.
+* **Focus rings:** a pointer tap hides the keyboard focus ring on every component until the next Tab
+  or arrow key.
+* **Cards:** `vertical` stacks media above the text. Tab order is the card (when it is tappable),
+  then its actions and overflow, then a revealed swipe action. Arrow keys show or hide that swipe
+  action, and Escape closes it. Space or Enter activates the focused control. Keyboard focus keeps
+  the secondary ring and the 10% state layer. Swipe can dismiss, reveal a leading or trailing
+  action, or do both. A partial swipe settles open on a background action; a longer swipe or flick
+  dismisses the card. Actions and overflow keep their own taps when the card is tappable. Outlined
+  fill is **surface**. Content padding is **16** on every side. Media and an edge-to-edge divider
+  sit outside that inset; a padding divider lines up with it on both sides. Heights follow the
+  variant elevation table (elevated hover is level 2). Focus ring is **secondary**, **3dp** thick, *
+  *2dp** outside the edge. Disabled elevated and filled containers fade to **0.38**. Optional media,
+  text, actions, overflow, dividers, one swipe action, and a card group (gap **8**, grid, staggered,
+  list, carousel, reorder). A swipe springs the whole card off-screen or back. Reorder lifts the
+  card, springs neighbors into the opening, then settles before the order changes. `openBuilder`
+  runs a full-screen container transform.
 
 ## 1.1.3
 

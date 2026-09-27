@@ -77,6 +77,10 @@ void main() {
     _autoHideSlideDoesNotTwitchTheBarOrTheBody,
   );
   testWidgets(
+    'actions hide colors the overlay and elevates the bar',
+    _actionsHideColorsTheOverlayAndElevatesTheBar,
+  );
+  testWidgets(
     'a title with no leading control starts 16 in',
     _titleWithNoLeadingControlStarts16In,
   );
@@ -792,6 +796,67 @@ Future<void> _autoHideSlideDoesNotTwitchTheBarOrTheBody(
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pumpAndSettle();
   await slide(M3EAppBarHideMode.actions);
+}
+
+Future<void> _actionsHideColorsTheOverlayAndElevatesTheBar(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        appBar: const M3EAppBar.top(
+          titleText: _inbox,
+          hideMode: M3EAppBarHideMode.actions,
+          leading: Icon(M3EIcons.menu),
+          actions: <Widget>[Icon(M3EIcons.search)],
+        ),
+        body: ListView(children: const <Widget>[SizedBox(height: 2400)]),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final M3EColorScheme scheme = M3ETheme.of(
+    tester.element(find.byType(M3EAppBar)),
+  ).colorScheme;
+  Material barMaterial() {
+    return tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byType(M3EAppBar),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+  }
+
+  ColoredBox overlay() {
+    return tester.widget<ColoredBox>(
+      find
+          .descendant(
+            of: find.byType(M3EAppBar),
+            matching: find.byType(ColoredBox),
+          )
+          .first,
+    );
+  }
+
+  expect(overlay().color, scheme.surface);
+  expect(barMaterial().color, scheme.surface);
+  expect(barMaterial().elevation, 0);
+
+  await tester.drag(find.byType(ListView), const Offset(0, -400));
+  await tester.pump();
+
+  expect(overlay().color, scheme.surfaceContainer);
+  expect(barMaterial().color, scheme.surfaceContainer);
+  expect(barMaterial().elevation, M3EElevation.level2);
+
+  tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
+  await tester.pump();
+
+  expect(overlay().color, scheme.surface);
+  expect(barMaterial().elevation, 0);
 }
 
 Future<void> _titleWithNoLeadingControlStarts16In(WidgetTester tester) async {
