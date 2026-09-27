@@ -2,12 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-List<Widget> _items(int count) {
-  return <Widget>[
+void _enableItem() {}
+
+List<M3ECarouselItem> _items(int count) {
+  return <M3ECarouselItem>[
     for (int i = 0; i < count; i++)
-      ColoredBox(
-        color: Colors.blue,
-        child: Center(child: Text('item$i')),
+      M3ECarouselItem(
+        onTap: _enableItem,
+        image: ColoredBox(
+          color: Colors.blue,
+          child: Center(child: Text('item$i')),
+        ),
       ),
   ];
 }
@@ -86,7 +91,13 @@ Future<void> _weightedViewWithConsumemaxweightFalseKeepsItem0After(
                 child: M3ECarouselView.weighted(
                   consumeMaxWeight: false,
                   flexWeights: const [2, 6, 2],
-                  children: _items(6),
+                  children: <Widget>[
+                    for (int i = 0; i < 6; i++)
+                      ColoredBox(
+                        color: Colors.blue,
+                        child: Center(child: Text('item$i')),
+                      ),
+                  ],
                 ),
               ),
             ),

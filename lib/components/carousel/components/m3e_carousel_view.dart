@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
@@ -33,6 +34,7 @@ class M3ECarouselView extends StatefulWidget {
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
+    this.scaleItems = true,
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -45,6 +47,7 @@ class M3ECarouselView extends StatefulWidget {
     required this.children,
     this.onIndexChanged,
     this.onChange,
+    this.leadingInset = 0,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        itemBuilder = null,
@@ -62,6 +65,7 @@ class M3ECarouselView extends StatefulWidget {
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
+    this.scaleItems = true,
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -75,6 +79,7 @@ class M3ECarouselView extends StatefulWidget {
     required this.children,
     this.onIndexChanged,
     this.onChange,
+    this.leadingInset = 0,
   }) : itemExtent = null,
        itemBuilder = null,
        itemCount = null;
@@ -90,6 +95,7 @@ class M3ECarouselView extends StatefulWidget {
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
+    this.scaleItems = true,
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -103,6 +109,7 @@ class M3ECarouselView extends StatefulWidget {
     this.onChange,
     this.infinite = false,
     this.physics,
+    this.leadingInset = 0,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        children = const <Widget>[];
@@ -118,6 +125,7 @@ class M3ECarouselView extends StatefulWidget {
     this.overlayColor,
     this.itemSnapping = false,
     this.shrinkExtent = 0.0,
+    this.scaleItems = true,
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -132,8 +140,13 @@ class M3ECarouselView extends StatefulWidget {
     this.onChange,
     this.infinite = false,
     this.physics,
+    this.leadingInset = 0,
   }) : itemExtent = null,
        children = const <Widget>[];
+
+  /// Empty space before the first item. It scrolls away and does not
+  /// change item sizes.
+  final double leadingInset;
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -193,6 +206,11 @@ class M3ECarouselView extends StatefulWidget {
   /// defined [shrinkExtent], the [shrinkExtent] is dynamically adjusted to match
   /// this remaining space, ensuring a smooth size transition.
   final double shrinkExtent;
+
+  /// Whether fixed-extent items shrink while scrolling.
+  ///
+  /// When false, every item keeps [itemExtent] and slides.
+  final bool scaleItems;
 
   /// Whether the carousel should keep scrolling to the next/previous items to
   /// maintain the original layout.
@@ -375,16 +393,28 @@ class _CarouselViewState extends State<M3ECarouselView> {
     _lastReportedLeadingItem = currentLeadingIndex;
     _lastReportedFocalItem = currentFocalIndex;
 
-    if (leadingChanged) {
-      widget.onIndexChanged?.call(currentLeadingIndex);
-    }
-    widget.onChange?.call(
-      M3ECarouselChangeDetails(
-        leadingIndex: currentLeadingIndex,
-        focalIndex: currentFocalIndex,
-        itemCount: itemCount,
-      ),
+    final details = M3ECarouselChangeDetails(
+      leadingIndex: currentLeadingIndex,
+      focalIndex: currentFocalIndex,
+      itemCount: itemCount,
     );
+    void notify() {
+      if (!mounted) {
+        return;
+      }
+      if (leadingChanged) {
+        widget.onIndexChanged?.call(currentLeadingIndex);
+      }
+      widget.onChange?.call(details);
+    }
+
+    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.persistentCallbacks ||
+        phase == SchedulerPhase.midFrameMicrotasks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => notify());
+      return;
+    }
+    notify();
   }
 
   /// Leading index for change callbacks; mirrors [ _CarouselPosition.leadingItem]
@@ -539,6 +569,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
+        scaleItems: widget.scaleItems,
         infinite: widget.infinite,
         delegate: delegate,
       );
@@ -557,6 +588,24 @@ class _CarouselViewState extends State<M3ECarouselView> {
     );
   }
 
+  /// Start padding so the first item rests after [M3ECarouselView.leadingInset].
+  EdgeInsetsGeometry? _leadingScrollPadding() {
+    if (widget.leadingInset <= 0) {
+      return null;
+    }
+    final bool vertical = widget.scrollDirection == Axis.vertical;
+    if (vertical) {
+      return widget.reverse
+          ? EdgeInsets.only(bottom: widget.leadingInset)
+          : EdgeInsets.only(top: widget.leadingInset);
+    }
+    final bool startIsRight =
+        (Directionality.of(context) == TextDirection.rtl) != widget.reverse;
+    return startIsRight
+        ? EdgeInsets.only(right: widget.leadingInset)
+        : EdgeInsets.only(left: widget.leadingInset);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ScrollPhysics physics = widget.itemSnapping
@@ -570,17 +619,31 @@ class _CarouselViewState extends State<M3ECarouselView> {
           Axis.vertical => constraints.maxHeight,
         };
 
+        final double leading = widget.scrollDirection == Axis.horizontal
+            ? widget.leadingInset
+            : 0;
         _itemExtent = widget.itemExtent == null
             ? null
-            : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
+            : clampDouble(
+                widget.itemExtent!,
+                0,
+                math.max(0, mainAxisExtent - leading),
+              );
+        final Widget sliver = _buildSliverCarousel(context);
+        final EdgeInsetsGeometry? leadingPadding = _leadingScrollPadding();
         return CustomScrollView(
           scrollDirection: widget.scrollDirection,
           reverse: widget.reverse,
           controller: _controller,
           physics: widget.physics ?? physics,
-          clipBehavior: Clip.antiAlias,
+          clipBehavior: Clip.none,
           scrollCacheExtent: const ScrollCacheExtent.viewport(0),
-          slivers: <Widget>[_buildSliverCarousel(context)],
+          slivers: <Widget>[
+            if (leadingPadding == null)
+              sliver
+            else
+              SliverPadding(padding: leadingPadding, sliver: sliver),
+          ],
         );
       },
     );

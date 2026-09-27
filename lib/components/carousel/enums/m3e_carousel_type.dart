@@ -19,6 +19,15 @@ enum M3ECarouselType {
   /// A carousel whose items scroll to the edge of the container, all sharing a
   /// uniform extent.
   uncontained,
+
+  /// Uncontained items with their own widths, from 9:16 to 16:9.
+  ///
+  /// Items keep those widths while scrolling. They do not grow or shrink
+  /// into a shared slot.
+  uncontainedMultiAspect,
+
+  /// One edge-to-edge item that fills the carousel and snaps vertically.
+  fullScreen,
 }
 
 /// The alignment of the focal item in a [M3ECarouselType.hero] carousel.

@@ -11,6 +11,15 @@ class M3ECarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [M3ECarouselView].
   final int initialItem;
 
+  /// Main-axis extents for a multi-aspect carousel.
+  ///
+  /// When set, [animateToItem] scrolls by these extents instead of a weighted
+  /// carousel position.
+  List<double>? variedItemExtents;
+
+  /// Space before the first multi-aspect item. Later items sit flush.
+  double variedLeadingGap = 0;
+
   /// The current leading item index in the [M3ECarouselView].
   int get leadingItem {
     assert(
@@ -22,7 +31,22 @@ class M3ECarouselController extends ScrollController {
       'CarouselController.leadingItem cannot be read when multiple CarouselViews '
       'are attached to the same controller.',
     );
+    final List<double>? extents = variedItemExtents;
+    if (extents != null && position is! _CarouselPosition) {
+      return _leadingFromExtents(position.pixels, extents);
+    }
     return (position as _CarouselPosition).leadingItem;
+  }
+
+  int _leadingFromExtents(double pixels, List<double> extents) {
+    double origin = variedLeadingGap;
+    for (int i = 0; i < extents.length; i++) {
+      if (pixels < origin + extents[i] / 2) {
+        return i;
+      }
+      origin += extents[i];
+    }
+    return extents.isEmpty ? 0 : extents.length - 1;
   }
 
   _CarouselViewState? _carouselState;
@@ -39,7 +63,20 @@ class M3ECarouselController extends ScrollController {
     Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.ease,
   }) async {
-    if (!hasClients || _carouselState == null) {
+    if (!hasClients) {
+      return;
+    }
+    final List<double>? extents = variedItemExtents;
+    if (extents != null && extents.isNotEmpty) {
+      final int target = index.clamp(0, extents.length - 1);
+      double offset = 0;
+      for (int i = 0; i < target; i++) {
+        offset += extents[i];
+      }
+      await animateTo(offset, duration: duration, curve: curve);
+      return;
+    }
+    if (_carouselState == null) {
       return;
     }
 
@@ -141,6 +178,9 @@ class M3ECarouselController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    if (variedItemExtents != null) {
+      return super.createScrollPosition(physics, context, oldPosition);
+    }
     assert(_carouselState != null, 'carousel invariant');
     return _CarouselPosition(
       physics: physics,
@@ -158,7 +198,10 @@ class M3ECarouselController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    (position as _CarouselPosition)
+    if (position is! _CarouselPosition || _carouselState == null) {
+      return;
+    }
+    position
       ..flexWeights = _carouselState!._flexWeights
       ..itemExtent = _carouselState!._itemExtent
       ..consumeMaxWeight = _carouselState!._consumeMaxWeight

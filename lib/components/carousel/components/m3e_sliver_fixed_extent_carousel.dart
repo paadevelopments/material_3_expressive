@@ -7,11 +7,13 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.minExtent,
     required this.itemExtent,
+    required this.scaleItems,
     required this.infinite,
   });
 
   final double itemExtent;
   final double minExtent;
+  final bool scaleItems;
   final bool infinite;
 
   @override
@@ -21,6 +23,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
+      scaleItems: scaleItems,
       infinite: infinite,
     );
   }
@@ -33,6 +36,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     renderObject
       ..maxExtent = itemExtent
       ..minExtent = minExtent
+      ..scaleItems = scaleItems
       ..infinite = infinite;
   }
 }
@@ -43,8 +47,9 @@ class _RenderSliverFixedExtentCarousel
     required super.childManager,
     required this._maxExtent,
     required this._minExtent,
+    required bool scaleItems,
     required this._infinite,
-  });
+  }) : _scaleItems = scaleItems;
 
   double get maxExtent => _maxExtent;
   double _maxExtent;
@@ -68,6 +73,17 @@ class _RenderSliverFixedExtentCarousel
     markNeedsLayout();
   }
 
+  bool get scaleItems => _scaleItems;
+  bool _scaleItems;
+
+  set scaleItems(bool value) {
+    if (_scaleItems == value) {
+      return;
+    }
+    _scaleItems = value;
+    markNeedsLayout();
+  }
+
   bool get infinite => _infinite;
   bool _infinite;
 
@@ -84,36 +100,22 @@ class _RenderSliverFixedExtentCarousel
     int index,
     SliverLayoutDimensions currentLayoutDimensions,
   ) {
-    if (maxExtent == 0.0) {
+    if (maxExtent == 0.0 || !scaleItems) {
       return maxExtent;
     }
 
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent)
         .floor();
-
-    // Calculate how many items have been completely scroll off screen.
-    final int offscreenItems = (constraints.scrollOffset / maxExtent).floor();
-
-    // If an item is partially off screen and partially on screen,
-    // `constraints.scrollOffset` must be greater than
-    // `offscreenItems * maxExtent`, so the difference between these two is how
-    // much the current first visible item is off screen.
+    final int offscreenItems = firstVisibleIndex;
     final double offscreenExtent =
         constraints.scrollOffset - offscreenItems * maxExtent;
+    final double effectiveMinExtent = _effectiveMinExtent;
 
-    // If there is not enough space to place the last visible item but the remaining
-    // space is larger than `minExtent`, the extent for last item should be at
-    // least the remaining extent to ensure a smooth size transition.
-    final double effectiveMinExtent = math.max(
-      constraints.remainingPaintExtent % maxExtent,
-      minExtent,
-    );
-
-    // Two special cases are the first and last visible items. Other items' extent
-    // should all return `maxExtent`.
+    // The leading item shrinks as it leaves. The trailing item grows into the
+    // space that is left. Both stop at [effectiveMinExtent]; past that they
+    // scroll off the edge instead of changing size.
     if (index == firstVisibleIndex) {
-      final double effectiveExtent = maxExtent - offscreenExtent;
-      return math.max(effectiveExtent, effectiveMinExtent);
+      return math.max(maxExtent - offscreenExtent, effectiveMinExtent);
     }
 
     final double scrollOffsetForLastIndex =
@@ -130,6 +132,15 @@ class _RenderSliverFixedExtentCarousel
     return maxExtent;
   }
 
+  /// Remainder of the viewport, and never smaller than [minExtent].
+  ///
+  /// Capped at [maxExtent] so a shrink extent larger than the item cannot
+  /// invert [clampDouble].
+  double get _effectiveMinExtent => math.min(
+    maxExtent,
+    math.max(constraints.remainingPaintExtent % maxExtent, minExtent),
+  );
+
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
@@ -140,30 +151,20 @@ class _RenderSliverFixedExtentCarousel
     double itemExtent,
     int index,
   ) {
-    if (maxExtent == 0.0) {
-      return maxExtent;
+    if (maxExtent == 0.0 || !scaleItems) {
+      return maxExtent * index;
     }
 
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent)
         .floor();
-
-    // If there is not enough space to place the last visible item but the remaining
-    // space is larger than `minExtent`, the extent for last item should be at
-    // least the remaining extent to make sure a smooth size transition.
-    final double effectiveMinExtent = math.max(
-      constraints.remainingPaintExtent % maxExtent,
-      minExtent,
-    );
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(
         index,
         layoutDimensions,
       );
-
-      // If the first item is collapsed to be less than `effectiveMinExtent`,
-      // then it should stop changing its size and should start to scroll off screen.
-      if (firstVisibleItemExtent <= effectiveMinExtent) {
-        return maxExtent * index - effectiveMinExtent + maxExtent;
+      // Past the shrink floor the item stops resizing and scrolls off.
+      if (firstVisibleItemExtent <= _effectiveMinExtent) {
+        return maxExtent * index - _effectiveMinExtent + maxExtent;
       }
       return constraints.scrollOffset;
     }
@@ -208,6 +209,14 @@ class _RenderSliverFixedExtentCarousel
       return math.max(0, actual.ceil());
     }
     return 0;
+  }
+
+  @override
+  double computeMaxScrollOffset(
+    SliverConstraints constraints,
+    double itemExtent,
+  ) {
+    return super.computeMaxScrollOffset(constraints, itemExtent);
   }
 
   @override

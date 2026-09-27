@@ -23,6 +23,8 @@ class _CarouselPlaygroundState extends State<CarouselPlayground> {
   Axis _axis = Axis.horizontal;
   bool _isExtended = false;
   bool _freeScroll = false;
+  bool _showAll = true;
+  bool _header = false;
   bool _showTitles = true;
 
   static const List<({String image, String title})> _images =
@@ -46,13 +48,15 @@ $kPlaySnippetImport
 M3ECarousel(
   axis: Axis.${_axis.name},
   type: M3ECarouselType.${_type.name},
-  isExtended: $_isExtended,
   freeScroll: $_freeScroll,
-  heroAlignment: M3ECarouselHeroAlignment.${_alignment.name},
-  children: <Widget>[
-    Image.asset('assets/i1.png', fit: BoxFit.cover),
-    Image.asset('assets/i2.png', fit: BoxFit.cover),
-    Image.asset('assets/i3.png', fit: BoxFit.cover),
+  showAll: $_showAll,
+  children: <M3ECarouselItem>[
+    M3ECarouselItem(
+      image: Image.asset('assets/i1.png', fit: BoxFit.cover),
+      title: const Text('Android'),
+      subtitle: const Text('Photo'),
+      onTap: () {},
+    ),
   ],
 );''',
       ),
@@ -70,6 +74,8 @@ M3ECarousel(
             isExtended: _isExtended,
             freeScroll: _freeScroll,
             showTitles: _showTitles,
+            showAll: _showAll,
+            header: _header,
           );
         },
       ),
@@ -77,8 +83,23 @@ M3ECarousel(
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.orientationOf(context) == Orientation.landscape &&
+        _type == M3ECarouselType.fullScreen) {
+      _type = M3ECarouselType.hero;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
+    final bool landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final List<M3ECarouselType> types = <M3ECarouselType>[
+      for (final M3ECarouselType type in M3ECarouselType.values)
+        if (!landscape || type != M3ECarouselType.fullScreen) type,
+    ];
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
@@ -110,36 +131,51 @@ M3ECarousel(
             PlayEnumMenu<M3ECarouselType>(
               label: 'Type',
               value: _type,
-              values: M3ECarouselType.values,
+              values: types,
               labelOf: (M3ECarouselType v) => v.name,
               onChanged: (M3ECarouselType v) => setState(() => _type = v),
             ),
-            PlayEnumSegmented<Axis>(
-              label: 'Axis',
-              value: _axis,
-              values: Axis.values,
-              labelOf: (Axis v) => v.name,
-              onChanged: (Axis v) => setState(() => _axis = v),
-            ),
-            PlayEnumMenu<M3ECarouselHeroAlignment>(
-              label: 'Hero alignment',
-              value: _alignment,
-              values: M3ECarouselHeroAlignment.values,
-              labelOf: (M3ECarouselHeroAlignment v) => v.name,
-              onChanged: (M3ECarouselHeroAlignment v) {
-                setState(() => _alignment = v);
-              },
-            ),
-            PlaySwitch(
-              label: 'Extended',
-              value: _isExtended,
-              onChanged: (bool v) => setState(() => _isExtended = v),
-            ),
+            if (_type != M3ECarouselType.fullScreen)
+              PlayEnumSegmented<Axis>(
+                label: 'Axis',
+                value: _axis,
+                values: Axis.values,
+                labelOf: (Axis v) => v.name,
+                onChanged: (Axis v) => setState(() => _axis = v),
+              ),
+            if (_type == M3ECarouselType.hero)
+              PlayEnumMenu<M3ECarouselHeroAlignment>(
+                label: 'Hero alignment',
+                value: _alignment,
+                values: M3ECarouselHeroAlignment.values,
+                labelOf: (M3ECarouselHeroAlignment v) => v.name,
+                onChanged: (M3ECarouselHeroAlignment v) {
+                  setState(() => _alignment = v);
+                },
+              ),
+            if (_type == M3ECarouselType.contained)
+              PlaySwitch(
+                label: 'Extended',
+                value: _isExtended,
+                onChanged: (bool v) => setState(() => _isExtended = v),
+              ),
             PlaySwitch(
               label: 'Free scroll',
               value: _freeScroll,
               onChanged: (bool v) => setState(() => _freeScroll = v),
             ),
+            if (_type != M3ECarouselType.fullScreen)
+              PlaySwitch(
+                label: 'Show all',
+                value: _showAll,
+                onChanged: (bool v) => setState(() => _showAll = v),
+              ),
+            if (_type != M3ECarouselType.fullScreen)
+              PlaySwitch(
+                label: 'Header',
+                value: _header,
+                onChanged: (bool v) => setState(() => _header = v),
+              ),
             PlaySwitch(
               label: 'Show titles',
               value: _showTitles,
@@ -160,6 +196,8 @@ class _CarouselDemoHost extends StatefulWidget {
     required this.isExtended,
     required this.freeScroll,
     required this.showTitles,
+    required this.showAll,
+    required this.header,
   });
 
   final M3ECarouselType type;
@@ -168,6 +206,8 @@ class _CarouselDemoHost extends StatefulWidget {
   final bool isExtended;
   final bool freeScroll;
   final bool showTitles;
+  final bool showAll;
+  final bool header;
 
   @override
   State<_CarouselDemoHost> createState() => _CarouselDemoHostState();
@@ -175,6 +215,66 @@ class _CarouselDemoHost extends StatefulWidget {
 
 class _CarouselDemoHostState extends State<_CarouselDemoHost> {
   int _focalIndex = 1;
+
+  Widget _carousel(String title) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final TextStyle titleStyle = theme.typeScale.titleMedium.copyWith(
+      color: const Color(0xFFFFFFFF),
+    );
+    final TextStyle bodyStyle = theme.typeScale.bodyMedium.copyWith(
+      color: const Color(0xFFFFFFFF),
+    );
+    return M3ECarousel(
+      axis: widget.type == M3ECarouselType.fullScreen
+          ? Axis.vertical
+          : widget.axis,
+      type: widget.type,
+      isExtended: widget.isExtended,
+      freeScroll: widget.freeScroll,
+      showAll: widget.showAll,
+      header: widget.header ? Text(title) : null,
+      heroAlignment: widget.alignment,
+      onChange: (M3ECarouselChangeDetails details) {
+        if (!mounted || _focalIndex == details.focalIndex) {
+          return;
+        }
+        setState(() => _focalIndex = details.focalIndex);
+      },
+      children: <M3ECarouselItem>[
+        for (int i = 0; i < _CarouselPlaygroundState._images.length; i++)
+          M3ECarouselItem(
+            semanticLabel: _CarouselPlaygroundState._images[i].title,
+            title: widget.showTitles
+                ? Text(
+                    _CarouselPlaygroundState._images[i].title,
+                    style: titleStyle,
+                  )
+                : null,
+            subtitle: widget.showTitles
+                ? Text('Photo', style: bodyStyle)
+                : null,
+            prefixText: widget.showTitles
+                ? Text('P${i + 1}', style: bodyStyle)
+                : null,
+            aspectRatio: i.isEven ? 16 / 9 : 9 / 16,
+            showScrim: const M3ECarouselScrim(
+              color: Color(0xFF000000),
+              opacity: 0.45,
+            ),
+            onTap: () {},
+            transform: i == 0
+                ? _CarouselDestination(
+                    title: _CarouselPlaygroundState._images[i].title,
+                  )
+                : null,
+            image: Image.asset(
+              _CarouselPlaygroundState._images[i].image,
+              fit: BoxFit.cover,
+            ),
+          ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,85 +291,54 @@ class _CarouselDemoHostState extends State<_CarouselDemoHost> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            height: widget.axis == Axis.vertical ? 320 : 200,
-            width: widget.axis == Axis.vertical ? 200 : double.infinity,
-            child: M3ECarousel(
-              axis: widget.axis,
-              type: widget.type,
-              isExtended: widget.isExtended,
-              freeScroll: widget.freeScroll,
-              heroAlignment: widget.alignment,
-              onChange: (M3ECarouselChangeDetails details) {
-                setState(() => _focalIndex = details.focalIndex);
-              },
-              children: <Widget>[
-                for (
-                  int i = 0;
-                  i < _CarouselPlaygroundState._images.length;
-                  i++
-                )
-                  _CarouselImage(
-                    asset: _CarouselPlaygroundState._images[i].image,
-                    title: _CarouselPlaygroundState._images[i].title,
-                    showTitle: widget.showTitles && i == _focalIndex,
-                  ),
-              ],
+      body: widget.type == M3ECarouselType.fullScreen
+          ? _carousel(title)
+          : Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal:
+                    widget.type == M3ECarouselType.uncontained ||
+                        widget.type == M3ECarouselType.uncontainedMultiAspect
+                    ? 0
+                    : 8,
+              ),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  height: widget.axis == Axis.vertical ? 320 : 200,
+                  width: widget.axis == Axis.vertical ? 200 : double.infinity,
+                  child: _carousel(title),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
 
-class _CarouselImage extends StatelessWidget {
-  const _CarouselImage({
-    required this.asset,
-    required this.title,
-    required this.showTitle,
-  });
+class _CarouselDestination extends StatelessWidget {
+  const _CarouselDestination({required this.title});
 
-  final String asset;
   final String title;
-  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        Image.asset(asset, fit: BoxFit.cover),
-        if (showTitle)
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[Color(0x00000000), Color(0x80000000)],
-              ),
+    final M3EThemeData theme = M3ETheme.of(context);
+    return ColoredBox(
+      color: theme.colorScheme.surface,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(title, style: theme.typeScale.headlineMedium),
+            const SizedBox(height: 16),
+            M3EButton(
+              style: M3EButtonStyle.text,
+              onPressed: () => M3ECardContainerTransformScope.closeOf(context),
+              child: const Text('Close'),
             ),
-          ),
-        if (showTitle)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFFFFFFFF),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }

@@ -98,7 +98,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
   List<int>? _flexWeights;
 
   set flexWeights(List<int>? value) {
-    if (flexWeights == value) {
+    if (_sameWeights(flexWeights, value)) {
       return;
     }
     final List<int>? oldWeights = _flexWeights;
@@ -322,4 +322,19 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
+}
+
+bool _sameWeights(List<int>? a, List<int>? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a == null || b == null || a.length != b.length) {
+    return false;
+  }
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
 }
