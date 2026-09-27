@@ -120,7 +120,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     this.avatarSize = 32,
     this.searchBarHeight = 56,
     this.searchBarRadius = 28,
-    this.searchElevation = M3EElevation.level3,
+    this.searchElevation = M3EElevation.level0,
     this.searchViewElevation = M3EElevation.level0,
     this.searchFullScreenHeader = 72,
     this.searchDockedHeader = 56,

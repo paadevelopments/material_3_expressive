@@ -48,7 +48,8 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
     var bestScore = double.infinity;
     for (final placement in order) {
       final Offset pos = _clampStepped(_raw(placement, childSize), childSize);
-      final double score = _overflowArea(pos, childSize);
+      final double score =
+          _overflowArea(pos, childSize) + _targetOverlap(pos, childSize);
       if (score < bestScore) {
         bestScore = score;
         best = pos;
@@ -130,6 +131,20 @@ class M3ETooltipPositionDelegate extends SingleChildLayoutDelegate {
     }
 
     return Offset(dx.clamp(0.0, maxX), dy.clamp(0.0, maxY));
+  }
+
+  /// Area of this bubble that covers the anchor. A clean placement scores 0
+  /// so the tooltip flips beside the control instead of sitting on it.
+  double _targetOverlap(Offset pos, Size childSize) {
+    final Rect child = pos & childSize;
+    if (!child.overlaps(target)) {
+      return 0;
+    }
+    final Rect hit = child.intersect(target);
+    if (hit.width <= 0 || hit.height <= 0) {
+      return 0;
+    }
+    return hit.width * hit.height;
   }
 
   double _overflowArea(Offset pos, Size childSize) {

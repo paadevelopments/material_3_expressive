@@ -140,6 +140,8 @@ class _M3ETappableState extends State<M3ETappable>
   late final AnimationController _scaleController;
   FocusNode? _internalFocusNode;
   int? _activePointer;
+  final List<ValueNotifier<bool>> _scrolling = <ValueNotifier<bool>>[];
+  bool _pointerInside = false;
 
   /// Raw focus-highlight from [FocusableActionDetector], before modality gate.
   bool _focusHighlight = false;
@@ -157,6 +159,12 @@ class _M3ETappableState extends State<M3ETappable>
     _scaleController = AnimationController.unbounded(vsync: this, value: 1);
     M3EFocusInteraction.instance.addListener(_onFocusInteractionChanged);
     _applyFocusableToNode();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bindScrolling();
   }
 
   @override
@@ -188,11 +196,86 @@ class _M3ETappableState extends State<M3ETappable>
 
   @override
   void dispose() {
+    _unbindScrolling();
     M3EFocusInteraction.instance.removeListener(_onFocusInteractionChanged);
     _clearPointerRoute();
     _internalFocusNode?.dispose();
     _scaleController.dispose();
     super.dispose();
+  }
+
+  void _bindScrolling() {
+    final next = <ValueNotifier<bool>>[];
+    context.visitAncestorElements((Element element) {
+      if (element is StatefulElement && element.state is ScrollableState) {
+        next.add(
+          (element.state as ScrollableState).position.isScrollingNotifier,
+        );
+      }
+      return true;
+    });
+    if (next.length == _scrolling.length) {
+      var same = true;
+      for (var i = 0; i < next.length; i++) {
+        if (!identical(next[i], _scrolling[i])) {
+          same = false;
+          break;
+        }
+      }
+      if (same) {
+        return;
+      }
+    }
+    _unbindScrolling();
+    _scrolling.addAll(next);
+    for (final ValueNotifier<bool> notifier in _scrolling) {
+      notifier.addListener(_onAncestorScroll);
+    }
+  }
+
+  void _unbindScrolling() {
+    for (final ValueNotifier<bool> notifier in _scrolling) {
+      notifier.removeListener(_onAncestorScroll);
+    }
+    _scrolling.clear();
+  }
+
+  bool get _ancestorScrolling {
+    for (final ValueNotifier<bool> notifier in _scrolling) {
+      if (notifier.value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _onAncestorScroll() {
+    if (!mounted || !widget.trackHover) {
+      return;
+    }
+    if (_ancestorScrolling) {
+      if (_state.hovered) {
+        _update(_state.copyWith(hovered: false));
+      }
+      return;
+    }
+    if (_pointerInside && !_state.hovered) {
+      _update(_state.copyWith(hovered: true));
+    }
+  }
+
+  void _setHovered(bool hovered) {
+    _pointerInside = hovered;
+    if (!widget.trackHover) {
+      return;
+    }
+    if (_ancestorScrolling) {
+      if (_state.hovered) {
+        _update(_state.copyWith(hovered: false));
+      }
+      return;
+    }
+    _update(_state.copyWith(hovered: hovered));
   }
 
   void _onFocusInteractionChanged() {
@@ -355,9 +438,7 @@ class _M3ETappableState extends State<M3ETappable>
         mouseCursor: _resolveCursor(interactive),
         trackHover: widget.trackHover,
         focusOverlay: widget.focusOverlay,
-        onHover: interactive && widget.trackHover
-            ? (bool hovered) => _update(_state.copyWith(hovered: hovered))
-            : null,
+        onHover: interactive && widget.trackHover ? _setHovered : null,
         child: content,
       );
     }
@@ -395,12 +476,8 @@ class _M3ETappableState extends State<M3ETappable>
     if (!widget.materialInk) {
       wrapped = MouseRegion(
         cursor: _resolveCursor(interactive),
-        onEnter: widget.trackHover
-            ? (_) => _update(_state.copyWith(hovered: true))
-            : null,
-        onExit: widget.trackHover
-            ? (_) => _update(_state.copyWith(hovered: false))
-            : null,
+        onEnter: widget.trackHover ? (_) => _setHovered(true) : null,
+        onExit: widget.trackHover ? (_) => _setHovered(false) : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onTap,

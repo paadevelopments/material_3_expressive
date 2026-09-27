@@ -24,8 +24,6 @@ enum _SearchArrangement { outside, inside, twoTrailing }
 
 enum _Flexibility { expanded, collapsed }
 
-enum _ManualControl { auto, show, hide }
-
 class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
   _AppBarKind _kind = _AppBarKind.top;
   M3EAppBarDensity _density = M3EAppBarDensity.regular;
@@ -40,6 +38,7 @@ class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
   M3EAppBarHideMode _hideMode = M3EAppBarHideMode.none;
   _Flexibility _flexibility = _Flexibility.expanded;
   _SearchArrangement _searchArrangement = _SearchArrangement.outside;
+  bool _wrapActions = false;
   String _title = 'Inbox';
 
   bool get _canFlex => _variant != M3EAppBarVariant.small;
@@ -86,6 +85,7 @@ $controllerArg  searchController: searchController,
   density: M3EAppBarDensity.${_density.name},
   shapeFamily: M3EAppBarShapeFamily.${_shape.name},
   centerTitle: $_centerTitle,
+  wrapActions: $_wrapActions,
   safeArea: $_safeArea,
   leading: const Icon(M3EIcons.menu),
   suggestionsBuilder: (context, controller) => const <Widget>[],
@@ -147,6 +147,7 @@ $controllerArg  titleText: ${playDartString(_title)},
             filledAction: _filledAction,
             hideMode: _hideMode,
             searchArrangement: _searchArrangement,
+            wrapActions: _wrapActions,
             startExpanded: !_canFlex || _flexibility == _Flexibility.expanded,
             useController: _useController,
           );
@@ -282,7 +283,7 @@ $controllerArg  titleText: ${playDartString(_title)},
               value: _filledAction,
               onChanged: (bool v) => setState(() => _filledAction = v),
             ),
-            if (_kind == _AppBarKind.search)
+            if (_kind == _AppBarKind.search) ...<Widget>[
               PlayEnumMenu<_SearchArrangement>(
                 label: 'Search arrangement',
                 value: _searchArrangement,
@@ -292,6 +293,12 @@ $controllerArg  titleText: ${playDartString(_title)},
                   setState(() => _searchArrangement = v);
                 },
               ),
+              PlaySwitch(
+                label: 'Wrap actions',
+                value: _wrapActions,
+                onChanged: (bool v) => setState(() => _wrapActions = v),
+              ),
+            ],
             PlayTextField(
               label: 'Title',
               value: _title,
@@ -328,6 +335,7 @@ class _AppBarDemoHost extends StatefulWidget {
     required this.filledAction,
     required this.hideMode,
     required this.searchArrangement,
+    required this.wrapActions,
     required this.startExpanded,
     required this.useController,
   });
@@ -344,6 +352,7 @@ class _AppBarDemoHost extends StatefulWidget {
   final bool filledAction;
   final M3EAppBarHideMode hideMode;
   final _SearchArrangement searchArrangement;
+  final bool wrapActions;
   final bool startExpanded;
   final bool useController;
 
@@ -354,7 +363,7 @@ class _AppBarDemoHost extends StatefulWidget {
 class _AppBarDemoHostState extends State<_AppBarDemoHost> {
   final M3ESearchController _searchController = M3ESearchController();
   M3EAppBarController? _appBarController;
-  _ManualControl _manual = _ManualControl.auto;
+  int _manual = 2;
 
   static const List<String> _suggestions = <String>[
     'Inbox',
@@ -505,48 +514,43 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
     return Stack(
       children: <Widget>[
         page,
-        Align(
+        M3EToolbar.floating(
           alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: M3EToolbar.floating(
-              safeArea: false,
-              actions: <M3EToolbarItem>[
-                _manualButton('Show', _ManualControl.show, controller.show),
-                _manualButton('Hide', _ManualControl.hide, controller.hide),
-                _manualButton(
-                  'Auto',
-                  _ManualControl.auto,
-                  controller.followScroll,
-                ),
-              ],
+          safeArea: false,
+          activeIndex: _manual,
+          onActiveIndexChanged: (int index) {
+            setState(() => _manual = index);
+            switch (index) {
+              case 0:
+                controller.show();
+              case 1:
+                controller.hide();
+              default:
+                controller.followScroll();
+            }
+          },
+          actions: <M3EToolbarItem>[
+            M3EToolbarAction(
+              icon: M3EIcons.visibility,
+              label: 'Show',
+              tooltip: 'Show',
+              onPressed: controller.show,
             ),
-          ),
+            M3EToolbarAction(
+              icon: M3EIcons.visibility_off,
+              label: 'Hide',
+              tooltip: 'Hide',
+              onPressed: controller.hide,
+            ),
+            M3EToolbarAction(
+              icon: M3EIcons.autorenew,
+              label: 'Auto',
+              tooltip: 'Auto',
+              onPressed: controller.followScroll,
+            ),
+          ],
         ),
       ],
-    );
-  }
-
-  M3EToolbarItem _manualButton(
-    String label,
-    _ManualControl value,
-    Future<void> Function() action,
-  ) {
-    final bool selected = _manual == value;
-    return M3EToolbarWidget(
-      semanticLabel: label,
-      child: TextButton(
-        onPressed: () {
-          setState(() => _manual = value);
-          action();
-        },
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
     );
   }
 
@@ -585,6 +589,7 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
           density: widget.density,
           shapeFamily: widget.shape,
           centerTitle: widget.centerTitle,
+          wrapActions: widget.wrapActions,
           safeArea: widget.safeArea,
           leading: widget.searchArrangement == _SearchArrangement.inside
               ? null

@@ -36,6 +36,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
         controller: _controller,
         focusNode: _focusNode,
         hintText: widget.hintText,
+        hintAlignment: widget.alignment,
         enabled: widget.enabled,
         readOnly: widget.readOnly,
         autoFocus: widget.autoFocus,

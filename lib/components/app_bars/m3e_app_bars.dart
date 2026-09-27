@@ -1,7 +1,13 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/rendering.dart' show FloatingHeaderSnapConfiguration;
+import 'package:flutter/rendering.dart'
+    show
+        FloatingHeaderSnapConfiguration,
+        RenderSliver,
+        RenderSliverSingleBoxAdapter,
+        ScrollDirection,
+        SliverGeometry;
 
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
@@ -98,12 +104,13 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     M3EAppBarVariant variant = M3EAppBarVariant.small,
     bool hideOnScroll = false,
     M3EAppBarHideMode hideMode = M3EAppBarHideMode.none,
+    bool wrapActions = false,
     ValueChanged<String>? onSubmitted,
     ValueChanged<String>? onChanged,
     VoidCallback? onClose,
     VoidCallback? onOpen,
     BoxConstraints? searchConstraints,
-    AlignmentGeometry barAlignment = Alignment.center,
+    AlignmentGeometry? barAlignment,
   }) {
     return M3EAppBar.top(
       key: key,
@@ -131,7 +138,10 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
         barLeading: barLeading,
         barTrailing: barTrailing,
         barBackgroundColor: barBackgroundColor,
-        barAlignment: barAlignment,
+        barAlignment:
+            barAlignment ??
+            (centerTitle ? Alignment.center : AlignmentDirectional.centerStart),
+        wrapActions: wrapActions,
         isFullScreen: isFullScreen,
         onSubmitted: onSubmitted,
         onChanged: onChanged,
@@ -387,7 +397,9 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     with SingleTickerProviderStateMixin {
   ScrollNotificationObserverState? _observer;
   ScrollPosition? _position;
+  final _M3EPageScroll _pageScroll = _M3EPageScroll();
   M3EAppBarController? _bound;
+  final OverlayPortalController _actionsOverlay = OverlayPortalController();
   late final AnimationController _visibility;
   bool _under = false;
   bool _follow = true;
@@ -400,6 +412,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   @override
   void initState() {
     super.initState();
+    _actionsOverlay.show();
     _visibility = AnimationController(
       vsync: this,
       value: 1,
@@ -463,17 +476,19 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   }
 
   void _onNotification(ScrollNotification notification) {
-    if (!defaultScrollNotificationPredicate(notification)) {
-      return;
-    }
-    if (notification.metrics.axis != Axis.vertical) {
+    if (!mounted || !_pageScroll.accepts(notification, context)) {
       return;
     }
     final BuildContext? target = notification.context;
     if (target != null && target.mounted) {
       _position = Scrollable.maybeOf(target)?.position;
     }
-    _applyOffset(notification.metrics.extentBefore);
+    // Metrics updates report a null delta. Those are layout corrections from
+    // the bar itself changing size, and must not reverse the slide.
+    final double? scrollDelta = notification is ScrollUpdateNotification
+        ? notification.scrollDelta
+        : null;
+    _applyOffset(notification.metrics.extentBefore, scrollDelta: scrollDelta);
   }
 
   void _onVisibility() {
@@ -521,24 +536,28 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _bound?.update(collapsed: _collapsedNow, visible: _visibleNow);
   }
 
-  void _applyOffset(double offset) {
+  void _applyOffset(double offset, {double? scrollDelta}) {
     final double previous = _offset;
     _offset = offset;
     final under = offset > 0;
     final changed = under != _under;
     _under = under;
-    if (_follow && bar._effectiveHideMode != M3EAppBarHideMode.none) {
-      final double delta = offset - previous;
+    if (_follow &&
+        scrollDelta != null &&
+        bar._effectiveHideMode != M3EAppBarHideMode.none) {
       final double range = math.max(0, _expanded - _collapsed);
-      if (delta > 0.5 && offset > range) {
-        _visibility.reverse();
-      } else if (delta < -0.5) {
-        _visibility.forward();
+      if (scrollDelta > 0.5 && offset > range) {
+        _m3eSlideAway(_visibility);
+      } else if (scrollDelta < -0.5) {
+        _m3eSlideBack(_visibility);
       }
     }
     _commitExtent(_slotHeight());
     _publish();
-    if (mounted && (changed || (offset - previous).abs() > 0.5)) {
+    // A small bar only changes color at the top. Rebuilding it on every
+    // pixel restarts hover under the pointer and the list appears to flicker.
+    final bool flexible = _expanded > _collapsed + 0.5;
+    if (mounted && (changed || (flexible && (offset - previous).abs() > 0.5))) {
       setState(() {});
     }
   }
@@ -562,10 +581,13 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       return;
     }
     final double? previous = _m3eAppBarHeightOf(bar);
-    _m3eAppBarWriteHeight(bar, height);
-    if (previous != null && (previous - height).abs() < 0.5) {
+    // preferredSize is only the scaffold's max. The child can be shorter, and
+    // that shorter size is what moves the body. Rebuilding the scaffold while
+    // the bar shrinks restarts the list and fights the slide.
+    if (previous != null && height <= previous + 0.5) {
       return;
     }
+    _m3eAppBarWriteHeight(bar, height);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     if (scaffold == null) {
       return;
@@ -655,8 +677,8 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       manual: !_follow,
     );
     final double slot = bar.toolbarHeight ?? motion.slot;
-    if ((_m3eAppBarHeightOf(bar) ?? -1) != slot && bar.toolbarHeight == null) {
-      _m3eAppBarWriteHeight(bar, slot);
+    if (bar.toolbarHeight == null) {
+      _commitExtent(slot);
     }
 
     final bool under = _under;
@@ -665,15 +687,12 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       theme: appBarTheme,
       scheme: scheme,
       under: under,
-      titleHide: motion.titleHide,
     );
     final double elevation =
         bar.elevation ??
         (under ? metrics.scrolledElevation : metrics.elevation);
     final Widget body = _M3EBarBody(
       expand: motion.titleExpand,
-      hide: motion.titleHide,
-      band: _collapsed,
       topPadding: appBarTheme.flexibleTopPadding,
       actionRow: appBarTheme.actionRowHeight,
       bottomPadding: metrics.flexibleBottomPadding,
@@ -693,7 +712,11 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
       trailingColor: appBarTheme.trailingColor(scheme),
       iconSize: metrics.iconSize,
-      tonal: appBarTheme.actionsTonalColor(scheme),
+      separateActions: motion.actions,
+      containerColor: bg,
+      containerElevation: elevation,
+      shadowColor: scheme.shadow,
+      shape: appBarTheme.shape(bar.shapeFamily),
     );
     final Widget clipped = motion.entire
         ? ClipRect(
@@ -706,26 +729,52 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
           )
         : body;
     final EdgeInsets safe = bar._edgeSafeAreaInset(context);
-    final Widget material = Material(
-      color: bg,
-      elevation: elevation,
-      shadowColor: scheme.shadow,
-      surfaceTintColor: const Color(0x00000000),
-      shape: appBarTheme.shape(bar.shapeFamily),
-      clipBehavior: bar.clipBehavior,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double inset = safe.top + safe.bottom;
-          final double available = constraints.maxHeight.isFinite
-              ? math.max(0, constraints.maxHeight - inset)
-              : slot;
-          final double height = math.min(math.max(0, slot), available);
-          return Padding(
-            padding: safe,
-            child: SizedBox(height: height, child: clipped),
+    final Widget? leading = _resolvedLeading(context, scheme, appBarTheme);
+    final Widget material = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double inset = safe.top + safe.bottom;
+        final double available = constraints.maxHeight.isFinite
+            ? math.max(0, constraints.maxHeight - inset)
+            : slot;
+        final double height = math.min(math.max(0, slot), available);
+        final double shown = motion.shown.clamp(0.0, 1.0);
+        final Widget padded = Padding(
+          padding: safe,
+          child: motion.actions
+              ? _m3eClipSliding(
+                  push: math.min(motion.painted * shown, available),
+                  visual: motion.painted,
+                  child: body,
+                )
+              : SizedBox(height: height, child: clipped),
+        );
+        if (!motion.actions) {
+          return Material(
+            color: bg,
+            elevation: elevation,
+            shadowColor: scheme.shadow,
+            surfaceTintColor: const Color(0x00000000),
+            shape: appBarTheme.shape(bar.shapeFamily),
+            clipBehavior: bar.clipBehavior,
+            child: padded,
           );
-        },
-      ),
+        }
+        return _M3EActionOverlay(
+          controller: _actionsOverlay,
+          inset: safe.top,
+          topPadding: appBarTheme.flexibleTopPadding,
+          actionRow: appBarTheme.actionRowHeight,
+          contentPadding: metrics.contentPadding,
+          hide: motion.titleHide,
+          tonal: appBarTheme.actionsTonalColor(scheme),
+          leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+          trailingColor: appBarTheme.trailingColor(scheme),
+          iconSize: metrics.iconSize,
+          leading: leading,
+          actions: bar.actions,
+          child: padded,
+        );
+      },
     );
     final Widget scoped = _M3EScrolledUnder(
       scrolledUnder: under,
@@ -820,6 +869,7 @@ class _M3EBottomAppBar extends StatefulWidget {
 class _M3EBottomAppBarState extends State<_M3EBottomAppBar> {
   ScrollNotificationObserverState? _observer;
   bool _under = false;
+  final _M3EPageScroll _pageScroll = _M3EPageScroll();
 
   @override
   void didChangeDependencies() {
@@ -841,10 +891,7 @@ class _M3EBottomAppBarState extends State<_M3EBottomAppBar> {
   }
 
   void _onNotification(ScrollNotification notification) {
-    if (!defaultScrollNotificationPredicate(notification)) {
-      return;
-    }
-    if (notification.metrics.axis != Axis.vertical) {
+    if (!mounted || !_pageScroll.accepts(notification, context)) {
       return;
     }
     final bool under = notification.metrics.extentBefore > 0;
@@ -1021,18 +1068,22 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     }
     final double pixels = position.pixels;
     final double delta = pixels - _lastPixels;
+    final underChanged = (_lastPixels > 0) != (pixels > 0);
     _lastPixels = pixels;
     _offset = pixels;
     if (_follow && bar._effectiveHideMode != M3EAppBarHideMode.none) {
       final double range = math.max(0, _expanded - _collapsed);
-      if (delta > 0.5 && pixels > range) {
-        _visibility.reverse();
-      } else if (delta < -0.5) {
-        _visibility.forward();
+      // Pixel corrections from the shrinking header keep the user's direction.
+      final ScrollDirection direction = position.userScrollDirection;
+      if (direction == ScrollDirection.reverse && pixels > range) {
+        _m3eSlideAway(_visibility);
+      } else if (direction == ScrollDirection.forward) {
+        _m3eSlideBack(_visibility);
       }
     }
     _publish();
-    if (mounted) {
+    final bool flexible = _expanded > _collapsed + 0.5;
+    if (mounted && (underChanged || (flexible && delta.abs() > 0.5))) {
       setState(() {});
     }
   }
@@ -1102,12 +1153,10 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     );
     final double top = MediaQuery.paddingOf(context).top;
     final double minContent = motion.entire
-        ? _collapsed * _visibility.value
+        ? _collapsed * motion.shown
         : _collapsed;
     final double maxContent = motion.entire
-        ? math.max(_expanded * _visibility.value, minContent)
-        : motion.actions
-        ? math.max(motion.slot, minContent)
+        ? math.max(_expanded * motion.shown, minContent)
         : _expanded;
     if (_bound != null &&
         (_collapsedNow != _bound!.isCollapsed ||
@@ -1119,107 +1168,211 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
       });
     }
 
-    final Widget sliver = SliverPersistentHeader(
-      pinned: bar.pinned,
-      floating: bar.floating,
-      delegate: _M3EAppBarDelegate(
-        minExtent: top + minContent,
-        maxExtent: top + math.max(maxContent, minContent),
-        snap: bar.snap && bar.floating,
-        vsync: this,
-        builder:
-            (
-              BuildContext context,
-              double shrinkOffset, {
-              required bool overlaps,
-            }) {
-              final double current = math.max(
-                top + minContent,
-                top + math.max(maxContent, minContent) - shrinkOffset,
-              );
-              final double range = math.max(0, maxContent - minContent);
-              final double expand = range <= 0.5
-                  ? 0
-                  : (1 - (shrinkOffset / range).clamp(0.0, 1.0));
-              final double titleExpand = motion.actions
-                  ? expand * motion.shown
-                  : expand;
-              final bool under = shrinkOffset > 0 || overlaps || _offset > 0;
-              final Color bg = _m3eBarColor(
-                bar: bar,
-                theme: appBarTheme,
-                scheme: scheme,
-                under: under,
-                titleHide: motion.titleHide,
-              );
-              final double elevation = under
-                  ? metrics.scrolledElevation
-                  : metrics.elevation;
-              final double contentSlot = math.max(0, current - top);
-              final double painted = motion.entire && motion.shown > 0.001
-                  ? contentSlot / motion.shown
-                  : contentSlot;
-              final Widget body = _M3EBarBody(
-                expand: titleExpand,
-                hide: motion.titleHide,
-                band: _collapsed,
-                topPadding: appBarTheme.flexibleTopPadding,
-                actionRow: appBarTheme.actionRowHeight,
-                bottomPadding: metrics.flexibleBottomPadding,
-                titleInset: metrics.titleInset,
-                contentPadding: metrics.contentPadding,
-                centerTitle: bar.centerTitle,
-                search: bar.title is _M3EAppBarSearchTitle,
-                leading:
-                    bar.leading ??
-                    (bar.automaticallyImplyLeading
-                        ? _maybeBackButton(
-                            context,
-                            bar.foregroundColor ??
-                                appBarTheme.leadingColor(scheme),
-                          )
-                        : null),
-                actions: bar.actions,
-                title: _sliverTitle(theme, appBarTheme, scheme, titleExpand),
-                leadingColor:
-                    bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
-                trailingColor: appBarTheme.trailingColor(scheme),
-                iconSize: metrics.iconSize,
-                tonal: appBarTheme.actionsTonalColor(scheme),
-              );
-              return _M3EScrolledUnder(
-                scrolledUnder: under,
-                child: Material(
-                  color: bg,
-                  elevation: elevation,
-                  shadowColor: scheme.shadow,
-                  surfaceTintColor: const Color(0x00000000),
-                  shape: appBarTheme.shape(bar.shapeFamily),
-                  child: SizedBox(
-                    height: current,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: top),
-                      child: ClipRect(
-                        child: motion.entire
-                            ? OverflowBox(
-                                alignment: Alignment.bottomCenter,
-                                minHeight: painted,
-                                maxHeight: painted,
-                                child: SizedBox(height: painted, child: body),
-                              )
-                            : body,
+    final Widget sliver = motion.actions
+        ? _actionSliver(theme, appBarTheme, scheme, metrics, motion, top)
+        : SliverPersistentHeader(
+            pinned: bar.pinned,
+            floating: bar.floating,
+            delegate: _M3EAppBarDelegate(
+              minExtent: top + minContent,
+              maxExtent: top + math.max(maxContent, minContent),
+              snap: bar.snap && bar.floating,
+              vsync: this,
+              builder:
+                  (
+                    BuildContext context,
+                    double shrinkOffset, {
+                    required bool overlaps,
+                  }) {
+                    final double current = math.max(
+                      top + minContent,
+                      top + math.max(maxContent, minContent) - shrinkOffset,
+                    );
+                    final double range = math.max(0, maxContent - minContent);
+                    final double expand = range <= 0.5
+                        ? 0
+                        : (1 - (shrinkOffset / range).clamp(0.0, 1.0));
+                    final double titleExpand = motion.actions
+                        ? expand * motion.shown
+                        : expand;
+                    final bool under =
+                        shrinkOffset > 0 || overlaps || _offset > 0;
+                    final Color bg = _m3eBarColor(
+                      bar: bar,
+                      theme: appBarTheme,
+                      scheme: scheme,
+                      under: under,
+                    );
+                    final double elevation = under
+                        ? metrics.scrolledElevation
+                        : metrics.elevation;
+                    final double contentSlot = math.max(0, current - top);
+                    final double painted = motion.entire && motion.shown > 0.001
+                        ? contentSlot / motion.shown
+                        : contentSlot;
+                    final Widget body = _M3EBarBody(
+                      expand: titleExpand,
+                      topPadding: appBarTheme.flexibleTopPadding,
+                      actionRow: appBarTheme.actionRowHeight,
+                      bottomPadding: metrics.flexibleBottomPadding,
+                      titleInset: metrics.titleInset,
+                      contentPadding: metrics.contentPadding,
+                      centerTitle: bar.centerTitle,
+                      search: bar.title is _M3EAppBarSearchTitle,
+                      leading:
+                          bar.leading ??
+                          (bar.automaticallyImplyLeading
+                              ? _maybeBackButton(
+                                  context,
+                                  bar.foregroundColor ??
+                                      appBarTheme.leadingColor(scheme),
+                                )
+                              : null),
+                      actions: bar.actions,
+                      title: _sliverTitle(
+                        theme,
+                        appBarTheme,
+                        scheme,
+                        titleExpand,
                       ),
-                    ),
-                  ),
-                ),
-              );
-            },
-      ),
-    );
+                      leadingColor:
+                          bar.foregroundColor ??
+                          appBarTheme.leadingColor(scheme),
+                      trailingColor: appBarTheme.trailingColor(scheme),
+                      iconSize: metrics.iconSize,
+                      separateActions: motion.actions,
+                      containerColor: bg,
+                      containerElevation: elevation,
+                      shadowColor: scheme.shadow,
+                      shape: appBarTheme.shape(bar.shapeFamily),
+                    );
+                    final Widget inner = ClipRect(
+                      child: motion.entire
+                          ? OverflowBox(
+                              alignment: Alignment.bottomCenter,
+                              minHeight: painted,
+                              maxHeight: painted,
+                              child: SizedBox(height: painted, child: body),
+                            )
+                          : body,
+                    );
+                    final Widget padded = SizedBox(
+                      height: current,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: top),
+                        child: inner,
+                      ),
+                    );
+                    return _M3EScrolledUnder(
+                      scrolledUnder: under,
+                      child: Material(
+                        color: bg,
+                        elevation: elevation,
+                        shadowColor: scheme.shadow,
+                        surfaceTintColor: const Color(0x00000000),
+                        shape: appBarTheme.shape(bar.shapeFamily),
+                        child: padded,
+                      ),
+                    );
+                  },
+            ),
+          );
     if (bar.semanticLabel == null) {
       return sliver;
     }
     return M3ESliverSemantic(label: bar.semanticLabel!, child: sliver);
+  }
+
+  Widget _actionSliver(
+    M3EThemeData theme,
+    M3EAppBarTheme appBarTheme,
+    M3EColorScheme scheme,
+    M3EAppBarMetrics metrics,
+    _M3EBarMotion motion,
+    double top,
+  ) {
+    final double shown = motion.shown.clamp(0.0, 1.0);
+    final double push = motion.painted * shown;
+    final double paintContent = math.max(push, _collapsed);
+    final bool under = _offset > 0;
+    final Color bg = _m3eBarColor(
+      bar: bar,
+      theme: appBarTheme,
+      scheme: scheme,
+      under: under,
+    );
+    final double elevation = under
+        ? metrics.scrolledElevation
+        : metrics.elevation;
+    final Widget? leading =
+        bar.leading ??
+        (bar.automaticallyImplyLeading
+            ? _maybeBackButton(
+                context,
+                bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+              )
+            : null);
+    final Widget body = _M3EBarBody(
+      expand: motion.titleExpand,
+      topPadding: appBarTheme.flexibleTopPadding,
+      actionRow: appBarTheme.actionRowHeight,
+      bottomPadding: metrics.flexibleBottomPadding,
+      titleInset: metrics.titleInset,
+      contentPadding: metrics.contentPadding,
+      centerTitle: bar.centerTitle,
+      search: bar.title is _M3EAppBarSearchTitle,
+      leading: leading,
+      actions: bar.actions,
+      title: _sliverTitle(theme, appBarTheme, scheme, motion.titleExpand),
+      leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+      trailingColor: appBarTheme.trailingColor(scheme),
+      iconSize: metrics.iconSize,
+      separateActions: true,
+      containerColor: bg,
+      containerElevation: elevation,
+      shadowColor: scheme.shadow,
+      shape: appBarTheme.shape(bar.shapeFamily),
+    );
+    return _M3EActionSliver(
+      layoutExtent: top + push,
+      paintExtent: top + paintContent,
+      child: _M3EScrolledUnder(
+        scrolledUnder: under,
+        child: SizedBox(
+          height: top + paintContent,
+          child: Padding(
+            padding: EdgeInsets.only(top: top),
+            child: Stack(
+              children: <Widget>[
+                _m3eClipSliding(
+                  push: push,
+                  visual: math.max(motion.painted, push),
+                  child: body,
+                ),
+                Positioned(
+                  top: appBarTheme.flexibleTopPadding,
+                  left: 0,
+                  right: 0,
+                  height: appBarTheme.actionRowHeight,
+                  child: _M3EActionRow(
+                    contentPadding: metrics.contentPadding,
+                    actionRow: appBarTheme.actionRowHeight,
+                    hide: motion.titleHide,
+                    tonal: appBarTheme.actionsTonalColor(scheme),
+                    leadingColor:
+                        bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+                    trailingColor: appBarTheme.trailingColor(scheme),
+                    iconSize: metrics.iconSize,
+                    leading: leading,
+                    actions: bar.actions,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget? _sliverTitle(
@@ -1386,24 +1539,100 @@ Color _m3eBarColor({
   required M3EAppBarTheme theme,
   required M3EColorScheme scheme,
   required bool under,
-  required double titleHide,
 }) {
   final Color rest = bar.backgroundColor ?? theme.backgroundColor(scheme);
   final Color scrolled =
       bar.backgroundColor ?? theme.scrolledBackgroundColor(scheme);
-  final base = under ? scrolled : rest;
-  if (titleHide <= 0) {
-    return base;
-  }
-  return Color.lerp(base, theme.actionsTonalColor(scheme), titleHide) ?? base;
+  return under ? scrolled : rest;
 }
 
-/// One title block, the action row, and the tonal fill while actions stay.
+/// Follows the page scrollable and ignores overlay scrollables.
+class _M3EPageScroll {
+  ScrollPosition? tracked;
+
+  /// Whether [notification] comes from the page this bar should follow.
+  bool accepts(ScrollNotification notification, BuildContext context) {
+    if (!defaultScrollNotificationPredicate(notification)) {
+      return false;
+    }
+    if (notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+    final BuildContext? target = notification.context;
+    if (target == null || !target.mounted) {
+      return false;
+    }
+    final ScrollPosition? position = Scrollable.maybeOf(target)?.position;
+    if (position == null) {
+      return false;
+    }
+    final ModalRoute<Object?>? barRoute = ModalRoute.of(context);
+    final ModalRoute<Object?>? targetRoute = ModalRoute.of(target);
+    if (barRoute != null &&
+        targetRoute != null &&
+        !identical(barRoute, targetRoute)) {
+      return false;
+    }
+    final ScrollController? primary = PrimaryScrollController.maybeOf(context);
+    if (primary != null && primary.hasClients) {
+      return position == primary.position;
+    }
+    final replacing = tracked != null;
+    if (!_scrollPositionAlive(tracked)) {
+      tracked = null;
+    }
+    if (tracked != null) {
+      return identical(position, tracked);
+    }
+    // Desktop lists do not attach to the route's primary controller.
+    // An idle scrollable must not clear a bar that is already scrolled under.
+    // A replaced position (refresh rebuilds the scrollable) is adopted so the
+    // bar keeps following the list, including when that list is back at rest.
+    if (notification.metrics.extentBefore > 0 || replacing) {
+      tracked = position;
+      return true;
+    }
+    return false;
+  }
+}
+
+bool _scrollPositionAlive(ScrollPosition? position) {
+  if (position == null || !position.hasPixels) {
+    return false;
+  }
+  final ScrollContext scrollContext = position.context;
+  if (scrollContext is ScrollableState &&
+      (!scrollContext.mounted ||
+          !identical(scrollContext.position, position))) {
+    return false;
+  }
+  final BuildContext? notificationContext = scrollContext.notificationContext;
+  return notificationContext != null && notificationContext.mounted;
+}
+
+/// Starts a hide once. Repeating [AnimationController.reverse] every pixel
+/// stops and restarts the travel, which reads as a twitch.
+void _m3eSlideAway(AnimationController visibility) {
+  if (visibility.status == AnimationStatus.reverse ||
+      visibility.value <= 0.001) {
+    return;
+  }
+  visibility.reverse();
+}
+
+/// Starts a show once. See [_m3eSlideAway].
+void _m3eSlideBack(AnimationController visibility) {
+  if (visibility.status == AnimationStatus.forward ||
+      visibility.value >= 0.999) {
+    return;
+  }
+  visibility.forward();
+}
+
+/// Title block and action row. Actions mode splits them into two layers.
 class _M3EBarBody extends StatelessWidget {
   const _M3EBarBody({
     required this.expand,
-    required this.hide,
-    required this.band,
     required this.topPadding,
     required this.actionRow,
     required this.bottomPadding,
@@ -1417,12 +1646,14 @@ class _M3EBarBody extends StatelessWidget {
     required this.leadingColor,
     required this.trailingColor,
     required this.iconSize,
-    required this.tonal,
+    required this.separateActions,
+    required this.containerColor,
+    required this.containerElevation,
+    required this.shadowColor,
+    required this.shape,
   });
 
   final double expand;
-  final double hide;
-  final double band;
   final double topPadding;
   final double actionRow;
   final double bottomPadding;
@@ -1436,7 +1667,11 @@ class _M3EBarBody extends StatelessWidget {
   final Color leadingColor;
   final Color trailingColor;
   final double iconSize;
-  final Color tonal;
+  final bool separateActions;
+  final Color containerColor;
+  final double containerElevation;
+  final Color shadowColor;
+  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -1445,33 +1680,19 @@ class _M3EBarBody extends StatelessWidget {
     );
     final double pad = padding.left;
     final int actionCount = actions?.length ?? 0;
-    final double lead = leading == null ? pad : pad + 48;
+    final double lead = leading == null ? titleInset : pad + 48;
     final double trail = actionCount == 0 ? pad : pad + 48.0 * actionCount;
     final double shownExpand = expand.clamp(0.0, 1.0);
-    final double shift = hide.clamp(0.0, 1.0) * band;
     final double boxTop =
-        (lerpDouble(0, topPadding + actionRow, shownExpand) ?? 0) - shift;
+        lerpDouble(0, topPadding + actionRow, shownExpand) ?? 0;
     final double boxBottom =
-        (lerpDouble(0, search ? 0 : bottomPadding, shownExpand) ?? 0) + shift;
+        lerpDouble(0, search ? 0 : bottomPadding, shownExpand) ?? 0;
     final double alignY = search
         ? (lerpDouble(0, -1, shownExpand) ?? 0)
         : (lerpDouble(0, 1, shownExpand) ?? 0);
-    return Stack(
-      children: <Widget>[
-        if (hide > 0)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: band,
-            child: IgnorePointer(
-              child: ColoredBox(
-                color: tonal.withValues(alpha: hide.clamp(0.0, 1.0)),
-              ),
-            ),
-          ),
-        if (title != null)
-          PositionedDirectional(
+    final Widget? titleBox = title == null
+        ? null
+        : PositionedDirectional(
             start: lerpDouble(lead, titleInset, shownExpand),
             end: lerpDouble(trail, titleInset, shownExpand),
             top: boxTop,
@@ -1482,27 +1703,278 @@ class _M3EBarBody extends StatelessWidget {
                   ? SizedBox(width: double.infinity, child: title)
                   : title,
             ),
-          ),
+          );
+    final controls = <Widget>[
+      PositionedDirectional(
+        top: topPadding,
+        start: pad,
+        height: actionRow,
+        child: IconTheme.merge(
+          data: IconThemeData(size: iconSize, color: leadingColor),
+          child: leading ?? const SizedBox.shrink(),
+        ),
+      ),
+      if (actions != null && actions!.isNotEmpty)
         PositionedDirectional(
           top: topPadding,
-          start: pad,
+          end: pad,
           height: actionRow,
           child: IconTheme.merge(
-            data: IconThemeData(size: iconSize, color: leadingColor),
-            child: leading ?? const SizedBox.shrink(),
-          ),
-        ),
-        if (actions != null && actions!.isNotEmpty)
-          PositionedDirectional(
-            top: topPadding,
-            end: pad,
-            height: actionRow,
-            child: IconTheme.merge(
-              data: IconThemeData(size: iconSize, color: trailingColor),
-              child: Row(mainAxisSize: MainAxisSize.min, children: actions!),
+            data: IconThemeData(size: iconSize, color: trailingColor),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[for (final Widget action in actions!) action],
             ),
           ),
-      ],
+        ),
+    ];
+    if (!separateActions) {
+      return Stack(children: <Widget>[?titleBox, ...controls]);
+    }
+    return Material(
+      color: containerColor,
+      elevation: containerElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: const Color(0x00000000),
+      shape: shape,
+      child: Stack(children: <Widget>[?titleBox]),
+    );
+  }
+}
+
+/// Paints the action band over the page. The layout slot shrinks with the bar.
+class _M3EActionSliver extends SingleChildRenderObjectWidget {
+  const _M3EActionSliver({
+    required this.layoutExtent,
+    required this.paintExtent,
+    required super.child,
+  });
+
+  final double layoutExtent;
+  final double paintExtent;
+
+  @override
+  RenderSliver createRenderObject(BuildContext context) {
+    return _RenderM3EActionSliver(
+      layoutExtent: layoutExtent,
+      paintExtent: paintExtent,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderM3EActionSliver renderObject,
+  ) {
+    if (renderObject.layoutExtent == layoutExtent &&
+        renderObject.paintExtent == paintExtent) {
+      return;
+    }
+    renderObject
+      ..layoutExtent = layoutExtent
+      ..paintExtent = paintExtent
+      ..markNeedsLayout();
+  }
+}
+
+class _RenderM3EActionSliver extends RenderSliverSingleBoxAdapter {
+  _RenderM3EActionSliver({
+    required this.layoutExtent,
+    required this.paintExtent,
+  });
+
+  double layoutExtent;
+  double paintExtent;
+
+  @override
+  double childMainAxisPosition(RenderBox child) => 0;
+
+  @override
+  void performLayout() {
+    final double paint = math.max(0, paintExtent);
+    final double layout = math.min(math.max(0, layoutExtent), paint);
+    child?.layout(
+      constraints.asBoxConstraints(minExtent: paint, maxExtent: paint),
+      parentUsesSize: true,
+    );
+    final double remaining = math.max(
+      0,
+      constraints.remainingPaintExtent - constraints.overlap,
+    );
+    final double painted = math.min(paint, remaining);
+    geometry = SliverGeometry(
+      scrollExtent: layout,
+      paintOrigin: math.min(constraints.overlap, 0),
+      paintExtent: painted,
+      layoutExtent: math.min(layout, remaining),
+      maxPaintExtent: math.max(paint, painted),
+      hitTestExtent: painted,
+      hasVisualOverflow: paint > layout + 0.5,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? box = child;
+    if (box == null || geometry?.visible != true) {
+      return;
+    }
+    context.paintChild(box, offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    applyPaintTransformForBoxChild(child as RenderBox, transform);
+  }
+}
+
+/// Slides [child] up out of a shrinking window.
+Widget _m3eClipSliding({
+  required double push,
+  required double visual,
+  required Widget child,
+}) {
+  final double open = math.max(visual, push);
+  return SizedBox(
+    height: math.max(0, push),
+    child: ClipRect(
+      child: OverflowBox(
+        alignment: Alignment.bottomCenter,
+        minHeight: open,
+        maxHeight: open,
+        child: SizedBox(height: open, child: child),
+      ),
+    ),
+  );
+}
+
+/// Actions painted above the page, with no bar behind them.
+class _M3EActionOverlay extends StatelessWidget {
+  const _M3EActionOverlay({
+    required this.controller,
+    required this.inset,
+    required this.topPadding,
+    required this.actionRow,
+    required this.contentPadding,
+    required this.hide,
+    required this.tonal,
+    required this.leadingColor,
+    required this.trailingColor,
+    required this.iconSize,
+    required this.leading,
+    required this.actions,
+    required this.child,
+  });
+
+  final OverlayPortalController controller;
+  final double inset;
+  final double topPadding;
+  final double actionRow;
+  final EdgeInsetsGeometry contentPadding;
+  final double hide;
+  final Color tonal;
+  final Color leadingColor;
+  final Color trailingColor;
+  final double iconSize;
+  final Widget? leading;
+  final List<Widget>? actions;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlayPortal.overlayChildLayoutBuilder(
+      controller: controller,
+      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+        final double dy = info.childPaintTransform.getTranslation().y;
+        return Positioned(
+          top: dy + inset + topPadding,
+          left: 0,
+          right: 0,
+          height: actionRow,
+          child: _M3EActionRow(
+            contentPadding: contentPadding,
+            actionRow: actionRow,
+            hide: hide,
+            tonal: tonal,
+            leadingColor: leadingColor,
+            trailingColor: trailingColor,
+            iconSize: iconSize,
+            leading: leading,
+            actions: actions,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
+/// Leading and trailing controls. Each one carries its own fill.
+class _M3EActionRow extends StatelessWidget {
+  const _M3EActionRow({
+    required this.contentPadding,
+    required this.actionRow,
+    required this.hide,
+    required this.tonal,
+    required this.leadingColor,
+    required this.trailingColor,
+    required this.iconSize,
+    required this.leading,
+    required this.actions,
+  });
+
+  final EdgeInsetsGeometry contentPadding;
+  final double actionRow;
+  final double hide;
+  final Color tonal;
+  final Color leadingColor;
+  final Color trailingColor;
+  final double iconSize;
+  final Widget? leading;
+  final List<Widget>? actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final EdgeInsets padding = contentPadding.resolve(
+      Directionality.of(context),
+    );
+    final double alpha = hide.clamp(0.0, 1.0);
+    return Padding(
+      padding: EdgeInsets.only(left: padding.left, right: padding.right),
+      child: Row(
+        children: <Widget>[
+          if (leading != null)
+            IconTheme.merge(
+              data: IconThemeData(size: iconSize, color: leadingColor),
+              child: _plate(leading!, alpha),
+            ),
+          const Spacer(),
+          if (actions != null)
+            IconTheme.merge(
+              data: IconThemeData(size: iconSize, color: trailingColor),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  for (final Widget action in actions!) _plate(action, alpha),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _plate(Widget child, double alpha) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: alpha <= 0 ? null : tonal.withValues(alpha: alpha),
+        borderRadius: BorderRadius.circular(actionRow / 2),
+      ),
+      child: SizedBox(
+        width: actionRow,
+        height: actionRow,
+        child: Center(child: child),
+      ),
     );
   }
 }
@@ -1626,6 +2098,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
     this.barTrailing,
     this.barBackgroundColor,
     this.barAlignment = Alignment.center,
+    this.wrapActions = false,
     this.isFullScreen = true,
     this.onSubmitted,
     this.onChanged,
@@ -1641,6 +2114,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
   final Iterable<Widget>? barTrailing;
   final WidgetStateProperty<Color?>? barBackgroundColor;
   final AlignmentGeometry barAlignment;
+  final bool wrapActions;
   final bool isFullScreen;
   final ValueChanged<String>? onSubmitted;
   final ValueChanged<String>? onChanged;
@@ -1670,6 +2144,7 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
       barLeading: barLeading,
       barTrailing: barTrailing,
       barAlignment: barAlignment,
+      wrapActions: wrapActions,
       barBackgroundColor:
           barBackgroundColor ?? WidgetStatePropertyAll<Color>(field),
       barElevation: WidgetStatePropertyAll<double>(appBarTheme.searchElevation),
