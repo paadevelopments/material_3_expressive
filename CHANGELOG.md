@@ -58,6 +58,20 @@
   the carousel into a vertical list. An item with `transform` morphs after the tap pulse. Reduced
   motion turns off parallax and size changes. Pass a `M3ECarouselController` to call
   `animateToItem`.
+* **Navigation bar:** flexible size is **64** and baseline **80** is the default. Vertical
+  items share the width; the active pill is **56×32** behind the icon. Horizontal items
+  start at **600** wide, use the widest label, and wrap that label in a **40** pill with
+  **16** side insets. Horizontal items keep an **8** gap (`wideItemGap`). Start and end
+  alignment inset that group from the bar edge by the same **8** (`wideEdgePadding`).
+  The container is **surface container high** at elevation **0**. The active label is
+  **on surface**, the active icon is **on secondary container**, and the pill is
+  **secondary container**. Inactive content is **on surface variant**. State layers use
+  **on secondary container** at **0.08** hover and **0.1** focus and press, painted on the
+  full pill. The focus ring is **secondary**, **3** thick, inset **3**, and
+  a pointer tap dismisses it. Arrow keys move focus. Space or Enter selects, including the
+  active destination. `M3ENavigationBarController` selects a destination and, with
+  `hideOnScroll`, shows or hides the bar from the page's scroll controller. A screen reader
+  never hides the bar. The system inset stays padding inside the colored bar.
 * **Tabs:** primary label-only and secondary bars are **48**; primary icon plus label is **64**.
   Container is **surface** at elevation **0**, with a **1dp** outline-variant divider inside that
   height. Primary active content is **primary**; secondary active content is **on surface**;
