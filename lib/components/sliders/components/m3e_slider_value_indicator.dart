@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../styles/m3e_slider_theme.dart';
 
-/// Floating value label shown while the slider handle is interacting.
+/// Floating value label shown while a slider handle is pressed or focused.
 class M3ESliderValueIndicator extends StatelessWidget {
   /// M3ESliderValueIndicator.
   const M3ESliderValueIndicator({
@@ -21,17 +21,36 @@ class M3ESliderValueIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle style = M3ETheme.of(context).typeScale.labelLarge
-        .copyWith(color: colors.valueIndicatorLabel);
+    final sliderTheme = M3ETheme.of(context).sliderTheme;
+    final style = M3ETheme.of(context).typeScale.labelLarge.copyWith(
+      color: colors.valueIndicatorLabel,
+      fontSize: sliderTheme.valueIndicatorFontSize,
+      height:
+          sliderTheme.valueIndicatorLineHeight /
+          sliderTheme.valueIndicatorFontSize,
+      letterSpacing: sliderTheme.valueIndicatorLetterSpacing,
+      fontWeight: sliderTheme.valueIndicatorFontWeight,
+    );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.valueIndicator,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(label, style: style),
+    return SizedBox(
+      width: sliderTheme.valueIndicatorWidth,
+      height: sliderTheme.valueIndicatorHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.valueIndicator,
+          borderRadius: BorderRadius.circular(sliderTheme.valueIndicatorRadius),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style,
+            ),
+          ),
+        ),
       ),
     );
   }

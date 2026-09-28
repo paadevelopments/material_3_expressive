@@ -47,10 +47,13 @@ abstract final class M3ESliderTokens {
   static const double stopIndicatorSize = 4;
 
   /// tickSize.
-  static const double tickSize = 4;
+  static const double tickSize = 2;
+
+  /// Opacity of discrete tick marks on the track.
+  static const double tickOpacity = 0.38;
 
   /// stopIndicatorTrailingSpace.
-  static const double stopIndicatorTrailingSpace = 6;
+  static const double stopIndicatorTrailingSpace = 4;
 
   /// Clear space between the track edge and the relocating icon's outer edge.
   ///
@@ -61,6 +64,42 @@ abstract final class M3ESliderTokens {
   /// valueIndicatorActiveBottomSpace.
 
   static const double valueIndicatorActiveBottomSpace = 12;
+
+  /// valueIndicatorWidth.
+  static const double valueIndicatorWidth = 48;
+
+  /// valueIndicatorHeight.
+  static const double valueIndicatorHeight = 44;
+
+  /// valueIndicatorRadius.
+  static const double valueIndicatorRadius = 22;
+
+  /// valueIndicatorFontSize.
+  static const double valueIndicatorFontSize = 14;
+
+  /// valueIndicatorLineHeight.
+  static const double valueIndicatorLineHeight = 20;
+
+  /// valueIndicatorLetterSpacing.
+  static const double valueIndicatorLetterSpacing = 0.5;
+
+  /// Diameter of the hover, focus, and press state layer.
+  static const double stateLayerSize = 40;
+
+  /// hoverStateOpacity.
+  static const double hoverStateOpacity = 0.08;
+
+  /// focusStateOpacity.
+  static const double focusStateOpacity = 0.1;
+
+  /// pressedStateOpacity.
+  static const double pressedStateOpacity = 0.1;
+
+  /// overlapOutlineWidth.
+  static const double overlapOutlineWidth = 1;
+
+  /// iconSize.
+  static const double iconSize = 24;
 
   /// disabledHandleOpacity.
 

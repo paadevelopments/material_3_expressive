@@ -2,6 +2,19 @@
 
 ### Changed
 
+* **Sliders:** sizes **XS–XL** (tracks **16 / 24 / 40 / 56 / 96**, handles **44 / 44 / 52 /
+  68 / 108**). Active track and handle are **primary**; inactive track is **secondary
+  container**. Stops are **4** with **4** trailing space (**on secondary container** on
+  the inactive end). Press and keyboard focus pinch the handle to **2**; there is
+  no focus ring, and hover does not paint a fill. At the end of the track the filled
+  cap uses the outer corner. An inset icon stays at its end and springs to the other
+  side of the thumb when that spot is too small. `wavelength` and `waveSpeed` update
+  a wavy track while it runs. Vertical sliders take the same stops as horizontal
+  ones (`divisions`, `dotSize`, `dotSpacing`, `dotBuilder`). The value indicator is **48×44**, fully rounded,
+  **inverse surface**. Arrows
+  move **1%** (or one stop); Space+arrow moves **10%** (or one stop); Home and End jump
+  to the ends. Inset icons on M, L, and XL move to the other track segment when they
+  do not fit.
 * **Focus rings:** hover, scroll, and press hide every keyboard focus ring as soon
   as the pointer interaction starts. Tab and the arrow keys show it again.
 * **Navigation drawer:** standard sheet is **surface** at elevation **0**; modal sheet is

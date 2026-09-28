@@ -16,6 +16,7 @@ class _M3ERangeSliderResolved {
     required this.thumbLength,
     required this.dotSize,
     required this.dotSpacing,
+    required this.tickSize,
     required this.useCustomDots,
   });
 
@@ -32,20 +33,16 @@ class _M3ERangeSliderResolved {
   final double thumbLength;
   final double dotSize;
   final double dotSpacing;
+  final double tickSize;
   final bool useCustomDots;
 }
 
 extension on _M3ERangeSliderState {
   _M3ERangeSliderResolved _resolve(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme baseSliderTheme = theme.sliderTheme;
-    // Widen the track gap by the ring outset so the outline never overlaps it.
-    final M3ESliderTheme sliderTheme = _showFocusOutline
-        ? baseSliderTheme.copyWith(
-            handleGap:
-                baseSliderTheme.handleGap + M3EFocusRing.outsetOf(context),
-          )
-        : baseSliderTheme;
+    final M3ESliderTheme sliderTheme = theme.sliderTheme.applyingSize(
+      widget.size,
+    );
     final M3ESliderColors colors = sliderTheme.colors(
       theme.colorScheme,
       enabled: _enabled,
@@ -57,8 +54,8 @@ extension on _M3ERangeSliderState {
       colors: colors,
       direction: direction,
       rtl: direction == TextDirection.rtl,
-      handleThickness: _pressed
-          ? sliderTheme.pressedHandleWidth
+      handleThickness: _pressed || _showFocusOutline
+          ? sliderTheme.focusHandleWidth
           : sliderTheme.handleWidth,
       wavelength: wavelength,
       waveSpeed: widget.waveSpeed ?? wavelength,
@@ -68,6 +65,7 @@ extension on _M3ERangeSliderState {
       thumbLength: widget.thumbLength ?? sliderTheme.handleHeight,
       dotSize: widget.dotSize ?? sliderTheme.stopIndicatorSize,
       dotSpacing: widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace,
+      tickSize: sliderTheme.tickSize,
       useCustomDots: widget.dotBuilder != null,
     );
   }
@@ -126,10 +124,19 @@ extension on _M3ERangeSliderState {
           cursor: _enabled
               ? SystemMouseCursors.click
               : SystemMouseCursors.basic,
+          onEnter: (_) => _setHovered(true),
+          onExit: (_) => _setHovered(false),
           child: gestureDetector,
         ),
       ),
     );
+  }
+
+  void _setHovered(bool value) {
+    if (_hovered == value || !mounted) {
+      return;
+    }
+    setState(() => _hovered = value);
   }
 
   void _selectThumb(double dx, double startX, double endX) {
@@ -165,7 +172,7 @@ extension on _M3ERangeSliderState {
         trackHeight: resolved.trackThickness,
         cornerRadius: resolved.cornerRadius,
         stopIndicatorSize: resolved.dotSize,
-        tickSize: resolved.dotSize,
+        tickSize: resolved.tickSize,
         edgeInset: resolved.dotSpacing,
         drawDots: !resolved.useCustomDots,
         isWavy: widget.wavy,
@@ -206,7 +213,7 @@ extension on _M3ERangeSliderState {
           handleGap: resolved.sliderTheme.handleGap,
           handleThickness: resolved.handleThickness,
           stopIndicatorSize: resolved.dotSize,
-          tickSize: resolved.dotSize,
+          tickSize: resolved.tickSize,
           edgeInset: resolved.dotSpacing,
           axis: Axis.horizontal,
           textDirection: resolved.direction,
@@ -218,15 +225,19 @@ extension on _M3ERangeSliderState {
   Widget _buildThumb({
     required bool pressed,
     required bool focused,
+    required bool overlap,
     required _M3ERangeSliderResolved resolved,
   }) {
     return M3ESliderThumb(
       color: resolved.colors.thumb,
       pressed: pressed,
       focused: focused,
+      hovered: _hovered,
+      overlap: overlap,
+      overlapColor: M3ETheme.of(context).colorScheme.onPrimary,
       width: resolved.sliderTheme.handleWidth,
       height: resolved.thumbLength,
-      pressedThickness: resolved.sliderTheme.pressedHandleWidth,
+      pressedThickness: resolved.sliderTheme.focusHandleWidth,
     );
   }
 
@@ -238,6 +249,9 @@ extension on _M3ERangeSliderState {
     required double endX,
     required _M3ERangeSliderResolved resolved,
   }) {
+    final overlap = (endX - startX).abs() <= resolved.sliderTheme.handleWidth;
+    final showValue = _pressed || _showFocusOutline;
+    final valueX = _keyboardThumb == _M3ERangeThumb.start ? startX : endX;
     return SizedBox(
       width: width,
       height: height,
@@ -255,6 +269,7 @@ extension on _M3ERangeSliderState {
                 pressed: _activeThumb == _M3ERangeThumb.start,
                 focused:
                     _showFocusOutline && _keyboardThumb == _M3ERangeThumb.start,
+                overlap: overlap,
                 resolved: resolved,
               ),
             ),
@@ -268,14 +283,18 @@ extension on _M3ERangeSliderState {
                 pressed: _activeThumb == _M3ERangeThumb.end,
                 focused:
                     _showFocusOutline && _keyboardThumb == _M3ERangeThumb.end,
+                overlap: overlap,
                 resolved: resolved,
               ),
             ),
           ),
-          if (_pressed)
+          if (showValue)
             Positioned(
-              left: (_activeThumb == _M3ERangeThumb.start ? startX : endX) - 24,
-              top: -resolved.sliderTheme.valueIndicatorBottomSpace - 24,
+              left: valueX - resolved.sliderTheme.valueIndicatorWidth / 2,
+              bottom:
+                  height / 2 +
+                  resolved.thumbLength / 2 +
+                  resolved.sliderTheme.valueIndicatorBottomSpace,
               child: M3ESliderValueIndicator(
                 label: _indicatorLabel(),
                 colors: resolved.colors,

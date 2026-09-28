@@ -77,6 +77,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
@@ -119,6 +121,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     super.key,
   }) : axis = Axis.horizontal,
        trackKind = M3ESliderTrackKind.centered,
@@ -164,6 +168,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
@@ -206,6 +212,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     super.key,
   }) : axis = Axis.horizontal,
        trackKind = M3ESliderTrackKind.centered,
@@ -244,6 +252,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     this.icon,
     this.iconPosition = M3ESliderIconPosition.end,
     this.iconSize,
@@ -289,6 +299,8 @@ class M3ESlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     super.key,
   }) : axis = Axis.vertical,
        trackKind = M3ESliderTrackKind.centered,
@@ -414,6 +426,12 @@ class M3ESlider extends StatefulWidget {
   /// Haptic feedback intensity fired on discrete value changes.
   final M3EHapticFeedback haptic;
 
+  /// Spec size. XS uses the ambient [M3ESliderTheme] geometry.
+  final M3ESliderSize size;
+
+  /// Accessibility name. Matches the adjacent text label when set.
+  final String? semanticLabel;
+
   /// Optional icon rendered on the relocating track end.
   ///
   /// Mutually exclusive with [divisions]. When set, track end stop dots are
@@ -438,6 +456,7 @@ class M3ESlider extends StatefulWidget {
 
 class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
   bool _pressed = false;
+  bool _hovered = false;
   bool _dragging = false;
   bool _isFocusedFromPointer = false;
   bool _iconDocked = false;
@@ -450,8 +469,7 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
   bool get _enabled => widget.enabled && widget.onChanged != null;
   bool get _vertical => widget.axis == Axis.vertical;
 
-  /// Shows a focus outline for keyboard/traditional focus, matching desktop
-  /// convention of hiding it after a pointer-driven focus grab.
+  /// Keyboard focus chrome. Hidden as soon as pointer interaction starts.
   bool get _showFocusOutline {
     if (!M3ETheme.of(context).keyboardFocusIndicators) {
       return false;
@@ -459,10 +477,14 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
     if (!_focusNode.hasFocus) {
       return false;
     }
-    if (FocusManager.instance.highlightMode == FocusHighlightMode.traditional) {
-      return true;
+    if (!M3EFocusInteraction.instance.ringsAllowed) {
+      return false;
     }
-    return !_isFocusedFromPointer;
+    if (_isFocusedFromPointer) {
+      return false;
+    }
+    return FocusManager.instance.highlightMode ==
+        FocusHighlightMode.traditional;
   }
 
   double get _fraction =>
@@ -485,6 +507,7 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
       ),
       vsync: this,
     )..addListener(_handleDockTick);
+    M3EFocusInteraction.instance.addListener(_handleFocusInteraction);
     if (widget.wavy) {
       _waveController.repeat();
     }
@@ -510,7 +533,17 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
     setState(() {});
   }
 
-  void _handleDockTick() => setState(() {});
+  void _handleFocusInteraction() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _handleDockTick() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   void didUpdateWidget(M3ESlider oldWidget) {
@@ -530,9 +563,12 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    M3EFocusInteraction.instance.removeListener(_handleFocusInteraction);
+    _dockController
+      ..removeListener(_handleDockTick)
+      ..dispose();
     _detachFocusNode();
     _waveController.dispose();
-    _dockController.dispose();
     super.dispose();
   }
 
@@ -563,6 +599,7 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
       builder: (BuildContext context) {
         return Semantics(
           slider: true,
+          label: widget.semanticLabel,
           enabled: _enabled,
           value:
               widget.semanticFormatterCallback?.call(widget.value) ??
@@ -633,10 +670,14 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
       return KeyEventResult.handled;
     }
     if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      final double step = M3ESliderMath.stepSize(
+      final coarse = HardwareKeyboard.instance.logicalKeysPressed.contains(
+        LogicalKeyboardKey.space,
+      );
+      final double step = M3ESliderMath.keyboardStep(
         widget.min,
         widget.max,
         widget.divisions,
+        coarse: coarse,
       );
       final double? next = _keyboardDelta(event.logicalKey, step);
       if (next != null) {
@@ -648,17 +689,22 @@ class _M3ESliderState extends State<M3ESlider> with TickerProviderStateMixin {
   }
 
   double? _keyboardDelta(LogicalKeyboardKey key, double step) {
+    final rtl = !_vertical && Directionality.of(context) == TextDirection.rtl;
+    final page = M3ESliderMath.pageStep(step, widget.divisions);
+    final verticalDownIncreases = _vertical && widget.topToBottom;
     switch (key) {
       case LogicalKeyboardKey.arrowRight:
-      case LogicalKeyboardKey.arrowUp:
-        return widget.value + step;
+        return widget.value + (rtl ? -step : step);
       case LogicalKeyboardKey.arrowLeft:
+        return widget.value + (rtl ? step : -step);
+      case LogicalKeyboardKey.arrowUp:
+        return widget.value + (verticalDownIncreases ? -step : step);
       case LogicalKeyboardKey.arrowDown:
-        return widget.value - step;
+        return widget.value + (verticalDownIncreases ? step : -step);
       case LogicalKeyboardKey.pageUp:
-        return widget.value + M3ESliderMath.pageStep(step, widget.divisions);
+        return widget.value + page;
       case LogicalKeyboardKey.pageDown:
-        return widget.value - M3ESliderMath.pageStep(step, widget.divisions);
+        return widget.value - page;
       case LogicalKeyboardKey.home:
         return widget.min;
       case LogicalKeyboardKey.end:
