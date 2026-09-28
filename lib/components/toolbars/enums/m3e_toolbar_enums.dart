@@ -14,11 +14,31 @@ enum M3EToolbarPlacement {
 
 /// Standard vs vibrant container color mapping.
 enum M3EToolbarColorStyle {
-  /// Surface container + on-surface content.
+  /// Surface container toolbar. Unselected content is on-surface-variant.
+  ///
+  /// Selected toggles use secondary container. The adjacent FAB uses
+  /// secondary container as well.
   standard,
 
-  /// Primary container toolbar (tertiary container FAB when present).
+  /// Primary container toolbar. Unselected content is on-primary-container.
+  ///
+  /// Selected toggles use surface container. The adjacent FAB uses tertiary
+  /// container.
   vibrant,
+}
+
+/// How docked actions use leftover width at the medium window size and up.
+///
+/// Below 600dp the bar always uses [even].
+enum M3EToolbarContentAlignment {
+  /// Equal gaps, preferring 32 and shrinking toward 4 when the bar is tight.
+  even,
+
+  /// Actions clustered in the center with the theme centered gap.
+  centered,
+
+  /// Leading and trailing groups with a flexible middle.
+  edges,
 }
 
 /// Edge used for docked placement and single-edge safe-area padding.

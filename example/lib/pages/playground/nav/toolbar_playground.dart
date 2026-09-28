@@ -71,6 +71,8 @@ extension on _ToolbarAlign {
 class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
   M3EToolbarColorStyle _colorStyle = M3EToolbarColorStyle.standard;
   M3EToolbarPlacement _placement = M3EToolbarPlacement.floating;
+  M3EToolbarContentAlignment _contentAlignment =
+      M3EToolbarContentAlignment.even;
   Axis _axis = Axis.horizontal;
   _ToolbarAlign _align = _ToolbarAlign.bottomCenter;
   double _screenOffset = M3EToolbarTokens.screenOffset;
@@ -78,7 +80,32 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
   bool _showFab = false;
   bool _fabExpands = true;
   bool _labeled = false;
+  bool _overflow = false;
+  bool _hideOnScroll = false;
   int _activeIndex = 0;
+
+  M3EToolbarExitDirection get _exitDirection {
+    if (_placement == M3EToolbarPlacement.docked) {
+      return M3EToolbarExitDirection.bottom;
+    }
+    if (_axis == Axis.vertical) {
+      return switch (_align) {
+        _ToolbarAlign.topStart ||
+        _ToolbarAlign.centerStart ||
+        _ToolbarAlign.bottomStart => M3EToolbarExitDirection.start,
+        _ToolbarAlign.topEnd ||
+        _ToolbarAlign.centerEnd ||
+        _ToolbarAlign.bottomEnd => M3EToolbarExitDirection.end,
+        _ => M3EToolbarExitDirection.bottom,
+      };
+    }
+    return switch (_align) {
+      _ToolbarAlign.topStart ||
+      _ToolbarAlign.topCenter ||
+      _ToolbarAlign.topEnd => M3EToolbarExitDirection.top,
+      _ => M3EToolbarExitDirection.bottom,
+    };
+  }
 
   List<M3EToolbarItem> get _actions {
     if (_labeled) {
@@ -96,7 +123,7 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
         ),
       ];
     }
-    return <M3EToolbarItem>[
+    final List<M3EToolbarItem> actions = <M3EToolbarItem>[
       M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
       M3EToolbarAction(
         icon: M3EIcons.share,
@@ -105,14 +132,24 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
       ),
       M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
     ];
+    if (_overflow) {
+      actions.addAll(<M3EToolbarItem>[
+        M3EToolbarAction(icon: M3EIcons.delete, onPressed: () {}),
+        M3EToolbarAction(icon: M3EIcons.settings, onPressed: () {}),
+      ]);
+    }
+    return actions;
   }
 
-  Widget _buildToolbar() {
+  Widget _buildToolbar({M3EToolbarScrollBehavior? scrollBehavior}) {
     if (_placement == M3EToolbarPlacement.docked) {
       return M3EToolbar.docked(
         colorStyle: _colorStyle,
+        contentAlignment: _contentAlignment,
+        maxInlineActions: _overflow ? 3 : 4,
         safeArea: false,
         dockEdge: M3EToolbarDockEdge.bottom,
+        scrollBehavior: scrollBehavior,
         activeIndex: _labeled ? _activeIndex : null,
         onActiveIndexChanged: _labeled
             ? (int i) => setState(() => _activeIndex = i)
@@ -122,6 +159,7 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
     }
     return M3EToolbar(
       colorStyle: _colorStyle,
+      maxInlineActions: _overflow ? 3 : 4,
       axis: _axis,
       expanded: _expanded,
       onExpandedChanged: (bool v) => setState(() => _expanded = v),
@@ -135,6 +173,7 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
       onFabPressed: _showFab && !_fabExpands ? () {} : null,
       alignment: _align.value,
       screenOffset: _screenOffset,
+      scrollBehavior: scrollBehavior,
       actions: _actions,
     );
   }
@@ -156,13 +195,20 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
     ),
     M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
   ],''';
+    final String scrollField = _hideOnScroll
+        ? '''
+  scrollBehavior: M3EToolbarScrollBehavior.exitAlways(
+    exitDirection: M3EToolbarExitDirection.${_exitDirection.name},
+  ),'''
+        : '';
     final String sample = _placement == M3EToolbarPlacement.docked
         ? '''
 M3EToolbar.docked(
   colorStyle: M3EToolbarColorStyle.${_colorStyle.name},
+  contentAlignment: M3EToolbarContentAlignment.${_contentAlignment.name},
   safeArea: false,
   dockEdge: M3EToolbarDockEdge.bottom,
-  activeIndex: ${_labeled ? _activeIndex : 'null'},
+  activeIndex: ${_labeled ? _activeIndex : 'null'},$scrollField
 $actions
 );'''
         : '''
@@ -172,7 +218,7 @@ M3EToolbar(
   alignment: ${_align.snippet},
   screenOffset: $_screenOffset,
   expanded: $_expanded,
-  activeIndex: ${_labeled ? _activeIndex : 'null'},
+  activeIndex: ${_labeled ? _activeIndex : 'null'},$scrollField
   fabExpandIcon: ${_showFab ? 'const Icon(M3EIcons.add)' : 'null'},${_showFab && !_fabExpands ? '''
   fabExpandsToolbar: false,
   onFabPressed: () {},''' : ''}
@@ -180,6 +226,23 @@ $actions
 );''';
     return <PlaySnippet>[
       PlaySnippet(label: 'Toolbar', code: '$kPlaySnippetImport\n$sample'),
+      if (_hideOnScroll)
+        PlaySnippet(
+          label: 'Scroll',
+          code:
+              '''
+$kPlaySnippetImport
+
+final behavior = M3EToolbarScrollBehavior.exitAlways(
+  exitDirection: M3EToolbarExitDirection.${_exitDirection.name},
+);
+
+M3EToolbarScrollWrapper(
+  behavior: behavior,
+  child: list,
+)
+''',
+        ),
     ];
   }
 
@@ -197,6 +260,10 @@ $actions
             showFab: _showFab,
             fabExpands: _fabExpands,
             labeled: _labeled,
+            overflow: _overflow,
+            hideOnScroll: _hideOnScroll,
+            exitDirection: _exitDirection,
+            contentAlignment: _contentAlignment,
             activeIndex: _activeIndex,
           );
         },
@@ -213,14 +280,29 @@ $actions
           label: 'Toolbar',
           child: Center(child: _buildToolbar()),
         ),
+        if (_hideOnScroll)
+          PlayPreviewCard(
+            label: 'Hide on scroll',
+            child: _ToolbarScrollPreview(
+              key: ValueKey(_exitDirection),
+              exitDirection: _exitDirection,
+              docked: _placement == M3EToolbarPlacement.docked,
+              toolbar: (M3EToolbarScrollBehavior behavior) {
+                return _buildToolbar(scrollBehavior: behavior);
+              },
+            ),
+          ),
         PlayPreviewCard(
           label: 'Toolbar demo',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Opens a page with the toolbar docked or floating over a '
-                'list, using the settings above.',
+                _hideOnScroll
+                    ? 'Opens a scrolling page. The toolbar slides away and '
+                          'returns with the list.'
+                    : 'Opens a page with the toolbar docked or floating over a '
+                          'list, using the settings above.',
                 style: theme.typeScale.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -257,13 +339,30 @@ $actions
                 setState(() => _colorStyle = v);
               },
             ),
+            if (_placement == M3EToolbarPlacement.docked)
+              PlayEnumMenu<M3EToolbarContentAlignment>(
+                label: 'Content alignment',
+                value: _contentAlignment,
+                values: M3EToolbarContentAlignment.values,
+                labelOf: (M3EToolbarContentAlignment v) => v.name,
+                onChanged: (M3EToolbarContentAlignment v) {
+                  setState(() => _contentAlignment = v);
+                },
+              ),
             if (_placement == M3EToolbarPlacement.floating) ...<Widget>[
               PlayEnumMenu<Axis>(
                 label: 'Axis',
                 value: _axis,
                 values: Axis.values,
                 labelOf: (Axis v) => v.name,
-                onChanged: (Axis v) => setState(() => _axis = v),
+                onChanged: (Axis v) {
+                  setState(() {
+                    _axis = v;
+                    _screenOffset = v == Axis.vertical
+                        ? M3EToolbarTokens.verticalScreenOffset
+                        : M3EToolbarTokens.screenOffset;
+                  });
+                },
               ),
               PlayEnumMenu<_ToolbarAlign>(
                 label: 'Alignment',
@@ -310,6 +409,16 @@ $actions
               value: _labeled,
               onChanged: (bool v) => setState(() => _labeled = v),
             ),
+            PlaySwitch(
+              label: 'Overflow',
+              value: _overflow,
+              onChanged: (bool v) => setState(() => _overflow = v),
+            ),
+            PlaySwitch(
+              label: 'Hide on scroll',
+              value: _hideOnScroll,
+              onChanged: (bool v) => setState(() => _hideOnScroll = v),
+            ),
           ],
         ),
       ],
@@ -328,6 +437,10 @@ class _ToolbarDemoHost extends StatefulWidget {
     required this.showFab,
     required this.fabExpands,
     required this.labeled,
+    required this.overflow,
+    required this.hideOnScroll,
+    required this.exitDirection,
+    required this.contentAlignment,
     required this.activeIndex,
   });
 
@@ -340,6 +453,10 @@ class _ToolbarDemoHost extends StatefulWidget {
   final bool showFab;
   final bool fabExpands;
   final bool labeled;
+  final bool overflow;
+  final bool hideOnScroll;
+  final M3EToolbarExitDirection exitDirection;
+  final M3EToolbarContentAlignment contentAlignment;
   final int activeIndex;
 
   @override
@@ -349,6 +466,23 @@ class _ToolbarDemoHost extends StatefulWidget {
 class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
   late bool _expanded = widget.expanded;
   late int _activeIndex = widget.activeIndex;
+  M3EToolbarScrollBehavior? _scrollBehavior;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.hideOnScroll) {
+      _scrollBehavior = M3EToolbarScrollBehavior.exitAlways(
+        exitDirection: widget.exitDirection,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollBehavior?.controller.dispose();
+    super.dispose();
+  }
 
   List<M3EToolbarItem> get _actions {
     if (widget.labeled) {
@@ -366,7 +500,7 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
         ),
       ];
     }
-    return <M3EToolbarItem>[
+    final List<M3EToolbarItem> actions = <M3EToolbarItem>[
       M3EToolbarAction(icon: M3EIcons.edit, onPressed: () {}),
       M3EToolbarAction(
         icon: M3EIcons.share,
@@ -375,13 +509,23 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       ),
       M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
     ];
+    if (widget.overflow) {
+      actions.addAll(<M3EToolbarItem>[
+        M3EToolbarAction(icon: M3EIcons.delete, onPressed: () {}),
+        M3EToolbarAction(icon: M3EIcons.settings, onPressed: () {}),
+      ]);
+    }
+    return actions;
   }
 
   Widget _toolbar() {
     if (widget.placement == M3EToolbarPlacement.docked) {
       return M3EToolbar.docked(
         colorStyle: widget.colorStyle,
+        contentAlignment: widget.contentAlignment,
+        maxInlineActions: widget.overflow ? 3 : 4,
         dockEdge: M3EToolbarDockEdge.bottom,
+        scrollBehavior: _scrollBehavior,
         activeIndex: widget.labeled ? _activeIndex : null,
         onActiveIndexChanged: widget.labeled
             ? (int i) => setState(() => _activeIndex = i)
@@ -391,6 +535,7 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
     }
     return M3EToolbar(
       colorStyle: widget.colorStyle,
+      maxInlineActions: widget.overflow ? 3 : 4,
       axis: widget.axis,
       expanded: _expanded,
       onExpandedChanged: (bool v) => setState(() => _expanded = v),
@@ -406,6 +551,7 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       screenOffset: widget.screenOffset,
       safeArea: true,
       dockEdge: M3EToolbarDockEdge.bottom,
+      scrollBehavior: _scrollBehavior,
       actions: _actions,
     );
   }
@@ -424,7 +570,9 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       itemBuilder: (BuildContext context, int index) {
         return M3EListItem(
           headline: 'Note ${index + 1}',
-          supportingText: 'Scroll the page under the toolbar',
+          supportingText: widget.hideOnScroll
+              ? 'Scroll to hide and show the toolbar'
+              : 'Scroll the page under the toolbar',
           leading: const Icon(M3EIcons.edit),
         );
       },
@@ -443,19 +591,100 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
         onPressed: () => Navigator.of(context).maybePop(),
       ),
     );
+    final Widget page = _scrollBehavior == null
+        ? _page(
+            context,
+            floating: widget.placement != M3EToolbarPlacement.docked,
+          )
+        : M3EToolbarScrollWrapper(
+            behavior: _scrollBehavior!,
+            child: _page(
+              context,
+              floating: widget.placement != M3EToolbarPlacement.docked,
+            ),
+          );
     if (widget.placement == M3EToolbarPlacement.docked) {
       return Scaffold(
         backgroundColor: theme.colorScheme.surface,
         appBar: appBar,
-        body: _page(context, floating: false),
+        body: page,
         bottomNavigationBar: _toolbar(),
       );
     }
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: appBar,
-      body: Stack(
-        children: <Widget>[_page(context, floating: true), _toolbar()],
+      body: Stack(children: <Widget>[page, _toolbar()]),
+    );
+  }
+}
+
+/// Compact list the toolbar can slide away from.
+class _ToolbarScrollPreview extends StatefulWidget {
+  /// Creates a scroll preview for [exitDirection].
+  const _ToolbarScrollPreview({
+    required this.exitDirection,
+    required this.docked,
+    required this.toolbar,
+    super.key,
+  });
+
+  /// Direction the toolbar leaves the stage.
+  final M3EToolbarExitDirection exitDirection;
+
+  /// Pins the bar to the bottom edge of the stage.
+  final bool docked;
+
+  /// Builds the toolbar bound to the stage's scroll behavior.
+  final Widget Function(M3EToolbarScrollBehavior behavior) toolbar;
+
+  @override
+  State<_ToolbarScrollPreview> createState() => _ToolbarScrollPreviewState();
+}
+
+class _ToolbarScrollPreviewState extends State<_ToolbarScrollPreview> {
+  late final M3EToolbarScrollBehavior _behavior =
+      M3EToolbarScrollBehavior.exitAlways(exitDirection: widget.exitDirection);
+
+  @override
+  void dispose() {
+    _behavior.controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
+    final Widget list = M3EList.scrollable(
+      color: scheme.surfaceContainerHighest,
+      itemCount: 12,
+      listPadding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
+      itemBuilder: (BuildContext context, int index) {
+        return M3EListItem(
+          headline: 'Note ${index + 1}',
+          supportingText: 'Scroll to hide and show the toolbar',
+          leading: const Icon(M3EIcons.edit),
+        );
+      },
+    );
+    return SizedBox(
+      height: 280,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: <Widget>[
+            M3EToolbarScrollWrapper(behavior: _behavior, child: list),
+            if (widget.docked)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: widget.toolbar(_behavior),
+              )
+            else
+              widget.toolbar(_behavior),
+          ],
+        ),
       ),
     );
   }

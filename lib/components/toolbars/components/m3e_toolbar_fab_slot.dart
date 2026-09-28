@@ -2,6 +2,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../foundations/foundations.dart';
 import '../../floating_action_buttons/m3e_floating_action_buttons.dart';
 import '../res/m3e_toolbar_tokens.dart';
 
@@ -12,8 +13,10 @@ class M3EToolbarFabSlot extends StatelessWidget {
     this.fab,
     this.icon,
     this.onPressed,
-    this.color = M3EFabColor.primary,
+    this.color = M3EFabColor.secondary,
     this.containerSize,
+    this.iconSize = M3EToolbarTokens.fabExpandedIcon,
+    this.cornerRadius,
     super.key,
   });
 
@@ -29,9 +32,15 @@ class M3EToolbarFabSlot extends StatelessWidget {
   /// color.
   final M3EFabColor color;
 
-  /// When set, scales the default FAB into this square (80 collapsed → 56
+  /// When set, sizes the default FAB to this square (80 collapsed → 56
   /// expanded). Ignored when [fab] is provided (parent tight-lays out child).
   final double? containerSize;
+
+  /// Icon size inside the default FAB. 28 collapsed, 24 expanded.
+  final double iconSize;
+
+  /// Corner radius of the default FAB. Falls back to the FAB theme.
+  final double? cornerRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +56,23 @@ class M3EToolbarFabSlot extends StatelessWidget {
       );
     }
 
-    final Widget button = M3EFab(
-      icon: icon ?? const SizedBox.shrink(),
-      onPressed: onPressed,
-      color: color,
-    );
-
     final double size = containerSize ?? M3EToolbarTokens.fabBaseline;
-    return SizedBox(
-      width: size,
-      height: size,
-      child: FittedBox(child: button),
+    final M3EThemeData theme = M3ETheme.of(context);
+    final Widget button = M3ETheme(
+      data: theme.copyWith(
+        fabTheme: theme.fabTheme.copyWith(
+          regularContainer: size,
+          regularIconSize: iconSize,
+          regularRadius: cornerRadius ?? theme.fabTheme.regularRadius,
+        ),
+      ),
+      child: M3EFab(
+        icon: icon ?? const SizedBox.shrink(),
+        onPressed: onPressed,
+        color: color,
+        size: M3EFabSize.regular,
+      ),
     );
+    return SizedBox(width: size, height: size, child: button);
   }
 }

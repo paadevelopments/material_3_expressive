@@ -15,6 +15,19 @@
   move **1%** (or one stop); Space+arrow moves **10%** (or one stop); Home and End jump
   to the ends. Inset icons on M, L, and XL move to the other track segment when they
   do not fit.
+* **Toolbars:** docked and floating bars are **64** tall. Docked padding is **16**,
+  with action gaps that prefer **32** and shrink toward **4**. Floating padding is
+  **8** with a **4** gap, a pill shape, and elevation **level 3** (docked stays
+  **0**). Horizontal floating margin is **16**; vertical is **24**. The paired FAB
+  is **56** (icon **24**) expanded and **80** (icon **28**) collapsed, **8** from the
+  bar, at the same elevation. Standard content is **surface container** /
+  **on surface variant**, with **secondary container** for a selected toggle and the
+  FAB. Vibrant content is **primary container** / **on primary container**, with
+  **surface container** when selected and a **tertiary container** FAB. One emphasis
+  action stays **primary**. Disabled content is **on surface** at **0.38**. Arrows
+  move between actions. Focus rings hide on pointer input. Scroll-exit does not run
+  together with collapse-to-FAB. At **600** and wider, docked actions can sit evenly,
+  centered, or at the edges.
 * **Focus rings:** hover, scroll, and press hide every keyboard focus ring as soon
   as the pointer interaction starts. Tab and the arrow keys show it again.
 * **Navigation drawer:** standard sheet is **surface** at elevation **0**; modal sheet is

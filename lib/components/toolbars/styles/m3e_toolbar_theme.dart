@@ -18,13 +18,18 @@ class M3EToolbarColors {
     required this.content,
     required this.fabContainer,
     required this.fabContent,
+    this.selectedContainer,
+    this.selectedContent,
+    this.emphasisContainer,
+    this.emphasisContent,
+    this.disabledContent,
   });
 
   /// container.
 
   final Color container;
 
-  /// content.
+  /// Unselected icon and label.
   final Color content;
 
   /// fabContainer.
@@ -32,6 +37,21 @@ class M3EToolbarColors {
 
   /// fabContent.
   final Color fabContent;
+
+  /// Selected toggle container. Tonal, not filled.
+  final Color? selectedContainer;
+
+  /// Selected toggle icon and label.
+  final Color? selectedContent;
+
+  /// Single filled emphasis action (primary).
+  final Color? emphasisContainer;
+
+  /// Icon and label on the filled emphasis action.
+  final Color? emphasisContent;
+
+  /// Disabled icon and label (on-surface at 0.38).
+  final Color? disabledContent;
 }
 
 /// Resolved layout metrics for floating / docked toolbars.
@@ -75,11 +95,21 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
     this.containerSize = M3EToolbarTokens.containerSize,
     this.floatingPadding = M3EToolbarTokens.floatingContentPadding,
     this.dockedHorizontalPadding = M3EToolbarTokens.dockedHorizontalPadding,
+    this.actionGap = M3EToolbarTokens.containerBetweenSpace,
+    this.dockedPreferredGap = M3EToolbarTokens.dockedPreferredGap,
+    this.dockedMinGap = M3EToolbarTokens.containerBetweenSpace,
+    this.centeredGap = M3EToolbarTokens.centeredGap,
     this.iconSize = 24,
     this.elevation = M3EToolbarTokens.elevationNone,
-    this.elevationWithFab = M3EToolbarTokens.elevationWithFabExpanded,
+    this.floatingElevation = M3EToolbarTokens.floatingElevation,
+    this.elevationWithFab = M3EToolbarTokens.floatingElevation,
     this.toolbarToFabGap = M3EToolbarTokens.toolbarToFabGap,
     this.screenOffset = M3EToolbarTokens.screenOffset,
+    this.verticalScreenOffset = M3EToolbarTokens.verticalScreenOffset,
+    this.compactBreakpoint = M3EToolbarTokens.compactBreakpoint,
+    this.fabExpandedIcon = M3EToolbarTokens.fabExpandedIcon,
+    this.fabCollapsedIcon = M3EToolbarTokens.fabCollapsedIcon,
+    this.dockedRadius = M3EToolbarTokens.dockedRadius,
     // Legacy fields retained for copyWith / lerp compatibility.
     this.heightSmall = 40,
     this.heightMedium = 48,
@@ -105,20 +135,50 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
   /// dockedHorizontalPadding.
   final double dockedHorizontalPadding;
 
+  /// Gap between floating actions.
+  final double actionGap;
+
+  /// Preferred docked gap. Clamped down to [dockedMinGap] when the bar is tight.
+  final double dockedPreferredGap;
+
+  /// Smallest docked gap before actions overflow.
+  final double dockedMinGap;
+
+  /// Gap when [M3EToolbarContentAlignment.centered] is active.
+  final double centeredGap;
+
   /// iconSize.
   final double iconSize;
 
-  /// elevation.
+  /// Docked elevation.
   final double elevation;
 
-  /// elevationWithFab.
+  /// Floating elevation (level 3). Does not change when a FAB is attached.
+  final double floatingElevation;
+
+  /// Kept for theme compatibility. Resolved metrics use [floatingElevation].
   final double elevationWithFab;
 
   /// toolbarToFabGap.
   final double toolbarToFabGap;
 
-  /// screenOffset.
+  /// Horizontal floating screen margin.
   final double screenOffset;
+
+  /// Vertical floating screen margin.
+  final double verticalScreenOffset;
+
+  /// Window width below which docked actions stay evenly spaced.
+  final double compactBreakpoint;
+
+  /// Expanded FAB icon size.
+  final double fabExpandedIcon;
+
+  /// Collapsed FAB icon size.
+  final double fabCollapsedIcon;
+
+  /// Docked corner radius. Default 0.
+  final double dockedRadius;
 
   /// heightSmall.
 
@@ -156,13 +216,16 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
             dockedHorizontalPadding,
             floatingPadding,
           );
+    final double barElevation = placement == M3EToolbarPlacement.floating
+        ? floatingElevation
+        : elevation;
     return M3EToolbarMetrics(
       crossAxisSize: containerSize,
       contentPadding: padding,
-      gap: M3EToolbarTokens.containerBetweenSpace,
+      gap: placement == M3EToolbarPlacement.floating ? actionGap : dockedMinGap,
       iconSize: iconSize,
-      elevation: elevation,
-      elevationWithFab: elevationWithFab,
+      elevation: barElevation,
+      elevationWithFab: barElevation,
     );
   }
 
@@ -178,9 +241,16 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
       case M3EToolbarColorStyle.standard:
         return M3EToolbarColors(
           container: scheme.surfaceContainer,
-          content: scheme.onSurface,
-          fabContainer: scheme.primaryContainer,
-          fabContent: scheme.onPrimaryContainer,
+          content: scheme.onSurfaceVariant,
+          fabContainer: scheme.secondaryContainer,
+          fabContent: scheme.onSecondaryContainer,
+          selectedContainer: scheme.secondaryContainer,
+          selectedContent: scheme.onSecondaryContainer,
+          emphasisContainer: scheme.primary,
+          emphasisContent: scheme.onPrimary,
+          disabledContent: scheme.onSurface.withValues(
+            alpha: M3EToolbarTokens.disabledContentAlpha,
+          ),
         );
       case M3EToolbarColorStyle.vibrant:
         return M3EToolbarColors(
@@ -188,6 +258,13 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
           content: scheme.onPrimaryContainer,
           fabContainer: scheme.tertiaryContainer,
           fabContent: scheme.onTertiaryContainer,
+          selectedContainer: scheme.surfaceContainer,
+          selectedContent: scheme.onSurface,
+          emphasisContainer: scheme.primary,
+          emphasisContent: scheme.onPrimary,
+          disabledContent: scheme.onSurface.withValues(
+            alpha: M3EToolbarTokens.disabledContentAlpha,
+          ),
         );
     }
   }
@@ -222,7 +299,12 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
   /// dockedShape.
 
   ShapeBorder dockedShape() {
-    return const RoundedRectangleBorder();
+    if (dockedRadius <= 0) {
+      return const RoundedRectangleBorder();
+    }
+    return RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(dockedRadius),
+    );
   }
 
   /// shape.
@@ -243,12 +325,13 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
 
   /// scopedTheme.
 
+  /// Unselected toolbar icons read [M3EColorScheme.onSurfaceVariant].
+  ///
+  /// Disabled content stays on [M3EColorScheme.onSurface] so the icon button
+  /// can fade it to [M3EToolbarTokens.disabledContentAlpha].
   M3EThemeData scopedTheme(M3EThemeData base, Color foreground) {
     return base.copyWith(
-      colorScheme: base.colorScheme.copyWith(
-        onSurface: foreground,
-        onSurfaceVariant: foreground,
-      ),
+      colorScheme: base.colorScheme.copyWith(onSurfaceVariant: foreground),
     );
   }
 
@@ -269,11 +352,21 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
     double? containerSize,
     double? floatingPadding,
     double? dockedHorizontalPadding,
+    double? actionGap,
+    double? dockedPreferredGap,
+    double? dockedMinGap,
+    double? centeredGap,
     double? iconSize,
     double? elevation,
+    double? floatingElevation,
     double? elevationWithFab,
     double? toolbarToFabGap,
     double? screenOffset,
+    double? verticalScreenOffset,
+    double? compactBreakpoint,
+    double? fabExpandedIcon,
+    double? fabCollapsedIcon,
+    double? dockedRadius,
     double? heightSmall,
     double? heightMedium,
     double? heightLarge,
@@ -288,11 +381,21 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
       floatingPadding: floatingPadding ?? this.floatingPadding,
       dockedHorizontalPadding:
           dockedHorizontalPadding ?? this.dockedHorizontalPadding,
+      actionGap: actionGap ?? this.actionGap,
+      dockedPreferredGap: dockedPreferredGap ?? this.dockedPreferredGap,
+      dockedMinGap: dockedMinGap ?? this.dockedMinGap,
+      centeredGap: centeredGap ?? this.centeredGap,
       iconSize: iconSize ?? this.iconSize,
       elevation: elevation ?? this.elevation,
+      floatingElevation: floatingElevation ?? this.floatingElevation,
       elevationWithFab: elevationWithFab ?? this.elevationWithFab,
       toolbarToFabGap: toolbarToFabGap ?? this.toolbarToFabGap,
       screenOffset: screenOffset ?? this.screenOffset,
+      verticalScreenOffset: verticalScreenOffset ?? this.verticalScreenOffset,
+      compactBreakpoint: compactBreakpoint ?? this.compactBreakpoint,
+      fabExpandedIcon: fabExpandedIcon ?? this.fabExpandedIcon,
+      fabCollapsedIcon: fabCollapsedIcon ?? this.fabCollapsedIcon,
+      dockedRadius: dockedRadius ?? this.dockedRadius,
       heightSmall: heightSmall ?? this.heightSmall,
       heightMedium: heightMedium ?? this.heightMedium,
       heightLarge: heightLarge ?? this.heightLarge,
@@ -318,11 +421,29 @@ class M3EToolbarTheme extends M3EThemeExtension<M3EToolbarTheme> {
         other.dockedHorizontalPadding,
         t,
       ),
+      actionGap: _lerp(actionGap, other.actionGap, t),
+      dockedPreferredGap: _lerp(
+        dockedPreferredGap,
+        other.dockedPreferredGap,
+        t,
+      ),
+      dockedMinGap: _lerp(dockedMinGap, other.dockedMinGap, t),
+      centeredGap: _lerp(centeredGap, other.centeredGap, t),
       iconSize: _lerp(iconSize, other.iconSize, t),
       elevation: _lerp(elevation, other.elevation, t),
+      floatingElevation: _lerp(floatingElevation, other.floatingElevation, t),
       elevationWithFab: _lerp(elevationWithFab, other.elevationWithFab, t),
       toolbarToFabGap: _lerp(toolbarToFabGap, other.toolbarToFabGap, t),
       screenOffset: _lerp(screenOffset, other.screenOffset, t),
+      verticalScreenOffset: _lerp(
+        verticalScreenOffset,
+        other.verticalScreenOffset,
+        t,
+      ),
+      compactBreakpoint: _lerp(compactBreakpoint, other.compactBreakpoint, t),
+      fabExpandedIcon: _lerp(fabExpandedIcon, other.fabExpandedIcon, t),
+      fabCollapsedIcon: _lerp(fabCollapsedIcon, other.fabCollapsedIcon, t),
+      dockedRadius: _lerp(dockedRadius, other.dockedRadius, t),
       heightSmall: _lerp(heightSmall, other.heightSmall, t),
       heightMedium: _lerp(heightMedium, other.heightMedium, t),
       heightLarge: _lerp(heightLarge, other.heightLarge, t),

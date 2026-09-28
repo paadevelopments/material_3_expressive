@@ -51,7 +51,7 @@ void main() {
     _floatingAlignmentPositionsPillInParent,
   );
   testWidgets(
-    'docked icons-only pins first/last to padded edges',
+    'docked icons-only uses the preferred gap inside the padding',
     _dockedIconsOnlyPinsFirstLastToPaddedEdges,
   );
   testWidgets(
@@ -282,14 +282,16 @@ Future<void> _dockedIconsOnlyPinsFirstLastToPaddedEdges(
   final double firstLeft = tester.getTopLeft(buttons.at(0)).dx;
   final double lastRight = tester.getTopRight(buttons.at(2)).dx;
 
-  // dockedHorizontalPadding = 16
+  // Leading padding stays 16. Extra width does not stretch the gap past 32,
+  // so the last action is not pinned to the trailing edge.
   expect(firstLeft - toolbarLeft, closeTo(16, 0.5));
-  expect(toolbarRight - lastRight, closeTo(16, 0.5));
+  expect(toolbarRight - lastRight, greaterThan(16));
 
   final double editX = tester.getCenter(find.byIcon(M3EIcons.edit)).dx;
   final double shareX = tester.getCenter(find.byIcon(M3EIcons.share)).dx;
   final double favoriteX = tester.getCenter(find.byIcon(M3EIcons.favorite)).dx;
-  expect(shareX - editX, closeTo(favoriteX - shareX, 0.5));
+  expect(shareX - editX, closeTo(80, 1));
+  expect(favoriteX - shareX, closeTo(shareX - editX, 0.5));
 }
 
 Future<void> _floatingTitleGetsOpticalStartInset(WidgetTester tester) async {

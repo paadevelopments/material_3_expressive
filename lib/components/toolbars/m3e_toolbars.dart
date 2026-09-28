@@ -3,6 +3,7 @@ import 'package:motor/motor.dart';
 
 import '../../foundations/foundations.dart';
 import '../floating_action_buttons/enums/m3e_fab.dart';
+import '../floating_action_buttons/styles/m3e_fab_theme.dart';
 import '../icon_buttons/enums/m3e_icon_button_enums.dart';
 import '../icon_buttons/styles/m3e_icon_button_theme.dart';
 import 'components/m3e_toolbar_actions_row.dart';
@@ -96,6 +97,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.onActiveIndexChanged,
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
+    this.contentAlignment = M3EToolbarContentAlignment.even,
     super.key,
   }) : assert(
          screenOffset == null || screenOffset >= 0,
@@ -144,6 +146,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.onActiveIndexChanged,
     this.fabExpandsToolbar = true,
     this.pillActiveSpring = true,
+    this.contentAlignment = M3EToolbarContentAlignment.even,
     super.key,
   }) : assert(
          screenOffset == null || screenOffset >= 0,
@@ -183,6 +186,7 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
     this.exitExtent,
     this.activeIndex,
     this.onActiveIndexChanged,
+    this.contentAlignment = M3EToolbarContentAlignment.even,
     super.key,
   }) : placement = M3EToolbarPlacement.docked,
        axis = Axis.horizontal,
@@ -294,6 +298,11 @@ class M3EToolbar extends StatefulWidget implements PreferredSizeWidget {
   /// ignored. Floating toolbars only.
   final bool fabExpandsToolbar;
 
+  /// How docked actions use leftover width at 600dp and wider.
+  ///
+  /// Below that width the bar always spaces items evenly. Ignored when floating.
+  final M3EToolbarContentAlignment contentAlignment;
+
   /// When true (default), labeled action selection springs the toolbar pill
   /// width in sync with each action's label morph.
   ///
@@ -384,9 +393,14 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     (M3EToolbarItem item) => item is M3EToolbarAction && item.isExpandTrigger,
   );
 
+  /// Scroll-exit and collapse-to-FAB do not run together.
+  bool get _scrollExitActive => widget.scrollBehavior != null;
+
   /// Neighbor-reveal expand (no FAB). FAB path uses whole-pill morph instead.
-  bool get _usesTriggerExpand => _floating && !_hasFab && _hasTrigger;
-  bool get _usesFabExpand => _hasFab && widget.fabExpandsToolbar;
+  bool get _usesTriggerExpand =>
+      _floating && !_hasFab && _hasTrigger && !_scrollExitActive;
+  bool get _usesFabExpand =>
+      _hasFab && widget.fabExpandsToolbar && !_scrollExitActive;
 
   M3EToolbarVisibilityController? get _visibility {
     return widget.visibilityController ?? widget.scrollBehavior?.controller;
@@ -591,9 +605,16 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   }
 
   /// Screen-edge clearance plus the dock-edge system inset, outside the pill.
+  ///
+  /// Horizontal floating bars use 16. Vertical bars use 24. An explicit
+  /// [M3EToolbar.screenOffset] replaces both. Safe area stays outside the pill.
   EdgeInsets _floatingOuterPadding(BuildContext context) {
+    final M3EToolbarTheme toolbarTheme = M3ETheme.of(context).toolbarTheme;
     final double offset =
-        widget.screenOffset ?? M3ETheme.of(context).toolbarTheme.screenOffset;
+        widget.screenOffset ??
+        (widget.axis == Axis.vertical
+            ? toolbarTheme.verticalScreenOffset
+            : toolbarTheme.screenOffset);
     final EdgeInsets safe = _edgeSafeAreaInset(context);
     return EdgeInsets.fromLTRB(
       offset,
@@ -627,14 +648,24 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     final VoidCallback? fabOnPressed = widget.floatingActionButton == null
         ? (fabExpands ? _onFabPressed : widget.onFabPressed)
         : widget.onFabPressed;
+    final M3EToolbarTheme toolbarTheme = M3ETheme.of(context).toolbarTheme;
+    final double fabProgress = fabExpands ? _expandCtrl.value : 1;
+    final M3EFabTheme fabTheme = M3ETheme.of(context).fabTheme;
     final Widget fab = M3EToolbarFabSlot(
       fab: widget.floatingActionButton,
       icon: fabIcon,
       onPressed: fabOnPressed,
       color: style == M3EToolbarColorStyle.vibrant
           ? M3EFabColor.tertiary
-          : M3EFabColor.primary,
+          : M3EFabColor.secondary,
       containerSize: fabExpands ? _fabSize : M3EToolbarTokens.fabBaseline,
+      iconSize:
+          toolbarTheme.fabCollapsedIcon +
+          (toolbarTheme.fabExpandedIcon - toolbarTheme.fabCollapsedIcon) *
+              fabProgress,
+      cornerRadius:
+          fabTheme.mediumRadius +
+          (fabTheme.regularRadius - fabTheme.mediumRadius) * fabProgress,
     );
 
     final horizontal = widget.axis == Axis.horizontal;
