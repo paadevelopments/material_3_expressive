@@ -358,6 +358,7 @@ class _M3ETappableState extends State<M3ETappable>
       // Clear rings without requestFocus here — focus on tap so the gesture
       // is not cancelled by a mid-press focus/rebuild.
       M3EFocusInteraction.instance.notePointerInteraction();
+      _syncFocusedVisual();
     }
     _update(_state.copyWith(pressed: true));
     _animateScale(widget.pressedScale);

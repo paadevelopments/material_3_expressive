@@ -2,6 +2,21 @@
 
 ### Changed
 
+* **Focus rings:** hover, scroll, and press hide every keyboard focus ring as soon
+  as the pointer interaction starts. Tab and the arrow keys show it again.
+* **Navigation drawer:** standard sheet is **surface** at elevation **0**; modal sheet is
+  **surface container**. Width **360**, height fills the parent, end corners **16**.
+  Destinations are **56** tall with a **336×56** pill inset **12** and a **28** icon
+  origin. Active icon and label are **on secondary container** (label weight **700**);
+  inactive icon and label are **on surface variant**. The pill is **secondary
+  container**. Hover is **0.08**, focus and press are **0.1**. Press uses InkSparkle.
+  The focus ring is **secondary**, **3** thick, inset **3**, and hides when any
+  pointer interaction starts. Arrows move focus. Enter and Space select. A modal drawer opens from a button,
+  slides with the expressive spatial spring, and dismisses on a destination, the scrim,
+  a drag toward the start edge, or system back. A dismissible standard drawer closes
+  only from its menu. Sections are separated by an **outline** divider. Trailing badge
+  labels and an optional semantic label are supported. `M3ENavigationDrawerController`
+  selects, opens, and closes the drawer.
 * **Navigation rail:** collapsed width **96** (narrow **80**), expanded **220–360**.
   Collapsed items are **64** (**56** without a label) with a **56×32** pill. Expanded
   items are **56** tall; the pill hugs the icon and label unless it fills the rail.

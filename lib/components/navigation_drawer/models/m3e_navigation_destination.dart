@@ -5,26 +5,31 @@ import 'package:flutter/widgets.dart';
 class M3ENavigationDestination {
   /// M3ENavigationDestination.
   const M3ENavigationDestination({
-    required this.icon,
     required this.label,
+    this.icon,
     this.selectedIcon,
     this.badgeLabel,
     this.showBadge = false,
+    this.semanticLabel,
   });
 
   /// Icon shown when the destination is not selected.
-  final Widget icon;
+  ///
+  /// Omit it on every destination, or provide it on every destination.
+  final Widget? icon;
 
   /// Optional icon shown when the destination is selected.
   final Widget? selectedIcon;
 
-  /// label.
-
+  /// Visible label. Kept to one line.
   final String label;
 
-  /// Optional text for a numeric badge on the icon.
+  /// Optional text for a trailing count, such as `24` or `100+`.
   final String? badgeLabel;
 
-  /// Whether to show a small dot badge on the icon.
+  /// Whether to show a small dot on the icon when [badgeLabel] is null.
   final bool showBadge;
+
+  /// Accessibility name when [label] is ambiguous. Defaults to [label].
+  final String? semanticLabel;
 }
