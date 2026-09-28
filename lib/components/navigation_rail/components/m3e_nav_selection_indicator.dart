@@ -5,9 +5,11 @@ import '../../../foundations/foundations.dart';
 
 /// Per-destination selection indicator.
 ///
-/// Width scales from 0.4 to 1 with [scaleSpring]. Opacity uses [fadeSpring].
-/// A resting unselected indicator is fully hidden. The child is only the
-/// indicator shape; icons and labels stay outside this widget.
+/// Width scales from 0.4 to 1 with [scaleSpring]. The selected pill is opaque
+/// immediately so the destination change is not waiting on a fade-in.
+/// Leaving a destination fades with [fadeSpring]. A resting unselected
+/// indicator is fully hidden. The child is only the indicator shape; icons
+/// and labels stay outside this widget.
 class M3ESelectionIndicator extends StatefulWidget {
   /// M3ESelectionIndicator.
   const M3ESelectionIndicator({
@@ -87,8 +89,9 @@ class _M3ESelectionIndicatorState extends State<M3ESelectionIndicator>
       if (_scale.value < _restScale) {
         _scale.value = _restScale;
       }
+      // Show the pill on this frame. Width still springs from the rest scale.
+      _fade.value = 1;
       _scale.animateTo(1);
-      _fade.animateTo(1);
       return;
     }
     if (_scale.value <= 0) {

@@ -134,6 +134,13 @@ Future<void> _m3enavigationbarSelectionIndicatorScalesInPlace(
 
   await tester.tap(find.text('Search'));
   await tester.pump();
+
+  indicators = tester
+      .widgetList<M3ESelectionIndicator>(find.byType(M3ESelectionIndicator))
+      .toList();
+  expect(_indicatorOpacity(tester, indicators[1]), 1);
+  expect(_indicatorScaleX(tester, indicators[1]), greaterThanOrEqualTo(0.4));
+
   await tester.pump(const Duration(milliseconds: 32));
 
   indicators = tester
@@ -142,6 +149,7 @@ Future<void> _m3enavigationbarSelectionIndicatorScalesInPlace(
   final double incoming = _indicatorScaleX(tester, indicators[1]);
   expect(incoming, greaterThan(0.4));
   expect(incoming, lessThan(1));
+  expect(_indicatorOpacity(tester, indicators[1]), 1);
   expect(_indicatorOpacity(tester, indicators[0]), lessThan(1));
 }
 

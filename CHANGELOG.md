@@ -67,7 +67,8 @@
   **on surface**, the active icon is **on secondary container**, and the pill is
   **secondary container**. Inactive content is **on surface variant**. State layers use
   **on secondary container** at **0.08** hover and **0.1** focus and press, painted on the
-  full pill. The focus ring is **secondary**, **3** thick, inset **3**, and
+  full pill. The selected pill is opaque as soon as the destination changes; its width
+  still springs from the center. The focus ring is **secondary**, **3** thick, inset **3**, and
   a pointer tap dismisses it. Arrow keys move focus. Space or Enter selects, including the
   active destination. `M3ENavigationBarController` selects a destination and, with
   `hideOnScroll`, shows or hides the bar from the page's scroll controller. A screen reader
