@@ -12,18 +12,23 @@ Finder _tooltip(String message) {
 }
 
 bool _railHasSelectionFill(WidgetTester tester) {
+  final Finder indicator = find.descendant(
+    of: find.byType(M3ENavigationRail),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is M3ESelectionIndicator && widget.selected,
+    ),
+  );
   return tester
       .widgetList<DecoratedBox>(
-        find.descendant(
-          of: find.byType(M3ENavigationRail),
-          matching: find.byType(DecoratedBox),
-        ),
+        find.descendant(of: indicator, matching: find.byType(DecoratedBox)),
       )
       .any((DecoratedBox box) {
-        final Decoration decoration = box.decoration;
-        return decoration is ShapeDecoration &&
-            decoration.color != null &&
-            decoration.color!.a > 0;
+        final Color? color = switch (box.decoration) {
+          BoxDecoration(:final Color? color) => color,
+          ShapeDecoration(:final Color? color) => color,
+          _ => null,
+        };
+        return color != null && color.a > 0;
       });
 }
 

@@ -58,8 +58,8 @@ class M3ERailBadge extends StatelessWidget {
     final m3e = M3ETheme.of(context);
     final badgeTheme = m3e.badgeTheme;
     final scheme = m3e.colorScheme;
-    final bg = theme.badgeBackground ?? badgeTheme.containerColor(scheme);
-    final fg = theme.badgeLargeLabel ?? badgeTheme.labelColor(scheme);
+    final bg = theme.badgeBackgroundResolved(scheme);
+    final fg = theme.badgeLabelResolved(scheme);
 
     if (child != null) {
       return M3EBadge(

@@ -19,11 +19,13 @@ class NavigationRailPlayground extends StatefulWidget {
 
 class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
   M3ENavigationRailType _type = M3ENavigationRailType.expanded;
-  final M3ENavigationRailModality _modality =
-      M3ENavigationRailModality.standard;
+  M3ENavigationRailModality _modality = M3ENavigationRailModality.standard;
+  M3ENavigationRailAlignment _alignment = M3ENavigationRailAlignment.top;
   M3ENavigationRailLabelBehavior _labelBehavior =
       M3ENavigationRailLabelBehavior.alwaysShow;
   bool _showFab = true;
+  bool _showDivider = false;
+  bool _hideWhenCollapsed = false;
 
   static const List<M3ENavigationRailSection> _sections =
       <M3ENavigationRailSection>[
@@ -59,9 +61,23 @@ class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
     onPressed: () {},
   ),'''
         : '';
+    final bool modal = _modality == M3ENavigationRailModality.modal;
+    final String opener = modal
+        ? '''
+final M3ENavigationRailController controller =
+    M3ENavigationRailController(expanded: false);
+
+M3EButton(
+  onPressed: controller.expand,
+  child: const Text('Open navigation'),
+);
+
+'''
+        : '';
+    final String controllerArg = modal ? '\n  controller: controller,' : '';
     final String sample =
         '''
-M3ENavigationRail(
+${opener}M3ENavigationRail(
   sections: const <M3ENavigationRailSection>[
     M3ENavigationRailSection(
       destinations: <M3ENavigationRailDestination>[
@@ -82,7 +98,10 @@ M3ENavigationRail(
   collapseTooltip: 'Collapse',
   type: M3ENavigationRailType.${_type.name},
   modality: M3ENavigationRailModality.${_modality.name},
-  labelBehavior: M3ENavigationRailLabelBehavior.${_labelBehavior.name},$fab
+  alignment: M3ENavigationRailAlignment.${_alignment.name},
+  labelBehavior: M3ENavigationRailLabelBehavior.${_labelBehavior.name},
+  showDivider: $_showDivider,
+  hideWhenCollapsed: $_hideWhenCollapsed,$controllerArg$fab
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -100,8 +119,11 @@ M3ENavigationRail(
             sections: _sections,
             type: _type,
             modality: _modality,
+            alignment: _alignment,
             labelBehavior: _labelBehavior,
             showFab: _showFab,
+            showDivider: _showDivider,
+            hideWhenCollapsed: _hideWhenCollapsed,
           );
         },
       ),
@@ -149,6 +171,24 @@ M3ENavigationRail(
                 setState(() => _type = v);
               },
             ),
+            PlayEnumMenu<M3ENavigationRailModality>(
+              label: 'Modality',
+              value: _modality,
+              values: M3ENavigationRailModality.values,
+              labelOf: (M3ENavigationRailModality v) => v.name,
+              onChanged: (M3ENavigationRailModality v) {
+                setState(() => _modality = v);
+              },
+            ),
+            PlayEnumMenu<M3ENavigationRailAlignment>(
+              label: 'Alignment',
+              value: _alignment,
+              values: M3ENavigationRailAlignment.values,
+              labelOf: (M3ENavigationRailAlignment v) => v.name,
+              onChanged: (M3ENavigationRailAlignment v) {
+                setState(() => _alignment = v);
+              },
+            ),
             PlayEnumMenu<M3ENavigationRailLabelBehavior>(
               label: 'Labels',
               value: _labelBehavior,
@@ -163,6 +203,16 @@ M3ENavigationRail(
               value: _showFab,
               onChanged: (bool v) => setState(() => _showFab = v),
             ),
+            PlaySwitch(
+              label: 'Divider',
+              value: _showDivider,
+              onChanged: (bool v) => setState(() => _showDivider = v),
+            ),
+            PlaySwitch(
+              label: 'Hide when collapsed',
+              value: _hideWhenCollapsed,
+              onChanged: (bool v) => setState(() => _hideWhenCollapsed = v),
+            ),
           ],
         ),
       ],
@@ -175,15 +225,21 @@ class _NavigationRailDemoHost extends StatefulWidget {
     required this.sections,
     required this.type,
     required this.modality,
+    required this.alignment,
     required this.labelBehavior,
     required this.showFab,
+    required this.showDivider,
+    required this.hideWhenCollapsed,
   });
 
   final List<M3ENavigationRailSection> sections;
   final M3ENavigationRailType type;
   final M3ENavigationRailModality modality;
+  final M3ENavigationRailAlignment alignment;
   final M3ENavigationRailLabelBehavior labelBehavior;
   final bool showFab;
+  final bool showDivider;
+  final bool hideWhenCollapsed;
 
   @override
   State<_NavigationRailDemoHost> createState() =>
@@ -192,6 +248,18 @@ class _NavigationRailDemoHost extends StatefulWidget {
 
 class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
   int _index = 0;
+  late final M3ENavigationRailController _controller =
+      M3ENavigationRailController(
+        expanded:
+            widget.type == M3ENavigationRailType.expanded ||
+            widget.type == M3ENavigationRailType.alwaysExpand,
+      );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   M3ENavigationRailDestination get _destination {
     return widget.sections
@@ -214,7 +282,11 @@ class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
             onDestinationSelected: (int i) => setState(() => _index = i),
             type: widget.type,
             modality: widget.modality,
+            alignment: widget.alignment,
             labelBehavior: widget.labelBehavior,
+            showDivider: widget.showDivider,
+            hideWhenCollapsed: widget.hideWhenCollapsed,
+            controller: _controller,
             fab: widget.showFab
                 ? M3ENavigationRailFabSlot(
                     icon: const Icon(M3EIcons.add),
@@ -224,29 +296,43 @@ class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
                 : null,
           ),
           Expanded(
-            child: Column(
-              children: <Widget>[
-                M3EAppBar.top(
-                  titleText: destination.label,
-                  leading: M3EIconButton(
-                    variant: M3EIconButtonVariant.standard,
-                    icon: const Icon(M3EIcons.arrow_back),
-                    tooltip: 'Back',
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: IconTheme(
-                      data: IconThemeData(
-                        size: 48,
-                        color: theme.colorScheme.primary,
-                      ),
-                      child: destination.icon,
+            child: ColoredBox(
+              color: theme.colorScheme.surfaceContainerHigh,
+              child: Column(
+                children: <Widget>[
+                  M3EAppBar.top(
+                    titleText: destination.label,
+                    leading: M3EIconButton(
+                      variant: M3EIconButtonVariant.standard,
+                      icon: const Icon(M3EIcons.arrow_back),
+                      tooltip: 'Back',
+                      onPressed: () => Navigator.of(context).maybePop(),
                     ),
                   ),
-                ),
-              ],
+                  if (widget.modality == M3ENavigationRailModality.modal)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: M3EButton(
+                          onPressed: _controller.expand,
+                          child: const Text('Open navigation'),
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: Center(
+                      child: IconTheme(
+                        data: IconThemeData(
+                          size: 48,
+                          color: theme.colorScheme.primary,
+                        ),
+                        child: destination.icon,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -11,8 +11,8 @@ import '../styles/m3e_navigation_bar_theme.dart';
 
 /// Single destination cell inside the M3E navigation bar.
 ///
-/// The active pill springs on the horizontal axis. InkSparkle paints on the
-/// cell. Keyboard focus draws an inset ring. Space or Enter selects.
+/// The active pill springs on the horizontal axis. Keyboard focus draws an
+/// inset ring. Space or Enter selects.
 class M3ENavBarDestinationButton extends StatelessWidget {
   /// M3ENavBarDestinationButton.
   const M3ENavBarDestinationButton({
@@ -179,17 +179,14 @@ class M3ENavBarDestinationButton extends StatelessWidget {
               final M3ETappableInkScope? ink = M3ETappableInkScope.maybeOf(
                 inkContext,
               );
-              final Color splash = theme.stateLayerColor(
-                M3ETheme.of(inkContext).colorScheme,
-              );
               return InkWell(
                 onTap: ink?.onTap,
                 onLongPress: ink?.onLongPress,
                 onHover: ink?.onHover,
                 mouseCursor: ink?.mouseCursor ?? SystemMouseCursors.click,
                 canRequestFocus: false,
-                splashFactory: InkSparkle.splashFactory,
-                splashColor: splash.withValues(alpha: theme.pressedOpacity),
+                splashFactory: NoSplash.splashFactory,
+                splashColor: const Color(0x00000000),
                 highlightColor: const Color(0x00000000),
                 overlayColor: const WidgetStatePropertyAll<Color>(
                   Color(0x00000000),

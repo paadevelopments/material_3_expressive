@@ -2,6 +2,19 @@
 
 ### Changed
 
+* **Navigation rail:** collapsed width **96** (narrow **80**), expanded **220–360**.
+  Collapsed items are **64** (**56** without a label) with a **56×32** pill. Expanded
+  items are **56** tall; the pill hugs the icon and label unless it fills the rail.
+  Container is **surface** at elevation **0**. Horizontal body scroll switches it to
+  **surface container** at elevation **1**, and offset **0** restores both. Active icon
+  is **on secondary container**, active label **on surface**, pill **secondary container**.
+  Arrows move focus. Enter and Space select, including the current destination. A modal
+  rail opens from a button, dismisses on the scrim, Escape, or system back, and leaves
+  no collapsed rail behind. Hide when collapsed opens already expanded and stays
+  expanded until it is dismissed. The destination list adds
+  `destinationTopPadding` (12) under a menu, FAB, or leading control, and drops
+  that gap when those controls are absent. `M3ENavigationRailController` selects, expands, and shows
+  the immersive rail. An optional divider sits on the content edge.
 * **Lists:** expressive defaults. One / two / three-line heights **56 / 72 / 88**. Padding **16×10
   **, slot gap **12**, icons **20**. `M3EListStyle.segmented` rests at **16** outer / **4** inner
   corners; hover, focus, press, drag, and selection use **16** all around. `M3EListStyle.standard`
