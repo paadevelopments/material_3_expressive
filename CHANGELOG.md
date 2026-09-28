@@ -58,6 +58,16 @@
   the carousel into a vertical list. An item with `transform` morphs after the tap pulse. Reduced
   motion turns off parallax and size changes. Pass a `M3ECarouselController` to call
   `animateToItem`.
+* **Tabs:** primary label-only and secondary bars are **48**; primary icon plus label is **64**.
+  Container is **surface** at elevation **0**, with a **1dp** outline-variant divider inside that
+  height. Primary active content is **primary**; secondary active content is **on surface**;
+  inactive content is **on surface variant** and becomes **on surface** on hover, focus, and press.
+  State layers are **0.08** hover and **0.1** focus and press. The primary indicator is **3dp**,
+  top corners **3**, inset **2**, at least **24** long. The secondary indicator is **2dp**, square,
+  and spans the slot. Icons on secondary tabs lead the label by **8**. Scrollable tabs start
+  **52** from the leading edge. Arrow keys move focus, Space or Enter selects, and a pointer tap
+  dismisses the inset focus ring. `M3ETabsController` selects a tab. `M3ETabsView` swipes between
+  bodies. `M3ETabs.sliver` scrolls away and returns on an upward scroll.
 * **Tooltips:** a plain tooltip stays off its anchor and ignores the pointer, so the cursor on an
   icon button does not twitch between pointer and arrow.
 * **Interaction:** hover stays off while a scrollable is moving, so a fast fling does not flash the
