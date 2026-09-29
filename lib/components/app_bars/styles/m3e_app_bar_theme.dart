@@ -103,7 +103,7 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     this.titleGap = 8,
     this.iconSize = 24,
     this.elevation = M3EElevation.level0,
-    this.scrolledElevation = M3EElevation.level2,
+    this.scrolledElevation = M3EElevation.level0,
     this.compactHeightReduction = 8,
     this.smallHeight = 64,
     this.collapsedHeight = 64,
