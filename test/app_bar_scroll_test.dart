@@ -19,17 +19,14 @@ void main() {
     _searchBarSwitchesColorWhenScrollStarts,
   );
   testWidgets(
-    'bottom bar raises elevation when content scrolls and restores it',
-    _bottomBarRaisesElevationWhenContentScrollsAndRestoresIt,
+    'bottom bar keeps flat elevation and color regardless of scroll',
+    _bottomBarKeepsFlatElevationAndColorRegardlessOfScroll,
   );
   testWidgets(
     'auto hide slide does not twitch the bar or the body',
     _autoHideSlideDoesNotTwitchTheBarOrTheBody,
   );
-  testWidgets(
-    'actions hide colors the overlay and elevates the bar',
-    _actionsHideColorsTheOverlayAndElevatesTheBar,
-  );
+  testWidgets('actions hide colors the overlay', _actionsHideColorsTheOverlay);
   testWidgets(
     'an overlay scrollable does not clear scroll-under',
     _overlayScrollableDoesNotClearScrollUnder,
@@ -82,7 +79,7 @@ Future<void> _topBarSwitchesColorWhenContentScrollsUnderIt(
   await tester.pump();
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
   await tester.pump();
@@ -128,7 +125,7 @@ Future<void> _everySliverVariantSwitchesColorWhenScrollStarts(
     await tester.pump();
 
     expect(material().color, scheme.surfaceContainer);
-    expect(material().elevation, M3EElevation.level2);
+    expect(material().elevation, 0);
 
     tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
     await tester.pump();
@@ -184,7 +181,7 @@ Future<void> _searchBarSwitchesColorWhenScrollStarts(
   await tester.pump();
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   tester
       .state<ScrollableState>(
@@ -201,7 +198,7 @@ Future<void> _searchBarSwitchesColorWhenScrollStarts(
   expect(material().elevation, 0);
 }
 
-Future<void> _bottomBarRaisesElevationWhenContentScrollsAndRestoresIt(
+Future<void> _bottomBarKeepsFlatElevationAndColorRegardlessOfScroll(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
@@ -237,7 +234,7 @@ Future<void> _bottomBarRaisesElevationWhenContentScrollsAndRestoresIt(
   await tester.pump();
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
   await tester.pump();
@@ -305,9 +302,7 @@ Future<void> _slideAppBarAndExpectNoTwitch(
   expect(bodyTop(), lessThan(startBody));
 }
 
-Future<void> _actionsHideColorsTheOverlayAndElevatesTheBar(
-  WidgetTester tester,
-) async {
+Future<void> _actionsHideColorsTheOverlay(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -357,7 +352,7 @@ Future<void> _actionsHideColorsTheOverlayAndElevatesTheBar(
 
   expect(overlay().color, scheme.surfaceContainer);
   expect(barMaterial().color, scheme.surfaceContainer);
-  expect(barMaterial().elevation, M3EElevation.level2);
+  expect(barMaterial().elevation, 0);
 
   tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
   await tester.pump();
@@ -413,13 +408,13 @@ Future<void> _overlayScrollableDoesNotClearScrollUnder(
   }
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   await tester.drag(find.byType(ListView).last, const Offset(0, 40));
   await tester.pump();
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 }
 
 Future<void> _desktopScrollUnderIgnoresAnIdleList(WidgetTester tester) async {
@@ -478,13 +473,13 @@ Future<void> _desktopScrollUnderBody(
   }
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   await tester.drag(find.byType(ListView).last, const Offset(0, 40));
   await tester.pump();
 
   expect(material().color, scheme.surfaceContainer);
-  expect(material().elevation, M3EElevation.level2);
+  expect(material().elevation, 0);
 
   await tester.drag(find.byType(ListView).first, const Offset(0, 800));
   await tester.pump();
@@ -519,7 +514,7 @@ Future<void> _refreshCycleDoesNotFreezeScrollUnder(WidgetTester tester) async {
     await tester.drag(find.byType(ListView), const Offset(0, -400));
     await tester.pump();
     expect(material().color, scheme.surfaceContainer);
-    expect(material().elevation, M3EElevation.level2);
+    expect(material().elevation, 0);
 
     await tester.drag(find.byType(ListView), const Offset(0, 800));
     await tester.pumpAndSettle();
@@ -542,7 +537,7 @@ Future<void> _refreshCycleDoesNotFreezeScrollUnder(WidgetTester tester) async {
     await tester.drag(find.byType(ListView), const Offset(0, -400));
     await tester.pump();
     expect(material().color, scheme.surfaceContainer);
-    expect(material().elevation, M3EElevation.level2);
+    expect(material().elevation, 0);
 
     await tester.drag(find.byType(ListView), const Offset(0, 800));
     await tester.pumpAndSettle();

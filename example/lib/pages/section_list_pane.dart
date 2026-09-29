@@ -38,6 +38,10 @@ class SectionListPane extends StatelessWidget {
       theme.colorScheme,
     );
     return ListView(
+      // Explicit so this pane is the app bar's scroll-under source on wide
+      // layouts too, where it sits beside a detail pane in the same route
+      // (desktop doesn't auto-inherit PrimaryScrollController for lists).
+      primary: true,
       padding: EdgeInsets.all(16),
       children: <Widget>[
         M3EList(
