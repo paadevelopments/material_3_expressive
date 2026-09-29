@@ -382,6 +382,11 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   double _fabSize = M3EToolbarTokens.fabBaseline;
   int? _activeIndex;
 
+  /// Docked bar's own measured extent along the exit axis, tracked so its
+  /// reserved layout space (e.g. Scaffold.bottomNavigationBar) can shrink in
+  /// sync with scroll-exit instead of leaving an empty slot behind.
+  double? _dockedExtent;
+
   bool get _floating => widget.placement == M3EToolbarPlacement.floating;
   bool get _hasFab =>
       _floating &&
@@ -710,26 +715,27 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     }
     final M3EToolbarVisibilityController resolved =
         controller ?? widget.scrollBehavior!.controller;
+    final bool vertical =
+        _exitDirection == M3EToolbarExitDirection.top ||
+        _exitDirection == M3EToolbarExitDirection.bottom;
 
     Widget measured = M3EToolbarMeasureSize(
       onChange: (Size size) {
+        final double rawExtent = vertical ? size.height : size.width;
+        if (!_floating && vertical && mounted) {
+          setState(() => _dockedExtent = rawExtent);
+        }
         if (widget.exitExtent != null || resolved.exitExtent != null) {
           final double extent = widget.exitExtent ?? resolved.exitExtent ?? 0;
           resolved.offsetLimit = -extent.abs();
           return;
         }
-        final bool vertical =
-            _exitDirection == M3EToolbarExitDirection.top ||
-            _exitDirection == M3EToolbarExitDirection.bottom;
-        final double extent =
-            (vertical ? size.height : size.width) +
-            M3EToolbarTokens.screenOffset;
-        resolved.offsetLimit = -extent;
+        resolved.offsetLimit = -(rawExtent + M3EToolbarTokens.screenOffset);
       },
       child: bar,
     );
 
-    return ClipRect(
+    final Widget sliding = ClipRect(
       child: ListenableBuilder(
         listenable: resolved,
         builder: (BuildContext context, Widget? child) {
@@ -742,6 +748,44 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
         },
         child: measured,
       ),
+    );
+
+    if (_floating || !vertical) {
+      return sliding;
+    }
+
+    // Docked bars sit in a fixed-size layout slot (typically
+    // Scaffold.bottomNavigationBar). Shrink the reported layout extent in
+    // sync with the scroll offset so that slot collapses along with the
+    // bar, instead of leaving an empty "ghost" the size of the bar once it
+    // has slid out of view.
+    final Alignment alignment = _exitDirection == M3EToolbarExitDirection.top
+        ? Alignment.topCenter
+        : Alignment.bottomCenter;
+    return ListenableBuilder(
+      listenable: resolved,
+      builder: (BuildContext context, Widget? child) {
+        final double? natural = _dockedExtent;
+        if (natural == null) {
+          return child!;
+        }
+        final double shrunk = (natural - resolved.offset.abs()).clamp(
+          0.0,
+          natural,
+        );
+        return SizedBox(
+          height: shrunk,
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: alignment,
+              minHeight: natural,
+              maxHeight: natural,
+              child: SizedBox(height: natural, child: child),
+            ),
+          ),
+        );
+      },
+      child: sliding,
     );
   }
 }

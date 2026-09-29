@@ -141,7 +141,7 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
     return actions;
   }
 
-  Widget _buildToolbar({M3EToolbarScrollBehavior? scrollBehavior}) {
+  Widget _buildToolbar() {
     if (_placement == M3EToolbarPlacement.docked) {
       return M3EToolbar.docked(
         colorStyle: _colorStyle,
@@ -149,7 +149,6 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
         maxInlineActions: _overflow ? 3 : 4,
         safeArea: false,
         dockEdge: M3EToolbarDockEdge.bottom,
-        scrollBehavior: scrollBehavior,
         activeIndex: _labeled ? _activeIndex : null,
         onActiveIndexChanged: _labeled
             ? (int i) => setState(() => _activeIndex = i)
@@ -173,7 +172,6 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
       onFabPressed: _showFab && !_fabExpands ? () {} : null,
       alignment: _align.value,
       screenOffset: _screenOffset,
-      scrollBehavior: scrollBehavior,
       actions: _actions,
     );
   }
@@ -280,18 +278,6 @@ M3EToolbarScrollWrapper(
           label: 'Toolbar',
           child: Center(child: _buildToolbar()),
         ),
-        if (_hideOnScroll)
-          PlayPreviewCard(
-            label: 'Hide on scroll',
-            child: _ToolbarScrollPreview(
-              key: ValueKey(_exitDirection),
-              exitDirection: _exitDirection,
-              docked: _placement == M3EToolbarPlacement.docked,
-              toolbar: (M3EToolbarScrollBehavior behavior) {
-                return _buildToolbar(scrollBehavior: behavior);
-              },
-            ),
-          ),
         PlayPreviewCard(
           label: 'Toolbar demo',
           child: Column(
@@ -615,77 +601,6 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       backgroundColor: theme.colorScheme.surface,
       appBar: appBar,
       body: Stack(children: <Widget>[page, _toolbar()]),
-    );
-  }
-}
-
-/// Compact list the toolbar can slide away from.
-class _ToolbarScrollPreview extends StatefulWidget {
-  /// Creates a scroll preview for [exitDirection].
-  const _ToolbarScrollPreview({
-    required this.exitDirection,
-    required this.docked,
-    required this.toolbar,
-    super.key,
-  });
-
-  /// Direction the toolbar leaves the stage.
-  final M3EToolbarExitDirection exitDirection;
-
-  /// Pins the bar to the bottom edge of the stage.
-  final bool docked;
-
-  /// Builds the toolbar bound to the stage's scroll behavior.
-  final Widget Function(M3EToolbarScrollBehavior behavior) toolbar;
-
-  @override
-  State<_ToolbarScrollPreview> createState() => _ToolbarScrollPreviewState();
-}
-
-class _ToolbarScrollPreviewState extends State<_ToolbarScrollPreview> {
-  late final M3EToolbarScrollBehavior _behavior =
-      M3EToolbarScrollBehavior.exitAlways(exitDirection: widget.exitDirection);
-
-  @override
-  void dispose() {
-    _behavior.controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
-    final Widget list = M3EList.scrollable(
-      color: scheme.surfaceContainerHighest,
-      itemCount: 12,
-      listPadding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
-      itemBuilder: (BuildContext context, int index) {
-        return M3EListItem(
-          headline: 'Note ${index + 1}',
-          supportingText: 'Scroll to hide and show the toolbar',
-          leading: const Icon(M3EIcons.edit),
-        );
-      },
-    );
-    return SizedBox(
-      height: 280,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: <Widget>[
-            M3EToolbarScrollWrapper(behavior: _behavior, child: list),
-            if (widget.docked)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: widget.toolbar(_behavior),
-              )
-            else
-              widget.toolbar(_behavior),
-          ],
-        ),
-      ),
     );
   }
 }

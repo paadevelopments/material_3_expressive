@@ -111,8 +111,14 @@ class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper>
     } else if (notification is ScrollUpdateNotification) {
       _handleScrollUpdate(notification);
     } else if (notification is ScrollEndNotification) {
-      final double velocity = notification.dragDetails?.primaryVelocity ?? 0;
-      _settleTo(velocity);
+      // Non-drag scroll input (mouse wheel, discrete trackpad ticks) fires its
+      // own start/update/end per tick with no drag details. Settling on those
+      // snaps the bar back before the next tick continues it, reading as a
+      // reversal while scrolling slowly. Only settle on a real drag release.
+      final DragEndDetails? drag = notification.dragDetails;
+      if (drag != null) {
+        _settleTo(drag.primaryVelocity ?? 0);
+      }
     }
     return false;
   }
