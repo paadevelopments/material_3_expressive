@@ -393,6 +393,24 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
     return widget.color ?? itemTheme.resolveContainer(scheme);
   }
 
+  /// Resting elevation for the row's [M3ECard] surface.
+  ///
+  /// List rows use a state-layer fill for hover/press/focus, not elevation —
+  /// unlike a standalone [M3ECard], a row should not float above its
+  /// neighbors on hover. This always resolves the variant's plain resting
+  /// value (ignoring interaction state) so [M3ECard] never applies its own
+  /// hover/press/focus elevation bump.
+  double _resolveElevation(bool paintContainer) {
+    if (widget.dragged || !paintContainer) {
+      return 0;
+    }
+    if (widget.elevation != null) {
+      return widget.elevation!;
+    }
+    return M3ETheme.of(context).cardTheme
+        .elevation(widget.variant, hovered: false, enabled: widget.enabled);
+  }
+
   Widget _buildCardSurface({
     required bool paintContainer,
     required BorderRadius radius,
@@ -412,7 +430,7 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
       borderRadius: radius,
       color: fill,
       border: paintContainer ? widget.border : null,
-      elevation: widget.dragged || !paintContainer ? 0 : widget.elevation,
+      elevation: _resolveElevation(paintContainer),
       padding: widget.padding,
       enabled: widget.enabled,
       dragged: widget.dragged,
