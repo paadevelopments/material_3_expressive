@@ -26,6 +26,9 @@ export 'res/m3e_navigation_rail_layout.dart';
 export 'styles/m3e_navigation_rail_theme.dart';
 
 part 'components/m3e_navigation_rail_children_mixin.dart';
+part 'components/m3e_navigation_rail_overlays.dart';
+part 'components/m3e_navigation_rail_build.dart';
+part 'components/m3e_navigation_rail_width.dart';
 
 /// Material 3 Expressive navigation rail.
 class M3ENavigationRail extends StatefulWidget {
@@ -182,23 +185,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     }
     final double target = _expandedTarget(context);
     return _width.value + 1 >= target;
-  }
-
-  double _collapsedInset(M3ENavigationRailTheme theme) {
-    final bool narrow =
-        (theme.collapsedWidth - theme.narrowCollapsedWidth).abs() < 0.5;
-    return narrow
-        ? theme.narrowHorizontalPadding
-        : theme.collapsedHorizontalPadding;
-  }
-
-  /// Leading edge of the destination icon for the current layout.
-  double _iconOrigin(M3ENavigationRailTheme theme, {required bool expanded}) {
-    if (expanded) {
-      return theme.expandedItemInset + theme.indicatorLeading;
-    }
-    return _collapsedInset(theme) +
-        (theme.verticalIndicatorWidth - theme.iconSize) / 2;
   }
 
   @override
@@ -406,132 +392,38 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
     setState(() => _expanded = next);
   }
 
-  void _syncOverlay() {
-    if (!mounted) {
-      return;
-    }
-    if (_isModal && _isExpanded) {
-      _modalShown = true;
-    }
-    if (_overlayVisible) {
-      if (_modalEntry == null) {
-        _insertOverlay();
-      } else {
-        _modalEntry!.markNeedsBuild();
-      }
-    } else {
-      _removeOverlay();
-    }
-    if (_needsCollapsedPeek) {
-      if (_collapsedPeekEntry == null) {
-        _insertCollapsedPeekOverlay();
-      } else {
-        _collapsedPeekEntry!.markNeedsBuild();
-      }
-    } else {
-      _removeCollapsedPeekOverlay();
-    }
-  }
-
-  void _insertOverlay() {
-    final OverlayState overlay = Overlay.of(context, rootOverlay: true);
-    _modalEntry = OverlayEntry(builder: _buildModalOverlay);
-    overlay.insert(_modalEntry!);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _modalShown) {
-        _modalFocus.requestFocus();
-      }
-    });
-  }
-
-  void _removeOverlay() {
-    _modalEntry?.remove();
-    _modalEntry = null;
-  }
-
-  void _insertCollapsedPeekOverlay() {
-    final OverlayState overlay = Overlay.of(context, rootOverlay: true);
-    _collapsedPeekEntry = OverlayEntry(builder: _buildCollapsedPeekOverlay);
-    overlay.insert(_collapsedPeekEntry!);
-  }
-
-  void _removeCollapsedPeekOverlay() {
-    _collapsedPeekEntry?.remove();
-    _collapsedPeekEntry = null;
-  }
-
   void _setExpanded(bool value) {
-    if ((!_canToggle && !_isModal) || _expanded == value) {
+    if (!_canChangeExpanded(value)) {
       return;
     }
-    setState(() {
-      _expanded = value;
-      _suppressInk = true;
-      if (_isModal && value) {
-        _modalShown = true;
-      }
-    });
+    setState(() => _applyExpanded(value));
     if (_isModal && value) {
       _width.value = 0;
     }
     _bound?.updateExpanded(expanded: value);
     _bound?.updateVisible(visible: value || !widget.hideWhenCollapsed);
+    _scheduleInkRestore();
+    widget.onTypeChanged?.call(_notifiedType);
+    _animateWidth();
+  }
+
+  bool _canChangeExpanded(bool value) =>
+      (_canToggle || _isModal) && _expanded != value;
+
+  void _applyExpanded(bool value) {
+    _expanded = value;
+    _suppressInk = true;
+    if (_isModal && value) {
+      _modalShown = true;
+    }
+  }
+
+  void _scheduleInkRestore() {
     Future<void>.delayed(M3ENavigationRailLayout.selectionDelay, () {
       if (mounted) {
         setState(() => _suppressInk = false);
       }
     });
-    widget.onTypeChanged?.call(_notifiedType);
-    _animateWidth();
-  }
-
-  void _dismissModal() {
-    if (!_isExpanded) {
-      return;
-    }
-    widget.onDismissModal?.call();
-    _setExpanded(false);
-  }
-
-  double _expandedTarget(BuildContext context) {
-    final M3ENavigationRailTheme theme = M3ETheme.of(context)
-        .navigationRailTheme;
-    return (widget.expandedWidth ?? theme.expandedMinWidth).clamp(
-      theme.expandedMinWidth,
-      theme.expandedMaxWidth,
-    );
-  }
-
-  double _targetWidth(BuildContext context) {
-    final M3ENavigationRailTheme theme = M3ETheme.of(context)
-        .navigationRailTheme;
-    if (_isModal) {
-      return _modalShown && _isExpanded ? _expandedTarget(context) : 0;
-    }
-    if (!_isExpanded && widget.hideWhenCollapsed) {
-      return 0;
-    }
-    return _isExpanded ? _expandedTarget(context) : theme.collapsedWidth;
-  }
-
-  void _animateWidth() {
-    final M3ENavigationRailTheme theme = M3ETheme.of(context)
-        .navigationRailTheme;
-    final double target = _targetWidth(context);
-    _width.motion = const MaterialSpringMotion.expressiveSpatialDefault()
-        .copyWith(
-          stiffness: theme.widthSpring.stiffness,
-          damping: theme.widthSpring.damping,
-        );
-    if (!_widthSeeded) {
-      _width.value = target;
-      _widthSeeded = true;
-      return;
-    }
-    if ((_width.value - target).abs() < 0.5) {
-      return;
-    }
-    _width.animateTo(target);
   }
 
   List<FocusNode> get _arrowNodes {
@@ -566,75 +458,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
       return rtl ? 1 : -1;
     }
     return 0;
-  }
-
-  Widget _buildModalOverlay(BuildContext context) {
-    final theme = M3ETheme.of(context).navigationRailTheme;
-    final double span = _expandedTarget(context);
-    final double reveal = span <= 0 ? 0 : (_width.value / span).clamp(0, 1);
-    final rtl = Directionality.of(context) == TextDirection.rtl;
-    return M3EScrimSystemUi.wrap(
-      CallbackShortcuts(
-        bindings: <ShortcutActivator, VoidCallback>{
-          const SingleActivator(LogicalKeyboardKey.escape): _dismissModal,
-        },
-        child: Focus(
-          focusNode: _modalFocus,
-          autofocus: true,
-          skipTraversal: true,
-          onKeyEvent: (FocusNode node, KeyEvent event) {
-            if (event is KeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.escape) {
-              _dismissModal();
-              return KeyEventResult.handled;
-            }
-            return KeyEventResult.ignored;
-          },
-          child: Stack(
-            children: <Widget>[
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _dismissModal,
-                  child: ColoredBox(
-                    color: M3ETheme.of(context).colorScheme.scrim
-                        .withValues(alpha: theme.modalScrimOpacity * reveal),
-                  ),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: FractionalTranslation(
-                  translation: Offset(rtl ? 1 - reveal : reveal - 1, 0),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: _buildRailCore(context, modal: true),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCollapsedPeekOverlay(BuildContext context) {
-    final M3ENavigationRailTheme theme = M3ETheme.of(context)
-        .navigationRailTheme;
-    final Widget button = M3EIconButton(
-      variant: M3EIconButtonVariant.standard,
-      icon: const Icon(M3EIcons.menu),
-      tooltip: widget.expandTooltip,
-      onPressed: _canToggle ? () => _setExpanded(true) : null,
-      suppressInk: _suppressInk,
-      focusNode: _menuFocus,
-    );
-    return CompositedTransformFollower(
-      link: _anchor,
-      showWhenUnlinked: false,
-      offset: Offset(8, theme.topSpace),
-      child: Material(type: MaterialType.transparency, child: button),
-    );
   }
 
   @override
@@ -707,151 +530,6 @@ class _M3ENavigationRailState extends State<M3ENavigationRail>
                 focusNode: _fabFocus,
               ),
       ),
-    );
-  }
-
-  Widget _buildRailCore(BuildContext context, {required bool modal}) {
-    final M3EThemeData m3e = M3ETheme.of(context);
-    final M3ENavigationRailTheme theme = m3e.navigationRailTheme;
-    final M3EColorScheme scheme = m3e.colorScheme;
-    final bool raised = widget.scrollUnder && _scrolledUnder && !modal;
-    final Color color =
-        widget.background ??
-        (modal
-            ? theme.modalContainerColorResolved(scheme)
-            : raised
-            ? theme.scrolledContainerColorResolved(scheme)
-            : theme.containerColorResolved(scheme));
-    final double elevation = raised ? theme.scrolledElevation : theme.elevation;
-    final double corner = modal
-        ? theme.modalContainerRadius
-        : theme.containerRadius;
-    final double raw = modal ? _expandedTarget(context) : _width.value;
-    final double width = raw < 0 ? 0 : raw;
-    final bool revealExpanded = !modal && _immersive && _showExpandedItems;
-    final double contentWidth = revealExpanded
-        ? _expandedTarget(context)
-        : width;
-    final BorderRadius? radius = corner > 0
-        ? BorderRadius.circular(corner)
-        : null;
-    Widget rail = DecoratedBox(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: radius,
-        boxShadow: M3EElevation.shadows(elevation, shadowColor: scheme.shadow),
-      ),
-      child: Material(type: MaterialType.transparency, child: _body(context)),
-    );
-    if (widget.showDivider) {
-      rail = Stack(
-        children: <Widget>[
-          rail,
-          PositionedDirectional(
-            top: 0,
-            bottom: 0,
-            end: 0,
-            width: theme.dividerThickness,
-            child: ColoredBox(color: theme.dividerColorResolved(scheme)),
-          ),
-        ],
-      );
-    }
-    if (radius != null) {
-      rail = ClipRRect(borderRadius: radius, child: rail);
-    }
-    rail = SizedBox(width: contentWidth, child: rail);
-    if (revealExpanded && contentWidth > width) {
-      rail = ClipRect(
-        child: OverflowBox(
-          alignment: AlignmentDirectional.centerStart,
-          minWidth: contentWidth,
-          maxWidth: contentWidth,
-          child: rail,
-        ),
-      );
-    }
-    return _shortcuts(SizedBox(width: width, child: rail));
-  }
-
-  double _destinationListTop(M3ENavigationRailTheme theme) {
-    final bool controls =
-        widget.leading != null || widget.fab != null || _canToggle;
-    if (!controls) {
-      return 0;
-    }
-    return theme.destinationTopPadding;
-  }
-
-  Widget _body(BuildContext context) {
-    final M3ENavigationRailTheme theme = M3ETheme.of(context)
-        .navigationRailTheme;
-    final double listTop = _destinationListTop(theme);
-    final listPadding = EdgeInsets.only(top: listTop);
-    final List<Widget> header = _headerChildren(context);
-    final List<Widget> destinations = _destinationChildren(context);
-    final Widget? trailing = widget.trailing != null && widget.trailingAtBottom
-        ? _buildTrailing(context)
-        : null;
-    final Widget group = widget.alignment == M3ENavigationRailAlignment.center
-        ? Expanded(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final double minHeight = constraints.maxHeight - listTop;
-                return SingleChildScrollView(
-                  padding: listPadding,
-                  physics: widget.scrollable
-                      ? const ClampingScrollPhysics()
-                      : const NeverScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: minHeight < 0 ? 0 : minHeight,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: destinations,
-                    ),
-                  ),
-                );
-              },
-            ),
-          )
-        : Expanded(
-            child: widget.scrollable
-                ? ListView(padding: listPadding, children: destinations)
-                : SingleChildScrollView(
-                    padding: listPadding,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: destinations,
-                    ),
-                  ),
-          );
-    final int destinationsCount = widget.sections.fold<int>(0, (
-      int count,
-      M3ENavigationRailSection section,
-    ) {
-      return count + section.destinations.length;
-    });
-    return Semantics(
-      role: destinationsCount > 0 ? SemanticsRole.menu : null,
-      explicitChildNodes: true,
-      child: Column(children: <Widget>[...header, group, ?trailing]),
-    );
-  }
-
-  Widget _shortcuts(Widget child) {
-    return CallbackShortcuts(
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.arrowDown): () => _move(1),
-        const SingleActivator(LogicalKeyboardKey.arrowUp): () => _move(-1),
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
-            _move(_arrowDelta(LogicalKeyboardKey.arrowRight)),
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
-            _move(_arrowDelta(LogicalKeyboardKey.arrowLeft)),
-      },
-      child: child,
     );
   }
 

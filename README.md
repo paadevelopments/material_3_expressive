@@ -84,7 +84,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.4.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.5.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -101,48 +101,60 @@ imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.3
+## What's new in 1.1.4
 
-Summary of updates since 1.1.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.3 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Deps** — `material_ui` `^1.4.0`; Flutter `>=3.47.0` (Dart `^3.13.0`).
-- **Breaking — buttons** — spec size, color, and shape tokens. Selection is
-  `isSelected` / `selectedIcon` / `selectedLabel`. `M3EToggleButton` is removed.
-- **Breaking — button groups** — module is `button_group` (`buttonGroupTheme`).
-  Density is `regular` / `comfortable` / `compact` / `dense`. Tab moves focus;
-  arrows are not captured.
-- **Breaking — icon buttons** — spec radii, outlines, and color roles. Default
-  variant is **`filled`**.
-- **Breaking — FABs** — `medium` is **80dp**. `regular` is the old **56dp**
-  size. Filled color styles and `M3EFabController`.
-- **Breaking — extended FABs** — `M3EExtendedFabSize` (`small` default).
-  Label required. `M3EExtendedFabController`.
-- **Breaking — FAB menus** — **2–6** items, `M3EFabMenuController`, per-item
-  container transform. Tab walks items; Escape closes.
-- **Segmented buttons** — outlined spec tokens, density heights, focus ring.
-- **Split buttons** — spec size tokens; open state is a state layer, not a
-  recolor.
-- **Checkboxes, radios, switches, chips** — spec sizes, colors, focus rings,
-  and `InkSparkle`. Radio groups and chip groups add arrow-key focus.
-- **Dividers** — **1dp** outline-variant line. Outer margins stay off unless
-  `outerMargin` is set.
-- **Navigation** — bar, rail, and drawer pills scale in place. They no longer
-  travel between destinations.
-- **Menus** — vertical and baseline (`M3EMenuVariant`). Multi-select stays
-  open (`M3EMenuSelectionMode`).
-- **Toolbars** — floating `alignment` and `screenOffset` (default **16**).
-  Docked ignores both.
-- **Overlays** — back closes an open menu, dropdown, split popup, or FAB menu
-  before leaving the page.
-- **Snackbars and tooltips** — spec padding, timing, and controllers. Escape
-  dismisses a focused snackbar.
-- **Breaking — badges** — error colors, **6dp** dot, **16dp** large badge.
-  `label` preferred over `count`. `smallOffset` / `largeOffset` replace
-  `defaultOffset`.
-- **Progress** — secondary-container track, circular gap **4dp**, optional
-  `showTrack`.
-- **Breaking — loading indicator** — `elevation` removed. `size`,
-  `containerShape`, and `indicatorColors` added.
+- **Deps** — `material_ui` `^1.5.0`.
+- **Sliders** — sizes `xs`–`xl` (tracks **16–96**, handles **44–108**).
+  Active track and handle are **primary**; inactive track is **secondary
+  container**. Wavy tracks take `wavelength` / `waveSpeed`. Value indicator
+  is **48×44**, fully rounded, **inverse surface**.
+- **Toolbars** — docked and floating bars are **64** tall. Standard content
+  is **surface container**; vibrant is **primary container**.
+  `contentAlignment` places docked actions at 600dp and wider. Scroll-exit
+  does not run together with collapse-to-FAB.
+- **Focus rings** — hover, scroll, and press hide every keyboard focus ring
+  as soon as the pointer interaction starts. Tab and the arrow keys show it
+  again.
+- **Navigation drawer** — standard sheet is **surface**; modal is **surface
+  container**. Width **360**. A modal drawer dismisses on a destination,
+  the scrim, a drag toward the start edge, or system back.
+  `M3ENavigationDrawerController` selects, opens, and closes it, and
+  `sections` group destinations below the primary list.
+- **Navigation rail** — collapsed width **96** (narrow **80**), expanded
+  **220–360**. A modal rail dismisses on the scrim, Escape, or system back
+  and leaves no collapsed rail behind. `M3ENavigationRailController`
+  selects, expands, and shows the immersive rail.
+- **Lists** — expressive defaults (heights **56 / 72 / 88**). `M3EList` is
+  the only list widget — `M3ECardList`, `M3EDismissibleList`,
+  `M3EDismissibleColumn`, and `M3EExpandableList` are removed. A dragged row
+  lifts to level **4** and commits when the drag ends.
+- **App bars** — small content band is **64**; flexible medium **112** and
+  large **120** (taller with a subtitle). `M3EAppBarHideMode.entire` slides
+  the whole bar; `.actions` leaves each action floating on its own fill.
+  `M3EAppBarController` (`expand`, `collapse`, `show`, `hide`,
+  `followScroll`) drives the bar.
+- **Carousel** — multi-browse, uncontained, uncontained multi-aspect, hero,
+  and full-screen. Items are `M3ECarouselItem` values.
+  `M3ECarouselController` steps with `next` / `previous`, moves with
+  `animateToItem` / `jumpToItem`, and opens the list with `showAll`.
+- **Navigation bar** — flexible size is **64**, baseline **80** is the
+  default. The selected pill is opaque as soon as the destination changes.
+  `M3ENavigationBarController` selects a destination and, with
+  `hideOnScroll`, shows or hides the bar from the page's scroll controller.
+- **Tabs** — primary label-only and secondary bars are **48**; primary icon
+  plus label is **64**. `M3ETabsController` selects a tab, `M3ETabsView`
+  swipes between bodies, and `M3ETabs.sliver` scrolls away and returns on
+  an upward scroll.
+- **Tooltips** — a plain tooltip stays off its anchor and ignores the
+  pointer, so the cursor on an icon button does not twitch.
+- **Interaction** — hover stays off while a scrollable is moving, so a fast
+  fling does not flash the controls under the pointer.
+- **Cards** — `vertical` stacks media above the text. Swipe can dismiss,
+  reveal a leading or trailing action, or do both. `openBuilder` runs a
+  full-screen container transform. `M3ECardGroup` lays out a collection
+  (grid, staggered, list, carousel) and reorders on a long-press drag.
 
 ## Installation
 
@@ -830,14 +842,25 @@ Keyboard: Enter or Space opens. Escape closes. Arrows move inside the panel.
 
 #### M3ESlider
 
-Slider for a value or a range, including centered, wavy, and vertical.
-Stops use `divisions`.
+Slider for a value or a range, including centered, wavy, and vertical,
+aligned with the Material 3 Expressive spec: sizes `xs`–`xl` scale the track
+(**16–96**) and handle (**44–108**) together. Active track and handle are
+**primary**; inactive track is **secondary container**. Stops use
+`divisions`.
 
 ```dart
 // in State
 M3ESlider(
   value: volume,
   onChanged: (v) => setState(() => volume = v),
+);
+
+// Spec size — track and handle scale together (defaults to xs)
+M3ESlider(
+  value: level,
+  size: M3ESliderSize.l,
+  semanticLabel: 'Volume',
+  onChanged: (v) => setState(() => level = v),
 );
 
 M3ESlider(
@@ -964,7 +987,11 @@ Keyboard: Enter moves focus.
 
 #### M3ECard
 
-Elevated, filled, and outlined surface for content and actions.
+Elevated, filled, and outlined surface for content and actions, aligned with
+the Material 3 Expressive spec: content padding **16** on every side, focus
+ring **secondary** at **3dp**. Optional media, headline, supporting text,
+actions, overflow menu, dividers, one swipe action, and a full-screen
+`openBuilder` container transform.
 
 ```dart
 M3ECard(child: const Text('Elevated'));
@@ -979,13 +1006,53 @@ M3ECard(
   onPressed: () {},
   child: const Text('Outlined (tap)'),
 );
+
+// Structured slots — vertical stacks media above the text
+M3ECard(
+  vertical: true,
+  media: Image.network(imageUrl, fit: BoxFit.cover),
+  headline: const Text('Weekend trip'),
+  supportingText: const Text('12 photos · 3 people'),
+  dividerAfterMedia: true,
+  actions: M3EButton.text(onPressed: () {}, child: const Text('Share')),
+  overflow: M3EIconButton(
+    icon: const Icon(M3EIcons.more_vert),
+    onPressed: () {},
+  ),
+);
+
+// Swipe to reveal a trailing action, or flick to dismiss
+M3ECard(
+  swipeMode: M3ECardSwipeMode.both,
+  trailingSwipeAction: const Icon(M3EIcons.delete),
+  onSwipe: () {},
+  child: const Text('Swipe me'),
+);
+
+// Full-screen container transform
+M3ECard(
+  openBuilder: (context) => const Scaffold(body: Center(child: Text('Detail'))),
+  child: const Text('Tap to open'),
+);
+
+// A group of cards sharing a gap, elevation, and layout
+M3ECardGroup(
+  layout: M3ECardGroupLayout.staggered,
+  onReorder: (oldIndex, newIndex) {},
+  children: const [
+    M3ECard(child: Text('One')),
+    M3ECard(child: Text('Two')),
+  ],
+);
 ```
 
 #### M3ECarousel
 
-Hero, contained, and uncontained layouts — horizontal by default, or vertical
-via `axis`. Use `onChange` for leading/focal index updates (e.g. hide labels on
-smaller items).
+Multi-browse, uncontained, uncontained multi-aspect, hero, and full-screen
+layouts — horizontal by default, or vertical via `axis`. Items are
+`M3ECarouselItem` values; a `null` `onTap` on an item disables it. Use
+`onChange` for leading/focal index updates (e.g. hide labels on smaller
+items).
 
 ```dart
 M3ECarousel(
@@ -995,8 +1062,26 @@ M3ECarousel(
   onChange: (details) {
     // details.focalIndex / details.leadingIndex / details.isFocal(i)
   },
-  children: List.generate(10, (i) => ColoredBox(color: Colors.blue)),
+  children: List.generate(
+    10,
+    (i) => M3ECarouselItem(
+      image: Image.network(imageUrls[i], fit: BoxFit.cover),
+      title: Text('Item $i'),
+      subtitle: const Text('Subtitle'),
+      onTap: () {},
+    ),
+  ),
 );
+
+// Step, jump, or open the full list with a controller
+final carouselController = M3ECarouselController();
+M3ECarousel(
+  controller: carouselController,
+  type: M3ECarouselType.uncontained,
+  showAll: true,
+  children: const [...],
+);
+// carouselController.next() / .previous() / .animateToItem(i) / .jumpToItem(i)
 ```
 
 #### M3EListItem
@@ -1021,7 +1106,9 @@ One list. List-level fields set the variant, selection, and reorder. Each
 `M3EListItem` can opt into `swipe`, `expanded`, and `transform`. A sub-list
 expansion is its own nested `M3EList`, which inherits the parent corner join,
 fill, and variant. Use `.scrollable` for a lazy list and `.sliver` inside a
-`CustomScrollView` (slivers keep selection and do not reorder).
+`CustomScrollView` (slivers keep selection and do not reorder). Resting
+corners (`M3EListStyle.segmented`, the default, vs `.standard`) are set on
+`M3EListTheme`, like other component styling.
 
 ```dart
 M3EList(
@@ -1211,9 +1298,11 @@ M3ESideSheet.show<void>(
 
 #### M3EAppBar
 
-Top, search, sliver, and bottom app bar variants. Docked top/bottom bars apply
-single-edge `safeArea` padding from `MediaQuery.viewPadding` by default
-(opt out with `safeArea: false`).
+Top, search, sliver, and bottom app bar variants, aligned with the
+Material 3 Expressive spec: small content band is **64**, flexible medium
+**112** and large **120** (taller with a subtitle). Docked top/bottom bars
+apply single-edge `safeArea` padding from `MediaQuery.viewPadding` by
+default (opt out with `safeArea: false`).
 
 ```dart
 M3EAppBar.top(
@@ -1249,11 +1338,24 @@ M3EAppBar.bottom(
     onPressed: () {},
   ),
 );
+
+// Sliver with a controller and an actions-only hide mode — the action row
+// stays on its own fill while the title/image slide away on scroll.
+final appBarController = M3EAppBarController();
+M3EAppBar.sliver(
+  controller: appBarController,
+  hideMode: M3EAppBarHideMode.actions,
+  titleText: 'Inbox',
+  actions: const [Icon(M3EIcons.search)],
+);
+// appBarController.expand() / .collapse() / .show() / .hide() / .followScroll()
 ```
 
 #### M3ETabs
 
-Primary and secondary tab bars.
+Primary and secondary tab bars, aligned with the Material 3 Expressive
+spec: primary label-only and secondary bars are **48**; primary icon plus
+label is **64**.
 
 ```dart
 // in State
@@ -1275,6 +1377,27 @@ M3ETabs(
     M3ETab(label: 'Photos', icon: Icon(M3EIcons.calendar_today)),
     M3ETab(label: 'Albums', icon: Icon(M3EIcons.menu)),
   ],
+);
+
+// Swipeable body kept in sync with the bar, plus a selection controller
+final tabsController = M3ETabsController();
+M3ETabs(
+  controller: tabsController,
+  selectedIndex: tabIndex,
+  onTabSelected: (i) => setState(() => tabIndex = i),
+  tabs: const [M3ETab(label: 'Overview'), M3ETab(label: 'Specs')],
+);
+M3ETabsView(
+  selectedIndex: tabIndex,
+  onTabSelected: (i) => setState(() => tabIndex = i),
+  children: const [Text('Overview'), Text('Specs')],
+);
+
+// Sliver — scrolls away and returns on an upward scroll
+M3ETabs.sliver(
+  selectedIndex: tabIndex,
+  onTabSelected: (i) => setState(() => tabIndex = i),
+  tabs: const [M3ETab(label: 'Overview'), M3ETab(label: 'Specs')],
 );
 ```
 
@@ -1327,12 +1450,27 @@ M3ENavigationBar(
   selectedIndex: barIndex,
   onDestinationSelected: (i) => setState(() => barIndex = i),
 );
+
+// Hide on a downward scroll, with a controller for manual show/hide/select
+final navBarController = M3ENavigationBarController();
+M3ENavigationBar(
+  controller: navBarController,
+  hideOnScroll: true,
+  scrollController: listScrollController,
+  destinations: const [...],
+  selectedIndex: barIndex,
+  onDestinationSelected: (i) => setState(() => barIndex = i),
+);
+// navBarController.show() / .hide() / .select(i)
 ```
 
 #### M3ENavigationRail
 
-Vertical navigation aligned with the Material 3 Expressive spec. The selected
-pill scales in place. Collapsed pills match the navigation bar.
+Vertical navigation aligned with the Material 3 Expressive spec: collapsed
+width **96** (narrow **80**), expanded **220–360**. The selected pill scales
+in place. Collapsed pills match the navigation bar. A modal rail dismisses
+on the scrim, Escape, or system back. Horizontal body scroll raises the
+rail's container automatically (`scrollUnder`, default on).
 
 ```dart
 // in State
@@ -1363,12 +1501,32 @@ M3ENavigationRail(
     onPressed: () {},
   ),
 );
+
+// Leading control, a divider on the content edge, and a controller
+final railController = M3ENavigationRailController();
+M3ENavigationRail(
+  controller: railController,
+  leading: M3EIconButton(
+    icon: const Icon(M3EIcons.menu),
+    onPressed: railController.toggle,
+  ),
+  showDivider: true,
+  alignment: M3ENavigationRailAlignment.center,
+  sections: const [...],
+  selectedIndex: railIndex,
+  onDestinationSelected: (i) => setState(() => railIndex = i),
+);
+
+// railController.expand() / .collapse() / .select(i) / .show() / .hide()
 ```
 
 #### M3ENavigationDrawer
 
-Modal drawer aligned with the Material 3 Expressive spec. The selected pill
-scales in place.
+Standard (default) or modal drawer aligned with the Material 3 Expressive
+spec: width **360**, end corners **16**. The selected pill scales in place.
+A modal drawer opens from a button and dismisses on a destination, the
+scrim, a drag toward the start edge, or system back. A dismissible standard
+drawer closes only from its `controller`.
 
 ```dart
 // in State
@@ -1382,6 +1540,29 @@ M3ENavigationDrawer(
       showBadge: true,
     ),
   ],
+  sections: const [
+    M3ENavigationDrawerSection(
+      header: 'Labels',
+      destinations: [
+        M3ENavigationDestination(icon: Icon(M3EIcons.favorite), label: 'Starred'),
+      ],
+    ),
+  ],
+  selectedIndex: drawerIndex,
+  onDestinationSelected: (i) => setState(() => drawerIndex = i),
+);
+
+// Modal drawer, opened from a button, with a controller
+final drawerController = M3ENavigationDrawerController();
+M3EIconButton(
+  icon: const Icon(M3EIcons.menu),
+  onPressed: drawerController.open,
+);
+M3ENavigationDrawer(
+  type: M3ENavigationDrawerType.modal,
+  controller: drawerController,
+  onDismissed: () {},
+  destinations: const [...],
   selectedIndex: drawerIndex,
   onDestinationSelected: (i) => setState(() => drawerIndex = i),
 );
@@ -1389,8 +1570,10 @@ M3ENavigationDrawer(
 
 #### M3EToolbar
 
-Floating or docked toolbar. Floating placement uses `alignment`. `screenOffset`
-(default 16) keeps the pill off the screen edge. Docked ignores both.
+Floating or docked toolbar, both **64** tall, aligned with the Material 3
+Expressive spec. Floating placement uses `alignment`. `screenOffset`
+(default 16) keeps the pill off the screen edge. Docked ignores both and
+uses `contentAlignment` to place actions at 600dp and wider.
 
 ```dart
 // Floating (default) — pill, wrap-content
@@ -1490,6 +1673,8 @@ M3EToolbar.docked(
   dockEdge: M3EToolbarDockEdge.bottom,
   safeArea: true,
   titleText: 'Inbox',
+  // At 600dp and wider: even (default), centered, or edges.
+  contentAlignment: M3EToolbarContentAlignment.even,
   actions: <M3EToolbarItem>[
     M3EToolbarAction(icon: M3EIcons.search, onPressed: () {}),
     M3EToolbarAction(

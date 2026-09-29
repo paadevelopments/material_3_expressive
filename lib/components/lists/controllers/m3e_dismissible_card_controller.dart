@@ -26,7 +26,9 @@ import '../utils/m3e_list_selection_fill.dart';
 import 'm3e_dismissible_list_controller.dart';
 
 part 'm3e_dismissible_card_build_mixin.dart';
+part 'm3e_dismissible_card_collapse_render.dart';
 part 'm3e_dismissible_card_drag_mixin.dart';
+part 'm3e_dismissible_card_spring_settle.dart';
 
 const int _kVibrationThresholdMs = 60;
 const double _kMaxPreDetachRoundness = 0.6;

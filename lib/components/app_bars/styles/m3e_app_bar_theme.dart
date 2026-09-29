@@ -443,89 +443,109 @@ class M3EAppBarTheme extends M3EThemeExtension<M3EAppBarTheme> {
     if (other is! M3EAppBarTheme) {
       return this;
     }
-    return M3EAppBarTheme(
+    return _lerpGeometry(
+      other,
+      t,
+    )._lerpSearch(other, t)._lerpSurfaceStates(other, t);
+  }
+
+  /// Bar heights, paddings, and icon sizing.
+  M3EAppBarTheme _lerpGeometry(M3EAppBarTheme other, double t) {
+    return copyWith(
       contentPadding:
           EdgeInsetsGeometry.lerp(contentPadding, other.contentPadding, t) ??
           contentPadding,
-      titleGap: _lerpDouble(titleGap, other.titleGap, t)!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      elevation: _lerpDouble(elevation, other.elevation, t)!,
+      titleGap: _lerpDouble(titleGap, other.titleGap, t),
+      iconSize: _lerpDouble(iconSize, other.iconSize, t),
+      elevation: _lerpDouble(elevation, other.elevation, t),
       scrolledElevation: _lerpDouble(
         scrolledElevation,
         other.scrolledElevation,
         t,
-      )!,
+      ),
       compactHeightReduction: _lerpDouble(
         compactHeightReduction,
         other.compactHeightReduction,
         t,
-      )!,
-      smallHeight: _lerpDouble(smallHeight, other.smallHeight, t)!,
-      collapsedHeight: _lerpDouble(collapsedHeight, other.collapsedHeight, t)!,
-      mediumExpanded: _lerpDouble(mediumExpanded, other.mediumExpanded, t)!,
+      ),
+      smallHeight: _lerpDouble(smallHeight, other.smallHeight, t),
+      collapsedHeight: _lerpDouble(collapsedHeight, other.collapsedHeight, t),
+      mediumExpanded: _lerpDouble(mediumExpanded, other.mediumExpanded, t),
       mediumFlexibleExpanded: _lerpDouble(
         mediumFlexibleExpanded,
         other.mediumFlexibleExpanded,
         t,
-      )!,
-      largeExpanded: _lerpDouble(largeExpanded, other.largeExpanded, t)!,
+      ),
+      largeExpanded: _lerpDouble(largeExpanded, other.largeExpanded, t),
       largeFlexibleExpanded: _lerpDouble(
         largeFlexibleExpanded,
         other.largeFlexibleExpanded,
         t,
-      )!,
+      ),
       mediumSubtitleExtra: _lerpDouble(
         mediumSubtitleExtra,
         other.mediumSubtitleExtra,
         t,
-      )!,
+      ),
       largeSubtitleExtra: _lerpDouble(
         largeSubtitleExtra,
         other.largeSubtitleExtra,
         t,
-      )!,
-      titleInset: _lerpDouble(titleInset, other.titleInset, t)!,
+      ),
+      titleInset: _lerpDouble(titleInset, other.titleInset, t),
       flexibleTopPadding: _lerpDouble(
         flexibleTopPadding,
         other.flexibleTopPadding,
         t,
-      )!,
+      ),
       flexibleBottomPadding: _lerpDouble(
         flexibleBottomPadding,
         other.flexibleBottomPadding,
         t,
-      )!,
-      actionRowHeight: _lerpDouble(actionRowHeight, other.actionRowHeight, t)!,
-      avatarSize: _lerpDouble(avatarSize, other.avatarSize, t)!,
-      searchBarHeight: _lerpDouble(searchBarHeight, other.searchBarHeight, t)!,
-      searchBarRadius: _lerpDouble(searchBarRadius, other.searchBarRadius, t)!,
-      searchElevation: _lerpDouble(searchElevation, other.searchElevation, t)!,
+      ),
+      actionRowHeight: _lerpDouble(actionRowHeight, other.actionRowHeight, t),
+      avatarSize: _lerpDouble(avatarSize, other.avatarSize, t),
+    );
+  }
+
+  /// Search bar/view sizing and elevation.
+  M3EAppBarTheme _lerpSearch(M3EAppBarTheme other, double t) {
+    return copyWith(
+      searchBarHeight: _lerpDouble(searchBarHeight, other.searchBarHeight, t),
+      searchBarRadius: _lerpDouble(searchBarRadius, other.searchBarRadius, t),
+      searchElevation: _lerpDouble(searchElevation, other.searchElevation, t),
       searchViewElevation: _lerpDouble(
         searchViewElevation,
         other.searchViewElevation,
         t,
-      )!,
+      ),
       searchFullScreenHeader: _lerpDouble(
         searchFullScreenHeader,
         other.searchFullScreenHeader,
         t,
-      )!,
+      ),
       searchDockedHeader: _lerpDouble(
         searchDockedHeader,
         other.searchDockedHeader,
         t,
-      )!,
+      ),
       searchOuterMargin: _lerpDouble(
         searchOuterMargin,
         other.searchOuterMargin,
         t,
-      )!,
-      focusRingWidth: _lerpDouble(focusRingWidth, other.focusRingWidth, t)!,
-      focusRingOffset: _lerpDouble(focusRingOffset, other.focusRingOffset, t)!,
-      hoverOpacity: _lerpDouble(hoverOpacity, other.hoverOpacity, t)!,
-      pressedOpacity: _lerpDouble(pressedOpacity, other.pressedOpacity, t)!,
-      bottomHeight: _lerpDouble(bottomHeight, other.bottomHeight, t)!,
-      bottomIconSize: _lerpDouble(bottomIconSize, other.bottomIconSize, t)!,
+      ),
+    );
+  }
+
+  /// Focus ring, hover/pressed opacity, and the bottom bar band.
+  M3EAppBarTheme _lerpSurfaceStates(M3EAppBarTheme other, double t) {
+    return copyWith(
+      focusRingWidth: _lerpDouble(focusRingWidth, other.focusRingWidth, t),
+      focusRingOffset: _lerpDouble(focusRingOffset, other.focusRingOffset, t),
+      hoverOpacity: _lerpDouble(hoverOpacity, other.hoverOpacity, t),
+      pressedOpacity: _lerpDouble(pressedOpacity, other.pressedOpacity, t),
+      bottomHeight: _lerpDouble(bottomHeight, other.bottomHeight, t),
+      bottomIconSize: _lerpDouble(bottomIconSize, other.bottomIconSize, t),
       bottomPadding:
           EdgeInsetsGeometry.lerp(bottomPadding, other.bottomPadding, t) ??
           bottomPadding,

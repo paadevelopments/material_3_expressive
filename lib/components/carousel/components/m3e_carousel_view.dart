@@ -362,9 +362,7 @@ class _CarouselViewState extends State<M3ECarouselView> {
     if (widget.itemExtent != oldWidget.itemExtent ||
         widget.restingExtents != oldWidget.restingExtents) {
       _itemExtent = widget.itemExtent;
-      final _CarouselPosition carouselPosition =
-          _controller.position as _CarouselPosition;
-      carouselPosition
+      (_controller.position as _CarouselPosition)
         ..restingExtents = widget.restingExtents
         ..itemExtent = _itemExtent;
     }
@@ -606,13 +604,13 @@ class _CarouselViewState extends State<M3ECarouselView> {
     if (widget.leadingInset <= 0) {
       return null;
     }
-    final bool vertical = widget.scrollDirection == Axis.vertical;
+    final vertical = widget.scrollDirection == Axis.vertical;
     if (vertical) {
       return widget.reverse
           ? EdgeInsets.only(bottom: widget.leadingInset)
           : EdgeInsets.only(top: widget.leadingInset);
     }
-    final bool startIsRight =
+    final startIsRight =
         (Directionality.of(context) == TextDirection.rtl) != widget.reverse;
     return startIsRight
         ? EdgeInsets.only(right: widget.leadingInset)

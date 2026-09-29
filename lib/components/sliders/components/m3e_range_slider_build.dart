@@ -84,7 +84,32 @@ extension on _M3ERangeSliderState {
     final double startX = _thumbX(_startFraction, width, resolved.rtl);
     final double endX = _thumbX(_endFraction, width, resolved.rtl);
 
-    final Widget gestureDetector = GestureDetector(
+    final Widget stackBody = _buildStackBody(
+      width: width,
+      height: height,
+      track: track,
+      startX: startX,
+      endX: endX,
+      resolved: resolved,
+    );
+    final Widget gestureDetector = _buildGestureDetector(
+      width: width,
+      startX: startX,
+      endX: endX,
+      resolved: resolved,
+      child: stackBody,
+    );
+    return _buildFocusRegion(gestureDetector);
+  }
+
+  Widget _buildGestureDetector({
+    required double width,
+    required double startX,
+    required double endX,
+    required _M3ERangeSliderResolved resolved,
+    required Widget child,
+  }) {
+    return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragStart: !_enabled
           ? null
@@ -104,15 +129,11 @@ extension on _M3ERangeSliderState {
             },
       onTapUp: !_enabled ? null : (_) => _endInteraction(),
       onTapCancel: !_enabled ? null : _endInteraction,
-      child: _buildStackBody(
-        width: width,
-        height: height,
-        track: track,
-        startX: startX,
-        endX: endX,
-        resolved: resolved,
-      ),
+      child: child,
     );
+  }
+
+  Widget _buildFocusRegion(Widget gestureDetector) {
     return TapRegion(
       onTapOutside: M3EFocus.tapOutsideHandler(_focusNode),
       child: Focus(

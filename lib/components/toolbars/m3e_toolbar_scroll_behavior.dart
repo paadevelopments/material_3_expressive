@@ -1,9 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:motor/motor.dart';
 
 import 'controllers/m3e_toolbar_visibility_controller.dart';
 import 'enums/m3e_toolbar_enums.dart';
-import 'utils/m3e_toolbar_spring_motion.dart';
 
 /// Integrates scroll notifications with a [M3EToolbarVisibilityController].
 class M3EToolbarScrollBehavior {
@@ -56,57 +54,15 @@ class M3EToolbarScrollWrapper extends StatefulWidget {
       _M3EToolbarScrollWrapperState();
 }
 
-class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper>
-    with TickerProviderStateMixin {
-  SingleMotionController? _settle;
-
-  @override
-  void dispose() {
-    _settle?.dispose();
-    super.dispose();
-  }
-
+class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper> {
   void _updateOffset(double delta) {
     widget.behavior.controller
       ..contentOffset += delta
       ..offset -= delta;
   }
 
-  void _settleTo(double velocity) {
-    _settle?.dispose();
-    _settle = null;
-
-    final M3EToolbarVisibilityController controller =
-        widget.behavior.controller;
-    if (controller.offset == 0 || controller.offset == controller.offsetLimit) {
-      return;
-    }
-
-    final double target;
-    if (velocity.abs() > 150) {
-      target = velocity > 0 ? controller.offsetLimit : 0;
-    } else {
-      target = controller.collapsedFraction < 0.5 ? 0 : controller.offsetLimit;
-    }
-
-    _settle =
-        SingleMotionController(
-            motion: controller.motion.toMotion(),
-            vsync: this,
-            initialValue: controller.offset,
-          )
-          ..addListener(() {
-            if (mounted) {
-              controller.offset = _settle!.value;
-            }
-          })
-          ..animateTo(target);
-  }
-
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollStartNotification) {
-      _settle?.dispose();
-      _settle = null;
       widget.behavior.controller.cancelAnimation();
     } else if (notification is ScrollUpdateNotification) {
       _handleScrollUpdate(notification);
@@ -117,14 +73,14 @@ class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper>
       // reversal while scrolling slowly. Only settle on a real drag release.
       final DragEndDetails? drag = notification.dragDetails;
       if (drag != null) {
-        _settleTo(drag.primaryVelocity ?? 0);
+        widget.behavior.controller.settle(velocity: drag.primaryVelocity ?? 0);
       }
     }
     return false;
   }
 
   void _handleScrollUpdate(ScrollUpdateNotification notification) {
-    if (_settle != null) {
+    if (widget.behavior.controller.isAnimating) {
       return;
     }
     final double delta = notification.scrollDelta ?? 0;

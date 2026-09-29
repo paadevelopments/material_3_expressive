@@ -90,6 +90,9 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   /// Whether the toolbar is fully off-screen.
   bool get isHidden => collapsedFraction >= 1;
 
+  /// Whether a settle / show / hide spring is currently running.
+  bool get isAnimating => _settle != null;
+
   /// Binds a ticker for spring show/hide. Safe to call repeatedly.
   // ignore: use_setters_to_change_properties -- attach/detach pair; not a field setter.
   void attach(TickerProvider vsync) {

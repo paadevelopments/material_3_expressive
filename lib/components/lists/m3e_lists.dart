@@ -62,12 +62,18 @@ export 'models/m3e_list_item_swipe.dart';
 export 'models/m3e_list_swipe_action.dart';
 export 'styles/m3e_dismissible_list_style.dart';
 export 'styles/m3e_expandable_style.dart';
+export 'styles/m3e_list_card_list_theme.dart';
+export 'styles/m3e_list_dismissible_theme.dart';
+export 'styles/m3e_list_expandable_theme.dart';
+export 'styles/m3e_list_item_theme.dart';
 export 'styles/m3e_list_reorder_state.dart';
 export 'styles/m3e_list_selection_state.dart';
 export 'styles/m3e_list_theme.dart';
 export 'utils/m3e_measure_size.dart';
 
 part 'components/m3e_list.dart';
+part 'components/m3e_list_build.dart';
+part 'components/m3e_list_expand.dart';
 
 /// A Material 3 Expressive list item.
 ///
@@ -350,14 +356,7 @@ class M3EListItem extends StatelessWidget {
     required double contentTop,
   }) {
     final bool rowSelected = _isSelected(context);
-    final M3EListInteractionScope? interaction =
-        M3EListInteractionScope.maybeOf(context);
-    final bool stateIcon =
-        interaction != null &&
-        (interaction.state.hovered ||
-            interaction.state.focused ||
-            interaction.state.pressed ||
-            interaction.state.dragged);
+    final bool stateIcon = _hasRowIconState(context);
     final M3EColorScheme scheme = theme.colorScheme;
     final Color leadingIcons = itemTheme.iconColor(
       scheme,
@@ -378,49 +377,18 @@ class M3EListItem extends StatelessWidget {
       index: index,
       leading: leading,
     );
-    final M3EListTrailingOverride? trailingOverride =
-        M3EListTrailingOverride.maybeOf(context);
-    final M3EListSwipeOverflow? overflow =
-        trailingOverride == null && trailing == null
-        ? M3EListSwipeOverflow.maybeOf(context)
-        : null;
-    Widget? resolvedTrailing = m3eResolveListTrailing(
-      context: context,
-      trailing: trailing,
-    );
-    if (trailingOverride == null &&
-        resolvedTrailing == null &&
-        overflow != null &&
-        index != null) {
-      resolvedTrailing = M3EListKeyTarget(
-        index: index,
-        onActivate: overflow.onReveal,
-        child: GestureDetector(
-          onTap: overflow.onReveal,
-          child: const Icon(M3EIcons.more_vert),
-        ),
-      );
-    }
+    final Widget? resolvedTrailing = _resolveRowTrailing(context, index);
     final CrossAxisAlignment rowAlign = tall
         ? CrossAxisAlignment.start
         : CrossAxisAlignment.center;
     final Widget text = _buildText(theme, itemTheme, rowSelected);
-    final double extraTop = itemTheme.isBaseline && iconTop > contentTop
-        ? iconTop - contentTop
-        : 0;
-    var leadingSlot = resolvedLeading;
-    if (leadingSlot != null && itemTheme.isBaseline && slotHeight > 0) {
-      leadingSlot = SizedBox(
-        height: slotHeight,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(top: extraTop),
-            child: leadingSlot,
-          ),
-        ),
-      );
-    }
+    final Widget? leadingSlot = _resolveLeadingSlot(
+      resolvedLeading,
+      itemTheme,
+      slotHeight: slotHeight,
+      iconTop: iconTop,
+      contentTop: contentTop,
+    );
 
     return Row(
       crossAxisAlignment: rowAlign,
@@ -456,6 +424,66 @@ class M3EListItem extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+
+  bool _hasRowIconState(BuildContext context) {
+    final M3EListInteractionScope? interaction =
+        M3EListInteractionScope.maybeOf(context);
+    return interaction != null &&
+        (interaction.state.hovered ||
+            interaction.state.focused ||
+            interaction.state.pressed ||
+            interaction.state.dragged);
+  }
+
+  Widget? _resolveRowTrailing(BuildContext context, int? index) {
+    final M3EListTrailingOverride? trailingOverride =
+        M3EListTrailingOverride.maybeOf(context);
+    final M3EListSwipeOverflow? overflow =
+        trailingOverride == null && trailing == null
+        ? M3EListSwipeOverflow.maybeOf(context)
+        : null;
+    final Widget? resolvedTrailing = m3eResolveListTrailing(
+      context: context,
+      trailing: trailing,
+    );
+    if (trailingOverride == null &&
+        resolvedTrailing == null &&
+        overflow != null &&
+        index != null) {
+      return M3EListKeyTarget(
+        index: index,
+        onActivate: overflow.onReveal,
+        child: GestureDetector(
+          onTap: overflow.onReveal,
+          child: const Icon(M3EIcons.more_vert),
+        ),
+      );
+    }
+    return resolvedTrailing;
+  }
+
+  Widget? _resolveLeadingSlot(
+    Widget? resolvedLeading,
+    M3EListItemTheme itemTheme, {
+    required double slotHeight,
+    required double iconTop,
+    required double contentTop,
+  }) {
+    if (resolvedLeading == null || !itemTheme.isBaseline || slotHeight <= 0) {
+      return resolvedLeading;
+    }
+    final double extraTop = iconTop > contentTop ? iconTop - contentTop : 0;
+    return SizedBox(
+      height: slotHeight,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: EdgeInsets.only(top: extraTop),
+          child: resolvedLeading,
+        ),
+      ),
     );
   }
 

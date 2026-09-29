@@ -70,39 +70,46 @@ class _M3EListKeyTargetState extends State<M3EListKeyTarget> {
       return widget.child;
     }
     final M3EThemeData theme = M3ETheme.of(context);
-    final itemTheme = theme.listTheme.item;
     return ListenableBuilder(
       listenable: Listenable.merge(<Listenable>[
         registration.node,
         M3EFocusInteraction.instance,
       ]),
-      builder: (BuildContext context, Widget? _) {
-        return Focus(
-          focusNode: registration.node,
-          skipTraversal: !registration.tabStop,
-          onKeyEvent: (FocusNode node, KeyEvent event) {
-            if (widget.onActivate == null || event is! KeyDownEvent) {
-              return KeyEventResult.ignored;
-            }
-            if (event.logicalKey == LogicalKeyboardKey.enter ||
-                event.logicalKey == LogicalKeyboardKey.space) {
-              widget.onActivate!();
-              return KeyEventResult.handled;
-            }
-            return KeyEventResult.ignored;
-          },
-          child: M3EListFocusRing(
-            focused:
-                registration.node.hasPrimaryFocus &&
-                theme.keyboardFocusIndicators,
-            radius: BorderRadius.circular(itemTheme.selectedRadius),
-            color: itemTheme.resolveFocusIndicator(theme.colorScheme),
-            thickness: itemTheme.focusIndicatorThickness,
-            inset: itemTheme.focusIndicatorInset,
-            child: widget.child,
-          ),
-        );
-      },
+      builder: (BuildContext context, Widget? _) =>
+          _buildFocusRing(registration, theme),
     );
+  }
+
+  Widget _buildFocusRing(
+    M3EListKeyboardRegistration registration,
+    M3EThemeData theme,
+  ) {
+    final itemTheme = theme.listTheme.item;
+    return Focus(
+      focusNode: registration.node,
+      skipTraversal: !registration.tabStop,
+      onKeyEvent: (FocusNode node, KeyEvent event) => _handleKeyEvent(event),
+      child: M3EListFocusRing(
+        focused:
+            registration.node.hasPrimaryFocus && theme.keyboardFocusIndicators,
+        radius: BorderRadius.circular(itemTheme.selectedRadius),
+        color: itemTheme.resolveFocusIndicator(theme.colorScheme),
+        thickness: itemTheme.focusIndicatorThickness,
+        inset: itemTheme.focusIndicatorInset,
+        child: widget.child,
+      ),
+    );
+  }
+
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (widget.onActivate == null || event is! KeyDownEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.space) {
+      widget.onActivate!();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 }

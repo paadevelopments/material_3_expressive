@@ -360,7 +360,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
 double _itemFromExtents(double pixels, List<double> extents) {
   final double offset = math.max(0, pixels);
   double start = 0;
-  for (int i = 0; i < extents.length; i++) {
+  for (var i = 0; i < extents.length; i++) {
     final double size = extents[i];
     if (size <= 0) {
       continue;
@@ -376,7 +376,7 @@ double _itemFromExtents(double pixels, List<double> extents) {
 double _extentPrefix(List<double> extents, int index) {
   double sum = 0;
   final int end = math.min(index, extents.length);
-  for (int i = 0; i < end; i++) {
+  for (var i = 0; i < end; i++) {
     sum += extents[i];
   }
   return sum;
@@ -389,7 +389,7 @@ bool _sameExtents(List<double>? a, List<double>? b) {
   if (a == null || b == null || a.length != b.length) {
     return false;
   }
-  for (int i = 0; i < a.length; i++) {
+  for (var i = 0; i < a.length; i++) {
     if (a[i] != b[i]) {
       return false;
     }

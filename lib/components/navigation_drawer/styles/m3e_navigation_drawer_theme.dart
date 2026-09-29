@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 
+part 'm3e_navigation_drawer_theme_lerp.dart';
+
 /// Theme values for `M3ENavigationDrawer`.
 @immutable
 class M3ENavigationDrawerTheme
@@ -372,134 +374,6 @@ class M3ENavigationDrawerTheme
     if (other is! M3ENavigationDrawerTheme) {
       return this;
     }
-    return M3ENavigationDrawerTheme(
-      width: _lerpDouble(width, other.width, t)!,
-      destinationHeight: _lerpDouble(
-        destinationHeight,
-        other.destinationHeight,
-        t,
-      )!,
-      headlineHorizontalPadding: _lerpDouble(
-        headlineHorizontalPadding,
-        other.headlineHorizontalPadding,
-        t,
-      )!,
-      headlineVerticalPadding: _lerpDouble(
-        headlineVerticalPadding,
-        other.headlineVerticalPadding,
-        t,
-      )!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      destinationHorizontalPadding: _lerpDouble(
-        destinationHorizontalPadding,
-        other.destinationHorizontalPadding,
-        t,
-      )!,
-      destinationVerticalPadding: _lerpDouble(
-        destinationVerticalPadding,
-        other.destinationVerticalPadding,
-        t,
-      )!,
-      destinationInnerHorizontalPadding: _lerpDouble(
-        destinationInnerHorizontalPadding,
-        other.destinationInnerHorizontalPadding,
-        t,
-      )!,
-      iconLabelGap: _lerpDouble(iconLabelGap, other.iconLabelGap, t)!,
-      contentPadding: _lerpDouble(contentPadding, other.contentPadding, t)!,
-      sectionIndent: _lerpDouble(sectionIndent, other.sectionIndent, t)!,
-      dividerInset: _lerpDouble(dividerInset, other.dividerInset, t)!,
-      dividerSpacing: _lerpDouble(dividerSpacing, other.dividerSpacing, t)!,
-      dividerThickness: _lerpDouble(
-        dividerThickness,
-        other.dividerThickness,
-        t,
-      )!,
-      endCornerRadius: _lerpDouble(endCornerRadius, other.endCornerRadius, t)!,
-      indicatorRadius: _lerpDouble(indicatorRadius, other.indicatorRadius, t)!,
-      elevation: _lerpDouble(elevation, other.elevation, t)!,
-      scrimOpacity: _lerpDouble(scrimOpacity, other.scrimOpacity, t)!,
-      hoverOpacity: _lerpDouble(hoverOpacity, other.hoverOpacity, t)!,
-      focusOpacity: _lerpDouble(focusOpacity, other.focusOpacity, t)!,
-      pressedOpacity: _lerpDouble(pressedOpacity, other.pressedOpacity, t)!,
-      focusRingThickness: _lerpDouble(
-        focusRingThickness,
-        other.focusRingThickness,
-        t,
-      )!,
-      focusRingInset: _lerpDouble(focusRingInset, other.focusRingInset, t)!,
-      dismissDragThreshold: _lerpDouble(
-        dismissDragThreshold,
-        other.dismissDragThreshold,
-        t,
-      )!,
-      activeLabelWeight: t < 0.5 ? activeLabelWeight : other.activeLabelWeight,
-      inactiveLabelWeight: t < 0.5
-          ? inactiveLabelWeight
-          : other.inactiveLabelWeight,
-      indicatorScaleSpring: t < 0.5
-          ? indicatorScaleSpring
-          : other.indicatorScaleSpring,
-      indicatorFadeSpring: t < 0.5
-          ? indicatorFadeSpring
-          : other.indicatorFadeSpring,
-      revealSpring: t < 0.5 ? revealSpring : other.revealSpring,
-      standardContainerColor: Color.lerp(
-        standardContainerColor,
-        other.standardContainerColor,
-        t,
-      ),
-      modalContainerColor: Color.lerp(
-        modalContainerColor,
-        other.modalContainerColor,
-        t,
-      ),
-      headlineForegroundColor: Color.lerp(
-        headlineForegroundColor,
-        other.headlineForegroundColor,
-        t,
-      ),
-      activeForegroundColor: Color.lerp(
-        activeForegroundColor,
-        other.activeForegroundColor,
-        t,
-      ),
-      inactiveForegroundColor: Color.lerp(
-        inactiveForegroundColor,
-        other.inactiveForegroundColor,
-        t,
-      ),
-      indicatorColor: Color.lerp(indicatorColor, other.indicatorColor, t),
-      selectedBadgeColor: Color.lerp(
-        selectedBadgeColor,
-        other.selectedBadgeColor,
-        t,
-      ),
-      unselectedBadgeColor: Color.lerp(
-        unselectedBadgeColor,
-        other.unselectedBadgeColor,
-        t,
-      ),
-      activeStateLayerColor: Color.lerp(
-        activeStateLayerColor,
-        other.activeStateLayerColor,
-        t,
-      ),
-      inactiveStateLayerColor: Color.lerp(
-        inactiveStateLayerColor,
-        other.inactiveStateLayerColor,
-        t,
-      ),
-      pressedStateLayerColor: Color.lerp(
-        pressedStateLayerColor,
-        other.pressedStateLayerColor,
-        t,
-      ),
-      focusRingColor: Color.lerp(focusRingColor, other.focusRingColor, t),
-      dividerColor: Color.lerp(dividerColor, other.dividerColor, t),
-      scrimColor: Color.lerp(scrimColor, other.scrimColor, t),
-    );
+    return _lerpNavigationDrawerTheme(this, other, t);
   }
-
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
 }

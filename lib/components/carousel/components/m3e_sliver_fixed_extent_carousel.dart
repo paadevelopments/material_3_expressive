@@ -53,11 +53,10 @@ class _RenderSliverFixedExtentCarousel
     required super.childManager,
     required this._maxExtent,
     required this._minExtent,
-    required bool scaleItems,
+    required this._scaleItems,
     required this._infinite,
     List<double>? restingExtents,
-  }) : _scaleItems = scaleItems,
-       _restingExtents = restingExtents == null
+  }) : _restingExtents = restingExtents == null
            ? null
            : List<double>.from(restingExtents);
 
@@ -132,7 +131,7 @@ class _RenderSliverFixedExtentCarousel
 
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent)
         .floor();
-    final int offscreenItems = firstVisibleIndex;
+    final offscreenItems = firstVisibleIndex;
     final double offscreenExtent =
         constraints.scrollOffset - offscreenItems * maxExtent;
     final double effectiveMinExtent = _effectiveMinExtent;
@@ -322,7 +321,7 @@ class _RenderSliverFixedExtentCarousel
 
   int _leadingIndex(double offset, List<double> extents) {
     double start = 0;
-    for (int i = 0; i < extents.length; i++) {
+    for (var i = 0; i < extents.length; i++) {
       final double next = start + extents[i];
       if (offset < next) {
         return i;
@@ -336,7 +335,7 @@ class _RenderSliverFixedExtentCarousel
   int _trailingIndex(double end, List<double> extents) {
     double start = 0;
     var trailing = 0;
-    for (int i = 0; i < extents.length; i++) {
+    for (var i = 0; i < extents.length; i++) {
       if (start >= end) {
         break;
       }

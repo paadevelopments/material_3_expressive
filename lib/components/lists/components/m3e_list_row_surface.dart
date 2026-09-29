@@ -345,20 +345,59 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
       pressed: pressed,
       dragged: dragged,
     );
-    final Color fill = !paintContainer
-        ? const Color(0x00000000)
-        : widget.selected
-        ? (widget.enabled
-              ? itemTheme.selectedColor(scheme)
-              : itemTheme.disabledSelectedColor(scheme))
-        : (paintContainer && itemTheme.style == M3EListStyle.standard
-              ? itemTheme.resolveContainer(scheme)
-              : (widget.color ?? itemTheme.resolveContainer(scheme)));
+    final Color fill = _resolveFill(itemTheme, scheme, paintContainer);
     final bool focused =
         (_focusNode?.hasPrimaryFocus ?? false) && theme.keyboardFocusIndicators;
     _originRadius = radius.topLeft.x;
     _originColor = fill.a == 0 ? scheme.surfaceContainerHighest : fill;
     _registration?.enabled = widget.enabled && _rowInteractive;
+    Widget card = _buildCardSurface(
+      paintContainer: paintContainer,
+      radius: radius,
+      fill: fill,
+    );
+    card = _stateLayer(
+      itemTheme: itemTheme,
+      scheme: scheme,
+      radius: radius,
+      dragged: dragged,
+      child: card,
+    );
+    card = M3EListFocusRing(
+      focused: focused,
+      radius: radius,
+      color: itemTheme.resolveFocusIndicator(scheme),
+      thickness: itemTheme.focusIndicatorThickness,
+      inset: itemTheme.focusIndicatorInset,
+      child: card,
+    );
+    return _wrapSemantics(card);
+  }
+
+  Color _resolveFill(
+    M3EListItemTheme itemTheme,
+    M3EColorScheme scheme,
+    bool paintContainer,
+  ) {
+    if (!paintContainer) {
+      return const Color(0x00000000);
+    }
+    if (widget.selected) {
+      return widget.enabled
+          ? itemTheme.selectedColor(scheme)
+          : itemTheme.disabledSelectedColor(scheme);
+    }
+    if (itemTheme.style == M3EListStyle.standard) {
+      return itemTheme.resolveContainer(scheme);
+    }
+    return widget.color ?? itemTheme.resolveContainer(scheme);
+  }
+
+  Widget _buildCardSurface({
+    required bool paintContainer,
+    required BorderRadius radius,
+    required Color fill,
+  }) {
     final bool canTransform = _transformInteractive && !widget.dragged;
     final VoidCallback? tap = canTransform ? _handleTap : widget.onTap;
     Widget child = widget.child;
@@ -368,7 +407,7 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
         child: child,
       );
     }
-    Widget card = M3ECard(
+    return M3ECard(
       variant: paintContainer ? widget.variant : M3ECardVariant.filled,
       borderRadius: radius,
       color: fill,
@@ -403,21 +442,9 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
         ),
       ),
     );
-    card = _stateLayer(
-      itemTheme: itemTheme,
-      scheme: scheme,
-      radius: radius,
-      dragged: dragged,
-      child: card,
-    );
-    card = M3EListFocusRing(
-      focused: focused,
-      radius: radius,
-      color: itemTheme.resolveFocusIndicator(scheme),
-      thickness: itemTheme.focusIndicatorThickness,
-      inset: itemTheme.focusIndicatorInset,
-      child: card,
-    );
+  }
+
+  Widget _wrapSemantics(Widget card) {
     if (widget.semanticChecked == null) {
       return card;
     }

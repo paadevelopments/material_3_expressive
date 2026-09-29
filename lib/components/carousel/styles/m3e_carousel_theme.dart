@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../enums/m3e_carousel_type.dart';
 
+part 'm3e_carousel_theme_interpolation.dart';
+
 /// Theme values for `M3ECarousel`.
 @immutable
 class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
@@ -359,91 +361,40 @@ class M3ECarouselTheme extends M3EThemeExtension<M3ECarouselTheme> {
     if (other is! M3ECarouselTheme) {
       return this;
     }
+    final motion = _lerpMotionValues(other, t);
+    final sizing = _lerpSizingValues(other, t);
     return M3ECarouselTheme(
-      uncontainedItemExtent: _lerpDouble(
-        uncontainedItemExtent,
-        other.uncontainedItemExtent,
-        t,
-      )!,
-      uncontainedShrinkExtent: _lerpDouble(
-        uncontainedShrinkExtent,
-        other.uncontainedShrinkExtent,
-        t,
-      )!,
-      borderRadiusValue: _lerpDouble(
-        borderRadiusValue,
-        other.borderRadiusValue,
-        t,
-      )!,
-      scrollAnimationDuration: _lerpInt(
-        scrollAnimationDuration,
-        other.scrollAnimationDuration,
-        t,
-      ),
-      singleSwipeGestureSensitivityRange: _lerpInt(
-        singleSwipeGestureSensitivityRange,
-        other.singleSwipeGestureSensitivityRange,
-        t,
-      ),
-      itemPadding:
-          EdgeInsets.lerp(
-            itemPadding as EdgeInsets?,
-            other.itemPadding as EdgeInsets?,
-            t,
-          ) ??
-          itemPadding,
-      elevation: _lerpDouble(elevation, other.elevation, t)!,
-      itemClipBehavior: t < 0.5 ? itemClipBehavior : other.itemClipBehavior,
-      outlineWidth: _lerpDouble(outlineWidth, other.outlineWidth, t)!,
-      hoverElevation: _lerpDouble(hoverElevation, other.hoverElevation, t)!,
-      focusThickness: _lerpDouble(focusThickness, other.focusThickness, t)!,
-      focusOffset: _lerpDouble(focusOffset, other.focusOffset, t)!,
-      hoverStateOpacity: _lerpDouble(
-        hoverStateOpacity,
-        other.hoverStateOpacity,
-        t,
-      )!,
-      focusStateOpacity: _lerpDouble(
-        focusStateOpacity,
-        other.focusStateOpacity,
-        t,
-      )!,
-      pressedStateOpacity: _lerpDouble(
-        pressedStateOpacity,
-        other.pressedStateOpacity,
-        t,
-      )!,
-      disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
-      disabledOutlineOpacity: _lerpDouble(
-        disabledOutlineOpacity,
-        other.disabledOutlineOpacity,
-        t,
-      )!,
-      smallMinWidth: _lerpDouble(smallMinWidth, other.smallMinWidth, t)!,
-      smallMaxWidth: _lerpDouble(smallMaxWidth, other.smallMaxWidth, t)!,
-      largeMaxWidth: _lerpDouble(largeMaxWidth, other.largeMaxWidth, t)!,
-      itemGap: _lerpDouble(itemGap, other.itemGap, t)!,
-      fullScreenGap: _lerpDouble(fullScreenGap, other.fullScreenGap, t)!,
-      showAllGap: _lerpDouble(showAllGap, other.showAllGap, t)!,
-      showAllPadding: _lerpDouble(showAllPadding, other.showAllPadding, t)!,
-      headerInset: _lerpDouble(headerInset, other.headerInset, t)!,
-      arrowSize: _lerpDouble(arrowSize, other.arrowSize, t)!,
-      expandedBreakpoint: _lerpDouble(
-        expandedBreakpoint,
-        other.expandedBreakpoint,
-        t,
-      )!,
-      minAspect: _lerpDouble(minAspect, other.minAspect, t)!,
-      maxAspect: _lerpDouble(maxAspect, other.maxAspect, t)!,
-      fullScreenRadius: _lerpDouble(
-        fullScreenRadius,
-        other.fullScreenRadius,
-        t,
-      )!,
+      uncontainedItemExtent: motion.uncontainedItemExtent,
+      uncontainedShrinkExtent: motion.uncontainedShrinkExtent,
+      borderRadiusValue: motion.borderRadiusValue,
+      scrollAnimationDuration: motion.scrollAnimationDuration,
+      singleSwipeGestureSensitivityRange:
+          motion.singleSwipeGestureSensitivityRange,
+      itemPadding: motion.itemPadding,
+      elevation: motion.elevation,
+      itemClipBehavior: motion.itemClipBehavior,
+      outlineWidth: motion.outlineWidth,
+      hoverElevation: motion.hoverElevation,
+      focusThickness: motion.focusThickness,
+      focusOffset: motion.focusOffset,
+      hoverStateOpacity: motion.hoverStateOpacity,
+      focusStateOpacity: motion.focusStateOpacity,
+      pressedStateOpacity: motion.pressedStateOpacity,
+      disabledOpacity: sizing.disabledOpacity,
+      disabledOutlineOpacity: sizing.disabledOutlineOpacity,
+      smallMinWidth: sizing.smallMinWidth,
+      smallMaxWidth: sizing.smallMaxWidth,
+      largeMaxWidth: sizing.largeMaxWidth,
+      itemGap: sizing.itemGap,
+      fullScreenGap: sizing.fullScreenGap,
+      showAllGap: sizing.showAllGap,
+      showAllPadding: sizing.showAllPadding,
+      headerInset: sizing.headerInset,
+      arrowSize: sizing.arrowSize,
+      expandedBreakpoint: sizing.expandedBreakpoint,
+      minAspect: sizing.minAspect,
+      maxAspect: sizing.maxAspect,
+      fullScreenRadius: sizing.fullScreenRadius,
     );
   }
-
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
-
-  int _lerpInt(int a, int b, double t) => (a + (b - a) * t).round();
 }

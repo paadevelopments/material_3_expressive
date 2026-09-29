@@ -137,7 +137,7 @@ class M3ECarouselController extends ScrollController {
 
   int _leadingFromExtents(double pixels, List<double> extents) {
     double origin = variedLeadingGap;
-    for (int i = 0; i < extents.length; i++) {
+    for (var i = 0; i < extents.length; i++) {
       if (pixels < origin + extents[i] / 2) {
         return i;
       }
@@ -205,7 +205,7 @@ class M3ECarouselController extends ScrollController {
   double _variedOffset(int index, List<double> extents) {
     final int target = index.clamp(0, extents.length - 1);
     double offset = 0;
-    for (int i = 0; i < target; i++) {
+    for (var i = 0; i < target; i++) {
       offset += extents[i];
     }
     return offset;

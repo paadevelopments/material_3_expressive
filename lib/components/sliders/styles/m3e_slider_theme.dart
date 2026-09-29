@@ -389,7 +389,50 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
     if (other is! M3ESliderTheme) {
       return this;
     }
+    final _M3ESliderGeometryLerp geometry = _lerpGeometry(other, t);
+    final _M3ESliderIndicatorLerp indicator = _lerpValueIndicator(other, t);
+    final _M3ESliderStateLerp state = _lerpState(other, t);
     return M3ESliderTheme(
+      height: geometry.height,
+      trackHeight: geometry.trackHeight,
+      handleGap: geometry.handleGap,
+      handleWidth: geometry.handleWidth,
+      handleHeight: geometry.handleHeight,
+      pressedHandleWidth: geometry.pressedHandleWidth,
+      focusHandleWidth: geometry.focusHandleWidth,
+      hoverHandleWidth: geometry.hoverHandleWidth,
+      trackInsideCornerSize: geometry.trackInsideCornerSize,
+      trackCornerRadius: geometry.trackCornerRadius,
+      stopIndicatorSize: geometry.stopIndicatorSize,
+      tickSize: geometry.tickSize,
+      stopIndicatorTrailingSpace: geometry.stopIndicatorTrailingSpace,
+      iconEdgeInset: geometry.iconEdgeInset,
+      iconSize: geometry.iconSize,
+      valueIndicatorBottomSpace: indicator.bottomSpace,
+      valueIndicatorWidth: indicator.width,
+      valueIndicatorHeight: indicator.height,
+      valueIndicatorRadius: indicator.radius,
+      valueIndicatorFontSize: indicator.fontSize,
+      valueIndicatorLineHeight: indicator.lineHeight,
+      valueIndicatorLetterSpacing: indicator.letterSpacing,
+      valueIndicatorFontWeight: indicator.fontWeight,
+      stateLayerSize: state.stateLayerSize,
+      hoverStateOpacity: state.hoverStateOpacity,
+      focusStateOpacity: state.focusStateOpacity,
+      pressedStateOpacity: state.pressedStateOpacity,
+      tickOpacity: state.tickOpacity,
+      overlapOutlineWidth: state.overlapOutlineWidth,
+      disabledActiveOpacity: state.disabledActiveOpacity,
+      disabledInactiveOpacity: state.disabledInactiveOpacity,
+      waveAmplitude: state.waveAmplitude,
+      wavelength: state.wavelength,
+      dockSpring: state.dockSpring,
+    );
+  }
+
+  /// Sizing / geometry fields lerped for [lerp].
+  _M3ESliderGeometryLerp _lerpGeometry(M3ESliderTheme other, double t) {
+    return (
       height: _lerp(height, other.height, t),
       trackHeight: _lerp(trackHeight, other.trackHeight, t),
       handleGap: _lerp(handleGap, other.handleGap, t),
@@ -417,44 +460,40 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
       ),
       iconEdgeInset: _lerp(iconEdgeInset, other.iconEdgeInset, t),
       iconSize: _lerp(iconSize, other.iconSize, t),
-      valueIndicatorBottomSpace: _lerp(
+    );
+  }
+
+  /// Value-indicator fields lerped for [lerp].
+  _M3ESliderIndicatorLerp _lerpValueIndicator(M3ESliderTheme other, double t) {
+    return (
+      bottomSpace: _lerp(
         valueIndicatorBottomSpace,
         other.valueIndicatorBottomSpace,
         t,
       ),
-      valueIndicatorWidth: _lerp(
-        valueIndicatorWidth,
-        other.valueIndicatorWidth,
-        t,
-      ),
-      valueIndicatorHeight: _lerp(
-        valueIndicatorHeight,
-        other.valueIndicatorHeight,
-        t,
-      ),
-      valueIndicatorRadius: _lerp(
-        valueIndicatorRadius,
-        other.valueIndicatorRadius,
-        t,
-      ),
-      valueIndicatorFontSize: _lerp(
-        valueIndicatorFontSize,
-        other.valueIndicatorFontSize,
-        t,
-      ),
-      valueIndicatorLineHeight: _lerp(
+      width: _lerp(valueIndicatorWidth, other.valueIndicatorWidth, t),
+      height: _lerp(valueIndicatorHeight, other.valueIndicatorHeight, t),
+      radius: _lerp(valueIndicatorRadius, other.valueIndicatorRadius, t),
+      fontSize: _lerp(valueIndicatorFontSize, other.valueIndicatorFontSize, t),
+      lineHeight: _lerp(
         valueIndicatorLineHeight,
         other.valueIndicatorLineHeight,
         t,
       ),
-      valueIndicatorLetterSpacing: _lerp(
+      letterSpacing: _lerp(
         valueIndicatorLetterSpacing,
         other.valueIndicatorLetterSpacing,
         t,
       ),
-      valueIndicatorFontWeight: t < 0.5
+      fontWeight: t < 0.5
           ? valueIndicatorFontWeight
           : other.valueIndicatorFontWeight,
+    );
+  }
+
+  /// State-layer / opacity / motion fields lerped for [lerp].
+  _M3ESliderStateLerp _lerpState(M3ESliderTheme other, double t) {
+    return (
       stateLayerSize: _lerp(stateLayerSize, other.stateLayerSize, t),
       hoverStateOpacity: _lerp(hoverStateOpacity, other.hoverStateOpacity, t),
       focusStateOpacity: _lerp(focusStateOpacity, other.focusStateOpacity, t),
@@ -487,3 +526,50 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
 
   double _lerp(double a, double b, double t) => a + (b - a) * t;
 }
+
+/// Geometry fields grouped for [M3ESliderTheme._lerpGeometry].
+typedef _M3ESliderGeometryLerp = ({
+  double height,
+  double trackHeight,
+  double handleGap,
+  double handleWidth,
+  double handleHeight,
+  double pressedHandleWidth,
+  double focusHandleWidth,
+  double hoverHandleWidth,
+  double trackInsideCornerSize,
+  double trackCornerRadius,
+  double stopIndicatorSize,
+  double tickSize,
+  double stopIndicatorTrailingSpace,
+  double iconEdgeInset,
+  double iconSize,
+});
+
+/// Value-indicator fields grouped for [M3ESliderTheme._lerpValueIndicator].
+typedef _M3ESliderIndicatorLerp = ({
+  double bottomSpace,
+  double width,
+  double height,
+  double radius,
+  double fontSize,
+  double lineHeight,
+  double letterSpacing,
+  FontWeight fontWeight,
+});
+
+/// State-layer / opacity / motion fields grouped for
+/// [M3ESliderTheme._lerpState].
+typedef _M3ESliderStateLerp = ({
+  double stateLayerSize,
+  double hoverStateOpacity,
+  double focusStateOpacity,
+  double pressedStateOpacity,
+  double tickOpacity,
+  double overlapOutlineWidth,
+  double disabledActiveOpacity,
+  double disabledInactiveOpacity,
+  double waveAmplitude,
+  double wavelength,
+  M3ESpring dockSpring,
+});

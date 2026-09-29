@@ -241,12 +241,7 @@ class _M3ECardGroupState extends State<M3ECardGroup>
   void _retarget(int from) {
     final int to = _targetIndex ?? from;
     for (var i = 0; i < _shiftGoals.length && i < _slotOrigins.length; i++) {
-      var visual = i;
-      if (i != from && from < to && i > from && i <= to) {
-        visual = i - 1;
-      } else if (i != from && from > to && i >= to && i < from) {
-        visual = i + 1;
-      }
+      final int visual = _visualSlotFor(i, from: from, to: to);
       final Offset target = i == from
           ? Offset.zero
           : _slotOrigins[visual] - _slotOrigins[i];
@@ -257,6 +252,21 @@ class _M3ECardGroupState extends State<M3ECardGroup>
       _shiftX[i].animateTo(target.dx);
       _shiftY[i].animateTo(target.dy);
     }
+  }
+
+  /// Slot that card [i] visually occupies while the dragged card moves from
+  /// [from] to [to], filling the gap it leaves behind.
+  int _visualSlotFor(int i, {required int from, required int to}) {
+    if (i == from) {
+      return i;
+    }
+    if (from < to && i > from && i <= to) {
+      return i - 1;
+    }
+    if (from > to && i >= to && i < from) {
+      return i + 1;
+    }
+    return i;
   }
 
   void _endDrag(LongPressEndDetails details) {

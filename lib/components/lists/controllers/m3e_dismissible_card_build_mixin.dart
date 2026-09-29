@@ -17,129 +17,6 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     );
   }
 
-  Widget _buildCollapsingCard(BuildContext context, int slotIndex) {
-    final slot = _slots[slotIndex];
-    final ctrl = slot.collapseCtrl!;
-    final totalH = slot.capturedHeight + style.gap;
-    final s = style;
-    final swipingRight = slot.dismissedDirection == DismissDirection.startToEnd;
-    final bgRadius = swipingRight
-        ? s.backgroundBorderRadius
-        : (s.secondaryBackgroundBorderRadius ?? s.backgroundBorderRadius);
-    final cardRadius = s.selectedBorderRadius ?? s.outerRadius;
-
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: ctrl,
-        child: slot.frozenChild == null
-            ? null
-            : Stack(
-                children: [
-                  if (slot.dismissedDirection != null)
-                    _buildCollapsingBackground(slot, s, bgRadius),
-                  _buildCollapsingFlyingCard(context, slot, s, cardRadius),
-                ],
-              ),
-        builder: (ctx, child) {
-          final h = (totalH * (1.0 - ctrl.value)).clamp(0.0, totalH);
-          return SizedBox(height: h, width: double.infinity, child: child);
-        },
-      ),
-    );
-  }
-
-  Widget _buildCollapsingBackground(
-    M3EDismissibleSlot slot,
-    M3EDismissibleListStyle s,
-    double bgRadius,
-  ) {
-    return ValueListenableBuilder<double>(
-      valueListenable: slot.flyNotifier,
-      builder: (_, flyOff, child) {
-        final progress = flyOff.abs();
-        final actionWidth = (progress - s.actionGap).clamp(0.0, progress);
-        final swipingRight =
-            slot.dismissedDirection == DismissDirection.startToEnd;
-        if (actionWidth <= 0) {
-          return const SizedBox.shrink();
-        }
-        final Widget? bg = swipingRight
-            ? s.background
-            : (s.secondaryBackground ?? s.background);
-        if (bg == null) {
-          return const SizedBox.shrink();
-        }
-        final double edgePad = s.actionEdgePadding;
-        final double pillHeight = math.max(
-          s.actionMinHeight,
-          (slot.capturedHeight > 0 ? slot.capturedHeight : 56) -
-              s.actionVerticalInset,
-        );
-        final double pillWidth = math.max(0, actionWidth - 2 * edgePad);
-        return Positioned.fill(
-          bottom: s.gap,
-          child: Align(
-            alignment: swipingRight
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: edgePad),
-              child: SizedBox(
-                width: pillWidth,
-                height: pillHeight,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(pillHeight / 2),
-                  child: bg,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCollapsingFlyingCard(
-    BuildContext context,
-    M3EDismissibleSlot slot,
-    M3EDismissibleListStyle s,
-    double cardRadius,
-  ) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: s.gap),
-      child: OverflowBox(
-        alignment: Alignment.topLeft,
-        minWidth: slot.capturedWidth > 0 ? slot.capturedWidth : 0,
-        maxWidth: slot.capturedWidth > 0
-            ? slot.capturedWidth
-            : MediaQuery.sizeOf(context).width,
-        minHeight: 0,
-        maxHeight: slot.capturedHeight,
-        child: IgnorePointer(
-          child: ValueListenableBuilder<double>(
-            valueListenable: slot.flyNotifier,
-            builder: (_, flyOff, child) =>
-                Transform.translate(offset: Offset(flyOff, 0), child: child),
-            child: Padding(
-              padding: EdgeInsets.zero,
-              child: M3ECard(
-                variant: M3ECardVariant.filled,
-                borderRadius: BorderRadius.circular(cardRadius),
-                color:
-                    s.color ??
-                    M3ETheme.of(context).colorScheme.surfaceContainerHighest,
-                border: s.border,
-                padding: s.padding ?? const EdgeInsets.all(16),
-                width: double.infinity,
-                child: M3EListItemScope(child: slot.frozenChild!),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   M3ECardPosition _cardPositionFor(int slotPos, int total) {
     if (total == 1) {
       return M3ECardPosition.single;
@@ -460,31 +337,46 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
           0,
         ),
         child: Builder(
-          builder: (BuildContext context) {
-            final Widget surface = Builder(
-              builder: (BuildContext context) => _buildForegroundCardSurface(
-                context,
-                slot: slot,
-                slotPos: slotPos,
-                layoutRadius: layoutRadius,
-                style: s,
-              ),
-            );
-            if (childOwnsSurface) {
-              return surface;
-            }
-            return GestureDetector(
-              onHorizontalDragStart: (_) =>
-                  _onForegroundDragStart(context, slot),
-              onHorizontalDragUpdate: (DragUpdateDetails details) =>
-                  _onForegroundDragUpdate(context, slot, details),
-              onHorizontalDragEnd: (DragEndDetails details) =>
-                  _onForegroundDragEnd(context, details),
-              child: surface,
-            );
-          },
+          builder: (BuildContext context) => _buildForegroundCardChild(
+            context,
+            slot: slot,
+            slotPos: slotPos,
+            layoutRadius: layoutRadius,
+            style: s,
+            childOwnsSurface: childOwnsSurface,
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildForegroundCardChild(
+    BuildContext context, {
+    required M3EDismissibleSlot slot,
+    required int slotPos,
+    required BorderRadius layoutRadius,
+    required M3EDismissibleListStyle style,
+    required bool childOwnsSurface,
+  }) {
+    final Widget surface = Builder(
+      builder: (BuildContext context) => _buildForegroundCardSurface(
+        context,
+        slot: slot,
+        slotPos: slotPos,
+        layoutRadius: layoutRadius,
+        style: style,
+      ),
+    );
+    if (childOwnsSurface) {
+      return surface;
+    }
+    return GestureDetector(
+      onHorizontalDragStart: (_) => _onForegroundDragStart(context, slot),
+      onHorizontalDragUpdate: (DragUpdateDetails details) =>
+          _onForegroundDragUpdate(context, slot, details),
+      onHorizontalDragEnd: (DragEndDetails details) =>
+          _onForegroundDragEnd(context, details),
+      child: surface,
     );
   }
 
@@ -565,38 +457,11 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     final selected = m3eSelectionFill(context, slotPos) != null;
     final inDragProxy = M3EListDragProxyScope.maybeOf(context) != null;
     if (swipeItemPaintsSurface(slotPos)) {
-      return KeyedSubtree(
-        key: inDragProxy ? null : _measureKey(slot),
-        child: Listener(
-          onPointerDown: (_) => _dismissDxAcc = 0,
-          onPointerMove: (PointerMoveEvent event) {
-            if (_dragSlotRef == null) {
-              _dismissDxAcc += event.delta.dx;
-              if (_dismissDxAcc.abs() < kTouchSlop ||
-                  event.delta.dx.abs() < event.delta.dy.abs()) {
-                return;
-              }
-              _onForegroundDragStart(context, slot);
-            }
-            _onForegroundDragUpdate(
-              context,
-              slot,
-              DragUpdateDetails(
-                globalPosition: event.position,
-                localPosition: event.localPosition,
-                delta: event.delta,
-                primaryDelta: event.delta.dx,
-              ),
-            );
-          },
-          onPointerUp: (PointerUpEvent event) => _onForegroundDragEnd(
-            context,
-            DragEndDetails(primaryVelocity: event.delta.dx),
-          ),
-          onPointerCancel: (_) =>
-              _onForegroundDragEnd(context, DragEndDetails()),
-          child: _swipeOverflow(slotPos, swipeItemBuilder(context, slotPos)),
-        ),
+      return _buildSwipeItemPointerSurface(
+        context,
+        slot: slot,
+        slotPos: slotPos,
+        inDragProxy: inDragProxy,
       );
     }
 
@@ -615,6 +480,53 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
           onPressed: onPressed,
         );
       },
+    );
+  }
+
+  Widget _buildSwipeItemPointerSurface(
+    BuildContext context, {
+    required M3EDismissibleSlot slot,
+    required int slotPos,
+    required bool inDragProxy,
+  }) {
+    return KeyedSubtree(
+      key: inDragProxy ? null : _measureKey(slot),
+      child: Listener(
+        onPointerDown: (_) => _dismissDxAcc = 0,
+        onPointerMove: (PointerMoveEvent event) =>
+            _onSwipeItemPointerMove(context, slot, event),
+        onPointerUp: (PointerUpEvent event) => _onForegroundDragEnd(
+          context,
+          DragEndDetails(primaryVelocity: event.delta.dx),
+        ),
+        onPointerCancel: (_) => _onForegroundDragEnd(context, DragEndDetails()),
+        child: _swipeOverflow(slotPos, swipeItemBuilder(context, slotPos)),
+      ),
+    );
+  }
+
+  void _onSwipeItemPointerMove(
+    BuildContext context,
+    M3EDismissibleSlot slot,
+    PointerMoveEvent event,
+  ) {
+    if (_dragSlotRef == null) {
+      _dismissDxAcc += event.delta.dx;
+      if (_dismissDxAcc.abs() < kTouchSlop ||
+          event.delta.dx.abs() < event.delta.dy.abs()) {
+        return;
+      }
+      _onForegroundDragStart(context, slot);
+    }
+    _onForegroundDragUpdate(
+      context,
+      slot,
+      DragUpdateDetails(
+        globalPosition: event.position,
+        localPosition: event.localPosition,
+        delta: event.delta,
+        primaryDelta: event.delta.dx,
+      ),
     );
   }
 

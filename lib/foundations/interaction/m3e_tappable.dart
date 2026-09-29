@@ -205,6 +205,19 @@ class _M3ETappableState extends State<M3ETappable>
   }
 
   void _bindScrolling() {
+    final List<ValueNotifier<bool>> next = _collectScrollingNotifiers();
+    if (_sameScrollingNotifiers(next)) {
+      return;
+    }
+    _unbindScrolling();
+    _scrolling.addAll(next);
+    for (final ValueNotifier<bool> notifier in _scrolling) {
+      notifier.addListener(_onAncestorScroll);
+    }
+  }
+
+  /// Ancestor scrollables' `isScrollingNotifier`s, nearest-first.
+  List<ValueNotifier<bool>> _collectScrollingNotifiers() {
     final next = <ValueNotifier<bool>>[];
     context.visitAncestorElements((Element element) {
       if (element is StatefulElement && element.state is ScrollableState) {
@@ -214,23 +227,19 @@ class _M3ETappableState extends State<M3ETappable>
       }
       return true;
     });
-    if (next.length == _scrolling.length) {
-      var same = true;
-      for (var i = 0; i < next.length; i++) {
-        if (!identical(next[i], _scrolling[i])) {
-          same = false;
-          break;
-        }
-      }
-      if (same) {
-        return;
+    return next;
+  }
+
+  bool _sameScrollingNotifiers(List<ValueNotifier<bool>> next) {
+    if (next.length != _scrolling.length) {
+      return false;
+    }
+    for (var i = 0; i < next.length; i++) {
+      if (!identical(next[i], _scrolling[i])) {
+        return false;
       }
     }
-    _unbindScrolling();
-    _scrolling.addAll(next);
-    for (final ValueNotifier<bool> notifier in _scrolling) {
-      notifier.addListener(_onAncestorScroll);
-    }
+    return true;
   }
 
   void _unbindScrolling() {

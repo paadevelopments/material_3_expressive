@@ -151,7 +151,6 @@ class _M3EDrawerDestinationButtonState
         ? border.borderRadius.resolve(Directionality.of(context))
         : BorderRadius.circular(drawerTheme.indicatorRadius);
     final fill = drawerTheme.destinationBackgroundColor(scheme, selected: true);
-    final interacting = _pressed || _hovered;
     final layer = drawerTheme.stateLayerColor(
       scheme,
       selected: selected,
@@ -167,204 +166,18 @@ class _M3EDrawerDestinationButtonState
         horizontal: drawerTheme.destinationHorizontalPadding,
         vertical: drawerTheme.destinationVerticalPadding,
       ),
-      child: FocusableActionDetector(
-        focusNode: _node,
-        mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: _handleFocusHighlight,
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) {
-              _select();
-              return null;
-            },
-          ),
-          ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
-            onInvoke: (ButtonActivateIntent intent) {
-              _select();
-              return null;
-            },
-          ),
-        },
-        child: Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (_) {
-            _dismissRingForPointer();
-            _setPressed(true);
-          },
-          onPointerUp: (_) => _setPressed(false),
-          onPointerCancel: (_) => _setPressed(false),
-          child: SizedBox(
-            height: drawerTheme.destinationHeight,
-            width: double.infinity,
-            child: Stack(
-              alignment: AlignmentDirectional.centerStart,
-              children: <Widget>[
-                Positioned.fill(
-                  child: M3ESelectionIndicator(
-                    selected: selected,
-                    scaleSpring: drawerTheme.indicatorScaleSpring,
-                    fadeSpring: drawerTheme.indicatorFadeSpring,
-                    child: DecoratedBox(
-                      decoration: ShapeDecoration(shape: border, color: fill),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Material(
-                    type: MaterialType.transparency,
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: radius),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => _select(fromPointer: true),
-                      onHover: (bool value) {
-                        _setHovered(value);
-                        _dismissRingForPointer();
-                      },
-                      canRequestFocus: false,
-                      customBorder: RoundedRectangleBorder(
-                        borderRadius: radius,
-                      ),
-                      mouseCursor: SystemMouseCursors.click,
-                      splashFactory: InkSparkle.splashFactory,
-                      splashColor: drawerTheme.stateLayerColor(
-                        scheme,
-                        selected: selected,
-                        pressed: true,
-                        focused: false,
-                      ),
-                      highlightColor: Colors.transparent,
-                      overlayColor: const WidgetStatePropertyAll<Color>(
-                        Colors.transparent,
-                      ),
-                      child: Stack(
-                        alignment: AlignmentDirectional.centerStart,
-                        children: <Widget>[
-                          if (interacting)
-                            Positioned.fill(
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: layer,
-                                  borderRadius: radius,
-                                ),
-                              ),
-                            ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(
-                              start:
-                                  drawerTheme
-                                      .destinationInnerHorizontalPadding +
-                                  widget.indent,
-                              end:
-                                  drawerTheme.destinationInnerHorizontalPadding,
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                if (glyph != null) ...<Widget>[
-                                  _glyph(
-                                    drawerTheme,
-                                    foreground,
-                                    scheme,
-                                    glyph,
-                                    selected: selected,
-                                  ),
-                                  SizedBox(width: drawerTheme.iconLabelGap),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    destination.label,
-                                    style: theme.typeScale.labelLarge.copyWith(
-                                      color: foreground,
-                                      fontWeight: selected
-                                          ? drawerTheme.activeLabelWeight
-                                          : drawerTheme.inactiveLabelWeight,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (destination.badgeLabel != null)
-                                  Text(
-                                    destination.badgeLabel!,
-                                    style: theme.typeScale.labelLarge.copyWith(
-                                      color: drawerTheme.badgeColor(
-                                        scheme,
-                                        selected: selected,
-                                      ),
-                                      fontWeight:
-                                          drawerTheme.inactiveLabelWeight,
-                                    ),
-                                  ),
-                                if (glyph == null &&
-                                    destination.showBadge &&
-                                    destination.badgeLabel == null)
-                                  _dot(
-                                    drawerTheme.badgeColor(
-                                      scheme,
-                                      selected: selected,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Positioned.fill(
-                            child: ListenableBuilder(
-                              listenable: M3EFocusInteraction.instance,
-                              builder: (BuildContext context, Widget? child) {
-                                final show =
-                                    _focused &&
-                                    M3EFocusRing.shouldShow(_node, context);
-                                if (!show) {
-                                  return const SizedBox.shrink();
-                                }
-                                return IgnorePointer(
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: <Widget>[
-                                      DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: drawerTheme.stateLayerColor(
-                                            scheme,
-                                            selected: selected,
-                                            pressed: false,
-                                            focused: true,
-                                          ),
-                                          borderRadius: radius,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.all(
-                                          drawerTheme.focusRingInset,
-                                        ),
-                                        child: DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            borderRadius: radius,
-                                            border: Border.all(
-                                              color: drawerTheme
-                                                  .focusRingColorResolved(
-                                                    scheme,
-                                                  ),
-                                              width: drawerTheme
-                                                  .focusRingThickness,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      child: _buildFocusable(
+        theme: theme,
+        drawerTheme: drawerTheme,
+        scheme: scheme,
+        destination: destination,
+        selected: selected,
+        foreground: foreground,
+        border: border,
+        radius: radius,
+        fill: fill,
+        layer: layer,
+        glyph: glyph,
       ),
     );
 
@@ -375,6 +188,245 @@ class _M3EDrawerDestinationButtonState
       label: announced,
       onTap: () => _select(),
       child: ExcludeSemantics(child: row),
+    );
+  }
+
+  Widget _buildFocusable({
+    required M3EThemeData theme,
+    required M3ENavigationDrawerTheme drawerTheme,
+    required M3EColorScheme scheme,
+    required M3ENavigationDestination destination,
+    required bool selected,
+    required Color foreground,
+    required ShapeBorder border,
+    required BorderRadius radius,
+    required Color fill,
+    required Color layer,
+    required Widget? glyph,
+  }) {
+    return FocusableActionDetector(
+      focusNode: _node,
+      mouseCursor: SystemMouseCursors.click,
+      onShowFocusHighlight: _handleFocusHighlight,
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (ActivateIntent intent) {
+            _select();
+            return null;
+          },
+        ),
+        ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+          onInvoke: (ButtonActivateIntent intent) {
+            _select();
+            return null;
+          },
+        ),
+      },
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) {
+          _dismissRingForPointer();
+          _setPressed(true);
+        },
+        onPointerUp: (_) => _setPressed(false),
+        onPointerCancel: (_) => _setPressed(false),
+        child: SizedBox(
+          height: drawerTheme.destinationHeight,
+          width: double.infinity,
+          child: Stack(
+            alignment: AlignmentDirectional.centerStart,
+            children: <Widget>[
+              Positioned.fill(
+                child: M3ESelectionIndicator(
+                  selected: selected,
+                  scaleSpring: drawerTheme.indicatorScaleSpring,
+                  fadeSpring: drawerTheme.indicatorFadeSpring,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(shape: border, color: fill),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: _buildInkContent(
+                  theme: theme,
+                  drawerTheme: drawerTheme,
+                  scheme: scheme,
+                  destination: destination,
+                  selected: selected,
+                  foreground: foreground,
+                  radius: radius,
+                  layer: layer,
+                  glyph: glyph,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInkContent({
+    required M3EThemeData theme,
+    required M3ENavigationDrawerTheme drawerTheme,
+    required M3EColorScheme scheme,
+    required M3ENavigationDestination destination,
+    required bool selected,
+    required Color foreground,
+    required BorderRadius radius,
+    required Color layer,
+    required Widget? glyph,
+  }) {
+    final bool interacting = _pressed || _hovered;
+    return Material(
+      type: MaterialType.transparency,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: radius),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _select(fromPointer: true),
+        onHover: (bool value) {
+          _setHovered(value);
+          _dismissRingForPointer();
+        },
+        canRequestFocus: false,
+        customBorder: RoundedRectangleBorder(borderRadius: radius),
+        mouseCursor: SystemMouseCursors.click,
+        splashFactory: InkSparkle.splashFactory,
+        splashColor: drawerTheme.stateLayerColor(
+          scheme,
+          selected: selected,
+          pressed: true,
+          focused: false,
+        ),
+        highlightColor: Colors.transparent,
+        overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+        child: Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: <Widget>[
+            if (interacting)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: layer, borderRadius: radius),
+                ),
+              ),
+            _buildContentRow(
+              drawerTheme: drawerTheme,
+              theme: theme,
+              scheme: scheme,
+              destination: destination,
+              foreground: foreground,
+              glyph: glyph,
+              selected: selected,
+            ),
+            Positioned.fill(
+              child: _buildFocusRingOverlay(
+                drawerTheme: drawerTheme,
+                scheme: scheme,
+                selected: selected,
+                radius: radius,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentRow({
+    required M3ENavigationDrawerTheme drawerTheme,
+    required M3EThemeData theme,
+    required M3EColorScheme scheme,
+    required M3ENavigationDestination destination,
+    required Color foreground,
+    required Widget? glyph,
+    required bool selected,
+  }) {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: drawerTheme.destinationInnerHorizontalPadding + widget.indent,
+        end: drawerTheme.destinationInnerHorizontalPadding,
+      ),
+      child: Row(
+        children: <Widget>[
+          if (glyph != null) ...<Widget>[
+            _glyph(drawerTheme, foreground, scheme, glyph, selected: selected),
+            SizedBox(width: drawerTheme.iconLabelGap),
+          ],
+          Expanded(
+            child: Text(
+              destination.label,
+              style: theme.typeScale.labelLarge.copyWith(
+                color: foreground,
+                fontWeight: selected
+                    ? drawerTheme.activeLabelWeight
+                    : drawerTheme.inactiveLabelWeight,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (destination.badgeLabel != null)
+            Text(
+              destination.badgeLabel!,
+              style: theme.typeScale.labelLarge.copyWith(
+                color: drawerTheme.badgeColor(scheme, selected: selected),
+                fontWeight: drawerTheme.inactiveLabelWeight,
+              ),
+            ),
+          if (glyph == null &&
+              destination.showBadge &&
+              destination.badgeLabel == null)
+            _dot(drawerTheme.badgeColor(scheme, selected: selected)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFocusRingOverlay({
+    required M3ENavigationDrawerTheme drawerTheme,
+    required M3EColorScheme scheme,
+    required bool selected,
+    required BorderRadius radius,
+  }) {
+    return ListenableBuilder(
+      listenable: M3EFocusInteraction.instance,
+      builder: (BuildContext context, Widget? child) {
+        final show = _focused && M3EFocusRing.shouldShow(_node, context);
+        if (!show) {
+          return const SizedBox.shrink();
+        }
+        return IgnorePointer(
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: drawerTheme.stateLayerColor(
+                    scheme,
+                    selected: selected,
+                    pressed: false,
+                    focused: true,
+                  ),
+                  borderRadius: radius,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(drawerTheme.focusRingInset),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: radius,
+                    border: Border.all(
+                      color: drawerTheme.focusRingColorResolved(scheme),
+                      width: drawerTheme.focusRingThickness,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -29,6 +29,7 @@ import 'm3e_list_row_surface.dart';
 import 'm3e_list_trailing_override.dart';
 
 part 'm3e_expandable_item_body.dart';
+part 'm3e_expandable_item_interaction.dart';
 
 /// M3EExpandableHeaderBuilder.
 

@@ -254,76 +254,6 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
     );
   }
 
-  void _startPushController({
-    required double multiplier,
-    required double target,
-    double? initialValue,
-  }) {
-    _pushCtrl?.dispose();
-    _pushCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(
-              style.detachPushSpring,
-              stiffness: style.detachPushSpring.stiffness * multiplier,
-            ),
-            vsync: this,
-            initialValue: initialValue ?? 0,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _detachPush = _pushCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(target);
-  }
-
-  void _startNeighbourController({
-    required double multiplier,
-    required double target,
-  }) {
-    _nbrCtrl?.dispose();
-    _nbrCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(
-              style.neighbourSpring,
-              stiffness: style.neighbourSpring.stiffness * multiplier,
-            ),
-            vsync: this,
-            initialValue: _neighbourFraction,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _neighbourFraction = _nbrCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(target);
-  }
-
-  void _startRoundnessController({
-    required double multiplier,
-    required double target,
-  }) {
-    _roundnessCtrl?.dispose();
-    _roundnessCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(
-              style.roundnessSnapSpring,
-              stiffness: style.roundnessSnapSpring.stiffness * multiplier,
-            ),
-            vsync: this,
-            initialValue: _roundnessFraction,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _roundnessFraction = _roundnessCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(target);
-  }
-
   /// handleDragEnd.
 
   @override
@@ -353,32 +283,43 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
         swipeMode != M3EListSwipeMode.reveal && _edgeDismisses(swipingRight);
 
     if (canReveal && actionList.isNotEmpty) {
-      final double actionsWidth = _computeActionsWidth(actionList);
-      final bool pastActions = _dragOffset.abs() > actionsWidth;
-      if (canDismiss && pastActions && _dragProgress >= 1.0) {
-        final direction = swipingRight
-            ? DismissDirection.startToEnd
-            : DismissDirection.endToStart;
-        _dismiss(_dragSlotIndex, speedMul, direction);
-        return;
-      }
-      if (_dragOffset.abs() >= actionsWidth * style.actionPreviewThreshold) {
-        _snapToRevealed(actionsWidth * (swipingRight ? 1.0 : -1.0), speedMul);
-      } else {
-        _springBack(speedMul);
-      }
+      _settleDragWithActions(
+        actionList: actionList,
+        swipingRight: swipingRight,
+        canDismiss: canDismiss,
+        speedMul: speedMul,
+      );
       return;
     }
 
     if (canDismiss && _dragProgress >= 1.0) {
-      final direction = swipingRight
-          ? DismissDirection.startToEnd
-          : DismissDirection.endToStart;
-      _dismiss(_dragSlotIndex, speedMul, direction);
+      _dismiss(_dragSlotIndex, speedMul, _dismissDirectionFor(swipingRight));
       return;
     }
 
     _springBack(speedMul);
+  }
+
+  DismissDirection _dismissDirectionFor(bool swipingRight) =>
+      swipingRight ? DismissDirection.startToEnd : DismissDirection.endToStart;
+
+  void _settleDragWithActions({
+    required List<M3EListSwipeAction> actionList,
+    required bool swipingRight,
+    required bool canDismiss,
+    required double speedMul,
+  }) {
+    final double actionsWidth = _computeActionsWidth(actionList);
+    final bool pastActions = _dragOffset.abs() > actionsWidth;
+    if (canDismiss && pastActions && _dragProgress >= 1.0) {
+      _dismiss(_dragSlotIndex, speedMul, _dismissDirectionFor(swipingRight));
+      return;
+    }
+    if (_dragOffset.abs() >= actionsWidth * style.actionPreviewThreshold) {
+      _snapToRevealed(actionsWidth * (swipingRight ? 1.0 : -1.0), speedMul);
+    } else {
+      _springBack(speedMul);
+    }
   }
 
   M3EDismissibleListController? _swipeController;
@@ -456,140 +397,6 @@ mixin M3EDismissibleCardDragMixin<T extends StatefulWidget>
       return;
     }
     _springBack(speedMul);
-  }
-
-  void _snapToRevealed(double targetOffset, double speedMul) {
-    _lockHover();
-    _pushCtrl?.dispose();
-    _pushCtrl = null;
-    _detachPush = 0.0;
-    _pastThreshold = false;
-    _pastActionThreshold = true;
-    _reEngaging = false;
-
-    final back = style.springBackSpring;
-    _springCtrl?.dispose();
-    _springCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(back, stiffness: back.stiffness * speedMul),
-            vsync: this,
-            initialValue: _dragOffset,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _dragOffset = _springCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(targetOffset);
-
-    _nbrCtrl?.dispose();
-    _nbrCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(back, stiffness: back.stiffness * speedMul),
-            vsync: this,
-            initialValue: _neighbourFraction,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _neighbourFraction = _nbrCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(0);
-
-    _roundnessCtrl?.dispose();
-    _roundnessCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(back, stiffness: back.stiffness * speedMul),
-            vsync: this,
-            initialValue: _roundnessFraction,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _roundnessFraction = _roundnessCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(0);
-  }
-
-  void _resetDragState() {
-    setState(() {
-      _dragSlotRef = null;
-      _dragSlotIndex = -1;
-      _dragOffset = 0.0;
-      _hoverLocked = false;
-      _detachPush = 0.0;
-      _neighbourFraction = 0.0;
-      _pastThreshold = false;
-      _pastActionThreshold = false;
-      _isDismissDragging = false;
-      _reEngaging = false;
-      _roundnessFraction = 0.0;
-    });
-    _dismissDxAcc = 0;
-  }
-
-  void _playPullHaptics() {
-    if (!style.enableFeedback) {
-      return;
-    }
-    if (_hapticStopwatch.elapsedMilliseconds < _kVibrationThresholdMs) {
-      return;
-    }
-    _hapticStopwatch.reset();
-    M3EHaptics.selection();
-  }
-
-  void _springBack(double speedMul) {
-    _lockHover();
-    _pushCtrl?.dispose();
-    _pushCtrl = null;
-    _detachPush = 0.0;
-    _roundnessCtrl?.dispose();
-    _roundnessCtrl = null;
-    _roundnessFraction = 0.0;
-    _pastActionThreshold = false;
-
-    final ref = _dragSlotRef;
-    final back = style.springBackSpring;
-    _springCtrl?.dispose();
-    _springCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(back, stiffness: back.stiffness * speedMul),
-            vsync: this,
-            initialValue: _dragOffset,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _dragOffset = _springCtrl!.value);
-            }
-          })
-          ..addStatusListener((s) {
-            if ((s == AnimationStatus.completed ||
-                    s == AnimationStatus.dismissed) &&
-                mounted &&
-                _dragSlotRef == ref) {
-              _resetDragState();
-            }
-          })
-          ..animateTo(0);
-
-    _nbrCtrl?.dispose();
-    _nbrCtrl =
-        SingleMotionController(
-            motion: _spatialMotion(back, stiffness: back.stiffness * speedMul),
-            vsync: this,
-            initialValue: _neighbourFraction,
-          )
-          ..addListener(() {
-            if (mounted) {
-              setState(() => _neighbourFraction = _nbrCtrl!.value);
-            }
-          })
-          ..addStatusListener(_onMotionSettled)
-          ..animateTo(0);
   }
 
   Future<void> _dismiss(

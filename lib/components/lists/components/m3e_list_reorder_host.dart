@@ -360,15 +360,7 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
   void _retarget(int from) {
     final int to = _targetIndex ?? from;
     for (var i = 0; i < widget.itemCount && i < _slotOrigins.length; i++) {
-      var visual = i;
-      if (i != from && from < to && i > from && i <= to) {
-        visual = i - 1;
-      } else if (i != from && from > to && i >= to && i < from) {
-        visual = i + 1;
-      }
-      final double target = i == from
-          ? 0
-          : _slotOrigins[visual].dy - _slotOrigins[i].dy;
+      final double target = _retargetOffset(i, from, to);
       if (_offsetGoals[i] == target) {
         continue;
       }
@@ -377,6 +369,24 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
         ..motion = _motion(M3EMotion.expressiveSpatialDefault)
         ..animateTo(target);
     }
+  }
+
+  double _retargetOffset(int i, int from, int to) {
+    if (i == from) {
+      return 0;
+    }
+    final int visual = _retargetVisualSlot(i, from, to);
+    return _slotOrigins[visual].dy - _slotOrigins[i].dy;
+  }
+
+  int _retargetVisualSlot(int i, int from, int to) {
+    if (from < to && i > from && i <= to) {
+      return i - 1;
+    }
+    if (from > to && i >= to && i < from) {
+      return i + 1;
+    }
+    return i;
   }
 
   void _endDrag() {

@@ -283,7 +283,40 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
     if (other is! M3ETabTheme) {
       return this;
     }
+    final _M3ETabGeometryLerp geometry = _lerpGeometry(other, t);
+    final _M3ETabSpacingLerp spacing = _lerpSpacing(other, t);
+    final _M3ETabInteractionLerp interaction = _lerpInteraction(other, t);
     return M3ETabTheme(
+      height: geometry.height,
+      iconAndLabelHeight: geometry.iconAndLabelHeight,
+      iconSize: geometry.iconSize,
+      indicatorHeight: geometry.indicatorHeight,
+      secondaryIndicatorHeight: geometry.secondaryIndicatorHeight,
+      primaryIndicatorWidth: geometry.primaryIndicatorWidth,
+      indicatorMinLength: geometry.indicatorMinLength,
+      indicatorInset: geometry.indicatorInset,
+      indicatorCornerRadius: geometry.indicatorCornerRadius,
+      dividerHeight: geometry.dividerHeight,
+      elevation: geometry.elevation,
+      stackedIconLabelGap: spacing.stackedIconLabelGap,
+      inlineIconLabelGap: spacing.inlineIconLabelGap,
+      inlineBadgeGap: spacing.inlineBadgeGap,
+      badgeOverlap: spacing.badgeOverlap,
+      scrollableLeadingOffset: spacing.scrollableLeadingOffset,
+      scrollableTabPadding: spacing.scrollableTabPadding,
+      labelMaxLines: spacing.labelMaxLines,
+      focusThickness: interaction.focusThickness,
+      focusInset: interaction.focusInset,
+      hoverOpacity: interaction.hoverOpacity,
+      focusOpacity: interaction.focusOpacity,
+      pressedOpacity: interaction.pressedOpacity,
+      indicatorSpring: interaction.indicatorSpring,
+    );
+  }
+
+  /// Bar / indicator geometry fields lerped for [lerp].
+  _M3ETabGeometryLerp _lerpGeometry(M3ETabTheme other, double t) {
+    return (
       height: _lerpDouble(height, other.height, t),
       iconAndLabelHeight: _lerpDouble(
         iconAndLabelHeight,
@@ -315,6 +348,12 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
       ),
       dividerHeight: _lerpDouble(dividerHeight, other.dividerHeight, t),
       elevation: _lerpDouble(elevation, other.elevation, t),
+    );
+  }
+
+  /// Spacing / label fields lerped for [lerp].
+  _M3ETabSpacingLerp _lerpSpacing(M3ETabTheme other, double t) {
+    return (
       stackedIconLabelGap: _lerpDouble(
         stackedIconLabelGap,
         other.stackedIconLabelGap,
@@ -338,6 +377,12 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
         t,
       ),
       labelMaxLines: t < 0.5 ? labelMaxLines : other.labelMaxLines,
+    );
+  }
+
+  /// Focus / state-opacity / motion fields lerped for [lerp].
+  _M3ETabInteractionLerp _lerpInteraction(M3ETabTheme other, double t) {
+    return (
       focusThickness: _lerpDouble(focusThickness, other.focusThickness, t),
       focusInset: _lerpDouble(focusInset, other.focusInset, t),
       hoverOpacity: _lerpDouble(hoverOpacity, other.hoverOpacity, t),
@@ -360,3 +405,40 @@ class M3ETabTheme extends M3EThemeExtension<M3ETabTheme> {
 
   static double _lerpDouble(double a, double b, double t) => a + (b - a) * t;
 }
+
+/// Geometry fields grouped for [M3ETabTheme._lerpGeometry].
+typedef _M3ETabGeometryLerp = ({
+  double height,
+  double iconAndLabelHeight,
+  double iconSize,
+  double indicatorHeight,
+  double secondaryIndicatorHeight,
+  double primaryIndicatorWidth,
+  double indicatorMinLength,
+  double indicatorInset,
+  double indicatorCornerRadius,
+  double dividerHeight,
+  double elevation,
+});
+
+/// Spacing / label fields grouped for [M3ETabTheme._lerpSpacing].
+typedef _M3ETabSpacingLerp = ({
+  double stackedIconLabelGap,
+  double inlineIconLabelGap,
+  double inlineBadgeGap,
+  double badgeOverlap,
+  double scrollableLeadingOffset,
+  double scrollableTabPadding,
+  int labelMaxLines,
+});
+
+/// Focus / state-opacity / motion fields grouped for
+/// [M3ETabTheme._lerpInteraction].
+typedef _M3ETabInteractionLerp = ({
+  double focusThickness,
+  double focusInset,
+  double hoverOpacity,
+  double focusOpacity,
+  double pressedOpacity,
+  M3ESpring indicatorSpring,
+});

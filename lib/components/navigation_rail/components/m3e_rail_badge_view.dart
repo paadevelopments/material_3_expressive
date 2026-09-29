@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/badges/m3e_badges.dart';
 
 import '../../../foundations/foundations.dart';
+import '../styles/m3e_navigation_rail_theme.dart';
 
 /// Navigation rail badge using [M3EBadge].
 ///

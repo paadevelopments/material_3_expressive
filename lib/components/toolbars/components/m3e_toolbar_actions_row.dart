@@ -119,18 +119,9 @@ class M3EToolbarActionsRow extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final bool iconsOnly = actions.every(
-      (M3EToolbarItem item) => item is M3EToolbarAction,
-    );
-    if (flexibleDockedGap &&
-        iconsOnly &&
-        pillActiveSpring &&
-        axis == Axis.horizontal) {
-      return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return _fittedDockedRow(constraints.maxWidth);
-        },
-      );
+    final Widget? fittedDockedRow = _maybeBuildFittedDockedRow();
+    if (fittedDockedRow != null) {
+      return fittedDockedRow;
     }
 
     final partitioned = M3EToolbarItemLayout.partitionInline(
@@ -139,8 +130,57 @@ class M3EToolbarActionsRow extends StatelessWidget {
     );
     final List<M3EToolbarItem> inline = partitioned.inline;
     final List<M3EToolbarAction> overflow = partitioned.overflow;
+    final List<Widget> slots = _buildInlineSlots(inline, overflow);
 
-    final slots = <Widget>[
+    // Fixed-pill selection keeps theme [gap] inside the reserved width and
+    // distributes leftover space evenly between slots (no trailing dead zone).
+    final double? reservedWidth = _reservedSelectionWidth(
+      context: context,
+      inline: inline,
+      hasOverflow: overflow.isNotEmpty,
+    );
+    final evenlySpace = reservedWidth != null;
+    final List<Widget> children = _applyInlineGaps(slots, evenlySpace);
+
+    if (flexibleDockedGap && reservedWidth == null && axis == Axis.horizontal) {
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return _dockedRow(slots, constraints.maxWidth);
+        },
+      );
+    }
+
+    final Widget content = _buildAlignedContent(children, evenlySpace);
+    if (reservedWidth == null) {
+      return content;
+    }
+    return SizedBox(width: reservedWidth, child: content);
+  }
+
+  /// Fast path for icon-only docked rows: fits inline actions to the
+  /// available width instead of laying out with a fixed [maxInline].
+  Widget? _maybeBuildFittedDockedRow() {
+    final bool iconsOnly = actions.every(
+      (M3EToolbarItem item) => item is M3EToolbarAction,
+    );
+    if (!(flexibleDockedGap &&
+        iconsOnly &&
+        pillActiveSpring &&
+        axis == Axis.horizontal)) {
+      return null;
+    }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return _fittedDockedRow(constraints.maxWidth);
+      },
+    );
+  }
+
+  List<Widget> _buildInlineSlots(
+    List<M3EToolbarItem> inline,
+    List<M3EToolbarAction> overflow,
+  ) {
+    return <Widget>[
       for (final M3EToolbarItem item in inline)
         _buildSlot(
           item: item,
@@ -159,57 +199,37 @@ class M3EToolbarActionsRow extends StatelessWidget {
           shape: shape,
         ),
     ];
+  }
 
-    // Fixed-pill selection keeps theme [gap] inside the reserved width and
-    // distributes leftover space evenly between slots (no trailing dead zone).
-    final double? reservedWidth = _reservedSelectionWidth(
-      context: context,
-      inline: inline,
-      hasOverflow: overflow.isNotEmpty,
-    );
-    final evenlySpace = reservedWidth != null;
-    final insertGaps =
+  List<Widget> _applyInlineGaps(List<Widget> slots, bool evenlySpace) {
+    final bool insertGaps =
         gap > 0 &&
         !evenlySpace &&
         mainAxisAlignment != MainAxisAlignment.spaceBetween;
-    final List<Widget> children = insertGaps
+    return insertGaps
         ? M3EToolbarItemLayout.withGaps(slots, gap: gap, axis: axis)
         : slots;
+  }
 
-    if (flexibleDockedGap && reservedWidth == null && axis == Axis.horizontal) {
-      return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return _dockedRow(slots, constraints.maxWidth);
-        },
-      );
-    }
-
+  Widget _buildAlignedContent(List<Widget> children, bool evenlySpace) {
     final MainAxisAlignment alignment = evenlySpace
         ? MainAxisAlignment.spaceBetween
         : mainAxisAlignment;
     final MainAxisSize mainAxisSize = expand || evenlySpace
         ? MainAxisSize.max
         : MainAxisSize.min;
-
-    Widget content;
     if (axis == Axis.vertical) {
-      content = Column(
-        mainAxisSize: mainAxisSize,
-        mainAxisAlignment: alignment,
-        children: children,
-      );
-    } else {
-      content = Row(
+      return Column(
         mainAxisSize: mainAxisSize,
         mainAxisAlignment: alignment,
         children: children,
       );
     }
-
-    if (reservedWidth == null) {
-      return content;
-    }
-    return SizedBox(width: reservedWidth, child: content);
+    return Row(
+      mainAxisSize: mainAxisSize,
+      mainAxisAlignment: alignment,
+      children: children,
+    );
   }
 
   double? _reservedSelectionWidth({

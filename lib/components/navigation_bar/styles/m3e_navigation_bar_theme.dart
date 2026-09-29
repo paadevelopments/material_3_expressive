@@ -5,6 +5,8 @@ import '../enums/m3e_nav_bar_enums.dart';
 import '../models/m3e_nav_metrics.dart';
 import '../res/m3e_nav_bar_constants.dart';
 
+part 'm3e_navigation_bar_theme_lerp.dart';
+
 /// Theme values for `M3ENavigationBar`.
 @immutable
 class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
@@ -341,89 +343,6 @@ class M3ENavigationBarTheme extends M3EThemeExtension<M3ENavigationBarTheme> {
     if (other is! M3ENavigationBarTheme) {
       return this;
     }
-    double mix(double a, double b) => a + (b - a) * t;
-    return M3ENavigationBarTheme(
-      heightSmall: mix(heightSmall, other.heightSmall),
-      heightMedium: mix(heightMedium, other.heightMedium),
-      iconSize: mix(iconSize, other.iconSize),
-      indicatorThickness: mix(indicatorThickness, other.indicatorThickness),
-      compactHeightReduction: mix(
-        compactHeightReduction,
-        other.compactHeightReduction,
-      ),
-      compactIndicatorReduction: mix(
-        compactIndicatorReduction,
-        other.compactIndicatorReduction,
-      ),
-      indicatorScaleSpring: t < 0.5
-          ? indicatorScaleSpring
-          : other.indicatorScaleSpring,
-      indicatorFadeSpring: t < 0.5
-          ? indicatorFadeSpring
-          : other.indicatorFadeSpring,
-      elevation: mix(elevation, other.elevation),
-      verticalIndicatorWidth: mix(
-        verticalIndicatorWidth,
-        other.verticalIndicatorWidth,
-      ),
-      verticalIndicatorHeight: mix(
-        verticalIndicatorHeight,
-        other.verticalIndicatorHeight,
-      ),
-      verticalIndicatorRadius: mix(
-        verticalIndicatorRadius,
-        other.verticalIndicatorRadius,
-      ),
-      verticalPaddingTop: mix(verticalPaddingTop, other.verticalPaddingTop),
-      verticalPaddingBottom: mix(
-        verticalPaddingBottom,
-        other.verticalPaddingBottom,
-      ),
-      verticalIconLabelGap: mix(
-        verticalIconLabelGap,
-        other.verticalIconLabelGap,
-      ),
-      horizontalIndicatorHeight: mix(
-        horizontalIndicatorHeight,
-        other.horizontalIndicatorHeight,
-      ),
-      horizontalPadding: mix(horizontalPadding, other.horizontalPadding),
-      horizontalIndicatorInset: mix(
-        horizontalIndicatorInset,
-        other.horizontalIndicatorInset,
-      ),
-      horizontalIconLabelGap: mix(
-        horizontalIconLabelGap,
-        other.horizontalIconLabelGap,
-      ),
-      baselineExtraPadding: mix(
-        baselineExtraPadding,
-        other.baselineExtraPadding,
-      ),
-      itemGap: mix(itemGap, other.itemGap),
-      wideItemGap: mix(wideItemGap, other.wideItemGap),
-      wideEdgePadding: mix(wideEdgePadding, other.wideEdgePadding),
-      hoverIndicatorWidth: mix(hoverIndicatorWidth, other.hoverIndicatorWidth),
-      wideBreakpoint: mix(wideBreakpoint, other.wideBreakpoint),
-      focusRingThickness: mix(focusRingThickness, other.focusRingThickness),
-      focusRingInset: mix(focusRingInset, other.focusRingInset),
-      hoverOpacity: mix(hoverOpacity, other.hoverOpacity),
-      focusOpacity: mix(focusOpacity, other.focusOpacity),
-      pressedOpacity: mix(pressedOpacity, other.pressedOpacity),
-      labelFontSize: mix(labelFontSize, other.labelFontSize),
-      labelLineHeight: mix(labelLineHeight, other.labelLineHeight),
-      labelLetterSpacing: mix(labelLetterSpacing, other.labelLetterSpacing),
-      inactiveLabelWeight: t < 0.5
-          ? inactiveLabelWeight
-          : other.inactiveLabelWeight,
-      activeLabelWeight: t < 0.5 ? activeLabelWeight : other.activeLabelWeight,
-      restingLabelMaxLines: t < 0.5
-          ? restingLabelMaxLines
-          : other.restingLabelMaxLines,
-      scaledLabelMaxLines: t < 0.5
-          ? scaledLabelMaxLines
-          : other.scaledLabelMaxLines,
-      truncationTextScale: mix(truncationTextScale, other.truncationTextScale),
-    );
+    return _lerpNavigationBarTheme(other, t);
   }
 }

@@ -259,22 +259,39 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
     if (ordered.isEmpty) {
       return null;
     }
-    if (_pinned != null &&
-        ordered.any(
-          (M3EListKeyboardRegistration member) =>
-              member.node == _pinned && member.slot == 0,
-        )) {
-      return _pinned;
+    final FocusNode? pinned = _pinnedEntry(ordered);
+    if (pinned != null) {
+      return pinned;
     }
-    final selected = _selectedIndex();
+    final FocusNode? selected = _selectedEntry(ordered);
     if (selected != null) {
-      for (final member in ordered) {
-        if (member.index == selected && member.slot == 0) {
-          return member.node;
-        }
-      }
+      return selected;
     }
     return ordered.first.node;
+  }
+
+  FocusNode? _pinnedEntry(List<M3EListKeyboardRegistration> ordered) {
+    if (_pinned == null) {
+      return null;
+    }
+    final bool stillPresent = ordered.any(
+      (M3EListKeyboardRegistration member) =>
+          member.node == _pinned && member.slot == 0,
+    );
+    return stillPresent ? _pinned : null;
+  }
+
+  FocusNode? _selectedEntry(List<M3EListKeyboardRegistration> ordered) {
+    final int? selected = _selectedIndex();
+    if (selected == null) {
+      return null;
+    }
+    for (final member in ordered) {
+      if (member.index == selected && member.slot == 0) {
+        return member.node;
+      }
+    }
+    return null;
   }
 
   void _moveNext() => _move(1);
@@ -332,45 +349,86 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
     if (ordered.isEmpty) {
       return;
     }
-    var index = ordered.indexWhere(
-      (M3EListKeyboardRegistration member) => member.node.hasPrimaryFocus,
-    );
-    if (index < 0) {
-      index = delta > 0 ? -1 : 0;
+    final int index = _focusedIndex(ordered, delta);
+    if (_tryEnterNestAtRowEnd(ordered, index, delta)) {
+      return;
     }
-    if (delta > 0 && index >= 0) {
-      final M3EListKeyboardRegistration current = ordered[index];
-      final bool endOfRow =
-          index == ordered.length - 1 ||
-          ordered[index + 1].index != current.index;
-      final _M3EListKeyboardGroupState? nest = _nests[current.index];
-      if (endOfRow && nest != null && nest._focusEdge(first: true)) {
-        return;
-      }
-    }
-    var next = index + delta;
-    if (next < 0 || next >= ordered.length) {
-      if (_parent != null &&
-          _nestIndex != null &&
-          _parent!._moveFromNest(_nestIndex!, delta)) {
-        return;
-      }
-      if (next < 0) {
-        final _M3EListKeyboardGroupState? nest = _nests[ordered.last.index];
-        if (delta < 0 && nest != null && nest._focusEdge(first: false)) {
-          return;
-        }
-        next = ordered.length - 1;
-      } else {
-        next = 0;
-      }
-    } else if (delta < 0 && ordered[next].index != ordered[index].index) {
-      final _M3EListKeyboardGroupState? nest = _nests[ordered[next].index];
-      if (nest != null && nest._focusEdge(first: false)) {
-        return;
-      }
+    final int? next = _resolveNextIndex(ordered, index, delta);
+    if (next == null) {
+      return;
     }
     _focusMember(ordered[next]);
+  }
+
+  int _focusedIndex(List<M3EListKeyboardRegistration> ordered, int delta) {
+    final int index = ordered.indexWhere(
+      (M3EListKeyboardRegistration member) => member.node.hasPrimaryFocus,
+    );
+    if (index >= 0) {
+      return index;
+    }
+    return delta > 0 ? -1 : 0;
+  }
+
+  /// True when the focused row is the last of a nested-list header and the
+  /// nested list swallowed the move by focusing its own edge.
+  bool _tryEnterNestAtRowEnd(
+    List<M3EListKeyboardRegistration> ordered,
+    int index,
+    int delta,
+  ) {
+    if (delta <= 0 || index < 0) {
+      return false;
+    }
+    final M3EListKeyboardRegistration current = ordered[index];
+    final bool endOfRow =
+        index == ordered.length - 1 ||
+        ordered[index + 1].index != current.index;
+    if (!endOfRow) {
+      return false;
+    }
+    final _M3EListKeyboardGroupState? nest = _nests[current.index];
+    return nest != null && nest._focusEdge(first: true);
+  }
+
+  /// The target index to focus, or null when a nested/parent group already
+  /// handled the move.
+  int? _resolveNextIndex(
+    List<M3EListKeyboardRegistration> ordered,
+    int index,
+    int delta,
+  ) {
+    final int next = index + delta;
+    if (next < 0 || next >= ordered.length) {
+      return _resolveWrappedIndex(ordered, next, delta);
+    }
+    if (delta < 0 && ordered[next].index != ordered[index].index) {
+      final _M3EListKeyboardGroupState? nest = _nests[ordered[next].index];
+      if (nest != null && nest._focusEdge(first: false)) {
+        return null;
+      }
+    }
+    return next;
+  }
+
+  int? _resolveWrappedIndex(
+    List<M3EListKeyboardRegistration> ordered,
+    int next,
+    int delta,
+  ) {
+    if (_parent != null &&
+        _nestIndex != null &&
+        _parent!._moveFromNest(_nestIndex!, delta)) {
+      return null;
+    }
+    if (next < 0) {
+      final _M3EListKeyboardGroupState? nest = _nests[ordered.last.index];
+      if (delta < 0 && nest != null && nest._focusEdge(first: false)) {
+        return null;
+      }
+      return ordered.length - 1;
+    }
+    return 0;
   }
 
   @override

@@ -2,6 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 
+part 'm3e_navigation_rail_theme_copy.dart';
+part 'm3e_navigation_rail_theme_lerp.dart';
+part 'm3e_navigation_rail_theme_resolve.dart';
+
 /// Theme values for `M3ENavigationRail`.
 @immutable
 class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
@@ -289,75 +293,6 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
   /// Spring for rail width, show/hide, and modal travel.
   final M3ESpring widthSpring;
 
-  /// Active icon color.
-  Color activeIconColor(M3EColorScheme scheme) =>
-      activeIconAndLabel ?? scheme.onSecondaryContainer;
-
-  /// Active label color.
-  Color activeLabelColorResolved(M3EColorScheme scheme) =>
-      activeLabelColor ?? scheme.onSurface;
-
-  /// Kept for callers that still ask for one active color.
-  Color activeIconAndLabelColor(M3EColorScheme scheme) =>
-      activeIconColor(scheme);
-
-  /// inactiveIconAndLabelColor.
-  Color inactiveIconAndLabelColor(M3EColorScheme scheme) =>
-      inactiveIconAndLabel ?? scheme.onSurfaceVariant;
-
-  /// activeIndicatorColorResolved.
-  Color activeIndicatorColorResolved(M3EColorScheme scheme) =>
-      activeIndicatorColor ?? scheme.secondaryContainer;
-
-  /// containerColorResolved.
-  Color containerColorResolved(M3EColorScheme scheme) =>
-      containerColor ?? scheme.surface;
-
-  /// Modal container color.
-  Color modalContainerColorResolved(M3EColorScheme scheme) =>
-      modalContainerColor ?? scheme.surfaceContainer;
-
-  /// Scrolled container color.
-  Color scrolledContainerColorResolved(M3EColorScheme scheme) =>
-      scrolledContainerColor ?? scheme.surfaceContainer;
-
-  /// State layer color.
-  Color stateLayerColorResolved(M3EColorScheme scheme) =>
-      stateLayerColor ?? scheme.onSecondaryContainer;
-
-  /// Focus ring color.
-  Color focusRingColorResolved(M3EColorScheme scheme) =>
-      focusRingColor ?? scheme.secondary;
-
-  /// Menu icon color.
-  Color menuColorResolved(M3EColorScheme scheme) =>
-      menuColor ?? scheme.onSurfaceVariant;
-
-  /// Badge fill.
-  Color badgeBackgroundResolved(M3EColorScheme scheme) =>
-      badgeBackground ?? scheme.error;
-
-  /// Badge label.
-  Color badgeLabelResolved(M3EColorScheme scheme) =>
-      badgeLargeLabel ?? scheme.onError;
-
-  /// Divider color.
-  Color dividerColorResolved(M3EColorScheme scheme) =>
-      dividerColor ?? scheme.outlineVariant;
-
-  /// Label style for [selected].
-  TextStyle labelStyle(M3EColorScheme scheme, {required bool selected}) {
-    return TextStyle(
-      fontSize: labelFontSize,
-      height: labelLineHeight / labelFontSize,
-      letterSpacing: labelLetterSpacing,
-      fontWeight: selected ? activeLabelWeight : inactiveLabelWeight,
-      color: selected
-          ? activeLabelColorResolved(scheme)
-          : inactiveIconAndLabelColor(scheme),
-    );
-  }
-
   @override
   M3ENavigationRailTheme copyWith({
     double? collapsedWidth,
@@ -432,90 +367,76 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     M3ESpring? iconScaleSpring,
     M3ESpring? widthSpring,
   }) {
-    return M3ENavigationRailTheme(
-      collapsedWidth: collapsedWidth ?? this.collapsedWidth,
-      narrowCollapsedWidth: narrowCollapsedWidth ?? this.narrowCollapsedWidth,
-      collapsedHorizontalPadding:
-          collapsedHorizontalPadding ?? this.collapsedHorizontalPadding,
-      narrowHorizontalPadding:
-          narrowHorizontalPadding ?? this.narrowHorizontalPadding,
-      expandedMinWidth: expandedMinWidth ?? this.expandedMinWidth,
-      expandedMaxWidth: expandedMaxWidth ?? this.expandedMaxWidth,
-      itemExpandedHeight:
-          itemHeight ?? itemExpandedHeight ?? this.itemExpandedHeight,
-      itemCollapsedHeight:
-          itemShortHeight ?? itemCollapsedHeight ?? this.itemCollapsedHeight,
-      shortItemHeight: shortItemHeight ?? this.shortItemHeight,
-      iconSize: iconSize ?? this.iconSize,
-      indicatorLeading: indicatorLeading ?? this.indicatorLeading,
-      indicatorTrailing: indicatorTrailing ?? this.indicatorTrailing,
-      expandedItemInset: expandedItemInset ?? this.expandedItemInset,
-      iconLabelGap: iconLabelGap ?? this.iconLabelGap,
-      verticalIconLabelGap: verticalIconLabelGap ?? this.verticalIconLabelGap,
-      itemVerticalGap: itemVerticalGap ?? this.itemVerticalGap,
-      expandedItemGap: expandedItemGap ?? this.expandedItemGap,
-      itemVerticalPadding: itemVerticalPadding ?? this.itemVerticalPadding,
-      topSpace: topSpace ?? this.topSpace,
-      destinationTopPadding:
-          destinationTopPadding ?? this.destinationTopPadding,
-      expandedTrailingSpace:
-          expandedTrailingSpace ?? this.expandedTrailingSpace,
-      headerMinSpace: headerMinSpace ?? this.headerMinSpace,
-      sectionHeaderSpacingTop:
-          sectionHeaderSpacingTop ?? this.sectionHeaderSpacingTop,
-      sectionHeaderSpacingBottom:
-          sectionHeaderSpacingBottom ?? this.sectionHeaderSpacingBottom,
-      verticalIndicatorWidth:
-          verticalIndicatorWidth ?? this.verticalIndicatorWidth,
-      verticalIndicatorHeight:
-          verticalIndicatorHeight ?? this.verticalIndicatorHeight,
-      verticalIndicatorRadius:
-          verticalIndicatorRadius ?? this.verticalIndicatorRadius,
-      expandedIndicatorHeight:
-          expandedIndicatorHeight ?? this.expandedIndicatorHeight,
-      expandedIndicatorRadius:
-          expandedIndicatorRadius ?? this.expandedIndicatorRadius,
-      noLabelIndicatorSize: noLabelIndicatorSize ?? this.noLabelIndicatorSize,
-      containerColor: containerColor ?? this.containerColor,
-      modalContainerColor: modalContainerColor ?? this.modalContainerColor,
-      scrolledContainerColor:
-          scrolledContainerColor ?? this.scrolledContainerColor,
-      activeIndicatorColor: activeIndicatorColor ?? this.activeIndicatorColor,
-      activeIconAndLabel: activeIconAndLabel ?? this.activeIconAndLabel,
-      activeLabelColor: activeLabelColor ?? this.activeLabelColor,
-      inactiveIconAndLabel: inactiveIconAndLabel ?? this.inactiveIconAndLabel,
-      menuColor: menuColor ?? this.menuColor,
-      badgeBackground: badgeBackground ?? this.badgeBackground,
-      badgeLargeLabel: badgeLargeLabel ?? this.badgeLargeLabel,
-      stateLayerColor: stateLayerColor ?? this.stateLayerColor,
-      focusRingColor: focusRingColor ?? this.focusRingColor,
-      dividerColor: dividerColor ?? this.dividerColor,
-      indicatorShapeFull: indicatorShapeFull ?? this.indicatorShapeFull,
-      indicatorFillsWidth: indicatorFillsWidth ?? this.indicatorFillsWidth,
-      elevation: elevation ?? this.elevation,
-      scrolledElevation: scrolledElevation ?? this.scrolledElevation,
-      modalScrimOpacity: modalScrimOpacity ?? this.modalScrimOpacity,
-      containerRadius: containerRadius ?? this.containerRadius,
-      modalContainerRadius: modalContainerRadius ?? this.modalContainerRadius,
-      dividerThickness: dividerThickness ?? this.dividerThickness,
-      hoverOpacity: hoverOpacity ?? this.hoverOpacity,
-      focusOpacity: focusOpacity ?? this.focusOpacity,
-      pressedOpacity: pressedOpacity ?? this.pressedOpacity,
-      focusRingThickness: focusRingThickness ?? this.focusRingThickness,
-      focusRingInset: focusRingInset ?? this.focusRingInset,
-      labelFontSize: labelFontSize ?? this.labelFontSize,
-      labelLineHeight: labelLineHeight ?? this.labelLineHeight,
-      labelLetterSpacing: labelLetterSpacing ?? this.labelLetterSpacing,
-      inactiveLabelWeight: inactiveLabelWeight ?? this.inactiveLabelWeight,
-      activeLabelWeight: activeLabelWeight ?? this.activeLabelWeight,
-      scaledLabelMaxLines: scaledLabelMaxLines ?? this.scaledLabelMaxLines,
-      truncationTextScale: truncationTextScale ?? this.truncationTextScale,
-      indicatorLeadSpring: indicatorLeadSpring ?? this.indicatorLeadSpring,
-      indicatorTrailSpring: indicatorTrailSpring ?? this.indicatorTrailSpring,
-      indicatorScaleSpring: indicatorScaleSpring ?? this.indicatorScaleSpring,
-      indicatorFadeSpring: indicatorFadeSpring ?? this.indicatorFadeSpring,
-      iconScaleSpring: iconScaleSpring ?? this.iconScaleSpring,
-      widthSpring: widthSpring ?? this.widthSpring,
+    return _copyNavigationRailTheme(
+      collapsedWidth: collapsedWidth,
+      narrowCollapsedWidth: narrowCollapsedWidth,
+      collapsedHorizontalPadding: collapsedHorizontalPadding,
+      narrowHorizontalPadding: narrowHorizontalPadding,
+      expandedMinWidth: expandedMinWidth,
+      expandedMaxWidth: expandedMaxWidth,
+      itemExpandedHeight: itemHeight ?? itemExpandedHeight,
+      itemCollapsedHeight: itemShortHeight ?? itemCollapsedHeight,
+      shortItemHeight: shortItemHeight,
+      iconSize: iconSize,
+      indicatorLeading: indicatorLeading,
+      indicatorTrailing: indicatorTrailing,
+      expandedItemInset: expandedItemInset,
+      iconLabelGap: iconLabelGap,
+      verticalIconLabelGap: verticalIconLabelGap,
+      itemVerticalGap: itemVerticalGap,
+      expandedItemGap: expandedItemGap,
+      itemVerticalPadding: itemVerticalPadding,
+      topSpace: topSpace,
+      destinationTopPadding: destinationTopPadding,
+      expandedTrailingSpace: expandedTrailingSpace,
+      headerMinSpace: headerMinSpace,
+      sectionHeaderSpacingTop: sectionHeaderSpacingTop,
+      sectionHeaderSpacingBottom: sectionHeaderSpacingBottom,
+      verticalIndicatorWidth: verticalIndicatorWidth,
+      verticalIndicatorHeight: verticalIndicatorHeight,
+      verticalIndicatorRadius: verticalIndicatorRadius,
+      expandedIndicatorHeight: expandedIndicatorHeight,
+      expandedIndicatorRadius: expandedIndicatorRadius,
+      noLabelIndicatorSize: noLabelIndicatorSize,
+      containerColor: containerColor,
+      modalContainerColor: modalContainerColor,
+      scrolledContainerColor: scrolledContainerColor,
+      activeIndicatorColor: activeIndicatorColor,
+      activeIconAndLabel: activeIconAndLabel,
+      activeLabelColor: activeLabelColor,
+      inactiveIconAndLabel: inactiveIconAndLabel,
+      menuColor: menuColor,
+      badgeBackground: badgeBackground,
+      badgeLargeLabel: badgeLargeLabel,
+      stateLayerColor: stateLayerColor,
+      focusRingColor: focusRingColor,
+      dividerColor: dividerColor,
+      indicatorShapeFull: indicatorShapeFull,
+      indicatorFillsWidth: indicatorFillsWidth,
+      elevation: elevation,
+      scrolledElevation: scrolledElevation,
+      modalScrimOpacity: modalScrimOpacity,
+      containerRadius: containerRadius,
+      modalContainerRadius: modalContainerRadius,
+      dividerThickness: dividerThickness,
+      hoverOpacity: hoverOpacity,
+      focusOpacity: focusOpacity,
+      pressedOpacity: pressedOpacity,
+      focusRingThickness: focusRingThickness,
+      focusRingInset: focusRingInset,
+      labelFontSize: labelFontSize,
+      labelLineHeight: labelLineHeight,
+      labelLetterSpacing: labelLetterSpacing,
+      inactiveLabelWeight: inactiveLabelWeight,
+      activeLabelWeight: activeLabelWeight,
+      scaledLabelMaxLines: scaledLabelMaxLines,
+      truncationTextScale: truncationTextScale,
+      indicatorLeadSpring: indicatorLeadSpring,
+      indicatorTrailSpring: indicatorTrailSpring,
+      indicatorScaleSpring: indicatorScaleSpring,
+      indicatorFadeSpring: indicatorFadeSpring,
+      iconScaleSpring: iconScaleSpring,
+      widthSpring: widthSpring,
     );
   }
 
@@ -524,187 +445,7 @@ class M3ENavigationRailTheme extends M3EThemeExtension<M3ENavigationRailTheme> {
     if (other is! M3ENavigationRailTheme) {
       return this;
     }
-    return M3ENavigationRailTheme(
-      collapsedWidth: _ld(collapsedWidth, other.collapsedWidth, t),
-      narrowCollapsedWidth: _ld(
-        narrowCollapsedWidth,
-        other.narrowCollapsedWidth,
-        t,
-      ),
-      collapsedHorizontalPadding: _ld(
-        collapsedHorizontalPadding,
-        other.collapsedHorizontalPadding,
-        t,
-      ),
-      narrowHorizontalPadding: _ld(
-        narrowHorizontalPadding,
-        other.narrowHorizontalPadding,
-        t,
-      ),
-      expandedMinWidth: _ld(expandedMinWidth, other.expandedMinWidth, t),
-      expandedMaxWidth: _ld(expandedMaxWidth, other.expandedMaxWidth, t),
-      itemExpandedHeight: _ld(itemExpandedHeight, other.itemExpandedHeight, t),
-      itemCollapsedHeight: _ld(
-        itemCollapsedHeight,
-        other.itemCollapsedHeight,
-        t,
-      ),
-      shortItemHeight: _ld(shortItemHeight, other.shortItemHeight, t),
-      iconSize: _ld(iconSize, other.iconSize, t),
-      indicatorLeading: _ld(indicatorLeading, other.indicatorLeading, t),
-      indicatorTrailing: _ld(indicatorTrailing, other.indicatorTrailing, t),
-      expandedItemInset: _ld(expandedItemInset, other.expandedItemInset, t),
-      iconLabelGap: _ld(iconLabelGap, other.iconLabelGap, t),
-      verticalIconLabelGap: _ld(
-        verticalIconLabelGap,
-        other.verticalIconLabelGap,
-        t,
-      ),
-      itemVerticalGap: _ld(itemVerticalGap, other.itemVerticalGap, t),
-      expandedItemGap: _ld(expandedItemGap, other.expandedItemGap, t),
-      itemVerticalPadding: _ld(
-        itemVerticalPadding,
-        other.itemVerticalPadding,
-        t,
-      ),
-      topSpace: _ld(topSpace, other.topSpace, t),
-      destinationTopPadding: _ld(
-        destinationTopPadding,
-        other.destinationTopPadding,
-        t,
-      ),
-      expandedTrailingSpace: _ld(
-        expandedTrailingSpace,
-        other.expandedTrailingSpace,
-        t,
-      ),
-      headerMinSpace: _ld(headerMinSpace, other.headerMinSpace, t),
-      sectionHeaderSpacingTop: _ld(
-        sectionHeaderSpacingTop,
-        other.sectionHeaderSpacingTop,
-        t,
-      ),
-      sectionHeaderSpacingBottom: _ld(
-        sectionHeaderSpacingBottom,
-        other.sectionHeaderSpacingBottom,
-        t,
-      ),
-      verticalIndicatorWidth: _ld(
-        verticalIndicatorWidth,
-        other.verticalIndicatorWidth,
-        t,
-      ),
-      verticalIndicatorHeight: _ld(
-        verticalIndicatorHeight,
-        other.verticalIndicatorHeight,
-        t,
-      ),
-      verticalIndicatorRadius: _ld(
-        verticalIndicatorRadius,
-        other.verticalIndicatorRadius,
-        t,
-      ),
-      expandedIndicatorHeight: _ld(
-        expandedIndicatorHeight,
-        other.expandedIndicatorHeight,
-        t,
-      ),
-      expandedIndicatorRadius: _ld(
-        expandedIndicatorRadius,
-        other.expandedIndicatorRadius,
-        t,
-      ),
-      noLabelIndicatorSize: _ld(
-        noLabelIndicatorSize,
-        other.noLabelIndicatorSize,
-        t,
-      ),
-      containerColor: Color.lerp(containerColor, other.containerColor, t),
-      modalContainerColor: Color.lerp(
-        modalContainerColor,
-        other.modalContainerColor,
-        t,
-      ),
-      scrolledContainerColor: Color.lerp(
-        scrolledContainerColor,
-        other.scrolledContainerColor,
-        t,
-      ),
-      activeIndicatorColor: Color.lerp(
-        activeIndicatorColor,
-        other.activeIndicatorColor,
-        t,
-      ),
-      activeIconAndLabel: Color.lerp(
-        activeIconAndLabel,
-        other.activeIconAndLabel,
-        t,
-      ),
-      activeLabelColor: Color.lerp(activeLabelColor, other.activeLabelColor, t),
-      inactiveIconAndLabel: Color.lerp(
-        inactiveIconAndLabel,
-        other.inactiveIconAndLabel,
-        t,
-      ),
-      menuColor: Color.lerp(menuColor, other.menuColor, t),
-      badgeBackground: Color.lerp(badgeBackground, other.badgeBackground, t),
-      badgeLargeLabel: Color.lerp(badgeLargeLabel, other.badgeLargeLabel, t),
-      stateLayerColor: Color.lerp(stateLayerColor, other.stateLayerColor, t),
-      focusRingColor: Color.lerp(focusRingColor, other.focusRingColor, t),
-      dividerColor: Color.lerp(dividerColor, other.dividerColor, t),
-      indicatorShapeFull: ShapeBorder.lerp(
-        indicatorShapeFull,
-        other.indicatorShapeFull,
-        t,
-      ),
-      indicatorFillsWidth: t < 0.5
-          ? indicatorFillsWidth
-          : other.indicatorFillsWidth,
-      elevation: _ld(elevation, other.elevation, t),
-      scrolledElevation: _ld(scrolledElevation, other.scrolledElevation, t),
-      modalScrimOpacity: _ld(modalScrimOpacity, other.modalScrimOpacity, t),
-      containerRadius: _ld(containerRadius, other.containerRadius, t),
-      modalContainerRadius: _ld(
-        modalContainerRadius,
-        other.modalContainerRadius,
-        t,
-      ),
-      dividerThickness: _ld(dividerThickness, other.dividerThickness, t),
-      hoverOpacity: _ld(hoverOpacity, other.hoverOpacity, t),
-      focusOpacity: _ld(focusOpacity, other.focusOpacity, t),
-      pressedOpacity: _ld(pressedOpacity, other.pressedOpacity, t),
-      focusRingThickness: _ld(focusRingThickness, other.focusRingThickness, t),
-      focusRingInset: _ld(focusRingInset, other.focusRingInset, t),
-      labelFontSize: _ld(labelFontSize, other.labelFontSize, t),
-      labelLineHeight: _ld(labelLineHeight, other.labelLineHeight, t),
-      labelLetterSpacing: _ld(labelLetterSpacing, other.labelLetterSpacing, t),
-      inactiveLabelWeight: t < 0.5
-          ? inactiveLabelWeight
-          : other.inactiveLabelWeight,
-      activeLabelWeight: t < 0.5 ? activeLabelWeight : other.activeLabelWeight,
-      scaledLabelMaxLines: t < 0.5
-          ? scaledLabelMaxLines
-          : other.scaledLabelMaxLines,
-      truncationTextScale: _ld(
-        truncationTextScale,
-        other.truncationTextScale,
-        t,
-      ),
-      indicatorLeadSpring: t < 0.5
-          ? indicatorLeadSpring
-          : other.indicatorLeadSpring,
-      indicatorTrailSpring: t < 0.5
-          ? indicatorTrailSpring
-          : other.indicatorTrailSpring,
-      indicatorScaleSpring: t < 0.5
-          ? indicatorScaleSpring
-          : other.indicatorScaleSpring,
-      indicatorFadeSpring: t < 0.5
-          ? indicatorFadeSpring
-          : other.indicatorFadeSpring,
-      iconScaleSpring: t < 0.5 ? iconScaleSpring : other.iconScaleSpring,
-      widthSpring: t < 0.5 ? widthSpring : other.widthSpring,
-    );
+    return _lerpNavigationRailTheme(other, t);
   }
 
   double _ld(double a, double b, double t) => a + (b - a) * t;
