@@ -839,38 +839,37 @@ class _CardPreviewPageState extends State<_CardPreviewPage> {
         },
       ),
     };
-    return ColoredBox(
-      color: theme.colorScheme.surface,
-      child: Column(
+    // Scaffold.appBar (not a plain Column) so the app bar's elevation
+    // shadow paints above the scrolled-under list instead of being painted
+    // over by it — a Column just stacks siblings in tree order, so the
+    // list immediately below would otherwise cover the shadow that's meant
+    // to overlap it.
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: title,
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: <Widget>[
-          M3EAppBar.top(
-            titleText: title,
-            leading: M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: const Icon(M3EIcons.arrow_back),
-              tooltip: 'Back',
-              onPressed: () => Navigator.of(context).maybePop(),
+          if (widget.screen != _CardScreen.collection) ...<Widget>[
+            Text(
+              _target == null
+                  ? 'Tap the card, the action, or the overflow.'
+                  : 'Last tap: $_target',
+              style: theme.typeScale.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: <Widget>[
-                if (widget.screen != _CardScreen.collection) ...<Widget>[
-                  Text(
-                    _target == null
-                        ? 'Tap the card, the action, or the overflow.'
-                        : 'Last tap: $_target',
-                    style: theme.typeScale.bodyMedium.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                body,
-              ],
-            ),
-          ),
+            const SizedBox(height: 12),
+          ],
+          body,
         ],
       ),
     );

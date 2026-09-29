@@ -56,6 +56,25 @@ class _ExampleAppState extends State<ExampleApp> {
   }
 }
 
+/// Wraps a [PreferredSizeWidget] app bar in the focus-order chrome the
+/// gallery shell uses, while still satisfying `Scaffold.appBar`'s type.
+class _OrderedAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _OrderedAppBar({required this.child});
+
+  final PreferredSizeWidget child;
+
+  @override
+  Size get preferredSize => child.preferredSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusTraversalOrder(
+      order: const NumericFocusOrder(0),
+      child: FocusTraversalGroup(child: child),
+    );
+  }
+}
+
 class _GalleryShell extends StatefulWidget {
   const _GalleryShell();
 
@@ -94,71 +113,64 @@ class _GalleryShellState extends State<_GalleryShell> {
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    return Scaffold(
-      body: ColoredBox(
-        color: theme.colorScheme.surface,
-        child: FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child: Column(
-            children: <Widget>[
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(0),
-                child: FocusTraversalGroup(
-                  child: M3EAppBar.top(
-                    titleText: 'Material 3 Expressive',
-                    actions: <Widget>[
-                      M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
-                        icon: const Icon(M3EIcons.palette),
-                        tooltip: 'Theme settings',
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (BuildContext context) =>
-                                  const ThemeConfigPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      M3EIconButton(
-                        variant: M3EIconButtonVariant.standard,
-                        icon: Icon(
-                          theme.brightness == Brightness.dark
-                              ? M3EIcons.light_mode
-                              : M3EIcons.dark_mode,
-                        ),
-                        tooltip: 'Toggle theme',
-                        onPressed: () {
-                          M3ETheme.controllerOf(context)?.toggleBrightness(
-                            fallback: theme.brightness,
-                            autoTheming: ExampleThemeScope.of(context)
-                                .autoTheming,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        // Scaffold (not a plain Column) so the app bar's elevation shadow
+        // paints above the scrolled-under page content instead of being
+        // painted over by it — a Column just stacks siblings in tree
+        // order, so the page immediately below would otherwise cover the
+        // shadow that's meant to overlap it.
+        appBar: _OrderedAppBar(
+          child: M3EAppBar.top(
+            titleText: 'Material 3 Expressive',
+            actions: <Widget>[
+              M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
+                icon: const Icon(M3EIcons.palette),
+                tooltip: 'Theme settings',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) =>
+                          const ThemeConfigPage(),
+                    ),
+                  );
+                },
               ),
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(1),
-                child: Expanded(
-                  child: TickerMode(enabled: true, child: _pages[_index]),
+              M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
+                icon: Icon(
+                  theme.brightness == Brightness.dark
+                      ? M3EIcons.light_mode
+                      : M3EIcons.dark_mode,
                 ),
-              ),
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(2),
-                child: FocusTraversalGroup(
-                  child: M3ENavigationBar(
-                    destinations: _destinations,
-                    selectedIndex: _index,
-                    onDestinationSelected: (int value) {
-                      setState(() => _index = value);
-                    },
-                  ),
-                ),
+                tooltip: 'Toggle theme',
+                onPressed: () {
+                  M3ETheme.controllerOf(context)?.toggleBrightness(
+                    fallback: theme.brightness,
+                    autoTheming: ExampleThemeScope.of(context).autoTheming,
+                  );
+                },
               ),
             ],
+          ),
+        ),
+        body: FocusTraversalOrder(
+          order: const NumericFocusOrder(1),
+          child: TickerMode(enabled: true, child: _pages[_index]),
+        ),
+        bottomNavigationBar: FocusTraversalOrder(
+          order: const NumericFocusOrder(2),
+          child: FocusTraversalGroup(
+            child: M3ENavigationBar(
+              destinations: _destinations,
+              selectedIndex: _index,
+              onDestinationSelected: (int value) {
+                setState(() => _index = value);
+              },
+            ),
           ),
         ),
       ),
