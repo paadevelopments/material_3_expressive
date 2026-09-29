@@ -444,5 +444,14 @@ mixin M3EDismissibleCardMixin<T extends StatefulWidget>
   void handleDragEnd(DragEndDetails d);
 
   /// buildSlot.
-  Widget buildSlot(BuildContext context, int slotIndex, [List<int>? visible]);
+  ///
+  /// When [suppressOwnGap] is true (building for the reorder host), the
+  /// row's own trailing gap is omitted so the host can apply it externally,
+  /// detached from the dragged card (see `M3EListReorderHost`).
+  Widget buildSlot(
+    BuildContext context,
+    int slotIndex, {
+    List<int>? visible,
+    bool suppressOwnGap = false,
+  });
 }

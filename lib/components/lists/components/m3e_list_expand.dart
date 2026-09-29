@@ -7,7 +7,11 @@ extension _M3EListExpand on _M3EListState {
     controller?.attach(open: openTransform, close: closeTransform);
   }
 
-  Widget _expandable(BuildContext context, int index) {
+  Widget _expandable(
+    BuildContext context,
+    int index, {
+    bool suppressOwnGap = false,
+  }) {
     final M3EListExpandableTheme expandable = M3ETheme.of(context)
         .listTheme
         .expandable;
@@ -38,6 +42,7 @@ extension _M3EListExpand on _M3EListState {
       collapseMotion: collapseMotion,
       allowMultiple: allowMultiple,
       cardList: cardList,
+      suppressOwnGap: suppressOwnGap,
     );
   }
 
@@ -50,6 +55,7 @@ extension _M3EListExpand on _M3EListState {
     required M3ESpring collapseMotion,
     required bool allowMultiple,
     required M3EListCardListTheme cardList,
+    bool suppressOwnGap = false,
   }) {
     return M3EExpandableItem(
       index: index,
@@ -65,6 +71,11 @@ extension _M3EListExpand on _M3EListState {
       expandMotion: expandMotion,
       collapseMotion: collapseMotion,
       nestVariant: _variant(context, cardList),
+      // Reorder rows get their trailing gap from the reorder host instead
+      // (see `_reorder`), so it sits detached from the dragged card. The
+      // decoration's own gap still separates a header from its own nested
+      // sublist (M3EExpandableSublist), and must stay intact.
+      trailingGap: suppressOwnGap ? 0 : null,
       onToggle: () => _handleExpandToggle(
         index,
         expanded,

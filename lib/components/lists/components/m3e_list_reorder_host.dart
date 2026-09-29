@@ -466,19 +466,30 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     final isDragSource = _dragIndex == index;
 
     // Source slot: keep height, hide content (floating proxy paints instead).
-    if (isDragSource) {
-      return IgnorePointer(child: Opacity(opacity: 0, child: listening));
-    }
+    final Widget positioned = isDragSource
+        ? IgnorePointer(child: Opacity(opacity: 0, child: listening))
+        : AnimatedBuilder(
+            animation: _offsetCtrl(index),
+            builder: (BuildContext context, Widget? child) {
+              return Transform.translate(
+                offset: Offset(0, _offsetCtrl(index).value),
+                child: child,
+              );
+            },
+            child: listening,
+          );
 
-    return AnimatedBuilder(
-      animation: _offsetCtrl(index),
-      builder: (BuildContext context, Widget? child) {
-        return Transform.translate(
-          offset: Offset(0, _offsetCtrl(index).value),
-          child: child,
-        );
-      },
-      child: listening,
+    // Applied outside the keyed subtree so it stays detached from the item:
+    // excluded from the measured drag size and the floating proxy's bounds,
+    // instead of trailing inside the card like `M3ECardListItem` normally
+    // does for non-reorder layouts.
+    final isLast = index == widget.itemCount - 1;
+    if (widget.gap <= 0 || isLast) {
+      return positioned;
+    }
+    return Padding(
+      padding: EdgeInsets.only(bottom: widget.gap),
+      child: positioned,
     );
   }
 

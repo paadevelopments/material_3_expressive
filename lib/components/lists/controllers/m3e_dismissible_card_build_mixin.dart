@@ -5,7 +5,12 @@ part of 'm3e_dismissible_card_controller.dart';
 mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     on M3EDismissibleCardMixin<T>, M3EDismissibleCardDragMixin<T> {
   @override
-  Widget buildSlot(BuildContext context, int slotIndex, [List<int>? visible]) {
+  Widget buildSlot(
+    BuildContext context,
+    int slotIndex, {
+    List<int>? visible,
+    bool suppressOwnGap = false,
+  }) {
     final slot = _slots[slotIndex];
     if (slot.isCollapsing) {
       return _buildCollapsingCard(context, slotIndex);
@@ -14,6 +19,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
       context,
       slotIndex,
       visible ?? computeVisibleIndices(),
+      suppressOwnGap: suppressOwnGap,
     );
   }
 
@@ -33,8 +39,9 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
   Widget _buildActiveCard(
     BuildContext context,
     int slotIndex,
-    List<int> visible,
-  ) {
+    List<int> visible, {
+    bool suppressOwnGap = false,
+  }) {
     final slot = _slots[slotIndex];
     final s = style;
     final slotPos = visible.indexOf(slotIndex);
@@ -95,6 +102,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
             bgRadius: bgRadius,
             actionWidth: actionWidth,
             swipingRight: swipingRight,
+            suppressOwnGap: suppressOwnGap,
           ),
         ),
       ),
@@ -118,7 +126,11 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     required double bgRadius,
     required double actionWidth,
     required bool swipingRight,
+    bool suppressOwnGap = false,
   }) {
+    // Reorder rows get their gap from the reorder host instead (see
+    // `M3EListReorderHost`), so it can sit detached from the dragged card.
+    final double gap = suppressOwnGap ? 0 : style.gap;
     return [
       if (showReveal && hasActions)
         _buildActiveActionsReveal(
@@ -126,7 +138,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
           isLast: isLast,
           swipingRight: swipingRight,
           actionList: actionList,
-          gap: style.gap,
+          gap: gap,
         )
       else if (showReveal && activeBg != null)
         _buildActiveActionBackground(
@@ -135,7 +147,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
           bgRadius: bgRadius,
           actionWidth: actionWidth,
           activeBg: activeBg,
-          gap: style.gap,
+          gap: gap,
         ),
       _buildActiveForegroundCard(
         context,
@@ -147,6 +159,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
         layoutRadius: layoutRadius,
         neighbourOffset: neighbourOffset,
         style: style,
+        gap: gap,
       ),
     ];
   }
@@ -325,12 +338,13 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     required BorderRadius layoutRadius,
     required double neighbourOffset,
     required M3EDismissibleListStyle style,
+    required double gap,
   }) {
     final s = style;
 
     final bool childOwnsSurface = swipeItemPaintsSurface(slotPos);
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : s.gap),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
       child: Transform.translate(
         offset: Offset(
           isDragged ? _dragOffset + _detachPush : neighbourOffset,

@@ -111,11 +111,20 @@ extension _M3EListBuild on _M3EListState {
   Widget _reorder(BuildContext context) {
     final M3EListReorderState reorderState =
         widget.reorderState ?? M3ETheme.of(context).listTheme.reorder;
+    final M3EListItemTheme itemTheme = M3ETheme.of(context).listTheme.item;
+    // Rows built for the reorder host suppress their own trailing gap (see
+    // `_card`/`_expandable`) so the host can apply it as a detached spacer
+    // instead — otherwise the gap paints as part of the dragged card.
+    final double resolvedGap = _baselineOr(
+      itemTheme,
+      widget.gap,
+      M3EListCardListTheme.defaultGap,
+    );
     return M3EListReorderHost(
       itemCount: slots.length,
       onReorder: widget.onReorder!,
       reorderState: reorderState,
-      gap: widget.gap,
+      gap: resolvedGap,
       scrollable: widget._layout == _M3EListLayout.scrollable,
       controller: widget.controller,
       physics: widget.physics,
@@ -128,17 +137,27 @@ extension _M3EListBuild on _M3EListState {
           index >= 0 &&
           index < slots.length &&
           slots[index].isVisible,
-      itemBuilder: (BuildContext context, int index) => _row(context, index),
+      itemBuilder: (BuildContext context, int index) =>
+          _row(context, index, suppressOwnGap: true),
     );
   }
 
-  Widget _row(BuildContext context, int slotIndex) {
+  Widget _row(
+    BuildContext context,
+    int slotIndex, {
+    bool suppressOwnGap = false,
+  }) {
     return Builder(
-      builder: (BuildContext context) => _rowBuilt(context, slotIndex),
+      builder: (BuildContext context) =>
+          _rowBuilt(context, slotIndex, suppressOwnGap: suppressOwnGap),
     );
   }
 
-  Widget _rowBuilt(BuildContext context, int slotIndex) {
+  Widget _rowBuilt(
+    BuildContext context,
+    int slotIndex, {
+    bool suppressOwnGap = false,
+  }) {
     final List<int> visible = computeVisibleIndices();
     final int dataIndex = visible.indexOf(slotIndex);
     final bool collapsing =
@@ -146,19 +165,37 @@ extension _M3EListBuild on _M3EListState {
         slotIndex < slots.length &&
         !slots[slotIndex].isVisible;
     if (collapsing || (dataIndex >= 0 && _swipeAt(dataIndex) != null)) {
-      return buildSlot(context, slotIndex, visible);
+      return buildSlot(
+        context,
+        slotIndex,
+        visible: visible,
+        suppressOwnGap: suppressOwnGap,
+      );
     }
     if (dataIndex < 0) {
       return const SizedBox.shrink();
     }
-    return _plain(context, dataIndex, visible.length);
+    return _plain(
+      context,
+      dataIndex,
+      visible.length,
+      suppressOwnGap: suppressOwnGap,
+    );
   }
 
-  Widget _plain(BuildContext context, int index, int total) {
+  Widget _plain(
+    BuildContext context,
+    int index,
+    int total, {
+    bool suppressOwnGap = false,
+  }) {
     if (_expandedAt(index) != null) {
-      return M3EListItemIndex(index: index, child: _expandable(context, index));
+      return M3EListItemIndex(
+        index: index,
+        child: _expandable(context, index, suppressOwnGap: suppressOwnGap),
+      );
     }
-    return _card(context, index, total);
+    return _card(context, index, total, suppressOwnGap: suppressOwnGap);
   }
 
   Widget _childAt(BuildContext context, int index) {
@@ -171,7 +208,12 @@ extension _M3EListBuild on _M3EListState {
     return _built[index];
   }
 
-  Widget _card(BuildContext context, int index, int total) {
+  Widget _card(
+    BuildContext context,
+    int index,
+    int total, {
+    bool suppressOwnGap = false,
+  }) {
     final M3EListItemTheme itemTheme = M3ETheme.of(context).listTheme.item;
     final M3EListCardListTheme cardList = M3ETheme.of(context)
         .listTheme
@@ -186,11 +228,11 @@ extension _M3EListBuild on _M3EListState {
       widget.innerRadius,
       M3EListCardListTheme.defaultInnerRadius,
     );
-    final double usedGap = _baselineOr(
-      itemTheme,
-      widget.gap,
-      M3EListCardListTheme.defaultGap,
-    );
+    // Reorder rows get their gap from the reorder host instead (see
+    // `_reorder`), so it can sit detached from the dragged card.
+    final double usedGap = suppressOwnGap
+        ? 0
+        : _baselineOr(itemTheme, widget.gap, M3EListCardListTheme.defaultGap);
     final M3ECardPosition position = calculateCardPosition(index, total);
     final M3EListFeatureScope? features = M3EListFeatureScope.maybeOf(context);
     final bool enabled = _enabledAt(index);

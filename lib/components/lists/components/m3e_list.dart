@@ -436,11 +436,21 @@ class _M3EListState extends State<M3EList>
   }
 
   @override
-  Widget buildSlot(BuildContext context, int slotIndex, [List<int>? visible]) {
+  Widget buildSlot(
+    BuildContext context,
+    int slotIndex, {
+    List<int>? visible,
+    bool suppressOwnGap = false,
+  }) {
     final List<int> shown = visible ?? computeVisibleIndices();
     final int dataIndex = shown.indexOf(slotIndex);
     _styleDataIndex = dataIndex < 0 ? null : dataIndex;
-    final Widget child = super.buildSlot(context, slotIndex, shown);
+    final Widget child = super.buildSlot(
+      context,
+      slotIndex,
+      visible: shown,
+      suppressOwnGap: suppressOwnGap,
+    );
     _styleDataIndex = null;
     return child;
   }

@@ -76,6 +76,7 @@ class M3EExpandableItem extends StatefulWidget {
     this.onTransformAnchor,
     this.expanded,
     this.nestVariant,
+    this.trailingGap,
   });
 
   /// index.
@@ -117,6 +118,14 @@ class M3EExpandableItem extends StatefulWidget {
 
   /// Variant a nested sublist inherits when it does not set its own.
   final M3ECardVariant? nestVariant;
+
+  /// Overrides the gap trailing this row, independent of [decoration].
+  ///
+  /// [decoration]'s own gap still separates a header from its nested sublist
+  /// (see [M3EExpandableSublist]) — this only overrides the space between
+  /// this row and the next one. Defaults to [M3EExpandableStyle.gap] when
+  /// null (e.g. when the reorder host supplies row spacing itself).
+  final double? trailingGap;
 
   @override
   State<M3EExpandableItem> createState() => _M3EExpandableItemState();
@@ -300,13 +309,15 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
       );
     }
 
+    final double trailingGap = widget.trailingGap ?? d.gap;
+
     // Same local reading-order group as dropdown panel items: header, then
     // revealed sublist rows, then the next sibling outside this group.
     return RepaintBoundary(
       child: Padding(
         padding: d.margin ?? EdgeInsets.zero,
         child: Padding(
-          padding: EdgeInsets.only(bottom: isLast ? 0 : d.gap),
+          padding: EdgeInsets.only(bottom: isLast ? 0 : trailingGap),
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: content,
