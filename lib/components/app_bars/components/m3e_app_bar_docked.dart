@@ -81,13 +81,18 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _observer?.addListener(_onNotification);
   }
 
+  /// Re-derives on-scroll state from the live scroll position whenever a
+  /// dependency changes (e.g. a theme rebuild). Notifications are the normal
+  /// source of truth, but nothing else corrects [_offset]/[_under] if a
+  /// dependency-driven rebuild ever leaves them stale, so this resyncs them
+  /// unconditionally rather than only when [_offset] happens to be zero.
   void _seedPrimary() {
     final ScrollController? primary = PrimaryScrollController.maybeOf(context);
     if (primary == null || !primary.hasClients) {
       return;
     }
     _position = primary.position;
-    if (_offset == 0 && primary.offset > 0) {
+    if (primary.offset != _offset) {
       _applyOffset(primary.offset);
     }
   }
