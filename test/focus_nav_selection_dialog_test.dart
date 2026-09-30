@@ -242,6 +242,8 @@ void registerFocusRingPaintsAboveOpaqueSiblingTests() {
         ),
       ),
     );
+    // Rings only paint during keyboard navigation (setUp resets that).
+    M3EFocusInteraction.instance.noteKeyboardHighlight();
     await tester.pumpAndSettle();
 
     final PhysicalModel model = tester.widget(

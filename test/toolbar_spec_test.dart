@@ -33,8 +33,8 @@ void main() {
     _standardFabIsSecondaryContainerAndMorphs80To56,
   );
   testWidgets(
-    'scroll exit keeps the toolbar from collapsing to the FAB',
-    _scrollExitKeepsTheToolbarFromCollapsingToTheFab,
+    'scroll exit composes with collapse-to-FAB',
+    _scrollExitComposesWithCollapseToTheFab,
   );
   testWidgets(
     'arrows move focus and a pointer hides the ring',
@@ -253,7 +253,10 @@ Future<void> _standardFabIsSecondaryContainerAndMorphs80To56(
   );
 }
 
-Future<void> _scrollExitKeepsTheToolbarFromCollapsingToTheFab(
+/// Hide-on-scroll no longer disables the FAB expand / collapse: a toolbar
+/// that starts collapsed with a scroll-exit behavior sits on its collapsed
+/// FAB, the same as one without a scroll behavior.
+Future<void> _scrollExitComposesWithCollapseToTheFab(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
@@ -269,8 +272,11 @@ Future<void> _scrollExitKeepsTheToolbarFromCollapsingToTheFab(
     ),
   );
   await tester.pump();
-  expect(tester.getSize(find.byType(M3EFab)).width, closeTo(56, 0.5));
-  expect(find.byIcon(M3EIcons.edit), findsOneWidget);
+  expect(tester.getSize(find.byType(M3EFab)).width, closeTo(80, 0.5));
+  expect(
+    IconTheme.of(tester.element(find.byIcon(M3EIcons.add))).size,
+    M3EToolbarTokens.fabCollapsedIcon,
+  );
 }
 
 Future<void> _arrowsMoveFocusAndAPointerHidesTheRing(

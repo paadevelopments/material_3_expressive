@@ -58,7 +58,7 @@ void main() {
     _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu,
   );
   testWidgets(
-    'nav selection content is centered and the collapsed rail pill matches the bar',
+    'nav selection content is centered and the collapsed rail pill matches its theme',
     _navSelectionContentIsCentered,
   );
   testWidgets(
@@ -384,8 +384,11 @@ Future<void> _navSelectionContentIsCentered(WidgetTester tester) async {
     tester,
     find.byType(M3ENavigationRail),
   );
-  expect(collapsedPill.width, M3ENavBarConstants.compactIndicatorWidth);
-  expect(collapsedPill.height, M3ENavBarConstants.indicatorHeight);
+  final M3ENavigationRailTheme railTheme = M3ETheme.of(
+    tester.element(find.byType(M3ENavigationRail)),
+  ).navigationRailTheme;
+  expect(collapsedPill.width, railTheme.verticalIndicatorWidth);
+  expect(collapsedPill.height, railTheme.verticalIndicatorHeight);
 }
 
 Future<void> _m3enavigationrailExpandDoesNotOverflow(

@@ -26,7 +26,10 @@ void main() {
     'auto hide slide does not twitch the bar or the body',
     _autoHideSlideDoesNotTwitchTheBarOrTheBody,
   );
-  testWidgets('actions hide colors the overlay', _actionsHideColorsTheOverlay);
+  testWidgets(
+    'actions hide keeps the resting color',
+    _actionsHideKeepsTheRestingColor,
+  );
   testWidgets(
     'an overlay scrollable does not clear scroll-under',
     _overlayScrollableDoesNotClearScrollUnder,
@@ -302,7 +305,9 @@ Future<void> _slideAppBarAndExpectNoTwitch(
   expect(bodyTop(), lessThan(startBody));
 }
 
-Future<void> _actionsHideColorsTheOverlay(WidgetTester tester) async {
+/// A bar that hides on scroll keeps its resting color and elevation; only a
+/// bar that stays switches to the scrolled-under look.
+Future<void> _actionsHideKeepsTheRestingColor(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -350,14 +355,15 @@ Future<void> _actionsHideColorsTheOverlay(WidgetTester tester) async {
   await tester.drag(find.byType(ListView), const Offset(0, -400));
   await tester.pump();
 
-  expect(overlay().color, scheme.surfaceContainer);
-  expect(barMaterial().color, scheme.surfaceContainer);
+  expect(overlay().color, scheme.surface);
+  expect(barMaterial().color, scheme.surface);
   expect(barMaterial().elevation, 0);
 
   tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
   await tester.pump();
 
   expect(overlay().color, scheme.surface);
+  expect(barMaterial().color, scheme.surface);
   expect(barMaterial().elevation, 0);
 }
 
