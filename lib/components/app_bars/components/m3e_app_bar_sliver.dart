@@ -280,40 +280,15 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
                         : motion.entire && motion.shown > 0.001
                         ? contentSlot / motion.shown
                         : contentSlot;
-                    final Widget body = _M3EBarBody(
-                      expand: titleExpand,
-                      topPadding: appBarTheme.flexibleTopPadding,
-                      actionRow: appBarTheme.actionRowHeight,
-                      bottomPadding: metrics.flexibleBottomPadding,
-                      titleInset: metrics.titleInset,
-                      contentPadding: metrics.contentPadding,
-                      centerTitle: bar.centerTitle,
-                      search: bar.title is _M3EAppBarSearchTitle,
-                      leading:
-                          bar.leading ??
-                          (bar.automaticallyImplyLeading
-                              ? _maybeBackButton(
-                                  context,
-                                  bar.foregroundColor ??
-                                      appBarTheme.leadingColor(scheme),
-                                )
-                              : null),
-                      actions: bar.actions,
-                      title: _sliverTitle(
-                        theme,
-                        appBarTheme,
-                        scheme,
-                        titleExpand,
-                      ),
-                      leadingColor:
-                          bar.foregroundColor ??
-                          appBarTheme.leadingColor(scheme),
-                      trailingColor: appBarTheme.trailingColor(scheme),
-                      iconSize: metrics.iconSize,
-                      separateActions: motion.actions,
-                      containerColor: bg,
-                      shadowColor: scheme.shadow,
-                      shape: appBarTheme.shape(bar.shapeFamily),
+                    final Widget body = _headerBody(
+                      context,
+                      theme,
+                      appBarTheme,
+                      scheme,
+                      metrics,
+                      motion,
+                      titleExpand,
+                      bg,
                     );
                     final Widget inner = ClipRect(
                       child: motion.entire
@@ -350,6 +325,47 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
       return sliver;
     }
     return M3ESliverSemantic(label: bar.semanticLabel!, child: sliver);
+  }
+
+  /// Title block and action row for the persistent header. [context] is
+  /// the header builder's own context.
+  Widget _headerBody(
+    BuildContext context,
+    M3EThemeData theme,
+    M3EAppBarTheme appBarTheme,
+    M3EColorScheme scheme,
+    M3EAppBarMetrics metrics,
+    _M3EBarMotion motion,
+    double titleExpand,
+    Color bg,
+  ) {
+    return _M3EBarBody(
+      expand: titleExpand,
+      topPadding: appBarTheme.flexibleTopPadding,
+      actionRow: appBarTheme.actionRowHeight,
+      bottomPadding: metrics.flexibleBottomPadding,
+      titleInset: metrics.titleInset,
+      contentPadding: metrics.contentPadding,
+      centerTitle: bar.centerTitle,
+      search: bar.title is _M3EAppBarSearchTitle,
+      leading:
+          bar.leading ??
+          (bar.automaticallyImplyLeading
+              ? _maybeBackButton(
+                  context,
+                  bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+                )
+              : null),
+      actions: bar.actions,
+      title: _sliverTitle(theme, appBarTheme, scheme, titleExpand),
+      leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+      trailingColor: appBarTheme.trailingColor(scheme),
+      iconSize: metrics.iconSize,
+      separateActions: motion.actions,
+      containerColor: bg,
+      shadowColor: scheme.shadow,
+      shape: appBarTheme.shape(bar.shapeFamily),
+    );
   }
 
   Widget? _sliverTitle(

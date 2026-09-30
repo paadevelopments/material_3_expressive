@@ -32,6 +32,7 @@ export 'enums/m3e_app_bar_enums.dart';
 export 'styles/m3e_app_bar_theme.dart';
 
 part 'components/m3e_app_bar_docked.dart';
+part 'components/m3e_app_bar_docked_parts.dart';
 part 'components/m3e_app_bar_bottom.dart';
 part 'components/m3e_app_bar_sliver.dart';
 part 'components/m3e_app_bar_sliver_actions.dart';
