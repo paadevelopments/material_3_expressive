@@ -197,10 +197,11 @@ class _RenderM3EActionSliver extends RenderSliverSingleBoxAdapter {
   }
 }
 
-/// Actions painted above the page, with no bar behind them.
+/// Actions painted over the bar, with no bar behind them once it slides
+/// away. They stay in the page's own tree, so route transitions (slide,
+/// fade, clip) move them together with the rest of the page.
 class _M3EActionOverlay extends StatelessWidget {
   const _M3EActionOverlay({
-    required this.controller,
     required this.color,
     required this.inset,
     required this.topPadding,
@@ -216,7 +217,6 @@ class _M3EActionOverlay extends StatelessWidget {
     required this.child,
   });
 
-  final OverlayPortalController controller;
   final Color color;
   final double inset;
   final double topPadding;
@@ -235,30 +235,28 @@ class _M3EActionOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: color,
-      child: OverlayPortal.overlayChildLayoutBuilder(
-        controller: controller,
-        overlayChildBuilder:
-            (BuildContext context, OverlayChildLayoutInfo info) {
-              final double dy = info.childPaintTransform.getTranslation().y;
-              return Positioned(
-                top: dy + inset + topPadding,
-                left: 0,
-                right: 0,
-                height: actionRow,
-                child: _M3EActionRow(
-                  contentPadding: contentPadding,
-                  actionRow: actionRow,
-                  hide: hide,
-                  tonal: tonal,
-                  leadingColor: leadingColor,
-                  trailingColor: trailingColor,
-                  iconSize: iconSize,
-                  leading: leading,
-                  actions: actions,
-                ),
-              );
-            },
-        child: child,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          child,
+          Positioned(
+            top: inset + topPadding,
+            left: 0,
+            right: 0,
+            height: actionRow,
+            child: _M3EActionRow(
+              contentPadding: contentPadding,
+              actionRow: actionRow,
+              hide: hide,
+              tonal: tonal,
+              leadingColor: leadingColor,
+              trailingColor: trailingColor,
+              iconSize: iconSize,
+              leading: leading,
+              actions: actions,
+            ),
+          ),
+        ],
       ),
     );
   }

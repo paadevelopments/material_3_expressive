@@ -138,12 +138,12 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     required bool underChanged,
     required double delta,
   }) {
-    // The actions band is sized from [_offset] here, not by a persistent
-    // header, so it has to rebuild with every scrolled pixel too.
-    final bool flexible =
-        _expanded > _collapsed + 0.5 ||
-        bar._effectiveHideMode == M3EAppBarHideMode.actions;
-    if (mounted && (underChanged || (flexible && delta.abs() > 0.5))) {
+    // The persistent header already rebuilds from its shrink offset every
+    // frame; rebuilding the whole sliver as well would build it twice. Only
+    // the actions band is sized from [_offset] here, so only it follows every
+    // scrolled pixel.
+    final follows = bar._effectiveHideMode == M3EAppBarHideMode.actions;
+    if (mounted && (underChanged || (follows && delta.abs() > 0.5))) {
       setState(() {});
     }
   }
@@ -261,8 +261,10 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
                     final double titleExpand = motion.actions
                         ? expand * motion.shown
                         : expand;
+                    // A bar that hides on scroll keeps its resting look.
                     final bool under =
-                        shrinkOffset > 0 || overlaps || _offset > 0;
+                        bar._effectiveHideMode == M3EAppBarHideMode.none &&
+                        (shrinkOffset > 0 || overlaps || _offset > 0);
                     final Color bg = _m3eBarColor(
                       bar: bar,
                       theme: appBarTheme,
@@ -361,26 +363,19 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     }
     final Color titleColor =
         bar.foregroundColor ?? appBarTheme.titleColor(scheme);
-    final TextStyle style =
-        TextStyle.lerp(
-          appBarTheme
-              .titleStyle(theme.typeScale, variant: bar.variant)
-              .copyWith(color: titleColor),
-          appBarTheme
-              .titleStyle(
-                theme.typeScale,
-                collapsed: false,
-                variant: bar.variant,
-              )
-              .copyWith(color: titleColor),
-          expand,
-        ) ??
-        appBarTheme.titleStyle(theme.typeScale, variant: bar.variant);
+    final TextStyle collapsedStyle = appBarTheme
+        .titleStyle(theme.typeScale, variant: bar.variant)
+        .copyWith(color: titleColor);
+    final TextStyle expandedStyle = appBarTheme
+        .titleStyle(theme.typeScale, collapsed: false, variant: bar.variant)
+        .copyWith(color: titleColor);
     final bool wrap = expand > 0.5;
-    final Widget? title = _headline(
+    final Widget? title = _collapsingHeadline(
       title: bar.title,
       titleText: bar.titleText,
-      style: style,
+      collapsedStyle: collapsedStyle,
+      expandedStyle: expandedStyle,
+      expand: expand,
       centerTitle: bar.centerTitle,
       wrap: wrap,
     );

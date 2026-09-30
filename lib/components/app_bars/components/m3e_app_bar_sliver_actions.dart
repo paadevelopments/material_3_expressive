@@ -14,16 +14,14 @@ extension _M3ESliverAppBarActions on _M3ESliverAppBarState {
     final double push = motion.band;
     final double paintContent = math.max(push, _collapsed);
     final double share = _follow ? 1.0 : motion.shown.clamp(0.0, 1.0);
-    final bool under = _offset > 0;
+    // Actions mode hides on scroll, so the bar keeps its resting look.
     final Color bg = _m3eBarColor(
       bar: bar,
       theme: appBarTheme,
       scheme: scheme,
-      under: under,
+      under: false,
     );
-    final double elevation = under
-        ? metrics.scrolledElevation
-        : metrics.elevation;
+    final double elevation = metrics.elevation;
     final Widget? leading = _actionSliverLeading(appBarTheme, scheme);
     final Widget body = _actionSliverBody(
       theme,
@@ -38,7 +36,7 @@ extension _M3ESliverAppBarActions on _M3ESliverAppBarState {
       maxExtent: top + _expanded * share,
       minExtent: top + _collapsed,
       child: _M3EScrolledUnder(
-        scrolledUnder: under,
+        scrolledUnder: false,
         child: SizedBox(
           height: top + paintContent,
           child: Padding(

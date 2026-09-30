@@ -70,6 +70,150 @@ Widget? _headline({
   );
 }
 
+/// Headline that follows the collapse at [expand] (0 collapsed, 1 expanded).
+///
+/// A [titleText] mid-collapse is laid out once at [expandedStyle] and scaled
+/// down toward [collapsedStyle]'s size. A scroll frame then only repaints it,
+/// instead of shaping the text at a new size (and, with variable fonts, a new
+/// font instance) on every pixel. Both ends use the real styles. A custom
+/// [title] widget is not scaled (it may be an image); it gets the lerped
+/// [DefaultTextStyle] as before.
+Widget? _collapsingHeadline({
+  required Widget? title,
+  required String? titleText,
+  required TextStyle collapsedStyle,
+  required TextStyle expandedStyle,
+  required double expand,
+  required bool centerTitle,
+  required bool wrap,
+}) {
+  final double t = expand.clamp(0.0, 1.0);
+  final double small = collapsedStyle.fontSize ?? 0;
+  final double big = expandedStyle.fontSize ?? 0;
+  if (title != null || t <= 0 || t >= 1 || small <= 0 || big <= 0) {
+    return _headline(
+      title: title,
+      titleText: titleText,
+      style: TextStyle.lerp(collapsedStyle, expandedStyle, t) ?? collapsedStyle,
+      centerTitle: centerTitle,
+      wrap: wrap,
+    );
+  }
+  final Widget? text = _headline(
+    title: null,
+    titleText: titleText,
+    style: expandedStyle,
+    centerTitle: centerTitle,
+    wrap: wrap,
+  );
+  if (text == null) {
+    return null;
+  }
+  return _M3EScaledBox(scale: lerpDouble(small / big, 1, t) ?? 1, child: text);
+}
+
+/// Lays [child] out in `1 / scale` of the space and paints it scaled by
+/// [scale], so it fills the same box as a child sized for the space directly.
+class _M3EScaledBox extends SingleChildRenderObjectWidget {
+  const _M3EScaledBox({required this.scale, required super.child});
+
+  final double scale;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderM3EScaledBox(scale);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderM3EScaledBox renderObject,
+  ) {
+    renderObject.scale = scale;
+  }
+}
+
+class _RenderM3EScaledBox extends RenderProxyBox {
+  _RenderM3EScaledBox(this._scale);
+
+  double _scale;
+
+  double get scale => _scale;
+
+  set scale(double value) {
+    if (value == _scale) {
+      return;
+    }
+    _scale = value;
+    markNeedsLayout();
+  }
+
+  Matrix4 get _transform => Matrix4.diagonal3Values(_scale, _scale, 1);
+
+  BoxConstraints _inner(BoxConstraints constraints) {
+    return BoxConstraints(
+      maxWidth: constraints.maxWidth / _scale,
+      maxHeight: constraints.maxHeight / _scale,
+    );
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final RenderBox? box = child;
+    if (box == null) {
+      return constraints.smallest;
+    }
+    return constraints.constrain(
+      box.getDryLayout(_inner(constraints)) * _scale,
+    );
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    if (box == null) {
+      size = constraints.smallest;
+      return;
+    }
+    box.layout(_inner(constraints), parentUsesSize: true);
+    size = constraints.constrain(box.size * _scale);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) {
+      return;
+    }
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(_transform);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox? box = child;
+    if (box == null) {
+      return false;
+    }
+    return result.addWithPaintTransform(
+      transform: _transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return box.hitTest(result, position: position);
+      },
+    );
+  }
+}
+
 Widget? _supporting({
   required Widget? subtitle,
   required String? subtitleText,

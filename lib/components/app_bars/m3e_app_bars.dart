@@ -3,11 +3,14 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/rendering.dart'
     show
+        BoxHitTestResult,
         FloatingHeaderSnapConfiguration,
+        RenderProxyBox,
         RenderSliver,
         RenderSliverSingleBoxAdapter,
         ScrollDirection,
-        SliverGeometry;
+        SliverGeometry,
+        TransformLayer;
 
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;

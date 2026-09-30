@@ -1351,6 +1351,33 @@ M3EAppBar.sliver(
 // appBarController.expand() / .collapse() / .show() / .hide() / .followScroll()
 ```
 
+**Collapse and hide on scroll with `M3EAppBar.top` / `.search`.** A
+`Scaffold` starts its body where the app bar ends, so a bar that shrinks
+drags the body up while the list inside it is also scrolling: the content
+then moves faster than the bar and slides under its edge. No bar can fix
+that from inside the `appBar` slot. Set `extendBodyBehindAppBar: true` and
+the page runs behind the bar instead: the bar keeps a fixed slot, only its
+surface moves, and it travels exactly with the content. `ListView`,
+`GridView`, and `CustomScrollView` pick up the bar height as top padding
+from the Scaffold on their own; add it yourself for anything else
+(`MediaQuery.paddingOf(context).top`).
+
+```dart
+Scaffold(
+  extendBodyBehindAppBar: true, // bar moves 1:1 with the content
+  appBar: M3EAppBar.top(
+    titleText: 'Inbox',
+    variant: M3EAppBarVariant.mediumFlexible,
+    hideMode: M3EAppBarHideMode.entire,
+  ),
+  body: ListView(children: messages),
+);
+```
+
+Without the flag, collapse still works but the content moves ahead of the
+bar, and hiding falls back to a timed slide. `M3EAppBar.sliver` needs no
+flag: it is part of the scroll content, so it always moves with it.
+
 #### M3ETabs
 
 Primary and secondary tab bars, aligned with the Material 3 Expressive

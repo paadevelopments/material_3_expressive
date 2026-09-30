@@ -88,8 +88,13 @@
   another route, and an idle list on desktop, do not clear the scrolled color or elevation. An auto
   hide slide follows the scroll and does not rebuild the page on the way down, so the bar and the
   body do not twitch. After a refresh replaces the list's scroll position, scrolling still updates
-  the bar color and elevation. In actions hide, the overlay uses that same scroll color with no
-  elevation, and the bar layer raises with the scroll. The sliver bar collapses and hides by
+  the bar color and elevation. A bar that hides on scroll (`entire`, `actions`, or
+  `hideOnScroll`) keeps its resting color, elevation, and search field color; only a bar that
+  stays shows the scrolled-under state. In actions hide, the floating actions are part of the
+  page, so they slide and fade with route transitions instead of showing ahead of them. A
+  collapsing `titleText` is laid out once and scaled between its two sizes instead of being
+  re-shaped every scroll frame. `preferredSize` of a top or search bar is its expanded height, so
+  the bar collapses and expands in the same frame as the scroll. The sliver bar collapses and hides by
   exactly the scrolled distance, so its edge stays on the content. A top or search bar does the
   same when its `Scaffold` sets `extendBodyBehindAppBar: true`: the bar keeps a fixed slot and
   only its surface moves. Without that flag the body moves with the bar, and hiding stays a

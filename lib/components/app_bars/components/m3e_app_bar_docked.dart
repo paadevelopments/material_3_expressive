@@ -16,7 +16,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   ScrollPosition? _position;
   final _M3EPageScroll _pageScroll = _M3EPageScroll();
   M3EAppBarController? _bound;
-  final OverlayPortalController _actionsOverlay = OverlayPortalController();
   late final AnimationController _visibility;
   bool _under = false;
   bool _follow = true;
@@ -37,7 +36,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   @override
   void initState() {
     super.initState();
-    _actionsOverlay.show();
     _visibility = AnimationController(
       vsync: this,
       value: 1,
@@ -120,7 +118,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     if (mounted) {
       setState(() {});
     }
-    _commitExtent(_slotHeight());
     _publish();
   }
 
@@ -172,7 +169,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     final changed = under != _under;
     _under = under;
     _maybeSlideForScroll();
-    _commitExtent(_slotHeight());
     _publish();
     // A small bar only changes color at the top. Rebuilding it on every
     // pixel restarts hover under the pointer and the list appears to flicker.
@@ -215,32 +211,16 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     }
   }
 
-  double _slotHeight() {
-    if (bar.toolbarHeight != null) {
-      return bar.toolbarHeight!;
-    }
-    if (_glued) {
-      return _expanded;
-    }
-    return _M3EBarMotion(
-      offset: _offset,
-      collapsed: _collapsed,
-      expanded: _expanded,
-      shown: _visibility.value,
-      mode: bar._effectiveHideMode,
-      manual: !_follow,
-    ).slot;
-  }
-
   void _commitExtent(double height) {
     if (bar.toolbarHeight != null || _collapsed <= 0) {
       return;
     }
     final double? previous = _m3eAppBarHeightOf(bar);
-    // preferredSize is only the scaffold's max. The child can be shorter, and
-    // that shorter size is what moves the body. Rebuilding the scaffold while
-    // the bar shrinks restarts the list and fights the slide.
-    if (previous != null && height <= previous + 0.5) {
+    // preferredSize is only the scaffold's max: the body starts where the
+    // bar's laid-out height ends. It is always the expanded height, so the
+    // bar can shrink and grow inside it in the same frame as the scroll. It
+    // only changes with the theme or variant, never per scroll frame.
+    if (previous != null && (height - previous).abs() <= 0.5) {
       return;
     }
     _m3eAppBarWriteHeight(bar, height);
@@ -339,10 +319,13 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     );
     final double slot = bar.toolbarHeight ?? (glued ? _expanded : motion.slot);
     if (bar.toolbarHeight == null) {
-      _commitExtent(slot);
+      _commitExtent(_expanded);
     }
 
-    final bool under = _under;
+    // A bar that hides on scroll keeps its resting color, elevation, and
+    // search field; only a bar that stays shows the scrolled-under state.
+    final bool under =
+        _under && bar._effectiveHideMode == M3EAppBarHideMode.none;
     final Color bg = _m3eBarColor(
       bar: bar,
       theme: appBarTheme,
@@ -404,7 +387,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
         return sheet;
       }
       return _M3EActionOverlay(
-        controller: _actionsOverlay,
         color: bg,
         inset: safe.top,
         topPadding: appBarTheme.flexibleTopPadding,
@@ -496,29 +478,22 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     }
     final Color titleColor =
         bar.foregroundColor ?? appBarTheme.titleColor(scheme);
-    final TextStyle style =
-        TextStyle.lerp(
-          appBarTheme
-              .titleStyle(theme.typeScale, variant: bar.variant)
-              .copyWith(color: titleColor),
-          appBarTheme
-              .titleStyle(
-                theme.typeScale,
-                collapsed: false,
-                variant: bar.variant,
-              )
-              .copyWith(color: titleColor),
-          expand,
-        ) ??
-        appBarTheme.titleStyle(theme.typeScale, variant: bar.variant);
+    final TextStyle collapsedStyle = appBarTheme
+        .titleStyle(theme.typeScale, variant: bar.variant)
+        .copyWith(color: titleColor);
+    final TextStyle expandedStyle = appBarTheme
+        .titleStyle(theme.typeScale, collapsed: false, variant: bar.variant)
+        .copyWith(color: titleColor);
     final TextStyle subtitleStyle = appBarTheme
         .subtitleStyle(theme.typeScale, bar.variant)
         .copyWith(color: appBarTheme.subtitleColor(scheme));
     final bool wrap = expand > 0.5;
-    final Widget? title = _headline(
+    final Widget? title = _collapsingHeadline(
       title: bar.title,
       titleText: bar.titleText,
-      style: style,
+      collapsedStyle: collapsedStyle,
+      expandedStyle: expandedStyle,
+      expand: expand,
       centerTitle: bar.centerTitle,
       wrap: wrap,
     );
