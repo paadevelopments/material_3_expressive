@@ -26,6 +26,14 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
 
   M3EAppBar get bar => widget.bar;
 
+  /// The page runs behind the bar ([Scaffold.extendBodyBehindAppBar]), so
+  /// the bar can keep a fixed slot and move its surface with the content.
+  /// Otherwise the body starts at the bar's laid-out height and moves with
+  /// every change to it, which can never stay in step with the scroll.
+  bool get _glued {
+    return Scaffold.maybeOf(context)?.widget.extendBodyBehindAppBar ?? false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -136,8 +144,12 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   }
 
   bool get _visibleNow {
-    if (bar._effectiveHideMode == M3EAppBarHideMode.actions) {
+    final M3EAppBarHideMode mode = bar._effectiveHideMode;
+    if (mode == M3EAppBarHideMode.actions) {
       return true;
+    }
+    if (_follow && _glued) {
+      return mode == M3EAppBarHideMode.none || _offset < _expanded - 0.5;
     }
     return _visibility.value > 0.01;
   }
@@ -171,7 +183,9 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   /// [ScrollPosition.userScrollDirection] so a hide/show starts the instant a
   /// drag changes direction, at any scroll position and at any drag speed.
   void _maybeSlideForScroll() {
-    if (!_follow || bar._effectiveHideMode == M3EAppBarHideMode.none) {
+    if (!_follow ||
+        bar._effectiveHideMode == M3EAppBarHideMode.none ||
+        _glued) {
       return;
     }
     switch (_position?.userScrollDirection) {
@@ -190,7 +204,10 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     required double offset,
     required double previous,
   }) {
-    final bool flexible = _expanded > _collapsed + 0.5;
+    // A glued bar moves its surface with every scrolled pixel.
+    final bool flexible =
+        _expanded > _collapsed + 0.5 ||
+        (_glued && bar._effectiveHideMode != M3EAppBarHideMode.none);
     final bool shouldRebuild =
         changed || (flexible && (offset - previous).abs() > 0.5);
     if (mounted && shouldRebuild) {
@@ -201,6 +218,9 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   double _slotHeight() {
     if (bar.toolbarHeight != null) {
       return bar.toolbarHeight!;
+    }
+    if (_glued) {
+      return _expanded;
     }
     return _M3EBarMotion(
       offset: _offset,
@@ -287,6 +307,9 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
 
   Future<void> _resumeScroll() {
     _follow = true;
+    if (_glued) {
+      return _visibility.forward();
+    }
     if (_offset <= math.max(0, _expanded - _collapsed) + 0.5) {
       return _visibility.forward();
     }
@@ -304,6 +327,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _expanded = bar.toolbarHeight != null
         ? bar.toolbarHeight!
         : metrics.expandedHeight(bar.variant, hasSubtitle: hasSubtitle);
+    final bool glued = _glued;
     final motion = _M3EBarMotion(
       offset: _offset,
       collapsed: _collapsed,
@@ -311,8 +335,9 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
       shown: _visibility.value,
       mode: bar._effectiveHideMode,
       manual: !_follow,
+      glued: glued,
     );
-    final double slot = bar.toolbarHeight ?? motion.slot;
+    final double slot = bar.toolbarHeight ?? (glued ? _expanded : motion.slot);
     if (bar.toolbarHeight == null) {
       _commitExtent(slot);
     }
@@ -365,6 +390,37 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
         : body;
     final EdgeInsets safe = bar._edgeSafeAreaInset(context);
     final Widget? leading = _resolvedLeading(context, scheme, appBarTheme);
+    Widget surface(Widget padded) {
+      final Widget sheet = Material(
+        color: bg,
+        elevation: elevation,
+        shadowColor: scheme.shadow,
+        surfaceTintColor: const Color(0x00000000),
+        shape: appBarTheme.shape(bar.shapeFamily),
+        clipBehavior: bar.clipBehavior,
+        child: padded,
+      );
+      if (!motion.actions) {
+        return sheet;
+      }
+      return _M3EActionOverlay(
+        controller: _actionsOverlay,
+        color: bg,
+        inset: safe.top,
+        topPadding: appBarTheme.flexibleTopPadding,
+        actionRow: appBarTheme.actionRowHeight,
+        contentPadding: metrics.contentPadding,
+        hide: motion.titleHide,
+        tonal: appBarTheme.actionsTonalColor(scheme),
+        leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
+        trailingColor: appBarTheme.trailingColor(scheme),
+        iconSize: metrics.iconSize,
+        leading: leading,
+        actions: bar.actions,
+        child: sheet,
+      );
+    }
+
     final Widget material = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double inset = safe.top + safe.bottom;
@@ -373,49 +429,33 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
             : slot;
         final double height = math.min(math.max(0, slot), available);
         final double shown = motion.shown.clamp(0.0, 1.0);
+        // Glued, the slot stays fixed and only the painted band shrinks, by
+        // exactly the scrolled distance, so it rides on the content.
+        final double band = math.min(motion.band, height);
         final Widget padded = Padding(
           padding: safe,
           child: motion.actions
               ? _m3eClipSliding(
-                  push: math.min(motion.painted * shown, available),
+                  push: glued
+                      ? band
+                      : math.min(motion.painted * shown, available),
                   visual: motion.painted,
                   child: body,
                 )
-              : SizedBox(height: height, child: clipped),
+              : SizedBox(height: glued ? band : height, child: clipped),
         );
-        if (!motion.actions) {
-          return Material(
-            color: bg,
-            elevation: elevation,
-            shadowColor: scheme.shadow,
-            surfaceTintColor: const Color(0x00000000),
-            shape: appBarTheme.shape(bar.shapeFamily),
-            clipBehavior: bar.clipBehavior,
-            child: padded,
-          );
+        if (!glued) {
+          return surface(padded);
         }
-        return _M3EActionOverlay(
-          controller: _actionsOverlay,
-          color: bg,
-          inset: safe.top,
-          topPadding: appBarTheme.flexibleTopPadding,
-          actionRow: appBarTheme.actionRowHeight,
-          contentPadding: metrics.contentPadding,
-          hide: motion.titleHide,
-          tonal: appBarTheme.actionsTonalColor(scheme),
-          leadingColor: bar.foregroundColor ?? appBarTheme.leadingColor(scheme),
-          trailingColor: appBarTheme.trailingColor(scheme),
-          iconSize: metrics.iconSize,
-          leading: leading,
-          actions: bar.actions,
-          child: Material(
-            color: bg,
-            elevation: elevation,
-            shadowColor: scheme.shadow,
-            surfaceTintColor: const Color(0x00000000),
-            shape: appBarTheme.shape(bar.shapeFamily),
-            clipBehavior: bar.clipBehavior,
-            child: padded,
+        // The empty part of the slot paints and hit-tests nothing, so the
+        // page behind it shows through and stays interactive.
+        return SizedBox(
+          height: height + inset,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Positioned(top: 0, left: 0, right: 0, child: surface(padded)),
+            ],
           ),
         );
       },

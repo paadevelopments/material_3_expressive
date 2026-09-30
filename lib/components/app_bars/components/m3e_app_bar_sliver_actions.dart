@@ -11,9 +11,9 @@ extension _M3ESliverAppBarActions on _M3ESliverAppBarState {
     _M3EBarMotion motion,
     double top,
   ) {
-    final double shown = motion.shown.clamp(0.0, 1.0);
-    final double push = motion.painted * shown;
+    final double push = motion.band;
     final double paintContent = math.max(push, _collapsed);
+    final double share = _follow ? 1.0 : motion.shown.clamp(0.0, 1.0);
     final bool under = _offset > 0;
     final Color bg = _m3eBarColor(
       bar: bar,
@@ -35,8 +35,8 @@ extension _M3ESliverAppBarActions on _M3ESliverAppBarState {
       bg,
     );
     return _M3EActionSliver(
-      layoutExtent: top + push,
-      paintExtent: top + paintContent,
+      maxExtent: top + _expanded * share,
+      minExtent: top + _collapsed,
       child: _M3EScrolledUnder(
         scrolledUnder: under,
         child: SizedBox(

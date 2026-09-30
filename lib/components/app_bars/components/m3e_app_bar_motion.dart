@@ -9,6 +9,7 @@ class _M3EBarMotion {
     required this.shown,
     required this.mode,
     required this.manual,
+    this.glued = false,
   });
 
   final double offset;
@@ -17,6 +18,10 @@ class _M3EBarMotion {
   final double shown;
   final M3EAppBarHideMode mode;
   final bool manual;
+
+  /// The page runs behind the bar and never moves with it, so the bar's
+  /// bottom edge can travel with the content one-to-one. See [band].
+  final bool glued;
 
   double get range => math.max(0, expanded - collapsed);
 
@@ -49,9 +54,33 @@ class _M3EBarMotion {
     return open;
   }
 
-  double get titleExpand => actions ? expand * shown.clamp(0.0, 1.0) : expand;
+  /// Visible band height when [glued]. The page does not move with the bar,
+  /// so subtracting the scroll [offset] keeps the bar's bottom edge exactly
+  /// on the content: both travel at the scroll rate. [shown] only takes part
+  /// while a controller drives the bar manually.
+  double get band {
+    final double share = manual ? shown.clamp(0.0, 1.0) : 1.0;
+    final double travel = expanded * share - offset;
+    if (entire || actions) {
+      return math.max(0, travel);
+    }
+    return painted;
+  }
 
-  double get titleHide => actions ? 1 - shown.clamp(0.0, 1.0) : 0;
+  /// How much of the bar is still revealed, for title and action styling.
+  double get reveal {
+    if (!glued || manual) {
+      return shown.clamp(0.0, 1.0);
+    }
+    if (expanded <= 0) {
+      return 1;
+    }
+    return (band / expanded).clamp(0.0, 1.0);
+  }
+
+  double get titleExpand => actions ? expand * reveal : expand;
+
+  double get titleHide => actions ? 1 - reveal : 0;
 }
 
 Color _m3eBarColor({

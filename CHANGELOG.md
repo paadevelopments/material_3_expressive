@@ -89,7 +89,11 @@
   hide slide follows the scroll and does not rebuild the page on the way down, so the bar and the
   body do not twitch. After a refresh replaces the list's scroll position, scrolling still updates
   the bar color and elevation. In actions hide, the overlay uses that same scroll color with no
-  elevation, and the bar layer raises with the scroll.
+  elevation, and the bar layer raises with the scroll. The sliver bar collapses and hides by
+  exactly the scrolled distance, so its edge stays on the content. A top or search bar does the
+  same when its `Scaffold` sets `extendBodyBehindAppBar: true`: the bar keeps a fixed slot and
+  only its surface moves. Without that flag the body moves with the bar, and hiding stays a
+  timed slide.
 * **Carousel:** multi-browse, uncontained, uncontained multi-aspect, hero, and full-screen. Items
   are `M3ECarouselItem` values (`image`, optional `title` / `subtitle` / `prefixText`, `onTap`,
   `showScrim`, `transform`). A null `onTap` disables the item. `M3ECarouselController` steps with

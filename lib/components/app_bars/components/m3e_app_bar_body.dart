@@ -110,23 +110,24 @@ class _M3EBarBody extends StatelessWidget {
   }
 }
 
-/// Paints the action band over the page. The layout slot shrinks with the bar.
+/// Paints the action band over the page. Behaves like a pinned header: it
+/// always scrolls by its full [maxExtent], and the space it pushes the page
+/// down by shrinks by exactly the scrolled distance, so the band's edge stays
+/// on the content. It never paints shorter than [minExtent], which keeps the
+/// action row pinned while the page scrolls beneath it.
 class _M3EActionSliver extends SingleChildRenderObjectWidget {
   const _M3EActionSliver({
-    required this.layoutExtent,
-    required this.paintExtent,
+    required this.maxExtent,
+    required this.minExtent,
     required super.child,
   });
 
-  final double layoutExtent;
-  final double paintExtent;
+  final double maxExtent;
+  final double minExtent;
 
   @override
   RenderSliver createRenderObject(BuildContext context) {
-    return _RenderM3EActionSliver(
-      layoutExtent: layoutExtent,
-      paintExtent: paintExtent,
-    );
+    return _RenderM3EActionSliver(maxExtent: maxExtent, minExtent: minExtent);
   }
 
   @override
@@ -134,33 +135,32 @@ class _M3EActionSliver extends SingleChildRenderObjectWidget {
     BuildContext context,
     covariant _RenderM3EActionSliver renderObject,
   ) {
-    if (renderObject.layoutExtent == layoutExtent &&
-        renderObject.paintExtent == paintExtent) {
+    if (renderObject.maxExtent == maxExtent &&
+        renderObject.minExtent == minExtent) {
       return;
     }
     renderObject
-      ..layoutExtent = layoutExtent
-      ..paintExtent = paintExtent
+      ..maxExtent = maxExtent
+      ..minExtent = minExtent
       ..markNeedsLayout();
   }
 }
 
 class _RenderM3EActionSliver extends RenderSliverSingleBoxAdapter {
-  _RenderM3EActionSliver({
-    required this.layoutExtent,
-    required this.paintExtent,
-  });
+  _RenderM3EActionSliver({required this.maxExtent, required this.minExtent});
 
-  double layoutExtent;
-  double paintExtent;
+  double maxExtent;
+  double minExtent;
 
   @override
   double childMainAxisPosition(RenderBox child) => 0;
 
   @override
   void performLayout() {
-    final double paint = math.max(0, paintExtent);
-    final double layout = math.min(math.max(0, layoutExtent), paint);
+    final double scroll = math.max(0, maxExtent);
+    final double floor = math.max(0, minExtent);
+    final double open = scroll - constraints.scrollOffset;
+    final double paint = math.max(floor, open);
     child?.layout(
       constraints.asBoxConstraints(minExtent: paint, maxExtent: paint),
       parentUsesSize: true,
@@ -171,13 +171,14 @@ class _RenderM3EActionSliver extends RenderSliverSingleBoxAdapter {
     );
     final double painted = math.min(paint, remaining);
     geometry = SliverGeometry(
-      scrollExtent: layout,
+      scrollExtent: scroll,
       paintOrigin: math.min(constraints.overlap, 0),
       paintExtent: painted,
-      layoutExtent: math.min(layout, remaining),
-      maxPaintExtent: math.max(paint, painted),
+      layoutExtent: open.clamp(0.0, painted),
+      maxPaintExtent: math.max(scroll, floor),
+      maxScrollObstructionExtent: floor,
       hitTestExtent: painted,
-      hasVisualOverflow: paint > layout + 0.5,
+      hasVisualOverflow: true,
     );
   }
 

@@ -562,6 +562,9 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
     final Widget page = switch (widget.kind) {
       _AppBarKind.top => Scaffold(
         backgroundColor: theme.colorScheme.surface,
+        // Lets the list run behind the bar so hide / collapse on scroll
+        // moves the bar's edge exactly with the content.
+        extendBodyBehindAppBar: true,
         appBar: M3EAppBar.top(
           controller: controller,
           title: image,
@@ -580,6 +583,9 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
       ),
       _AppBarKind.search => Scaffold(
         backgroundColor: theme.colorScheme.surface,
+        // Lets the list run behind the bar so hide / collapse on scroll
+        // moves the bar's edge exactly with the content.
+        extendBodyBehindAppBar: true,
         appBar: M3EAppBar.search(
           controller: controller,
           searchController: _searchController,
@@ -612,6 +618,9 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
       ),
       _AppBarKind.bottom => Scaffold(
         backgroundColor: theme.colorScheme.surface,
+        // Lets the list run behind the bar so hide / collapse on scroll
+        // moves the bar's edge exactly with the content.
+        extendBodyBehindAppBar: true,
         appBar: M3EAppBar.top(
           controller: controller,
           titleText: widget.title,

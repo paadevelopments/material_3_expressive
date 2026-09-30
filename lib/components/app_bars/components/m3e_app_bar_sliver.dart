@@ -99,8 +99,12 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
   }
 
   bool get _visibleNow {
-    if (bar._effectiveHideMode == M3EAppBarHideMode.actions) {
+    final M3EAppBarHideMode mode = bar._effectiveHideMode;
+    if (mode == M3EAppBarHideMode.actions) {
       return true;
+    }
+    if (_follow) {
+      return mode == M3EAppBarHideMode.none || _offset < _expanded - 0.5;
     }
     return _visibility.value > 0.01;
   }
@@ -126,33 +130,19 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     final underChanged = (_lastPixels > 0) != (pixels > 0);
     _lastPixels = pixels;
     _offset = pixels;
-    _maybeSlideForScroll(position);
     _publish();
     _maybeRebuildAfterScroll(underChanged: underChanged, delta: delta);
-  }
-
-  /// Starts or stops the hide-on-scroll travel. Follows [position]'s own
-  /// [ScrollPosition.userScrollDirection] so a hide/show starts the instant a
-  /// drag changes direction, at any scroll position and at any drag speed.
-  void _maybeSlideForScroll(ScrollPosition position) {
-    if (!_follow || bar._effectiveHideMode == M3EAppBarHideMode.none) {
-      return;
-    }
-    switch (position.userScrollDirection) {
-      case ScrollDirection.reverse:
-        _m3eSlideAway(_visibility);
-      case ScrollDirection.forward:
-        _m3eSlideBack(_visibility);
-      case ScrollDirection.idle:
-        break;
-    }
   }
 
   void _maybeRebuildAfterScroll({
     required bool underChanged,
     required double delta,
   }) {
-    final bool flexible = _expanded > _collapsed + 0.5;
+    // The actions band is sized from [_offset] here, not by a persistent
+    // header, so it has to rebuild with every scrolled pixel too.
+    final bool flexible =
+        _expanded > _collapsed + 0.5 ||
+        bar._effectiveHideMode == M3EAppBarHideMode.actions;
     if (mounted && (underChanged || (flexible && delta.abs() > 0.5))) {
       setState(() {});
     }
@@ -196,12 +186,11 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     return _visibility.reverse();
   }
 
+  /// Scroll hiding is pure geometry (the bar scrolls with the content), so
+  /// [_visibility] only needs to settle back to fully shown.
   Future<void> _resumeScroll() {
     _follow = true;
-    if (_offset <= math.max(0, _expanded - _collapsed) + 0.5) {
-      return _visibility.forward();
-    }
-    return Future<void>.value();
+    return _visibility.forward();
   }
 
   @override
@@ -220,10 +209,15 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
       shown: _visibility.value,
       mode: bar._effectiveHideMode,
       manual: !_follow,
+      glued: true,
     );
     final double top = MediaQuery.paddingOf(context).top;
+    // Following scroll, the whole bar is ordinary scroll extent: the header
+    // shrinks by exactly the scrolled distance, so the content below it (and
+    // the bar's edge) move together at the scroll rate.
+    final bool sweep = _follow && motion.entire;
     final double minContent = motion.entire
-        ? _collapsed * motion.shown
+        ? (sweep ? 0.0 : _collapsed * motion.shown)
         : _collapsed;
     final double maxContent = motion.entire
         ? math.max(_expanded * motion.shown, minContent)
@@ -258,7 +252,9 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
                       top + minContent,
                       top + math.max(maxContent, minContent) - shrinkOffset,
                     );
-                    final double range = math.max(0, maxContent - minContent);
+                    final double range = sweep
+                        ? math.max(0, _expanded - _collapsed)
+                        : math.max(0, maxContent - minContent);
                     final double expand = range <= 0.5
                         ? 0
                         : (1 - (shrinkOffset / range).clamp(0.0, 1.0));
@@ -277,7 +273,9 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
                         ? metrics.scrolledElevation
                         : metrics.elevation;
                     final double contentSlot = math.max(0, current - top);
-                    final double painted = motion.entire && motion.shown > 0.001
+                    final double painted = sweep
+                        ? math.max(_collapsed, contentSlot)
+                        : motion.entire && motion.shown > 0.001
                         ? contentSlot / motion.shown
                         : contentSlot;
                     final Widget body = _M3EBarBody(
