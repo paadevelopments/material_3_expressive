@@ -52,7 +52,9 @@ class M3EToolbarScrollBehavior {
   ///
   /// The two are mutually exclusive by construction — pick one via
   /// [M3EToolbarScrollBehavior.exitAlways] or
-  /// [M3EToolbarScrollBehavior.collapseAlways].
+  /// [M3EToolbarScrollBehavior.collapseAlways]. Pass the same behavior to the
+  /// toolbar and its [M3EToolbarScrollWrapper]; a collapse request reaching a
+  /// scroll-exit toolbar is asserted in debug builds.
   final M3EToolbarScrollAction action;
 }
 

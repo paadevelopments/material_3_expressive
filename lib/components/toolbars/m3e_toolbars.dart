@@ -536,7 +536,22 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
   /// the collapse/expand starts instantly instead of waiting on a spring.
   void _handleScrollCollapseRequest() {
     final M3EToolbarVisibilityController? controller = _visibility;
-    if (controller == null || !_collapseOnScrollActive) {
+    if (controller == null) {
+      return;
+    }
+    if (!_collapseOnScrollActive) {
+      // Scroll-exit and collapse-on-scroll never run together. A collapse
+      // request here means the scroll wrapper was handed a different
+      // behavior (collapseAlways) than this toolbar (exitAlways) over the
+      // same controller.
+      assert(
+        !controller.collapseRequested,
+        'M3EToolbarScrollBehavior.exitAlways and '
+        'M3EToolbarScrollBehavior.collapseAlways do not run together. This '
+        'toolbar slides away on scroll, but its controller received a '
+        'collapse-on-scroll request. Give M3EToolbarScrollWrapper the same '
+        'M3EToolbarScrollBehavior as the toolbar.',
+      );
       return;
     }
     _setExpanded(!controller.collapseRequested);
