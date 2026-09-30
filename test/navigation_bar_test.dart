@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/components/navigation_bar/components/m3e_nav_bar_destination_button.dart';
 import 'package:material_3_expressive/components/navigation_rail/components/m3e_nav_selection_indicator.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -133,6 +134,13 @@ Future<void> _m3enavigationbarSelectionIndicatorScalesInPlace(
 
   await tester.tap(find.text('Search'));
   await tester.pump();
+
+  indicators = tester
+      .widgetList<M3ESelectionIndicator>(find.byType(M3ESelectionIndicator))
+      .toList();
+  expect(_indicatorOpacity(tester, indicators[1]), 1);
+  expect(_indicatorScaleX(tester, indicators[1]), greaterThanOrEqualTo(0.4));
+
   await tester.pump(const Duration(milliseconds: 32));
 
   indicators = tester
@@ -141,6 +149,7 @@ Future<void> _m3enavigationbarSelectionIndicatorScalesInPlace(
   final double incoming = _indicatorScaleX(tester, indicators[1]);
   expect(incoming, greaterThan(0.4));
   expect(incoming, lessThan(1));
+  expect(_indicatorOpacity(tester, indicators[1]), 1);
   expect(_indicatorOpacity(tester, indicators[0]), lessThan(1));
 }
 
@@ -191,43 +200,38 @@ Future<void> _m3enavigationbarAutolayoutUsesWideAtWideBreakpoint(
     M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
     M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Search'),
   ];
-  final double breakpoint = M3ENavBarConstants.minWideBarWidth(
-    destinations.length,
-  );
+  const double breakpoint = M3ENavBarConstants.mediumWindowBreakpoint;
 
   await tester.pumpWidget(
     _host(
-      SizedBox(
+      const SizedBox(
         width: breakpoint,
-        child: const M3ENavigationBar(
-          safeArea: false,
-          destinations: destinations,
-        ),
+        child: M3ENavigationBar(safeArea: false, destinations: destinations),
       ),
     ),
   );
   await tester.pump();
-  await tester.pump(M3ENavBarConstants.layoutSettleDuration);
 
   expect(find.text('Home'), findsOneWidget);
   expect(find.text('Search'), findsOneWidget);
-  expect(find.byType(M3ESelectionIndicator), findsWidgets);
+  final double wideWidth = tester
+      .getSize(find.byType(M3ENavBarDestinationButton).first)
+      .width;
+  expect(wideWidth, lessThan(breakpoint / 2));
 
-  // Below the computed breakpoint, autoLayout stays compact.
   await tester.pumpWidget(
     _host(
-      SizedBox(
+      const SizedBox(
         width: breakpoint - 1,
-        child: const M3ENavigationBar(
-          safeArea: false,
-          destinations: destinations,
-        ),
+        child: M3ENavigationBar(safeArea: false, destinations: destinations),
       ),
     ),
   );
   await tester.pump();
-  await tester.pump(M3ENavBarConstants.layoutSettleDuration);
-  expect(find.text('Home'), findsOneWidget);
+  expect(
+    tester.getSize(find.byType(M3ENavBarDestinationButton).first).width,
+    closeTo((breakpoint - 1) / destinations.length, 1),
+  );
 }
 
 Future<void> _m3enavigationbarForcedWideAlignsDestinationGroup(
@@ -259,16 +263,12 @@ Future<void> _m3enavigationbarForcedWideAlignsDestinationGroup(
   await tester.pump();
 
   final Rect bar = tester.getRect(find.byType(M3ENavigationBar));
-  final Rect search = tester.getRect(find.text('Search'));
-  // Last fixed chip is flush to the trailing bar inset.
+  final Rect search = tester.getRect(
+    find.byType(M3ENavBarDestinationButton).last,
+  );
   expect(
-    search.center.dx,
-    closeTo(
-      bar.right -
-          M3ENavBarConstants.wideBarHorizontalPadding -
-          M3ENavBarConstants.wideDestinationWidth / 2,
-      24,
-    ),
+    search.right,
+    closeTo(bar.right - M3ENavigationBarTheme.defaults.wideEdgePadding, 1),
   );
   expect(search.left, greaterThan(bar.left + 100));
 }
@@ -335,16 +335,16 @@ Future<void> _m3enavigationbarWideChipsUseFixedEqualWidth(
   await tester.pump();
   await tester.pump(M3ENavBarConstants.layoutSettleDuration);
 
-  final Rect home = tester.getRect(find.text('Home'));
-  final Rect browse = tester.getRect(find.text('Browse'));
-  // Equal fixed chips: centers are one chip+gap apart regardless of icon.
+  final Rect home = tester.getRect(
+    find.byType(M3ENavBarDestinationButton).at(0),
+  );
+  final Rect browse = tester.getRect(
+    find.byType(M3ENavBarDestinationButton).at(1),
+  );
+  expect(home.width, closeTo(browse.width, 1));
   expect(
     browse.center.dx - home.center.dx,
-    closeTo(
-      M3ENavBarConstants.wideDestinationWidth +
-          M3ENavBarConstants.wideDestinationGap,
-      2,
-    ),
+    closeTo(home.width + M3ENavigationBarTheme.defaults.wideItemGap, 2),
   );
 }
 
@@ -379,11 +379,16 @@ Future<void> _m3enavigationbarRespectsCustomWidebreakpointAndWidth(
   await tester.pump();
   await tester.pump(M3ENavBarConstants.layoutSettleDuration);
 
-  final Rect home = tester.getRect(find.text('Home'));
-  final Rect search = tester.getRect(find.text('Search'));
+  final Rect home = tester.getRect(
+    find.byType(M3ENavBarDestinationButton).at(0),
+  );
+  final Rect search = tester.getRect(
+    find.byType(M3ENavBarDestinationButton).at(1),
+  );
+  expect(home.width, closeTo(customWidth, 1));
   expect(
     search.center.dx - home.center.dx,
-    closeTo(customWidth + M3ENavBarConstants.wideDestinationGap, 2),
+    closeTo(customWidth + M3ENavigationBarTheme.defaults.wideItemGap, 2),
   );
 
   await tester.pumpWidget(
@@ -415,7 +420,7 @@ Future<void> _m3enavigationbarRespectsCustomWidebreakpointAndWidth(
   final Rect searchCompact = tester.getRect(find.text('Search'));
   expect(
     searchCompact.center.dx - homeCompact.center.dx,
-    greaterThan(customWidth + M3ENavBarConstants.wideDestinationGap + 20),
+    greaterThan(customWidth + 20),
   );
 }
 

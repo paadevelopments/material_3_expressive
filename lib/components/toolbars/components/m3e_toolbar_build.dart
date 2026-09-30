@@ -20,6 +20,8 @@ extension _M3EToolbarBuild on _M3EToolbarState {
         theme: chrome.theme,
         scheme: chrome.scheme,
         metrics: chrome.metrics,
+        toolbarTheme: chrome.toolbarTheme,
+        style: chrome.style,
         iconButtonSize: chrome.iconButtonSize,
         availableExtent: chrome.availableExtent,
         opticalInset: chrome.opticalInset,
@@ -218,6 +220,8 @@ extension _M3EToolbarBuild on _M3EToolbarState {
     required M3EThemeData theme,
     required M3EColorScheme scheme,
     required M3EToolbarMetrics metrics,
+    required M3EToolbarTheme toolbarTheme,
+    required M3EToolbarColorStyle style,
     required M3EIconButtonSize iconButtonSize,
     required double availableExtent,
     required double opticalInset,
@@ -255,10 +259,18 @@ extension _M3EToolbarBuild on _M3EToolbarState {
             trailing: widget.trailing,
             gap: metrics.gap,
             pillActiveSpring: widget.pillActiveSpring,
+            colorStyle: style,
           );
         },
       );
     }
+    final M3EIconButtonShapeVariant shape = _floating
+        ? M3EIconButtonShapeVariant.round
+        : M3EIconButtonShapeVariant.square;
+    final Size target = theme.iconButtonTheme.target(
+      iconButtonSize,
+      M3EIconButtonWidth.defaultWidth,
+    );
     return M3EToolbarActionsRow(
       actions: actions,
       maxInline: widget.maxInlineActions,
@@ -277,6 +289,16 @@ extension _M3EToolbarBuild on _M3EToolbarState {
           ? MainAxisAlignment.spaceBetween
           : MainAxisAlignment.start,
       pillActiveSpring: widget.pillActiveSpring,
+      flexibleDockedGap: dockedIconsOnly,
+      compact:
+          MediaQuery.sizeOf(context).width < toolbarTheme.compactBreakpoint,
+      contentAlignment: widget.contentAlignment,
+      preferredGap: toolbarTheme.dockedPreferredGap,
+      minGap: toolbarTheme.dockedMinGap,
+      centeredGap: toolbarTheme.centeredGap,
+      slotExtent: target.width,
+      shape: shape,
+      colorStyle: style,
     );
   }
 
@@ -363,9 +385,13 @@ extension _M3EToolbarBuild on _M3EToolbarState {
       bar = Align(alignment: widget.alignment, child: bar);
     }
     bar = _wrapVisibility(bar);
-    if (widget.semanticLabel != null) {
-      bar = Semantics(container: true, label: widget.semanticLabel, child: bar);
-    }
+    bar = FocusTraversalGroup(child: bar);
+    bar = Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: widget.semanticLabel,
+      child: bar,
+    );
     return bar;
   }
 }

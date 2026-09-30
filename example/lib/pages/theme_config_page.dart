@@ -16,38 +16,35 @@ class ThemeConfigPage extends StatelessWidget {
     final M3EThemeData theme = M3ETheme.of(context);
     final ExampleThemeSettings settings = ExampleThemeScope.of(context);
 
+    // Scaffold.appBar (not a plain Column) so the app bar's elevation
+    // shadow paints above the scrolled-under list instead of being painted
+    // over by it — a Column just stacks siblings in tree order, so the
+    // list immediately below would otherwise cover the shadow that's meant
+    // to overlap it.
     return Scaffold(
-      body: ColoredBox(
-        color: theme.colorScheme.surface,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewPaddingOf(context).bottom,
-          ),
-          child: Column(
-            children: <Widget>[
-              M3EAppBar.top(
-                titleText: 'Theme',
-                leading: M3EIconButton(
-                  variant: M3EIconButtonVariant.standard,
-                  icon: const Icon(M3EIcons.arrow_back),
-                  tooltip: 'Back',
-                  onPressed: () => Navigator.of(context).maybePop(),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  children: <Widget>[
-                    _toggles(theme, settings),
-                    const SizedBox(height: 24),
-                    _seeds(theme, settings),
-                    const SizedBox(height: 24),
-                    _type(theme, settings),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      backgroundColor: theme.colorScheme.surface,
+      appBar: M3EAppBar.top(
+        titleText: 'Theme',
+        leading: M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
+      body: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: <Widget>[
+            _toggles(theme, settings),
+            const SizedBox(height: 24),
+            _seeds(theme, settings),
+            const SizedBox(height: 24),
+            _type(theme, settings),
+          ],
         ),
       ),
     );
@@ -76,7 +73,7 @@ class ThemeConfigPage extends StatelessWidget {
       ),
     ];
 
-    return M3ECardList(
+    return M3EList(
       itemCount: rows.length,
       itemBuilder: (BuildContext context, int index) => rows[index],
     );

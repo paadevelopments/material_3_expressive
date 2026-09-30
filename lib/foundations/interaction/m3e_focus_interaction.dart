@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -5,13 +6,14 @@ import '../theme/m3e_theme.dart';
 
 /// Tracks whether keyboard focus rings are allowed after the last interaction.
 ///
-/// Pointer interaction clears rings; only keyboard focus-navigation keys enable
-/// them again. Focus state on nodes is unchanged — only ring *visibility* is
-/// gated.
+/// Any pointer interaction (hover, press, scroll, or pan) clears rings. Only
+/// keyboard focus-navigation keys enable them again. Focus on nodes is
+/// unchanged — only ring visibility is gated.
 class M3EFocusInteraction extends ChangeNotifier {
   M3EFocusInteraction._() {
     FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+    _bindPointerRoute();
     _syncFromHighlightMode(FocusManager.instance.highlightMode);
   }
 
@@ -27,23 +29,53 @@ class M3EFocusInteraction extends ChangeNotifier {
   /// Listenable for rebuilds when [ringsAllowed] changes.
   Listenable get listenable => this;
 
-  /// Call on pointer down/tap so rings hide until keyboard nav resumes.
+  /// Call when a pointer interaction starts so rings hide until keyboard nav.
   ///
-  /// Listener notification is deferred to the next frame so a rebuild cannot
-  /// cancel an in-progress tap gesture (e.g. list item InkWell).
-  void notePointerInteraction() {
+  /// [immediate] notifies listeners in this event. Press uses a deferred
+  /// notification so a rebuild cannot cancel an in-progress tap.
+  void notePointerInteraction({bool immediate = false}) {
     if (!_ringsAllowed) {
       return;
     }
     _ringsAllowed = false;
+    if (immediate) {
+      notifyListeners();
+      return;
+    }
     if (_notifyPointerScheduled) {
       return;
     }
     _notifyPointerScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _notifyPointerScheduled = false;
-      notifyListeners();
+      if (!_ringsAllowed) {
+        notifyListeners();
+      }
     });
+  }
+
+  GestureBinding? _boundPointerBinding;
+
+  void _bindPointerRoute() {
+    final GestureBinding binding = GestureBinding.instance;
+    if (identical(_boundPointerBinding, binding)) {
+      return;
+    }
+    _boundPointerBinding = binding;
+    binding.pointerRouter.addGlobalRoute(_handlePointer);
+  }
+
+  void _handlePointer(PointerEvent event) {
+    final press = event is PointerDownEvent;
+    final pointer =
+        press ||
+        event is PointerHoverEvent ||
+        event is PointerScrollEvent ||
+        event is PointerPanZoomStartEvent;
+    if (!pointer) {
+      return;
+    }
+    notePointerInteraction(immediate: !press);
   }
 
   /// Call when keyboard focus navigation becomes active (Tab / arrows).
@@ -131,6 +163,7 @@ class M3EFocusInteraction extends ChangeNotifier {
     // Re-bind key handler in case the test binding cleared handlers.
     HardwareKeyboard.instance.removeHandler(instance._handleKeyEvent);
     HardwareKeyboard.instance.addHandler(instance._handleKeyEvent);
+    instance._bindPointerRoute();
     instance.notifyListeners();
   }
 }

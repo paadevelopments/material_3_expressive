@@ -68,6 +68,23 @@ abstract final class M3EToolbarItemLayout {
     };
   }
 
+  /// Docked gap clamped to `[minGap, preferredGap]`.
+  ///
+  /// Wide bars stay at [preferredGap]. Tight bars shrink toward [minGap].
+  static double dockedGap({
+    required double available,
+    required double slotExtent,
+    required int slotCount,
+    required double preferredGap,
+    required double minGap,
+  }) {
+    if (slotCount <= 1 || !available.isFinite) {
+      return preferredGap;
+    }
+    final double even = (available - slotCount * slotExtent) / (slotCount - 1);
+    return even.clamp(minGap, preferredGap);
+  }
+
   /// Inserts [gap] between consecutive [children] along [axis].
   static List<Widget> withGaps(
     List<Widget> children, {

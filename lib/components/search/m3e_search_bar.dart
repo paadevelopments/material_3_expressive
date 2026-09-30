@@ -57,6 +57,7 @@ class M3ESearchBar extends StatefulWidget {
     this.smartDashesType,
     this.smartQuotesType,
     this.alignment = AlignmentDirectional.centerStart,
+    this.wrapActions,
     this.onEscape,
     super.key,
   });
@@ -161,6 +162,13 @@ class M3ESearchBar extends StatefulWidget {
   /// Alignment of leading, hint, and trailing while the field is empty and
   /// unfocused. Switches to start layout when focused or when text is present.
   final AlignmentGeometry alignment;
+
+  /// Groups leading, hint, and trailing into one row that follows [alignment].
+  ///
+  /// Null keeps the previous rule: group only when [alignment] is centered.
+  /// True always groups while idle. False keeps leading and trailing at the
+  /// ends of the pill and aligns only the hint.
+  final bool? wrapActions;
 
   /// Called when Escape is pressed while the search field has focus.
   ///
@@ -293,6 +301,9 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   bool _groupsIdleContent(TextDirection textDirection) {
     if (!_alignIdleContent) {
       return false;
+    }
+    if (widget.wrapActions != null) {
+      return widget.wrapActions!;
     }
     final Alignment resolved = widget.alignment.resolve(textDirection);
     return resolved.x.abs() < 0.001;

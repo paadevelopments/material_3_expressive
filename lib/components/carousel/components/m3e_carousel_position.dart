@@ -7,6 +7,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
     required super.context,
     this.initialItem = 0,
     double? itemExtent,
+    List<double>? restingExtents,
     List<int>? flexWeights,
     this._consumeMaxWeight = true,
     this._infinite = false,
@@ -18,6 +19,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
          'Exactly one of flexWeights or itemExtent must be non-null',
        ),
        _itemToShowOnStartup = initialItem.toDouble(),
+       _restingExtents = restingExtents == null || restingExtents.isEmpty
+           ? null
+           : List<double>.from(restingExtents),
        super(initialPixels: null);
 
   int initialItem;
@@ -81,6 +85,10 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
     if (_itemExtent == value) {
       return;
     }
+    if (restingExtents != null) {
+      _itemExtent = value;
+      return;
+    }
     if (hasPixels && _itemExtent != null && viewportDimension != 0.0) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
       final double newPixel = getPixelsFromItem(
@@ -93,12 +101,26 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
     _itemExtent = value;
   }
 
+  /// Resting main-axis size of each item, when widths vary.
+  List<double>? get restingExtents => _restingExtents;
+  List<double>? _restingExtents;
+
+  set restingExtents(List<double>? value) {
+    final List<double>? next = value == null || value.isEmpty
+        ? null
+        : List<double>.from(value);
+    if (_sameExtents(_restingExtents, next)) {
+      return;
+    }
+    _restingExtents = next;
+  }
+
   @override
   List<int>? get flexWeights => _flexWeights;
   List<int>? _flexWeights;
 
   set flexWeights(List<int>? value) {
-    if (flexWeights == value) {
+    if (_sameWeights(flexWeights, value)) {
       return;
     }
     final List<int>? oldWeights = _flexWeights;
@@ -170,6 +192,10 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
 
   double getItemFromPixels(double pixels, double viewportDimension) {
     assert(viewportDimension > 0.0, 'carousel invariant');
+    final List<double>? extents = restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _itemFromExtents(pixels, extents);
+    }
     double fraction;
     if (itemExtent != null) {
       fraction = itemExtent! / viewportDimension;
@@ -192,6 +218,13 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
     List<int>? flexWeights,
     double? itemExtent,
   ) {
+    final List<double>? extents = restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      final double clamped = item.clamp(0, extents.length - 1).toDouble();
+      final int whole = clamped.floor();
+      final double fraction = clamped - whole;
+      return _extentPrefix(extents, whole) + fraction * extents[whole];
+    }
     double fraction;
     if (viewportDimension == 0.0) {
       return 0;
@@ -322,4 +355,59 @@ class _CarouselPosition extends ScrollPositionWithSingleContext
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
+}
+
+double _itemFromExtents(double pixels, List<double> extents) {
+  final double offset = math.max(0, pixels);
+  double start = 0;
+  for (var i = 0; i < extents.length; i++) {
+    final double size = extents[i];
+    if (size <= 0) {
+      continue;
+    }
+    if (offset < start + size) {
+      return i + (offset - start) / size;
+    }
+    start += size;
+  }
+  return (extents.length - 1).toDouble();
+}
+
+double _extentPrefix(List<double> extents, int index) {
+  double sum = 0;
+  final int end = math.min(index, extents.length);
+  for (var i = 0; i < end; i++) {
+    sum += extents[i];
+  }
+  return sum;
+}
+
+bool _sameExtents(List<double>? a, List<double>? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a == null || b == null || a.length != b.length) {
+    return false;
+  }
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool _sameWeights(List<int>? a, List<int>? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a == null || b == null || a.length != b.length) {
+    return false;
+  }
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
 }

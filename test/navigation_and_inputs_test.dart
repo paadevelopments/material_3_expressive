@@ -12,18 +12,23 @@ Finder _tooltip(String message) {
 }
 
 bool _railHasSelectionFill(WidgetTester tester) {
+  final Finder indicator = find.descendant(
+    of: find.byType(M3ENavigationRail),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is M3ESelectionIndicator && widget.selected,
+    ),
+  );
   return tester
       .widgetList<DecoratedBox>(
-        find.descendant(
-          of: find.byType(M3ENavigationRail),
-          matching: find.byType(DecoratedBox),
-        ),
+        find.descendant(of: indicator, matching: find.byType(DecoratedBox)),
       )
       .any((DecoratedBox box) {
-        final Decoration decoration = box.decoration;
-        return decoration is ShapeDecoration &&
-            decoration.color != null &&
-            decoration.color!.a > 0;
+        final Color? color = switch (box.decoration) {
+          BoxDecoration(:final Color? color) => color,
+          ShapeDecoration(:final Color? color) => color,
+          _ => null,
+        };
+        return color != null && color.a > 0;
       });
 }
 
@@ -53,7 +58,7 @@ void main() {
     _m3enavigationrailIndicatorStaysOnSelectionAfterMediaqu,
   );
   testWidgets(
-    'nav selection content is centered and the collapsed rail pill matches the bar',
+    'nav selection content is centered and the collapsed rail pill matches its theme',
     _navSelectionContentIsCentered,
   );
   testWidgets(
@@ -379,8 +384,11 @@ Future<void> _navSelectionContentIsCentered(WidgetTester tester) async {
     tester,
     find.byType(M3ENavigationRail),
   );
-  expect(collapsedPill.width, M3ENavBarConstants.compactIndicatorWidth);
-  expect(collapsedPill.height, M3ENavBarConstants.indicatorHeight);
+  final M3ENavigationRailTheme railTheme = M3ETheme.of(
+    tester.element(find.byType(M3ENavigationRail)),
+  ).navigationRailTheme;
+  expect(collapsedPill.width, railTheme.verticalIndicatorWidth);
+  expect(collapsedPill.height, railTheme.verticalIndicatorHeight);
 }
 
 Future<void> _m3enavigationrailExpandDoesNotOverflow(

@@ -211,12 +211,27 @@ class M3ESliderTrackPainter extends CustomPainter {
   ) {
     final double activeStart = metrics.activeStart;
     final double activeEnd = metrics.activeEnd;
-    final double startCorner = (_rtl || _centered || _range)
+    final bool filledReachesEnd =
+        metrics.adjustedValueStart >=
+        metrics.sliderEnd - metrics.endGap - metrics.corner;
+    final bool filledReachesStart =
+        metrics.adjustedValueEnd <=
+        metrics.sliderStart + metrics.startGap + metrics.corner;
+    var startCorner = (_rtl || _centered || _range)
         ? insideCornerSize
         : metrics.corner;
-    final double endCorner = (_rtl && !_centered && !_range)
+    var endCorner = (_rtl && !_centered && !_range)
         ? metrics.corner
         : insideCornerSize;
+    // At a track end the filled cap uses the outer corner, same as the far edge.
+    if (filledReachesEnd && endCorner == insideCornerSize) {
+      endCorner = metrics.corner;
+    }
+    if (filledReachesStart &&
+        (_centered || _range) &&
+        startCorner == insideCornerSize) {
+      startCorner = metrics.corner;
+    }
     if (activeEnd - activeStart <= startCorner) {
       return;
     }

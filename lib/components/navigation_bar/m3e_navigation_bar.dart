@@ -1,32 +1,32 @@
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../foundations/foundations.dart';
 import 'components/m3e_nav_bar_destination_button.dart';
+import 'controllers/m3e_navigation_bar_controller.dart';
 import 'enums/m3e_nav_bar_enums.dart';
 import 'models/m3e_nav_metrics.dart';
 import 'models/m3e_navigation_bar_destination.dart';
-import 'res/m3e_nav_bar_constants.dart';
 import 'styles/m3e_navigation_bar_theme.dart';
 
+export 'controllers/m3e_navigation_bar_controller.dart';
 export 'enums/m3e_nav_bar_enums.dart';
 export 'models/m3e_nav_metrics.dart';
 export 'models/m3e_navigation_bar_destination.dart';
 export 'res/m3e_nav_bar_constants.dart';
 export 'styles/m3e_navigation_bar_theme.dart';
 
+part 'components/m3e_navigation_bar_build.dart';
+
 /// A Material 3 Expressive navigation bar.
 ///
-/// Pill selection scales each destination's own indicator in place.
-///
-/// When [autoLayout] is true (default), the bar switches to
-/// [M3ENavBarLayout.wide] once its own width reaches the effective breakpoint
-/// ([wideBreakpoint], or [M3ENavBarConstants.minWideBarWidth] for the current
-/// destinations and [wideDestinationWidth]). Wide mode keeps the bar full
-/// width and only aligns the destination group via [alignment]. Each wide
-/// destination uses a fixed chip width so the pill never clips when
-/// icons/labels appear or disappear.
+/// The flexible size is 64. The baseline size is 80. Vertical items share the
+/// width and keep the pill behind the icon. Horizontal items turn on in a
+/// medium window, or when [layout] is [M3ENavBarLayout.wide]. Arrow keys move
+/// focus. Space or Enter selects, including the active destination.
 class M3ENavigationBar extends StatefulWidget {
   /// M3ENavigationBar.
   const M3ENavigationBar({
@@ -51,6 +51,9 @@ class M3ENavigationBar extends StatefulWidget {
     this.padding,
     this.safeArea = true,
     this.semanticLabel,
+    this.controller,
+    this.hideOnScroll = false,
+    this.scrollController,
   });
 
   /// destinations.
@@ -59,7 +62,7 @@ class M3ENavigationBar extends StatefulWidget {
   /// selectedIndex.
   final int selectedIndex;
 
-  /// onDestinationSelected.
+  /// Called when a destination is chosen, including the active one.
   final ValueChanged<int>? onDestinationSelected;
 
   /// labelBehavior.
@@ -77,16 +80,17 @@ class M3ENavigationBar extends StatefulWidget {
   /// Destination-group placement in wide layout (bar stays full width).
   final M3ENavBarAlignment alignment;
 
-  /// Auto-layout width threshold. When null, uses
-  /// [M3ENavBarConstants.minWideBarWidth] for [destinations] and
-  /// [wideDestinationWidth] so wide mode only activates when all chips fit.
+  /// Auto-layout width threshold. When null, uses the theme breakpoint
+  /// (600).
   final double? wideBreakpoint;
 
-  /// Fixed width of each destination chip in wide layout. When null, uses
-  /// [M3ENavBarConstants.wideDestinationWidth].
+  /// Width of each horizontal destination. When null, every item uses the
+  /// widest icon-plus-label content.
   final double? wideDestinationWidth;
 
-  /// size.
+  /// Flexible [M3ENavBarSize.small] or baseline [M3ENavBarSize.medium].
+  ///
+  /// Defaults to the baseline bar.
   final M3ENavBarSize size;
 
   /// shapeFamily.
@@ -110,213 +114,248 @@ class M3ENavigationBar extends StatefulWidget {
   /// padding.
   final EdgeInsetsGeometry? padding;
 
-  /// safeArea.
+  /// When true, the system navigation inset is padding inside the bar.
   final bool safeArea;
 
   /// semanticLabel.
   final String? semanticLabel;
+
+  /// Optional selection and visibility controller.
+  final M3ENavigationBarController? controller;
+
+  /// When true, [scrollController] hides the bar on a downward scroll.
+  final bool hideOnScroll;
+
+  /// Body scroll position. A bottom bar is not inside that scroll view.
+  final ScrollController? scrollController;
 
   @override
   State<M3ENavigationBar> createState() => _M3ENavigationBarState();
 }
 
 class _M3ENavigationBarState extends State<M3ENavigationBar> {
-  double get _resolvedWideDestinationWidth =>
-      widget.wideDestinationWidth ?? M3ENavBarConstants.wideDestinationWidth;
+  final List<FocusNode> _nodes = <FocusNode>[];
+  M3ENavigationBarController? _bound;
+  ScrollController? _scroll;
+  late final ValueChanged<int> _controllerSelect = _selectFromController;
+  bool _inside = false;
+  bool _redirecting = false;
+  int _focusIndex = 0;
+  bool _visible = true;
 
-  double get _resolvedWideBreakpoint =>
-      widget.wideBreakpoint ??
-      M3ENavBarConstants.minWideBarWidth(
-        widget.destinations.length,
-        itemWidth: _resolvedWideDestinationWidth,
-      );
-
-  M3ENavBarLayout _resolveLayout(double maxWidth) {
-    if (!widget.autoLayout) {
-      return widget.layout;
+  int get _selected {
+    if (widget.destinations.isEmpty) {
+      return 0;
     }
-    return maxWidth >= _resolvedWideBreakpoint
-        ? M3ENavBarLayout.wide
-        : M3ENavBarLayout.compact;
+    return widget.selectedIndex.clamp(0, widget.destinations.length - 1);
   }
 
-  MainAxisAlignment _wideMainAxisAlignment() {
-    return switch (widget.alignment) {
-      M3ENavBarAlignment.start => MainAxisAlignment.start,
-      M3ENavBarAlignment.center => MainAxisAlignment.center,
-      M3ENavBarAlignment.end => MainAxisAlignment.end,
-    };
+  @override
+  void initState() {
+    super.initState();
+    _focusIndex = widget.selectedIndex;
+    _syncNodes();
+    _bindScroll();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bindController();
+  }
+
+  @override
+  void didUpdateWidget(covariant M3ENavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.destinations.length != widget.destinations.length) {
+      _syncNodes();
+    }
+    if (oldWidget.controller != widget.controller) {
+      _bindController();
+    } else {
+      _bound?.updateIndex(_selected);
+    }
+    if (oldWidget.scrollController != widget.scrollController ||
+        oldWidget.hideOnScroll != widget.hideOnScroll) {
+      _bindScroll();
+    }
+    if (!_inside) {
+      _focusIndex = _selected;
+    }
+  }
+
+  @override
+  void dispose() {
+    _bound?.removeListener(_onController);
+    _bound?.detach(_controllerSelect);
+    _scroll?.removeListener(_onScroll);
+    for (final FocusNode node in _nodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  void _syncNodes() {
+    final int count = widget.destinations.length;
+    while (_nodes.length < count) {
+      _nodes.add(
+        FocusNode(debugLabel: 'nav ${_nodes.length}')..addListener(_onFocus),
+      );
+    }
+    while (_nodes.length > count) {
+      _nodes.removeLast()
+        ..removeListener(_onFocus)
+        ..dispose();
+    }
+    if (_nodes.isEmpty) {
+      _focusIndex = 0;
+      return;
+    }
+    _focusIndex = _focusIndex.clamp(0, _nodes.length - 1);
+  }
+
+  void _bindController() {
+    final M3ENavigationBarController? next = widget.controller;
+    if (identical(_bound, next)) {
+      _bound?.updateIndex(_selected);
+      return;
+    }
+    _bound?.removeListener(_onController);
+    _bound?.detach(_controllerSelect);
+    _bound = next;
+    next?.attach(_controllerSelect, _selected);
+    next?.addListener(_onController);
+  }
+
+  void _bindScroll() {
+    final ScrollController? next = widget.hideOnScroll
+        ? widget.scrollController
+        : null;
+    if (identical(_scroll, next)) {
+      return;
+    }
+    _scroll?.removeListener(_onScroll);
+    _scroll = next;
+    _scroll?.addListener(_onScroll);
+  }
+
+  void _selectFromController(int index) {
+    widget.onDestinationSelected?.call(index);
+  }
+
+  void _onController() {
+    if (!mounted) {
+      return;
+    }
+    final bool visible = _bound?.visible ?? _visible;
+    if (visible == _visible) {
+      return;
+    }
+    setState(() => _visible = visible);
+  }
+
+  void _onScroll() {
+    if (!mounted || !widget.hideOnScroll) {
+      return;
+    }
+    final ScrollController? scroll = _scroll;
+    if (scroll == null || !scroll.hasClients) {
+      return;
+    }
+    if (MediaQuery.accessibleNavigationOf(context)) {
+      _applyVisible(true);
+      return;
+    }
+    final ScrollDirection direction = scroll.position.userScrollDirection;
+    if (direction == ScrollDirection.reverse) {
+      _applyVisible(false);
+    } else if (direction == ScrollDirection.forward) {
+      _applyVisible(true);
+    }
+  }
+
+  void _applyVisible(bool visible) {
+    final M3ENavigationBarController? bound = _bound;
+    if (bound != null) {
+      bound.updateVisible(visible: visible);
+      return;
+    }
+    if (_visible == visible) {
+      return;
+    }
+    setState(() => _visible = visible);
+  }
+
+  bool _shown(BuildContext context) {
+    if (!widget.hideOnScroll) {
+      return true;
+    }
+    if (MediaQuery.accessibleNavigationOf(context)) {
+      return true;
+    }
+    return _bound?.visible ?? _visible;
+  }
+
+  void _onFocus() {
+    if (!mounted || _redirecting || _nodes.isEmpty) {
+      return;
+    }
+    final bool any = _nodes.any((FocusNode node) => node.hasFocus);
+    if (!any) {
+      if (!_inside) {
+        return;
+      }
+      setState(() {
+        _inside = false;
+        _focusIndex = _selected;
+      });
+      return;
+    }
+    final int focused = _nodes.indexWhere((FocusNode node) => node.hasFocus);
+    if (!_inside) {
+      _inside = true;
+      if (focused != _selected) {
+        _redirecting = true;
+        _focusIndex = _selected;
+        _nodes[_selected].requestFocus();
+        _redirecting = false;
+        setState(() {});
+        return;
+      }
+    }
+    if (focused >= 0 && focused != _focusIndex) {
+      setState(() => _focusIndex = focused);
+    }
+  }
+
+  void _move(int delta) {
+    final int current = _nodes.indexWhere((FocusNode node) => node.hasFocus);
+    if (current < 0) {
+      return;
+    }
+    final int next = current + delta;
+    if (next < 0 || next >= _nodes.length) {
+      return;
+    }
+    setState(() {
+      _inside = true;
+      _focusIndex = next;
+    });
+    _nodes[next].requestFocus();
+  }
+
+  bool _tabStop(int index) {
+    if (_inside) {
+      return index == _focusIndex;
+    }
+    return index == _selected;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(widget.destinations.isNotEmpty, 'Provide at least one destination');
-    return M3EComponentTheme(builder: _buildNavigationBar);
-  }
-
-  Widget _buildNavigationBar(BuildContext context) {
-    final M3EThemeData m3e = M3ETheme.of(context);
-    final M3ENavigationBarTheme navTheme = m3e.navigationBarTheme;
-    final M3EColorScheme scheme = m3e.colorScheme;
-    final metrics = navTheme.metrics(widget.density, m3e.spacing);
-    final double height = widget.size == M3ENavBarSize.small
-        ? metrics.heightSmall
-        : metrics.heightMedium;
-    final Color bg = widget.backgroundColor ?? navTheme.containerColor(scheme);
-    final ShapeBorder shape = navTheme.containerShape(widget.shapeFamily);
-    final double bottomInset = widget.safeArea
-        ? M3ESafeArea.bottomOf(context)
-        : 0.0;
-    final Color indicator =
-        widget.indicatorColor ?? navTheme.indicatorColor(scheme);
-
-    Widget nav = Material(
-      color: bg,
-      elevation: widget.elevation ?? 0,
-      shape: shape,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: SizedBox(
-          height: height,
-          width: double.infinity,
-          child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final M3ENavBarLayout effective = _resolveLayout(
-                constraints.maxWidth,
-              );
-              return _buildDestinationsBody(
-                m3e: m3e,
-                navTheme: navTheme,
-                scheme: scheme,
-                metrics: metrics,
-                indicator: indicator,
-                barHeight: height,
-                layout: effective,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-    nav = Padding(padding: widget.padding ?? EdgeInsets.zero, child: nav);
-    if (widget.semanticLabel != null) {
-      nav = Semantics(container: true, label: widget.semanticLabel, child: nav);
-    }
-    return nav;
-  }
-
-  Widget _buildDestinationsBody({
-    required M3EThemeData m3e,
-    required M3ENavigationBarTheme navTheme,
-    required M3EColorScheme scheme,
-    required M3ENavMetrics metrics,
-    required Color indicator,
-    required double barHeight,
-    required M3ENavBarLayout layout,
-  }) {
-    final Color selected = navTheme.selectedColor(scheme);
-    final Color unselected = navTheme.unselectedColor(scheme);
-    final TextStyle labelBase = navTheme.labelStyle(m3e.typeScale);
-    final Widget destinationsRow = layout == M3ENavBarLayout.wide
-        ? _buildWideRow(
-            selected: selected,
-            unselected: unselected,
-            labelBase: labelBase,
-            metrics: metrics,
-            indicator: indicator,
-            barHeight: barHeight,
-          )
-        : _buildCompactRow(
-            selected: selected,
-            unselected: unselected,
-            labelBase: labelBase,
-            metrics: metrics,
-            indicator: indicator,
-          );
-
-    return destinationsRow;
-  }
-
-  Widget _buildCompactRow({
-    required Color selected,
-    required Color unselected,
-    required TextStyle labelBase,
-    required M3ENavMetrics metrics,
-    required Color indicator,
-  }) {
-    return Row(
-      children: <Widget>[
-        for (int i = 0; i < widget.destinations.length; i++)
-          Expanded(
-            child: M3ENavBarDestinationButton(
-              destination: widget.destinations[i],
-              selected: i == widget.selectedIndex,
-              selectedColor: selected,
-              unselectedColor: unselected,
-              labelStyle: labelBase,
-              iconSize: metrics.iconSize,
-              labelBehavior: widget.labelBehavior,
-              iconBehavior: widget.iconBehavior,
-              layout: M3ENavBarLayout.compact,
-              indicatorStyle: widget.indicatorStyle,
-              indicatorWidth: M3ENavBarConstants.compactIndicatorWidth,
-              indicatorHeight: M3ENavBarConstants.indicatorHeight,
-              underlineThickness: metrics.indicatorThickness,
-              underlineColor: indicator,
-              indicatorColor: indicator,
-              onTap: () => widget.onDestinationSelected?.call(i),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildWideRow({
-    required Color selected,
-    required Color unselected,
-    required TextStyle labelBase,
-    required M3ENavMetrics metrics,
-    required Color indicator,
-    required double barHeight,
-  }) {
-    // Content SizedBox height already excludes system-nav bottom inset.
-    final double widePillHeight = math.max(
-      M3ENavBarConstants.indicatorHeight,
-      barHeight - M3ENavBarConstants.wideIndicatorHeightReduction,
-    );
-    final double chipWidth = _resolvedWideDestinationWidth;
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: M3ENavBarConstants.wideBarHorizontalPadding,
-      ),
-      child: Row(
-        mainAxisAlignment: _wideMainAxisAlignment(),
-        children: <Widget>[
-          for (int i = 0; i < widget.destinations.length; i++) ...<Widget>[
-            if (i > 0)
-              const SizedBox(width: M3ENavBarConstants.wideDestinationGap),
-            M3ENavBarDestinationButton(
-              destination: widget.destinations[i],
-              selected: i == widget.selectedIndex,
-              selectedColor: selected,
-              unselectedColor: unselected,
-              labelStyle: labelBase,
-              iconSize: metrics.iconSize,
-              labelBehavior: widget.labelBehavior,
-              iconBehavior: widget.iconBehavior,
-              layout: M3ENavBarLayout.wide,
-              indicatorStyle: widget.indicatorStyle,
-              indicatorWidth: M3ENavBarConstants.compactIndicatorWidth,
-              indicatorHeight: widePillHeight,
-              wideDestinationWidth: chipWidth,
-              underlineThickness: metrics.indicatorThickness,
-              underlineColor: indicator,
-              indicatorColor: indicator,
-              onTap: () => widget.onDestinationSelected?.call(i),
-            ),
-          ],
-        ],
-      ),
+    return M3EComponentTheme(
+      builder: (BuildContext context) => _buildNavigationBar(context),
     );
   }
 }

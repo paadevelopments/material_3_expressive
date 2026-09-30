@@ -108,14 +108,30 @@ abstract final class M3ESliderMath {
         key == LogicalKeyboardKey.end;
   }
 
-  /// Single keyboard step: one division width, or 1% of the range when
-  /// continuous.
+  /// Single keyboard step: one division, or 1% of the range when continuous.
   static double stepSize(double min, double max, int? divisions) {
-    return (max - min) / (divisions ?? 100);
+    return keyboardStep(min, max, divisions, coarse: false);
   }
 
-  /// Coarser PageUp/PageDown step — ten [stepSize]s per page.
+  /// Larger keyboard step: one division, or 10% of the range when continuous.
   static double pageStep(double step, int? divisions) {
-    return step * math.max(1, (divisions ?? 100) ~/ 10);
+    if (divisions != null && divisions > 0) {
+      return step;
+    }
+    return step * 10;
+  }
+
+  /// Arrow step, or the Space+arrow step when [coarse] is true.
+  static double keyboardStep(
+    double min,
+    double max,
+    int? divisions, {
+    required bool coarse,
+  }) {
+    if (divisions != null && divisions > 0) {
+      return (max - min) / divisions;
+    }
+    final span = max - min;
+    return coarse ? span / 10 : span / 100;
   }
 }

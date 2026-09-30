@@ -1,4 +1,16 @@
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
+import 'package:flutter/rendering.dart'
+    show
+        BoxHitTestResult,
+        FloatingHeaderSnapConfiguration,
+        RenderProxyBox,
+        RenderSliver,
+        RenderSliverSingleBoxAdapter,
+        ScrollDirection,
+        SliverGeometry,
+        TransformLayer;
 
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
@@ -11,10 +23,25 @@ import '../search/controllers/m3e_search_controller.dart';
 import '../search/m3e_search_anchor.dart';
 import '../tooltips/m3e_tooltips.dart';
 import 'components/m3e_app_bar_semantics.dart';
+import 'controllers/m3e_app_bar_controller.dart';
 import 'enums/m3e_app_bar_enums.dart';
+import 'styles/m3e_app_bar_theme.dart';
 
+export 'controllers/m3e_app_bar_controller.dart';
 export 'enums/m3e_app_bar_enums.dart';
 export 'styles/m3e_app_bar_theme.dart';
+
+part 'components/m3e_app_bar_docked.dart';
+part 'components/m3e_app_bar_docked_parts.dart';
+part 'components/m3e_app_bar_bottom.dart';
+part 'components/m3e_app_bar_sliver.dart';
+part 'components/m3e_app_bar_sliver_actions.dart';
+part 'components/m3e_app_bar_motion.dart';
+part 'components/m3e_app_bar_scroll.dart';
+part 'components/m3e_app_bar_body.dart';
+part 'components/m3e_app_bar_title.dart';
+
+const Duration _kAppBarTravel = Duration(milliseconds: 250);
 
 /// Which app bar layout an [M3EAppBar] renders.
 enum _M3EAppBarKind { top, bottom, sliver }
@@ -33,6 +60,8 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.title,
     this.titleText,
+    this.subtitle,
+    this.subtitleText,
     this.actions,
     this.centerTitle = false,
     this.backgroundColor,
@@ -45,13 +74,16 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.safeArea = true,
     this.clipBehavior = Clip.none,
     this.semanticLabel,
+    this.controller,
+    this.variant = M3EAppBarVariant.small,
+    this.hideOnScroll = false,
+    this.hideMode = M3EAppBarHideMode.none,
   }) : _kind = _M3EAppBarKind.top,
        _dockEdge = _M3EAppBarDockEdge.top,
        floatingActionButton = null,
        pinned = true,
        floating = false,
-       snap = false,
-       variant = M3EAppBarVariant.medium;
+       snap = false;
 
   /// A top app bar whose title is a read-only anchored [M3ESearchAnchor.bar].
   ///
@@ -81,12 +113,17 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     bool safeArea = true,
     Clip clipBehavior = Clip.none,
     String? semanticLabel,
+    M3EAppBarController? controller,
+    M3EAppBarVariant variant = M3EAppBarVariant.small,
+    bool hideOnScroll = false,
+    M3EAppBarHideMode hideMode = M3EAppBarHideMode.none,
+    bool wrapActions = false,
     ValueChanged<String>? onSubmitted,
     ValueChanged<String>? onChanged,
     VoidCallback? onClose,
     VoidCallback? onOpen,
     BoxConstraints? searchConstraints,
-    AlignmentGeometry barAlignment = Alignment.center,
+    AlignmentGeometry? barAlignment,
   }) {
     return M3EAppBar.top(
       key: key,
@@ -103,6 +140,10 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       safeArea: safeArea,
       clipBehavior: clipBehavior,
       semanticLabel: semanticLabel,
+      controller: controller,
+      variant: variant,
+      hideOnScroll: hideOnScroll,
+      hideMode: hideMode,
       title: _M3EAppBarSearchTitle(
         searchController: searchController,
         suggestionsBuilder: suggestionsBuilder,
@@ -110,7 +151,10 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
         barLeading: barLeading,
         barTrailing: barTrailing,
         barBackgroundColor: barBackgroundColor,
-        barAlignment: barAlignment,
+        barAlignment:
+            barAlignment ??
+            (centerTitle ? Alignment.center : AlignmentDirectional.centerStart),
+        wrapActions: wrapActions,
         isFullScreen: isFullScreen,
         onSubmitted: onSubmitted,
         onChanged: onChanged,
@@ -135,6 +179,8 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
        leading = null,
        title = null,
        titleText = null,
+       subtitle = null,
+       subtitleText = null,
        centerTitle = false,
        backgroundColor = null,
        foregroundColor = null,
@@ -148,14 +194,24 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
        pinned = true,
        floating = false,
        snap = false,
+       hideOnScroll = false,
+       hideMode = M3EAppBarHideMode.none,
+       controller = null,
        variant = M3EAppBarVariant.medium;
 
   /// A scrolling sliver app bar for use in `CustomScrollView.slivers`.
+  ///
+  /// Flexible variants are pinned. They collapse to the small content height
+  /// and stay there until the scroll offset returns to the top. [hideOnScroll]
+  /// additionally moves that bar away while content scrolls forward and brings
+  /// it back when the user scrolls back.
   const M3EAppBar.sliver({
     super.key,
     this.leading,
     this.title,
     this.titleText,
+    this.subtitle,
+    this.subtitleText,
     this.actions,
     this.centerTitle = false,
     this.backgroundColor,
@@ -163,7 +219,10 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.pinned = true,
     this.floating = false,
     this.snap = false,
-    this.shapeFamily = M3EAppBarShapeFamily.round,
+    this.hideOnScroll = false,
+    this.hideMode = M3EAppBarHideMode.none,
+    this.controller,
+    this.shapeFamily = M3EAppBarShapeFamily.square,
     this.density = M3EAppBarDensity.regular,
     this.variant = M3EAppBarVariant.medium,
     this.semanticLabel,
@@ -188,6 +247,12 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// titleText.
   final String? titleText;
+
+  /// Optional subtitle widget. Shown under the headline.
+  final Widget? subtitle;
+
+  /// Optional subtitle string. Ignored when [subtitle] is set.
+  final String? subtitleText;
 
   /// actions.
   final List<Widget>? actions;
@@ -242,19 +307,65 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// snap.
   final bool snap;
 
+  /// When true, the bar slides away as content scrolls forward and returns
+  /// when the user scrolls back. Same as [hideMode] [M3EAppBarHideMode.entire].
+  final bool hideOnScroll;
+
+  /// Which parts slide away on scroll. [hideOnScroll] selects
+  /// [M3EAppBarHideMode.entire] when this is [M3EAppBarHideMode.none].
+  final M3EAppBarHideMode hideMode;
+
+  /// Optional controller for expand, collapse, show, and hide.
+  final M3EAppBarController? controller;
+
   /// variant.
   final M3EAppBarVariant variant;
 
   @override
-  Size get preferredSize => Size.fromHeight(toolbarHeight ?? 72);
+  Size get preferredSize {
+    if (_kind == _M3EAppBarKind.bottom) {
+      return Size.fromHeight(M3EAppBarTheme.defaults.bottomHeight);
+    }
+    final double? live = _m3eAppBarHeightOf(this);
+    if (live != null) {
+      return Size.fromHeight(math.max(0, live));
+    }
+    return Size.fromHeight(_fallbackContentHeight());
+  }
+
+  /// Content-band height before the first scroll frame.
+  double _fallbackContentHeight() {
+    if (toolbarHeight != null) {
+      return toolbarHeight!;
+    }
+    final M3EAppBarMetrics metrics = M3EAppBarTheme.defaults.metrics(density);
+    if (variant == M3EAppBarVariant.small) {
+      return metrics.smallHeight;
+    }
+    return metrics.expandedHeight(
+      variant,
+      hasSubtitle: subtitle != null || subtitleText != null,
+    );
+  }
+
+  /// [hideOnScroll] means the whole bar when [hideMode] is [M3EAppBarHideMode.none].
+  M3EAppBarHideMode get _effectiveHideMode {
+    if (hideMode != M3EAppBarHideMode.none) {
+      return hideMode;
+    }
+    if (hideOnScroll) {
+      return M3EAppBarHideMode.entire;
+    }
+    return M3EAppBarHideMode.none;
+  }
 
   @override
   Widget build(BuildContext context) {
     return M3EComponentTheme(
       builder: (context) => switch (_kind) {
-        _M3EAppBarKind.top => _buildTop(context),
-        _M3EAppBarKind.bottom => _buildBottom(context),
-        _M3EAppBarKind.sliver => _buildSliver(context),
+        _M3EAppBarKind.top => _M3EDockedAppBar(bar: this),
+        _M3EAppBarKind.bottom => _M3EBottomAppBar(bar: this),
+        _M3EAppBarKind.sliver => _M3ESliverAppBar(bar: this),
       },
     );
   }
@@ -270,329 +381,17 @@ class M3EAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: _dockEdge == _M3EAppBarDockEdge.bottom ? mq.bottom : 0,
     );
   }
-
-  Widget _buildTop(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final appBarTheme = theme.appBarTheme;
-    final metrics = appBarTheme.metrics(density);
-    final bg =
-        backgroundColor ?? appBarTheme.backgroundColor(theme.colorScheme);
-    final fg = foregroundColor ?? theme.colorScheme.onSurface;
-    final shape = appBarTheme.shape(shapeFamily);
-    final height = toolbarHeight ?? metrics.smallHeight;
-    final tStyle = appBarTheme.titleStyle(theme.typeScale);
-    final searchMaxWidth = theme.searchBarTheme.maxWidth;
-    final contentPadding = metrics.contentPadding.resolve(
-      Directionality.of(context),
-    );
-
-    final resolvedLeading =
-        leading ??
-        (automaticallyImplyLeading ? _maybeBackButton(context, fg) : null);
-
-    final resolvedTitle =
-        title ??
-        (titleText != null
-            ? Text(titleText!, style: tStyle, overflow: TextOverflow.ellipsis)
-            : null);
-
-    // Content band height includes content padding; system insets sit outside
-    // it but inside Material (toolbar docked model).
-    final Widget contentBand = SizedBox(
-      height: height,
-      child: Padding(
-        padding: contentPadding,
-        child: IconTheme.merge(
-          data: IconThemeData(size: metrics.iconSize, color: fg),
-          child: DefaultTextStyle(
-            style: tStyle.copyWith(color: fg),
-            child: Row(
-              children: [
-                ?resolvedLeading,
-                if (resolvedTitle != null)
-                  Expanded(
-                    child: _TitleSlot(
-                      centerTitle: centerTitle,
-                      maxContentWidth: searchMaxWidth,
-                      titleGap: appBarTheme.titleGap,
-                      child: resolvedTitle,
-                    ),
-                  )
-                else
-                  const Spacer(),
-                if (actions != null) ..._withSpacers(actions!),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final bar = Material(
-      color: bg,
-      elevation: elevation ?? metrics.elevation,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      child: Padding(padding: _edgeSafeAreaInset(context), child: contentBand),
-    );
-
-    if (semanticLabel == null) {
-      return bar;
-    }
-    return Semantics(container: true, label: semanticLabel, child: bar);
-  }
-
-  Widget _buildBottom(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final appBarTheme = theme.appBarTheme;
-    final scheme = theme.colorScheme;
-    final contentPadding = appBarTheme.bottomPadding.resolve(
-      Directionality.of(context),
-    );
-
-    final Widget contentBand = SizedBox(
-      height: appBarTheme.bottomHeight,
-      child: Padding(
-        padding: contentPadding,
-        child: Row(
-          children: <Widget>[
-            IconTheme.merge(
-              data: IconThemeData(
-                color: scheme.onSurfaceVariant,
-                size: appBarTheme.bottomIconSize,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: actions ?? const <Widget>[],
-              ),
-            ),
-            const Spacer(),
-            ?floatingActionButton,
-          ],
-        ),
-      ),
-    );
-
-    return Material(
-      color: appBarTheme.bottomBackgroundColor(scheme),
-      child: Padding(padding: _edgeSafeAreaInset(context), child: contentBand),
-    );
-  }
-
-  Widget _buildSliver(BuildContext context) {
-    final theme = M3ETheme.of(context);
-    final appBarTheme = theme.appBarTheme;
-    final metrics = appBarTheme.metrics(density);
-    final bg =
-        backgroundColor ?? appBarTheme.backgroundColor(theme.colorScheme);
-    final fg = foregroundColor ?? theme.colorScheme.onSurface;
-    final shape = appBarTheme.shape(shapeFamily);
-
-    final collapsedStyle = appBarTheme.titleStyle(theme.typeScale);
-    final expandedStyle = appBarTheme.titleStyle(
-      theme.typeScale,
-      collapsed: false,
-    );
-
-    final collapsed = metrics.collapsedHeight;
-    final expanded = switch (variant) {
-      M3EAppBarVariant.medium => metrics.mediumExpanded,
-      M3EAppBarVariant.large => metrics.largeExpanded,
-      M3EAppBarVariant.small => metrics.smallHeight,
-    };
-
-    final resolvedTitleWidget =
-        title ??
-        (titleText != null
-            ? Text(
-                titleText!,
-                style: collapsedStyle,
-                overflow: TextOverflow.ellipsis,
-              )
-            : null);
-
-    final bar = SliverAppBar(
-      pinned: pinned,
-      floating: floating,
-      snap: snap && floating,
-      backgroundColor: bg,
-      foregroundColor: fg,
-      collapsedHeight: collapsed,
-      expandedHeight: expanded,
-      centerTitle: centerTitle,
-      leading: leading,
-      title: resolvedTitleWidget,
-      actions: actions,
-      shape: shape,
-      flexibleSpace: _buildFlexibleSpace(context, expandedStyle),
-    );
-
-    if (semanticLabel == null) {
-      return bar;
-    }
-    return M3ESliverSemantic(label: semanticLabel!, child: bar);
-  }
-
-  List<Widget> _withSpacers(List<Widget> items) {
-    final out = <Widget>[];
-    for (var i = 0; i < items.length; i++) {
-      out.add(items[i]);
-      if (i < items.length - 1) {
-        out.add(const SizedBox(width: 4));
-      }
-    }
-    return out;
-  }
-
-  Widget? _maybeBackButton(BuildContext context, Color fg) {
-    final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
-    if (!canPop) {
-      return null;
-    }
-    final String message = MaterialLocalizations.of(context).backButtonTooltip;
-    return M3ETooltip(
-      message: message,
-      dismissDelay: Duration.zero,
-      child: IconButton(
-        icon: const BackButtonIcon(),
-        color: fg,
-        onPressed: () => Navigator.maybeOf(context)?.maybePop(),
-      ),
-    );
-  }
-
-  Widget? _buildFlexibleSpace(BuildContext context, TextStyle expandedStyle) {
-    switch (variant) {
-      case M3EAppBarVariant.small:
-        return null;
-      case M3EAppBarVariant.medium:
-      case M3EAppBarVariant.large:
-        final t =
-            title ??
-            (titleText != null ? Text(titleText!, style: expandedStyle) : null);
-        if (t == null) {
-          return null;
-        }
-        return FlexibleSpaceBar(
-          titlePadding: const EdgeInsetsDirectional.only(
-            start: 16,
-            bottom: 16,
-            end: 16,
-          ),
-          title: DefaultTextStyle(
-            style: expandedStyle.copyWith(
-              color: M3ETheme.of(context).colorScheme.onSurface,
-            ),
-            child: t,
-          ),
-          collapseMode: CollapseMode.pin,
-          expandedTitleScale: 1,
-        );
-    }
-  }
 }
 
-/// Places an app bar title between leading and actions.
-///
-/// Anchored search titles fill up to [maxContentWidth], then follow
-/// [centerTitle]. Other titles keep intrinsic width and only use alignment.
-class _TitleSlot extends StatelessWidget {
-  const _TitleSlot({
-    required this.centerTitle,
-    required this.maxContentWidth,
-    required this.titleGap,
-    required this.child,
-  });
+/// Live content-band height for [M3EAppBar.preferredSize].
+final Expando<double> _m3eAppBarHeights = Expando<double>();
 
-  final bool centerTitle;
-  final double maxContentWidth;
-  final double titleGap;
-  final Widget child;
+double? _m3eAppBarHeightOf(M3EAppBar bar) => _m3eAppBarHeights[bar];
 
-  @override
-  Widget build(BuildContext context) {
-    final alignment = centerTitle
-        ? Alignment.center
-        : AlignmentDirectional.centerStart;
-
-    final Widget slot;
-    final bool fillSlot =
-        child is M3ESearchAnchor || child is _M3EAppBarSearchTitle;
-    if (!fillSlot) {
-      slot = Align(alignment: alignment, child: child);
-    } else {
-      slot = LayoutBuilder(
-        builder: (context, constraints) {
-          final width = math.min(constraints.maxWidth, maxContentWidth);
-          return Align(
-            alignment: alignment,
-            child: SizedBox(width: width, child: child),
-          );
-        },
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: titleGap),
-      child: slot,
-    );
-  }
+void _m3eAppBarWriteHeight(M3EAppBar bar, double height) {
+  _m3eAppBarHeights[bar] = height;
 }
 
-/// Read-only anchored search title with a default [ColorScheme.surface] fill.
-class _M3EAppBarSearchTitle extends StatelessWidget {
-  const _M3EAppBarSearchTitle({
-    required this.searchController,
-    required this.suggestionsBuilder,
-    this.barHintText,
-    this.barLeading,
-    this.barTrailing,
-    this.barBackgroundColor,
-    this.barAlignment = Alignment.center,
-    this.isFullScreen = true,
-    this.onSubmitted,
-    this.onChanged,
-    this.onClose,
-    this.onOpen,
-    this.searchConstraints,
-  });
-
-  final M3ESearchController searchController;
-  final M3ESearchSuggestionsBuilder suggestionsBuilder;
-  final String? barHintText;
-  final Widget? barLeading;
-  final Iterable<Widget>? barTrailing;
-  final WidgetStateProperty<Color?>? barBackgroundColor;
-  final AlignmentGeometry barAlignment;
-  final bool isFullScreen;
-  final ValueChanged<String>? onSubmitted;
-  final ValueChanged<String>? onChanged;
-  final VoidCallback? onClose;
-  final VoidCallback? onOpen;
-  final BoxConstraints? searchConstraints;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color surface = M3ETheme.of(context).colorScheme.surface;
-    return M3ESearchAnchor.bar(
-      searchController: searchController,
-      suggestionsBuilder: suggestionsBuilder,
-      barHintText: barHintText,
-      barLeading: barLeading,
-      barTrailing: barTrailing,
-      barAlignment: barAlignment,
-      // Surface contrasts against the app bar's surfaceContainerHigh.
-      barBackgroundColor:
-          barBackgroundColor ?? WidgetStatePropertyAll<Color>(surface),
-      isFullScreen: isFullScreen,
-      onSubmitted: onSubmitted,
-      onChanged: onChanged,
-      onClose: onClose,
-      onOpen: onOpen,
-      // minHeight 0 so the bar fills the content band after vertical padding.
-      constraints: searchConstraints ?? const BoxConstraints(),
-      expandOnFocus: false,
-      expandRestPadding: 0,
-    );
-  }
+void _m3eAppBarClearHeight(M3EAppBar bar) {
+  _m3eAppBarHeights[bar] = null;
 }

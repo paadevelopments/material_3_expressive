@@ -109,13 +109,19 @@ class _SectionHostPageState extends State<SectionHostPage>
             child: FocusTraversalOrder(
               order: const NumericFocusOrder(1),
               child: FocusTraversalGroup(
-                child: selected == null
-                    ? const SizedBox.shrink()
-                    : _WideDetail(
-                        key: ValueKey<String>(selected.id),
-                        title: selected.title,
-                        child: selected.playgroundBuilder(context),
-                      ),
+                // Keeps the detail pane's own scrollables from attaching to
+                // the route's shared PrimaryScrollController, so only the
+                // left list pane (see SectionListPane) drives the gallery
+                // app bar's on-scroll state on wide layouts.
+                child: PrimaryScrollController.none(
+                  child: selected == null
+                      ? const SizedBox.shrink()
+                      : _WideDetail(
+                          key: ValueKey<String>(selected.id),
+                          title: selected.title,
+                          child: selected.playgroundBuilder(context),
+                        ),
+                ),
               ),
             ),
           ),

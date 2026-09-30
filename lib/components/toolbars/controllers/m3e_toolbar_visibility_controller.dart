@@ -12,7 +12,7 @@ import '../utils/m3e_toolbar_spring_motion.dart';
 class M3EToolbarVisibilityController extends ChangeNotifier {
   /// M3EToolbarVisibilityController.
   M3EToolbarVisibilityController({
-    this.motion = M3EMotion.expressiveSpatialFast,
+    this.motion = M3EMotion.expressiveSpatialDefault,
     double? exitExtent,
   }) : _exitExtent = exitExtent {
     if (exitExtent != null) {
@@ -30,6 +30,7 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
 
   TickerProvider? _vsync;
   SingleMotionController? _settle;
+  double? _animatingTarget;
 
   /// Optional fixed exit distance. When null, the toolbar measures itself and
   /// sets [offsetLimit] to `-(extent + screenOffset)`.
@@ -90,6 +91,37 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   /// Whether the toolbar is fully off-screen.
   bool get isHidden => collapsedFraction >= 1;
 
+  /// Whether a settle / show / hide spring is currently running.
+  bool get isAnimating => _settle != null;
+
+  bool _collapseRequested = false;
+
+  /// Scroll-collapse intent for `M3EToolbarScrollAction.collapse`, read by
+  /// the toolbar to flip its own expand state (via its adjacent FAB /
+  /// expand-trigger spring) the instant a scroll direction changes.
+  ///
+  /// Independent of [offset], which only animates for
+  /// `M3EToolbarScrollAction.hide`'s slide-away.
+  bool get collapseRequested => _collapseRequested;
+
+  /// Requests the collapse-on-scroll target. No-op if already requested.
+  void requestCollapse() {
+    if (_collapseRequested) {
+      return;
+    }
+    _collapseRequested = true;
+    notifyListeners();
+  }
+
+  /// Reverses [requestCollapse]. No-op if not currently requested.
+  void requestExpand() {
+    if (!_collapseRequested) {
+      return;
+    }
+    _collapseRequested = false;
+    notifyListeners();
+  }
+
   /// Binds a ticker for spring show/hide. Safe to call repeatedly.
   // ignore: use_setters_to_change_properties -- attach/detach pair; not a field setter.
   void attach(TickerProvider vsync) {
@@ -100,6 +132,7 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   void detach() {
     _settle?.dispose();
     _settle = null;
+    _animatingTarget = null;
     _vsync = null;
   }
 
@@ -107,6 +140,7 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   void cancelAnimation() {
     _settle?.dispose();
     _settle = null;
+    _animatingTarget = null;
   }
 
   /// Animates to fully visible (`offset == 0`).
@@ -139,12 +173,20 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
   }
 
   void _animateTo(double target) {
+    // Already there and idle, or already mid-flight toward the same target:
+    // restarting the spring on every scroll delta would read as a twitch.
+    if ((offset == target && !isAnimating) ||
+        (isAnimating && _animatingTarget == target)) {
+      return;
+    }
     final TickerProvider? vsync = _vsync;
     if (vsync == null) {
+      cancelAnimation();
       offset = target;
       return;
     }
     cancelAnimation();
+    _animatingTarget = target;
     _settle =
         SingleMotionController(
           motion: motion.toMotion(),

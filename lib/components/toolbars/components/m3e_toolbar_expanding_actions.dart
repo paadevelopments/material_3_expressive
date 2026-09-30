@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
 import '../../icon_buttons/enums/m3e_icon_button_enums.dart';
+import '../enums/m3e_toolbar_enums.dart';
 import '../models/m3e_toolbar_item.dart';
 import '../utils/m3e_toolbar_item_layout.dart';
 import 'm3e_toolbar_icon_button.dart';
@@ -30,6 +31,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
     this.gap = 0,
     this.opticalInset = 0,
     this.pillActiveSpring = true,
+    this.colorStyle = M3EToolbarColorStyle.standard,
     super.key,
   });
 
@@ -81,6 +83,9 @@ class M3EToolbarExpandingActions extends StatelessWidget {
   /// When false, the parent toolbar reserves a fixed labeled-selection width.
   final bool pillActiveSpring;
 
+  /// colorStyle.
+  final M3EToolbarColorStyle colorStyle;
+
   static const double _iconRevealStart = 0.4;
 
   @override
@@ -117,6 +122,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
       action: trigger,
       size: iconButtonSize,
       onPressed: onTriggerPressed,
+      colorStyle: colorStyle,
       pillActiveSpring: pillActiveSpring,
     );
 
@@ -167,6 +173,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
             action: action,
             size: iconButtonSize,
+            colorStyle: colorStyle,
             pillActiveSpring: pillActiveSpring,
           ),
         ),
@@ -291,6 +298,7 @@ class M3EToolbarExpandingActions extends StatelessWidget {
           buildAction: (M3EToolbarAction action) => M3EToolbarIconButton(
             action: action,
             size: iconButtonSize,
+            colorStyle: colorStyle,
             pillActiveSpring: pillActiveSpring,
           ),
         ),

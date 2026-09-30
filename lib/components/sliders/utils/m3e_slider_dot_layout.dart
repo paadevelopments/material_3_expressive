@@ -105,7 +105,7 @@ abstract final class M3ESliderDotLayout {
       out.add(
         M3ESliderDotPlacement(
           primary: stopStart,
-          color: colors.inactiveTick,
+          color: colors.stopIndicator,
           size: stopIndicatorSize,
           active: false,
         ),
@@ -115,7 +115,7 @@ abstract final class M3ESliderDotLayout {
       out.add(
         M3ESliderDotPlacement(
           primary: stopEnd,
-          color: colors.inactiveTick,
+          color: colors.stopIndicator,
           size: stopIndicatorSize,
           active: false,
         ),

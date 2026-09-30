@@ -12,6 +12,8 @@ class M3ETappableInkScope extends InheritedWidget {
     this.onTapUp,
     this.onTapCancel,
     this.onHover,
+    this.trackHover = true,
+    this.focusOverlay = true,
     super.key,
   });
 
@@ -36,6 +38,12 @@ class M3ETappableInkScope extends InheritedWidget {
   /// Called when the hover state changes.
   final ValueChanged<bool>? onHover;
 
+  /// When false, the ink overlay does not paint hover.
+  final bool trackHover;
+
+  /// When false, the ink overlay does not paint the focused wash.
+  final bool focusOverlay;
+
   /// Returns the nearest [M3ETappableInkScope], if any.
   static M3ETappableInkScope? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<M3ETappableInkScope>();
@@ -53,6 +61,8 @@ class M3ETappableInkScope extends InheritedWidget {
         onTapDown != oldWidget.onTapDown ||
         onTapUp != oldWidget.onTapUp ||
         onTapCancel != oldWidget.onTapCancel ||
-        onHover != oldWidget.onHover;
+        onHover != oldWidget.onHover ||
+        trackHover != oldWidget.trackHover ||
+        focusOverlay != oldWidget.focusOverlay;
   }
 }

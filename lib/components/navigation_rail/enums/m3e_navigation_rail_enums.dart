@@ -3,7 +3,7 @@ enum M3ENavigationRailModality {
   /// Occupies layout space.
   standard,
 
-  /// Overlays content with a scrim and dismisses on tap/esc.
+  /// Overlays content with a scrim. Open it from a button. Dismiss leaves no rail.
   modal,
 }
 
@@ -31,7 +31,16 @@ extension M3ENavigationRailTypeX on M3ENavigationRailType {
   bool get isExpanded => this == M3ENavigationRailType.expanded;
 }
 
-/// Controls how labels are shown for rail destinations when the rail is expanded.
+/// Vertical alignment of the destination group.
+enum M3ENavigationRailAlignment {
+  /// Packs destinations under the menu and FAB.
+  top,
+
+  /// Centers destinations in the space under the menu and FAB.
+  center,
+}
+
+/// Controls how labels are shown for rail destinations.
 ///
 /// - alwaysShow (default): show all labels (subject to width constraints).
 /// - onlySelected: show the label only for the selected destination.

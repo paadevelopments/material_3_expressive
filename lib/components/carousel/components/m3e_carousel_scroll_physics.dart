@@ -17,31 +17,65 @@ class M3ECarouselScrollPhysics extends ScrollPhysics {
     Tolerance tolerance,
     double velocity,
   ) {
-    double fraction;
-
-    if (position.itemExtent != null) {
-      fraction = position.itemExtent! / position.viewportDimension;
-    } else {
-      assert(position.flexWeights != null, 'carousel invariant');
-      fraction = position.flexWeights!.first / position.flexWeights!.sum;
+    final List<double>? extents = position.restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _variedExtentTarget(position, extents, tolerance, velocity);
     }
+    return _uniformExtentTarget(position, tolerance, velocity);
+  }
 
-    final double itemWidth = position.viewportDimension * fraction;
+  /// Target scroll offset when items have individual resting extents.
+  double _variedExtentTarget(
+    _CarouselPosition position,
+    List<double> extents,
+    Tolerance tolerance,
+    double velocity,
+  ) {
+    final double item = _applyVelocityBias(
+      _itemFromExtents(position.pixels, extents),
+      tolerance,
+      velocity,
+    );
+    final int index = item.round().clamp(0, extents.length - 1);
+    return _extentPrefix(extents, index);
+  }
 
+  /// Target scroll offset when every item shares one extent or flex weight.
+  double _uniformExtentTarget(
+    _CarouselPosition position,
+    Tolerance tolerance,
+    double velocity,
+  ) {
+    final double itemWidth =
+        position.viewportDimension * _uniformFraction(position);
     final double actual = math.max(0, position.pixels) / itemWidth;
     final double round = actual.roundToDouble();
-    double item;
-    if ((actual - round).abs() < precisionErrorTolerance) {
-      item = round;
-    } else {
-      item = actual;
-    }
-    if (velocity < -tolerance.velocity) {
-      item -= 0.5;
-    } else if (velocity > tolerance.velocity) {
-      item += 0.5;
-    }
+    final snapped = (actual - round).abs() < precisionErrorTolerance
+        ? round
+        : actual;
+    final double item = _applyVelocityBias(snapped, tolerance, velocity);
     return item.roundToDouble() * itemWidth;
+  }
+
+  /// Fraction of the viewport one item occupies.
+  double _uniformFraction(_CarouselPosition position) {
+    if (position.itemExtent != null) {
+      return position.itemExtent! / position.viewportDimension;
+    }
+    assert(position.flexWeights != null, 'carousel invariant');
+    return position.flexWeights!.first / position.flexWeights!.sum;
+  }
+
+  /// Nudges [item] half a step toward the fling direction once the velocity
+  /// clears [tolerance], so a decisive swipe advances to the next item.
+  double _applyVelocityBias(double item, Tolerance tolerance, double velocity) {
+    if (velocity < -tolerance.velocity) {
+      return item - 0.5;
+    }
+    if (velocity > tolerance.velocity) {
+      return item + 0.5;
+    }
+    return item;
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
+import 'package:material_3_expressive/components/toolbars/models/m3e_toolbar_item.dart'
+    show M3EToolbarAction;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EToolbar;
 
@@ -14,11 +16,31 @@ enum M3EToolbarPlacement {
 
 /// Standard vs vibrant container color mapping.
 enum M3EToolbarColorStyle {
-  /// Surface container + on-surface content.
+  /// Surface container toolbar. Unselected content is on-surface-variant.
+  ///
+  /// Selected toggles use secondary container. The adjacent FAB uses
+  /// secondary container as well.
   standard,
 
-  /// Primary container toolbar (tertiary container FAB when present).
+  /// Primary container toolbar. Unselected content is on-primary-container.
+  ///
+  /// Selected toggles use surface container. The adjacent FAB uses tertiary
+  /// container.
   vibrant,
+}
+
+/// How docked actions use leftover width at the medium window size and up.
+///
+/// Below 600dp the bar always uses [even].
+enum M3EToolbarContentAlignment {
+  /// Equal gaps, preferring 32 and shrinking toward 4 when the bar is tight.
+  even,
+
+  /// Actions clustered in the center with the theme centered gap.
+  centered,
+
+  /// Leading and trailing groups with a flexible middle.
+  edges,
 }
 
 /// Edge used for docked placement and single-edge safe-area padding.
@@ -46,6 +68,20 @@ enum M3EToolbarFabPosition {
 
   /// FAB below the toolbar.
   bottom,
+}
+
+/// What scrolling does to a toolbar with a scroll behavior attached.
+enum M3EToolbarScrollAction {
+  /// Slides the whole pill away, then back, via [M3EToolbarExitDirection].
+  hide,
+
+  /// Collapses the pill to its adjacent FAB / expand-trigger action instead
+  /// of sliding away, then reverses on the opposite scroll direction.
+  ///
+  /// Requires the toolbar to have an adjacent FAB (with
+  /// [M3EToolbar.fabExpandsToolbar] true) or an
+  /// [M3EToolbarAction.isExpandTrigger] action.
+  collapse,
 }
 
 /// Direction a toolbar slides when exiting via scroll / visibility controller.

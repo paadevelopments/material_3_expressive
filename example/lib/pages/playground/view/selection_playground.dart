@@ -22,8 +22,8 @@ class _SelectionPlaygroundState extends State<SelectionPlayground> {
 
   List<PlaySnippet> get _snippets {
     final String body = _dismissible
-        ? 'M3EDismissibleList(itemCount: items.length, itemBuilder: itemBuilder)'
-        : 'M3ECardList.builder(itemCount: items.length, itemBuilder: itemBuilder)';
+        ? 'M3EList.scrollable(itemCount: items.length, itemBuilder: itemBuilder)'
+        : 'M3EList.scrollable(itemCount: items.length, itemBuilder: itemBuilder)';
     final String selectedColor = _customHighlight
         ? '\n  selectedColor: const Color(0xFF4CAF50),'
         : '';
@@ -201,6 +201,17 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
       headline: item.title,
       supportingText: item.subtitle,
       leading: _leading(context, index),
+      swipe: widget.dismissible
+          ? M3EListItemSwipe(
+              onDismiss: (DismissDirection direction) async {
+                M3ESnackbar.show(
+                  context,
+                  message: 'Dismissed ${_items[index].title}',
+                );
+                return true;
+              },
+            )
+          : null,
     );
   }
 
@@ -226,7 +237,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
 
   Widget _body(M3EThemeData theme) {
     if (widget.dismissible) {
-      return M3EDismissibleList(
+      return M3EList.scrollable(
         selection: true,
         selectionState: const M3EListSelectionState(
           selectedIcon: Icon(M3EIcons.check_circle),
@@ -235,14 +246,7 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
         listPadding: _listPadding,
         onTap: _onTap,
         onLongPress: _onLongPress,
-        onDismiss: (int index, DismissDirection direction) async {
-          M3ESnackbar.show(
-            context,
-            message: 'Dismissed ${_items[index].title}',
-          );
-          return true;
-        },
-        style: M3EDismissibleListStyle(
+        dismissStyle: M3EDismissibleListStyle(
           background: Container(
             color: theme.colorScheme.success,
             alignment: Alignment.centerLeft,
@@ -259,7 +263,8 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
         itemBuilder: _item,
       );
     }
-    return M3ECardList.builder(
+    return M3EList.scrollable(
+      color: theme.colorScheme.surfaceContainerHighest,
       selection: true,
       selectionState: const M3EListSelectionState(
         selectedIcon: Icon(M3EIcons.check_circle),

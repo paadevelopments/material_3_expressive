@@ -1,53 +1,61 @@
 part of '../m3e_navigation_rail.dart';
 
 mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
-  bool get _isExpanded;
   bool get _suppressInk;
-  Widget _buildMenuButton(BuildContext context, {required Alignment alignment});
+  bool get _showExpandedItems;
+  List<FocusNode> get _destinationNodes;
+
+  Widget _buildMenuButton(BuildContext context);
   Widget? _buildFab(BuildContext context, {required bool showLabels});
+
   Widget? _buildTrailing(BuildContext context) {
-    final tr = widget.trailing;
-    if (tr == null) {
+    final Widget? trailing = widget.trailing;
+    if (trailing == null) {
       return null;
     }
-    final isExpanded = _isExpanded;
     return Padding(
-      padding: M3ENavigationRailLayout.sectionPadding,
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
       child: Align(
-        alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
-        child: tr,
+        alignment: _showExpandedItems
+            ? AlignmentDirectional.centerStart
+            : Alignment.center,
+        child: trailing,
       ),
     );
   }
 
-  List<Widget> _buildChildren(
-    BuildContext context, {
-    required bool showLabels,
-  }) {
+  List<Widget> _headerChildren(BuildContext context) {
     final theme = M3ETheme.of(context).navigationRailTheme;
-    final isExpanded = _isExpanded;
-    final children = <Widget>[
-      const SizedBox(height: M3ENavigationRailLayout.topGap),
-      _buildMenuButton(
-        context,
-        alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
-      ),
-    ];
-    final fabWidget = _buildFab(context, showLabels: showLabels);
-    if (fabWidget != null) {
-      children.add(fabWidget);
+    final children = <Widget>[SizedBox(height: theme.topSpace)];
+    if (widget.leading != null) {
+      children.add(
+        Padding(
+          padding: const EdgeInsetsDirectional.only(bottom: 8),
+          child: widget.leading,
+        ),
+      );
     }
-    // Stay on the collapsed item layout until the width animation has room
-    // for the label row. Switching immediately overflows the still-narrow rail.
-    if (showLabels) {
-      children.addAll(_buildExpandedDestinations(context, theme));
-    } else {
-      children.addAll(_buildCollapsedDestinations(theme));
+    children.add(_buildMenuButton(context));
+    final Widget? fab = _buildFab(context, showLabels: _showExpandedItems);
+    if (fab != null) {
+      children.add(fab);
+    }
+    return children;
+  }
+
+  List<Widget> _destinationChildren(BuildContext context) {
+    final M3ENavigationRailTheme theme = M3ETheme.of(context)
+        .navigationRailTheme;
+    final List<Widget> children = _showExpandedItems
+        ? _buildExpandedDestinations(context, theme)
+        : _buildCollapsedDestinations(theme);
+    if (_showExpandedItems) {
+      children.add(SizedBox(height: theme.expandedTrailingSpace));
     }
     if (widget.trailing != null && !widget.trailingAtBottom) {
-      final trailingWidget = _buildTrailing(context);
-      if (trailingWidget != null) {
-        children.add(trailingWidget);
+      final Widget? trailing = _buildTrailing(context);
+      if (trailing != null) {
+        children.add(trailing);
       }
     }
     return children;
@@ -58,43 +66,41 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
     M3ENavigationRailTheme theme,
   ) {
     final children = <Widget>[];
-    for (final section in widget.sections) {
+    var index = 0;
+    for (final M3ENavigationRailSection section in widget.sections) {
       if (section.header != null) {
         children.add(_sectionHeader(context, theme, section.header!));
       }
-      for (final dest in section.destinations) {
-        final index = _M3ENavigationRailState._destinationIndex(
-          widget.sections,
-          dest,
-        );
+      for (final M3ENavigationRailDestination dest in section.destinations) {
+        final itemIndex = index;
         children.add(
-          _destinationPadding(
-            theme: theme,
-            start: 16,
-            end: 16,
+          _paddedDestination(
+            gap: theme.expandedItemGap,
             child: M3ERailItem(
               destination: dest,
-              selected: index == widget.selectedIndex,
-              onTap: () => widget.onDestinationSelected(index),
+              selected: itemIndex == widget.selectedIndex,
+              onTap: () => widget.onDestinationSelected(itemIndex),
               expanded: true,
               labelBehavior: widget.labelBehavior,
               suppressInk: _suppressInk,
+              focusNode: _destinationNodes[itemIndex],
             ),
           ),
         );
+        index++;
       }
     }
     return children;
   }
 
   List<Widget> _buildCollapsedDestinations(M3ENavigationRailTheme theme) {
-    final all = widget.sections.expand((s) => s.destinations).toList();
+    final List<M3ENavigationRailDestination> all = widget.sections
+        .expand((M3ENavigationRailSection s) => s.destinations)
+        .toList();
     return <Widget>[
       for (var i = 0; i < all.length; i++)
-        _destinationPadding(
-          theme: theme,
-          start: M3ENavigationRailLayout.horizontalInset,
-          end: M3ENavigationRailLayout.horizontalInset,
+        _paddedDestination(
+          gap: theme.itemVerticalGap,
           child: M3ERailItem(
             destination: all[i],
             selected: i == widget.selectedIndex,
@@ -102,6 +108,7 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
             expanded: false,
             labelBehavior: widget.labelBehavior,
             suppressInk: _suppressInk,
+            focusNode: _destinationNodes[i],
           ),
         ),
     ];
@@ -112,11 +119,11 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
     M3ENavigationRailTheme theme,
     Widget header,
   ) {
-    final m3e = M3ETheme.of(context);
+    final M3EThemeData m3e = M3ETheme.of(context);
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        start: 16,
-        end: 16,
+        start: theme.indicatorLeading,
+        end: theme.indicatorTrailing,
         top: theme.sectionHeaderSpacingTop,
         bottom: theme.sectionHeaderSpacingBottom,
       ),
@@ -129,19 +136,9 @@ mixin _M3ENavigationRailChildrenMixin on State<M3ENavigationRail> {
     );
   }
 
-  Widget _destinationPadding({
-    required M3ENavigationRailTheme theme,
-    required double start,
-    required double end,
-    required Widget child,
-  }) {
+  Widget _paddedDestination({required double gap, required Widget child}) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        start: start,
-        end: end,
-        top: theme.itemVerticalGap,
-        bottom: theme.itemVerticalGap,
-      ),
+      padding: EdgeInsets.only(bottom: gap),
       child: child,
     );
   }

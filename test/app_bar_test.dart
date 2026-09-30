@@ -1,13 +1,13 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-const String _inbox = 'Inbox';
+import 'helpers/app_bar_test_helpers.dart';
+
 const String _custom = 'Custom';
 const String _compact = 'Compact';
 const String _large = 'Large';
-
-Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
   testWidgets(
@@ -27,6 +27,18 @@ void main() {
     _compactDensityReducesTheBarHeight,
   );
   testWidgets(
+    'regular content band is 64 and sits below the status bar',
+    _regularContentBandSitsBelowTheStatusBar,
+  );
+  testWidgets(
+    'flexible and baseline slivers use spec content heights',
+    _flexibleAndBaselineSliversUseSpecContentHeights,
+  );
+  testWidgets(
+    'controller collapses and hides the sliver',
+    _controllerCollapsesAndHidesTheSliver,
+  );
+  testWidgets(
     'M3EAppBar.sliver renders an expanded large title',
     _m3eappbarSliverRendersAnExpandedLargeTitle,
   );
@@ -34,6 +46,19 @@ void main() {
     'M3EAppBar.search fills title slot and opens the search view',
     _m3eappbarSearchFillsTitleSlotAndOpensTheSearchView,
   );
+  testWidgets(
+    'expanded title sits below the action row and returns when collapsed',
+    _expandedTitleSitsBelowTheActionRowAndReturnsWhenCollapsed,
+  );
+  testWidgets(
+    'entire hide slides the bar away and actions hide keeps the icons',
+    _entireHideSlidesTheBarAwayAndActionsHideKeepsTheIcons,
+  );
+  testWidgets(
+    'a title with no leading control starts 16 in',
+    _titleWithNoLeadingControlStarts16In,
+  );
+  testWidgets('search pill has no elevation', _searchPillHasNoElevation);
 }
 
 Future<void> _m3eappbarTopDoesNotImplyABackButtonWithoutLeading(
@@ -44,7 +69,7 @@ Future<void> _m3eappbarTopDoesNotImplyABackButtonWithoutLeading(
       home: Builder(
         builder: (BuildContext context) {
           return Scaffold(
-            appBar: const M3EAppBar.top(titleText: _inbox),
+            appBar: const M3EAppBar.top(titleText: appBarInboxTitle),
             body: Center(
               child: TextButton(
                 onPressed: () {
@@ -80,7 +105,12 @@ Future<void> _m3eappbarTopShowsAnExplicitLeadingWidget(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
-    _host(const M3EAppBar.top(titleText: _inbox, leading: Icon(M3EIcons.menu))),
+    hostAppBar(
+      const M3EAppBar.top(
+        titleText: appBarInboxTitle,
+        leading: Icon(M3EIcons.menu),
+      ),
+    ),
   );
 
   expect(find.byIcon(M3EIcons.menu), findsOneWidget);
@@ -90,7 +120,7 @@ Future<void> _m3eappbarTopHonoursACustomTitleWidgetAndActions(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
-    _host(
+    hostAppBar(
       const M3EAppBar.top(
         title: Text(_custom),
         actions: <Widget>[Icon(M3EIcons.search)],
@@ -104,7 +134,7 @@ Future<void> _m3eappbarTopHonoursACustomTitleWidgetAndActions(
 
 Future<void> _compactDensityReducesTheBarHeight(WidgetTester tester) async {
   await tester.pumpWidget(
-    _host(
+    hostAppBar(
       const M3EAppBar.top(
         titleText: _compact,
         density: M3EAppBarDensity.compact,
@@ -117,14 +147,161 @@ Future<void> _compactDensityReducesTheBarHeight(WidgetTester tester) async {
         .descendant(of: find.byType(M3EAppBar), matching: find.byType(SizedBox))
         .first,
   );
-  expect(box.height, 64);
+  expect(box.height, 56);
+}
+
+Future<void> _regularContentBandSitsBelowTheStatusBar(
+  WidgetTester tester,
+) async {
+  tester.view.devicePixelRatio = 1;
+  tester.view.viewPadding = const FakeViewPadding(top: 24);
+  tester.view.padding = const FakeViewPadding(top: 24);
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: M3EThemeData.light(),
+      home: const Scaffold(
+        appBar: M3EAppBar.top(titleText: appBarInboxTitle),
+        body: SizedBox.expand(),
+      ),
+    ),
+  );
+
+  final Size band = tester.getSize(
+    find
+        .descendant(of: find.byType(M3EAppBar), matching: find.byType(SizedBox))
+        .first,
+  );
+  expect(band.height, 64);
+  expect(tester.getSize(find.byType(M3EAppBar)).height, 88);
+  expect(
+    tester.getTopLeft(find.text(appBarInboxTitle)).dy,
+    greaterThanOrEqualTo(24),
+  );
+}
+
+Future<double> _sliverExtent(
+  WidgetTester tester, {
+  required M3EAppBarVariant variant,
+  String? subtitleText,
+}) async {
+  await tester.pumpWidget(
+    hostAppBar(
+      CustomScrollView(
+        slivers: <Widget>[
+          M3EAppBar.sliver(
+            titleText: appBarInboxTitle,
+            subtitleText: subtitleText,
+            variant: variant,
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  final RenderSliver sliver = tester.renderObject<RenderSliver>(
+    find.byType(M3EAppBar),
+  );
+  return sliver.geometry!.maxPaintExtent;
+}
+
+Future<void> _flexibleAndBaselineSliversUseSpecContentHeights(
+  WidgetTester tester,
+) async {
+  expect(
+    await _sliverExtent(tester, variant: M3EAppBarVariant.mediumFlexible),
+    112,
+  );
+  expect(
+    await _sliverExtent(
+      tester,
+      variant: M3EAppBarVariant.mediumFlexible,
+      subtitleText: 'New messages',
+    ),
+    136,
+  );
+  expect(
+    await _sliverExtent(tester, variant: M3EAppBarVariant.largeFlexible),
+    120,
+  );
+  expect(
+    await _sliverExtent(
+      tester,
+      variant: M3EAppBarVariant.largeFlexible,
+      subtitleText: 'New messages',
+    ),
+    152,
+  );
+  expect(await _sliverExtent(tester, variant: M3EAppBarVariant.medium), 112);
+  expect(
+    await _sliverExtent(
+      tester,
+      variant: M3EAppBarVariant.medium,
+      subtitleText: 'New messages',
+    ),
+    136,
+  );
+  expect(await _sliverExtent(tester, variant: M3EAppBarVariant.large), 152);
+  expect(
+    await _sliverExtent(
+      tester,
+      variant: M3EAppBarVariant.large,
+      subtitleText: 'New messages',
+    ),
+    184,
+  );
+}
+
+Future<void> _controllerCollapsesAndHidesTheSliver(WidgetTester tester) async {
+  final controller = M3EAppBarController();
+  addTearDown(controller.dispose);
+
+  await tester.pumpWidget(
+    hostAppBar(
+      CustomScrollView(
+        slivers: <Widget>[
+          M3EAppBar.sliver(
+            controller: controller,
+            titleText: appBarInboxTitle,
+            variant: M3EAppBarVariant.mediumFlexible,
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 4000)),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  expect(controller.isCollapsed, isFalse);
+  expect(controller.isVisible, isTrue);
+
+  final Future<void> collapsing = controller.collapse();
+  await tester.pumpAndSettle();
+  await collapsing;
+  expect(controller.isCollapsed, isTrue);
+
+  final Future<void> expanding = controller.expand();
+  await tester.pumpAndSettle();
+  await expanding;
+  expect(controller.isCollapsed, isFalse);
+
+  final Future<void> hiding = controller.hide();
+  await tester.pumpAndSettle();
+  await hiding;
+  expect(controller.isVisible, isFalse);
+
+  final Future<void> showing = controller.show();
+  await tester.pumpAndSettle();
+  await showing;
+  expect(controller.isVisible, isTrue);
 }
 
 Future<void> _m3eappbarSliverRendersAnExpandedLargeTitle(
   WidgetTester tester,
 ) async {
   await tester.pumpWidget(
-    _host(
+    hostAppBar(
       CustomScrollView(
         slivers: <Widget>[
           const M3EAppBar.sliver(
@@ -194,4 +371,190 @@ Future<void> _m3eappbarSearchFillsTitleSlotAndOpensTheSearchView(
   await tester.tap(find.byType(M3ESearchBar));
   await tester.pumpAndSettle();
   expect(controller.isOpen, isTrue);
+}
+
+Future<void> _expandedTitleSitsBelowTheActionRowAndReturnsWhenCollapsed(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    hostAppBar(
+      const CustomScrollView(
+        slivers: <Widget>[
+          M3EAppBar.sliver(
+            titleText: _large,
+            variant: M3EAppBarVariant.large,
+            leading: Icon(M3EIcons.menu),
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 2400)),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final double iconTop = tester.getTopLeft(find.byIcon(M3EIcons.menu)).dy;
+  final double expandedTop = tester.getTopLeft(find.text(_large)).dy;
+  expect(expandedTop, greaterThan(iconTop + 24));
+
+  tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(400);
+  await tester.pump();
+
+  final double collapsedTop = tester.getTopLeft(find.text(_large)).dy;
+  expect(collapsedTop, lessThan(expandedTop - 24));
+}
+
+Future<void> _entireHideSlidesTheBarAwayAndActionsHideKeepsTheIcons(
+  WidgetTester tester,
+) async {
+  await _entireHideSlidesTheBarAway(tester);
+  await _actionsHideKeepsTheIconsVisible(tester);
+}
+
+Future<void> _entireHideSlidesTheBarAway(WidgetTester tester) async {
+  await tester.pumpWidget(
+    hostAppBar(
+      const CustomScrollView(
+        slivers: <Widget>[
+          M3EAppBar.sliver(
+            titleText: appBarInboxTitle,
+            variant: M3EAppBarVariant.mediumFlexible,
+            hideMode: M3EAppBarHideMode.entire,
+            leading: Icon(M3EIcons.menu),
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 4000)),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final double before = tester
+      .renderObject<RenderSliver>(find.byType(M3EAppBar))
+      .geometry!
+      .paintExtent;
+  expect(before, greaterThan(64));
+
+  await tester.drag(find.byType(CustomScrollView), const Offset(0, -800));
+  await tester.pumpAndSettle();
+
+  final double after = tester
+      .renderObject<RenderSliver>(find.byType(M3EAppBar, skipOffstage: false))
+      .geometry!
+      .paintExtent;
+  expect(after, lessThan(1));
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pumpAndSettle();
+}
+
+Future<void> _actionsHideKeepsTheIconsVisible(WidgetTester tester) async {
+  await tester.pumpWidget(
+    hostAppBar(
+      const CustomScrollView(
+        slivers: <Widget>[
+          M3EAppBar.sliver(
+            titleText: appBarInboxTitle,
+            variant: M3EAppBarVariant.mediumFlexible,
+            hideMode: M3EAppBarHideMode.actions,
+            leading: Icon(M3EIcons.menu),
+            actions: <Widget>[Icon(M3EIcons.search)],
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 4000)),
+        ],
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.drag(find.byType(CustomScrollView), const Offset(0, -800));
+  await tester.pumpAndSettle();
+
+  expect(find.byIcon(M3EIcons.menu), findsOneWidget);
+  expect(find.byIcon(M3EIcons.search), findsOneWidget);
+  final double iconTop = tester.getTopLeft(find.byIcon(M3EIcons.menu)).dy;
+  expect(iconTop, lessThan(64));
+  final SliverGeometry geometry = tester
+      .renderObject<RenderSliver>(find.byType(M3EAppBar))
+      .geometry!;
+  expect(geometry.layoutExtent, lessThan(8));
+  expect(geometry.paintExtent, greaterThan(48));
+  expect(
+    tester
+        .renderObjectList<RenderClipRect>(
+          find.descendant(
+            of: find.byType(M3EAppBar),
+            matching: find.byType(ClipRect),
+          ),
+        )
+        .where((RenderClipRect clip) => clip.size.width > 100)
+        .every((RenderClipRect clip) => clip.size.height < 8),
+    isTrue,
+  );
+  expect(
+    tester
+        .getTopLeft(
+          find.byWidgetPredicate(
+            (Widget widget) => widget is SizedBox && widget.height == 4000,
+          ),
+        )
+        .dy,
+    lessThan(iconTop + 24),
+  );
+
+  final M3EColorScheme scheme = M3ETheme.of(
+    tester.element(find.byType(M3EAppBar, skipOffstage: false)),
+  ).colorScheme;
+  expect(
+    find.byWidgetPredicate((Widget widget) {
+      if (widget is! DecoratedBox) {
+        return false;
+      }
+      final Decoration decoration = widget.decoration;
+      return decoration is BoxDecoration &&
+          decoration.color == scheme.surfaceContainerHigh;
+    }),
+    findsWidgets,
+  );
+}
+
+Future<void> _titleWithNoLeadingControlStarts16In(WidgetTester tester) async {
+  await tester.pumpWidget(
+    const MaterialApp(
+      home: Scaffold(appBar: M3EAppBar.top(titleText: appBarInboxTitle)),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final double dx = tester.getTopLeft(find.text(appBarInboxTitle)).dx;
+  expect(dx, greaterThanOrEqualTo(16));
+  expect(dx, lessThan(24));
+}
+
+Future<void> _searchPillHasNoElevation(WidgetTester tester) async {
+  final controller = M3ESearchController();
+  addTearDown(controller.dispose);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        appBar: M3EAppBar.search(
+          searchController: controller,
+          barHintText: 'Search',
+          suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+            return const <Widget>[];
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final Material pill = tester.widget<Material>(
+    find
+        .descendant(
+          of: find.byType(M3ESearchBar),
+          matching: find.byType(Material),
+        )
+        .first,
+  );
+  expect(pill.elevation, 0);
 }

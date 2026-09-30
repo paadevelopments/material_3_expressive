@@ -31,6 +31,13 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
   bool _doubleTapTrigger = false;
   bool _useSublist = true;
   bool _showSelectedIcon = true;
+  bool _baseline = false;
+  bool _containerTransform = false;
+  M3EListStyle _style = M3EListStyle.segmented;
+  bool _disabled = false;
+  bool _selected = false;
+  M3EListSwipeMode _swipeMode = M3EListSwipeMode.both;
+  M3EListSwipeEdge _dismissEdge = M3EListSwipeEdge.both;
   String _headline = 'Wireless charging';
   String _supporting = 'On · Fast charge enabled';
 
@@ -64,51 +71,62 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
 M3EListItem(
   headline: $headline,
   supportingText: $supporting,${_showLeading ? '\n  leading: const Icon(M3EIcons.schedule),' : ''}${_showTrailing ? '\n  trailing: const Icon(M3EIcons.chevron_right),' : ''}
-  onTap: () {},
+  onTap: () {},${_containerTransform ? '\n  transform: const Text(\'Full screen destination\'),' : ''}
 );''',
       _ListKind.cardList =>
         '''
-M3ECardList(
+M3EList(
   variant: M3ECardVariant.${_variant.name},$features
   itemCount: 3,
   itemBuilder: (BuildContext context, int index) {
     return M3EListItem(
       headline: $headline,
-      supportingText: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.inbox),' : ''}${_showTrailing ? '\n      trailing: const Icon(M3EIcons.chevron_right),' : ''}
+      supportingText: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.inbox),' : ''}${_showTrailing ? '\n      trailing: const Icon(M3EIcons.chevron_right),' : ''}${_containerTransform ? '\n      transform: const Text(\'Full screen destination\'),' : ''}
     );
   },
 );''',
       _ListKind.dismissible =>
         '''
-M3EDismissibleColumn(
+M3EList(
   itemCount: 3,$selectionFeature${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
-  onDismiss: (int index, DismissDirection direction) async => true,
   itemBuilder: (BuildContext context, int index) {
     return M3EListItem(
-      headline: $headline,${_showLeading ? '\n      leading: const Icon(M3EIcons.schedule),' : ''}
+      headline: $headline,${_showLeading ? '\n      leading: const Icon(M3EIcons.schedule),' : ''}${_containerTransform ? '\n      transform: const Text(\'Full screen destination\'),' : ''}
+      swipe: M3EListItemSwipe(
+        mode: M3EListSwipeMode.${_swipeMode.name},
+        edge: M3EListSwipeEdge.${_dismissEdge.name},
+        onDismiss: (DismissDirection direction) async => true,
+      ),
     );
   },
 );''',
       _ListKind.expandable =>
         '''
-M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
-  data: <M3EExpandableData>[
-    M3EExpandableData(
-      title: $headline,
-      subtitle: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.battery_alert),' : ''}
-      expanded: ${_useSublist ? '''M3EExpandableExpanded.list(
-        M3ECardList(
+M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
+  itemCount: 1,
+  itemBuilder: (BuildContext context, int index) {
+    return M3EListItem(
+      headline: $headline,
+      supportingText: $supporting,${_showLeading ? '\n      leading: const Icon(M3EIcons.battery_alert),' : ''}
+      expanded: ${_containerTransform
+            ? '''M3EExpandableExpanded.transform(
+        const Text('Full screen destination'),
+      ),'''
+            : _useSublist
+            ? '''M3EExpandableExpanded.list(
+        M3EList(
           embedded: true,
           itemCount: 2,${_nestedSelection ? '\n          selection: true,' : ''}
           itemBuilder: (BuildContext context, int index) {
             return M3EListItem(headline: 'Child \${index + 1}');
           },
         ),
-      ),''' : '''M3EExpandableExpanded.content(
+      ),'''
+            : '''M3EExpandableExpanded.content(
         const Text('Expanded body'),
       ),'''}
-    ),
-  ],
+    );
+  },
 );''',
     };
     return <PlaySnippet>[
@@ -132,8 +150,15 @@ M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  r
             doubleTapTrigger: _doubleTapTrigger,
             useSublist: _useSublist,
             showSelectedIcon: _showSelectedIcon,
+            baseline: _baseline,
+            listStyle: _style,
+            containerTransform: _containerTransform,
+            disabled: _disabled,
+            selected: _selected,
             headline: _headline,
             supporting: _supporting,
+            swipeMode: _swipeMode,
+            dismissEdge: _dismissEdge,
           );
         },
       ),
@@ -208,12 +233,58 @@ M3EExpandableList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  r
               value: _showTrailing,
               onChanged: (bool v) => setState(() => _showTrailing = v),
             ),
-            if (_kind == _ListKind.expandable)
+            PlaySwitch(
+              label: 'Baseline',
+              value: _baseline,
+              onChanged: (bool v) => setState(() => _baseline = v),
+            ),
+            PlayEnumMenu<M3EListStyle>(
+              label: 'Style',
+              value: _style,
+              values: M3EListStyle.values,
+              labelOf: (M3EListStyle value) => value.name,
+              onChanged: (M3EListStyle value) => setState(() => _style = value),
+            ),
+            PlaySwitch(
+              label: 'Container transform',
+              value: _containerTransform,
+              onChanged: (bool v) => setState(() => _containerTransform = v),
+            ),
+            PlaySwitch(
+              label: 'Disabled sample',
+              value: _disabled,
+              onChanged: (bool v) => setState(() => _disabled = v),
+            ),
+            PlaySwitch(
+              label: 'Selected sample',
+              value: _selected,
+              onChanged: (bool v) => setState(() => _selected = v),
+            ),
+            if (_kind == _ListKind.dismissible) ...<Widget>[
+              PlayEnumMenu<M3EListSwipeMode>(
+                label: 'Swipe',
+                value: _swipeMode,
+                values: M3EListSwipeMode.values,
+                labelOf: (M3EListSwipeMode value) => value.name,
+                onChanged: (M3EListSwipeMode value) =>
+                    setState(() => _swipeMode = value),
+              ),
+              PlayEnumMenu<M3EListSwipeEdge>(
+                label: 'Dismiss direction',
+                value: _dismissEdge,
+                values: M3EListSwipeEdge.values,
+                labelOf: (M3EListSwipeEdge value) => value.name,
+                onChanged: (M3EListSwipeEdge value) =>
+                    setState(() => _dismissEdge = value),
+              ),
+            ],
+            if (_kind == _ListKind.expandable) ...<Widget>[
               PlaySwitch(
                 label: 'List expansion',
                 value: _useSublist,
                 onChanged: (bool v) => setState(() => _useSublist = v),
               ),
+            ],
           ],
         ),
         if (_kind == _ListKind.expandable)
@@ -316,8 +387,15 @@ class _ListDemoHost extends StatefulWidget {
     required this.doubleTapTrigger,
     required this.useSublist,
     required this.showSelectedIcon,
+    required this.baseline,
+    required this.listStyle,
+    required this.containerTransform,
+    required this.disabled,
+    required this.selected,
     required this.headline,
     required this.supporting,
+    required this.swipeMode,
+    required this.dismissEdge,
   });
 
   final _ListKind kind;
@@ -331,8 +409,15 @@ class _ListDemoHost extends StatefulWidget {
   final bool doubleTapTrigger;
   final bool useSublist;
   final bool showSelectedIcon;
+  final bool baseline;
+  final M3EListStyle listStyle;
+  final bool containerTransform;
+  final bool disabled;
+  final bool selected;
   final String headline;
   final String supporting;
+  final M3EListSwipeMode swipeMode;
+  final M3EListSwipeEdge dismissEdge;
 
   @override
   State<_ListDemoHost> createState() => _ListDemoHostState();
@@ -340,6 +425,9 @@ class _ListDemoHost extends StatefulWidget {
 
 class _ListDemoHostState extends State<_ListDemoHost> {
   static const EdgeInsets _listPadding = EdgeInsets.all(16);
+
+  final M3EExpandableListController _transformController =
+      M3EExpandableListController();
 
   final List<String> _order = <String>['0', '1', '2', '3', '4'];
   Set<int> _expanded = <int>{0};
@@ -393,7 +481,7 @@ class _ListDemoHostState extends State<_ListDemoHost> {
   }
 
   Widget _list() {
-    return switch (widget.kind) {
+    final Widget list = switch (widget.kind) {
       _ListKind.item => Column(
         spacing: M3EListCardListTheme.defaultGap,
         children: <Widget>[
@@ -403,7 +491,39 @@ class _ListDemoHostState extends State<_ListDemoHost> {
               supporting: widget.supporting,
               showLeading: widget.showLeading,
               showTrailing: widget.showTrailing,
+              selected: widget.selected && i == 0,
+              enabled: !(widget.disabled && i == 1),
+              appearance: widget.baseline
+                  ? M3EListAppearance.baseline
+                  : M3EListAppearance.expressive,
+              transform: widget.containerTransform
+                  ? _ListTransformPage(title: '${widget.headline} ${i + 1}')
+                  : null,
             ),
+          const M3EListItem(
+            headline: 'Avatar',
+            supportingText: '40dp circle',
+            leading: M3EListAvatar(label: 'A'),
+          ),
+          const M3EListItem(
+            headline: 'Image',
+            supportingText: '56dp',
+            leading: M3EListImage(child: ColoredBox(color: Color(0xFF6750A4))),
+          ),
+          const M3EListItem(
+            headline: 'Video',
+            supportingText: '100 by 56',
+            leading: M3EListVideo(child: ColoredBox(color: Color(0xFF6750A4))),
+          ),
+          const M3EListItem(
+            headline: 'Large video',
+            supportingText: '114 by 64',
+            largeLeading: true,
+            leading: M3EListVideo(
+              large: true,
+              child: ColoredBox(color: Color(0xFF6750A4)),
+            ),
+          ),
         ],
       ),
       _ListKind.cardList => _CardListPreview(
@@ -417,6 +537,9 @@ class _ListDemoHostState extends State<_ListDemoHost> {
         selectionState: _selectionState,
         order: _order,
         onReorder: _onReorder,
+        disabled: widget.disabled,
+        selected: widget.selected,
+        containerTransform: widget.containerTransform,
       ),
       _ListKind.dismissible => _DismissiblePreview(
         headline: widget.headline,
@@ -426,12 +549,17 @@ class _ListDemoHostState extends State<_ListDemoHost> {
         selectionState: _selectionState,
         order: _order,
         onReorder: _onReorder,
+        swipeMode: widget.swipeMode,
+        dismissEdge: widget.dismissEdge,
+        containerTransform: widget.containerTransform,
       ),
       _ListKind.expandable => _ExpandablePreview(
         headline: widget.headline,
         supporting: widget.supporting,
         showLeading: widget.showLeading,
         useSublist: widget.useSublist,
+        containerTransform: widget.containerTransform,
+        transformController: _transformController,
         selection: widget.selection,
         nestedSelection: widget.nestedSelection,
         reorder: widget.reorder,
@@ -443,6 +571,24 @@ class _ListDemoHostState extends State<_ListDemoHost> {
         onExpansionChanged: _onExpansionChanged,
       ),
     };
+    return Builder(
+      builder: (BuildContext context) {
+        final M3EThemeData theme = M3ETheme.of(context);
+        return M3ETheme(
+          data: theme.copyWith(
+            listTheme: theme.listTheme.copyWith(
+              item: theme.listTheme.item.copyWith(
+                appearance: widget.baseline
+                    ? M3EListAppearance.baseline
+                    : M3EListAppearance.expressive,
+                style: widget.listStyle,
+              ),
+            ),
+          ),
+          child: list,
+        );
+      },
+    );
   }
 
   @override
@@ -471,21 +617,34 @@ class _ItemPreview extends StatelessWidget {
     required this.supporting,
     required this.showLeading,
     required this.showTrailing,
+    required this.selected,
+    required this.enabled,
+    required this.appearance,
+    this.transform,
   });
 
   final String headline;
   final String supporting;
   final bool showLeading;
   final bool showTrailing;
+  final bool selected;
+  final bool enabled;
+  final M3EListAppearance appearance;
+  final Widget? transform;
 
   @override
   Widget build(BuildContext context) {
     return M3EListItem(
       headline: headline,
       supportingText: supporting,
+      trailingText: '32',
       leading: showLeading ? const Icon(M3EIcons.schedule) : null,
       trailing: showTrailing ? const Icon(M3EIcons.chevron_right) : null,
-      onTap: () {},
+      selected: selected,
+      enabled: enabled,
+      appearance: appearance,
+      onTap: enabled ? () {} : null,
+      transform: enabled ? transform : null,
     );
   }
 }
@@ -502,6 +661,9 @@ class _CardListPreview extends StatelessWidget {
     required this.selectionState,
     required this.order,
     required this.onReorder,
+    required this.disabled,
+    required this.selected,
+    required this.containerTransform,
   });
 
   final String headline;
@@ -514,30 +676,48 @@ class _CardListPreview extends StatelessWidget {
   final M3EListSelectionState selectionState;
   final List<String> order;
   final ReorderCallback onReorder;
+  final bool disabled;
+  final bool selected;
+  final bool containerTransform;
 
   @override
   Widget build(BuildContext context) {
-    return M3ECardList(
+    final M3EThemeData theme = M3ETheme.of(context);
+    return M3EList(
       variant: variant,
+      semanticsLabel: 'Sample list',
       selection: selection,
       reorder: reorder,
       selectionState: selectionState,
       onReorder: reorder ? onReorder : null,
       itemCount: order.length,
+      colorBuilder: (int index) {
+        if (selected && index == 0) {
+          return theme.colorScheme.secondaryContainer;
+        }
+        return null;
+      },
       itemBuilder: (BuildContext context, int index) {
         final String id = order[index];
         return M3EListItem(
           headline: '$headline $id',
           supportingText: supporting,
+          trailingText: '32',
           leading: showLeading ? const Icon(M3EIcons.inbox) : null,
           trailing: showTrailing ? const Icon(M3EIcons.chevron_right) : null,
+          selected: selected && index == 0,
+          enabled: !(disabled && index == 1),
+          onTap: () {},
+          transform: containerTransform && !(disabled && index == 1)
+              ? _ListTransformPage(title: '$headline $id')
+              : null,
         );
       },
     );
   }
 }
 
-class _DismissiblePreview extends StatelessWidget {
+class _DismissiblePreview extends StatefulWidget {
   const _DismissiblePreview({
     required this.headline,
     required this.showLeading,
@@ -546,6 +726,9 @@ class _DismissiblePreview extends StatelessWidget {
     required this.selectionState,
     required this.order,
     required this.onReorder,
+    required this.swipeMode,
+    required this.dismissEdge,
+    required this.containerTransform,
   });
 
   final String headline;
@@ -555,33 +738,54 @@ class _DismissiblePreview extends StatelessWidget {
   final M3EListSelectionState selectionState;
   final List<String> order;
   final ReorderCallback onReorder;
+  final M3EListSwipeMode swipeMode;
+  final M3EListSwipeEdge dismissEdge;
+  final bool containerTransform;
+
+  @override
+  State<_DismissiblePreview> createState() => _DismissiblePreviewState();
+}
+
+class _DismissiblePreviewState extends State<_DismissiblePreview> {
+  final M3EDismissibleListController _controller =
+      M3EDismissibleListController();
 
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    return M3EDismissibleColumn(
-      selection: selection,
-      reorder: reorder,
-      selectionState: selectionState,
-      onReorder: reorder ? onReorder : null,
-      itemCount: order.length,
-      onDismiss: (int index, DismissDirection direction) async => true,
-      // Leading: classic full-dismiss strip (no actions).
-      // Trailing: multi-action preview snap.
-      trailingActionsBuilder: (int index) => <M3EListSwipeAction>[
-        M3EListSwipeAction(
-          icon: const Icon(M3EIcons.archive),
-          onPressed: () {},
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            M3EButton(
+              style: M3EButtonStyle.tonal,
+              onPressed: () => _controller.reveal(0),
+              child: const Text('Reveal'),
+            ),
+            const SizedBox(width: 8),
+            M3EButton(
+              style: M3EButtonStyle.tonal,
+              onPressed: () => _controller.dismiss(0),
+              child: const Text('Dismiss'),
+            ),
+          ],
         ),
-        M3EListSwipeAction(
-          icon: const Icon(M3EIcons.delete),
-          isPrimary: true,
-          backgroundColor: theme.colorScheme.danger,
-          foregroundColor: theme.colorScheme.onError,
-          onPressed: () {},
-        ),
+        const SizedBox(height: 12),
+        _column(theme),
       ],
-      style: M3EDismissibleListStyle(
+    );
+  }
+
+  Widget _column(M3EThemeData theme) {
+    return M3EList(
+      dismissController: _controller,
+      selection: widget.selection,
+      reorder: widget.reorder,
+      selectionState: widget.selectionState,
+      onReorder: widget.reorder ? widget.onReorder : null,
+      itemCount: widget.order.length,
+      dismissStyle: M3EDismissibleListStyle(
         background: ColoredBox(
           color: theme.colorScheme.success,
           child: const Center(
@@ -591,9 +795,38 @@ class _DismissiblePreview extends StatelessWidget {
       ),
       itemBuilder: (BuildContext context, int index) {
         return M3EListItem(
-          headline: '$headline ${order[index]}',
+          headline: '${widget.headline} ${widget.order[index]}',
           supportingText: 'Swipe for actions or dismiss',
-          leading: showLeading ? const Icon(M3EIcons.schedule) : null,
+          leading: widget.showLeading ? const Icon(M3EIcons.schedule) : null,
+          transform: widget.containerTransform
+              ? _ListTransformPage(
+                  title: '${widget.headline} ${widget.order[index]}',
+                )
+              : null,
+          swipe: M3EListItemSwipe(
+            mode: widget.swipeMode,
+            edge: widget.dismissEdge,
+            onDismiss: (DismissDirection direction) async => true,
+            leading: <M3EListSwipeAction>[
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.push_pin),
+                onPressed: () {},
+              ),
+            ],
+            trailing: <M3EListSwipeAction>[
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.archive),
+                onPressed: () {},
+              ),
+              M3EListSwipeAction(
+                icon: const Icon(M3EIcons.delete),
+                isPrimary: true,
+                backgroundColor: theme.colorScheme.danger,
+                foregroundColor: theme.colorScheme.onError,
+                onPressed: () {},
+              ),
+            ],
+          ),
         );
       },
     );
@@ -606,6 +839,8 @@ class _ExpandablePreview extends StatelessWidget {
     required this.supporting,
     required this.showLeading,
     required this.useSublist,
+    required this.containerTransform,
+    required this.transformController,
     required this.selection,
     required this.nestedSelection,
     required this.reorder,
@@ -621,6 +856,8 @@ class _ExpandablePreview extends StatelessWidget {
   final String supporting;
   final bool showLeading;
   final bool useSublist;
+  final bool containerTransform;
+  final M3EExpandableListController transformController;
   final bool selection;
   final bool nestedSelection;
   final bool reorder;
@@ -640,9 +877,16 @@ class _ExpandablePreview extends StatelessWidget {
       leading: showLeading
           ? Icon(isPrimary ? M3EIcons.battery_alert : M3EIcons.system_update)
           : null,
-      expanded: useSublist && isPrimary
+      expanded: containerTransform && isPrimary
+          ? M3EExpandableExpanded.transform(
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text('Full screen destination'),
+              ),
+            )
+          : useSublist && isPrimary
           ? M3EExpandableExpanded.list(
-              M3ECardList(
+              M3EList(
                 embedded: true,
                 selection: nestedSelection,
                 selectionState: selectionState,
@@ -685,16 +929,71 @@ class _ExpandablePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3EExpandableList(
+    final List<M3EExpandableData> sections = <M3EExpandableData>[
+      for (final String id in order) _section(context, id),
+    ];
+    final Widget list = M3EList(
+      expandController: transformController,
       initiallyExpanded: initiallyExpanded,
       onExpansionChanged: onExpansionChanged,
       selection: selection,
       selectionState: selectionState,
       reorder: reorder,
       onReorder: reorder ? onReorder : null,
-      data: <M3EExpandableData>[
-        for (final String id in order) _section(context, id),
+      itemCount: sections.length,
+      itemBuilder: (BuildContext context, int index) {
+        final M3EExpandableData item = sections[index];
+        return M3EListItem(
+          headline: item.title,
+          supportingText: item.subtitle,
+          leading: item.leading,
+          trailing: item.trailing,
+          expanded: item.expanded,
+        );
+      },
+    );
+    if (!containerTransform) {
+      return list;
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        M3EButton(
+          onPressed: () => transformController.open(0),
+          child: const Text('Open transform'),
+        ),
+        const SizedBox(height: 12),
+        list,
       ],
+    );
+  }
+}
+
+class _ListTransformPage extends StatelessWidget {
+  const _ListTransformPage({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    return ColoredBox(
+      color: theme.colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(title, style: theme.typeScale.headlineSmall),
+            const SizedBox(height: 16),
+            M3EButton(
+              onPressed: () => M3ECardContainerTransformScope.closeOf(context),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -50,6 +50,8 @@ class M3ERangeSlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     super.key,
   }) : wavy = false,
        amplitude = null,
@@ -86,6 +88,8 @@ class M3ERangeSlider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.haptic = M3EHapticFeedback.none,
+    this.size = M3ESliderSize.xs,
+    this.semanticLabel,
     super.key,
   }) : wavy = true,
        assert(max > min, 'max must be greater than min.');
@@ -170,6 +174,12 @@ class M3ERangeSlider extends StatefulWidget {
   /// Haptic feedback intensity fired on discrete value changes.
   final M3EHapticFeedback haptic;
 
+  /// Spec size. XS uses the ambient [M3ESliderTheme] geometry.
+  final M3ESliderSize size;
+
+  /// Accessibility name. Matches the adjacent text label when set.
+  final String? semanticLabel;
+
   @override
   State<M3ERangeSlider> createState() => _M3ERangeSliderState();
 }
@@ -178,6 +188,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     with TickerProviderStateMixin {
   _M3ERangeThumb? _activeThumb;
   bool _dragging = false;
+  bool _hovered = false;
   bool _isFocusedFromPointer = false;
   bool _ownsFocusNode = false;
   late FocusNode _focusNode;
@@ -198,10 +209,14 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     if (!_focusNode.hasFocus) {
       return false;
     }
-    if (FocusManager.instance.highlightMode == FocusHighlightMode.traditional) {
-      return true;
+    if (!M3EFocusInteraction.instance.ringsAllowed) {
+      return false;
     }
-    return !_isFocusedFromPointer;
+    if (_isFocusedFromPointer) {
+      return false;
+    }
+    return FocusManager.instance.highlightMode ==
+        FocusHighlightMode.traditional;
   }
 
   double get _startFraction =>
@@ -215,6 +230,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
   void initState() {
     super.initState();
     _attachFocusNode(widget.focusNode);
+    M3EFocusInteraction.instance.addListener(_handleFocusInteraction);
     _waveController = AnimationController(
       vsync: this,
       duration: M3EMotion.extraLong2,
@@ -244,6 +260,12 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     setState(() {});
   }
 
+  void _handleFocusInteraction() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void didUpdateWidget(M3ERangeSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -262,6 +284,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
 
   @override
   void dispose() {
+    M3EFocusInteraction.instance.removeListener(_handleFocusInteraction);
     _detachFocusNode();
     _waveController.dispose();
     super.dispose();
@@ -294,6 +317,8 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     return M3EComponentTheme(
       builder: (BuildContext context) {
         return Semantics(
+          slider: true,
+          label: widget.semanticLabel,
           enabled: _enabled,
           value:
               widget.semanticFormatterCallback?.call(widget.values) ??
@@ -391,10 +416,14 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
       if (_activeThumb == null) {
         setState(() => _activeThumb = thumb);
       }
-      final double step = M3ESliderMath.stepSize(
+      final coarse = HardwareKeyboard.instance.logicalKeysPressed.contains(
+        LogicalKeyboardKey.space,
+      );
+      final double step = M3ESliderMath.keyboardStep(
         widget.min,
         widget.max,
         widget.divisions,
+        coarse: coarse,
       );
       final double current = thumb == _M3ERangeThumb.start
           ? widget.values.start
@@ -409,17 +438,32 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
   }
 
   double? _keyboardDelta(LogicalKeyboardKey key, double current, double step) {
+    final reverse = Directionality.of(context) == TextDirection.rtl;
+    final increase = reverse
+        ? LogicalKeyboardKey.arrowLeft
+        : LogicalKeyboardKey.arrowRight;
+    final decrease = reverse
+        ? LogicalKeyboardKey.arrowRight
+        : LogicalKeyboardKey.arrowLeft;
+    final page = M3ESliderMath.pageStep(step, widget.divisions);
     switch (key) {
       case LogicalKeyboardKey.arrowRight:
+      case LogicalKeyboardKey.arrowLeft:
+        if (key == increase) {
+          return current + step;
+        }
+        if (key == decrease) {
+          return current - step;
+        }
+        return null;
       case LogicalKeyboardKey.arrowUp:
         return current + step;
-      case LogicalKeyboardKey.arrowLeft:
       case LogicalKeyboardKey.arrowDown:
         return current - step;
       case LogicalKeyboardKey.pageUp:
-        return current + M3ESliderMath.pageStep(step, widget.divisions);
+        return current + page;
       case LogicalKeyboardKey.pageDown:
-        return current - M3ESliderMath.pageStep(step, widget.divisions);
+        return current - page;
       case LogicalKeyboardKey.home:
         return widget.min;
       case LogicalKeyboardKey.end:

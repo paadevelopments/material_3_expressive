@@ -175,7 +175,7 @@ class _M3EMenuState extends State<M3EMenu> {
       selectionMode: widget.selectionMode,
       closeOnSelect: !stayOpen && widget.closeOnSelect,
       selectedValue: widget.selectedValue,
-      callerFocusNode: _anchorFocus,
+      callerFocusNode: _focusedAnchorNode(),
       onItemChosen: stayOpen ? widget.onSelected : null,
       onEntry: (OverlayEntry entry) => _menuEntry = entry,
     );
@@ -187,6 +187,17 @@ class _M3EMenuState extends State<M3EMenu> {
     if (result != null && !stayOpen) {
       widget.onSelected?.call(result);
     }
+  }
+
+  FocusNode _focusedAnchorNode() {
+    final FocusNode? current = FocusManager.instance.primaryFocus;
+    if (current == null) {
+      return _anchorFocus;
+    }
+    if (current == _anchorFocus || current.ancestors.contains(_anchorFocus)) {
+      return current;
+    }
+    return _anchorFocus;
   }
 
   KeyEventResult _onAnchorKey(FocusNode node, KeyEvent event) {
@@ -214,6 +225,8 @@ class _M3EMenuState extends State<M3EMenu> {
           key: _anchorKey,
           child: Focus(
             focusNode: _anchorFocus,
+            canRequestFocus: false,
+            skipTraversal: true,
             onKeyEvent: _onAnchorKey,
             child: widget.anchorBuilder(context, _openMenu),
           ),

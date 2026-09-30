@@ -40,3 +40,5 @@ migrate_working_dir/
 
 # Generated component spec docs (session artifacts)
 specs/
+
+.claude/

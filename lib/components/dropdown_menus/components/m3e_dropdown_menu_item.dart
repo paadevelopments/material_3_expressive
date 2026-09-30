@@ -206,7 +206,7 @@ class _M3EDropdownMenuItemWidgetState<T>
               });
             }
           },
-          child: child!,
+          child: child,
         );
       },
       child: content,

@@ -57,11 +57,10 @@ class M3EExpandableStyle {
   /// Expand icon padding.
   final EdgeInsetsGeometry iconPadding;
 
-  /// Width of the vertical pill behind the trailing expand icon.
+  /// Side length of the square behind the trailing expand icon.
   ///
-  /// Height fills the header content area. Size is stable across expand /
-  /// collapse; only the fill toggles. Defaults to
-  /// [M3EListExpandableTheme.defaultExpandedIconBackgroundSize].
+  /// Size is stable across expand and collapse; only the fill toggles.
+  /// Defaults to [M3EListExpandableTheme.defaultExpandedIconBackgroundSize].
   final double expandedIconBackgroundSize;
 
   /// Fill for the expanded trailing-icon chrome.

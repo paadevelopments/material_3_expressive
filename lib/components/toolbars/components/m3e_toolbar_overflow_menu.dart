@@ -14,6 +14,7 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
     required this.iconButtonSize,
     this.textStyle,
     this.destructiveColor,
+    this.shape = M3EIconButtonShapeVariant.round,
     super.key,
   });
 
@@ -32,6 +33,9 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
 
   /// destructiveColor.
   final Color? destructiveColor;
+
+  /// shape.
+  final M3EIconButtonShapeVariant shape;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,7 @@ class M3EToolbarOverflowMenu extends StatelessWidget {
           variant: M3EIconButtonVariant.standard,
           icon: icon,
           size: iconButtonSize,
+          shape: shape,
           tooltip: 'More options',
           onPressed: open,
         );

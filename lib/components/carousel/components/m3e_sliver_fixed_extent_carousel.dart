@@ -7,12 +7,18 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.minExtent,
     required this.itemExtent,
+    required this.scaleItems,
     required this.infinite,
+    this.restingExtents,
   });
 
   final double itemExtent;
   final double minExtent;
+  final bool scaleItems;
   final bool infinite;
+
+  /// Per-item resting size. When set, each item shrinks from its own size.
+  final List<double>? restingExtents;
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
@@ -21,7 +27,9 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
+      scaleItems: scaleItems,
       infinite: infinite,
+      restingExtents: restingExtents,
     );
   }
 
@@ -33,7 +41,9 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     renderObject
       ..maxExtent = itemExtent
       ..minExtent = minExtent
-      ..infinite = infinite;
+      ..scaleItems = scaleItems
+      ..infinite = infinite
+      ..restingExtents = restingExtents;
   }
 }
 
@@ -43,8 +53,12 @@ class _RenderSliverFixedExtentCarousel
     required super.childManager,
     required this._maxExtent,
     required this._minExtent,
+    required this._scaleItems,
     required this._infinite,
-  });
+    List<double>? restingExtents,
+  }) : _restingExtents = restingExtents == null
+           ? null
+           : List<double>.from(restingExtents);
 
   double get maxExtent => _maxExtent;
   double _maxExtent;
@@ -68,6 +82,17 @@ class _RenderSliverFixedExtentCarousel
     markNeedsLayout();
   }
 
+  bool get scaleItems => _scaleItems;
+  bool _scaleItems;
+
+  set scaleItems(bool value) {
+    if (_scaleItems == value) {
+      return;
+    }
+    _scaleItems = value;
+    markNeedsLayout();
+  }
+
   bool get infinite => _infinite;
   bool _infinite;
 
@@ -79,41 +104,43 @@ class _RenderSliverFixedExtentCarousel
     markNeedsLayout();
   }
 
+  List<double>? get restingExtents => _restingExtents;
+  List<double>? _restingExtents;
+
+  set restingExtents(List<double>? value) {
+    if (_sameExtents(_restingExtents, value)) {
+      return;
+    }
+    _restingExtents = value == null ? null : List<double>.from(value);
+    markNeedsLayout();
+  }
+
   // This implements the [itemExtentBuilder] callback.
   double _buildItemExtent(
     int index,
     SliverLayoutDimensions currentLayoutDimensions,
   ) {
-    if (maxExtent == 0.0) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _variedExtent(index, extents);
+    }
+
+    if (maxExtent == 0.0 || !scaleItems) {
       return maxExtent;
     }
 
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent)
         .floor();
-
-    // Calculate how many items have been completely scroll off screen.
-    final int offscreenItems = (constraints.scrollOffset / maxExtent).floor();
-
-    // If an item is partially off screen and partially on screen,
-    // `constraints.scrollOffset` must be greater than
-    // `offscreenItems * maxExtent`, so the difference between these two is how
-    // much the current first visible item is off screen.
+    final offscreenItems = firstVisibleIndex;
     final double offscreenExtent =
         constraints.scrollOffset - offscreenItems * maxExtent;
+    final double effectiveMinExtent = _effectiveMinExtent;
 
-    // If there is not enough space to place the last visible item but the remaining
-    // space is larger than `minExtent`, the extent for last item should be at
-    // least the remaining extent to ensure a smooth size transition.
-    final double effectiveMinExtent = math.max(
-      constraints.remainingPaintExtent % maxExtent,
-      minExtent,
-    );
-
-    // Two special cases are the first and last visible items. Other items' extent
-    // should all return `maxExtent`.
+    // The leading item shrinks as it leaves. The trailing item grows into the
+    // space that is left. Both stop at [effectiveMinExtent]; past that they
+    // scroll off the edge instead of changing size.
     if (index == firstVisibleIndex) {
-      final double effectiveExtent = maxExtent - offscreenExtent;
-      return math.max(effectiveExtent, effectiveMinExtent);
+      return math.max(maxExtent - offscreenExtent, effectiveMinExtent);
     }
 
     final double scrollOffsetForLastIndex =
@@ -130,6 +157,15 @@ class _RenderSliverFixedExtentCarousel
     return maxExtent;
   }
 
+  /// Remainder of the viewport, and never smaller than [minExtent].
+  ///
+  /// Capped at [maxExtent] so a shrink extent larger than the item cannot
+  /// invert [clampDouble].
+  double get _effectiveMinExtent => math.min(
+    maxExtent,
+    math.max(constraints.remainingPaintExtent % maxExtent, minExtent),
+  );
+
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
@@ -140,30 +176,25 @@ class _RenderSliverFixedExtentCarousel
     double itemExtent,
     int index,
   ) {
-    if (maxExtent == 0.0) {
-      return maxExtent;
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _variedOffset(index, extents);
+    }
+
+    if (maxExtent == 0.0 || !scaleItems) {
+      return maxExtent * index;
     }
 
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent)
         .floor();
-
-    // If there is not enough space to place the last visible item but the remaining
-    // space is larger than `minExtent`, the extent for last item should be at
-    // least the remaining extent to make sure a smooth size transition.
-    final double effectiveMinExtent = math.max(
-      constraints.remainingPaintExtent % maxExtent,
-      minExtent,
-    );
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(
         index,
         layoutDimensions,
       );
-
-      // If the first item is collapsed to be less than `effectiveMinExtent`,
-      // then it should stop changing its size and should start to scroll off screen.
-      if (firstVisibleItemExtent <= effectiveMinExtent) {
-        return maxExtent * index - effectiveMinExtent + maxExtent;
+      // Past the shrink floor the item stops resizing and scrolls off.
+      if (firstVisibleItemExtent <= _effectiveMinExtent) {
+        return maxExtent * index - _effectiveMinExtent + maxExtent;
       }
       return constraints.scrollOffset;
     }
@@ -180,6 +211,11 @@ class _RenderSliverFixedExtentCarousel
     )
     double itemExtent,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _leadingIndex(scrollOffset, extents);
+    }
+
     if (maxExtent == 0.0) {
       return 0;
     }
@@ -198,6 +234,11 @@ class _RenderSliverFixedExtentCarousel
     )
     double itemExtent,
   ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      return _trailingIndex(scrollOffset, extents);
+    }
+
     if (maxExtent > 0.0) {
       final double actual = scrollOffset / maxExtent - 1;
       final int round = actual.round();
@@ -208,6 +249,100 @@ class _RenderSliverFixedExtentCarousel
       return math.max(0, actual.ceil());
     }
     return 0;
+  }
+
+  @override
+  double computeMaxScrollOffset(
+    SliverConstraints constraints,
+    double itemExtent,
+  ) {
+    final List<double>? extents = _restingExtents;
+    if (extents != null && extents.isNotEmpty) {
+      double sum = 0;
+      for (final double extent in extents) {
+        sum += extent;
+      }
+      return sum;
+    }
+    return super.computeMaxScrollOffset(constraints, itemExtent);
+  }
+
+  double _variedExtent(int index, List<double> extents) {
+    if (index < 0 || index >= extents.length) {
+      return 0;
+    }
+    final double rest = extents[index];
+    if (!scaleItems) {
+      return rest;
+    }
+    final int leading = _leadingIndex(constraints.scrollOffset, extents);
+    if (index == leading) {
+      final double into =
+          constraints.scrollOffset - _extentPrefix(extents, index);
+      return math.max(rest - into, _floorFor(rest));
+    }
+    final double end =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
+    final int trailing = _trailingIndex(end, extents);
+    if (index == trailing) {
+      final double leftover = end - _extentPrefix(extents, index);
+      return clampDouble(leftover, _floorFor(rest), rest);
+    }
+    return rest;
+  }
+
+  double _variedOffset(int index, List<double> extents) {
+    if (!scaleItems || index < 0 || index >= extents.length) {
+      return _extentPrefix(extents, index);
+    }
+    final int leading = _leadingIndex(constraints.scrollOffset, extents);
+    if (index != leading) {
+      return _extentPrefix(extents, index);
+    }
+    final double rest = extents[index];
+    final double floor = _floorFor(rest);
+    final double extent = _variedExtent(index, extents);
+    if (extent <= floor) {
+      return _extentPrefix(extents, index) + (rest - floor);
+    }
+    return constraints.scrollOffset;
+  }
+
+  /// Shrink floor for one item, matching the uniform uncontained rule.
+  double _floorFor(double itemMax) {
+    if (itemMax <= 0) {
+      return 0;
+    }
+    return math.min(
+      itemMax,
+      math.max(constraints.remainingPaintExtent % itemMax, minExtent),
+    );
+  }
+
+  int _leadingIndex(double offset, List<double> extents) {
+    double start = 0;
+    for (var i = 0; i < extents.length; i++) {
+      final double next = start + extents[i];
+      if (offset < next) {
+        return i;
+      }
+      start = next;
+    }
+    return extents.length - 1;
+  }
+
+  /// Last item that has started before [end].
+  int _trailingIndex(double end, List<double> extents) {
+    double start = 0;
+    var trailing = 0;
+    for (var i = 0; i < extents.length; i++) {
+      if (start >= end) {
+        break;
+      }
+      trailing = i;
+      start += extents[i];
+    }
+    return trailing;
   }
 
   @override

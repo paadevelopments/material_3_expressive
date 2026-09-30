@@ -182,11 +182,7 @@ Future<void> _appearMorphStartsBelowRestingScale(WidgetTester tester) async {
       data: M3EThemeData.light(),
       home: const Scaffold(
         body: Center(
-          child: M3EFab(
-            appear: true,
-            icon: Icon(Icons.add),
-            onPressed: _noop,
-          ),
+          child: M3EFab(appear: true, icon: Icon(Icons.add), onPressed: _noop),
         ),
       ),
     ),

@@ -1,12 +1,13 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
-import '../../cards/m3e_cards.dart';
+import '../../cards/enums/m3e_card_variant.dart';
 import '../enums/m3e_list_enums.dart';
 import 'm3e_card_radius_motion.dart';
 import 'm3e_expandable_nest_scope.dart';
 import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_item_scope.dart';
+import 'm3e_list_row_surface.dart';
 
 /// Internal helper to calculate [M3ECardPosition] based on index and total.
 M3ECardPosition calculateCardPosition(int index, int total) => total == 1
@@ -170,13 +171,17 @@ class M3ECardListItem extends StatelessWidget {
         ? M3ECardVariant.filled
         : variant;
     final BorderSide? effectiveBorder = dragProxy != null ? null : border;
+    final Color? inheritedSurface = color == null && resolvedColor == null
+        ? nest?.surfaceColor
+        : null;
     final Color? effectiveColor = dragProxy != null
         ? dragProxy.color
         : (resolvedColor ??
               color ??
+              inheritedSurface ??
               (variant == M3ECardVariant.outlined
                   ? null
-                  : cardListTheme.backgroundColor(scheme)));
+                  : cardListTheme.backgroundColor(scheme, variant: variant)));
 
     final bool isLast =
         position == M3ECardPosition.last || position == M3ECardPosition.single;
@@ -187,27 +192,28 @@ class M3ECardListItem extends StatelessWidget {
     final VoidCallback? wrappedOnLongPress = onLongPress != null
         ? () => onLongPress!(index)
         : null;
+    final parentPads = padding != null;
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : gap),
       child: M3ECardRadiusMotion(
         radius: borderRadius,
         builder: (BuildContext context, BorderRadius animatedRadius) {
-          return M3ECard(
+          return M3EListRowSurface(
+            index: index,
             variant: effectiveVariant,
-            border: effectiveBorder,
-            borderRadius: animatedRadius,
+            radius: animatedRadius,
             color: effectiveColor,
-            padding: padding ?? cardListTheme.itemPadding,
-            onPressed: dragProxy != null ? null : wrappedOnTap,
+            border: effectiveBorder,
+            elevation: dragProxy != null ? 0 : null,
+            padding: parentPads ? padding! : EdgeInsets.zero,
+            onTap: dragProxy != null ? null : wrappedOnTap,
             onLongPress: dragProxy != null ? null : wrappedOnLongPress,
+            dragged: dragProxy != null,
             mouseCursor: mouseCursor,
             semanticLabel: semanticLabel,
             haptic: haptic,
-            width: double.infinity,
-            elevation: dragProxy != null ? 0 : null,
-            animationDuration: Duration.zero,
-            child: M3EListItemScope(child: child),
+            child: M3EListItemScope(padsChild: parentPads, child: child),
           );
         },
       ),

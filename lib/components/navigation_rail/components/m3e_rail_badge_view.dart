@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/components/badges/m3e_badges.dart';
 
 import '../../../foundations/foundations.dart';
+import '../styles/m3e_navigation_rail_theme.dart';
 
 /// Navigation rail badge using [M3EBadge].
 ///
@@ -58,8 +59,8 @@ class M3ERailBadge extends StatelessWidget {
     final m3e = M3ETheme.of(context);
     final badgeTheme = m3e.badgeTheme;
     final scheme = m3e.colorScheme;
-    final bg = theme.badgeBackground ?? badgeTheme.containerColor(scheme);
-    final fg = theme.badgeLargeLabel ?? badgeTheme.labelColor(scheme);
+    final bg = theme.badgeBackgroundResolved(scheme);
+    final fg = theme.badgeLabelResolved(scheme);
 
     if (child != null) {
       return M3EBadge(

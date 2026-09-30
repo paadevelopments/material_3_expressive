@@ -91,6 +91,7 @@ class _M3EFabMenuOverlay {
                       ? Alignment.bottomRight
                       : Alignment.bottomLeft,
                   child: SingleChildScrollView(
+                    primary: false,
                     reverse: true,
                     child: _M3EFabMenuItems(menu).build(theme),
                   ),

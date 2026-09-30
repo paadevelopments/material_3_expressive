@@ -1,5 +1,6 @@
 # Tooling / IDE (not needed on pub.dev)
 .cursor/
+.claude/
 .fvm/
 .idea/
 .vscode/

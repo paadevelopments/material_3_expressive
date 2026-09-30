@@ -56,6 +56,10 @@ void _registerTooltipDismissTests() {
     _plainDismissesImmediatelyAfterLeave,
   );
   testWidgets(
+    'plain tooltip at the top does not cover the anchor',
+    _plainTooltipAtTheTopDoesNotCoverTheAnchor,
+  );
+  testWidgets(
     'tooltip does not add an extra tab stop around icon buttons',
     _tooltipDoesNotAddAnExtraTabStopAroundIconButtons,
   );
@@ -125,6 +129,53 @@ Future<void> _plainDismissesImmediatelyAfterLeave(WidgetTester tester) async {
   await gesture.moveTo(const Offset(5, 5));
   await tester.pump();
   expect(find.text('Edit'), findsNothing);
+}
+
+Future<void> _plainTooltipAtTheTopDoesNotCoverTheAnchor(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+      home: const Scaffold(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: M3ETooltip(
+            message: 'Back',
+            child: SizedBox(
+              key: _anchorKey,
+              width: 48,
+              height: 48,
+              child: ColoredBox(color: Color(0xFF000000)),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  final TestGesture gesture = await tester.createGesture(
+    kind: PointerDeviceKind.mouse,
+  );
+  await gesture.addPointer(location: Offset.zero);
+  addTearDown(gesture.removePointer);
+  await tester.pump();
+  await gesture.moveTo(tester.getCenter(find.byKey(_anchorKey)));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+
+  final Rect anchor = tester.getRect(find.byKey(_anchorKey));
+  final Rect tip = tester.getRect(find.text('Back'));
+  expect(tip.overlaps(anchor), isFalse);
+  expect(tip.top, greaterThanOrEqualTo(anchor.bottom));
+  expect(
+    find.ancestor(of: find.text('Back'), matching: find.byType(IgnorePointer)),
+    findsWidgets,
+  );
+
+  await gesture.moveTo(anchor.center + const Offset(6, 6));
+  await tester.pump();
+  expect(find.text('Back'), findsOneWidget);
 }
 
 Future<void> _persistentRichIgnoresHoverAndShowsOnTap(

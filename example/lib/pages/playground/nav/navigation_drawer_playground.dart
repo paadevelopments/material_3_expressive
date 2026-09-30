@@ -2,6 +2,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_enum_menu.dart';
 import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
 import '../../../widgets/playground/play_preview_card.dart';
@@ -21,6 +22,9 @@ class _NavigationDrawerPlaygroundState
     extends State<NavigationDrawerPlayground> {
   String _headline = 'Mail';
   bool _badges = true;
+  bool _sections = true;
+  bool _dismissible = false;
+  M3ENavigationDrawerType _type = M3ENavigationDrawerType.standard;
 
   List<M3ENavigationDestination> get _destinations {
     return <M3ENavigationDestination>[
@@ -42,14 +46,34 @@ class _NavigationDrawerPlaygroundState
     ];
   }
 
+  List<M3ENavigationDrawerSection> get _sectionList {
+    if (!_sections) {
+      return const <M3ENavigationDrawerSection>[];
+    }
+    return const <M3ENavigationDrawerSection>[
+      M3ENavigationDrawerSection(
+        header: 'Labels',
+        destinations: <M3ENavigationDestination>[
+          M3ENavigationDestination(
+            icon: Icon(M3EIcons.folder),
+            label: 'Personal',
+          ),
+          M3ENavigationDestination(icon: Icon(M3EIcons.work), label: 'Work'),
+          M3ENavigationDestination(
+            icon: Icon(M3EIcons.flight),
+            label: 'Travel',
+          ),
+        ],
+      ),
+    ];
+  }
+
   List<PlaySnippet> get _snippets {
-    final String headline = _headline.isEmpty
+    final headline = _headline.isEmpty
         ? ''
         : '  headline: ${playDartString(_headline)},\n';
-    final String destinations = _badges
+    final badges = _badges
         ? '''
-  destinations: const <M3ENavigationDestination>[
-    M3ENavigationDestination(icon: Icon(M3EIcons.home), label: 'Home'),
     M3ENavigationDestination(
       icon: Icon(M3EIcons.search),
       label: 'Search',
@@ -59,24 +83,61 @@ class _NavigationDrawerPlaygroundState
       icon: Icon(M3EIcons.calendar_today),
       label: 'Agenda',
       badgeLabel: '3',
-    ),
-    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
-  ],'''
+    ),'''
         : '''
-  destinations: const <M3ENavigationDestination>[
-    M3ENavigationDestination(icon: Icon(M3EIcons.home), label: 'Home'),
     M3ENavigationDestination(icon: Icon(M3EIcons.search), label: 'Search'),
     M3ENavigationDestination(
       icon: Icon(M3EIcons.calendar_today),
       label: 'Agenda',
+    ),''';
+    final sections = _sections
+        ? '''
+  sections: const <M3ENavigationDrawerSection>[
+    M3ENavigationDrawerSection(
+      header: 'Labels',
+      destinations: <M3ENavigationDestination>[
+        M3ENavigationDestination(
+          icon: Icon(M3EIcons.folder),
+          label: 'Personal',
+        ),
+        M3ENavigationDestination(icon: Icon(M3EIcons.work), label: 'Work'),
+        M3ENavigationDestination(
+          icon: Icon(M3EIcons.flight),
+          label: 'Travel',
+        ),
+      ],
     ),
-    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
-  ],''';
-    final String sample =
+  ],
+'''
+        : '';
+    final modal = _type == M3ENavigationDrawerType.modal;
+    final controlled = modal || _dismissible;
+    final opener = controlled
+        ? '''
+final M3ENavigationDrawerController controller =
+    M3ENavigationDrawerController(${modal ? '' : 'isOpen: true'});
+
+M3EButton(
+  onPressed: controller.${modal ? 'open' : 'toggle'},
+  child: const Text('Open navigation'),
+);
+
+'''
+        : '';
+    final controllerArg = controlled ? '  controller: controller,\n' : '';
+    final dismissibleArg = _dismissible && !modal
+        ? '  dismissible: true,\n'
+        : '';
+    final typeArg = modal ? '  type: M3ENavigationDrawerType.modal,\n' : '';
+    final sample =
         '''
-M3ENavigationDrawer(
-$headline$destinations
-  selectedIndex: 0,
+${opener}M3ENavigationDrawer(
+$headline  destinations: const <M3ENavigationDestination>[
+    M3ENavigationDestination(icon: Icon(M3EIcons.home), label: 'Home'),
+$badges
+    M3ENavigationDestination(icon: Icon(M3EIcons.edit), label: 'Drafts'),
+  ],
+$sections$typeArg$dismissibleArg$controllerArg  selectedIndex: 0,
   onDestinationSelected: (int i) {},
 );''';
     return <PlaySnippet>[
@@ -94,6 +155,9 @@ $headline$destinations
           return _NavigationDrawerDemoHost(
             headline: _headline.isEmpty ? null : _headline,
             destinations: _destinations,
+            sections: _sectionList,
+            type: _type,
+            dismissible: _dismissible,
           );
         },
       ),
@@ -102,7 +166,7 @@ $headline$destinations
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
+    final theme = M3ETheme.of(context);
     return PlaygroundBody(
       previews: <Widget>[
         PlayPreviewCard(
@@ -111,8 +175,8 @@ $headline$destinations
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Opens a full screen with the drawer beside the page, the way '
-                'an app uses it. Switch destinations to review the indicator.',
+                'Opens a full screen with the drawer beside the page. A modal '
+                'drawer opens from the menu and covers the page.',
                 style: theme.typeScale.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -141,6 +205,25 @@ $headline$destinations
               value: _badges,
               onChanged: (bool v) => setState(() => _badges = v),
             ),
+            PlaySwitch(
+              label: 'Section',
+              value: _sections,
+              onChanged: (bool v) => setState(() => _sections = v),
+            ),
+            PlayEnumMenu<M3ENavigationDrawerType>(
+              label: 'Type',
+              value: _type,
+              values: M3ENavigationDrawerType.values,
+              labelOf: (M3ENavigationDrawerType value) => value.name,
+              onChanged: (M3ENavigationDrawerType value) {
+                setState(() => _type = value);
+              },
+            ),
+            PlaySwitch(
+              label: 'Dismissible',
+              value: _dismissible,
+              onChanged: (bool v) => setState(() => _dismissible = v),
+            ),
           ],
         ),
       ],
@@ -152,10 +235,16 @@ class _NavigationDrawerDemoHost extends StatefulWidget {
   const _NavigationDrawerDemoHost({
     required this.headline,
     required this.destinations,
+    required this.sections,
+    required this.type,
+    required this.dismissible,
   });
 
   final String? headline;
   final List<M3ENavigationDestination> destinations;
+  final List<M3ENavigationDrawerSection> sections;
+  final M3ENavigationDrawerType type;
+  final bool dismissible;
 
   @override
   State<_NavigationDrawerDemoHost> createState() =>
@@ -163,72 +252,121 @@ class _NavigationDrawerDemoHost extends StatefulWidget {
 }
 
 class _NavigationDrawerDemoHostState extends State<_NavigationDrawerDemoHost> {
+  late final M3ENavigationDrawerController _controller;
   int _index = 0;
+
+  bool get _menu =>
+      widget.type == M3ENavigationDrawerType.modal || widget.dismissible;
+
+  List<M3ENavigationDestination> get _all {
+    return <M3ENavigationDestination>[
+      ...widget.destinations,
+      for (final section in widget.sections) ...section.destinations,
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final startsOpen =
+        widget.type == M3ENavigationDrawerType.standard && !widget.dismissible;
+    _controller = M3ENavigationDrawerController(isOpen: startsOpen);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ENavigationDestination destination = widget.destinations[_index];
-    final double drawerWidth = theme.navigationDrawerTheme.width;
-    return ColoredBox(
+    final theme = M3ETheme.of(context);
+    final destination = _all[_index.clamp(0, _all.length - 1)];
+    final drawer = M3ENavigationDrawer(
+      headline: widget.headline,
+      destinations: widget.destinations,
+      sections: widget.sections,
+      type: widget.type,
+      dismissible: widget.dismissible,
+      controller: _controller,
+      selectedIndex: _index,
+      onDestinationSelected: (int i) => setState(() => _index = i),
+    );
+    final page = _page(theme, destination);
+    final modal = widget.type == M3ENavigationDrawerType.modal;
+    return Material(
       color: theme.colorScheme.surface,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          // The drawer is a fixed-width pane. Keep a readable page beside it,
-          // and scroll sideways when the window is narrower than both.
-          const double minContentWidth = 200;
-          final double width =
-              constraints.maxWidth >= drawerWidth + minContentWidth
-              ? constraints.maxWidth
-              : drawerWidth + minContentWidth;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: width,
-              height: constraints.maxHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  M3ENavigationDrawer(
-                    headline: widget.headline,
-                    destinations: widget.destinations,
-                    selectedIndex: _index,
-                    onDestinationSelected: (int i) =>
-                        setState(() => _index = i),
-                  ),
-                  SizedBox(
-                    width: width - drawerWidth,
-                    child: Column(
+      child: modal
+          ? Stack(
+              children: <Widget>[
+                Positioned.fill(child: page),
+                drawer,
+              ],
+            )
+          : LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                const minContentWidth = 200;
+                final drawerWidth = theme.navigationDrawerTheme.width;
+                final width =
+                    constraints.maxWidth >= drawerWidth + minContentWidth
+                    ? constraints.maxWidth
+                    : drawerWidth + minContentWidth;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: width,
+                    height: constraints.maxHeight,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        M3EAppBar.top(
-                          titleText: destination.label,
-                          leading: M3EIconButton(
-                            variant: M3EIconButtonVariant.standard,
-                            icon: const Icon(M3EIcons.arrow_back),
-                            tooltip: 'Back',
-                            onPressed: () => Navigator.of(context).maybePop(),
-                          ),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: IconTheme(
-                              data: IconThemeData(
-                                size: 48,
-                                color: theme.colorScheme.primary,
-                              ),
-                              child: destination.icon,
-                            ),
-                          ),
-                        ),
+                        drawer,
+                        Expanded(child: page),
                       ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
-      ),
+    );
+  }
+
+  Widget _page(M3EThemeData theme, M3ENavigationDestination destination) {
+    return Column(
+      children: <Widget>[
+        M3EAppBar.top(
+          titleText: destination.label,
+          leading: M3EIconButton(
+            variant: M3EIconButtonVariant.standard,
+            icon: Icon(_menu ? M3EIcons.menu : M3EIcons.arrow_back),
+            tooltip: _menu ? 'Open navigation' : 'Back',
+            onPressed: () {
+              if (_menu) {
+                _controller.toggle();
+                return;
+              }
+              Navigator.of(context).maybePop();
+            },
+          ),
+          actions: <Widget>[
+            if (_menu)
+              M3EIconButton(
+                variant: M3EIconButtonVariant.standard,
+                icon: const Icon(M3EIcons.arrow_back),
+                tooltip: 'Back',
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+          ],
+        ),
+        Expanded(
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(size: 48, color: theme.colorScheme.primary),
+              child: destination.icon ?? const Icon(M3EIcons.folder),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

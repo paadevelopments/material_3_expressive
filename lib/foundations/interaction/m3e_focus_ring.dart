@@ -88,9 +88,19 @@ class M3EFocusRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: M3EFocusInteraction.instance,
+      builder: (BuildContext context, Widget? _) => _paint(context),
+    );
+  }
+
+  Widget _paint(BuildContext context) {
     final theme = M3ETheme.of(context);
     final ringTheme = theme.focusRingTheme;
-    final bool show = focused && theme.keyboardFocusIndicators;
+    final bool show =
+        focused &&
+        theme.keyboardFocusIndicators &&
+        M3EFocusInteraction.instance.ringsAllowed;
     final resolvedColor = color ?? ringTheme.resolveColor(theme.colorScheme);
     final resolvedGap = gap ?? ringTheme.gap;
     final resolvedWidth = width ?? ringTheme.width;

@@ -46,6 +46,7 @@ class _M3ESliderResolved {
     required this.thumbLength,
     required this.dotSize,
     required this.dotSpacing,
+    required this.tickSize,
     required this.useCustomDots,
   });
 
@@ -63,20 +64,16 @@ class _M3ESliderResolved {
   final double thumbLength;
   final double dotSize;
   final double dotSpacing;
+  final double tickSize;
   final bool useCustomDots;
 }
 
 extension on _M3ESliderState {
   _M3ESliderResolved _resolve(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final M3ESliderTheme baseSliderTheme = theme.sliderTheme;
-    // Widen the track gap by the ring outset so the outline never overlaps it.
-    final M3ESliderTheme sliderTheme = _showFocusOutline
-        ? baseSliderTheme.copyWith(
-            handleGap:
-                baseSliderTheme.handleGap + M3EFocusRing.outsetOf(context),
-          )
-        : baseSliderTheme;
+    final M3ESliderTheme sliderTheme = theme.sliderTheme.applyingSize(
+      widget.size,
+    );
     final M3ESliderColors colors = sliderTheme.colors(
       theme.colorScheme,
       enabled: _enabled,
@@ -84,8 +81,8 @@ extension on _M3ESliderState {
     final TextDirection direction = Directionality.of(context);
     final bool rtl = !_vertical && direction == TextDirection.rtl;
     final bool reverse = _vertical ? !widget.topToBottom : rtl;
-    final double handleThickness = _pressed
-        ? sliderTheme.pressedHandleWidth
+    final double handleThickness = _pressed || _showFocusOutline
+        ? sliderTheme.focusHandleWidth
         : (_vertical
               ? M3ESliderTokens.verticalHandleHeight
               : sliderTheme.handleWidth);
@@ -111,6 +108,7 @@ extension on _M3ESliderState {
       thumbLength: widget.thumbLength ?? sliderTheme.handleHeight,
       dotSize: widget.dotSize ?? sliderTheme.stopIndicatorSize,
       dotSpacing: widget.dotSpacing ?? sliderTheme.stopIndicatorTrailingSpace,
+      tickSize: sliderTheme.tickSize,
       useCustomDots: widget.dotBuilder != null,
     );
   }
@@ -204,7 +202,7 @@ extension on _M3ESliderState {
           handleGap: resolved.sliderTheme.handleGap,
           handleThickness: resolved.handleThickness,
           stopIndicatorSize: resolved.dotSize,
-          tickSize: resolved.dotSize,
+          tickSize: resolved.tickSize,
           edgeInset: resolved.dotSpacing,
           axis: widget.axis,
           textDirection: resolved.direction,
@@ -226,7 +224,7 @@ extension on _M3ESliderState {
         trackHeight: resolved.trackThickness,
         cornerRadius: resolved.cornerRadius,
         stopIndicatorSize: resolved.dotSize,
-        tickSize: resolved.dotSize,
+        tickSize: resolved.tickSize,
         edgeInset: resolved.dotSpacing,
         drawDots: !resolved.useCustomDots && widget.icon == null,
         isWavy: widget.wavy,
@@ -247,7 +245,7 @@ extension on _M3ESliderState {
       trackHeight: resolved.trackThickness,
       cornerRadius: resolved.cornerRadius,
       stopIndicatorSize: resolved.dotSize,
-      tickSize: resolved.dotSize,
+      tickSize: resolved.tickSize,
       edgeInset: resolved.dotSpacing,
       drawDots: !resolved.useCustomDots && widget.icon == null,
       isWavy: widget.wavy,
@@ -268,6 +266,7 @@ extension on _M3ESliderState {
           color: resolved.colors.thumb,
           pressed: _pressed,
           focused: _showFocusOutline,
+          hovered: _hovered,
           axis: widget.axis,
           width: _vertical
               ? resolved.thumbLength
@@ -275,7 +274,7 @@ extension on _M3ESliderState {
           height: _vertical
               ? M3ESliderTokens.verticalHandleHeight
               : resolved.thumbLength,
-          pressedThickness: resolved.sliderTheme.pressedHandleWidth,
+          pressedThickness: resolved.sliderTheme.focusHandleWidth,
         );
   }
 
@@ -323,6 +322,8 @@ extension on _M3ESliderState {
           cursor: _enabled
               ? SystemMouseCursors.click
               : SystemMouseCursors.basic,
+          onEnter: (_) => _setHovered(true),
+          onExit: (_) => _setHovered(false),
           child: gestureDetector,
         ),
       ),
@@ -361,6 +362,13 @@ extension on _M3ESliderState {
       onTapUp: _tapUp,
       onTapCancel: _endInteraction,
     );
+  }
+
+  void _setHovered(bool value) {
+    if (_hovered == value || !mounted) {
+      return;
+    }
+    setState(() => _hovered = value);
   }
 
   void _pressStart(DragStartDetails details) {
@@ -441,12 +449,19 @@ extension on _M3ESliderState {
             child: Center(child: thumb),
           ),
           ?iconOverlay,
-          if (_pressed)
+          if (_pressed || _showFocusOutline)
             Positioned(
-              left: _vertical ? cross + 8 : thumbPrimary - 24,
+              left: _vertical
+                  ? cross / 2 + resolved.thumbLength / 2 + 8
+                  : thumbPrimary - resolved.sliderTheme.valueIndicatorWidth / 2,
+              bottom: _vertical
+                  ? null
+                  : cross / 2 +
+                        resolved.thumbLength / 2 +
+                        resolved.sliderTheme.valueIndicatorBottomSpace,
               top: _vertical
-                  ? thumbPrimary - 12
-                  : -resolved.sliderTheme.valueIndicatorBottomSpace - 24,
+                  ? thumbPrimary - resolved.sliderTheme.valueIndicatorHeight / 2
+                  : null,
               child: M3ESliderValueIndicator(
                 label: resolved.indicatorLabel,
                 colors: resolved.colors,
@@ -457,8 +472,8 @@ extension on _M3ESliderState {
     );
   }
 
-  /// Icon that rests at one track end and relocates beside the thumb once it
-  /// gets close, so it is never covered. Standard track only.
+  /// Icon that rests at [M3ESlider.iconPosition] and springs to the other side
+  /// of the thumb when that resting spot no longer fits. Standard track only.
   Widget? _buildRelocatingIcon({
     required BuildContext context,
     required double extent,
@@ -470,16 +485,15 @@ extension on _M3ESliderState {
         widget.trackKind != M3ESliderTrackKind.standard) {
       return null;
     }
-    final double iconSize = widget.iconSize ?? 24;
+    final double iconSize = widget.iconSize ?? resolved.sliderTheme.iconSize;
     final double iconHalf = iconSize / 2;
     final double edgeInset =
         widget.iconEdgeInset ?? resolved.sliderTheme.iconEdgeInset;
     final double thumbHalf = resolved.handleThickness / 2;
     final bool reverse = resolved.reverse;
-
-    final nearEnd =
+    final restAtEnd =
         (widget.iconPosition == M3ESliderIconPosition.end) != reverse;
-    final double restingCenter = nearEnd
+    final double restingCenter = restAtEnd
         ? extent - edgeInset - iconHalf
         : edgeInset + iconHalf;
 
@@ -489,18 +503,14 @@ extension on _M3ESliderState {
     _updateIconDock(isDocked);
 
     final double dockOffset = thumbHalf + iconHalf + 12;
-    final double dockedTarget = reverse
-        ? thumbPrimary + dockOffset
-        : thumbPrimary - dockOffset;
-
-    final minCenter = iconHalf;
-    final maxCenter = extent - iconHalf;
+    final double dockedTarget = restAtEnd
+        ? thumbPrimary - dockOffset
+        : thumbPrimary + dockOffset;
     final double iconCenter = lerpDouble(
       restingCenter,
       dockedTarget,
       _dockController.value,
-    )!.clamp(minCenter, maxCenter);
-
+    )!.clamp(iconHalf, extent - iconHalf);
     final bool overActive = reverse
         ? iconCenter >= thumbPrimary
         : iconCenter <= thumbPrimary;
@@ -513,7 +523,7 @@ extension on _M3ESliderState {
           )
         : overActive
         ? theme.colorScheme.onPrimary
-        : theme.colorScheme.onSurfaceVariant;
+        : theme.colorScheme.onSecondaryContainer;
 
     return Positioned(
       left: _vertical ? (cross - iconSize) / 2 : iconCenter - iconHalf,

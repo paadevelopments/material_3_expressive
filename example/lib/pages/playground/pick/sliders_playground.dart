@@ -21,25 +21,39 @@ class SlidersPlayground extends StatefulWidget {
 
 class _SlidersPlaygroundState extends State<SlidersPlayground> {
   _SliderKind _kind = _SliderKind.continuous;
+  M3ESliderSize _size = M3ESliderSize.xs;
   double _value = 0.45;
   M3ESliderRange _range = const M3ESliderRange(0.2, 0.7);
   bool _enabled = true;
-  double _trackThickness = 16;
-  M3ESliderIconPosition _iconPosition = M3ESliderIconPosition.end;
+  bool _stops = false;
+  double _wavelength = 40;
+  M3ESliderIconPosition _iconPosition = M3ESliderIconPosition.start;
+
+  bool get _showIcon =>
+      _size.index >= M3ESliderSize.m.index &&
+      (_kind == _SliderKind.continuous || _kind == _SliderKind.vertical) &&
+      !_stops;
 
   String _num(double value) {
     return value == value.roundToDouble() ? '${value.toInt()}' : '$value';
   }
 
   List<PlaySnippet> get _snippets {
-    final String thickness = _num(_trackThickness);
+    final String sizeArg = '  size: M3ESliderSize.${_size.name},\n';
+    final String stopsArg = _stops ? '  divisions: 10,\n' : '';
+    final String iconArg = _showIcon
+        ? '''
+  icon: const Icon(M3EIcons.volume_up),
+  iconPosition: M3ESliderIconPosition.${_iconPosition.name},
+'''
+        : '';
     final String sample = switch (_kind) {
       _SliderKind.continuous =>
         '''
 M3ESlider(
   value: ${_num(_value)},
   enabled: $_enabled,
-  trackThickness: $thickness,
+$sizeArg$stopsArg$iconArg  semanticLabel: 'Volume',
   onChanged: (double v) {},
 );''',
       _SliderKind.wavy =>
@@ -47,8 +61,8 @@ M3ESlider(
 M3ESlider.wavy(
   value: ${_num(_value)},
   enabled: $_enabled,
-  trackThickness: $thickness,
-  onChanged: (double v) {},
+  wavelength: ${_num(_wavelength)},
+$sizeArg  onChanged: (double v) {},
 );''',
       _SliderKind.centered =>
         '''
@@ -57,8 +71,7 @@ M3ESlider.centered(
   min: -100,
   max: 100,
   enabled: $_enabled,
-  trackThickness: $thickness,
-  onChanged: (double v) {},
+$sizeArg  onChanged: (double v) {},
 );''',
       _SliderKind.discrete =>
         '''
@@ -67,8 +80,7 @@ M3ESlider(
   max: 5,
   divisions: 5,
   enabled: $_enabled,
-  trackThickness: $thickness,
-  haptic: M3EHapticFeedback.light,
+$sizeArg  haptic: M3EHapticFeedback.light,
   onChanged: (double v) {},
 );''',
       _SliderKind.vertical =>
@@ -76,19 +88,14 @@ M3ESlider(
 M3ESlider.vertical(
   value: ${_num(_value)},
   enabled: $_enabled,
-  trackThickness: $thickness,
-  thumbLength: 80,
-  icon: const Icon(M3EIcons.volume_up),
-  iconPosition: M3ESliderIconPosition.${_iconPosition.name},
-  onChanged: (double v) {},
+$sizeArg$stopsArg$iconArg  onChanged: (double v) {},
 );''',
       _SliderKind.range =>
         '''
 M3ERangeSlider(
   values: M3ESliderRange(${_num(_range.start)}, ${_num(_range.end)}),
   enabled: $_enabled,
-  trackThickness: $thickness,
-  onChanged: (M3ESliderRange v) {},
+$sizeArg  onChanged: (M3ESliderRange v) {},
 );''',
     };
     return <PlaySnippet>[
@@ -119,15 +126,20 @@ M3ERangeSlider(
               labelOf: (_SliderKind v) => v.name,
               onChanged: (_SliderKind v) => setState(() => _kind = v),
             ),
-            PlaySlider(
-              label: 'Track thickness',
-              value: _trackThickness,
-              min: 8,
-              max: 40,
-              divisions: 16,
-              onChanged: (double v) => setState(() => _trackThickness = v),
+            PlayEnumMenu<M3ESliderSize>(
+              label: 'Size',
+              value: _size,
+              values: M3ESliderSize.values,
+              labelOf: (M3ESliderSize value) => value.name,
+              onChanged: (M3ESliderSize value) => setState(() => _size = value),
             ),
-            if (_kind == _SliderKind.vertical)
+            PlaySwitch(
+              label: 'Stops',
+              value: _stops,
+              onChanged: (bool value) => setState(() => _stops = value),
+            ),
+            if (_kind == _SliderKind.continuous ||
+                _kind == _SliderKind.vertical)
               PlayEnumMenu<M3ESliderIconPosition>(
                 label: 'Icon position',
                 value: _iconPosition,
@@ -136,6 +148,15 @@ M3ERangeSlider(
                 onChanged: (M3ESliderIconPosition v) {
                   setState(() => _iconPosition = v);
                 },
+              ),
+            if (_kind == _SliderKind.wavy)
+              PlaySlider(
+                label: 'Wavelength',
+                value: _wavelength,
+                min: 16,
+                max: 120,
+                onChanged: (double value) =>
+                    setState(() => _wavelength = value),
               ),
             PlaySwitch(
               label: 'Enabled',
@@ -160,13 +181,18 @@ M3ERangeSlider(
       _SliderKind.continuous => M3ESlider(
         value: _value,
         enabled: _enabled,
-        trackThickness: _trackThickness,
+        size: _size,
+        divisions: _stops ? 10 : null,
+        semanticLabel: 'Volume',
+        icon: _showIcon ? const Icon(M3EIcons.volume_up) : null,
+        iconPosition: _iconPosition,
         onChanged: onChanged ?? (_) {},
       ),
       _SliderKind.wavy => M3ESlider.wavy(
         value: _value,
         enabled: _enabled,
-        trackThickness: _trackThickness,
+        size: _size,
+        wavelength: _wavelength,
         onChanged: onChanged ?? (_) {},
       ),
       _SliderKind.centered => M3ESlider.centered(
@@ -174,7 +200,7 @@ M3ERangeSlider(
         min: -100,
         max: 100,
         enabled: _enabled,
-        trackThickness: _trackThickness,
+        size: _size,
         onChanged: _enabled
             ? (double v) => setState(() => _value = (v + 100) / 200)
             : (_) {},
@@ -184,7 +210,7 @@ M3ERangeSlider(
         max: 5,
         divisions: 5,
         enabled: _enabled,
-        trackThickness: _trackThickness,
+        size: _size,
         haptic: M3EHapticFeedback.light,
         onChanged: _enabled
             ? (double v) => setState(() => _value = v / 5)
@@ -193,16 +219,16 @@ M3ERangeSlider(
       _SliderKind.vertical => M3ESlider.vertical(
         value: _value,
         enabled: _enabled,
-        trackThickness: _trackThickness,
-        thumbLength: 80,
-        icon: const Icon(M3EIcons.volume_up),
+        size: _size,
+        divisions: _stops ? 10 : null,
+        icon: _showIcon ? const Icon(M3EIcons.volume_up) : null,
         iconPosition: _iconPosition,
         onChanged: onChanged ?? (_) {},
       ),
       _SliderKind.range => M3ERangeSlider(
         values: _range,
         enabled: _enabled,
-        trackThickness: _trackThickness,
+        size: _size,
         onChanged: onRangeChanged ?? (_) {},
       ),
     };

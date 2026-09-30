@@ -59,7 +59,21 @@ class M3EStateLayerOverlay extends StatelessWidget {
           splashFactory: InkSparkle.splashFactory,
           splashColor: M3EStateLayer.splashColor(color),
           highlightColor: Colors.transparent,
-          overlayColor: M3EStateLayer.overlayColorHoverFocus(color),
+          overlayColor: WidgetStateProperty.resolveWith((
+            Set<WidgetState> states,
+          ) {
+            final resolved = Set<WidgetState>.of(states);
+            if (!ink.trackHover) {
+              resolved.remove(WidgetState.hovered);
+            }
+            if (!ink.focusOverlay) {
+              resolved.remove(WidgetState.focused);
+            }
+            if (ink.trackHover && resolved.contains(WidgetState.pressed)) {
+              return null;
+            }
+            return M3EStateLayer.resolveOverlayColor(color, resolved);
+          }),
           child: child,
         ),
       );

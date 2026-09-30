@@ -97,6 +97,7 @@ class M3ESearchAnchor extends StatefulWidget {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     AlignmentGeometry barAlignment = AlignmentDirectional.centerStart,
+    bool? wrapActions,
   }) {
     return M3ESearchAnchor(
       key: key,
@@ -137,6 +138,7 @@ class M3ESearchAnchor extends StatefulWidget {
           barTrailing: barTrailing,
           barHintText: barHintText,
           barAlignment: barAlignment,
+          wrapActions: wrapActions,
           onTap: onTap,
           barElevation: barElevation,
           barBackgroundColor: barBackgroundColor,
@@ -266,6 +268,7 @@ class _M3ESearchAnchorBar extends StatefulWidget {
     this.barTrailing,
     this.barHintText,
     this.barAlignment = AlignmentDirectional.centerStart,
+    this.wrapActions,
     this.onTap,
     this.barElevation,
     this.barBackgroundColor,
@@ -292,6 +295,7 @@ class _M3ESearchAnchorBar extends StatefulWidget {
   final Iterable<Widget>? barTrailing;
   final String? barHintText;
   final AlignmentGeometry barAlignment;
+  final bool? wrapActions;
   final GestureTapCallback? onTap;
   final WidgetStateProperty<double?>? barElevation;
   final WidgetStateProperty<Color?>? barBackgroundColor;
@@ -398,6 +402,7 @@ class _M3ESearchAnchorBarState extends State<_M3ESearchAnchorBar> {
         shape: widget.barShape,
         padding: widget.barPadding,
         alignment: widget.barAlignment,
+        wrapActions: widget.wrapActions,
         leading: widget.barLeading ?? const Icon(M3EIcons.search),
         trailing: _buildTrailing(),
         textCapitalization: widget.textCapitalization,

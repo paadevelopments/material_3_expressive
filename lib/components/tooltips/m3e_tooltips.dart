@@ -252,17 +252,19 @@ class _M3ETooltipState extends State<M3ETooltip>
     final OverlayState? overlay = Overlay.maybeOf(context);
     final overlayBox = overlay?.context.findRenderObject() as RenderBox?;
 
-    final Widget bubble = MouseRegion(
-      onEnter: (_) => _cancelHide(),
-      onExit: (_) {
-        if (_isTransient) {
-          _scheduleHide();
-        }
-      },
-      child: _isRich
-          ? _buildRich(theme, tooltipTheme)
-          : _buildPlain(theme, tooltipTheme),
-    );
+    // Plain bubbles must not hit-test. Covering the icon steals the pointer
+    // cursor, the button exits, and the tooltip hides and shows in a loop.
+    final Widget bubble = _isRich
+        ? MouseRegion(
+            onEnter: (_) => _cancelHide(),
+            onExit: (_) {
+              if (_isTransient) {
+                _scheduleHide();
+              }
+            },
+            child: _buildRich(theme, tooltipTheme),
+          )
+        : IgnorePointer(child: _buildPlain(theme, tooltipTheme));
 
     if (targetBox == null ||
         overlayBox == null ||

@@ -49,7 +49,7 @@ class M3EToolbarAction extends M3EToolbarItem {
   /// When true, the overflow menu entry uses the error color.
   final bool isDestructive;
 
-  /// When true, uses filled / trigger-like coloring.
+  /// When true, uses the tonal selected colors (not a filled emphasis).
   ///
   /// When [M3EToolbar.onActiveIndexChanged] is set, the toolbar owns selection
   /// and overwrites this. Otherwise the flag is respected as provided.

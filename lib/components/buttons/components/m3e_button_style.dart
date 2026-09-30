@@ -162,18 +162,36 @@ extension _M3EButtonStyle on _M3EButtonState {
     if (states.contains(WidgetState.disabled)) {
       return null;
     }
+    // Keyboard focus uses the outset ring only, and press feedback comes
+    // from the ripple/shape morph alone — neither should ever paint a
+    // fill.
+    //
+    // Critically, when either is present the result must not leak a color
+    // from another simultaneously-active state (like hover) either:
+    // InkResponse bakes a highlight's color in once, at creation time,
+    // from whatever the *full* combined state set happens to be at that
+    // instant. A tap always requests focus while hover/press are still
+    // active, so the focus highlight — which stays active until focus is
+    // lost, not until hover/press clear — would otherwise capture the
+    // hover tint at that moment and keep painting it long after the
+    // pointer actually left (only clearing once focus moves elsewhere).
+    if (states.contains(WidgetState.focused) ||
+        states.contains(WidgetState.pressed)) {
+      return Colors.transparent;
+    }
+    if (!states.contains(WidgetState.hovered)) {
+      return Colors.transparent;
+    }
     final dec = widget.decoration;
-    final activeStates = _selectionStates(states);
     Color? foreground;
     if (dec?.foregroundColor != null) {
-      foreground = dec!.foregroundColor!.resolve(activeStates);
+      foreground = dec!.foregroundColor!.resolve(_selectionStates(states));
     }
     foreground ??= _selectionForegroundColor();
-    // Keyboard focus uses the outset ring only. Ignore [WidgetState.focused]
-    // here so pointer-acquired focus does not leave a sticky fill.
-    final overlayStates = Set<WidgetState>.of(states)
-      ..remove(WidgetState.focused);
-    return M3EStateLayer.resolveOverlayColor(foreground, overlayStates);
+    return M3EStateLayer.resolveOverlayColor(foreground, <WidgetState>{
+          WidgetState.hovered,
+        }) ??
+        Colors.transparent;
   }
 
   Set<WidgetState> _selectionStates(Set<WidgetState> states) {

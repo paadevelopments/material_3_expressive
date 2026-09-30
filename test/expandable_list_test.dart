@@ -18,6 +18,47 @@ final List<M3EExpandableData> _items = <M3EExpandableData>[
   ),
 ];
 
+M3EList _dataList({
+  required List<M3EExpandableData> data,
+  bool selection = false,
+  M3EListSelectionState? selectionState,
+  ValueChanged<Set<int>>? onSelectionChanged,
+  bool? allowMultipleExpanded,
+  Set<int> initiallyExpanded = const <int>{},
+  void Function(int index, {required bool isExpanded})? onExpansionChanged,
+}) {
+  return M3EList(
+    itemCount: data.length,
+    selection: selection,
+    selectionState: selectionState,
+    onSelectionChanged: onSelectionChanged,
+    allowMultipleExpanded: allowMultipleExpanded,
+    initiallyExpanded: initiallyExpanded,
+    onExpansionChanged: onExpansionChanged,
+    itemBuilder: (BuildContext context, int index) {
+      final M3EExpandableData item = data[index];
+      return M3EListItem(
+        headline: item.title,
+        supportingText: item.subtitle,
+        leading: item.leading,
+        trailing: item.trailing,
+        expanded: item.expanded,
+      );
+    },
+  );
+}
+
+bool _focusInNestedList() {
+  var found = false;
+  primaryFocus?.context?.visitAncestorElements((Element element) {
+    if (element.widget.key == const Key('nested-list')) {
+      found = true;
+    }
+    return !found;
+  });
+  return found;
+}
+
 Widget _host(Widget child) {
   return M3EMaterialApp(
     data: M3EThemeData.light(),
@@ -31,14 +72,15 @@ Widget _host(Widget child) {
 }
 
 Widget _expandedSublistForTabTraversal(List<String> taps) {
-  return M3EExpandableList(
+  return _dataList(
     initiallyExpanded: const <int>{0},
     data: <M3EExpandableData>[
       M3EExpandableData(
         title: 'Parent',
         subtitle: 'Has nested rows',
         expanded: M3EExpandableExpanded.list(
-          M3ECardList(
+          M3EList(
+            key: const Key('nested-list'),
             embedded: true,
             itemCount: 2,
             onTap: (int index) => taps.add('nested-$index'),
@@ -78,7 +120,7 @@ void main() {
 
 void registerExpandableListRendersTitlesTests() {
   testWidgets('M3EExpandableList renders item titles', (tester) async {
-    await tester.pumpWidget(_host(M3EExpandableList(data: _items)));
+    await tester.pumpWidget(_host(_dataList(data: _items)));
 
     expect(find.text('Battery level low'), findsOneWidget);
     expect(find.text('System update available'), findsOneWidget);
@@ -94,7 +136,7 @@ void registerExpandableListExpandsAndReportsTests() {
 
     await tester.pumpWidget(
       _host(
-        M3EExpandableList(
+        _dataList(
           data: _items,
           onExpansionChanged: (int index, {required bool isExpanded}) {
             changedIndex = index;
@@ -122,7 +164,7 @@ void registerExpandableListSingleExpandTests() {
 
     await tester.pumpWidget(
       _host(
-        M3EExpandableList(
+        _dataList(
           data: _items,
           allowMultipleExpanded: false,
           onExpansionChanged: (int index, {required bool isExpanded}) {
@@ -160,17 +202,11 @@ void registerExpandableSublistTabTraversalTests() {
     // Header, then nested rows (dropdown-style reading order).
     expect(primaryFocus?.nextFocus(), isTrue);
     await tester.pumpAndSettle();
-    expect(
-      primaryFocus?.context?.findAncestorWidgetOfExactType<M3ECardList>(),
-      isNull,
-    );
+    expect(_focusInNestedList(), isFalse);
 
     expect(primaryFocus?.nextFocus(), isTrue);
     await tester.pumpAndSettle();
-    expect(
-      primaryFocus?.context?.findAncestorWidgetOfExactType<M3ECardList>(),
-      isNotNull,
-    );
+    expect(_focusInNestedList(), isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(taps, <String>['nested-0']);
@@ -181,6 +217,38 @@ void registerExpandableSublistTabTraversalTests() {
     await tester.pumpAndSettle();
     expect(taps, <String>['nested-0', 'nested-1']);
   });
+
+  testWidgets('arrow keys walk an expanded sublist between headers', (
+    WidgetTester tester,
+  ) async {
+    final taps = <String>[];
+    await _pumpExpandedSublistForTabTraversal(tester, taps);
+
+    expect(primaryFocus?.nextFocus(), isTrue);
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0', 'nested-1']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(_focusInNestedList(), isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(taps, <String>['nested-0', 'nested-1', 'nested-1']);
+  });
 }
 
 void registerExpandableSublistSelectionPersistenceTests() {
@@ -189,13 +257,13 @@ void registerExpandableSublistSelectionPersistenceTests() {
   ) async {
     await tester.pumpWidget(
       _host(
-        M3EExpandableList(
+        _dataList(
           initiallyExpanded: const <int>{0},
           data: <M3EExpandableData>[
             M3EExpandableData(
               title: 'Parent',
               expanded: M3EExpandableExpanded.list(
-                M3ECardList(
+                M3EList(
                   embedded: true,
                   selection: true,
                   selectionState: const M3EListSelectionState(
@@ -251,7 +319,7 @@ void registerExpandableSelectionTrailingExpandTests() {
     Set<int>? last;
     await tester.pumpWidget(
       _host(
-        M3EExpandableList(
+        _dataList(
           selection: true,
           onSelectionChanged: (Set<int> s) => last = s,
           selectionState: const M3EListSelectionState(

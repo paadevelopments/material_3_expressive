@@ -102,6 +102,7 @@ class M3ESearchBarInput extends StatefulWidget {
     this.smartDashesType,
     this.smartQuotesType,
     this.contentPadding = EdgeInsets.zero,
+    this.hintAlignment = AlignmentDirectional.centerStart,
     super.key,
   });
 
@@ -175,6 +176,9 @@ class M3ESearchBarInput extends StatefulWidget {
   /// contentPadding.
   final EdgeInsetsGeometry contentPadding;
 
+  /// Alignment of the idle hint inside the field.
+  final AlignmentGeometry hintAlignment;
+
   @override
   State<M3ESearchBarInput> createState() => _M3ESearchBarInputState();
 }
@@ -214,7 +218,12 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
           alignment: AlignmentDirectional.centerStart,
           children: <Widget>[
             if (widget.controller.text.isEmpty && widget.hintText != null)
-              _buildIdleHint(),
+              Positioned.fill(
+                child: Align(
+                  alignment: widget.hintAlignment,
+                  child: _buildIdleHint(),
+                ),
+              ),
             Listener(
               behavior: HitTestBehavior.translucent,
               onPointerDown: (_) => widget.onTap?.call(),
@@ -236,7 +245,12 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
 
   Widget _buildIdleHint() {
     return IgnorePointer(
-      child: Text(widget.hintText!, style: widget.hintStyle, maxLines: 1),
+      child: Text(
+        widget.hintText!,
+        style: widget.hintStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 

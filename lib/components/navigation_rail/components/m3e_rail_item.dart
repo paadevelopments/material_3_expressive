@@ -16,6 +16,8 @@ class M3ERailItem extends StatelessWidget {
     required this.expanded,
     required this.labelBehavior,
     this.suppressInk = false,
+    this.focusNode,
+    this.skipTraversal = false,
   });
 
   /// Destination data driving this item.
@@ -33,14 +35,25 @@ class M3ERailItem extends StatelessWidget {
   /// Whether this item's label should be visible.
   final M3ENavigationRailLabelBehavior labelBehavior;
 
-  /// When true, disables splash/hover/highlight effects to prevent flicker during transitions.
+  /// When true, disables the splash while the rail width is changing.
   final bool suppressInk;
+
+  /// Focus node owned by the rail.
+  final FocusNode? focusNode;
+
+  /// When true, Tab skips this destination.
+  final bool skipTraversal;
 
   @override
   Widget build(BuildContext context) {
     final theme = M3ETheme.of(context).navigationRailTheme;
+    final bool unlabeled =
+        destination.short ||
+        labelBehavior == M3ENavigationRailLabelBehavior.alwaysHide;
     final height = expanded
         ? theme.itemExpandedHeight
+        : unlabeled
+        ? theme.shortItemHeight
         : theme.itemCollapsedHeight;
 
     final Widget button = M3ERailItemButton(
@@ -54,22 +67,14 @@ class M3ERailItem extends StatelessWidget {
       semanticLabel: destination.semanticLabel,
       suppressInk: suppressInk,
       badgeCount: destination.badgeCount,
+      short: destination.short,
+      focusNode: focusNode,
+      skipTraversal: skipTraversal,
     );
 
-    Widget core;
-    if (!expanded) {
-      // Collapsed: left-aligned icon-only button with 48x48 tap target.
-      core = SizedBox(
-        height: height,
-        child: Align(alignment: Alignment.centerLeft, child: button),
-      );
-    } else {
-      core = ConstrainedBox(
-        constraints: BoxConstraints(minHeight: height),
-        child: Row(children: [Expanded(child: button)]),
-      );
-    }
-
-    return Semantics(selected: selected, button: true, child: core);
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
+      child: button,
+    );
   }
 }

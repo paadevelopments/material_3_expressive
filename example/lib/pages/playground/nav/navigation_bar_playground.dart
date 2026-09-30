@@ -27,12 +27,13 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
   M3ENavBarAlignment _alignment = M3ENavBarAlignment.center;
   double _wideDestinationWidth = M3ENavBarConstants.wideDestinationWidth;
   bool _customBreakpoint = false;
-  double _wideBreakpoint = M3ENavBarConstants.wideBreakpoint;
+  double _wideBreakpoint = M3ENavBarConstants.mediumWindowBreakpoint;
   M3ENavBarSize _size = M3ENavBarSize.medium;
   M3ENavBarShapeFamily _shape = M3ENavBarShapeFamily.square;
   M3ENavBarDensity _density = M3ENavBarDensity.regular;
   M3ENavBarIndicatorStyle _indicator = M3ENavBarIndicatorStyle.pill;
   bool _badges = true;
+  bool _hideOnScroll = false;
 
   List<M3ENavigationBarDestination> get _destinations {
     return <M3ENavigationBarDestination>[
@@ -90,6 +91,9 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
     final String breakpointLine = _customBreakpoint
         ? '\n  wideBreakpoint: ${_wideBreakpoint.round()},'
         : '';
+    final String hideLine = _hideOnScroll
+        ? '\n  hideOnScroll: true,\n  scrollController: scrollController,'
+        : '';
     final String sample =
         '''
 M3ENavigationBar(
@@ -105,7 +109,7 @@ $destinations
   size: M3ENavBarSize.${_size.name},
   shapeFamily: M3ENavBarShapeFamily.${_shape.name},
   density: M3ENavBarDensity.${_density.name},
-  indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},
+  indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},$hideLine
 );''';
     return <PlaySnippet>[
       PlaySnippet(
@@ -133,6 +137,7 @@ $destinations
             shapeFamily: _shape,
             density: _density,
             indicatorStyle: _indicator,
+            hideOnScroll: _hideOnScroll,
           );
         },
       ),
@@ -150,8 +155,9 @@ $destinations
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Opens a full screen with the bar along the bottom, the way '
-                'an app uses it. Switch destinations to review the indicator.',
+                'Opens a full screen with the bar along the bottom. Tap the '
+                'active destination to scroll the list to the top. Turn on '
+                'hide on scroll to slide the bar away.',
                 style: theme.typeScale.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -285,6 +291,11 @@ $destinations
               value: _badges,
               onChanged: (bool v) => setState(() => _badges = v),
             ),
+            PlaySwitch(
+              label: 'Hide on scroll',
+              value: _hideOnScroll,
+              onChanged: (bool v) => setState(() => _hideOnScroll = v),
+            ),
           ],
         ),
       ],
@@ -306,6 +317,7 @@ class _NavigationBarDemoHost extends StatefulWidget {
     required this.shapeFamily,
     required this.density,
     required this.indicatorStyle,
+    required this.hideOnScroll,
   });
 
   final List<M3ENavigationBarDestination> destinations;
@@ -320,6 +332,7 @@ class _NavigationBarDemoHost extends StatefulWidget {
   final M3ENavBarShapeFamily shapeFamily;
   final M3ENavBarDensity density;
   final M3ENavBarIndicatorStyle indicatorStyle;
+  final bool hideOnScroll;
 
   @override
   State<_NavigationBarDemoHost> createState() => _NavigationBarDemoHostState();
@@ -327,6 +340,13 @@ class _NavigationBarDemoHost extends StatefulWidget {
 
 class _NavigationBarDemoHostState extends State<_NavigationBarDemoHost> {
   int _index = 0;
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -344,16 +364,30 @@ class _NavigationBarDemoHostState extends State<_NavigationBarDemoHost> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: Center(
-        child: IconTheme(
-          data: IconThemeData(size: 48, color: theme.colorScheme.primary),
-          child: destination.buildIcon(selected: true),
-        ),
+      body: M3EList.scrollable(
+        controller: _scroll,
+        itemCount: 24,
+        listPadding: const EdgeInsets.all(16),
+        itemBuilder: (BuildContext context, int index) {
+          return M3EListItem(
+            headline: '$title ${index + 1}',
+            supportingText: 'Tap the active destination to return to the top',
+          );
+        },
       ),
       bottomNavigationBar: M3ENavigationBar(
         destinations: widget.destinations,
         selectedIndex: _index,
-        onDestinationSelected: (int i) => setState(() => _index = i),
+        onDestinationSelected: (int i) {
+          if (i == _index && _scroll.hasClients) {
+            _scroll.animateTo(
+              0,
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOut,
+            );
+          }
+          setState(() => _index = i);
+        },
         autoLayout: widget.autoLayout,
         layout: widget.layout,
         alignment: widget.alignment,
@@ -365,6 +399,8 @@ class _NavigationBarDemoHostState extends State<_NavigationBarDemoHost> {
         shapeFamily: widget.shapeFamily,
         density: widget.density,
         indicatorStyle: widget.indicatorStyle,
+        hideOnScroll: widget.hideOnScroll,
+        scrollController: _scroll,
       ),
     );
   }
