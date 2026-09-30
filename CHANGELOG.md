@@ -91,7 +91,9 @@
   the bar color and elevation. A bar that hides on scroll (`entire`, `actions`, or
   `hideOnScroll`) keeps its resting color, elevation, and search field color; only a bar that
   stays shows the scrolled-under state. In actions hide, the floating actions are part of the
-  page, so they slide and fade with route transitions instead of showing ahead of them. A
+  page, so they slide and fade with route transitions instead of showing ahead of them, and they
+  stay tappable after the bar slides away. The bar follows every scroll step, including the
+  sub-pixel steps of a slow drag, instead of waiting for half a pixel per event. A
   collapsing `titleText` is laid out once and scaled between its two sizes instead of being
   re-shaped every scroll frame. `preferredSize` of a top or search bar is its expanded height, so
   the bar collapses and expands in the same frame as the scroll. The sliver bar collapses and hides by

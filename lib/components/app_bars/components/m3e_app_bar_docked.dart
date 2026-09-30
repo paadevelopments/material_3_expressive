@@ -20,6 +20,11 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   bool _under = false;
   bool _follow = true;
   double _offset = 0;
+
+  /// [_offset] as of the last build. Compared against instead of the previous
+  /// notification so slow drags (many sub-pixel steps) still move the bar
+  /// every frame; several notifications in one frame share one build.
+  double _builtOffset = 0;
   double _collapsed = 0;
   double _expanded = 0;
 
@@ -163,7 +168,6 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   }
 
   void _applyOffset(double offset) {
-    final double previous = _offset;
     _offset = offset;
     final under = offset > 0;
     final changed = under != _under;
@@ -172,7 +176,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _publish();
     // A small bar only changes color at the top. Rebuilding it on every
     // pixel restarts hover under the pointer and the list appears to flicker.
-    _maybeRebuild(changed: changed, offset: offset, previous: previous);
+    _maybeRebuild(changed: changed, offset: offset);
   }
 
   /// Starts or stops the hide-on-scroll travel. Follows the scrollable's own
@@ -195,17 +199,12 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     }
   }
 
-  void _maybeRebuild({
-    required bool changed,
-    required double offset,
-    required double previous,
-  }) {
+  void _maybeRebuild({required bool changed, required double offset}) {
     // A glued bar moves its surface with every scrolled pixel.
     final bool flexible =
         _expanded > _collapsed + 0.5 ||
         (_glued && bar._effectiveHideMode != M3EAppBarHideMode.none);
-    final bool shouldRebuild =
-        changed || (flexible && (offset - previous).abs() > 0.5);
+    final bool shouldRebuild = changed || (flexible && offset != _builtOffset);
     if (mounted && shouldRebuild) {
       setState(() {});
     }
@@ -308,6 +307,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
         ? bar.toolbarHeight!
         : metrics.expandedHeight(bar.variant, hasSubtitle: hasSubtitle);
     final bool glued = _glued;
+    _builtOffset = _offset;
     final motion = _M3EBarMotion(
       offset: _offset,
       collapsed: _collapsed,

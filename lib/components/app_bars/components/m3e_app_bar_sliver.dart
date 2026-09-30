@@ -143,7 +143,7 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     // the actions band is sized from [_offset] here, so only it follows every
     // scrolled pixel.
     final follows = bar._effectiveHideMode == M3EAppBarHideMode.actions;
-    if (mounted && (underChanged || (follows && delta.abs() > 0.5))) {
+    if (mounted && (underChanged || (follows && delta != 0))) {
       setState(() {});
     }
   }

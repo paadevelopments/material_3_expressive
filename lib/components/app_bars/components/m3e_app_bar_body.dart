@@ -233,12 +233,15 @@ class _M3EActionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: color,
+    // The fill only backs the bar itself. The box stays at least as tall as
+    // the action row, though, so the actions keep receiving taps after the
+    // bar slides away beneath them (hit tests stop at a box's bounds).
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: inset + topPadding + actionRow),
       child: Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
-          child,
+          ColoredBox(color: color, child: child),
           Positioned(
             top: inset + topPadding,
             left: 0,
