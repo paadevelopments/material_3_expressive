@@ -400,14 +400,19 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     (M3EToolbarItem item) => item is M3EToolbarAction && item.isExpandTrigger,
   );
 
-  /// Scroll-exit and collapse-to-FAB do not run together.
-  bool get _scrollExitActive => widget.scrollBehavior != null;
+  /// Scroll-collapse (collapse to the adjacent FAB / expand-trigger action
+  /// instead of sliding away). Requires one of those to exist — asserted in
+  /// [initState].
+  bool get _collapseOnScrollActive =>
+      widget.scrollBehavior?.action == M3EToolbarScrollAction.collapse;
 
   /// Neighbor-reveal expand (no FAB). FAB path uses whole-pill morph instead.
-  bool get _usesTriggerExpand =>
-      _floating && !_hasFab && _hasTrigger && !_scrollExitActive;
-  bool get _usesFabExpand =>
-      _hasFab && widget.fabExpandsToolbar && !_scrollExitActive;
+  ///
+  /// Independent of scroll behavior: hide-on-scroll's slide-away and
+  /// collapse-on-scroll's collapse both compose with a manual tap
+  /// expand/collapse rather than disabling it.
+  bool get _usesTriggerExpand => _floating && !_hasFab && _hasTrigger;
+  bool get _usesFabExpand => _hasFab && widget.fabExpandsToolbar;
 
   M3EToolbarVisibilityController? get _visibility {
     return widget.visibilityController ?? widget.scrollBehavior?.controller;
@@ -480,6 +485,13 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
           1,
       'At most one M3EToolbarAction may set isExpandTrigger.',
     );
+    assert(
+      !_collapseOnScrollActive ||
+          (_floating && ((_hasFab && widget.fabExpandsToolbar) || _hasTrigger)),
+      'M3EToolbarScrollBehavior.collapseAlways requires a floating toolbar '
+      'with an adjacent FAB (fabExpandsToolbar true) or an '
+      'M3EToolbarAction.isExpandTrigger action.',
+    );
     _activeIndex = widget.activeIndex;
     _expanded = widget.expanded;
     final bool startExpanded =
@@ -491,6 +503,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     )..addListener(_handleExpandTick);
     _fabSize = _resolvedFabSize(_expandCtrl.value);
     _visibility?.attach(this);
+    _visibility?.addListener(_handleScrollCollapseRequest);
     _applyExitExtent();
   }
 
@@ -507,10 +520,26 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     if (oldWidget.visibilityController != widget.visibilityController ||
         oldWidget.scrollBehavior?.controller !=
             widget.scrollBehavior?.controller) {
+      final M3EToolbarVisibilityController? oldController =
+          oldWidget.visibilityController ??
+          oldWidget.scrollBehavior?.controller;
+      oldController?.removeListener(_handleScrollCollapseRequest);
       oldWidget.visibilityController?.detach();
       oldWidget.scrollBehavior?.controller.detach();
       _visibility?.attach(this);
+      _visibility?.addListener(_handleScrollCollapseRequest);
     }
+  }
+
+  /// Mirrors `M3EToolbarVisibilityController.collapseRequested` onto
+  /// [_expanded] for [M3EToolbarScrollAction.collapse] — edge-triggered, so
+  /// the collapse/expand starts instantly instead of waiting on a spring.
+  void _handleScrollCollapseRequest() {
+    final M3EToolbarVisibilityController? controller = _visibility;
+    if (controller == null || !_collapseOnScrollActive) {
+      return;
+    }
+    _setExpanded(!controller.collapseRequested);
   }
 
   void _syncActiveIndex(M3EToolbar oldWidget) {
@@ -541,6 +570,7 @@ class _M3EToolbarState extends State<M3EToolbar> with TickerProviderStateMixin {
     _expandCtrl
       ..removeListener(_handleExpandTick)
       ..dispose();
+    _visibility?.removeListener(_handleScrollCollapseRequest);
     _visibility?.detach();
     super.dispose();
   }

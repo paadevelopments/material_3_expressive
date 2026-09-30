@@ -12,7 +12,7 @@ import '../utils/m3e_toolbar_spring_motion.dart';
 class M3EToolbarVisibilityController extends ChangeNotifier {
   /// M3EToolbarVisibilityController.
   M3EToolbarVisibilityController({
-    this.motion = M3EMotion.expressiveSpatialFast,
+    this.motion = M3EMotion.expressiveSpatialDefault,
     double? exitExtent,
   }) : _exitExtent = exitExtent {
     if (exitExtent != null) {
@@ -93,6 +93,34 @@ class M3EToolbarVisibilityController extends ChangeNotifier {
 
   /// Whether a settle / show / hide spring is currently running.
   bool get isAnimating => _settle != null;
+
+  bool _collapseRequested = false;
+
+  /// Scroll-collapse intent for `M3EToolbarScrollAction.collapse`, read by
+  /// the toolbar to flip its own expand state (via its adjacent FAB /
+  /// expand-trigger spring) the instant a scroll direction changes.
+  ///
+  /// Independent of [offset], which only animates for
+  /// `M3EToolbarScrollAction.hide`'s slide-away.
+  bool get collapseRequested => _collapseRequested;
+
+  /// Requests the collapse-on-scroll target. No-op if already requested.
+  void requestCollapse() {
+    if (_collapseRequested) {
+      return;
+    }
+    _collapseRequested = true;
+    notifyListeners();
+  }
+
+  /// Reverses [requestCollapse]. No-op if not currently requested.
+  void requestExpand() {
+    if (!_collapseRequested) {
+      return;
+    }
+    _collapseRequested = false;
+    notifyListeners();
+  }
 
   /// Binds a ticker for spring show/hide. Safe to call repeatedly.
   // ignore: use_setters_to_change_properties -- attach/detach pair; not a field setter.

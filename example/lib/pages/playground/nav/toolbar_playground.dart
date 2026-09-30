@@ -82,7 +82,24 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
   bool _labeled = false;
   bool _overflow = false;
   bool _hideOnScroll = false;
+  bool _collapseOnScroll = false;
   int _activeIndex = 0;
+
+  /// Whether an adjacent FAB or expand-trigger action exists to collapse to
+  /// — [M3EToolbarScrollBehavior.collapseAlways] requires one.
+  bool get _hasExpandTarget {
+    if (_placement != M3EToolbarPlacement.floating) {
+      return false;
+    }
+    if (_showFab) {
+      return _fabExpands;
+    }
+    return !_labeled;
+  }
+
+  /// [_collapseOnScroll], but discarding a stale `true` once its expand
+  /// target (FAB / trigger) has disappeared from other control changes.
+  bool get _effectiveCollapseOnScroll => _collapseOnScroll && _hasExpandTarget;
 
   M3EToolbarExitDirection get _exitDirection {
     if (_placement == M3EToolbarPlacement.docked) {
@@ -193,12 +210,20 @@ class _ToolbarPlaygroundState extends State<ToolbarPlayground> {
     ),
     M3EToolbarAction(icon: M3EIcons.favorite, onPressed: () {}),
   ],''';
-    final String scrollField = _hideOnScroll
-        ? '''
+    final String scrollField = switch ((
+      _hideOnScroll,
+      _effectiveCollapseOnScroll,
+    )) {
+      (true, _) =>
+        '''
   scrollBehavior: M3EToolbarScrollBehavior.exitAlways(
     exitDirection: M3EToolbarExitDirection.${_exitDirection.name},
-  ),'''
-        : '';
+  ),''',
+      (_, true) =>
+        '''
+  scrollBehavior: M3EToolbarScrollBehavior.collapseAlways(),''',
+      _ => '',
+    };
     final String sample = _placement == M3EToolbarPlacement.docked
         ? '''
 M3EToolbar.docked(
@@ -224,16 +249,18 @@ $actions
 );''';
     return <PlaySnippet>[
       PlaySnippet(label: 'Toolbar', code: '$kPlaySnippetImport\n$sample'),
-      if (_hideOnScroll)
+      if (_hideOnScroll || _effectiveCollapseOnScroll)
         PlaySnippet(
           label: 'Scroll',
           code:
               '''
 $kPlaySnippetImport
 
-final behavior = M3EToolbarScrollBehavior.exitAlways(
+final behavior = ${_hideOnScroll ? '''
+M3EToolbarScrollBehavior.exitAlways(
   exitDirection: M3EToolbarExitDirection.${_exitDirection.name},
-);
+);''' : '''
+M3EToolbarScrollBehavior.collapseAlways();'''}
 
 M3EToolbarScrollWrapper(
   behavior: behavior,
@@ -260,6 +287,7 @@ M3EToolbarScrollWrapper(
             labeled: _labeled,
             overflow: _overflow,
             hideOnScroll: _hideOnScroll,
+            collapseOnScroll: _effectiveCollapseOnScroll,
             exitDirection: _exitDirection,
             contentAlignment: _contentAlignment,
             activeIndex: _activeIndex,
@@ -284,11 +312,18 @@ M3EToolbarScrollWrapper(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                _hideOnScroll
-                    ? 'Opens a scrolling page. The toolbar slides away and '
-                          'returns with the list.'
-                    : 'Opens a page with the toolbar docked or floating over a '
-                          'list, using the settings above.',
+                switch ((_hideOnScroll, _effectiveCollapseOnScroll)) {
+                  (true, _) =>
+                    'Opens a scrolling page. The toolbar slides away and '
+                        'returns with the list.',
+                  (_, true) =>
+                    'Opens a scrolling page. The toolbar collapses to its '
+                        'FAB / expand-trigger action and returns with the '
+                        'list.',
+                  _ =>
+                    'Opens a page with the toolbar docked or floating over a '
+                        'list, using the settings above.',
+                },
                 style: theme.typeScale.bodyMedium.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -403,8 +438,24 @@ M3EToolbarScrollWrapper(
             PlaySwitch(
               label: 'Hide on scroll',
               value: _hideOnScroll,
-              onChanged: (bool v) => setState(() => _hideOnScroll = v),
+              onChanged: (bool v) => setState(() {
+                _hideOnScroll = v;
+                if (v) {
+                  _collapseOnScroll = false;
+                }
+              }),
             ),
+            if (_hasExpandTarget)
+              PlaySwitch(
+                label: 'Collapse on scroll',
+                value: _collapseOnScroll,
+                onChanged: (bool v) => setState(() {
+                  _collapseOnScroll = v;
+                  if (v) {
+                    _hideOnScroll = false;
+                  }
+                }),
+              ),
           ],
         ),
       ],
@@ -425,6 +476,7 @@ class _ToolbarDemoHost extends StatefulWidget {
     required this.labeled,
     required this.overflow,
     required this.hideOnScroll,
+    required this.collapseOnScroll,
     required this.exitDirection,
     required this.contentAlignment,
     required this.activeIndex,
@@ -441,6 +493,7 @@ class _ToolbarDemoHost extends StatefulWidget {
   final bool labeled;
   final bool overflow;
   final bool hideOnScroll;
+  final bool collapseOnScroll;
   final M3EToolbarExitDirection exitDirection;
   final M3EToolbarContentAlignment contentAlignment;
   final int activeIndex;
@@ -461,6 +514,8 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       _scrollBehavior = M3EToolbarScrollBehavior.exitAlways(
         exitDirection: widget.exitDirection,
       );
+    } else if (widget.collapseOnScroll) {
+      _scrollBehavior = M3EToolbarScrollBehavior.collapseAlways();
     }
   }
 
@@ -556,9 +611,14 @@ class _ToolbarDemoHostState extends State<_ToolbarDemoHost> {
       itemBuilder: (BuildContext context, int index) {
         return M3EListItem(
           headline: 'Note ${index + 1}',
-          supportingText: widget.hideOnScroll
-              ? 'Scroll to hide and show the toolbar'
-              : 'Scroll the page under the toolbar',
+          supportingText: switch ((
+            widget.hideOnScroll,
+            widget.collapseOnScroll,
+          )) {
+            (true, _) => 'Scroll to hide and show the toolbar',
+            (_, true) => 'Scroll to collapse and expand the toolbar',
+            _ => 'Scroll the page under the toolbar',
+          },
           leading: const Icon(M3EIcons.edit),
         );
       },

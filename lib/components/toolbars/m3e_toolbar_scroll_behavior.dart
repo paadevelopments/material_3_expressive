@@ -7,11 +7,12 @@ import 'enums/m3e_toolbar_enums.dart';
 class M3EToolbarScrollBehavior {
   /// M3EToolbarScrollBehavior.
   const M3EToolbarScrollBehavior({
-    required this.exitDirection,
+    this.exitDirection = M3EToolbarExitDirection.bottom,
     required this.controller,
+    this.action = M3EToolbarScrollAction.hide,
   });
 
-  /// Creates a behavior that exits while scrolling (opt-in).
+  /// Creates a behavior that exits (slides away) while scrolling (opt-in).
   factory M3EToolbarScrollBehavior.exitAlways({
     M3EToolbarExitDirection exitDirection = M3EToolbarExitDirection.bottom,
     M3EToolbarVisibilityController? controller,
@@ -22,13 +23,37 @@ class M3EToolbarScrollBehavior {
     );
   }
 
-  /// Direction the toolbar slides when hiding.
+  /// Creates a behavior that collapses to the adjacent FAB / expand-trigger
+  /// action while scrolling (opt-in), instead of sliding the whole pill away.
+  ///
+  /// Requires the toolbar to have an adjacent FAB (with
+  /// `M3EToolbar.fabExpandsToolbar` true) or an
+  /// `M3EToolbarAction.isExpandTrigger` action — asserted in debug builds.
+  factory M3EToolbarScrollBehavior.collapseAlways({
+    M3EToolbarVisibilityController? controller,
+  }) {
+    return M3EToolbarScrollBehavior(
+      controller: controller ?? M3EToolbarVisibilityController(),
+      action: M3EToolbarScrollAction.collapse,
+    );
+  }
+
+  /// Direction the toolbar slides when hiding. Unused when [action] is
+  /// `M3EToolbarScrollAction.collapse`.
   final M3EToolbarExitDirection exitDirection;
 
   /// Shared visibility state (manual
   /// [M3EToolbarVisibilityController.show] /
   /// [M3EToolbarVisibilityController.hide] or scroll-driven).
   final M3EToolbarVisibilityController controller;
+
+  /// Whether scrolling slides the pill away (`hide`, default) or collapses
+  /// it to the adjacent FAB / expand-trigger action (`collapse`).
+  ///
+  /// The two are mutually exclusive by construction — pick one via
+  /// [M3EToolbarScrollBehavior.exitAlways] or
+  /// [M3EToolbarScrollBehavior.collapseAlways].
+  final M3EToolbarScrollAction action;
 }
 
 /// Listens to [ScrollNotification]s on [child] and updates [behavior].
@@ -62,20 +87,35 @@ class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper> {
     return false;
   }
 
-  /// Springs fully open/closed the instant a scroll delta changes direction,
-  /// at any scroll position and at any drag speed.
-  /// [M3EToolbarVisibilityController.show] / [M3EToolbarVisibilityController.hide]
-  /// are no-ops when already at or heading to that target, so repeated deltas
-  /// in the same direction don't restart the spring.
+  /// Triggers the instant the scroll delta changes direction, at any scroll
+  /// position and at any drag speed:
+  /// [M3EToolbarScrollAction.hide] springs the pill fully open/closed
+  /// ([M3EToolbarVisibilityController.show] / [M3EToolbarVisibilityController.hide]
+  /// are no-ops when already at or heading to that target, so repeated
+  /// deltas in the same direction don't restart the spring);
+  /// [M3EToolbarScrollAction.collapse] flips the collapse-request flag
+  /// instead, which the toolbar mirrors onto its own expand state.
   void _handleScrollUpdate(ScrollUpdateNotification notification) {
     final double? delta = notification.scrollDelta;
     if (delta == null || delta == 0) {
       return;
     }
-    if (delta > 0) {
-      widget.behavior.controller.hide();
-    } else {
-      widget.behavior.controller.show();
+    final M3EToolbarVisibilityController controller =
+        widget.behavior.controller;
+    final bool hiding = delta > 0;
+    switch (widget.behavior.action) {
+      case M3EToolbarScrollAction.hide:
+        if (hiding) {
+          controller.hide();
+        } else {
+          controller.show();
+        }
+      case M3EToolbarScrollAction.collapse:
+        if (hiding) {
+          controller.requestCollapse();
+        } else {
+          controller.requestExpand();
+        }
     }
   }
 

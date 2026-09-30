@@ -1,5 +1,7 @@
 import 'package:material_3_expressive/components/toolbars/m3e_toolbars.dart'
     show M3EToolbar;
+import 'package:material_3_expressive/components/toolbars/models/m3e_toolbar_item.dart'
+    show M3EToolbarAction;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3EToolbar;
 
@@ -66,6 +68,20 @@ enum M3EToolbarFabPosition {
 
   /// FAB below the toolbar.
   bottom,
+}
+
+/// What scrolling does to a toolbar with a scroll behavior attached.
+enum M3EToolbarScrollAction {
+  /// Slides the whole pill away, then back, via [M3EToolbarExitDirection].
+  hide,
+
+  /// Collapses the pill to its adjacent FAB / expand-trigger action instead
+  /// of sliding away, then reverses on the opposite scroll direction.
+  ///
+  /// Requires the toolbar to have an adjacent FAB (with
+  /// [M3EToolbar.fabExpandsToolbar] true) or an
+  /// [M3EToolbarAction.isExpandTrigger] action.
+  collapse,
 }
 
 /// Direction a toolbar slides when exiting via scroll / visibility controller.

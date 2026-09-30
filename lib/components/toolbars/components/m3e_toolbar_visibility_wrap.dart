@@ -2,6 +2,12 @@ part of '../m3e_toolbars.dart';
 
 extension _M3EToolbarVisibilityWrap on _M3EToolbarState {
   Widget _wrapVisibility(Widget bar) {
+    // Collapse-on-scroll reuses the FAB / expand-trigger spring instead —
+    // offset never moves in that mode, so this slide wrapper has nothing to
+    // do and is skipped outright.
+    if (_collapseOnScrollActive) {
+      return bar;
+    }
     final M3EToolbarVisibilityController? controller = _visibility;
     if (controller == null && widget.scrollBehavior == null) {
       return bar;
