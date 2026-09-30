@@ -98,13 +98,13 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
   /// dependency-driven rebuild ever leaves them stale, so this resyncs them
   /// unconditionally rather than only when [_offset] happens to be zero.
   void _seedPrimary() {
-    final ScrollController? primary = PrimaryScrollController.maybeOf(context);
-    if (primary == null || !primary.hasClients) {
+    final ScrollPosition? primary = _m3eSinglePrimaryPosition(context);
+    if (primary == null) {
       return;
     }
-    _position = primary.position;
-    if (primary.offset != _offset) {
-      _applyOffset(primary.offset);
+    _position = primary;
+    if (primary.pixels != _offset) {
+      _applyOffset(primary.pixels);
     }
   }
 
@@ -239,11 +239,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     if (current != null && current.hasPixels) {
       return current;
     }
-    final ScrollController? primary = PrimaryScrollController.maybeOf(context);
-    if (primary != null && primary.hasClients) {
-      return primary.position;
-    }
-    return current;
+    return _m3eSinglePrimaryPosition(context) ?? current;
   }
 
   Future<void> _expand() {

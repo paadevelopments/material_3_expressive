@@ -43,6 +43,10 @@ void main() {
     _refreshCycleDoesNotFreezeScrollUnder,
   );
   testWidgets(
+    'several primary scrollables on one route do not throw',
+    _severalPrimaryScrollablesDoNotThrow,
+  );
+  testWidgets(
     'replacing the page scrollable does not throw',
     _replacingThePageScrollableDoesNotThrow,
   );
@@ -627,4 +631,58 @@ class _RefreshScrollHostState extends State<_RefreshScrollHost> {
       ),
     );
   }
+}
+
+/// On Android and iOS every primary vertical scrollable on a route attaches
+/// to the route's [PrimaryScrollController], so it can hold several
+/// positions. The bar must not read the single `position` then.
+Future<void> _severalPrimaryScrollablesDoNotThrow(WidgetTester tester) async {
+  final controller = M3EAppBarController();
+  addTearDown(controller.dispose);
+  Widget page(Brightness brightness) {
+    return MaterialApp(
+      home: M3ETheme(
+        data: brightness == Brightness.light
+            ? M3EThemeData.light()
+            : M3EThemeData.dark(),
+        child: Scaffold(
+          appBar: M3EAppBar.top(
+            controller: controller,
+            titleText: appBarInboxTitle,
+            variant: M3EAppBarVariant.mediumFlexible,
+          ),
+          body: Column(
+            children: <Widget>[
+              Expanded(
+                child: ListView(
+                  primary: true,
+                  children: const <Widget>[SizedBox(height: 2400)],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  primary: true,
+                  children: const <Widget>[SizedBox(height: 2400)],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  await tester.pumpWidget(page(Brightness.light));
+  final ScrollController primary = PrimaryScrollController.of(
+    tester.element(find.byType(M3EAppBar)),
+  );
+  expect(primary.positions.length, 2);
+
+  // A dependency change re-seeds the bar from the primary controller.
+  await tester.pumpWidget(page(Brightness.dark));
+  await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+  await tester.pumpAndSettle();
+  await controller.expand();
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
 }

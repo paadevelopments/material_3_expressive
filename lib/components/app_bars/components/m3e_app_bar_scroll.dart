@@ -12,7 +12,9 @@ class _M3EPageScroll {
     }
     final ScrollController? primary = PrimaryScrollController.maybeOf(context);
     if (primary != null && primary.hasClients) {
-      return position == primary.position;
+      // Several scrollables can share the route's primary controller (see
+      // [_m3eSinglePrimaryPosition]); any of them is the page.
+      return primary.positions.contains(position);
     }
     return _acceptsTracked(position, notification);
   }
@@ -66,6 +68,21 @@ class _M3EPageScroll {
     }
     return false;
   }
+}
+
+/// The route's [PrimaryScrollController] position, when exactly one
+/// scrollable is attached to it.
+///
+/// On Android and iOS every primary vertical scrollable on a route attaches
+/// to that controller automatically, so it can hold several positions at
+/// once, and [ScrollController.position] throws then. With none or several
+/// there is no single page position to read, so this returns null.
+ScrollPosition? _m3eSinglePrimaryPosition(BuildContext context) {
+  final ScrollController? primary = PrimaryScrollController.maybeOf(context);
+  if (primary == null || primary.positions.length != 1) {
+    return null;
+  }
+  return primary.positions.single;
 }
 
 bool _scrollPositionAlive(ScrollPosition? position) {
