@@ -55,37 +55,27 @@ class M3EToolbarScrollWrapper extends StatefulWidget {
 }
 
 class _M3EToolbarScrollWrapperState extends State<M3EToolbarScrollWrapper> {
-  void _updateOffset(double delta) {
-    widget.behavior.controller
-      ..contentOffset += delta
-      ..offset -= delta;
-  }
-
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollStartNotification) {
-      widget.behavior.controller.cancelAnimation();
-    } else if (notification is ScrollUpdateNotification) {
+    if (notification is ScrollUpdateNotification) {
       _handleScrollUpdate(notification);
-    } else if (notification is ScrollEndNotification) {
-      // Non-drag scroll input (mouse wheel, discrete trackpad ticks) fires its
-      // own start/update/end per tick with no drag details. Settling on those
-      // snaps the bar back before the next tick continues it, reading as a
-      // reversal while scrolling slowly. Only settle on a real drag release.
-      final DragEndDetails? drag = notification.dragDetails;
-      if (drag != null) {
-        widget.behavior.controller.settle(velocity: drag.primaryVelocity ?? 0);
-      }
     }
     return false;
   }
 
+  /// Springs fully open/closed the instant a scroll delta changes direction,
+  /// at any scroll position and at any drag speed.
+  /// [M3EToolbarVisibilityController.show] / [M3EToolbarVisibilityController.hide]
+  /// are no-ops when already at or heading to that target, so repeated deltas
+  /// in the same direction don't restart the spring.
   void _handleScrollUpdate(ScrollUpdateNotification notification) {
-    if (widget.behavior.controller.isAnimating) {
+    final double? delta = notification.scrollDelta;
+    if (delta == null || delta == 0) {
       return;
     }
-    final double delta = notification.scrollDelta ?? 0;
-    if (delta != 0) {
-      _updateOffset(delta);
+    if (delta > 0) {
+      widget.behavior.controller.hide();
+    } else {
+      widget.behavior.controller.show();
     }
   }
 

@@ -105,12 +105,7 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     if (target != null && target.mounted) {
       _position = Scrollable.maybeOf(target)?.position;
     }
-    // Metrics updates report a null delta. Those are layout corrections from
-    // the bar itself changing size, and must not reverse the slide.
-    final double? scrollDelta = notification is ScrollUpdateNotification
-        ? notification.scrollDelta
-        : null;
-    _applyOffset(notification.metrics.extentBefore, scrollDelta: scrollDelta);
+    _applyOffset(notification.metrics.extentBefore);
   }
 
   void _onVisibility() {
@@ -158,13 +153,13 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _bound?.update(collapsed: _collapsedNow, visible: _visibleNow);
   }
 
-  void _applyOffset(double offset, {double? scrollDelta}) {
+  void _applyOffset(double offset) {
     final double previous = _offset;
     _offset = offset;
     final under = offset > 0;
     final changed = under != _under;
     _under = under;
-    _maybeSlideForScroll(offset, scrollDelta);
+    _maybeSlideForScroll();
     _commitExtent(_slotHeight());
     _publish();
     // A small bar only changes color at the top. Rebuilding it on every
@@ -172,18 +167,21 @@ class _M3EDockedAppBarState extends State<_M3EDockedAppBar>
     _maybeRebuild(changed: changed, offset: offset, previous: previous);
   }
 
-  /// Starts or stops the hide-on-scroll travel for [offset]/[scrollDelta].
-  void _maybeSlideForScroll(double offset, double? scrollDelta) {
-    if (!_follow ||
-        scrollDelta == null ||
-        bar._effectiveHideMode == M3EAppBarHideMode.none) {
+  /// Starts or stops the hide-on-scroll travel. Follows the scrollable's own
+  /// [ScrollPosition.userScrollDirection] so a hide/show starts the instant a
+  /// drag changes direction, at any scroll position and at any drag speed.
+  void _maybeSlideForScroll() {
+    if (!_follow || bar._effectiveHideMode == M3EAppBarHideMode.none) {
       return;
     }
-    final double range = math.max(0, _expanded - _collapsed);
-    if (scrollDelta > 0.5 && offset > range) {
-      _m3eSlideAway(_visibility);
-    } else if (scrollDelta < -0.5) {
-      _m3eSlideBack(_visibility);
+    switch (_position?.userScrollDirection) {
+      case ScrollDirection.reverse:
+        _m3eSlideAway(_visibility);
+      case ScrollDirection.forward:
+        _m3eSlideBack(_visibility);
+      case ScrollDirection.idle:
+      case null:
+        break;
     }
   }
 

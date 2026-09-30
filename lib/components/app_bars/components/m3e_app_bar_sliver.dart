@@ -126,23 +126,25 @@ class _M3ESliverAppBarState extends State<_M3ESliverAppBar>
     final underChanged = (_lastPixels > 0) != (pixels > 0);
     _lastPixels = pixels;
     _offset = pixels;
-    _maybeSlideForScroll(position, pixels);
+    _maybeSlideForScroll(position);
     _publish();
     _maybeRebuildAfterScroll(underChanged: underChanged, delta: delta);
   }
 
-  /// Starts or stops the hide-on-scroll travel for the current [position].
-  void _maybeSlideForScroll(ScrollPosition position, double pixels) {
+  /// Starts or stops the hide-on-scroll travel. Follows [position]'s own
+  /// [ScrollPosition.userScrollDirection] so a hide/show starts the instant a
+  /// drag changes direction, at any scroll position and at any drag speed.
+  void _maybeSlideForScroll(ScrollPosition position) {
     if (!_follow || bar._effectiveHideMode == M3EAppBarHideMode.none) {
       return;
     }
-    final double range = math.max(0, _expanded - _collapsed);
-    // Pixel corrections from the shrinking header keep the user's direction.
-    final ScrollDirection direction = position.userScrollDirection;
-    if (direction == ScrollDirection.reverse && pixels > range) {
-      _m3eSlideAway(_visibility);
-    } else if (direction == ScrollDirection.forward) {
-      _m3eSlideBack(_visibility);
+    switch (position.userScrollDirection) {
+      case ScrollDirection.reverse:
+        _m3eSlideAway(_visibility);
+      case ScrollDirection.forward:
+        _m3eSlideBack(_visibility);
+      case ScrollDirection.idle:
+        break;
     }
   }
 
