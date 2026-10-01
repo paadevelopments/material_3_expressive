@@ -2,11 +2,52 @@ import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../../../widgets/playground/control_panel.dart';
+import '../../../widgets/playground/controls/play_enum_menu.dart';
 import '../../../widgets/playground/controls/play_enum_segmented.dart';
 import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
 import '../../../widgets/playground/play_preview_card.dart';
 import '../../../widgets/playground/playground_body.dart';
+
+/// Dialog variants shown in the playground.
+enum _DialogKind {
+  basic(
+    'Basic',
+    'A modal over a scrim for urgent info or a decision. The headline and '
+        'actions stay pinned while long content scrolls.',
+    'Reset settings?',
+  ),
+  selection(
+    'Selection',
+    'Pick from a list before committing. Tab lands on the list, arrows move, '
+        'Space or Enter selects, and the next Tab reaches the actions.',
+    'Phone ringtone',
+  ),
+  fullScreen(
+    'Full screen',
+    'Fills the view for multi-step tasks on compact screens. The header tints '
+        'on scroll; closing with unsaved changes asks to discard them.',
+    'New event',
+  ),
+  adaptive(
+    'Adaptive',
+    'Full screen below 600dp and a basic dialog above it. Resize the window '
+        'to see it switch.',
+    'Create a new album',
+  ),
+  fabTransform(
+    'FAB transform',
+    'Tap the FAB to morph it into a full-screen dialog with a container '
+        'transform.',
+    'New event',
+  );
+
+  const _DialogKind(this.label, this.description, this.defaultTitle);
+
+  final String label;
+  final String description;
+  final String defaultTitle;
+}
 
 /// Live playground for [M3EDialog].
 class DialogsPlayground extends StatefulWidget {
@@ -18,7 +59,18 @@ class DialogsPlayground extends StatefulWidget {
 }
 
 class _DialogsPlaygroundState extends State<DialogsPlayground> {
-  String _title = 'Reset settings?';
+  static const List<String> _options = <String>[
+    'None',
+    'Callisto',
+    'Ganymede',
+    'Luna',
+    'Oberon',
+  ];
+
+  _DialogKind _kind = _DialogKind.basic;
+  final Map<_DialogKind, String> _titles = <_DialogKind, String>{
+    for (final _DialogKind k in _DialogKind.values) k: k.defaultTitle,
+  };
   String _content = 'This will restore all settings to their default values.';
   bool _showIcon = true;
   bool _topDivider = false;
@@ -27,114 +79,119 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
   bool _multiSelect = false;
   bool _longContent = false;
   bool _truncateTitle = false;
-  M3EDialogPosition _position = M3EDialogPosition.center;
   bool _textField = false;
   bool _leadingAction = false;
+  bool _contentHeadline = false;
   bool _bottomBar = false;
   bool _unsaved = true;
+  M3EDialogPosition _position = M3EDialogPosition.center;
 
-  List<PlaySnippet> get _snippets {
+  String get _title => _titles[_kind]!;
+
+  // ---- Snippets -----------------------------------------------------------
+
+  PlaySnippet get _snippet {
+    final String code = switch (_kind) {
+      _DialogKind.basic => _basicSnippet,
+      _DialogKind.selection => _selectionSnippet,
+      _DialogKind.fullScreen => _fullScreenSnippet,
+      _DialogKind.adaptive => _adaptiveSnippet,
+      _DialogKind.fabTransform => _fabSnippet,
+    };
+    return PlaySnippet(
+      label: _kind.label,
+      code: '$kPlaySnippetImport\n\n$code',
+    );
+  }
+
+  String get _positionArg => _position == M3EDialogPosition.center
+      ? ''
+      : '\n  position: M3EDialogPosition.${_position.name},';
+
+  String get _barrierArg =>
+      _barrierDismissible ? '' : '\n  barrierDismissible: false,';
+
+  String get _basicSnippet {
     final String icon = _showIcon
         ? '\n    icon: const Icon(M3EIcons.error),'
         : '';
-    final String maxLines = _truncateTitle ? '\n    titleMaxLines: 1,' : '';
-    final String align = _position == M3EDialogPosition.center
-        ? ''
-        : '\n  position: M3EDialogPosition.${_position.name},';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: 'Dialog',
-        code:
-            '''
-$kPlaySnippetImport
-
+    final String lines = _truncateTitle ? '\n    titleMaxLines: 1,' : '';
+    final String top = _topDivider ? '\n    topDivider: true,' : '';
+    final String bottom = _bottomDivider ? '\n    bottomDivider: true,' : '';
+    final String leading = _leadingAction
+        ? "\n    leadingAction: M3EButton.text(onPressed: () {}, child: const Text('Learn more')),"
+        : '';
+    return '''
 M3EDialog.show<void>(
-  context,
-  barrierDismissible: $_barrierDismissible,$align
+  context,$_barrierArg$_positionArg
   dialog: M3EDialog(
-    title: ${playDartString(_title)},$icon$maxLines
-    content: Text(${playDartString(_content)}),
-    topDivider: $_topDivider,
-    bottomDivider: $_bottomDivider,
+    title: ${playDartString(_title)},$icon$lines
+    content: Text(${playDartString(_content)}),$top$bottom$leading
     actions: <Widget>[
-      M3EButton(
-        style: M3EButtonStyle.text,
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
-      ),
-      M3EButton(
-        style: M3EButtonStyle.text,
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Confirm'),
-      ),
+      M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Confirm')),
     ],
   ),
-);''',
-      ),
-      PlaySnippet(
-        label: 'Selection',
-        code:
-            '''
-$kPlaySnippetImport
+);''';
+  }
 
-await M3EDialog.showSelectionScreen(
+  String get _selectionSnippet {
+    final String multi = _multiSelect ? '\n  multiSelect: true,' : '';
+    return '''
+final List<String>? picked = await M3EDialog.showSelectionScreen(
   context,
-  title: ${playDartString(_title)},
-  multiSelect: $_multiSelect,
-  barrierDismissible: $_barrierDismissible,
-  options: const <String>['Standard', 'Pro', 'Team', 'Enterprise'],
-  confirmLabel: ${_multiSelect ? "'Done'" : "'OK'"},
-);''',
-      ),
-      PlaySnippet(
-        label: 'Full screen',
-        code:
-            '''
-$kPlaySnippetImport
+  title: ${playDartString(_title)},$multi$_barrierArg
+  options: const <String>['None', 'Callisto', 'Ganymede', 'Luna', 'Oberon'],
+);''';
+  }
 
+  String get _fullScreenSnippet {
+    final String headline = _contentHeadline
+        ? '\n  contentHeadline: ${playDartString(_title)},'
+        : '';
+    final String bar = _bottomBar
+        ? '''
+
+  bottomActions: <Widget>[
+    M3EButton.text(onPressed: controller.dismiss, child: const Text('Cancel')),
+    M3EButton.text(onPressed: controller.close, child: const Text('Create')),
+  ],'''
+        : '';
+    return '''
 final controller = M3EDialogController(hasUnsavedChanges: $_unsaved);
 M3EDialog.showFullScreen<void>(
   context,
-  title: 'New event',
+  title: ${playDartString(_title)},
   confirmLabel: 'Save',
-  onConfirm: () => controller.close(),
-  controller: controller,
+  onConfirm: controller.close,
+  controller: controller,$headline$bar
   contentPadding: EdgeInsets.zero,
   body: M3EList.scrollable(
     variant: M3ECardVariant.filled,
     listPadding: const EdgeInsets.all(16),
     itemCount: 20,
-    itemBuilder: (BuildContext context, int index) => M3EListItem(
-      headline: 'Field \${index + 1}',
-      onTap: () {},
-    ),
+    itemBuilder: (BuildContext context, int i) =>
+        M3EListItem(headline: 'Field \${i + 1}', onTap: () {}),
   ),
-);''',
-      ),
-      PlaySnippet(
-        label: 'Adaptive',
-        code:
-            '''
-$kPlaySnippetImport
+);''';
+  }
 
+  String get _adaptiveSnippet =>
+      '''
 M3EDialog.showAdaptive<void>(
-  context,
-  title: 'Create a new album',
+  context,$_barrierArg$_positionArg
+  title: ${playDartString(_title)},
   content: Text(${playDartString(_content)}),
   confirmLabel: 'Save',
-  onConfirm: () => Navigator.of(context).pop(),
-);''',
-      ),
-      const PlaySnippet(
-        label: 'FAB transform',
-        code:
-            '''
-$kPlaySnippetImport
+  onConfirm: () => Navigator.pop(context),
+);''';
 
+  String get _fabSnippet =>
+      '''
 M3EFab(
   icon: const Icon(M3EIcons.add),
   openBuilder: (BuildContext context) => M3EFullScreenDialog(
-    title: 'New event',
+    title: ${playDartString(_title)},
     confirmLabel: 'Save',
     onConfirm: () => M3EFabContainerTransformScope.closeOf(context),
     contentPadding: EdgeInsets.zero,
@@ -142,16 +199,16 @@ M3EFab(
       variant: M3ECardVariant.filled,
       listPadding: const EdgeInsets.all(16),
       itemCount: 20,
-      itemBuilder: (BuildContext context, int index) => M3EListItem(
-        headline: 'Field \${index + 1}',
-        onTap: () {},
-      ),
+      itemBuilder: (BuildContext context, int i) =>
+          M3EListItem(headline: 'Field \${i + 1}', onTap: () {}),
     ),
   ),
-);''',
-      ),
-    ];
-  }
+);''';
+
+  // ---- Launchers ----------------------------------------------------------
+
+  Widget _textAction(String label, VoidCallback? onPressed) =>
+      M3EButton.text(onPressed: onPressed, child: Text(label));
 
   Widget _buildContent() {
     final Widget text = _longContent
@@ -187,38 +244,26 @@ M3EFab(
         content: _buildContent(),
         topDivider: _topDivider,
         bottomDivider: _bottomDivider,
-        leadingAction: _leadingAction
-            ? M3EButton(
-                style: M3EButtonStyle.text,
-                onPressed: () {},
-                child: const Text('Learn more'),
-              )
-            : null,
+        leadingAction: _leadingAction ? _textAction('Learn more', () {}) : null,
         actions: <Widget>[
-          M3EButton(
-            style: M3EButtonStyle.text,
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          M3EButton(
-            style: M3EButtonStyle.text,
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Confirm'),
-          ),
+          _textAction('Cancel', () => Navigator.of(context).pop()),
+          _textAction('Confirm', () => Navigator.of(context).pop()),
         ],
       ),
     );
   }
 
   Future<void> _showSelection() async {
-    await M3EDialog.showSelectionScreen(
+    final List<String>? picked = await M3EDialog.showSelectionScreen(
       context,
       title: _title,
       multiSelect: _multiSelect,
       barrierDismissible: _barrierDismissible,
-      options: const <String>['Standard', 'Pro', 'Team', 'Enterprise'],
-      confirmLabel: _multiSelect ? 'Done' : 'OK',
+      options: _options,
     );
+    if (picked != null && mounted) {
+      M3ESnackbar.show(context, message: 'Picked ${picked.join(', ')}');
+    }
   }
 
   /// Filled card list, inset 16 from the sides. It scrolls under the header,
@@ -243,23 +288,15 @@ M3EFab(
     final controller = M3EDialogController(hasUnsavedChanges: _unsaved);
     M3EDialog.showFullScreen<void>(
       context,
-      title: 'New event',
+      title: _title,
       confirmLabel: 'Save',
       onConfirm: controller.close,
       controller: controller,
-      contentHeadline: _longContent ? _title : null,
+      contentHeadline: _contentHeadline ? _title : null,
       bottomActions: _bottomBar
           ? <Widget>[
-              M3EButton(
-                style: M3EButtonStyle.text,
-                onPressed: controller.dismiss,
-                child: const Text('Cancel'),
-              ),
-              M3EButton(
-                style: M3EButtonStyle.text,
-                onPressed: controller.close,
-                child: const Text('Create'),
-              ),
+              _textAction('Cancel', controller.dismiss),
+              _textAction('Create', controller.close),
             ]
           : const <Widget>[],
       contentPadding: EdgeInsets.zero,
@@ -270,17 +307,18 @@ M3EFab(
   void _showAdaptive() {
     M3EDialog.showAdaptive<void>(
       context,
-      title: 'Create a new album',
+      title: _title,
       content: _buildContent(),
       confirmLabel: 'Save',
       onConfirm: () => Navigator.of(context).pop(),
+      barrierDismissible: _barrierDismissible,
       position: _position,
     );
   }
 
   Widget _fullScreenDestination(BuildContext context) {
     return M3EFullScreenDialog(
-      title: 'New event',
+      title: _title,
       confirmLabel: 'Save',
       onConfirm: () => M3EFabContainerTransformScope.closeOf(context),
       contentPadding: EdgeInsets.zero,
@@ -288,131 +326,153 @@ M3EFab(
     );
   }
 
+  // ---- Preview ------------------------------------------------------------
+
+  Widget _trigger() {
+    if (_kind == _DialogKind.fabTransform) {
+      return M3EFab(
+        icon: const Icon(M3EIcons.add),
+        tooltip: 'Open full-screen dialog',
+        openBuilder: _fullScreenDestination,
+      );
+    }
+    final VoidCallback open = switch (_kind) {
+      _DialogKind.basic => _showBasic,
+      _DialogKind.selection => _showSelection,
+      _DialogKind.fullScreen => _showFullScreen,
+      _DialogKind.adaptive || _DialogKind.fabTransform => _showAdaptive,
+    };
+    return M3EButton(
+      onPressed: open,
+      child: Text('Open ${_kind.label.toLowerCase()} dialog'),
+    );
+  }
+
+  Widget _preview() {
+    final M3EThemeData theme = M3ETheme.of(context);
+    return PlayPreviewCard(
+      label: '${_kind.label} dialog',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            _kind.description,
+            style: theme.typeScale.bodyMedium.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _trigger(),
+        ],
+      ),
+    );
+  }
+
+  // ---- Controls -----------------------------------------------------------
+
+  Widget _switch(String label, bool value, ValueChanged<bool> onChanged) {
+    return PlaySwitch(
+      label: label,
+      value: value,
+      onChanged: (bool v) => setState(() => onChanged(v)),
+    );
+  }
+
+  Widget get _titleField => PlayTextField(
+    key: ValueKey<_DialogKind>(_kind),
+    label: 'Title',
+    value: _title,
+    onChanged: (String v) => setState(() => _titles[_kind] = v),
+  );
+
+  Widget get _contentField => PlayTextField(
+    label: 'Content',
+    value: _content,
+    onChanged: (String v) => setState(() => _content = v),
+  );
+
+  Widget get _barrierSwitch => _switch(
+    'Barrier dismissible',
+    _barrierDismissible,
+    (bool v) => _barrierDismissible = v,
+  );
+
+  Widget get _positionControl => PlayEnumSegmented<M3EDialogPosition>(
+    label: 'Position',
+    value: _position,
+    values: M3EDialogPosition.values,
+    labelOf: (M3EDialogPosition p) => p.name,
+    onChanged: (M3EDialogPosition p) => setState(() => _position = p),
+  );
+
+  List<Widget> get _kindControls => switch (_kind) {
+    _DialogKind.basic => <Widget>[
+      _titleField,
+      _contentField,
+      _switch('Show icon', _showIcon, (bool v) => _showIcon = v),
+      _switch('Long content (scrolls)', _longContent, (bool v) {
+        _longContent = v;
+      }),
+      _switch('Truncate headline (1 line)', _truncateTitle, (bool v) {
+        _truncateTitle = v;
+      }),
+      _switch('Top divider', _topDivider, (bool v) => _topDivider = v),
+      _switch('Bottom divider', _bottomDivider, (bool v) {
+        _bottomDivider = v;
+      }),
+      _switch('Leading action (caution)', _leadingAction, (bool v) {
+        _leadingAction = v;
+      }),
+      _switch('Text field (keyboard)', _textField, (bool v) {
+        _textField = v;
+      }),
+      _barrierSwitch,
+      _positionControl,
+    ],
+    _DialogKind.selection => <Widget>[
+      _titleField,
+      _switch('Multi select', _multiSelect, (bool v) => _multiSelect = v),
+      _barrierSwitch,
+    ],
+    _DialogKind.fullScreen => <Widget>[
+      _titleField,
+      _switch('Unsaved changes', _unsaved, (bool v) => _unsaved = v),
+      _switch('Bottom action bar', _bottomBar, (bool v) => _bottomBar = v),
+      _switch('Headline in content', _contentHeadline, (bool v) {
+        _contentHeadline = v;
+      }),
+    ],
+    _DialogKind.adaptive => <Widget>[
+      _titleField,
+      _contentField,
+      _switch('Text field (keyboard)', _textField, (bool v) {
+        _textField = v;
+      }),
+      _barrierSwitch,
+      _positionControl,
+    ],
+    _DialogKind.fabTransform => <Widget>[_titleField],
+  };
+
   @override
   Widget build(BuildContext context) {
     return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Triggers',
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              M3EButton(
-                style: M3EButtonStyle.tonal,
-                onPressed: _showBasic,
-                child: const Text('Dialog'),
-              ),
-              M3EButton(
-                style: M3EButtonStyle.tonal,
-                onPressed: _showSelection,
-                child: const Text('Selection'),
-              ),
-              M3EButton(
-                style: M3EButtonStyle.tonal,
-                onPressed: _showFullScreen,
-                child: const Text('Full screen'),
-              ),
-              M3EButton(
-                style: M3EButtonStyle.tonal,
-                onPressed: _showAdaptive,
-                child: const Text('Adaptive'),
-              ),
-              M3EFab(
-                size: M3EFabSize.small,
-                icon: const Icon(M3EIcons.add),
-                tooltip: 'Open full-screen dialog',
-                openBuilder: _fullScreenDestination,
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
+      previews: <Widget>[_preview()],
+      snippets: <PlaySnippet>[_snippet],
       controls: <Widget>[
         PlayControlPanel(
-          title: 'Content',
+          title: 'Variant',
           children: <Widget>[
-            PlayTextField(
-              label: 'Title',
-              value: _title,
-              onChanged: (String v) => setState(() => _title = v),
-            ),
-            PlayTextField(
-              label: 'Content',
-              value: _content,
-              onChanged: (String v) => setState(() => _content = v),
-            ),
-            PlaySwitch(
-              label: 'Show icon',
-              value: _showIcon,
-              onChanged: (bool v) => setState(() => _showIcon = v),
-            ),
-            PlaySwitch(
-              label: 'Long content (scrolls)',
-              value: _longContent,
-              onChanged: (bool v) => setState(() => _longContent = v),
-            ),
-            PlaySwitch(
-              label: 'Truncate headline (1 line)',
-              value: _truncateTitle,
-              onChanged: (bool v) => setState(() => _truncateTitle = v),
-            ),
-            PlaySwitch(
-              label: 'Top divider',
-              value: _topDivider,
-              onChanged: (bool v) => setState(() => _topDivider = v),
-            ),
-            PlaySwitch(
-              label: 'Bottom divider',
-              value: _bottomDivider,
-              onChanged: (bool v) => setState(() => _bottomDivider = v),
-            ),
-            PlaySwitch(
-              label: 'Leading action (caution)',
-              value: _leadingAction,
-              onChanged: (bool v) => setState(() => _leadingAction = v),
+            PlayEnumMenu<_DialogKind>(
+              label: 'Dialog',
+              value: _kind,
+              values: _DialogKind.values,
+              labelOf: (_DialogKind k) => k.label,
+              onChanged: (_DialogKind k) => setState(() => _kind = k),
             ),
           ],
         ),
-        PlayControlPanel(
-          title: 'Behavior',
-          children: <Widget>[
-            PlaySwitch(
-              label: 'Barrier dismissible',
-              value: _barrierDismissible,
-              onChanged: (bool v) => setState(() => _barrierDismissible = v),
-            ),
-            PlayEnumSegmented<M3EDialogPosition>(
-              label: 'Position',
-              value: _position,
-              values: M3EDialogPosition.values,
-              labelOf: (M3EDialogPosition p) => p.name,
-              onChanged: (M3EDialogPosition p) => setState(() => _position = p),
-            ),
-            PlaySwitch(
-              label: 'Text field in content (keyboard)',
-              value: _textField,
-              onChanged: (bool v) => setState(() => _textField = v),
-            ),
-            PlaySwitch(
-              label: 'Multi select (selection)',
-              value: _multiSelect,
-              onChanged: (bool v) => setState(() => _multiSelect = v),
-            ),
-            PlaySwitch(
-              label: 'Unsaved changes (full screen)',
-              value: _unsaved,
-              onChanged: (bool v) => setState(() => _unsaved = v),
-            ),
-            PlaySwitch(
-              label: 'Bottom action bar (full screen)',
-              value: _bottomBar,
-              onChanged: (bool v) => setState(() => _bottomBar = v),
-            ),
-          ],
-        ),
+        PlayControlPanel(title: 'Options', children: _kindControls),
       ],
     );
   }
