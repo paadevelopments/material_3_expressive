@@ -113,6 +113,16 @@ Summary of updates since 1.1.4 (details in [`CHANGELOG.md`](CHANGELOG.md)):
   the bar, supports predictive back, moves through results with the arrow
   keys, and announces when results change. `M3ESliverSearchBar` scrolls away
   and comes back when you scroll toward the top.
+- **Text fields** — filled and outlined fields are **56** tall, with a **4**
+  corner. The label springs between the middle and the top, and the outlined
+  label sits in a notch. Focus is **primary**: a **2** line on filled, a **3**
+  outline on outlined. Errors are **error** and show an error icon. Adds
+  prefix and suffix text, a placeholder, a character counter, required and
+  read-only fields, clear and password buttons, and opt-in density. Text
+  fields can be multi-line (`maxLines: null` grows without a limit) or a text
+  area, and icons and prefix/suffix text can align to the first line, center
+  or bottom. The focus ring is **secondary**, **3** thick. Tab skips disabled
+  fields.
 
 
 ## Installation
