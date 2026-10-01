@@ -1,3 +1,5 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -27,17 +29,11 @@ Map<String, Widget Function(VoidCallback)> _buttonVariants() {
   };
 }
 
-/// InkResponse (material_ui) resolves and bakes a highlight's color in
-/// once, at creation time, from the *full* combined state set active at
-/// that instant — not just the state the highlight represents. A tap
-/// always requests focus while hover/press are still active (see
-/// `_effectiveOnPressed`), so the moment the focus highlight is first
-/// created, the states set can legitimately be {hovered, pressed, focused}
-/// all at once. If that combination ever resolves to a real color, the
-/// focus highlight — which stays active until focus is lost, not until
-/// hover/press clear — bakes in a stray tint that outlives the click and
-/// the hover, only clearing once something else takes focus. Plain hover
-/// alone must still resolve to a real fill.
+/// InkResponse (material_ui) bakes a highlight's color in once, from the
+/// full state set active at creation. Hover and focus resolve with the same
+/// set, so any ink overlay color either sticks after a click or hides hover
+/// while the button is focused. The ink overlay must stay transparent for
+/// every state; the hover layer is painted from live states instead.
 Future<void> _expectNoBakedFill(
   WidgetTester tester,
   String variantName,
@@ -54,6 +50,7 @@ Future<void> _expectNoBakedFill(
   expect(overlay, isNotNull, reason: '$variantName has no overlayColor');
 
   for (final states in <Set<WidgetState>>[
+    <WidgetState>{WidgetState.hovered},
     <WidgetState>{WidgetState.focused},
     <WidgetState>{WidgetState.pressed},
     <WidgetState>{WidgetState.hovered, WidgetState.focused},
@@ -70,18 +67,87 @@ Future<void> _expectNoBakedFill(
       reason: '$variantName baked a fill in for $states',
     );
   }
+}
 
-  final Color? hoverOnly = overlay!.resolve(<WidgetState>{WidgetState.hovered});
-  expect(
-    hoverOnly,
-    isNotNull,
-    reason: '$variantName lost its plain hover fill',
+/// Opaque-ish fill painted by the button's live state layer, if any.
+Color _stateLayer(WidgetTester tester) {
+  final Iterable<ColoredBox> boxes = tester.widgetList<ColoredBox>(
+    find.descendant(
+      of: find.byType(TweenAnimationBuilder<Color?>),
+      matching: find.byType(ColoredBox),
+    ),
   );
-  expect(
-    hoverOnly,
-    isNot(Colors.transparent),
-    reason: '$variantName lost its plain hover fill',
+  return boxes.isEmpty ? Colors.transparent : boxes.first.color;
+}
+
+/// Hover shows after a click focused the button, and clears on exit.
+Future<void> _hoverAfterTap(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _host(M3EButton.text(onPressed: () {}, child: const Text(_save))),
   );
+  final Offset center = tester.getCenter(find.text(_save));
+  final TestGesture mouse = await tester.createGesture(
+    kind: PointerDeviceKind.mouse,
+  );
+  addTearDown(mouse.removePointer);
+  await mouse.addPointer(location: Offset.zero);
+  await mouse.moveTo(center);
+  await tester.pumpAndSettle();
+  expect(_stateLayer(tester).a, greaterThan(0));
+
+  await mouse.down(center);
+  await mouse.up();
+  await mouse.moveTo(Offset.zero);
+  await tester.pumpAndSettle();
+  expect(_stateLayer(tester).a, 0, reason: 'fill stuck after the click');
+
+  await mouse.moveTo(center);
+  await tester.pumpAndSettle();
+  expect(
+    _stateLayer(tester).a,
+    greaterThan(0),
+    reason: 'no hover when focused',
+  );
+}
+
+/// Press shows while held and clears on release; keyboard focus shows a
+/// layer, click focus does not.
+Future<void> _pressAndFocus(WidgetTester tester) async {
+  // Focus modality is process-wide; start clean of earlier pointer tests.
+  M3EFocusInteraction.resetForTest();
+  final node = FocusNode();
+  addTearDown(node.dispose);
+  await tester.pumpWidget(
+    _host(
+      M3EButton.text(
+        focusNode: node,
+        onPressed: () {},
+        child: const Text(_save),
+      ),
+    ),
+  );
+  final TestGesture press = await tester.startGesture(
+    tester.getCenter(find.text(_save)),
+  );
+  await tester.pumpAndSettle();
+  expect(_stateLayer(tester).a, closeTo(0.1, 0.01), reason: 'no press layer');
+
+  await press.up();
+  await tester.pumpAndSettle();
+  expect(node.hasFocus, isTrue);
+  expect(_stateLayer(tester).a, 0, reason: 'press layer stuck after release');
+
+  // A real Tab switches Flutter to keyboard highlight mode.
+  node.unfocus();
+  await tester.pump();
+  await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+  await tester.pumpAndSettle();
+  expect(node.hasPrimaryFocus, isTrue);
+  expect(_stateLayer(tester).a, closeTo(0.1, 0.01), reason: 'no focus layer');
+
+  M3EFocusInteraction.instance.notePointerInteraction(immediate: true);
+  await tester.pumpAndSettle();
+  expect(_stateLayer(tester).a, 0, reason: 'focus layer after pointer use');
 }
 
 void main() {
@@ -123,6 +189,9 @@ void main() {
       }
     },
   );
+
+  testWidgets('hover shows again after a click', _hoverAfterTap);
+  testWidgets('press and keyboard focus layers never stick', _pressAndFocus);
 
   testWidgets('M3EButtonGroup renders each action label', (tester) async {
     await tester.pumpWidget(

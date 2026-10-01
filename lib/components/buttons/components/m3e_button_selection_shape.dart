@@ -9,34 +9,36 @@ extension _M3EButtonSelectionShape on _M3EButtonState {
     bool freezeRight,
   })
   _resolveSelectionShapes(M3EButtonMeasurements measurements) {
-    final explicit = widget.decorationBorderRadius;
+    final explicit = _decoration?.borderRadius;
     final fullyRound = BorderRadius.circular(measurements.height / 2);
     final square = BorderRadius.circular(
       _buttonTheme.squareRadius(widget.size),
     );
-    final unselected = widget.decorationUnselectedRadius != null
-        ? BorderRadius.circular(widget.decorationUnselectedRadius!)
+    final double? unselectedRadius = _decoration?.unselectedRadius;
+    final double? selectedRadius = _decoration?.selectedRadius;
+    final unselected = unselectedRadius != null
+        ? BorderRadius.circular(unselectedRadius)
         : explicit != null
         ? BorderRadius.circular(explicit)
         : widget.shape == M3EButtonShape.round
         ? fullyRound
         : square;
-    final selected = widget.decorationSelectedRadius != null
-        ? BorderRadius.circular(widget.decorationSelectedRadius!)
+    final selected = selectedRadius != null
+        ? BorderRadius.circular(selectedRadius)
         : explicit != null
         ? BorderRadius.circular(explicit)
         : widget.shape == M3EButtonShape.round
         ? square
         : fullyRound;
     final pressed = BorderRadius.circular(
-      widget.decorationPressedRadius ??
+      _decoration?.pressedRadius ??
           explicit ??
           _buttonTheme.pressedRadius(widget.size),
     );
     // Spec (buttons + button groups): hover keeps resting shape; press morphs.
     final restingShape = _isSelected ? selected : unselected;
-    final hovered = widget.decoration?.hoveredRadius != null
-        ? BorderRadius.circular(widget.decoration!.hoveredRadius!)
+    final hovered = _decoration?.hoveredRadius != null
+        ? BorderRadius.circular(_decoration!.hoveredRadius!)
         : restingShape;
 
     if (!widget.isGroupConnected) {
@@ -74,14 +76,14 @@ extension _M3EButtonSelectionShape on _M3EButtonState {
             : groupTheme.connectedOuterSquareRadiusFor(widget.size));
     final innerRadius =
         explicit ??
-        widget.decorationConnectedInnerRadius ??
+        _decoration?.connectedInnerRadius ??
         groupTheme.connectedInnerRadiusFor(widget.size);
     final pressedInnerRadius =
-        widget.decorationPressedRadius ??
+        _decoration?.pressedRadius ??
         explicit ??
         groupTheme.connectedPressedInnerRadiusFor(widget.size);
     final selectedInnerRadius =
-        widget.decorationSelectedRadius ??
+        _decoration?.selectedRadius ??
         explicit ??
         groupTheme.connectedSelectedInnerRadiusFor(measurements.height);
     final resting = BorderRadiusDirectional.horizontal(
@@ -98,17 +100,13 @@ extension _M3EButtonSelectionShape on _M3EButtonState {
       ),
     ).resolve(Directionality.of(context));
     final connectedResting = _isSelected ? connectedSelected : resting;
-    final connectedHovered = widget.decoration?.hoveredRadius != null
+    final connectedHovered = _decoration?.hoveredRadius != null
         ? BorderRadiusDirectional.horizontal(
             start: Radius.circular(
-              widget.isFirstInGroup
-                  ? outerRadius
-                  : widget.decoration!.hoveredRadius!,
+              widget.isFirstInGroup ? outerRadius : _decoration!.hoveredRadius!,
             ),
             end: Radius.circular(
-              widget.isLastInGroup
-                  ? outerRadius
-                  : widget.decoration!.hoveredRadius!,
+              widget.isLastInGroup ? outerRadius : _decoration!.hoveredRadius!,
             ),
           ).resolve(Directionality.of(context))
         : connectedResting;

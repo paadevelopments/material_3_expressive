@@ -60,6 +60,61 @@
 * **Text fields (web):** fixed fields that ignored typing after password
   visibility, read-only or keyboard type changed while focused and the field
   was then refocused. The caret showed but no text was entered.
+* **Dialogs:** basic dialogs follow the spec: **surface container high**,
+  **28** corners, **level 3**, **280–560** wide, **24** padding, **16** icon to
+  headline and headline to body, **24** body to actions and **8** between
+  actions. The icon is **24** **secondary** and centres the headline. The
+  headline is **on surface** (headline small), supporting text **on surface
+  variant** (body medium), and dividers **outline**, **1** thick. Content now
+  scrolls with the headline and actions pinned. Actions stack (confirm on top)
+  when they don't fit, and `leadingAction` adds an optional third action.
+  Every text button in the action row, whether built in (selection, discard)
+  or passed by the caller, uses the dialog action tokens: label large in
+  **primary** with **0.08** hover, **0.1** keyboard-focus (plus the ring) and
+  **0.1** press layers, and the sparkle ripple. Added `subhead`,
+  `titleMaxLines` (a truncated headline expands on tap), `scrollController`
+  and `semanticLabel`. Dialogs are announced as alert dialogs and labelled by
+  their headline. Every value lives on `M3EDialogTheme` and its new
+  `appearance` (`M3EDialogAppearance`) and `fullScreen`
+  (`M3EFullScreenDialogTheme`).
+* **Dialogs:** dialogs open and close on springs: basic dialogs fade and scale
+  up, and full-screen dialogs slide up. Focus lands on the first interactive
+  element, Tab and Shift+Tab wrap inside the dialog, and Escape always
+  closes it. `onDismissRequest` can block Escape, back, barrier and close.
+  `M3EDialogController` closes the dialog, reports `isOpen` and `variant`, and
+  with `hasUnsavedChanges` shows "Discard unsaved changes?" before closing
+  (`M3EDialog.showDiscardConfirmation`). `position` (`M3EDialogPosition`
+  center, left, right, top or bottom) places basic dialogs inside the system
+  bars and above the soft keyboard. On screens **600** and wider, an
+  off-centre dialog keeps a **56** margin. Keyboard users land on the first
+  element, while pointer users get no highlighted control. The **0.1** focus
+  layer only shows during keyboard navigation. In selection dialogs the list is
+  one Tab stop: arrow keys (and Home / End) move between rows, Space or Enter
+  selects, and the next Tab moves on to the actions.
+* **Dialogs:** full-screen dialogs (now `M3EFullScreenDialog`, also usable as
+  an `M3EFab.openBuilder` container-transform destination) have a **56**
+  header (was **64**) on **surface** that extends under the status bar like an
+  app bar: a **24** **on surface** close icon
+  **16** from the edge, a title large headline **24** after it, and a trailing
+  action (`confirmLabel` / `onConfirm`). The header turns **surface container**
+  at **level 2** while content scrolls under it. Content is padded **24** top,
+  left and right by default (`contentPadding`), and the dialog fills the view
+  width.
+  Added `bottomActions` (a **56** action bar that extends under the
+  navigation bar and lifts while more content sits below it) and `contentHeadline` for long headlines. The divider is
+  **surface container highest**.
+* **Dialogs:** `M3EDialog.showAdaptive` / `M3EAdaptiveDialog` is full-screen
+  below **600** and a basic dialog at **600** and wider. It morphs between
+  the two on a spatial spring when the window is resized.
+* **Buttons:** added `M3EButtonDecorationScope`. `M3EButton`s below it take
+  its decoration, with their own `decoration` merged on top field by field.
+  `styles` limits it to certain button styles.
+* **Buttons:** state layers are painted from live states (pressed **0.1**
+  over keyboard focus **0.1** over hover **0.08**) instead of ink
+  highlights, which kept their first color. Hover now shows again after a
+  click, the press layer clears as soon as the press is released, and the
+  focus layer shows only for keyboard focus (with the ring), never after a
+  click.
 * **Breaking — text fields:** `M3ETextFieldTheme` was rebuilt around the spec
   tokens. Removed `minHeight` (use `containerHeight`), `contentHeight`,
   `contentVerticalPadding` and `labelRestingOffset` (layout is derived from

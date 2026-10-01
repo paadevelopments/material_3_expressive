@@ -1185,15 +1185,23 @@ Row(
 
 #### M3EDialog
 
-Modal dialog — use the static `.show` helper. Optional `topDivider` /
-`bottomDivider` draw full-bleed lines between header, content, and actions
-(padding lives on those sections so dividers can reach the edges).
+Basic and full-screen dialogs that follow the M3 spec. A basic dialog is
+**280–560** wide on **surface container high**, with **28** corners, **24**
+padding and a **0.32** scrim. Full-screen dialogs fill the view. The headline and actions stay pinned while the
+content scrolls, and actions stack when they don't fit. Focus lands on the
+first interactive element, Tab and Shift+Tab wrap inside the dialog, and
+Escape closes it. Every value can be changed on `M3EDialogTheme` (plus
+`appearance` and `fullScreen`).
 
 ```dart
 M3EDialog.show<void>(
   context,
+  // center (default), left, right, top or bottom; stays inside the system
+  // bars and above the keyboard, with 56dp margins on 600dp+ when off-centre.
+  position: M3EDialogPosition.right,
   dialog: M3EDialog(
     title: 'Reset settings?',
+    icon: const Icon(M3EIcons.restart_alt), // centres the headline
     content: const Text('This restores default values.'),
     topDivider: true,
     bottomDivider: true,
@@ -1204,6 +1212,7 @@ M3EDialog.show<void>(
         child: const Text('Cancel'),
       ),
       M3EButton(
+        style: M3EButtonStyle.text,
         onPressed: () => Navigator.of(context).pop(),
         child: const Text('Reset'),
       ),
@@ -1216,16 +1225,45 @@ final List<String>? picked = await M3EDialog.showSelectionScreen(
   context,
   title: 'Choose a plan',
   options: const <String>['Standard', 'Pro', 'Team'],
-  multiSelect: false,
 );
 
-// Full-screen variant
+// Full-screen (compact widths). Close asks to discard unsaved changes.
+final controller = M3EDialogController(hasUnsavedChanges: true);
 M3EDialog.showFullScreen<void>(
   context,
   title: 'New event',
-  body: const Padding(
-    padding: EdgeInsets.all(24),
-    child: Text('Full-screen dialog body.'),
+  confirmLabel: 'Save',
+  onConfirm: controller.close,
+  controller: controller,
+  contentPadding: EdgeInsets.zero, // the list insets itself and scrolls
+  body: M3EList.scrollable(        // under the header
+    variant: M3ECardVariant.filled,
+    listPadding: const EdgeInsets.all(16),
+    itemCount: 20,
+    itemBuilder: (context, index) => M3EListItem(
+      headline: 'Field ${index + 1}',
+      onTap: () {},
+    ),
+  ),
+);
+
+// Full-screen below 600dp, basic at 600dp and wider; morphs on resize.
+M3EDialog.showAdaptive<void>(
+  context,
+  title: 'Create a new album',
+  content: const Text('Album details'),
+  confirmLabel: 'Save',
+  onConfirm: () => Navigator.of(context).pop(),
+);
+
+// FAB container transform into a full-screen dialog
+M3EFab(
+  icon: const Icon(M3EIcons.add),
+  openBuilder: (context) => M3EFullScreenDialog(
+    title: 'New event',
+    confirmLabel: 'Save',
+    onConfirm: () => M3EFabContainerTransformScope.closeOf(context),
+    body: const Text('Form fields'),
   ),
 );
 ```

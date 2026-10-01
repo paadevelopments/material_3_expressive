@@ -74,7 +74,8 @@ void registerSelectionDialogEnterSelectsRowTests() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    // Row is the Tab stop; embedded radio is not.
+    // Rows share one roving Tab stop (the active row); arrows move between
+    // them. Embedded radios are never Tab stops.
     final Finder optionFocus = find.descendant(
       of: find.bySemanticsLabel('B'),
       matching: find.byType(FocusableActionDetector),
@@ -84,7 +85,7 @@ void registerSelectionDialogEnterSelectsRowTests() {
         .firstWhere((FocusableActionDetector d) => d.enabled);
     final FocusNode? node = detector.focusNode;
     expect(node, isNotNull);
-    expect(node!.skipTraversal, isFalse);
+    expect(node!.skipTraversal, isTrue);
     expect(node.canRequestFocus, isTrue);
 
     final Finder radioFocus = find.descendant(

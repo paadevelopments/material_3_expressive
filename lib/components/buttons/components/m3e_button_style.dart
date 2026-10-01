@@ -3,7 +3,7 @@ part of '../m3e_buttons.dart';
 
 extension _M3EButtonStyle on _M3EButtonState {
   ButtonStyle _buildBaseStyle() {
-    final dec = widget.decoration;
+    final dec = _decoration;
     final effectivePadding = dec?.padding != null
         ? WidgetStateProperty.all<EdgeInsetsGeometry>(dec!.padding!)
         : null;
@@ -44,10 +44,10 @@ extension _M3EButtonStyle on _M3EButtonState {
       elevation: WidgetStateProperty.resolveWith(_resolveElevation),
       side: WidgetStateProperty.resolveWith(_resolveSide),
       mouseCursor: WidgetStateProperty.resolveWith(_resolveMouseCursor),
-      overlayColor: m3eUsesGradientOverlay(dec?.overlayGradient)
-          ? const WidgetStatePropertyAll<Color?>(Colors.transparent)
-          : (dec?.overlayColor ??
-                WidgetStateProperty.resolveWith(_resolveOverlayColor)),
+      // Ink highlights resolve hover and focus with the same state set and
+      // keep their first color, so the state layer is painted by
+      // [_withStateLayer] from live states instead.
+      overlayColor: const WidgetStatePropertyAll<Color?>(Colors.transparent),
       surfaceTintColor: dec?.surfaceTintColor,
       enableFeedback:
           (dec?.haptic ?? M3EHapticFeedback.none) == M3EHapticFeedback.none &&
@@ -56,7 +56,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   Color? _resolveForegroundColor(Set<WidgetState> states) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     final activeStates = _selectionStates(states);
     if (dec?.foregroundGradient?.resolve(activeStates) != null) {
       return m3eGradientForegroundSourceColor;
@@ -76,7 +76,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   Color? _resolveBackgroundColor(Set<WidgetState> states) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     final activeStates = _selectionStates(states);
     if (dec?.backgroundColor != null) {
       final color = dec!.backgroundColor!.resolve(activeStates);
@@ -104,7 +104,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   double? _resolveElevation(Set<WidgetState> states) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     if (dec?.elevation != null) {
       final e = dec!.elevation!.resolve(states);
       if (e != null) {
@@ -115,7 +115,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   BorderSide? _resolveSide(Set<WidgetState> states) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     final activeStates = _selectionStates(states);
     if (dec?.outlineGradient?.resolve(activeStates) != null) {
       return BorderSide.none;
@@ -145,7 +145,7 @@ extension _M3EButtonStyle on _M3EButtonState {
   }
 
   MouseCursor? _resolveMouseCursor(Set<WidgetState> states) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     if (dec?.mouseCursor != null) {
       final cursor = dec!.mouseCursor!.resolve(states);
       if (cursor != null) {
@@ -158,40 +158,67 @@ extension _M3EButtonStyle on _M3EButtonState {
     return widget.mouseCursor;
   }
 
-  Color? _resolveOverlayColor(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
+  /// State layer color for live [states] (pressed over focus over hover).
+  ///
+  /// Press shows only while held. Focus shows only for keyboard focus (the
+  /// same rule as the ring), so a click that focuses the button leaves no
+  /// fill. A decoration `overlayColor` gets the same gated states.
+  Color? _stateLayerColor(Set<WidgetState> states) {
+    final M3EButtonDecoration? dec = _decoration;
+    if (states.contains(WidgetState.disabled) ||
+        m3eUsesGradientOverlay(dec?.overlayGradient)) {
       return null;
     }
-    // Keyboard focus uses the outset ring only, and press feedback comes
-    // from the ripple/shape morph alone — neither should ever paint a
-    // fill.
-    //
-    // Critically, when either is present the result must not leak a color
-    // from another simultaneously-active state (like hover) either:
-    // InkResponse bakes a highlight's color in once, at creation time,
-    // from whatever the *full* combined state set happens to be at that
-    // instant. A tap always requests focus while hover/press are still
-    // active, so the focus highlight — which stays active until focus is
-    // lost, not until hover/press clear — would otherwise capture the
-    // hover tint at that moment and keep painting it long after the
-    // pointer actually left (only clearing once focus moves elsewhere).
-    if (states.contains(WidgetState.focused) ||
-        states.contains(WidgetState.pressed)) {
-      return Colors.transparent;
+    final live = <WidgetState>{
+      ...states.difference(const <WidgetState>{WidgetState.focused}),
+      if (isFocused) WidgetState.focused,
+    };
+    final WidgetStateProperty<Color?>? custom = dec?.overlayColor;
+    if (custom != null) {
+      return custom.resolve(live);
     }
-    if (!states.contains(WidgetState.hovered)) {
-      return Colors.transparent;
-    }
-    final dec = widget.decoration;
-    Color? foreground;
-    if (dec?.foregroundColor != null) {
-      foreground = dec!.foregroundColor!.resolve(_selectionStates(states));
-    }
-    foreground ??= _selectionForegroundColor();
-    return M3EStateLayer.resolveOverlayColor(foreground, <WidgetState>{
-          WidgetState.hovered,
-        }) ??
-        Colors.transparent;
+    final Color foreground =
+        dec?.foregroundColor?.resolve(_selectionStates(states)) ??
+        _selectionForegroundColor();
+    final double opacity = live.contains(WidgetState.pressed)
+        ? M3EStateOpacity.pressed
+        : live.contains(WidgetState.focused)
+        ? M3EStateOpacity.focus
+        : live.contains(WidgetState.hovered)
+        ? M3EStateOpacity.hover
+        : 0;
+    return opacity == 0 ? null : foreground.withValues(alpha: opacity);
+  }
+
+  /// Paints the state layer under the button content, clipped to [radius].
+  ButtonLayerBuilder _withStateLayer(
+    BorderRadius radius,
+    ButtonLayerBuilder? surface,
+  ) {
+    return (BuildContext context, Set<WidgetState> states, Widget? child) {
+      final Widget inner = surface?.call(context, states, child) ?? child!;
+      final Color color = _stateLayerColor(states) ?? Colors.transparent;
+      return Stack(
+        fit: StackFit.passthrough,
+        children: <Widget>[
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ClipRRect(
+                borderRadius: radius,
+                child: TweenAnimationBuilder<Color?>(
+                  tween: ColorTween(end: color),
+                  duration: M3EMotion.short3,
+                  curve: M3EMotion.standard,
+                  builder: (BuildContext context, Color? value, _) =>
+                      ColoredBox(color: value ?? Colors.transparent),
+                ),
+              ),
+            ),
+          ),
+          inner,
+        ],
+      );
+    };
   }
 
   Set<WidgetState> _selectionStates(Set<WidgetState> states) {

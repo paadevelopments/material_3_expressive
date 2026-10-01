@@ -53,6 +53,9 @@ class _M3EButtonState extends State<M3EButton>
     with M3EBaseButtonState<M3EButton> {
   late M3EButtonMeasurements _measurements;
 
+  /// [M3EButton.decoration] merged over the nearest scope decoration.
+  M3EButtonDecoration? _decoration;
+
   M3EButtonTheme get _buttonTheme => M3ETheme.of(context).buttonTheme;
 
   M3EColorScheme get _scheme => M3ETheme.of(context).colorScheme;
@@ -69,7 +72,7 @@ class _M3EButtonState extends State<M3EButton>
 
   @override
   M3EButtonMotion? get effectiveMotion {
-    final decorationMotion = widget.decorationMotion;
+    final decorationMotion = _decoration?.motion;
     if (decorationMotion != null) {
       return decorationMotion;
     }
@@ -89,9 +92,21 @@ class _M3EButtonState extends State<M3EButton>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _resolveDecoration();
     _updateMeasurements();
     updateLabelStyle(context);
     updateSpringMotion();
+  }
+
+  /// Own decoration merged over the nearest [M3EButtonDecorationScope].
+  void _resolveDecoration() {
+    final M3EButtonDecoration? scoped = M3EButtonDecorationScope.maybeOf(
+      context,
+      widget.style,
+    );
+    _decoration = scoped == null
+        ? widget.decoration
+        : scoped.merge(widget.decoration);
   }
 
   void _updateMeasurements() {
@@ -111,14 +126,15 @@ class _M3EButtonState extends State<M3EButton>
       _updateMeasurements();
     }
 
+    final M3EButtonDecoration? previous = _decoration;
+    _resolveDecoration();
     if (oldWidget.size != widget.size ||
-        oldWidget.decoration?.foregroundColor !=
-            widget.decoration?.foregroundColor ||
+        previous?.foregroundColor != _decoration?.foregroundColor ||
         oldWidget.style != widget.style) {
       updateLabelStyle(context);
     }
 
-    if (widget.decoration?.motion != oldWidget.decoration?.motion) {
+    if (_decoration?.motion != previous?.motion) {
       updateSpringMotion();
     }
   }
