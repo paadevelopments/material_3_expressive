@@ -1902,22 +1902,42 @@ Keyboard: Escape dismisses when focused.
 
 #### M3ETextField
 
-Filled or outlined field with a floating label. Height grows with `maxLines`.
+Filled or outlined field (**56** tall) with a label that springs between the
+middle and the top. It supports leading and trailing icons, prefix and suffix
+text, a placeholder, supporting or error text (with an error icon), a
+character counter, and required (`isRequired`) and read-only fields. Input can
+be single-line, multi-line (grows up to `maxLines`) or a fixed-height text area
+(`minLines == maxLines`). `density` (**0** to **-3**) is opt-in. Every value is
+customizable through `M3ETextFieldTheme` and `M3ETextFieldColorTheme`.
 
 ```dart
 M3ETextField(
   controller: nameController,
   label: 'Full name',
   supportingText: 'As it appears on your ID',
-  leading: const Icon(M3EIcons.edit),
+  leading: const Icon(M3EIcons.search),
+  showClearButton: true,
 );
 
 const M3ETextField(
-  label: 'Email',
+  label: 'Price',
   variant: M3ETextFieldVariant.outlined,
-  errorText: 'Enter a valid email address',
+  prefixText: '€',
+  prefixSemanticsLabel: 'Euro',
+  isRequired: true,
+  maxLength: 20,
+);
+
+const M3ETextField(
+  label: 'Password',
+  obscureText: true,
+  showPasswordToggle: true,
+  errorText: 'At least 6 characters required',
 );
 ```
+
+Keyboard: Tab focuses enabled fields and Escape unfocuses. The focus ring hides
+on pointer input.
 
 #### M3ESearchBar / M3ESearchAnchor / M3ESliverSearchBar
 

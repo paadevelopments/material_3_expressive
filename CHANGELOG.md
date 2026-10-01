@@ -29,6 +29,39 @@
   `M3ESliverSearchBar` scrolls away with content and returns when the user
   scrolls toward the top, or stays `fixed`. App bar search keeps the divided
   view.
+* **Text fields:** containers are **56** tall with a **4** corner (top corners
+  only on filled). Padding is **16** without icons and **12** to a **24** icon,
+  with **16** between icon and text. On filled fields the label sits **8** from
+  the top over the input, with **8** below. Supporting text and the counter sit
+  **4** below, inset **16**, with a **16** gap. Filled fields are **surface
+  container highest** with a **1** (focused **2**) bottom indicator. Hover adds
+  an **0.08** **on surface** layer. Outlined fields use a **1** (focused **3**)
+  **outline** with a **4**-padded notch for the floating label. Labels, icons and
+  supporting text are **on surface variant**, and input is **on surface**. Focus
+  is **primary** and error is **error**, darkening to **on error container** on
+  hover. Disabled fields fade to **0.38** (filled container **0.04**, outline
+  **0.12**) and are skipped by Tab. The label springs between the middle and the
+  top. Added `prefixText`, `suffixText`, `placeholder`, `isRequired` (asterisk),
+  `maxLength` with a counter, `readOnly`, `minLines` (multi-line and text area),
+  `supportingTextOnFocusOnly`, `density` (**0** to **-3**, **4** each), and
+  `showClearButton` / `showPasswordToggle`. An error icon is shown by default.
+  Tap, double-tap, long-press and drag select text. The keyboard focus ring is
+  **secondary** (or **error**), **3** thick, **2** off the field, and hides on
+  pointer input. Screen readers hear the label (with its asterisk) and the
+  supporting text. The error message has the alert role, and the counter reads
+  "Character count, N of M characters entered". Outlined fields with a label
+  reserve **8** above the container for the floating label.
+* **Breaking — text fields:** `M3ETextFieldTheme` was rebuilt around the spec
+  tokens. Removed `minHeight` (use `containerHeight`), `contentHeight`,
+  `contentVerticalPadding` and `labelRestingOffset` (layout is derived from
+  `verticalPadding` and the text styles), `horizontalPadding` as `EdgeInsets`
+  (now a `double`), `iconGap` (use `iconTextGap` / `iconEdgePadding`),
+  `labelFloatingTopPadding`, `labelRestingTopPadding`, `labelBottomPadding`,
+  `supportingTextPadding` (use `supportingTopPadding` /
+  `supportingHorizontalPadding`), `labelSlotHeight()`, `accentColor()`,
+  `backgroundDecoration()`, `borderDecoration()` and `decoration()`. Colors are
+  now set per state with `colors: M3ETextFieldColorTheme(...)`, or resolved with
+  `resolveColors()`.
 
 ### Fixed
 
