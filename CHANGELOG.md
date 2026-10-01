@@ -109,6 +109,53 @@
 * **Dialogs:** `M3EDialog.showAdaptive` / `M3EAdaptiveDialog` is full-screen
   below **600** and a basic dialog at **600** and wider. It morphs between
   the two on a spatial spring when the window is resized.
+* **Bottom sheets:** sheets follow the spec. The container is **surface
+  container low** at **level 1**, with **28** top corners and square bottom
+  corners. Sheets are full width up to **640**. Below that width the top
+  margin is **72**; above it the top margin is **56** and each side margin is
+  **56**, so the sheet is `min(640, width − 112)` wide and centred. The width
+  springs when the window crosses **640**. The drag handle is **32×4**,
+  **on surface variant** at **0.4**, with **22** above and below, so it sits
+  in a **48** top strip. That strip shows the grab cursor, and grabbing while
+  you drag. The handle is a **48** button (labelled "Drag handle", read with
+  the current height) with the sparkle ripple, **0.08** hover and **0.1**
+  press layers, and a **secondary** focus ring **3** thick and **2** off the
+  handle. The ring hides on pointer input. The scrim is **scrim** at
+  **0.32**. The optional surface tint (`colors.surfaceTintColor`) is off by
+  default. The container paints under the system bars, while its content is
+  inset from the bottom (and side) bars. The insets are read from the view,
+  so this also works in edge-to-edge apps.
+* **Bottom sheets:** added preset heights (`M3EBottomSheetValue`).
+  `collapsed` is the initial height, capped at **50%** of the screen;
+  `expanded` fits the content, up to the screen minus the top margin. Long
+  content can be pulled up and then scrolls inside: vertical lists that use
+  the primary scroll controller grow the sheet before they scroll, and
+  horizontal lists scroll on their own. Dragging snaps on spatial springs. A
+  fling faster than **700** dp/s moves one height, and a release below half
+  the lowest height dismisses. Tapping the handle, or pressing Space or Enter
+  on it, cycles the heights (`handleCyclesToClose` adds closing). The handle
+  also offers Expand, Collapse and Dismiss accessibility actions. Tab lands
+  on the handle, and keyboard users start there on a modal sheet. Escape,
+  the scrim, back and a downward swipe close modal sheets; `onDismissRequest`
+  can veto them. On Android, predictive back narrows the sheet by up to **48**
+  and shortens it by up to **24**, from the bottom centre.
+* **Bottom sheets:** added `M3EBottomSheet.standard`, which sits next to the
+  main UI with no scrim. It has an optional `previewHeight`, can be hidden,
+  and `isDismissible` allows dragging it away. `expandToFullScreen` adds a
+  full-screen height: the corners spring to **0**, the handle gives way to a
+  **64** header with a collapse (standard) or close (modal) button, and an
+  optional `fullScreenTitle` is shown. With `expandToFullScreen` the sheet spans
+  the full view width. `M3EBottomSheetController` expands,
+  collapses, cycles, shows, hides and closes the sheet without dragging.
+  `M3EBottomSheet.showAdaptive` shows an `M3ESideSheet` at **840** and wider.
+  Every value is on `M3EBottomSheetTheme`, plus `colors`
+  (`M3EBottomSheetColors`) and `dragHandle`
+  (`M3EBottomSheetDragHandleStyle`). The labels are on
+  `M3EBottomSheetLabels`.
+* **Bottom sheets (defaults):** `handleVerticalPadding` is now **22** (was
+  **16**). `dismissVelocity` is now **700** (was **200**) and means the fling
+  speed that moves one preset height. Before, any downward fling faster than
+  it popped the sheet.
 * **Buttons:** added `M3EButtonDecorationScope`. `M3EButton`s below it take
   its decoration, with their own `decoration` merged on top field by field.
   `styles` limits it to certain button styles.

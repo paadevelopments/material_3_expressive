@@ -1240,17 +1240,55 @@ move between options and Tab moves on to the actions.
 
 #### M3EBottomSheet
 
-Modal bottom sheet — use `.show`.
+Standard and modal bottom sheets. A sheet is full width up to **640**, on
+**surface container low**, with **28** top corners and an optional **32×4**
+drag handle in a **48** top strip. Below **640** wide the top margin is
+**72**. Above that, the top and side margins are **56**. A modal sheet opens
+over a **0.32** scrim, at no more than half the screen. It can be pulled up to
+its content height; long content then scrolls inside. A standard sheet sits
+next to the main UI without a scrim. Customize everything on
+`M3EBottomSheetTheme`.
 
 ```dart
+// Modal: closes on scrim tap, swipe down, Escape or back.
 M3EBottomSheet.show<void>(
   context,
-  builder: (context) => const Padding(
-    padding: EdgeInsets.all(24),
-    child: Text('A modal bottom sheet with a drag handle.'),
+  builder: (context) => ListView(
+    children: [for (final item in items) Text(item)],
   ),
 );
+
+// Standard: place it over your content, e.g. in a Stack.
+final controller = M3EBottomSheetController();
+Stack(
+  children: [
+    const MapView(),
+    Positioned.fill(
+      child: M3EBottomSheet.standard(
+        controller: controller,
+        previewHeight: 64,
+        expandToFullScreen: true, // full width, plus a full-screen height with a collapse button
+        fullScreenTitle: 'Places',
+        child: const PlacesList(),
+      ),
+    ),
+  ],
+);
+controller.expand(); // or collapse(), cycle(), show(), hide()
+
+// Bottom sheet below 840dp, side sheet at 840dp and wider.
+M3EBottomSheet.showAdaptive<void>(
+  context,
+  title: 'Share',
+  builder: (context) => const ShareTargets(),
+);
 ```
+
+Keyboard and accessibility: Tab focuses the drag handle, and Space or Enter
+cycles the heights. Escape closes a modal sheet. Only the handle is labelled
+("Drag handle"); it reads as a button with the current height and has Expand,
+Collapse and Dismiss actions. Use `M3EBottomSheetController` as the
+single-pointer alternative to dragging when there is no handle.
 
 #### M3ESideSheet
 
@@ -2031,7 +2069,7 @@ Several components present transient UI over the app. They all require a
 | Component | API |
 | --------- | --- |
 | `M3EDialog` | `M3EDialog.show`, `.showSelectionScreen`, `.showFullScreen`, `.showAdaptive` |
-| `M3EBottomSheet` | `M3EBottomSheet.show` |
+| `M3EBottomSheet` | `M3EBottomSheet.show`, `.showAdaptive`, `.standard` |
 | `M3ESideSheet` | `M3ESideSheet.show` |
 | `M3ESnackbar` | `M3ESnackbar.show` |
 
