@@ -282,6 +282,19 @@ Prefer fixing issues in source over adding `// ignore` or new `analysis_options`
 
 ---
 
+## 12. Version Bumps & CHANGELOG Retention
+
+Every time the user asks to bump the package version, tidy [`CHANGELOG.md`](CHANGELOG.md) in the same change:
+
+1. **Current version stays detailed.** The section for the version being released keeps its full entries.
+2. **Compress every previous version.** Rewrite each older section as short bullets: one line per component or area saying what changed, without token-by-token values. Keep every **Breaking** entry and its migration (old name → new name).
+3. **Keep only the last 3 versions.** The current one plus the two before it. Delete older sections entirely.
+4. Do not change the meaning of past entries or drop a breaking change from the kept versions.
+
+Bump `version:` in `pubspec.yaml` in the same change (scope `pubspec`, for example `pubspec: bump version to 1.1.6`).
+
+---
+
 ## Quick Reference Checklist
 
 Before declaring a task done:
@@ -296,6 +309,7 @@ Before declaring a task done:
 - [ ] I reported what changed, why, and how to test
 - [ ] I did **not** push or commit without user confirmation
 - [ ] I did **not** add or upgrade dependencies without approval
+- [ ] On a version bump, older CHANGELOG sections are compressed and only the last 3 versions remain
 - [ ] New code matches `m3e_` / `M3E` naming, folder layout, and The base rule
 - [ ] Cross-component usage imports public entry/types only — no private internals from other folders
 - [ ] Haptics (when used) go through foundations — not raw `HapticFeedback` scattered in components
