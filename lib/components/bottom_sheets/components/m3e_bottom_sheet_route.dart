@@ -23,9 +23,7 @@ Future<T?> _pushModalSheet<T>(
       transitionDuration: enter > scrim ? enter : scrim,
       traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
       pageBuilder: (BuildContext context, Animation<double> animation, _) {
-        return M3EScrimSystemUi.wrapBottomSheet(
-          M3EComponentTheme(builder: (_) => host(animation, sheetTheme)),
-        );
+        return M3EComponentTheme(builder: (_) => host(animation, sheetTheme));
       },
       transitionBuilder: (_, _, _, Widget child) => child,
     ),

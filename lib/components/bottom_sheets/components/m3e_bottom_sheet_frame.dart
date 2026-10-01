@@ -3,6 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
@@ -47,6 +48,7 @@ class M3EBottomSheetFrame extends StatefulWidget {
     this.entrance,
     this.backProgress,
     this.handleFocusNode,
+    this.overlayStyle,
     super.key,
   });
 
@@ -103,6 +105,10 @@ class M3EBottomSheetFrame extends StatefulWidget {
 
   /// Focus node for the drag handle.
   final FocusNode? handleFocusNode;
+
+  /// System bar style where the sheet sits under a system bar. Null leaves
+  /// the bars to the page below.
+  final SystemUiOverlayStyle? overlayStyle;
 
   @override
   State<M3EBottomSheetFrame> createState() => _M3EBottomSheetFrameState();

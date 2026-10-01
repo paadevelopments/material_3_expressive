@@ -29,12 +29,18 @@ void main() {
   testWidgets('full-screen height shows a close header', _fullScreen);
   testWidgets('full-screen option spans the view width', _fullWidth);
   testWidgets('content clears the bottom system bar', _bottomInset);
+  testWidgets('light theme: bar icons follow the sheet', _lightBars);
+  testWidgets('dark theme: status icons stay light', _darkBars);
   testWidgets('showAdaptive swaps to a side sheet at 840dp', _adaptive);
   testWidgets('inner list grows the sheet before scrolling', _scrollHandOff);
   testWidgets('predictive back shrinks the sheet', _predictiveBack);
 }
 
-Future<BuildContext> _pump(WidgetTester tester, Size size) async {
+Future<BuildContext> _pump(
+  WidgetTester tester,
+  Size size, {
+  M3EThemeData? theme,
+}) async {
   tester.view
     ..physicalSize = size
     ..devicePixelRatio = 1;
@@ -42,7 +48,7 @@ Future<BuildContext> _pump(WidgetTester tester, Size size) async {
   late BuildContext captured;
   await tester.pumpWidget(
     M3ETheme(
-      data: _theme,
+      data: theme ?? _theme,
       child: MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -452,4 +458,67 @@ Future<void> _bottomInset(WidgetTester tester) async {
   expect(sheet.bottom, 800, reason: 'container paints under the bar');
   expect(tester.getRect(find.text('Short')).top, sheet.top + 48);
   expect(sheet.height, 48 + 100 + 48, reason: 'strip + content + inset');
+}
+
+SystemUiOverlayStyle? _styleAt(WidgetTester tester, Offset offset) {
+  return tester.binding.renderViews.first.debugLayer!
+      .find<SystemUiOverlayStyle>(offset);
+}
+
+Future<void> _lightBars(WidgetTester tester) async {
+  final BuildContext context = await _pump(tester, const Size(400, 800));
+  final controller = M3EBottomSheetController();
+  addTearDown(controller.dispose);
+  M3EBottomSheet.show<void>(
+    context,
+    controller: controller,
+    expandToFullScreen: true,
+    builder: _longList,
+  );
+  const top = Offset(200, 1);
+  const bottom = Offset(200, 799);
+  await tester.pump();
+  expect(
+    _styleAt(tester, bottom)?.systemNavigationBarIconBrightness,
+    Brightness.light,
+    reason: 'only the scrim sits under the navigation bar while opening',
+  );
+  await tester.pumpAndSettle();
+  expect(_styleAt(tester, top)?.statusBarIconBrightness, Brightness.light);
+  expect(
+    _styleAt(tester, bottom)?.systemNavigationBarIconBrightness,
+    Brightness.dark,
+    reason: 'the light sheet sits under the navigation bar',
+  );
+  controller.expand();
+  await tester.pumpAndSettle();
+  expect(
+    _styleAt(tester, top)?.statusBarIconBrightness,
+    Brightness.dark,
+    reason: 'the light sheet now sits under the status bar',
+  );
+}
+
+Future<void> _darkBars(WidgetTester tester) async {
+  final BuildContext context = await _pump(
+    tester,
+    const Size(400, 800),
+    theme: M3EThemeData.dark(seedColor: const Color(0xFF6750A4)),
+  );
+  M3EBottomSheet.show<void>(
+    context,
+    expandToFullScreen: true,
+    initialValue: M3EBottomSheetValue.fullScreen,
+    builder: _longList,
+  );
+  await tester.pumpAndSettle();
+  expect(
+    _styleAt(tester, const Offset(200, 1)),
+    M3EScrimSystemUi.bottomSheetOverlayStyle,
+  );
+  expect(
+    _styleAt(tester, const Offset(200, 799)),
+    M3EScrimSystemUi.bottomSheetOverlayStyle,
+    reason: 'the sheet adds no style of its own in dark theme',
+  );
 }

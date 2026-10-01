@@ -5,6 +5,7 @@ import '../../../foundations/foundations.dart';
 import '../controllers/m3e_bottom_sheet_controller.dart';
 import '../enums/m3e_bottom_sheet_enums.dart';
 import '../models/m3e_bottom_sheet_labels.dart';
+import '../res/m3e_bottom_sheet_system_ui.dart';
 import '../styles/m3e_bottom_sheet_theme.dart';
 import '../utils/m3e_bottom_sheet_spring.dart';
 import 'm3e_bottom_sheet_frame.dart';
@@ -253,7 +254,7 @@ class _M3EBottomSheetModalHostState extends State<M3EBottomSheetModalHost>
     );
   }
 
-  Widget _buildSheet() {
+  Widget _buildSheet({required bool light}) {
     return M3EBottomSheetFrame(
       variant: M3EBottomSheetVariant.modal,
       theme: _theme,
@@ -270,12 +271,26 @@ class _M3EBottomSheetModalHostState extends State<M3EBottomSheetModalHost>
       entrance: _entrance,
       backProgress: _back,
       handleFocusNode: _handle,
+      overlayStyle: light ? M3EBottomSheetSystemUi.lightSurface : null,
       child: widget.child,
     );
   }
 
+  /// Light theme: icons follow what sits under each bar (dark scrim or light
+  /// sheet). Dark theme: light status icons, navigation bar left as is.
+  Widget _systemUi(Widget child, {required bool light}) {
+    return light
+        ? M3EScrimSystemUi.wrap(child)
+        : M3EScrimSystemUi.wrapBottomSheet(child);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final light = M3ETheme.of(context).brightness == Brightness.light;
+    return _systemUi(_popScope(light: light), light: light);
+  }
+
+  Widget _popScope({required bool light}) {
     return PopScope<Object?>(
       canPop: widget.onDismissRequest == null,
       onPopInvokedWithResult: (bool didPop, Object? result) {
@@ -296,7 +311,10 @@ class _M3EBottomSheetModalHostState extends State<M3EBottomSheetModalHost>
           focusNode: _host,
           child: Stack(
             fit: StackFit.expand,
-            children: <Widget>[_buildScrim(context), _buildSheet()],
+            children: <Widget>[
+              _buildScrim(context),
+              _buildSheet(light: light),
+            ],
           ),
         ),
       ),

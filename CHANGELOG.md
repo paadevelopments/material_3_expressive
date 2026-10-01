@@ -125,6 +125,10 @@
   default. The container paints under the system bars, while its content is
   inset from the bottom (and side) bars. The insets are read from the view,
   so this also works in edge-to-edge apps.
+  In light theme, a modal sheet sets the system bar icons from whatever is under
+  each bar: light icons over the scrim, dark icons where the sheet reaches under
+  the status bar or the navigation bar. Dark theme keeps light status-bar
+  icons. Standard sheets don't touch the system bars.
 * **Bottom sheets:** added preset heights (`M3EBottomSheetValue`).
   `collapsed` is the initial height, capped at **50%** of the screen;
   `expanded` fits the content, up to the screen minus the top margin. Long

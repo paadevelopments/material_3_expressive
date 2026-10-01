@@ -45,6 +45,13 @@ extension _M3EBottomSheetFrameBuild on _M3EBottomSheetFrameState {
         child: _sheet(context),
       ),
     );
+    final SystemUiOverlayStyle? overlay = widget.overlayStyle;
+    if (overlay != null) {
+      sheet = AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlay,
+        child: sheet,
+      );
+    }
     sheet = _predictiveBack(sheet, width, visible);
     final bool hidden = !_modal && visible <= 0;
     return Stack(
