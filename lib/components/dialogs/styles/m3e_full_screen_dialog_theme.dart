@@ -21,11 +21,11 @@ class M3EFullScreenDialogTheme {
     this.cornerRadius = 0,
     this.containerElevation = M3EElevation.level0,
     this.headerElevation = M3EElevation.level0,
-    this.headerScrolledElevation = M3EElevation.level2,
+    this.headerScrolledElevation = M3EElevation.level0,
     this.actionBarElevation = M3EElevation.level0,
-    this.actionBarScrolledElevation = M3EElevation.level2,
+    this.actionBarScrolledElevation = M3EElevation.level0,
     this.dividerThickness = 1,
-    this.showDivider = true,
+    this.showDivider = false,
     this.containerColor,
     this.onScrollContainerColor,
     this.headerColor,
@@ -71,19 +71,20 @@ class M3EFullScreenDialogTheme {
   /// Header elevation at rest (level 0).
   final double headerElevation;
 
-  /// Header elevation while content scrolls under it (level 2).
+  /// Header elevation while content scrolls under it (level 0, like the app
+  /// bar; only the color changes).
   final double headerScrolledElevation;
 
   /// Action bar elevation at rest (level 0).
   final double actionBarElevation;
 
-  /// Action bar elevation while content scrolls under it (level 2).
+  /// Action bar elevation while content scrolls under it (level 0).
   final double actionBarScrolledElevation;
 
   /// Divider thickness (1).
   final double dividerThickness;
 
-  /// Whether the header divider shows by default.
+  /// Whether the header divider shows by default (off).
   final bool showDivider;
 
   /// Container color. Null uses `surface`.

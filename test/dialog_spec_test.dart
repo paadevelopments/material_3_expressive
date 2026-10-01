@@ -28,6 +28,7 @@ void main() {
   testWidgets('selection list uses arrows inside one Tab stop', _arrows);
   testWidgets('caller and built-in actions share one style', _sameActions);
   testWidgets('full-screen header extends under the status bar', _underBars);
+  testWidgets('full-screen bars clear system bars edge-to-edge', _edgeToEdge);
 }
 
 Future<BuildContext> _pump(WidgetTester tester, Size size) async {
@@ -83,7 +84,9 @@ Future<void> _themeDefaults(WidgetTester tester) async {
   expect(t.fullScreen.actionBarHeight, 56);
   expect(t.fullScreen.contentPadding, const EdgeInsets.fromLTRB(24, 24, 24, 0));
   expect(t.fullScreen.elementGap, 8);
-  expect(t.fullScreen.headerScrolledElevation, M3EElevation.level2);
+  expect(t.fullScreen.headerScrolledElevation, M3EElevation.level0);
+  expect(t.fullScreen.actionBarScrolledElevation, M3EElevation.level0);
+  expect(t.fullScreen.showDivider, isFalse);
 
   final M3EColorScheme s = _theme.colorScheme;
   expect(t.containerColor(s), s.surfaceContainerHigh);
@@ -537,4 +540,39 @@ Future<void> _underBars(WidgetTester tester) async {
   final Rect barRect = tester.getRect(bar.first);
   expect(barRect.bottom, 800);
   expect(barRect.height, 56 + 30);
+}
+
+/// `drawUnderSystemBars` clears MediaQuery padding; the dialog must still
+/// keep its header and action bar content clear of the system bars.
+Future<void> _edgeToEdge(WidgetTester tester) async {
+  const bars = FakeViewPadding(top: 40, bottom: 30);
+  tester.view
+    ..physicalSize = const Size(400, 800)
+    ..devicePixelRatio = 1
+    ..padding = bars
+    ..viewPadding = bars;
+  addTearDown(tester.view.reset);
+  late BuildContext context;
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: _theme,
+      drawUnderSystemBars: true,
+      home: Builder(
+        builder: (BuildContext c) {
+          context = c;
+          return const SizedBox.expand();
+        },
+      ),
+    ),
+  );
+  M3EDialog.showFullScreen<void>(
+    context,
+    title: 'Edge',
+    bottomActions: <Widget>[_textButton('Create', () {})],
+    body: const Text('Body'),
+  );
+  await tester.pumpAndSettle();
+  expect(tester.getRect(find.text('Create')).bottom, lessThan(800 - 30));
+  expect(tester.getRect(find.text('Edge')).top, greaterThan(40));
+  expect(find.byType(M3EDivider), findsNothing);
 }

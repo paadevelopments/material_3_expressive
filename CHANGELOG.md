@@ -94,15 +94,18 @@
 * **Dialogs:** full-screen dialogs (now `M3EFullScreenDialog`, also usable as
   an `M3EFab.openBuilder` container-transform destination) have a **56**
   header (was **64**) on **surface** that extends under the status bar like an
-  app bar: a **24** **on surface** close icon
-  **16** from the edge, a title large headline **24** after it, and a trailing
-  action (`confirmLabel` / `onConfirm`). The header turns **surface container**
-  at **level 2** while content scrolls under it. Content is padded **24** top,
-  left and right by default (`contentPadding`), and the dialog fills the view
-  width.
-  Added `bottomActions` (a **56** action bar that extends under the
-  navigation bar and lifts while more content sits below it) and `contentHeadline` for long headlines. The divider is
-  **surface container highest**.
+  app bar: a **24** **on surface** close icon **16** from the edge, a title
+  large headline **24** after it, and a trailing action (`confirmLabel` /
+  `onConfirm`). The header turns **surface container** while content scrolls
+  under it, staying at **level 0** like an app bar
+  (`headerScrolledElevation` can raise it). Content is padded **24** top, left
+  and right by default (`contentPadding`), and the dialog fills the view
+  width. Added `bottomActions` (a **56** action bar that extends under the
+  navigation bar, with its actions kept above it) and `contentHeadline` for
+  long headlines. The header divider is off by default (`showDivider`); when
+  shown it is **surface container highest**. System bar insets are read from
+  the view, so the header and action bar stay clear of the bars in
+  edge-to-edge apps (`M3EMaterialApp.drawUnderSystemBars`).
 * **Dialogs:** `M3EDialog.showAdaptive` / `M3EAdaptiveDialog` is full-screen
   below **600** and a basic dialog at **600** and wider. It morphs between
   the two on a spatial spring when the window is resized.

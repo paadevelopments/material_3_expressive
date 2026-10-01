@@ -1185,49 +1185,35 @@ Row(
 
 #### M3EDialog
 
-Basic and full-screen dialogs that follow the M3 spec. A basic dialog is
-**280–560** wide on **surface container high**, with **28** corners, **24**
-padding and a **0.32** scrim. Full-screen dialogs fill the view. The headline and actions stay pinned while the
-content scrolls, and actions stack when they don't fit. Focus lands on the
-first interactive element, Tab and Shift+Tab wrap inside the dialog, and
-Escape closes it. Every value can be changed on `M3EDialogTheme` (plus
-`appearance` and `fullScreen`).
+Basic and full-screen dialogs. A basic dialog is **280–560** wide on
+**surface container high**, with **28** corners and **24** padding, over a
+**0.32** scrim. The headline and actions stay pinned while content scrolls, and
+actions stack when they don't fit. `position` places it at the center
+(default), left, right, top or bottom, inside the system bars and above the
+keyboard. A full-screen dialog fills the view, and its header changes color on
+scroll like an app bar. Customize everything on `M3EDialogTheme`.
 
 ```dart
 M3EDialog.show<void>(
   context,
-  // center (default), left, right, top or bottom; stays inside the system
-  // bars and above the keyboard, with 56dp margins on 600dp+ when off-centre.
-  position: M3EDialogPosition.right,
   dialog: M3EDialog(
     title: 'Reset settings?',
-    icon: const Icon(M3EIcons.restart_alt), // centres the headline
     content: const Text('This restores default values.'),
-    topDivider: true,
-    bottomDivider: true,
     actions: [
-      M3EButton(
-        style: M3EButtonStyle.text,
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
-      ),
-      M3EButton(
-        style: M3EButtonStyle.text,
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Reset'),
-      ),
+      M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Reset')),
     ],
   ),
 );
 
-// Selection list (single or multi); confirm disabled until a choice is made
-final List<String>? picked = await M3EDialog.showSelectionScreen(
+// Pick from a list; confirm stays disabled until something is chosen.
+final picked = await M3EDialog.showSelectionScreen(
   context,
   title: 'Choose a plan',
-  options: const <String>['Standard', 'Pro', 'Team'],
+  options: const ['Standard', 'Pro', 'Team'],
 );
 
-// Full-screen (compact widths). Close asks to discard unsaved changes.
+// Full screen; closing with unsaved changes asks to discard them.
 final controller = M3EDialogController(hasUnsavedChanges: true);
 M3EDialog.showFullScreen<void>(
   context,
@@ -1235,38 +1221,22 @@ M3EDialog.showFullScreen<void>(
   confirmLabel: 'Save',
   onConfirm: controller.close,
   controller: controller,
-  contentPadding: EdgeInsets.zero, // the list insets itself and scrolls
-  body: M3EList.scrollable(        // under the header
-    variant: M3ECardVariant.filled,
-    listPadding: const EdgeInsets.all(16),
-    itemCount: 20,
-    itemBuilder: (context, index) => M3EListItem(
-      headline: 'Field ${index + 1}',
-      onTap: () {},
-    ),
-  ),
+  body: const Text('Form fields'),
 );
 
-// Full-screen below 600dp, basic at 600dp and wider; morphs on resize.
+// Full screen below 600dp, basic dialog above; switches on resize.
 M3EDialog.showAdaptive<void>(
   context,
-  title: 'Create a new album',
+  title: 'Create album',
   content: const Text('Album details'),
   confirmLabel: 'Save',
-  onConfirm: () => Navigator.of(context).pop(),
-);
-
-// FAB container transform into a full-screen dialog
-M3EFab(
-  icon: const Icon(M3EIcons.add),
-  openBuilder: (context) => M3EFullScreenDialog(
-    title: 'New event',
-    confirmLabel: 'Save',
-    onConfirm: () => M3EFabContainerTransformScope.closeOf(context),
-    body: const Text('Form fields'),
-  ),
+  onConfirm: () => Navigator.pop(context),
 );
 ```
+
+Keyboard: focus starts on the first control, and Tab and Shift+Tab stay inside
+the dialog. Space or Enter activates. Escape closes. In a selection list, arrows
+move between options and Tab moves on to the actions.
 
 #### M3EBottomSheet
 
@@ -2060,7 +2030,7 @@ Several components present transient UI over the app. They all require a
 
 | Component | API |
 | --------- | --- |
-| `M3EDialog` | `M3EDialog.show`, `M3EDialog.showFullScreen` |
+| `M3EDialog` | `M3EDialog.show`, `.showSelectionScreen`, `.showFullScreen`, `.showAdaptive` |
 | `M3EBottomSheet` | `M3EBottomSheet.show` |
 | `M3ESideSheet` | `M3ESideSheet.show` |
 | `M3ESnackbar` | `M3ESnackbar.show` |

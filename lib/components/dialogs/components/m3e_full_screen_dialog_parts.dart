@@ -55,8 +55,12 @@ extension _M3EFullScreenDialogParts on _M3EFullScreenDialogState {
   }
 
   /// Side insets plus the [top] status bar / [bottom] navigation bar.
+  ///
+  /// Read from the view, not [MediaQuery]: edge-to-edge apps (e.g.
+  /// `M3EMaterialApp.drawUnderSystemBars`) clear the padding. The bottom
+  /// drops to 0 while the keyboard is up.
   EdgeInsets _systemInset({bool top = false, bool bottom = false}) {
-    final EdgeInsets system = MediaQuery.paddingOf(context);
+    final EdgeInsets system = M3ESafeArea.paddingOf(context);
     return EdgeInsets.only(
       left: system.left,
       right: system.right,
