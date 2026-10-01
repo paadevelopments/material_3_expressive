@@ -1921,13 +1921,12 @@ const M3ETextField(
 
 #### M3ESearchBar / M3ESearchAnchor / M3ESliverSearchBar
 
-Search follows the M3 Expressive **contained** style:
-- **Bar** — **56** pill, **24** from its pane, **12** once focused.
-- **View** — full-screen on compact windows (below **600**), docked with a
-  scrim on medium and expanded windows.
-
-`viewStyle: M3ESearchViewStyle.divided` switches to the baseline header and
-divider.
+Contained search bar (**56** pill, **24** → **12** margins on focus) and a
+search view that is full-screen below **600** and docked with a scrim above.
+Use `viewStyle: M3ESearchViewStyle.divided` for the baseline style. The hint
+is the accessibility label, result changes are announced, and predictive back
+is supported on Android. Every value is customizable through
+`M3ESearchBarTheme` and `M3ESearchViewTheme`.
 
 ```dart
 // Inline bar: leading icon, one trailing action + avatar, clear while typing.
@@ -1977,29 +1976,8 @@ CustomScrollView(
 );
 ```
 
-Keyboard:
-
-| Keys | Action |
-| ---- | ------ |
-| Tab / Shift+Tab | Move between the leading button, the field, and trailing actions |
-| Space / Enter | Open the search view from an anchor; Enter in the field runs the search |
-| Arrows | Move from the field into the results and between results |
-| Escape / Back | Close the view and return the bar to its resting state |
-
-Accessibility and gestures:
-- The hinted text is the field's accessibility label.
-- Results changes are announced. Override the text with
-  `suggestionsAnnouncementBuilder`.
-- On Android, predictive back scales the view toward the gesture.
-
-Every value is in `M3ESearchBarTheme` and `M3ESearchViewTheme`, including:
-- margins, paddings, and tap target sizes
-- avatar size and shape
-- focus ring
-- colors
-- springs and breakpoint
-- scrim
-- predictive back
+Keyboard: Tab, then Space or Enter opens the view. Arrows move through
+results. Escape closes.
 
 ---
 

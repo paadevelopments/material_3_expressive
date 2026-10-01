@@ -48,8 +48,12 @@ class M3EListKeyboardGroup extends StatefulWidget {
     required this.itemCount,
     required this.child,
     this.semanticsLabel,
+    this.sliver = false,
     super.key,
   });
+
+  /// Whether [child] is a sliver. Uses sliver-safe semantics.
+  final bool sliver;
 
   /// Number of rows. Used to clamp the entry index.
   final int itemCount;
@@ -433,18 +437,28 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget body = Shortcuts.manager(
+      manager: _shortcuts,
+      // Shortcuts' own Semantics is a box; slivers need SliverSemantics.
+      includeSemantics: !widget.sliver,
+      child: FocusTraversalGroup(policy: _policy, child: widget.child),
+    );
     return _M3EListKeyboardScope(
       state: this,
       binding: _binding,
-      child: Semantics(
-        container: true,
-        explicitChildNodes: true,
-        label: widget.semanticsLabel,
-        child: Shortcuts.manager(
-          manager: _shortcuts,
-          child: FocusTraversalGroup(policy: _policy, child: widget.child),
-        ),
-      ),
+      child: widget.sliver
+          ? SliverSemantics(
+              container: true,
+              explicitChildNodes: true,
+              label: widget.semanticsLabel,
+              sliver: body,
+            )
+          : Semantics(
+              container: true,
+              explicitChildNodes: true,
+              label: widget.semanticsLabel,
+              child: body,
+            ),
     );
   }
 }

@@ -295,6 +295,8 @@ Future<void> _dividedFullScreenView72HeaderAndDivider(
   expect(bar.height, closeTo(72, 0.1));
   final M3EDivider divider = tester.widget<M3EDivider>(find.byType(M3EDivider));
   expect(divider.color, _theme.colorScheme.outline);
+  // Results line up with the header's 16 space.
+  expect(tester.getRect(find.byType(ListTile).first).left, closeTo(16, 0.1));
 }
 
 Future<void> _arrowdownMovesFromTheFieldIntoTheResults(

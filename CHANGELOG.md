@@ -20,7 +20,7 @@
   inset **12**. Contained docked puts its results in a
   **28**-radius container **2** below the bar, with a **0.32** scrim behind.
   Divided uses a **72** (full-screen) or **56** (docked) header and an
-  **outline** divider. When `isFullScreen` is not set, the view is full-screen
+  **outline** divider, with results inset **16**. When `isFullScreen` is not set, the view is full-screen
   below **600** and docked at **600** and wider, and it switches between the two
   when the window is resized. The bar morphs into the view with a spatial
   spring. On Android, predictive back scales the view down to **0.9**, toward
@@ -29,6 +29,11 @@
   `M3ESliverSearchBar` scrolls away with content and returns when the user
   scrolls toward the top, or stays `fixed`. App bar search keeps the divided
   view.
+
+### Fixed
+
+* **Lists:** `M3EList.sliver` no longer throws in a `CustomScrollView`. Its
+  semantics, `margin`, and `emptyBuilder` now build as slivers.
 
 ## 1.1.4
 

@@ -48,6 +48,7 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
     this.predictiveBackMaxOffsetY = 24,
     this.containedFullScreenBarVerticalPadding = 8,
     this.containedFullScreenResultsInset = 12,
+    this.dividedResultsInset = 16,
   });
 
   /// defaults.
@@ -147,6 +148,9 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
 
   /// Contained full-screen results side inset (12), aligned with the bar.
   final double containedFullScreenResultsInset;
+
+  /// Divided results side inset (16), aligned with the header's 16 space.
+  final double dividedResultsInset;
 
   /// Docked container color: surface container high.
 
@@ -255,6 +259,7 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
     double? predictiveBackMaxOffsetY,
     double? containedFullScreenBarVerticalPadding,
     double? containedFullScreenResultsInset,
+    double? dividedResultsInset,
   }) {
     return M3ESearchViewTheme(
       elevation: elevation ?? this.elevation,
@@ -301,6 +306,7 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
       containedFullScreenResultsInset:
           containedFullScreenResultsInset ??
           this.containedFullScreenResultsInset,
+      dividedResultsInset: dividedResultsInset ?? this.dividedResultsInset,
     );
   }
 
@@ -359,6 +365,7 @@ class M3ESearchViewTheme extends M3EThemeExtension<M3ESearchViewTheme> {
       containedFullScreenResultsInset: l(
         (M3ESearchViewTheme x) => x.containedFullScreenResultsInset,
       ),
+      dividedResultsInset: l((M3ESearchViewTheme x) => x.dividedResultsInset),
       shrinkWrap: b.shrinkWrap,
       style: b.style,
       containerTransformSpring: b.containerTransformSpring,

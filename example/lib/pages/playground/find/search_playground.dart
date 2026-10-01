@@ -395,6 +395,7 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: M3ETheme.of(context).colorScheme.surface,
       appBar: M3EAppBar.top(
         titleText: 'Search',
         leading: M3EIconButton(
@@ -411,15 +412,20 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: _o.useAnchor ? _buildAnchor() : _buildBar(),
           ),
-          SliverList.builder(
-            itemCount: 40,
-            itemBuilder: (BuildContext context, int index) {
-              return M3EListItem(
-                headline: _names[index % _names.length],
-                supportingText: 'Result ${index + 1}',
-                leading: const Icon(M3EIcons.widgets),
-              );
-            },
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            sliver: M3EList.sliver(
+              variant: M3ECardVariant.filled,
+              itemCount: 40,
+              itemBuilder: (BuildContext context, int index) {
+                return M3EListItem(
+                  headline: _names[index % _names.length],
+                  supportingText: 'Result ${index + 1}',
+                  leading: const Icon(M3EIcons.widgets),
+                  onTap: () {},
+                );
+              },
+            ),
           ),
         ],
       ),

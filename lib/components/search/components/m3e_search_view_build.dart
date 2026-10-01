@@ -85,7 +85,7 @@ extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
         : 0;
     final double inset = contained
         ? viewTheme.containedFullScreenResultsInset
-        : 0;
+        : viewTheme.dividedResultsInset;
     final double backRadius =
         viewTheme.cornerRadius * clampDouble(_back.value, 0, 1);
     final double radius =
@@ -233,7 +233,10 @@ extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
           fit: s.shrinkWrap ? FlexFit.loose : FlexFit.tight,
           child: _fadeIn(
             _buildResults(
-              padding: EdgeInsets.symmetric(vertical: pad),
+              padding: EdgeInsets.symmetric(
+                horizontal: viewTheme.dividedResultsInset,
+                vertical: pad,
+              ),
               shrinkWrap: s.shrinkWrap,
             ),
           ),
