@@ -160,6 +160,56 @@
   **16**). `dismissVelocity` is now **700** (was **200**) and means the fling
   speed that moves one preset height. Before, any downward fling faster than
   it popped the sheet.
+* **Side sheets:** sheets follow the spec. They are **256** wide by default
+  (`width`, capped at **400**) and span the window height, anchored to the end
+  edge (left in RTL, with the header mirrored; `edge` picks the start edge).
+  Modal sheets are **surface container low** at **level 1** with **16**
+  corners facing the content; `M3ESideSheet.standard` is **surface** at
+  **level 0** with no rounding and an optional vertical edge divider.
+  `detached` insets the sheet **16** from the edges and rounds every corner
+  **16**. The header has **24** start/end padding (**16** before the optional
+  back icon) and **12** between the back icon, headline and close icon, with
+  **8** above and below, so the header is **64** tall and lines up with a
+  small app bar. The headline is title large on **on surface variant**, on
+  one line with an ellipsis (`headlineMaxLines`). The bottom actions bar is at least **72** tall, with **16** above
+  and **24** below the buttons, which sit at the start **8** apart under an
+  **outline variant** divider. The back and close icons are **on surface
+  variant**, and turn **primary** with **primary** state layers on hover
+  (**0.08**), keyboard focus (**0.1**) and press (**0.1**), using the sparkle
+  ripple. The sheet's focus ring is **secondary**, **3** thick and **2** off,
+  and it hides on pointer input. The body scrolls vertically and independently
+  of the page (`scrollable` wraps non-scrolling content). The container
+  paints under the system bars, while its content is inset from them. The
+  insets are read from the view (as the app bar does), so the header and
+  actions stay clear of the bars in edge-to-edge apps. The optional surface
+  tint (`colors.surfaceTintColor`) is off by default.
+* **Side sheets:** `M3ESideSheet.show` springs the modal sheet in from its
+  edge over a **0.32** scrim. The close icon, the scrim, Escape, back and
+  `M3ESideSheetController.close` dismiss it; `onDismissRequest` can veto them.
+  On Android, predictive back lifts the sheet off the top and bottom edges
+  (**48** in total), scales its width toward the gesture (grows up to **12**
+  from its own edge, shrinks up to **24** from the other edge) and rounds every
+  corner to **16**. Release commits and cancel springs back. In light theme,
+  modal sheets set the system bar icons from what is under each bar: light
+  icons over the scrim, dark icons where the sheet sits under the status or
+  navigation bar. Dark theme keeps light icons. Standard sheets don't touch
+  the system bars. The sheet reads
+  as a dialog named by its headline: the headline comes first, then back,
+  close, content and the actions in order. Tab lands on the icon buttons, and
+  keyboard users start on the first one.
+* **Side sheets:** added `M3ESideSheetLayout`, which places a sheet next to
+  `body`. A standard sheet springs open as the body shrinks, keeping a **24**
+  margin on its trailing edge. In `M3ESideSheetLayoutMode.adaptive` (default)
+  the sheet is modal below **600** (scrim, Escape, back and predictive back)
+  and standard at **600** and wider, and it morphs between the two on a spatial
+  spring when the window is resized. `M3ESideSheetController` opens, closes and
+  toggles it. Every value is on `M3ESideSheetTheme`, plus `colors`
+  (`M3ESideSheetColors`), `action` (`M3ESideSheetActionStyle`) and `motion`
+  (`M3ESideSheetMotion`). The labels are on `M3ESideSheetLabels`.
+* **Side sheets (defaults):** the width is now **256** (was **320**), the modal
+  corner radius is now **16** (was **28**), the headline is now **on surface
+  variant** (was **on surface**), and the open and close motion is now a
+  spatial spring (was a 450 ms curve).
 * **Buttons:** added `M3EButtonDecorationScope`. `M3EButton`s below it take
   its decoration, with their own `decoration` merged on top field by field.
   `styles` limits it to certain button styles.
@@ -169,6 +219,15 @@
   click, the press layer clears as soon as the press is released, and the
   focus layer shows only for keyboard focus (with the ring), never after a
   click.
+* **Breaking — side sheets:** `M3ESideSheetTheme` was rebuilt around the
+  spec. `cornerRadius` is now `modalCornerRadius`. `headerPadding` is replaced
+  by `horizontalPadding`, `startPaddingWithIcon`, `headerVerticalPadding` and
+  `topElementsGap`. `actionsPadding` is replaced by `actionsTopPadding`,
+  `actionsBottomPadding` and `horizontalPadding`. `closeButtonPadding` and
+  `iconSize` are removed (the close icon is an `M3EIconButton`).
+  `containerColor(scheme)` now takes the variant, and `titleStyle()` is now
+  `headlineStyle()`. `M3ESideSheet(title:, body:, actions:)` and
+  `M3ESideSheet.show` still work as before.
 * **Breaking — text fields:** `M3ETextFieldTheme` was rebuilt around the spec
   tokens. Removed `minHeight` (use `containerHeight`), `contentHeight`,
   `contentVerticalPadding` and `labelRestingOffset` (layout is derived from

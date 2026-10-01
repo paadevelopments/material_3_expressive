@@ -295,6 +295,18 @@ Bump `version:` in `pubspec.yaml` in the same change (scope `pubspec`, for examp
 
 ---
 
+## 13. README Component Docs
+
+Every component section in [`README.md`](README.md) (`#### M3E<Component>`) follows the same three-part pattern. Match it whenever you add or update a section:
+
+1. **Description**: one short, precise paragraph covering what the component is, its variants, and its key spec values (bold numbers and color roles). Point to the theme class for customization. Do not use bullet lists or exhaustive API tours.
+2. **Snippet**: one short `dart` code block showing how to get started with a basic implementation. Show only the common entry points (for example `.show` and the standard variant), with brief inline comments. Do not include long or full-app code.
+3. **Keyboard**: directly under the snippet, one very short line that starts with `Keyboard:` and lists that component's keys (for example `Keyboard: Tab, then Space or Enter. Escape closes.`). Omit it only when the component has no keyboard interaction.
+
+Use an existing section (for example `M3EButton`, `M3EDialog`, `M3EBottomSheet`) as the reference before writing.
+
+---
+
 ## Quick Reference Checklist
 
 Before declaring a task done:
@@ -306,6 +318,7 @@ Before declaring a task done:
 - [ ] Entry-file API changes are reflected in the example app
 - [ ] Commit message would follow `<scope>: <message>` (if committing)
 - [ ] I did **not** make breaking API changes (or got explicit approval)
+- [ ] README component sections follow §13 (description, short snippet, one-line `Keyboard:`)
 - [ ] I reported what changed, why, and how to test
 - [ ] I did **not** push or commit without user confirmation
 - [ ] I did **not** add or upgrade dependencies without approval

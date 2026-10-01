@@ -1292,18 +1292,33 @@ single-pointer alternative to dragging when there is no handle.
 
 #### M3ESideSheet
 
-Side sheet panel — use `.show`.
+Standard and modal side sheets anchored to the end edge (left in RTL). A sheet
+is **256** wide (up to **400**) and spans the window height. A modal sheet is on
+**surface container low** with **16** corners facing the content, over a
+**0.32** scrim. A standard sheet is on **surface** and sits next to the
+content, which shrinks to make room. `M3ESideSheetLayout` turns it modal below
+**600**. Customize everything on `M3ESideSheetTheme`.
 
 ```dart
+// Modal: closes on the close icon, scrim tap, Escape or back.
 M3ESideSheet.show<void>(
   context,
   title: 'Filters',
-  body: const Padding(
-    padding: EdgeInsets.all(24),
-    child: Text('Side sheet content.'),
-  ),
+  body: const FilterList(),
 );
+
+// Standard next to your content; modal on compact windows.
+final controller = M3ESideSheetController();
+M3ESideSheetLayout(
+  controller: controller,
+  body: const Inbox(),
+  sheet: const M3ESideSheet.standard(title: 'Details', body: Details()),
+);
+controller.toggle(); // or open(), close()
 ```
+
+Keyboard: Tab moves through the back and close icons, content and actions, and
+Space or Enter activates them. Escape closes a modal sheet.
 
 ---
 
@@ -2070,7 +2085,7 @@ Several components present transient UI over the app. They all require a
 | --------- | --- |
 | `M3EDialog` | `M3EDialog.show`, `.showSelectionScreen`, `.showFullScreen`, `.showAdaptive` |
 | `M3EBottomSheet` | `M3EBottomSheet.show`, `.showAdaptive`, `.standard` |
-| `M3ESideSheet` | `M3ESideSheet.show` |
+| `M3ESideSheet` | `M3ESideSheet.show`, `M3ESideSheetLayout` |
 | `M3ESnackbar` | `M3ESnackbar.show` |
 
 ## Example app (detailed)
