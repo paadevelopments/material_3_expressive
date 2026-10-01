@@ -51,6 +51,15 @@
   supporting text. The error message has the alert role, and the counter reads
   "Character count, N of M characters entered". Outlined fields with a label
   reserve **8** above the container for the floating label.
+* **Text fields:** `iconAlignment` and `affixAlignment`
+  (`M3ETextFieldSlotAlignment.firstLine` / `.center` / `.bottom`, also on
+  `M3ETextFieldTheme`) place the icons and the prefix/suffix text in multi-line
+  fields and text areas. Icons default to `center` and prefix/suffix text to
+  `firstLine`. `maxLines` is now `int?` (default still **1**); `null` lets the
+  field grow without a line limit.
+* **Text fields (web):** fixed fields that ignored typing after password
+  visibility, read-only or keyboard type changed while focused and the field
+  was then refocused. The caret showed but no text was entered.
 * **Breaking — text fields:** `M3ETextFieldTheme` was rebuilt around the spec
   tokens. Removed `minHeight` (use `containerHeight`), `contentHeight`,
   `contentVerticalPadding` and `labelRestingOffset` (layout is derived from

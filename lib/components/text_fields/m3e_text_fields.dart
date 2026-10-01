@@ -12,6 +12,7 @@ import 'components/m3e_text_field_container_painter.dart';
 import 'components/m3e_text_field_label.dart';
 import 'components/m3e_text_field_selection_builder.dart';
 import 'components/m3e_text_field_supporting_row.dart';
+import 'enums/m3e_text_field_slot_alignment.dart';
 import 'enums/m3e_text_field_variant.dart';
 import 'models/m3e_text_field_colors.dart';
 import 'models/m3e_text_field_states.dart';
@@ -19,6 +20,7 @@ import 'styles/m3e_text_field_theme.dart';
 import 'utils/m3e_text_field_autofill_client.dart';
 import 'utils/m3e_text_field_selection_controls.dart';
 
+export 'enums/m3e_text_field_slot_alignment.dart';
 export 'enums/m3e_text_field_variant.dart';
 export 'models/m3e_text_field_colors.dart';
 export 'models/m3e_text_field_states.dart';
@@ -100,6 +102,8 @@ class M3ETextField extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none,
     this.textAlign = TextAlign.start,
     this.density,
+    this.iconAlignment,
+    this.affixAlignment,
     this.theme,
     this.onTap,
     this.onEditingComplete,
@@ -161,8 +165,9 @@ class M3ETextField extends StatefulWidget {
   /// Called on a tap outside the field. Default: unfocus.
   final TapRegionCallback? onTapOutside;
 
-  /// Maximum visible lines. Above 1 the field grows as text wraps.
-  final int maxLines;
+  /// Maximum visible lines. Above 1 the field grows as text wraps; null
+  /// lets it grow without a limit.
+  final int? maxLines;
 
   /// Minimum visible lines. Set equal to [maxLines] for a fixed-height text
   /// area that scrolls vertically.
@@ -240,6 +245,14 @@ class M3ETextField extends StatefulWidget {
   /// Density from 0 down to -3; each step removes 4dp of height. Overrides
   /// the theme density.
   final int? density;
+
+  /// Leading/trailing icon position in multi-line fields. Overrides
+  /// [M3ETextFieldTheme.iconAlignment].
+  final M3ETextFieldSlotAlignment? iconAlignment;
+
+  /// Prefix/suffix text position in multi-line fields. Overrides
+  /// [M3ETextFieldTheme.affixAlignment].
+  final M3ETextFieldSlotAlignment? affixAlignment;
 
   /// Per-field theme. Default: `M3EThemeData.textFieldTheme`.
   final M3ETextFieldTheme? theme;

@@ -1907,7 +1907,10 @@ middle and the top. It supports leading and trailing icons, prefix and suffix
 text, a placeholder, supporting or error text (with an error icon), a
 character counter, and required (`isRequired`) and read-only fields. Input can
 be single-line, multi-line (grows up to `maxLines`) or a fixed-height text area
-(`minLines == maxLines`). `density` (**0** to **-3**) is opt-in. Every value is
+(`minLines == maxLines`); `maxLines: null` grows without a limit. In taller
+fields, `iconAlignment` and `affixAlignment` keep icons and prefix/suffix text
+on the first line, centered, or at the bottom. `density` (**0** to **-3**) is
+opt-in. Every value is
 customizable through `M3ETextFieldTheme` and `M3ETextFieldColorTheme`.
 
 ```dart

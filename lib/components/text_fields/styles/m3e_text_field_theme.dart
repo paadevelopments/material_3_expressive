@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../enums/m3e_text_field_slot_alignment.dart';
 import '../enums/m3e_text_field_variant.dart';
 import '../models/m3e_text_field_colors.dart';
 import '../models/m3e_text_field_states.dart';
@@ -44,6 +45,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     this.floatingLabelTextStyle,
     this.supportingTextStyle,
     this.colors = const M3ETextFieldColorTheme(),
+    this.iconAlignment = M3ETextFieldSlotAlignment.center,
+    this.affixAlignment = M3ETextFieldSlotAlignment.firstLine,
   });
 
   /// defaults.
@@ -135,6 +138,13 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
 
   /// Color tokens.
   final M3ETextFieldColorTheme colors;
+
+  /// Leading/trailing icon position in multi-line fields. Default: centered,
+  /// per the spec's "icon alignment: vertically centered".
+  final M3ETextFieldSlotAlignment iconAlignment;
+
+  /// Prefix/suffix text position in multi-line fields. Default: first line.
+  final M3ETextFieldSlotAlignment affixAlignment;
 
   /// [density] clamped to the supported range.
   static int clampDensity(int density) => density.clamp(-3, 0);
@@ -236,6 +246,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     TextStyle? floatingLabelTextStyle,
     TextStyle? supportingTextStyle,
     M3ETextFieldColorTheme? colors,
+    M3ETextFieldSlotAlignment? iconAlignment,
+    M3ETextFieldSlotAlignment? affixAlignment,
   }) {
     return M3ETextFieldTheme(
       containerHeight: containerHeight ?? this.containerHeight,
@@ -270,6 +282,8 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
           floatingLabelTextStyle ?? this.floatingLabelTextStyle,
       supportingTextStyle: supportingTextStyle ?? this.supportingTextStyle,
       colors: colors ?? this.colors,
+      iconAlignment: iconAlignment ?? this.iconAlignment,
+      affixAlignment: affixAlignment ?? this.affixAlignment,
     );
   }
 

@@ -59,6 +59,8 @@ void main() {
   testWidgets('clear and password toggles', _clearAndPassword);
   testWidgets('density removes 4dp per step', _density);
   testWidgets('required label and affix labels', _requiredAndAffixes);
+  testWidgets('null maxLines grows without a limit', _unlimitedLines);
+  testWidgets('icons and affixes follow slot alignment', _slotAlignment);
 }
 
 Future<void> _filledMeasurements(WidgetTester tester) async {
@@ -309,4 +311,72 @@ Future<void> _requiredAndAffixes(WidgetTester tester) async {
   expect(find.bySemanticsLabel('Price*'), findsOneWidget);
   expect(find.bySemanticsLabel('Euro'), findsOneWidget);
   semantics.dispose();
+}
+
+Widget _multiLine(
+  TextEditingController controller, {
+  int? maxLines,
+  M3ETextFieldSlotAlignment? icons,
+  M3ETextFieldSlotAlignment? affixes,
+}) {
+  return _app(
+    M3ETextField(
+      controller: controller,
+      label: 'Notes',
+      leading: const Icon(M3EIcons.search),
+      prefixText: '>',
+      maxLines: maxLines,
+      iconAlignment: icons,
+      affixAlignment: affixes,
+    ),
+  );
+}
+
+TextEditingController _longText() {
+  final controller = TextEditingController(
+    text: List<String>.filled(12, 'wrapping words').join(' '),
+  );
+  addTearDown(controller.dispose);
+  return controller;
+}
+
+Future<void> _unlimitedLines(WidgetTester tester) async {
+  final TextEditingController controller = _longText();
+  await tester.pumpWidget(_multiLine(controller));
+  await tester.pumpAndSettle();
+  expect(tester.widget<EditableText>(find.byType(EditableText)).maxLines, null);
+  expect(_container(tester).height, greaterThan(56 + 24 * 3));
+}
+
+Future<void> _slotAlignment(WidgetTester tester) async {
+  final TextEditingController controller = _longText();
+  Future<(Rect, Rect, Rect, Rect)> layout(
+    M3ETextFieldSlotAlignment alignment,
+  ) async {
+    await tester.pumpWidget(
+      _multiLine(controller, icons: alignment, affixes: alignment),
+    );
+    await tester.pumpAndSettle();
+    return (
+      _container(tester),
+      tester.getRect(find.byIcon(M3EIcons.search)),
+      tester.getRect(find.text('>')),
+      tester.getRect(find.byType(EditableText)),
+    );
+  }
+
+  var (box, icon, prefix, input) = await layout(
+    M3ETextFieldSlotAlignment.firstLine,
+  );
+  // Same spot as a single-line field: icon centered in the first 56dp.
+  expect(icon.center.dy, closeTo(box.top + 28, 0.5));
+  expect(prefix.top, closeTo(input.top, 0.5));
+
+  (box, icon, prefix, input) = await layout(M3ETextFieldSlotAlignment.center);
+  expect(icon.center.dy, closeTo(box.center.dy, 0.5));
+  expect(prefix.center.dy, closeTo(input.center.dy, 0.5));
+
+  (box, icon, prefix, input) = await layout(M3ETextFieldSlotAlignment.bottom);
+  expect(icon.center.dy, closeTo(box.bottom - 28, 0.5));
+  expect(prefix.bottom, closeTo(input.bottom, 0.5));
 }

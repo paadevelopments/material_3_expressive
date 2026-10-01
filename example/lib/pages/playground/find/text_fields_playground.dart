@@ -15,9 +15,11 @@ enum _LineMode {
   multi,
   area;
 
-  int get maxLines => switch (this) {
+  /// Multi-line grows without a limit; the text area is fixed at 4 lines.
+  int? get maxLines => switch (this) {
     _LineMode.single => 1,
-    _LineMode.multi || _LineMode.area => 4,
+    _LineMode.multi => null,
+    _LineMode.area => 4,
   };
 
   int? get minLines => this == _LineMode.area ? 4 : null;
@@ -35,6 +37,9 @@ class TextFieldsPlayground extends StatefulWidget {
 class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
   M3ETextFieldVariant _variant = M3ETextFieldVariant.filled;
   _LineMode _lines = _LineMode.single;
+  M3ETextFieldSlotAlignment _iconAlignment = M3ETextFieldSlotAlignment.center;
+  M3ETextFieldSlotAlignment _affixAlignment =
+      M3ETextFieldSlotAlignment.firstLine;
   bool _enabled = true;
   bool _readOnly = false;
   bool _required = false;
@@ -98,6 +103,14 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
     add(_lines != _LineMode.single, 'maxLines: ${_lines.maxLines}');
     add(_lines == _LineMode.area, 'minLines: ${_lines.minLines}');
     add(_density != 0, 'density: ${_density.round()}');
+    add(
+      _iconAlignment != M3ETextFieldSlotAlignment.center,
+      'iconAlignment: M3ETextFieldSlotAlignment.${_iconAlignment.name}',
+    );
+    add(
+      _affixAlignment != M3ETextFieldSlotAlignment.firstLine,
+      'affixAlignment: M3ETextFieldSlotAlignment.${_affixAlignment.name}',
+    );
     buffer.write(');');
     return buffer.toString();
   }
@@ -145,8 +158,16 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
       maxLines: obscure ? 1 : _lines.maxLines,
       minLines: obscure ? null : _lines.minLines,
       density: _density.round(),
+      iconAlignment: _iconAlignment,
+      affixAlignment: _affixAlignment,
     );
   }
+
+  static String _alignmentLabel(M3ETextFieldSlotAlignment v) => switch (v) {
+    M3ETextFieldSlotAlignment.firstLine => 'first line',
+    M3ETextFieldSlotAlignment.center => 'center',
+    M3ETextFieldSlotAlignment.bottom => 'bottom',
+  };
 
   List<Widget> _appearanceControls() {
     return <Widget>[
@@ -167,6 +188,22 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
           _LineMode.area => 'text area',
         },
         onChanged: (_LineMode v) => setState(() => _lines = v),
+      ),
+      PlayEnumSegmented<M3ETextFieldSlotAlignment>(
+        label: 'Icon alignment',
+        value: _iconAlignment,
+        values: M3ETextFieldSlotAlignment.values,
+        labelOf: _alignmentLabel,
+        onChanged: (M3ETextFieldSlotAlignment v) =>
+            setState(() => _iconAlignment = v),
+      ),
+      PlayEnumSegmented<M3ETextFieldSlotAlignment>(
+        label: 'Prefix/suffix alignment',
+        value: _affixAlignment,
+        values: M3ETextFieldSlotAlignment.values,
+        labelOf: _alignmentLabel,
+        onChanged: (M3ETextFieldSlotAlignment v) =>
+            setState(() => _affixAlignment = v),
       ),
       PlaySlider(
         label: 'Density',

@@ -4,6 +4,19 @@ part of '../m3e_text_fields.dart';
 extension _M3ETextFieldBuild on _M3ETextFieldState {
   bool get _outlined => widget.variant == M3ETextFieldVariant.outlined;
 
+  /// Row alignment for [alignment]; [baseline] lines text up on its first line.
+  static CrossAxisAlignment _crossAxisFor(
+    M3ETextFieldSlotAlignment alignment, {
+    bool baseline = false,
+  }) {
+    return switch (alignment) {
+      M3ETextFieldSlotAlignment.firstLine =>
+        baseline ? CrossAxisAlignment.baseline : CrossAxisAlignment.start,
+      M3ETextFieldSlotAlignment.center => CrossAxisAlignment.center,
+      M3ETextFieldSlotAlignment.bottom => CrossAxisAlignment.end,
+    };
+  }
+
   Widget _buildInteractive(M3EThemeData theme, M3ETextFieldTheme fieldTheme) {
     final bool enabled = widget.enabled;
     Widget field = ListenableBuilder(
@@ -93,9 +106,14 @@ extension _M3ETextFieldBuild on _M3ETextFieldState {
         children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints(minHeight: height),
+            // Icon slots are one single-line field tall, so `start` keeps
+            // them level with the first line as the field grows.
             child: Row(
+              crossAxisAlignment: _crossAxisFor(
+                widget.iconAlignment ?? fieldTheme.iconAlignment,
+              ),
               children: <Widget>[
-                ..._leadingSlot(fieldTheme, colors),
+                ..._leadingSlot(fieldTheme, colors, height),
                 Expanded(
                   child: _buildInputArea(theme, fieldTheme, colors, height),
                 ),
@@ -189,6 +207,7 @@ extension _M3ETextFieldBuild on _M3ETextFieldState {
   List<Widget> _leadingSlot(
     M3ETextFieldTheme fieldTheme,
     M3ETextFieldColors colors,
+    double height,
   ) {
     if (widget.leading == null) {
       return <Widget>[SizedBox(width: fieldTheme.horizontalPadding)];
@@ -196,6 +215,7 @@ extension _M3ETextFieldBuild on _M3ETextFieldState {
     return <Widget>[
       SizedBox(
         width: fieldTheme.iconSlotWidth,
+        height: height,
         child: Center(
           child: IconTheme.merge(
             data: IconThemeData(
@@ -330,7 +350,10 @@ extension _M3ETextFieldBuild on _M3ETextFieldState {
         !_populated &&
         (widget.label == null || (_focused && widget.enabled));
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
+      crossAxisAlignment: _crossAxisFor(
+        widget.affixAlignment ?? fieldTheme.affixAlignment,
+        baseline: true,
+      ),
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
         if (widget.prefixText != null)
