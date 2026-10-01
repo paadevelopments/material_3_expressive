@@ -93,6 +93,10 @@ void main() {
     _dockedAt600WithScrim2GapAndR28Results,
   );
   testWidgets(
+    'docked view widens around a centered resting bar',
+    _dockedViewWidensAroundACenteredRestingBar,
+  );
+  testWidgets(
     'divided full-screen view: 72 header and divider',
     _dividedFullScreenView72HeaderAndDivider,
   );
@@ -434,4 +438,41 @@ Future<void> _scrollAwaySliverBarHidesAndReappearsTowardTheTop(
   await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
   await tester.pumpAndSettle();
   expect(tester.getRect(_barMaterial).top, greaterThanOrEqualTo(0));
+}
+
+Future<void> _dockedViewWidensAroundACenteredRestingBar(
+  WidgetTester tester,
+) async {
+  _setWindow(tester, const Size(1400, 900));
+  final controller = M3ESearchController();
+  await tester.pumpWidget(
+    M3EMaterialApp(
+      data: _theme,
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            M3ESearchAnchor.bar(
+              searchController: controller,
+              barHintText: 'Search',
+              suggestionsBuilder: _results,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  final Rect resting = tester.getRect(_barMaterial);
+  // Capped at 720 and centered in the 1400 pane.
+  expect(resting.width, 720);
+  expect(resting.center.dx, closeTo(700, 0.1));
+
+  controller.openView();
+  await tester.pumpAndSettle();
+  final Rect open = tester.getRect(
+    find.descendant(of: _viewBar, matching: find.byType(Material)).first,
+  );
+  expect(open.center.dx, closeTo(resting.center.dx, 0.1));
+  expect(open.top, closeTo(resting.top, 0.1));
+  expect(open.width, 720);
 }

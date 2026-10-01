@@ -75,24 +75,36 @@ extension _M3ESearchViewTransition on _M3ESearchViewContentState {
     double right = begin.right;
     final Rect? pane = _paneRect;
     if (style == M3ESearchViewStyle.contained && pane != null) {
-      // The bar widens to the focused margins inside its pane.
-      left = math.min(left, pane.left + viewTheme.containedLeadingMargin);
-      right = math.max(right, pane.right - viewTheme.containedTrailingMargin);
+      // Widen around the resting pill by the unfocused → focused margin
+      // change (24 → 12), never past the focused margin of the pane.
+      final double rest = M3ETheme.of(context).searchBarTheme.unfocusedMargin;
+      final double growStart = math.max(
+        0,
+        math.min(rest, begin.left - pane.left) -
+            viewTheme.containedLeadingMargin,
+      );
+      final double growEnd = math.max(
+        0,
+        math.min(rest, pane.right - begin.right) -
+            viewTheme.containedTrailingMargin,
+      );
+      left -= growStart;
+      right += growEnd;
     }
     final double width = clampDouble(
       right - left,
       math.min(box.minWidth, screen.width),
       math.min(box.maxWidth, screen.width),
     );
+    // Keep the view centered on the widened bar when width is clamped.
+    left += (right - left - width) / 2;
+    right = left + width;
     final double height = clampDouble(
       screen.height * viewTheme.maxHeightFactor,
       math.min(box.minHeight, screen.height),
       math.min(box.maxHeight, screen.height),
     );
-    double x = Directionality.of(context) == TextDirection.rtl
-        ? right - width
-        : left;
-    x = clampDouble(x, 0, math.max(0, screen.width - width));
+    final double x = clampDouble(left, 0, math.max(0, screen.width - width));
     double y = begin.top;
     if (y + height > screen.height) {
       y = math.max(0, screen.height - height);
