@@ -340,6 +340,8 @@ class _M3EAppBarSearchTitle extends StatelessWidget {
           ? appBarTheme.searchFullScreenHeader
           : appBarTheme.searchDockedHeader,
       dividerColor: scheme.outline,
+      // App bar search keeps the baseline header + divider view.
+      viewStyle: M3ESearchViewStyle.divided,
       isFullScreen: isFullScreen,
       onSubmitted: onSubmitted,
       onChanged: onChanged,

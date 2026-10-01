@@ -1,4 +1,3 @@
-import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart'
@@ -13,14 +12,21 @@ import 'package:material_ui/material_ui.dart'
 
 import '../../../foundations/foundations.dart';
 import '../icon_buttons/m3e_icon_buttons.dart';
+import 'components/m3e_search_anchor_scope.dart';
+import 'models/m3e_search_anchor_surface.dart';
 import 'res/m3e_search_constants.dart';
 import 'styles/m3e_search_bar_theme.dart';
+import 'utils/m3e_search_spring.dart';
 
 part 'components/m3e_search_bar_input.dart';
 part 'components/m3e_search_bar_build.dart';
 
-/// M3ESearchBar.
-
+/// A Material 3 Expressive search bar (contained style).
+///
+/// A 56dp pill on surface container high with an optional leading icon,
+/// hinted search text, up to two trailing icons, and an optional [avatar].
+/// The bar sits [margin] (24) from its pane and widens to [focusedMargin]
+/// (12) on focus with a spatial spring.
 class M3ESearchBar extends StatefulWidget {
   /// M3ESearchBar.
   const M3ESearchBar({
@@ -59,6 +65,11 @@ class M3ESearchBar extends StatefulWidget {
     this.alignment = AlignmentDirectional.centerStart,
     this.wrapActions,
     this.onEscape,
+    this.avatar,
+    this.showClearButton = false,
+    this.focusIndicatorColor,
+    this.margin,
+    this.focusedMargin,
     super.key,
   });
 
@@ -72,10 +83,12 @@ class M3ESearchBar extends StatefulWidget {
   /// hintText.
   final String? hintText;
 
-  /// leading.
+  /// Leading navigational icon button (menu, arrow) or a non-functional
+  /// search [Icon]. A plain [Icon] is hidden from screen readers.
   final Widget? leading;
 
-  /// trailing.
+  /// One or two trailing icons or icon buttons. With an [avatar], use at
+  /// most one.
   final Iterable<Widget>? trailing;
 
   /// onTap.
@@ -150,7 +163,8 @@ class M3ESearchBar extends StatefulWidget {
   /// expandOnFocus.
   final bool expandOnFocus;
 
-  /// expandRestPadding.
+  /// Legacy resting margin. When set (and [margin] is null), the bar rests at
+  /// this margin and narrows it by half on focus.
   final double? expandRestPadding;
 
   /// smartDashesType.
@@ -176,6 +190,21 @@ class M3ESearchBar extends StatefulWidget {
   /// so Escape closes the overlay instead of only clearing focus.
   final VoidCallback? onEscape;
 
+  /// Optional trailing avatar, clipped to a 30dp circle in a 48dp target.
+  final Widget? avatar;
+
+  /// Shows a clear (X) action before [trailing] while the field has text.
+  final bool showClearButton;
+
+  /// Focus indicator color. Defaults to secondary.
+  final Color? focusIndicatorColor;
+
+  /// Side margin while unfocused. Defaults to the theme (24).
+  final double? margin;
+
+  /// Side margin while focused. Defaults to the theme (12).
+  final double? focusedMargin;
+
   @override
   State<M3ESearchBar> createState() => _M3ESearchBarState();
 }
@@ -190,6 +219,9 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   FocusNode? _internalFocusNode;
   bool _expandPaddingSyncScheduled = false;
   bool _showFocusRing = false;
+  bool _marginReady = false;
+  M3ESearchAnchorSurface? _surface;
+  BuildContext? _surfaceContext;
 
   FocusNode get _focusNode =>
       widget.focusNode ?? (_internalFocusNode ??= FocusNode());
@@ -204,12 +236,18 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     _syncFocusedState();
     FocusManager.instance.addHighlightModeListener(_handleHighlightModeChange);
     M3EFocusInteraction.instance.addListener(_handleFocusInteractionChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      _syncExpandPaddingController(M3ETheme.of(context).searchBarTheme);
-    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_marginReady) {
+      // Start at the resting margin so the first frame does not jump.
+      _marginReady = true;
+      _expandPaddingController.value = _targetExpandPadding(
+        M3ETheme.of(context).searchBarTheme,
+      );
+    }
   }
 
   void _handleFocusInteractionChanged() {
@@ -260,6 +298,9 @@ class _M3ESearchBarState extends State<M3ESearchBar>
     M3EFocusInteraction.instance.removeListener(_handleFocusInteractionChanged);
     _focusNode.removeListener(_handleFocusChange);
     _controller.removeListener(_handleTextChange);
+    if (_surfaceContext != null) {
+      _surface?.detach(_surfaceContext!);
+    }
     _expandPaddingController.dispose();
     _statesController.dispose();
     if (widget.controller == null) {
@@ -310,27 +351,36 @@ class _M3ESearchBarState extends State<M3ESearchBar>
   }
 
   double _restingExpandPadding(M3ESearchBarTheme barTheme) {
-    return widget.expandRestPadding ?? barTheme.restingExpandPadding;
+    return widget.margin ??
+        widget.expandRestPadding ??
+        barTheme.unfocusedMargin;
   }
 
   double _focusedExpandPadding(M3ESearchBarTheme barTheme) {
-    return _restingExpandPadding(barTheme) / 2;
+    if (widget.focusedMargin != null) {
+      return widget.focusedMargin!;
+    }
+    if (widget.margin == null && widget.expandRestPadding != null) {
+      return widget.expandRestPadding! / 2;
+    }
+    return barTheme.focusedMargin;
   }
 
   bool _shouldAnimateExpandPadding(M3ESearchBarTheme barTheme) {
-    // Read-only bars can still use the resting (unexpanded) inset; they just
-    // never animate to the focused width because they do not take focus.
-    if (!widget.expandOnFocus || !barTheme.expandOnFocus || !widget.enabled) {
+    // Read-only and disabled bars keep the resting margin; they never take
+    // focus, so they never widen.
+    if (!widget.expandOnFocus || !barTheme.expandOnFocus) {
       return false;
     }
-    return _restingExpandPadding(barTheme) > 0.5;
+    return _restingExpandPadding(barTheme) > 0.5 ||
+        _focusedExpandPadding(barTheme) > 0.5;
   }
 
   double _targetExpandPadding(M3ESearchBarTheme barTheme) {
     if (!_shouldAnimateExpandPadding(barTheme)) {
       return 0;
     }
-    return _focusNode.hasFocus
+    return _focusNode.hasFocus && widget.enabled && !widget.readOnly
         ? _focusedExpandPadding(barTheme)
         : _restingExpandPadding(barTheme);
   }
@@ -350,11 +400,11 @@ class _M3ESearchBarState extends State<M3ESearchBar>
       _expandPaddingController
         ..stop()
         ..animateWith(
-          SpringSimulation(
-            barTheme.focusExpandSpring.toDescription(),
-            _expandPaddingController.value,
-            target,
-            _expandPaddingController.velocity,
+          m3eSearchSpringSimulation(
+            barTheme.focusExpandSpring,
+            from: _expandPaddingController.value,
+            to: target,
+            velocity: _expandPaddingController.velocity,
           ),
         );
       return;
@@ -401,9 +451,11 @@ class _M3ESearchBarState extends State<M3ESearchBar>
         final states = _statesController.value;
         final textDirection = Directionality.of(context);
 
-        if (_expandPaddingController.value == 0 &&
-            !_expandPaddingController.isAnimating &&
-            _shouldAnimateExpandPadding(barTheme)) {
+        if (!_expandPaddingController.isAnimating &&
+            _shouldAnimateExpandPadding(barTheme) &&
+            (_expandPaddingController.value - _targetExpandPadding(barTheme))
+                    .abs() >
+                0.5) {
           _scheduleExpandPaddingSync(barTheme);
         }
 
@@ -419,8 +471,14 @@ class _M3ESearchBarState extends State<M3ESearchBar>
           override: widget.constraints,
         );
 
+        // Capped at the max width (720) and centered in wider panes.
+        final Widget sized = Align(
+          heightFactor: 1,
+          child: ConstrainedBox(constraints: barConstraints, child: bar),
+        );
+
         if (!_shouldAnimateExpandPadding(barTheme)) {
-          return ConstrainedBox(constraints: barConstraints, child: bar);
+          return sized;
         }
 
         return AnimatedBuilder(
@@ -431,9 +489,10 @@ class _M3ESearchBarState extends State<M3ESearchBar>
             final horizontal = pad.isFinite && pad > 0 ? pad : 0.0;
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontal),
-              child: ConstrainedBox(constraints: barConstraints, child: bar),
+              child: child,
             );
           },
+          child: sized,
         );
       },
     );

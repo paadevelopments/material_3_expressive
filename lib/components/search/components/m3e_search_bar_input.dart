@@ -2,65 +2,27 @@ part of '../m3e_search_bar.dart';
 
 double _resolveActionIconSize({
   required M3EIconButtonTheme iconButtonTheme,
+  required M3ESearchBarTheme barTheme,
   required Iterable<Widget>? trailing,
   required Widget? leading,
 }) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
+  final Widget? referenceAction = trailing != null && trailing.isNotEmpty
+      ? trailing.last
+      : leading;
   if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.iconSize(button.size);
+    return iconButtonTheme.iconSize(referenceAction.size);
   }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    if (icon.size != null) {
-      return icon.size!;
-    }
+  if (referenceAction is Icon && referenceAction.size != null) {
+    return referenceAction.size!;
   }
-  return iconButtonTheme.iconSize(M3EIconButtonSize.sm);
+  return barTheme.iconSize;
 }
 
-Widget? _resolveReferenceAction({
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  if (trailing != null && trailing.isNotEmpty) {
-    return trailing.last;
-  }
-  return leading;
-}
-
-double _resolveActionSlotWidth({
-  required M3EIconButtonTheme iconButtonTheme,
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
-  if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.target(button.size, button.width).width;
-  }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    return icon.size ??
-        iconButtonTheme
-            .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-            .width;
-  }
-  return iconButtonTheme
-      .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-      .width;
-}
-
+/// Square tap target; heightFactor keeps it from stretching the bar.
 Widget _wrapActionSlot({required double width, required Widget child}) {
   return SizedBox(
     width: width,
-    child: Center(child: child),
+    child: Center(heightFactor: 1, child: child),
   );
 }
 
@@ -284,7 +246,8 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
       backgroundCursorColor: widget.cursorColor.withValues(alpha: 0.4),
       selectionColor: widget.selectionColor,
       textCapitalization: widget.textCapitalization,
-      textInputAction: widget.textInputAction,
+      // Enter executes the search; the field unfocuses and keeps the query.
+      textInputAction: widget.textInputAction ?? TextInputAction.search,
       keyboardType: widget.keyboardType,
       scrollPadding: widget.scrollPadding,
       contextMenuBuilder: widget.contextMenuBuilder,

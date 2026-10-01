@@ -1,3 +1,35 @@
+## 1.1.5
+
+### Changed
+
+* **Search:** search bars are **56** tall and fully rounded, on **surface container
+  high**, with no shadow. They sit **24** from their pane and spring out to
+  **12** when focused. Width is **360–720**. With actions, the edge to the 48
+  tap target is **4**, the target to the label is **4**, and trailing targets
+  have no gap between them. Without actions the label is **16** from each edge.
+  The leading icon is **on surface**; trailing icons and hinted text are **on
+  surface variant**; input text is **on surface** (body large). Hover is
+  **0.08** and press is **0.1** on **on surface**, with the sparkle ripple. The
+  keyboard focus ring is **secondary**, **3** thick, **2** off the bar, and hides
+  on pointer input. `avatar` adds a **30** circle in a **48** target, and
+  `showClearButton` puts a clear action first while the field has text. Enter
+  runs the search and keeps the query visible.
+* **Search:** the view comes in `M3ESearchViewStyle.contained` (default) and
+  `.divided`. Contained full-screen sits on **surface container low** with the
+  pill bar **12** from each side and **8** above and below it, and results
+  inset **12**. Contained docked puts its results in a
+  **28**-radius container **2** below the bar, with a **0.32** scrim behind.
+  Divided uses a **72** (full-screen) or **56** (docked) header and an
+  **outline** divider. When `isFullScreen` is not set, the view is full-screen
+  below **600** and docked at **600** and wider, and it switches between the two
+  when the window is resized. The bar morphs into the view with a spatial
+  spring. On Android, predictive back scales the view down to **0.9**, toward
+  the gesture. Arrow keys move from the field into the results and between
+  them. Screen readers hear "N results available" when the results change.
+  `M3ESliverSearchBar` scrolls away with content and returns when the user
+  scrolls toward the top, or stays `fixed`. App bar search keeps the divided
+  view.
+
 ## 1.1.4
 
 ### Changed

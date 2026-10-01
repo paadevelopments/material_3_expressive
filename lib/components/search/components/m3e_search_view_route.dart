@@ -1,15 +1,17 @@
 part of 'm3e_search_view.dart';
 
-/// M3ESearchViewRoute.
-
+/// Route that hosts the focused search view above its anchor.
 class M3ESearchViewRoute extends PopupRoute<void> {
   /// M3ESearchViewRoute.
   M3ESearchViewRoute({
     required this.anchorKey,
+    required this.surface,
     required this.searchController,
     required this.suggestionsBuilder,
-    required this.showFullScreenView,
+    required this.isFullScreen,
+    required this.transformDuration,
     this.toggleVisibility,
+    this.viewStyle,
     this.viewBuilder,
     this.viewLeading,
     this.viewTrailing,
@@ -36,11 +38,16 @@ class M3ESearchViewRoute extends PopupRoute<void> {
     this.keyboardType,
     this.smartDashesType,
     this.smartQuotesType,
+    this.showViewClearButton = true,
+    this.announcementBuilder,
+    this.scrimColor,
   });
 
-  /// anchorKey.
-
+  /// Key on the anchor (margin box) used when no bar surface is registered.
   final GlobalKey anchorKey;
+
+  /// Bar surface registered by the anchor's search bar.
+  final M3ESearchAnchorSurface surface;
 
   /// searchController.
   final M3ESearchController searchController;
@@ -48,11 +55,17 @@ class M3ESearchViewRoute extends PopupRoute<void> {
   /// suggestionsBuilder.
   final M3ESearchSuggestionsBuilder suggestionsBuilder;
 
-  /// showFullScreenView.
-  final bool showFullScreenView;
+  /// Forced layout. Null picks full-screen below the compact breakpoint.
+  final bool? isFullScreen;
+
+  /// Settle time of the container transform spring.
+  final Duration transformDuration;
 
   /// toggleVisibility.
   final ValueGetter<bool>? toggleVisibility;
+
+  /// Contained or divided. Null uses the view theme.
+  final M3ESearchViewStyle? viewStyle;
 
   /// viewBuilder.
   final M3ESearchViewBuilder? viewBuilder;
@@ -132,85 +145,31 @@ class M3ESearchViewRoute extends PopupRoute<void> {
   /// smartQuotesType.
   final SmartQuotesType? smartQuotesType;
 
-  final RectTween _rectTween = RectTween();
-  CurvedAnimation? _curvedAnimation;
-  CurvedAnimation? _viewFadeCurve;
+  /// Whether a clear (X) action leads the header trailing actions.
+  final bool showViewClearButton;
 
-  Rect? _anchorRect(BuildContext context) {
-    final BuildContext? anchorContext = anchorKey.currentContext;
-    if (anchorContext == null) {
-      return null;
+  /// Screen reader text when results change.
+  final M3ESearchAnnouncementBuilder? announcementBuilder;
+
+  /// Docked scrim color override.
+  final Color? scrimColor;
+
+  /// Bar surface (or anchor) rect in [navigatorBox] coordinates.
+  Rect? anchorRect(RenderObject? navigatorBox) {
+    final Rect? bar = surface.rectIn(navigatorBox);
+    if (bar != null) {
+      return bar;
     }
-    final searchBarBox = anchorContext.findRenderObject()! as RenderBox;
-    final NavigatorState navigator = Navigator.of(context);
-    final Offset boxLocation = searchBarBox.localToGlobal(
-      Offset.zero,
-      ancestor: navigator.context.findRenderObject(),
-    );
-    return boxLocation & searchBarBox.size;
+    return paneRect(navigatorBox);
   }
 
-  void _updateTweens(BuildContext context, M3ESearchViewTheme viewTheme) {
-    final navigatorBox =
-        Navigator.of(context).context.findRenderObject()! as RenderBox;
-    final Size screenSize = navigatorBox.size;
-    final Rect anchorRect = _anchorRect(context) ?? Rect.zero;
-    final BoxConstraints effectiveConstraints =
-        viewConstraints ?? viewTheme.constraints();
-    _rectTween.begin = anchorRect;
-
-    final double viewWidth = clampDouble(
-      anchorRect.width,
-      effectiveConstraints.minWidth,
-      effectiveConstraints.maxWidth,
-    );
-    final double viewHeight = clampDouble(
-      screenSize.height * 2 / 3,
-      effectiveConstraints.minHeight,
-      effectiveConstraints.maxHeight,
-    );
-
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.ltr:
-        final double viewLeftToScreenRight = screenSize.width - anchorRect.left;
-        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
-        Offset topLeft = anchorRect.topLeft;
-        if (viewLeftToScreenRight < viewWidth) {
-          topLeft = Offset(
-            screenSize.width - math.min(viewWidth, screenSize.width),
-            topLeft.dy,
-          );
-        }
-        if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(
-            topLeft.dx,
-            screenSize.height - math.min(viewHeight, screenSize.height),
-          );
-        }
-        _rectTween.end = showFullScreenView
-            ? Offset.zero & screenSize
-            : (topLeft & Size(viewWidth, viewHeight));
-      case TextDirection.rtl:
-        final double viewRightToScreenLeft = anchorRect.right;
-        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
-        var topLeft = Offset(
-          math.max(anchorRect.right - viewWidth, 0),
-          anchorRect.top,
-        );
-        if (viewRightToScreenLeft < viewWidth) {
-          topLeft = Offset(0, topLeft.dy);
-        }
-        if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(
-            topLeft.dx,
-            screenSize.height - math.min(viewHeight, screenSize.height),
-          );
-        }
-        _rectTween.end = showFullScreenView
-            ? Offset.zero & screenSize
-            : (topLeft & Size(viewWidth, viewHeight));
+  /// Anchor margin box in [navigatorBox] coordinates.
+  Rect? paneRect(RenderObject? navigatorBox) {
+    final RenderObject? box = anchorKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !box.attached) {
+      return null;
     }
+    return box.localToGlobal(Offset.zero, ancestor: navigatorBox) & box.size;
   }
 
   @override
@@ -223,16 +182,10 @@ class M3ESearchViewRoute extends PopupRoute<void> {
   String? get barrierLabel => M3ESearchConstants.dismissBarrierLabel;
 
   @override
-  Duration get transitionDuration => M3ESearchConstants.openViewDuration;
+  Duration get transitionDuration => transformDuration;
 
   @override
   TickerFuture didPush() {
-    assert(
-      anchorKey.currentContext != null,
-      'Search view route requires an attached anchor.',
-    );
-    final BuildContext anchorContext = anchorKey.currentContext!;
-    _updateTweens(anchorContext, M3ETheme.of(anchorContext).searchViewTheme);
     toggleVisibility?.call();
     viewOnOpen?.call();
     return super.didPush();
@@ -240,27 +193,15 @@ class M3ESearchViewRoute extends PopupRoute<void> {
 
   @override
   bool didPop(void result) {
-    assert(
-      anchorKey.currentContext != null,
-      'Search view route requires an attached anchor.',
-    );
-    final BuildContext anchorContext = anchorKey.currentContext!;
-    _updateTweens(anchorContext, M3ETheme.of(anchorContext).searchViewTheme);
     toggleVisibility?.call();
     viewOnClose?.call();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (anchorKey.currentContext != null) {
-        FocusScope.of(anchorKey.currentContext!).unfocus();
+      final BuildContext? anchorContext = anchorKey.currentContext;
+      if (anchorContext != null && anchorContext.mounted) {
+        FocusScope.of(anchorContext).unfocus();
       }
     });
     return super.didPop(result);
-  }
-
-  @override
-  void dispose() {
-    _curvedAnimation?.dispose();
-    _viewFadeCurve?.dispose();
-    super.dispose();
   }
 
   @override
@@ -269,69 +210,9 @@ class M3ESearchViewRoute extends PopupRoute<void> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        _curvedAnimation ??= CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubicEmphasized,
-          reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-        );
-        _viewFadeCurve ??= CurvedAnimation(
-          parent: animation,
-          curve: M3ESearchConstants.viewFadeOnInterval,
-          reverseCurve: M3ESearchConstants.viewFadeOnInterval.flipped,
-        );
-
-        final Rect viewRect = _rectTween.evaluate(_curvedAnimation!)!;
-        final double topPadding = showFullScreenView
-            ? lerpDouble(
-                0,
-                M3ESafeArea.topOf(context),
-                _curvedAnimation!.value,
-              )!
-            : 0;
-
-        return M3EComponentTheme(
-          builder: (BuildContext context) {
-            return FadeTransition(
-              opacity: _viewFadeCurve!,
-              child: M3ESearchViewContent(
-                searchController: searchController,
-                suggestionsBuilder: suggestionsBuilder,
-                animation: _curvedAnimation!,
-                viewRect: viewRect,
-                viewMaxWidth: _rectTween.end!.width,
-                topPadding: topPadding,
-                showFullScreenView: showFullScreenView,
-                viewBuilder: viewBuilder,
-                viewLeading: viewLeading,
-                viewTrailing: viewTrailing,
-                viewHintText: viewHintText,
-                viewBackgroundColor: viewBackgroundColor,
-                viewElevation: viewElevation,
-                viewSurfaceTintColor: viewSurfaceTintColor,
-                viewSide: viewSide,
-                viewShape: viewShape,
-                viewBarPadding: viewBarPadding,
-                viewHeaderHeight: viewHeaderHeight,
-                viewHeaderTextStyle: viewHeaderTextStyle,
-                viewHeaderHintStyle: viewHeaderHintStyle,
-                dividerColor: dividerColor,
-                viewConstraints: viewConstraints,
-                viewPadding: viewPadding,
-                shrinkWrap: shrinkWrap,
-                textCapitalization: textCapitalization,
-                viewOnChanged: viewOnChanged,
-                viewOnSubmitted: viewOnSubmitted,
-                textInputAction: textInputAction,
-                keyboardType: keyboardType,
-                smartDashesType: smartDashesType,
-                smartQuotesType: smartQuotesType,
-              ),
-            );
-          },
-        );
+    return M3EComponentTheme(
+      builder: (BuildContext context) {
+        return M3ESearchViewContent(route: this, animation: animation);
       },
     );
   }

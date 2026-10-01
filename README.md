@@ -101,60 +101,19 @@ imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.4
+## What's new in 1.1.5
 
-Summary of updates since 1.1.3 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.4 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Deps** — `material_ui` `^1.5.0`.
-- **Sliders** — sizes `xs`–`xl` (tracks **16–96**, handles **44–108**).
-  Active track and handle are **primary**; inactive track is **secondary
-  container**. Wavy tracks take `wavelength` / `waveSpeed`. Value indicator
-  is **48×44**, fully rounded, **inverse surface**.
-- **Toolbars** — docked and floating bars are **64** tall. Standard content
-  is **surface container**; vibrant is **primary container**.
-  `contentAlignment` places docked actions at 600dp and wider. Scroll-exit
-  does not run together with collapse-to-FAB.
-- **Focus rings** — hover, scroll, and press hide every keyboard focus ring
-  as soon as the pointer interaction starts. Tab and the arrow keys show it
-  again.
-- **Navigation drawer** — standard sheet is **surface**; modal is **surface
-  container**. Width **360**. A modal drawer dismisses on a destination,
-  the scrim, a drag toward the start edge, or system back.
-  `M3ENavigationDrawerController` selects, opens, and closes it, and
-  `sections` group destinations below the primary list.
-- **Navigation rail** — collapsed width **96** (narrow **80**), expanded
-  **220–360**. A modal rail dismisses on the scrim, Escape, or system back
-  and leaves no collapsed rail behind. `M3ENavigationRailController`
-  selects, expands, and shows the immersive rail.
-- **Lists** — expressive defaults (heights **56 / 72 / 88**). `M3EList` is
-  the only list widget — `M3ECardList`, `M3EDismissibleList`,
-  `M3EDismissibleColumn`, and `M3EExpandableList` are removed. A dragged row
-  lifts to level **4** and commits when the drag ends.
-- **App bars** — small content band is **64**; flexible medium **112** and
-  large **120** (taller with a subtitle). `M3EAppBarHideMode.entire` slides
-  the whole bar; `.actions` leaves each action floating on its own fill.
-  `M3EAppBarController` (`expand`, `collapse`, `show`, `hide`,
-  `followScroll`) drives the bar.
-- **Carousel** — multi-browse, uncontained, uncontained multi-aspect, hero,
-  and full-screen. Items are `M3ECarouselItem` values.
-  `M3ECarouselController` steps with `next` / `previous`, moves with
-  `animateToItem` / `jumpToItem`, and opens the list with `showAll`.
-- **Navigation bar** — flexible size is **64**, baseline **80** is the
-  default. The selected pill is opaque as soon as the destination changes.
-  `M3ENavigationBarController` selects a destination and, with
-  `hideOnScroll`, shows or hides the bar from the page's scroll controller.
-- **Tabs** — primary label-only and secondary bars are **48**; primary icon
-  plus label is **64**. `M3ETabsController` selects a tab, `M3ETabsView`
-  swipes between bodies, and `M3ETabs.sliver` scrolls away and returns on
-  an upward scroll.
-- **Tooltips** — a plain tooltip stays off its anchor and ignores the
-  pointer, so the cursor on an icon button does not twitch.
-- **Interaction** — hover stays off while a scrollable is moving, so a fast
-  fling does not flash the controls under the pointer.
-- **Cards** — `vertical` stacks media above the text. Swipe can dismiss,
-  reveal a leading or trailing action, or do both. `openBuilder` runs a
-  full-screen container transform. `M3ECardGroup` lays out a collection
-  (grid, staggered, list, carousel) and reorders on a long-press drag.
+- **Search** — **56** pill bar on **surface container high**, **24** from its
+  pane and **12** once focused (spring), **360–720** wide. Optional avatar
+  (**30** in a **48** target) and a clear action. The focus ring is
+  **secondary**, **3** thick. The view is contained (default) or divided,
+  full-screen below **600**, otherwise docked with a scrim. It springs out of
+  the bar, supports predictive back, moves through results with the arrow
+  keys, and announces when results change. `M3ESliverSearchBar` scrolls away
+  and comes back when you scroll toward the top.
+
 
 ## Installation
 
@@ -162,7 +121,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.1.4
+  material_3_expressive: ^1.1.5
 ```
 
 Then fetch it:
@@ -1960,41 +1919,87 @@ const M3ETextField(
 );
 ```
 
-#### M3ESearchBar / M3ESearchAnchor
+#### M3ESearchBar / M3ESearchAnchor / M3ESliverSearchBar
 
-Search field, or a bar that opens a full search view. Escape closes the view.
-Enter or Space on the anchor opens it.
+Search follows the M3 Expressive **contained** style:
+- **Bar** — **56** pill, **24** from its pane, **12** once focused.
+- **View** — full-screen on compact windows (below **600**), docked with a
+  scrim on medium and expanded windows.
+
+`viewStyle: M3ESearchViewStyle.divided` switches to the baseline header and
+divider.
 
 ```dart
-// Inline bar
+// Inline bar: leading icon, one trailing action + avatar, clear while typing.
 M3ESearchBar(
   controller: searchController,
-  hintText: 'Search components',
+  hintText: 'Search messages',
+  leading: const Icon(M3EIcons.search),
   trailing: [
     M3EIconButton(
-      icon: const Icon(M3EIcons.close),
-      onPressed: searchController.clear,
+      icon: const Icon(M3EIcons.mic),
+      tooltip: 'Voice search',
+      onPressed: () {},
+    ),
+  ],
+  avatar: Image.asset('assets/me.png'),
+  showClearButton: true,
+);
+
+// Anchor + search view. Results are lists; separate groups with gaps.
+final controller = M3ESearchController();
+M3ESearchAnchor.bar(
+  searchController: controller,
+  barHintText: 'Search messages',
+  // null: full-screen below 600dp, docked above (swaps on resize).
+  isFullScreen: null,
+  viewStyle: M3ESearchViewStyle.contained,
+  suggestionsBuilder: (context, controller) => [
+    M3EList(
+      itemCount: names.length,
+      itemBuilder: (context, i) => M3EListItem(
+        headline: names[i],
+        onTap: () => controller.closeView(names[i]),
+      ),
     ),
   ],
 );
 
-// Anchor + search view
-final controller = M3ESearchController();
-M3ESearchAnchor.bar(
-  searchController: controller,
-  barHintText: 'Search',
-  suggestionsBuilder: (context, controller) sync* {
-    for (final name in names.where((n) => n.contains(controller.text))) {
-      yield ListTile(
-        title: Text(name),
-        onTap: () => controller.closeView(name),
-      );
-    }
-  },
+// Scroll away with content and come back on scroll toward the top.
+CustomScrollView(
+  slivers: [
+    const M3ESliverSearchBar(
+      scrollBehavior: M3ESearchBarScrollBehavior.scrollAway, // or .fixed
+      child: M3ESearchBar(hintText: 'Search your library'),
+    ),
+    // content slivers…
+  ],
 );
 ```
 
-Keyboard: Enter or Space opens the view. Escape closes it.
+Keyboard:
+
+| Keys | Action |
+| ---- | ------ |
+| Tab / Shift+Tab | Move between the leading button, the field, and trailing actions |
+| Space / Enter | Open the search view from an anchor; Enter in the field runs the search |
+| Arrows | Move from the field into the results and between results |
+| Escape / Back | Close the view and return the bar to its resting state |
+
+Accessibility and gestures:
+- The hinted text is the field's accessibility label.
+- Results changes are announced. Override the text with
+  `suggestionsAnnouncementBuilder`.
+- On Android, predictive back scales the view toward the gesture.
+
+Every value is in `M3ESearchBarTheme` and `M3ESearchViewTheme`, including:
+- margins, paddings, and tap target sizes
+- avatar size and shape
+- focus ring
+- colors
+- springs and breakpoint
+- scrim
+- predictive back
 
 ---
 
