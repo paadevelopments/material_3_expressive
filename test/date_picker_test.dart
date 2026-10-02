@@ -43,6 +43,10 @@ void main() {
     'M3EDatePickerDialog landscape calendar and input have no overflow',
     _landscapeDialogLayout,
   );
+  testWidgets(
+    'M3ECalendarDatePicker has no overflow paging into a 6-row month',
+    _sixRowMonthPaging,
+  );
 }
 
 Future<void> _calendarSelectsDay(WidgetTester tester) async {
@@ -322,4 +326,29 @@ Future<void> _landscapeDialogLayout(WidgetTester tester) async {
   await tester.pumpAndSettle();
   expect(tester.takeException(), isNull);
   expect(find.byType(M3EDatePickerHeader), findsOneWidget);
+}
+
+Future<void> _sixRowMonthPaging(WidgetTester tester) async {
+  // July 2026 has 5 week rows and August 2026 has 6 (Sunday-first).
+  await tester.pumpWidget(
+    _host(
+      M3ECalendarDatePicker(
+        firstDate: DateTime(2026),
+        lastDate: DateTime(2026, 12, 31),
+        initialDate: DateTime(2026, 7, 15),
+        currentDate: DateTime(2026, 7, 15),
+        onDateChanged: (_) {},
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.bySemanticsLabel('Next month'));
+  // Check every frame of the page animation.
+  for (var i = 0; i < 12; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.takeException(), isNull);
+  }
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+  expect(find.text('August 2026'), findsWidgets);
 }

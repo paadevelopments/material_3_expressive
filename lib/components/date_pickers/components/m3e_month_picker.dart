@@ -166,7 +166,7 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
     final bool canGoPrevious = page > 0;
     final bool canGoNext = page < _monthCount - 1;
 
-    return Column(
+    final Widget content = Column(
       mainAxisSize: widget.expandToFit ? MainAxisSize.max : MainAxisSize.min,
       children: <Widget>[
         _MonthNavRow(
@@ -206,6 +206,17 @@ class _M3EMonthPickerState extends State<M3EMonthPicker> {
             rangeEnd: widget.rangeEnd,
           ),
       ],
+    );
+    if (widget.expandToFit) {
+      return content;
+    }
+    // The body is sized for the displayed month, so a taller neighbour month
+    // (6 rows) clips while paging instead of overflowing.
+    return UnconstrainedBox(
+      constrainedAxis: Axis.horizontal,
+      alignment: Alignment.topCenter,
+      clipBehavior: Clip.hardEdge,
+      child: content,
     );
   }
 }
