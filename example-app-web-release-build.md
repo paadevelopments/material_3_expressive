@@ -23,7 +23,7 @@ Do **not** skip post-build steps. Follow [AGENTS.md](AGENTS.md): use FVM Flutter
 | Live demo | https://paadevelopments.github.io/material_3_expressive/ |
 | Site root | [`docs/`](docs/) (GitHub Pages) |
 | Base href | `/material_3_expressive/` |
-| Flutter SDK | `3.44.0` via FVM ([`.fvmrc`](.fvmrc)) |
+| Flutter SDK | `3.47.0` via FVM ([`.fvmrc`](.fvmrc)) |
 
 `flutter build web` writes a fresh [`docs/index.html`](docs/index.html) from [`example/web/index.html`](example/web/index.html) using `flutter_bootstrap.js`. That default loader caused blank-page hangs on iOS Safari. The patched index instead uses `flutter.js` + `loadEntrypoint` with `renderer: "canvaskit"`, plus an inline splash screen. Splash and loader customizations live **only** in docs — not in the example app.
 
