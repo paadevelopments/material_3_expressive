@@ -35,8 +35,13 @@ An interactive gallery demonstrating **all 44 widgets** also lives in the
 [`example/`](example/) directory (same build as the live demo). It groups
 components the same way as the official Material 3 catalog, with a live
 playground per component under [`example/lib/pages/playground/`](example/lib/pages/playground/).
-Each playground includes a **Code** section with paste-ready Dart that tracks
-the current controls (copy to clipboard).
+Each tab lists its components (a card grid on wide windows). Opening one shows
+its preview screen: the component sits in its real place (app bars on top, nav
+bars at the bottom, FABs in the FAB slot), next to a controls pane on wide
+windows or behind a **Tap for controls** banner that opens a full-height
+bottom sheet on narrow ones. Only the controls that apply to the selected
+variant appear, and a **Code** tab shows paste-ready Dart that tracks them
+(copy to clipboard).
 
 | Tab | Playgrounds | Components |
 | --- | ----------- | ---------- |
@@ -2110,7 +2115,10 @@ The [`example/`](example/) project is a full gallery app:
   scale, variable-font axes, and conversion demos.
 - **Pages:** playgrounds under
   [`example/lib/pages/playground/`](example/lib/pages/playground/), grouped
-  by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`).
+  by tab (`do/`, `pick/`, `view/`, `nav/`, `find/`). Each opens on
+  [`preview_screen.dart`](example/lib/pages/preview/preview_screen.dart); the
+  shared layout and controls live in
+  [`example/lib/widgets/playground/`](example/lib/widgets/playground/).
 - **Theme toggle:** app-bar `M3EIconButton` calls
   `M3ETheme.controllerOf(context)?.toggleBrightness(...)`.
 

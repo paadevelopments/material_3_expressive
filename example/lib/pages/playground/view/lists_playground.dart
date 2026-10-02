@@ -1,25 +1,22 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 enum _ListKind { item, cardList, dismissible, expandable }
 
 /// Live playground for list components.
-class ListsPlayground extends StatefulWidget {
+class ListsPlayground extends PlaygroundWidget {
   /// Creates the lists playground.
   const ListsPlayground({super.key});
 
   @override
-  State<ListsPlayground> createState() => _ListsPlaygroundState();
+  PlaygroundState<ListsPlayground> createState() => _ListsPlaygroundState();
 }
 
-class _ListsPlaygroundState extends State<ListsPlayground> {
+class _ListsPlaygroundState extends PlaygroundState<ListsPlayground> {
   _ListKind _kind = _ListKind.item;
   M3ECardVariant _variant = M3ECardVariant.outlined;
   bool _showLeading = true;
@@ -61,7 +58,8 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
     });
   }
 
-  List<PlaySnippet> get _snippets {
+  @override
+  List<PlaySnippet> get snippets {
     final String headline = playDartString(_headline);
     final String supporting = playDartString(_supporting);
     final String selectionFeature = _selection ? '\n  selection: true,' : '';
@@ -136,262 +134,235 @@ M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: tr
     ];
   }
 
-  void _openDemo() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return _ListDemoHost(
-            kind: _kind,
-            variant: _variant,
-            showLeading: _showLeading,
-            showTrailing: _showTrailing,
-            selection: _selection,
-            nestedSelection: _nestedSelection,
-            reorder: _reorder,
-            singleSelect: _singleSelect,
-            doubleTapTrigger: _doubleTapTrigger,
-            useSublist: _useSublist,
-            expandedStateFill: _expandedStateFill,
-            roundSublistBottom: _roundSublistBottom,
-            showSelectedIcon: _showSelectedIcon,
-            baseline: _baseline,
-            listStyle: _style,
-            containerTransform: _containerTransform,
-            disabled: _disabled,
-            selected: _selected,
-            headline: _headline,
-            supporting: _supporting,
-            swipeMode: _swipeMode,
-            dismissEdge: _dismissEdge,
-          );
-        },
-      ),
+  @override
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    return _ListDemoHost(
+      padding: padding,
+      kind: _kind,
+      variant: _variant,
+      showLeading: _showLeading,
+      showTrailing: _showTrailing,
+      selection: _selection,
+      nestedSelection: _nestedSelection,
+      reorder: _reorder,
+      singleSelect: _singleSelect,
+      doubleTapTrigger: _doubleTapTrigger,
+      useSublist: _useSublist,
+      expandedStateFill: _expandedStateFill,
+      roundSublistBottom: _roundSublistBottom,
+      showSelectedIcon: _showSelectedIcon,
+      baseline: _baseline,
+      listStyle: _style,
+      containerTransform: _containerTransform,
+      disabled: _disabled,
+      selected: _selected,
+      headline: _headline,
+      supporting: _supporting,
+      swipeMode: _swipeMode,
+      dismissEdge: _dismissEdge,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'List demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Opens a full page for the selected list. Swipe, expand, '
-                'select, and reorder there.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: const Text('Open list demo'),
-              ),
-            ],
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          PlayEnumChoice<_ListKind>(
+            label: 'Variant',
+            value: _kind,
+            values: _ListKind.values,
+            labelOf: (_ListKind v) => v.name,
+            onChanged: (_ListKind v) => setState(() => _kind = v),
           ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Content',
+          if (_kind == _ListKind.cardList)
+            PlayEnumChoice<M3ECardVariant>(
+              label: 'Card variant',
+              value: _variant,
+              values: M3ECardVariant.values,
+              labelOf: (M3ECardVariant v) => v.name,
+              onChanged: (M3ECardVariant v) {
+                setState(() => _variant = v);
+              },
+            ),
+          PlayTextField(
+            label: 'Headline',
+            value: _headline,
+            onChanged: (String v) => setState(() => _headline = v),
+          ),
+          PlayTextField(
+            label: 'Supporting',
+            value: _supporting,
+            onChanged: (String v) => setState(() => _supporting = v),
+          ),
+          PlaySwitchItem(
+            label: 'Leading',
+            value: _showLeading,
+            onChanged: (bool v) => setState(() => _showLeading = v),
+          ),
+          PlaySwitchItem(
+            label: 'Trailing',
+            value: _showTrailing,
+            onChanged: (bool v) => setState(() => _showTrailing = v),
+          ),
+          PlaySwitchItem(
+            label: 'Baseline',
+            value: _baseline,
+            onChanged: (bool v) => setState(() => _baseline = v),
+          ),
+          PlayEnumChoice<M3EListStyle>(
+            label: 'Style',
+            value: _style,
+            values: M3EListStyle.values,
+            labelOf: (M3EListStyle value) => value.name,
+            onChanged: (M3EListStyle value) => setState(() => _style = value),
+          ),
+          PlaySwitchItem(
+            label: 'Container transform',
+            value: _containerTransform,
+            onChanged: (bool v) => setState(() => _containerTransform = v),
+          ),
+          PlaySwitchItem(
+            label: 'Disabled sample',
+            value: _disabled,
+            onChanged: (bool v) => setState(() => _disabled = v),
+          ),
+          PlaySwitchItem(
+            label: 'Selected sample',
+            value: _selected,
+            onChanged: (bool v) => setState(() => _selected = v),
+          ),
+          if (_kind == _ListKind.dismissible) ...<Widget>[
+            PlayEnumChoice<M3EListSwipeMode>(
+              label: 'Swipe',
+              value: _swipeMode,
+              values: M3EListSwipeMode.values,
+              labelOf: (M3EListSwipeMode value) => value.name,
+              onChanged: (M3EListSwipeMode value) =>
+                  setState(() => _swipeMode = value),
+            ),
+            PlayEnumChoice<M3EListSwipeEdge>(
+              label: 'Dismiss direction',
+              value: _dismissEdge,
+              values: M3EListSwipeEdge.values,
+              labelOf: (M3EListSwipeEdge value) => value.name,
+              onChanged: (M3EListSwipeEdge value) =>
+                  setState(() => _dismissEdge = value),
+            ),
+          ],
+          if (_kind == _ListKind.expandable) ...<Widget>[
+            PlaySwitchItem(
+              label: 'List expansion',
+              value: _useSublist,
+              onChanged: (bool v) => setState(() => _useSublist = v),
+            ),
+            PlaySwitchItem(
+              label: 'Expanded state fill',
+              value: _expandedStateFill,
+              onChanged: (bool v) => setState(() => _expandedStateFill = v),
+            ),
+            if (_useSublist)
+              PlaySwitchItem(
+                label: 'Round sublist bottom',
+                value: _roundSublistBottom,
+                onChanged: (bool v) => setState(() => _roundSublistBottom = v),
+              ),
+          ],
+        ],
+      ),
+      if (_kind == _ListKind.expandable)
+        PlayControlGroup(
+          title: 'Header selection & reorder',
           children: <Widget>[
-            PlayEnumMenu<_ListKind>(
-              label: 'Kind',
-              value: _kind,
-              values: _ListKind.values,
-              labelOf: (_ListKind v) => v.name,
-              onChanged: (_ListKind v) => setState(() => _kind = v),
+            PlaySwitchItem(
+              label: 'Selection',
+              value: _selection,
+              onChanged: (bool v) => setState(() => _selection = v),
             ),
-            if (_kind == _ListKind.cardList)
-              PlayEnumMenu<M3ECardVariant>(
-                label: 'Card variant',
-                value: _variant,
-                values: M3ECardVariant.values,
-                labelOf: (M3ECardVariant v) => v.name,
-                onChanged: (M3ECardVariant v) {
-                  setState(() => _variant = v);
-                },
+            PlaySwitchItem(
+              label: 'Reorder',
+              value: _reorder,
+              onChanged: (bool v) => setState(() => _reorder = v),
+            ),
+            if (_selection) ...<Widget>[
+              PlaySwitchItem(
+                label: 'Single select',
+                value: _singleSelect,
+                onChanged: (bool v) => setState(() => _singleSelect = v),
               ),
-            PlayTextField(
-              label: 'Headline',
-              value: _headline,
-              onChanged: (String v) => setState(() => _headline = v),
-            ),
-            PlayTextField(
-              label: 'Supporting',
-              value: _supporting,
-              onChanged: (String v) => setState(() => _supporting = v),
-            ),
-            PlaySwitch(
-              label: 'Leading',
-              value: _showLeading,
-              onChanged: (bool v) => setState(() => _showLeading = v),
-            ),
-            PlaySwitch(
-              label: 'Trailing',
-              value: _showTrailing,
-              onChanged: (bool v) => setState(() => _showTrailing = v),
-            ),
-            PlaySwitch(
-              label: 'Baseline',
-              value: _baseline,
-              onChanged: (bool v) => setState(() => _baseline = v),
-            ),
-            PlayEnumMenu<M3EListStyle>(
-              label: 'Style',
-              value: _style,
-              values: M3EListStyle.values,
-              labelOf: (M3EListStyle value) => value.name,
-              onChanged: (M3EListStyle value) => setState(() => _style = value),
-            ),
-            PlaySwitch(
-              label: 'Container transform',
-              value: _containerTransform,
-              onChanged: (bool v) => setState(() => _containerTransform = v),
-            ),
-            PlaySwitch(
-              label: 'Disabled sample',
-              value: _disabled,
-              onChanged: (bool v) => setState(() => _disabled = v),
-            ),
-            PlaySwitch(
-              label: 'Selected sample',
-              value: _selected,
-              onChanged: (bool v) => setState(() => _selected = v),
-            ),
-            if (_kind == _ListKind.dismissible) ...<Widget>[
-              PlayEnumMenu<M3EListSwipeMode>(
-                label: 'Swipe',
-                value: _swipeMode,
-                values: M3EListSwipeMode.values,
-                labelOf: (M3EListSwipeMode value) => value.name,
-                onChanged: (M3EListSwipeMode value) =>
-                    setState(() => _swipeMode = value),
+              PlaySwitchItem(
+                label: 'Selected icon (leading flip)',
+                value: _showSelectedIcon,
+                onChanged: _setShowSelectedIcon,
               ),
-              PlayEnumMenu<M3EListSwipeEdge>(
-                label: 'Dismiss direction',
-                value: _dismissEdge,
-                values: M3EListSwipeEdge.values,
-                labelOf: (M3EListSwipeEdge value) => value.name,
-                onChanged: (M3EListSwipeEdge value) =>
-                    setState(() => _dismissEdge = value),
+              PlaySwitchItem(
+                label: 'Double-tap trigger',
+                value: _doubleTapTrigger,
+                onChanged: _setDoubleTapTrigger,
               ),
-            ],
-            if (_kind == _ListKind.expandable) ...<Widget>[
-              PlaySwitch(
-                label: 'List expansion',
-                value: _useSublist,
-                onChanged: (bool v) => setState(() => _useSublist = v),
-              ),
-              PlaySwitch(
-                label: 'Expanded state fill',
-                value: _expandedStateFill,
-                onChanged: (bool v) => setState(() => _expandedStateFill = v),
-              ),
-              if (_useSublist)
-                PlaySwitch(
-                  label: 'Round sublist bottom',
-                  value: _roundSublistBottom,
-                  onChanged: (bool v) =>
-                      setState(() => _roundSublistBottom = v),
-                ),
             ],
           ],
         ),
-        if (_kind == _ListKind.expandable)
-          PlayControlPanel(
-            title: 'Header selection & reorder',
-            children: <Widget>[
-              PlaySwitch(
-                label: 'Selection',
-                value: _selection,
-                onChanged: (bool v) => setState(() => _selection = v),
-              ),
-              PlaySwitch(
+      if (_kind == _ListKind.cardList ||
+          _kind == _ListKind.dismissible ||
+          (_kind == _ListKind.expandable && _useSublist))
+        PlayControlGroup(
+          title: _kind == _ListKind.expandable
+              ? 'Sublist selection'
+              : 'Selection & reorder',
+          children: <Widget>[
+            PlaySwitchItem(
+              label: 'Selection',
+              value: _kind == _ListKind.expandable
+                  ? _nestedSelection
+                  : _selection,
+              onChanged: (bool v) => setState(() {
+                if (_kind == _ListKind.expandable) {
+                  _nestedSelection = v;
+                } else {
+                  _selection = v;
+                }
+              }),
+            ),
+            if (_kind == _ListKind.cardList || _kind == _ListKind.dismissible)
+              PlaySwitchItem(
                 label: 'Reorder',
                 value: _reorder,
                 onChanged: (bool v) => setState(() => _reorder = v),
               ),
-              if (_selection) ...<Widget>[
-                PlaySwitch(
-                  label: 'Single select',
-                  value: _singleSelect,
-                  onChanged: (bool v) => setState(() => _singleSelect = v),
-                ),
-                PlaySwitch(
-                  label: 'Selected icon (leading flip)',
-                  value: _showSelectedIcon,
-                  onChanged: _setShowSelectedIcon,
-                ),
-                PlaySwitch(
-                  label: 'Double-tap trigger',
-                  value: _doubleTapTrigger,
-                  onChanged: _setDoubleTapTrigger,
-                ),
-              ],
-            ],
-          ),
-        if (_kind == _ListKind.cardList ||
-            _kind == _ListKind.dismissible ||
-            (_kind == _ListKind.expandable && _useSublist))
-          PlayControlPanel(
-            title: _kind == _ListKind.expandable
-                ? 'Sublist selection'
-                : 'Selection & reorder',
-            children: <Widget>[
-              PlaySwitch(
-                label: 'Selection',
-                value: _kind == _ListKind.expandable
+            if ((_kind == _ListKind.expandable
                     ? _nestedSelection
-                    : _selection,
-                onChanged: (bool v) => setState(() {
-                  if (_kind == _ListKind.expandable) {
-                    _nestedSelection = v;
-                  } else {
-                    _selection = v;
-                  }
-                }),
+                    : _selection) &&
+                _kind != _ListKind.expandable) ...<Widget>[
+              PlaySwitchItem(
+                label: 'Single select',
+                value: _singleSelect,
+                onChanged: (bool v) => setState(() => _singleSelect = v),
               ),
-              if (_kind == _ListKind.cardList || _kind == _ListKind.dismissible)
-                PlaySwitch(
-                  label: 'Reorder',
-                  value: _reorder,
-                  onChanged: (bool v) => setState(() => _reorder = v),
-                ),
-              if ((_kind == _ListKind.expandable
-                      ? _nestedSelection
-                      : _selection) &&
-                  _kind != _ListKind.expandable) ...<Widget>[
-                PlaySwitch(
-                  label: 'Single select',
-                  value: _singleSelect,
-                  onChanged: (bool v) => setState(() => _singleSelect = v),
-                ),
-                PlaySwitch(
-                  label: 'Selected icon (leading flip)',
-                  value: _showSelectedIcon,
-                  onChanged: _setShowSelectedIcon,
-                ),
-                PlaySwitch(
-                  label: 'Double-tap trigger',
-                  value: _doubleTapTrigger,
-                  onChanged: _setDoubleTapTrigger,
-                ),
-              ],
+              PlaySwitchItem(
+                label: 'Selected icon (leading flip)',
+                value: _showSelectedIcon,
+                onChanged: _setShowSelectedIcon,
+              ),
+              PlaySwitchItem(
+                label: 'Double-tap trigger',
+                value: _doubleTapTrigger,
+                onChanged: _setDoubleTapTrigger,
+              ),
             ],
-          ),
-      ],
-    );
+          ],
+        ),
+    ];
   }
 }
 
 class _ListDemoHost extends StatefulWidget {
   const _ListDemoHost({
+    required this.padding,
     required this.kind,
     required this.variant,
     required this.showLeading,
@@ -416,6 +387,7 @@ class _ListDemoHost extends StatefulWidget {
     required this.dismissEdge,
   });
 
+  final EdgeInsets padding;
   final _ListKind kind;
   final M3ECardVariant variant;
   final bool showLeading;
@@ -444,8 +416,6 @@ class _ListDemoHost extends StatefulWidget {
 }
 
 class _ListDemoHostState extends State<_ListDemoHost> {
-  static const EdgeInsets _listPadding = EdgeInsets.all(16);
-
   final M3EExpandableListController _transformController =
       M3EExpandableListController();
 
@@ -615,20 +585,10 @@ class _ListDemoHostState extends State<_ListDemoHost> {
 
   @override
   Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final Widget list = _list();
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: M3EAppBar.top(
-        titleText: widget.kind.name,
-        leading: M3EIconButton(
-          variant: M3EIconButtonVariant.standard,
-          icon: const Icon(M3EIcons.arrow_back),
-          tooltip: 'Back',
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-      ),
-      body: SingleChildScrollView(padding: _listPadding, child: list),
+    return SingleChildScrollView(
+      primary: true,
+      padding: widget.padding,
+      child: _list(),
     );
   }
 }

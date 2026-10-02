@@ -1,13 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Dialog variants shown in the playground.
 enum _DialogKind {
@@ -50,15 +46,15 @@ enum _DialogKind {
 }
 
 /// Live playground for [M3EDialog].
-class DialogsPlayground extends StatefulWidget {
+class DialogsPlayground extends PlaygroundWidget {
   /// Creates the dialogs playground.
   const DialogsPlayground({super.key});
 
   @override
-  State<DialogsPlayground> createState() => _DialogsPlaygroundState();
+  PlaygroundState<DialogsPlayground> createState() => _DialogsPlaygroundState();
 }
 
-class _DialogsPlaygroundState extends State<DialogsPlayground> {
+class _DialogsPlaygroundState extends PlaygroundState<DialogsPlayground> {
   static const List<String> _options = <String>[
     'None',
     'Callisto',
@@ -73,6 +69,7 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
   };
   String _content = 'This will restore all settings to their default values.';
   bool _showIcon = true;
+  bool _subhead = false;
   bool _topDivider = false;
   bool _bottomDivider = false;
   bool _barrierDismissible = true;
@@ -116,6 +113,9 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
         ? '\n    icon: const Icon(M3EIcons.error),'
         : '';
     final String lines = _truncateTitle ? '\n    titleMaxLines: 1,' : '';
+    final String subhead = _subhead
+        ? "\n    subhead: 'Applies to every device',"
+        : '';
     final String top = _topDivider ? '\n    topDivider: true,' : '';
     final String bottom = _bottomDivider ? '\n    bottomDivider: true,' : '';
     final String leading = _leadingAction
@@ -125,7 +125,7 @@ class _DialogsPlaygroundState extends State<DialogsPlayground> {
 M3EDialog.show<void>(
   context,$_barrierArg$_positionArg
   dialog: M3EDialog(
-    title: ${playDartString(_title)},$icon$lines
+    title: ${playDartString(_title)},$icon$subhead$lines
     content: Text(${playDartString(_content)}),$top$bottom$leading
     actions: <Widget>[
       M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -240,6 +240,7 @@ M3EFab(
       dialog: M3EDialog(
         title: _title,
         icon: _showIcon ? const Icon(M3EIcons.error) : null,
+        subhead: _subhead ? 'Applies to every device' : null,
         titleMaxLines: _truncateTitle ? 1 : null,
         content: _buildContent(),
         topDivider: _topDivider,
@@ -328,50 +329,61 @@ M3EFab(
 
   // ---- Preview ------------------------------------------------------------
 
-  Widget _trigger() {
-    if (_kind == _DialogKind.fabTransform) {
-      return M3EFab(
-        icon: const Icon(M3EIcons.add),
-        tooltip: 'Open full-screen dialog',
-        openBuilder: _fullScreenDestination,
-      );
-    }
+  @override
+  Widget buildPreview(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final bool fab = _kind == _DialogKind.fabTransform;
     final VoidCallback open = switch (_kind) {
       _DialogKind.basic => _showBasic,
       _DialogKind.selection => _showSelection,
       _DialogKind.fullScreen => _showFullScreen,
       _DialogKind.adaptive || _DialogKind.fabTransform => _showAdaptive,
     };
-    return M3EButton(
-      onPressed: open,
-      child: Text('Open ${_kind.label.toLowerCase()} dialog'),
-    );
-  }
-
-  Widget _preview() {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlayPreviewCard(
-      label: '${_kind.label} dialog',
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 360),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
             _kind.description,
+            textAlign: TextAlign.center,
             style: theme.typeScale.bodyMedium.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 12),
-          _trigger(),
+          if (!fab) ...<Widget>[
+            const SizedBox(height: 16),
+            M3EButton(
+              onPressed: open,
+              child: Text('Open ${_kind.label.toLowerCase()} dialog'),
+            ),
+          ],
         ],
       ),
     );
   }
 
+  @override
+  PlaygroundSlots buildSlots(BuildContext context, PlaygroundChrome chrome) {
+    if (_kind != _DialogKind.fabTransform) {
+      return const PlaygroundSlots();
+    }
+    return PlaygroundSlots(
+      floatingActionButton: M3EFab(
+        icon: const Icon(M3EIcons.add),
+        tooltip: 'Open full-screen dialog',
+        openBuilder: _fullScreenDestination,
+      ),
+    );
+  }
+
+  @override
+  List<PlaySnippet> get snippets => <PlaySnippet>[_snippet];
+
   // ---- Controls -----------------------------------------------------------
 
   Widget _switch(String label, bool value, ValueChanged<bool> onChanged) {
-    return PlaySwitch(
+    return PlaySwitchItem(
       label: label,
       value: value,
       onChanged: (bool v) => setState(() => onChanged(v)),
@@ -397,7 +409,7 @@ M3EFab(
     (bool v) => _barrierDismissible = v,
   );
 
-  Widget get _positionControl => PlayEnumSegmented<M3EDialogPosition>(
+  Widget get _positionControl => PlayEnumChoice<M3EDialogPosition>(
     label: 'Position',
     value: _position,
     values: M3EDialogPosition.values,
@@ -410,6 +422,7 @@ M3EFab(
       _titleField,
       _contentField,
       _switch('Show icon', _showIcon, (bool v) => _showIcon = v),
+      _switch('Subhead', _subhead, (bool v) => _subhead = v),
       _switch('Long content (scrolls)', _longContent, (bool v) {
         _longContent = v;
       }),
@@ -455,25 +468,21 @@ M3EFab(
   };
 
   @override
-  Widget build(BuildContext context) {
-    return PlaygroundBody(
-      previews: <Widget>[_preview()],
-      snippets: <PlaySnippet>[_snippet],
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Variant',
-          children: <Widget>[
-            PlayEnumMenu<_DialogKind>(
-              label: 'Dialog',
-              value: _kind,
-              values: _DialogKind.values,
-              labelOf: (_DialogKind k) => k.label,
-              onChanged: (_DialogKind k) => setState(() => _kind = k),
-            ),
-          ],
-        ),
-        PlayControlPanel(title: 'Options', children: _kindControls),
-      ],
-    );
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Variant',
+        children: <Widget>[
+          PlayEnumChoice<_DialogKind>(
+            label: 'Dialog',
+            value: _kind,
+            values: _DialogKind.values,
+            labelOf: (_DialogKind k) => k.label,
+            onChanged: (_DialogKind k) => setState(() => _kind = k),
+          ),
+        ],
+      ),
+      PlayControlGroup(title: 'Options', children: _kindControls),
+    ];
   }
 }

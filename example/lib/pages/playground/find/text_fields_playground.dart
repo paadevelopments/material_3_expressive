@@ -1,13 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_slider.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Input line modes shown in the playground.
 enum _LineMode {
@@ -26,15 +23,16 @@ enum _LineMode {
 }
 
 /// Live playground for [M3ETextField].
-class TextFieldsPlayground extends StatefulWidget {
+class TextFieldsPlayground extends PlaygroundWidget {
   /// Creates the text fields playground.
   const TextFieldsPlayground({super.key});
 
   @override
-  State<TextFieldsPlayground> createState() => _TextFieldsPlaygroundState();
+  PlaygroundState<TextFieldsPlayground> createState() =>
+      _TextFieldsPlaygroundState();
 }
 
-class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
+class _TextFieldsPlaygroundState extends PlaygroundState<TextFieldsPlayground> {
   M3ETextFieldVariant _variant = M3ETextFieldVariant.filled;
   _LineMode _lines = _LineMode.single;
   M3ETextFieldSlotAlignment _iconAlignment = M3ETextFieldSlotAlignment.center;
@@ -70,6 +68,16 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
 
   String? _nonEmpty(String value) => value.isEmpty ? null : value;
 
+  bool get _singleLine => _lines == _LineMode.single;
+
+  bool get _hasIcons =>
+      _showLeading ||
+      _showTrailing ||
+      _clearButton ||
+      (_singleLine && _passwordToggle);
+
+  bool get _hasAffix => _prefix.isNotEmpty || _suffix.isNotEmpty;
+
   String get _sample {
     final buffer = StringBuffer()
       ..writeln('M3ETextField(')
@@ -83,16 +91,16 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
 
     add(!_showError, 'supportingText: ${playDartString(_supporting)}');
     add(_showError, 'errorText: ${playDartString(_error)}');
-    add(!_errorIcon, 'showErrorIcon: false');
+    add(_showError && !_errorIcon, 'showErrorIcon: false');
     add(!_enabled, 'enabled: false');
-    add(_readOnly, 'readOnly: true');
+    add(_enabled && _readOnly, 'readOnly: true');
     add(_required, 'isRequired: true');
-    add(_obscure, 'obscureText: true');
-    add(_passwordToggle, 'showPasswordToggle: true');
+    add(_singleLine && _obscure, 'obscureText: true');
+    add(_singleLine && _passwordToggle, 'showPasswordToggle: true');
     add(_showLeading, 'leading: const Icon(M3EIcons.search)');
     add(_showTrailing, 'trailing: const Icon(M3EIcons.mic)');
     add(_clearButton, 'showClearButton: true');
-    add(_supportingOnFocus, 'supportingTextOnFocusOnly: true');
+    add(!_showError && _supportingOnFocus, 'supportingTextOnFocusOnly: true');
     add(_counter, 'maxLength: 20');
     add(_prefix.isNotEmpty, 'prefixText: ${playDartString(_prefix)}');
     add(_suffix.isNotEmpty, 'suffixText: ${playDartString(_suffix)}');
@@ -104,11 +112,15 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
     add(_lines == _LineMode.area, 'minLines: ${_lines.minLines}');
     add(_density != 0, 'density: ${_density.round()}');
     add(
-      _iconAlignment != M3ETextFieldSlotAlignment.center,
+      !_singleLine &&
+          _hasIcons &&
+          _iconAlignment != M3ETextFieldSlotAlignment.center,
       'iconAlignment: M3ETextFieldSlotAlignment.${_iconAlignment.name}',
     );
     add(
-      _affixAlignment != M3ETextFieldSlotAlignment.firstLine,
+      !_singleLine &&
+          _hasAffix &&
+          _affixAlignment != M3ETextFieldSlotAlignment.firstLine,
       'affixAlignment: M3ETextFieldSlotAlignment.${_affixAlignment.name}',
     );
     buffer.write(');');
@@ -116,21 +128,26 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(label: 'Text field', child: _buildField()),
-      ],
-      snippets: <PlaySnippet>[
-        PlaySnippet(label: 'Text field', code: '$kPlaySnippetImport\n$_sample'),
-      ],
-      controls: <Widget>[
-        PlayControlPanel(title: 'Appearance', children: _appearanceControls()),
-        PlayControlPanel(title: 'State', children: _stateControls()),
-        PlayControlPanel(title: 'Icons', children: _iconControls()),
-        PlayControlPanel(title: 'Content', children: _contentControls()),
-      ],
+  Widget buildPreview(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: _buildField(),
     );
+  }
+
+  @override
+  List<PlaySnippet> get snippets => <PlaySnippet>[
+    PlaySnippet(label: 'Text field', code: '$kPlaySnippetImport\n\n$_sample'),
+  ];
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(title: 'Appearance', children: _appearanceControls()),
+      PlayControlGroup(title: 'State', children: _stateControls()),
+      PlayControlGroup(title: 'Icons', children: _iconControls()),
+      PlayControlGroup(title: 'Content', children: _contentControls()),
+    ];
   }
 
   Widget _buildField() {
@@ -143,7 +160,7 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
       showErrorIcon: _errorIcon,
       variant: _variant,
       enabled: _enabled,
-      readOnly: _readOnly,
+      readOnly: _enabled && _readOnly,
       isRequired: _required,
       obscureText: obscure,
       showPasswordToggle: _passwordToggle && _lines == _LineMode.single,
@@ -171,14 +188,14 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
 
   List<Widget> _appearanceControls() {
     return <Widget>[
-      PlayEnumSegmented<M3ETextFieldVariant>(
+      PlayEnumChoice<M3ETextFieldVariant>(
         label: 'Variant',
         value: _variant,
         values: M3ETextFieldVariant.values,
         labelOf: (M3ETextFieldVariant v) => v.name,
         onChanged: (M3ETextFieldVariant v) => setState(() => _variant = v),
       ),
-      PlayEnumSegmented<_LineMode>(
+      PlayEnumChoice<_LineMode>(
         label: 'Input lines',
         value: _lines,
         values: _LineMode.values,
@@ -189,22 +206,24 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
         },
         onChanged: (_LineMode v) => setState(() => _lines = v),
       ),
-      PlayEnumSegmented<M3ETextFieldSlotAlignment>(
-        label: 'Icon alignment',
-        value: _iconAlignment,
-        values: M3ETextFieldSlotAlignment.values,
-        labelOf: _alignmentLabel,
-        onChanged: (M3ETextFieldSlotAlignment v) =>
-            setState(() => _iconAlignment = v),
-      ),
-      PlayEnumSegmented<M3ETextFieldSlotAlignment>(
-        label: 'Prefix/suffix alignment',
-        value: _affixAlignment,
-        values: M3ETextFieldSlotAlignment.values,
-        labelOf: _alignmentLabel,
-        onChanged: (M3ETextFieldSlotAlignment v) =>
-            setState(() => _affixAlignment = v),
-      ),
+      if (!_singleLine && _hasIcons)
+        PlayEnumChoice<M3ETextFieldSlotAlignment>(
+          label: 'Icon alignment',
+          value: _iconAlignment,
+          values: M3ETextFieldSlotAlignment.values,
+          labelOf: _alignmentLabel,
+          onChanged: (M3ETextFieldSlotAlignment v) =>
+              setState(() => _iconAlignment = v),
+        ),
+      if (!_singleLine && _hasAffix)
+        PlayEnumChoice<M3ETextFieldSlotAlignment>(
+          label: 'Prefix/suffix alignment',
+          value: _affixAlignment,
+          values: M3ETextFieldSlotAlignment.values,
+          labelOf: _alignmentLabel,
+          onChanged: (M3ETextFieldSlotAlignment v) =>
+              setState(() => _affixAlignment = v),
+        ),
       PlaySlider(
         label: 'Density',
         value: _density,
@@ -218,71 +237,77 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
 
   List<Widget> _stateControls() {
     return <Widget>[
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Enabled',
         value: _enabled,
         onChanged: (bool v) => setState(() => _enabled = v),
       ),
-      PlaySwitch(
-        label: 'Read only',
-        value: _readOnly,
-        onChanged: (bool v) => setState(() => _readOnly = v),
-      ),
-      PlaySwitch(
+      if (_enabled)
+        PlaySwitchItem(
+          label: 'Read only',
+          value: _readOnly,
+          onChanged: (bool v) => setState(() => _readOnly = v),
+        ),
+      PlaySwitchItem(
         label: 'Required',
         value: _required,
         onChanged: (bool v) => setState(() => _required = v),
       ),
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Error',
         value: _showError,
         onChanged: (bool v) => setState(() => _showError = v),
       ),
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Character counter (20)',
         value: _counter,
         onChanged: (bool v) => setState(() => _counter = v),
       ),
-      PlaySwitch(
-        label: 'Supporting text on focus only',
-        value: _supportingOnFocus,
-        onChanged: (bool v) => setState(() => _supportingOnFocus = v),
-      ),
+      if (!_showError)
+        PlaySwitchItem(
+          label: 'Supporting text on focus only',
+          value: _supportingOnFocus,
+          onChanged: (bool v) => setState(() => _supportingOnFocus = v),
+        ),
     ];
   }
 
   List<Widget> _iconControls() {
     return <Widget>[
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Leading icon',
         value: _showLeading,
         onChanged: (bool v) => setState(() => _showLeading = v),
       ),
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Trailing icon',
         value: _showTrailing,
         onChanged: (bool v) => setState(() => _showTrailing = v),
       ),
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Clear button',
         value: _clearButton,
         onChanged: (bool v) => setState(() => _clearButton = v),
       ),
-      PlaySwitch(
-        label: 'Error icon',
-        value: _errorIcon,
-        onChanged: (bool v) => setState(() => _errorIcon = v),
-      ),
-      PlaySwitch(
-        label: 'Obscure text',
-        value: _obscure,
-        onChanged: (bool v) => setState(() => _obscure = v),
-      ),
-      PlaySwitch(
-        label: 'Password toggle',
-        value: _passwordToggle,
-        onChanged: (bool v) => setState(() => _passwordToggle = v),
-      ),
+      if (_showError)
+        PlaySwitchItem(
+          label: 'Error icon',
+          value: _errorIcon,
+          onChanged: (bool v) => setState(() => _errorIcon = v),
+        ),
+      if (_singleLine) ...<Widget>[
+        PlaySwitchItem(
+          label: 'Obscure text',
+          description: 'Single-line fields only',
+          value: _obscure,
+          onChanged: (bool v) => setState(() => _obscure = v),
+        ),
+        PlaySwitchItem(
+          label: 'Password toggle',
+          value: _passwordToggle,
+          onChanged: (bool v) => setState(() => _passwordToggle = v),
+        ),
+      ],
     ];
   }
 
@@ -293,16 +318,18 @@ class _TextFieldsPlaygroundState extends State<TextFieldsPlayground> {
         value: _label,
         onChanged: (String v) => setState(() => _label = v),
       ),
-      PlayTextField(
-        label: 'Supporting text',
-        value: _supporting,
-        onChanged: (String v) => setState(() => _supporting = v),
-      ),
-      PlayTextField(
-        label: 'Error text',
-        value: _error,
-        onChanged: (String v) => setState(() => _error = v),
-      ),
+      if (!_showError)
+        PlayTextField(
+          label: 'Supporting text',
+          value: _supporting,
+          onChanged: (String v) => setState(() => _supporting = v),
+        ),
+      if (_showError)
+        PlayTextField(
+          label: 'Error text',
+          value: _error,
+          onChanged: (String v) => setState(() => _error = v),
+        ),
       PlayTextField(
         label: 'Prefix',
         value: _prefix,

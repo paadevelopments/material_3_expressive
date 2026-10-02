@@ -1,250 +1,63 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:material_ui/material_ui.dart' show MaterialPageRoute, Scaffold;
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
+import '../../../widgets/playground/controls/play_slider.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Bottom sheet variants shown in the playground.
 enum _SheetKind {
-  modal(
-    'Modal',
-    'Opens over a scrim at no more than half the screen. Drag, tap or press '
-        'Space / Enter on the handle to change height; tap the scrim, swipe '
-        'down or press Escape to close.',
-  ),
-  standard(
-    'Standard',
-    'Sits next to the main content without a scrim, so both stay usable. '
-        'Tap a row behind it to cycle its height without dragging.',
-  ),
-  adaptive(
-    'Adaptive',
-    'A modal bottom sheet below 840dp and a side sheet at 840dp and wider.',
-  );
+  modal('modal'),
+  standard('standard'),
+  adaptive('adaptive (side sheet ≥ 840dp)');
 
-  const _SheetKind(this.label, this.description);
+  const _SheetKind(this.label);
 
   final String label;
-  final String description;
-}
-
-/// Sheet options picked in the playground.
-class _SheetOptions {
-  const _SheetOptions({
-    required this.kind,
-    required this.showDragHandle,
-    required this.openExpanded,
-    required this.fullScreen,
-    required this.cyclesToClose,
-    required this.longContent,
-    required this.title,
-    required this.body,
-  });
-
-  final _SheetKind kind;
-  final bool showDragHandle;
-  final bool openExpanded;
-  final bool fullScreen;
-  final bool cyclesToClose;
-  final bool longContent;
-  final String title;
-  final String body;
-
-  M3EBottomSheetValue get initialValue => openExpanded
-      ? M3EBottomSheetValue.expanded
-      : M3EBottomSheetValue.collapsed;
 }
 
 /// Live playground for [M3EBottomSheet].
-class BottomSheetPlayground extends StatefulWidget {
+class BottomSheetPlayground extends PlaygroundWidget {
   /// Creates the bottom sheet playground.
   const BottomSheetPlayground({super.key});
 
   @override
-  State<BottomSheetPlayground> createState() => _BottomSheetPlaygroundState();
+  PlaygroundState<BottomSheetPlayground> createState() =>
+      _BottomSheetPlaygroundState();
 }
 
-class _BottomSheetPlaygroundState extends State<BottomSheetPlayground> {
+class _BottomSheetPlaygroundState
+    extends PlaygroundState<BottomSheetPlayground> {
+  final M3EBottomSheetController _controller = M3EBottomSheetController();
+
   _SheetKind _kind = _SheetKind.modal;
+  M3EBottomSheetValue _initialValue = M3EBottomSheetValue.collapsed;
   bool _showDragHandle = true;
-  bool _openExpanded = false;
+  bool _enableDrag = true;
+  bool _dismissible = true;
   bool _fullScreen = false;
   bool _cyclesToClose = false;
+  bool _usePreview = false;
+  double _previewHeight = 64;
   bool _longContent = true;
   String _title = 'Share';
   String _body = 'Secondary content anchored to the bottom of the screen.';
 
-  _SheetOptions get _options => _SheetOptions(
-    kind: _kind,
-    showDragHandle: _showDragHandle,
-    openExpanded: _openExpanded,
-    fullScreen: _fullScreen,
-    cyclesToClose: _cyclesToClose,
-    longContent: _longContent,
-    title: _title,
-    body: _body,
-  );
+  bool get _standard => _kind == _SheetKind.standard;
 
-  String get _snippetTap => _kind == _SheetKind.standard
-      ? '(int i) {}'
-      : '(int i) => Navigator.pop(context)';
+  bool get _hasTitle => _fullScreen || _kind == _SheetKind.adaptive;
 
-  List<PlaySnippet> get _snippets {
-    final String call = switch (_kind) {
-      _SheetKind.modal => 'M3EBottomSheet.show<void>(\n  context,',
-      _SheetKind.adaptive =>
-        'M3EBottomSheet.showAdaptive<void>(\n'
-            '  context,\n'
-            '  title: ${playDartString(_title)},',
-      _SheetKind.standard => 'M3EBottomSheet.standard(',
-    };
-    final String list = _kind == _SheetKind.standard
-        ? '  child: M3EList.scrollable('
-        : '  builder: (BuildContext context) => M3EList.scrollable(';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: '${_kind.label} bottom sheet',
-        code:
-            '''
-$kPlaySnippetImport
+  List<M3EBottomSheetValue> get _initialValues => <M3EBottomSheetValue>[
+    if (_standard && _usePreview) M3EBottomSheetValue.preview,
+    M3EBottomSheetValue.collapsed,
+    M3EBottomSheetValue.expanded,
+  ];
 
-$call
-  showDragHandle: $_showDragHandle,
-  initialValue: ${_options.initialValue},
-  expandToFullScreen: $_fullScreen,
-  theme: M3ETheme.of(context).bottomSheetTheme.copyWith(
-    handleCyclesToClose: $_cyclesToClose,
-  ),
-$list
-    variant: M3ECardVariant.filled,
-    listPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-    itemCount: ${_longContent ? 30 : 3},
-    onTap: $_snippetTap,
-    itemBuilder: (BuildContext context, int i) =>
-        M3EListItem(headline: 'Action \${i + 1}'),
-  ),
-);''',
-      ),
-    ];
-  }
-
-  void _openDemo() {
-    final _SheetOptions options = _options;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => _SheetDemoScreen(options: options),
-      ),
-    );
-  }
-
-  Widget _switch(String label, bool value, ValueChanged<bool> onChanged) {
-    return PlaySwitch(
-      label: label,
-      value: value,
-      onChanged: (bool v) => setState(() => onChanged(v)),
-    );
-  }
-
-  List<Widget> _controls() {
-    return <Widget>[
-      PlayControlPanel(
-        title: 'Sheet',
-        children: <Widget>[
-          PlayEnumSegmented<_SheetKind>(
-            label: 'Variant',
-            value: _kind,
-            values: _SheetKind.values,
-            labelOf: (_SheetKind k) => k.label,
-            onChanged: (_SheetKind v) => setState(() => _kind = v),
-          ),
-          _switch('Drag handle', _showDragHandle, (v) => _showDragHandle = v),
-          _switch('Open fully raised', _openExpanded, (v) => _openExpanded = v),
-          _switch('Full-screen height', _fullScreen, (v) => _fullScreen = v),
-          _switch(
-            'Handle cycle closes',
-            _cyclesToClose,
-            (v) => _cyclesToClose = v,
-          ),
-          _switch(
-            'Long list (scrolls inside)',
-            _longContent,
-            (v) => _longContent = v,
-          ),
-          PlayTextField(
-            label: 'Title',
-            value: _title,
-            onChanged: (String v) => setState(() => _title = v),
-          ),
-          PlayTextField(
-            label: 'Body',
-            value: _body,
-            onChanged: (String v) => setState(() => _body = v),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: '${_kind.label} bottom sheet',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                _kind.description,
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: Text('Open ${_kind.label.toLowerCase()} sheet demo'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: _controls(),
-    );
-  }
-}
-
-/// Dedicated preview screen: app content with the selected sheet.
-class _SheetDemoScreen extends StatefulWidget {
-  const _SheetDemoScreen({required this.options});
-
-  final _SheetOptions options;
-
-  @override
-  State<_SheetDemoScreen> createState() => _SheetDemoScreenState();
-}
-
-class _SheetDemoScreenState extends State<_SheetDemoScreen> {
-  final M3EBottomSheetController _controller = M3EBottomSheetController();
-
-  _SheetOptions get _options => widget.options;
-
-  bool get _standard => _options.kind == _SheetKind.standard;
-
-  @override
-  void initState() {
-    super.initState();
-    if (!_standard) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showSheet());
-    }
-  }
+  M3EBottomSheetValue get _effectiveInitial =>
+      _initialValues.contains(_initialValue)
+      ? _initialValue
+      : M3EBottomSheetValue.collapsed;
 
   @override
   void dispose() {
@@ -254,21 +67,20 @@ class _SheetDemoScreenState extends State<_SheetDemoScreen> {
 
   M3EBottomSheetTheme _sheetTheme(BuildContext context) =>
       M3ETheme.of(context).bottomSheetTheme
-          .copyWith(handleCyclesToClose: _options.cyclesToClose);
+          .copyWith(handleCyclesToClose: _cyclesToClose);
 
-  void _showSheet() {
-    if (!mounted) {
-      return;
-    }
+  void _showSheet(BuildContext context) {
     Widget builder(BuildContext context) =>
         _sheetContent(context, () => Navigator.of(context).pop());
-    if (_options.kind == _SheetKind.adaptive) {
+    if (_kind == _SheetKind.adaptive) {
       M3EBottomSheet.showAdaptive<void>(
         context,
-        title: _options.title,
-        showDragHandle: _options.showDragHandle,
-        initialValue: _options.initialValue,
-        expandToFullScreen: _options.fullScreen,
+        title: _title,
+        showDragHandle: _showDragHandle,
+        enableDrag: _enableDrag,
+        isDismissible: _dismissible,
+        initialValue: _effectiveInitial,
+        expandToFullScreen: _fullScreen,
         theme: _sheetTheme(context),
         builder: builder,
       );
@@ -276,10 +88,12 @@ class _SheetDemoScreenState extends State<_SheetDemoScreen> {
     }
     M3EBottomSheet.show<void>(
       context,
-      showDragHandle: _options.showDragHandle,
-      initialValue: _options.initialValue,
-      expandToFullScreen: _options.fullScreen,
-      fullScreenTitle: _options.title,
+      showDragHandle: _showDragHandle,
+      enableDrag: _enableDrag,
+      isDismissible: _dismissible,
+      initialValue: _effectiveInitial,
+      expandToFullScreen: _fullScreen,
+      fullScreenTitle: _fullScreen ? _title : null,
       theme: _sheetTheme(context),
       builder: builder,
     );
@@ -288,12 +102,11 @@ class _SheetDemoScreenState extends State<_SheetDemoScreen> {
   /// Body text over a filled card list of actions.
   Widget _sheetContent(BuildContext context, VoidCallback onAction) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final int count = _options.longContent ? 30 : 3;
     final Widget list = M3EList.scrollable(
       variant: M3ECardVariant.filled,
-      shrinkWrap: !_options.longContent,
+      shrinkWrap: !_longContent,
       listPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: count,
+      itemCount: _longContent ? 30 : 3,
       onTap: (_) => onAction(),
       itemBuilder: (BuildContext context, int index) => M3EListItem(
         headline: 'Action ${index + 1}',
@@ -307,56 +120,204 @@ class _SheetDemoScreenState extends State<_SheetDemoScreen> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-          child: Text(_options.body, style: theme.typeScale.bodyLarge),
+          child: Text(_body, style: theme.typeScale.bodyLarge),
         ),
         Flexible(child: list),
       ],
     );
   }
 
-  /// Main content behind the sheet, as a filled card list.
-  Widget _mainContent() {
-    return M3EList.scrollable(
+  @override
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    final Widget content = M3EList.scrollable(
+      controller: PrimaryScrollController.of(context),
       variant: M3ECardVariant.filled,
-      listPadding: const EdgeInsets.fromLTRB(16, 8, 16, 160),
+      listPadding: padding.copyWith(bottom: padding.bottom + 160),
       itemCount: 20,
-      onTap: (_) => _standard ? _controller.cycle() : _showSheet(),
+      onTap: (_) => _standard ? _controller.cycle() : _showSheet(context),
       itemBuilder: (BuildContext context, int index) => M3EListItem(
         headline: 'Item ${index + 1}',
-        supportingText: _standard ? 'Tap to cycle the sheet' : 'Tap to open',
+        supportingText: _standard
+            ? 'Tap to cycle the sheet height'
+            : 'Tap to open the sheet',
         leading: const Icon(M3EIcons.label),
       ),
+    );
+    if (!_standard) {
+      return content;
+    }
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(child: content),
+        Positioned.fill(
+          child: M3EBottomSheet.standard(
+            // Structural options only apply when the sheet is created.
+            key: ValueKey<String>(
+              '$_effectiveInitial-$_fullScreen-$_usePreview-$_previewHeight-'
+              '$_dismissible-$_longContent',
+            ),
+            controller: _controller,
+            showDragHandle: _showDragHandle,
+            enableDrag: _enableDrag,
+            isDismissible: _dismissible,
+            initialValue: _effectiveInitial,
+            previewHeight: _usePreview ? _previewHeight : null,
+            expandToFullScreen: _fullScreen,
+            fullScreenTitle: _fullScreen ? _title : null,
+            theme: _sheetTheme(context),
+            child: _sheetContent(context, () {}),
+          ),
+        ),
+      ],
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: M3EAppBar.top(
-        titleText: '${_options.kind.label} bottom sheet',
-        automaticallyImplyLeading: true,
+  List<PlaySnippet> get snippets {
+    final String call = switch (_kind) {
+      _SheetKind.modal => 'M3EBottomSheet.show<void>(\n  context,',
+      _SheetKind.adaptive =>
+        'M3EBottomSheet.showAdaptive<void>(\n'
+            '  context,\n'
+            '  title: ${playDartString(_title)},',
+      _SheetKind.standard => 'M3EBottomSheet.standard(',
+    };
+    final StringBuffer args = StringBuffer()
+      ..writeln('  showDragHandle: $_showDragHandle,')
+      ..writeln('  enableDrag: $_enableDrag,')
+      ..writeln('  isDismissible: $_dismissible,')
+      ..writeln('  initialValue: $_effectiveInitial,')
+      ..writeln('  expandToFullScreen: $_fullScreen,');
+    if (_fullScreen && _kind != _SheetKind.adaptive) {
+      args.writeln('  fullScreenTitle: ${playDartString(_title)},');
+    }
+    if (_standard && _usePreview) {
+      args.writeln('  previewHeight: ${_previewHeight.round()},');
+    }
+    if (_cyclesToClose) {
+      args.writeln(
+        '  theme: M3ETheme.of(context).bottomSheetTheme.copyWith(\n'
+        '    handleCyclesToClose: true,\n'
+        '  ),',
+      );
+    }
+    final String child = _standard
+        ? '  child: content,'
+        : '  builder: (BuildContext context) => content,';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: '${_kind.name} bottom sheet',
+        code: '$kPlaySnippetImport\n\n$call\n$args$child\n);',
       ),
-      body: Stack(
+    ];
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Variant',
         children: <Widget>[
-          Positioned.fill(child: _mainContent()),
-          if (_standard)
-            Positioned.fill(
-              child: M3EBottomSheet.standard(
-                controller: _controller,
-                showDragHandle: _options.showDragHandle,
-                initialValue: _options.initialValue,
-                previewHeight: 64,
-                isDismissible: true,
-                expandToFullScreen: _options.fullScreen,
-                fullScreenTitle: _options.title,
-                theme: _sheetTheme(context),
-                child: _sheetContent(context, () {}),
-              ),
-            ),
+          PlayEnumChoice<_SheetKind>(
+            label: 'Sheet',
+            value: _kind,
+            values: _SheetKind.values,
+            labelOf: (_SheetKind k) => k.label,
+            onChanged: (_SheetKind v) => setState(() => _kind = v),
+          ),
         ],
       ),
-    );
+      PlayControlGroup(
+        title: 'Height',
+        children: <Widget>[
+          if (_standard)
+            PlaySwitchItem(
+              label: 'Preview height',
+              description: 'A peek below the collapsed height',
+              value: _usePreview,
+              onChanged: (bool v) => setState(() => _usePreview = v),
+            ),
+          if (_standard && _usePreview)
+            PlaySlider(
+              label: 'Preview height',
+              value: _previewHeight,
+              min: 48,
+              max: 160,
+              divisions: 14,
+              onChanged: (double v) => setState(() => _previewHeight = v),
+            ),
+          PlayEnumChoice<M3EBottomSheetValue>(
+            label: 'Initial height',
+            value: _effectiveInitial,
+            values: _initialValues,
+            labelOf: (M3EBottomSheetValue v) => v.name,
+            onChanged: (M3EBottomSheetValue v) {
+              setState(() => _initialValue = v);
+            },
+          ),
+          PlaySwitchItem(
+            label: 'Full-screen height',
+            description: 'Adds a full-screen step with a header',
+            value: _fullScreen,
+            onChanged: (bool v) => setState(() => _fullScreen = v),
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Behavior',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'Drag handle',
+            value: _showDragHandle,
+            onChanged: (bool v) => setState(() => _showDragHandle = v),
+          ),
+          if (_showDragHandle)
+            PlaySwitchItem(
+              label: 'Handle cycle closes',
+              description: 'Tapping past the tallest height closes',
+              value: _cyclesToClose,
+              onChanged: (bool v) => setState(() => _cyclesToClose = v),
+            ),
+          PlaySwitchItem(
+            label: 'Drag to resize',
+            value: _enableDrag,
+            onChanged: (bool v) => setState(() => _enableDrag = v),
+          ),
+          PlaySwitchItem(
+            label: 'Dismissible',
+            description: _standard
+                ? 'Dragging down can hide the sheet'
+                : 'Scrim tap, swipe down and Escape close it',
+            value: _dismissible,
+            onChanged: (bool v) => setState(() => _dismissible = v),
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          if (_hasTitle)
+            PlayTextField(
+              label: 'Title',
+              value: _title,
+              onChanged: (String v) => setState(() => _title = v),
+            ),
+          PlayTextField(
+            label: 'Body',
+            value: _body,
+            onChanged: (String v) => setState(() => _body = v),
+          ),
+          PlaySwitchItem(
+            label: 'Long list',
+            description: 'Scrolls inside the sheet',
+            value: _longContent,
+            onChanged: (bool v) => setState(() => _longContent = v),
+          ),
+        ],
+      ),
+    ];
   }
 }

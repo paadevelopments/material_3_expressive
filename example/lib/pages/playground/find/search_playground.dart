@@ -1,34 +1,39 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:material_ui/material_ui.dart' show MaterialPageRoute, Scaffold;
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
+/// Search widget shown in the sliver.
+enum _Mode { anchor, bar }
+
+/// Search view layout; auto is full screen below 600dp.
 enum _Layout { auto, fullScreen, docked }
 
+/// Leading slot content.
 enum _Leading { search, menu, none }
 
+/// Trailing slot content.
 enum _Trailing { none, one, two, avatar, iconAvatar }
 
 /// Live playground for [M3ESearchBar], [M3ESearchAnchor], and
 /// [M3ESliverSearchBar].
-class SearchPlayground extends StatefulWidget {
+class SearchPlayground extends PlaygroundWidget {
   /// Creates the search playground.
   const SearchPlayground({super.key});
 
   @override
-  State<SearchPlayground> createState() => _SearchPlaygroundState();
+  PlaygroundState<SearchPlayground> createState() => _SearchPlaygroundState();
 }
 
-class _SearchPlaygroundState extends State<SearchPlayground> {
+class _SearchPlaygroundState extends PlaygroundState<SearchPlayground> {
+  final TextEditingController _barController = TextEditingController();
+  final M3ESearchController _anchorController = M3ESearchController();
+
+  _Mode _mode = _Mode.anchor;
   bool _expandOnFocus = true;
   bool _enabled = true;
-  bool _useAnchor = true;
   bool _showClear = true;
   M3ESearchViewStyle _style = M3ESearchViewStyle.contained;
   _Layout _layout = _Layout.auto;
@@ -36,225 +41,6 @@ class _SearchPlaygroundState extends State<SearchPlayground> {
   _Trailing _trailing = _Trailing.one;
   M3ESearchBarScrollBehavior _scroll = M3ESearchBarScrollBehavior.scrollAway;
   String _hint = 'Search components';
-
-  bool? get _isFullScreen => switch (_layout) {
-    _Layout.auto => null,
-    _Layout.fullScreen => true,
-    _Layout.docked => false,
-  };
-
-  void _openDemo() {
-    final options = _SearchDemoOptions(
-      useAnchor: _useAnchor,
-      style: _style,
-      isFullScreen: _isFullScreen,
-      leading: _leading,
-      trailing: _trailing,
-      scroll: _scroll,
-      enabled: _enabled,
-      expandOnFocus: _expandOnFocus,
-      showClear: _showClear,
-      hint: _hint,
-    );
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => _SearchDemoHost(options: options),
-      ),
-    );
-  }
-
-  List<PlaySnippet> get _snippets {
-    final String sample = _useAnchor
-        ? '''
-M3ESearchAnchor.bar(
-  searchController: searchController,
-  barHintText: ${playDartString(_hint)},
-  isFullScreen: ${_isFullScreen ?? 'null'}, // null: full-screen below 600dp
-  viewStyle: M3ESearchViewStyle.${_style.name},
-  suggestionsBuilder: (context, controller) => const <Widget>[],
-);'''
-        : '''
-M3ESearchBar(
-  hintText: ${playDartString(_hint)},
-  enabled: $_enabled,
-  expandOnFocus: $_expandOnFocus,
-  showClearButton: $_showClear,
-);''';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: _useAnchor ? 'Search anchor' : 'Search bar',
-        code: '$kPlaySnippetImport\n$sample',
-      ),
-      PlaySnippet(
-        label: 'Scroll behavior',
-        code:
-            '''
-$kPlaySnippetImport
-CustomScrollView(
-  slivers: <Widget>[
-    M3ESliverSearchBar(
-      scrollBehavior: M3ESearchBarScrollBehavior.${_scroll.name},
-      child: M3ESearchBar(hintText: 'Search your library'),
-    ),
-    // content slivers…
-  ],
-);''',
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Search demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Opens a screen with the search bar on top of scrolling '
-                'content. Resize the window across 600dp to switch between '
-                'full-screen and docked search.',
-                style: M3ETheme.of(context).typeScale.bodyMedium.copyWith(
-                  color: M3ETheme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: const Text('Open search demo'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Mode',
-          children: <Widget>[
-            PlaySwitch(
-              label: 'Use search anchor',
-              value: _useAnchor,
-              onChanged: (bool v) => setState(() => _useAnchor = v),
-            ),
-            if (_useAnchor)
-              PlayEnumSegmented<M3ESearchViewStyle>(
-                label: 'Style',
-                value: _style,
-                values: M3ESearchViewStyle.values,
-                labelOf: (M3ESearchViewStyle v) => v.name,
-                onChanged: (M3ESearchViewStyle v) => setState(() => _style = v),
-              ),
-            if (_useAnchor)
-              PlayEnumSegmented<_Layout>(
-                label: 'Layout',
-                value: _layout,
-                values: _Layout.values,
-                labelOf: (_Layout v) => v.name,
-                onChanged: (_Layout v) => setState(() => _layout = v),
-              ),
-            if (!_useAnchor)
-              PlaySwitch(
-                label: 'Expand on focus',
-                value: _expandOnFocus,
-                onChanged: (bool v) => setState(() => _expandOnFocus = v),
-              ),
-            PlaySwitch(
-              label: 'Enabled',
-              value: _enabled,
-              onChanged: (bool v) => setState(() => _enabled = v),
-            ),
-            PlaySwitch(
-              label: 'Clear button',
-              value: _showClear,
-              onChanged: (bool v) => setState(() => _showClear = v),
-            ),
-            PlayTextField(
-              label: 'Hint',
-              value: _hint,
-              onChanged: (String v) => setState(() => _hint = v),
-            ),
-          ],
-        ),
-        PlayControlPanel(
-          title: 'Content',
-          children: <Widget>[
-            PlayEnumSegmented<_Leading>(
-              label: 'Leading',
-              value: _leading,
-              values: _Leading.values,
-              labelOf: (_Leading v) => v.name,
-              onChanged: (_Leading v) => setState(() => _leading = v),
-            ),
-            PlayEnumSegmented<_Trailing>(
-              label: 'Trailing',
-              value: _trailing,
-              values: _Trailing.values,
-              labelOf: (_Trailing v) => switch (v) {
-                _Trailing.none => 'none',
-                _Trailing.one => '1',
-                _Trailing.two => '2',
-                _Trailing.avatar => 'avatar',
-                _Trailing.iconAvatar => '1 + avatar',
-              },
-              onChanged: (_Trailing v) => setState(() => _trailing = v),
-            ),
-            PlayEnumSegmented<M3ESearchBarScrollBehavior>(
-              label: 'Scroll',
-              value: _scroll,
-              values: M3ESearchBarScrollBehavior.values,
-              labelOf: (M3ESearchBarScrollBehavior v) => v.name,
-              onChanged: (M3ESearchBarScrollBehavior v) =>
-                  setState(() => _scroll = v),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SearchDemoOptions {
-  const _SearchDemoOptions({
-    required this.useAnchor,
-    required this.style,
-    required this.isFullScreen,
-    required this.leading,
-    required this.trailing,
-    required this.scroll,
-    required this.enabled,
-    required this.expandOnFocus,
-    required this.showClear,
-    required this.hint,
-  });
-
-  final bool useAnchor;
-  final M3ESearchViewStyle style;
-  final bool? isFullScreen;
-  final _Leading leading;
-  final _Trailing trailing;
-  final M3ESearchBarScrollBehavior scroll;
-  final bool enabled;
-  final bool expandOnFocus;
-  final bool showClear;
-  final String hint;
-}
-
-/// Full screen with the search bar above scrolling content.
-class _SearchDemoHost extends StatefulWidget {
-  const _SearchDemoHost({required this.options});
-
-  final _SearchDemoOptions options;
-
-  @override
-  State<_SearchDemoHost> createState() => _SearchDemoHostState();
-}
-
-class _SearchDemoHostState extends State<_SearchDemoHost> {
-  final TextEditingController _barController = TextEditingController();
-  final M3ESearchController _anchorController = M3ESearchController();
 
   static const List<String> _history = <String>['Buttons', 'Navigation bar'];
 
@@ -271,6 +57,14 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
     'Tooltip',
   ];
 
+  bool get _anchor => _mode == _Mode.anchor;
+
+  bool? get _isFullScreen => switch (_layout) {
+    _Layout.auto => null,
+    _Layout.fullScreen => true,
+    _Layout.docked => false,
+  };
+
   @override
   void dispose() {
     _barController.dispose();
@@ -278,9 +72,7 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
     super.dispose();
   }
 
-  _SearchDemoOptions get _o => widget.options;
-
-  Widget? get _leadingWidget => switch (_o.leading) {
+  Widget? get _leadingWidget => switch (_leading) {
     _Leading.search => const Icon(M3EIcons.search),
     _Leading.menu => M3EIconButton(
       variant: M3EIconButtonVariant.standard,
@@ -304,16 +96,15 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
       tooltip: 'More',
       onPressed: () {},
     );
-    return switch (_o.trailing) {
+    return switch (_trailing) {
       _Trailing.none || _Trailing.avatar => null,
       _Trailing.one || _Trailing.iconAvatar => <Widget>[mic],
       _Trailing.two => <Widget>[mic, more],
     };
   }
 
-  Widget? get _avatar {
-    if (_o.trailing != _Trailing.avatar &&
-        _o.trailing != _Trailing.iconAvatar) {
+  Widget? _avatar(BuildContext context) {
+    if (_trailing != _Trailing.avatar && _trailing != _Trailing.iconAvatar) {
       return null;
     }
     final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
@@ -329,7 +120,7 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
     );
   }
 
-  /// History group, a gap, then a "Results" group.
+  /// History group before typing, results after.
   Iterable<Widget> _suggestions(
     BuildContext context,
     M3ESearchController controller,
@@ -364,56 +155,53 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
     ];
   }
 
-  Widget _buildAnchor() {
-    return M3ESearchAnchor.bar(
-      searchController: _anchorController,
-      barHintText: _o.hint,
-      barLeading: _leadingWidget,
-      barTrailing: _trailingWidgets,
-      barAvatar: _avatar,
-      isFullScreen: _o.isFullScreen,
-      viewStyle: _o.style,
-      showViewClearButton: _o.showClear,
-      enabled: _o.enabled,
-      suggestionsBuilder: _suggestions,
-    );
-  }
-
-  Widget _buildBar() {
+  Widget _search(BuildContext context) {
+    if (_anchor) {
+      return M3ESearchAnchor.bar(
+        searchController: _anchorController,
+        barHintText: _hint,
+        barLeading: _leadingWidget,
+        barTrailing: _trailingWidgets,
+        barAvatar: _avatar(context),
+        isFullScreen: _isFullScreen,
+        viewStyle: _style,
+        showViewClearButton: _showClear,
+        enabled: _enabled,
+        suggestionsBuilder: _suggestions,
+      );
+    }
     return M3ESearchBar(
       controller: _barController,
-      hintText: _o.hint,
-      enabled: _o.enabled,
-      expandOnFocus: _o.expandOnFocus,
+      hintText: _hint,
+      enabled: _enabled,
+      expandOnFocus: _expandOnFocus,
       leading: _leadingWidget,
       trailing: _trailingWidgets,
-      avatar: _avatar,
-      showClearButton: _o.showClear,
+      avatar: _avatar(context),
+      showClearButton: _showClear,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: M3ETheme.of(context).colorScheme.surface,
-      appBar: M3EAppBar.top(
-        titleText: 'Search',
-        leading: M3EIconButton(
-          variant: M3EIconButtonVariant.standard,
-          icon: const Icon(M3EIcons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
-          tooltip: 'Back',
-        ),
-      ),
-      body: CustomScrollView(
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    // The sliver search bar scrolls with the page, below the banner.
+    return Padding(
+      padding: EdgeInsets.only(top: padding.top - 16),
+      child: CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           M3ESliverSearchBar(
-            scrollBehavior: _o.scroll,
+            // The scroll behavior only applies when the sliver is created.
+            key: ValueKey<M3ESearchBarScrollBehavior>(_scroll),
+            scrollBehavior: _scroll,
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _o.useAnchor ? _buildAnchor() : _buildBar(),
+            child: _search(context),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: padding.copyWith(top: 8),
             sliver: M3EList.sliver(
               variant: M3ECardVariant.filled,
               itemCount: 40,
@@ -430,5 +218,163 @@ class _SearchDemoHostState extends State<_SearchDemoHost> {
         ],
       ),
     );
+  }
+
+  @override
+  List<PlaySnippet> get snippets {
+    final String leading = switch (_leading) {
+      _Leading.search => 'const Icon(M3EIcons.search)',
+      _Leading.menu => 'menuButton',
+      _Leading.none => 'null',
+    };
+    final String trailing = switch (_trailing) {
+      _Trailing.none || _Trailing.avatar => 'null',
+      _Trailing.one || _Trailing.iconAvatar => '<Widget>[micButton]',
+      _Trailing.two => '<Widget>[micButton, moreButton]',
+    };
+    final bool avatar =
+        _trailing == _Trailing.avatar || _trailing == _Trailing.iconAvatar;
+    final String search = _anchor
+        ? '''
+M3ESearchAnchor.bar(
+        searchController: searchController,
+        barHintText: ${playDartString(_hint)},
+        barLeading: $leading,
+        barTrailing: $trailing,${avatar ? '\n        barAvatar: avatar,' : ''}
+        isFullScreen: ${_isFullScreen ?? 'null'}, // null: full screen below 600dp
+        viewStyle: M3ESearchViewStyle.${_style.name},
+        showViewClearButton: $_showClear,
+        enabled: $_enabled,
+        suggestionsBuilder: (context, controller) => <Widget>[],
+      )'''
+        : '''
+M3ESearchBar(
+        hintText: ${playDartString(_hint)},
+        leading: $leading,
+        trailing: $trailing,${avatar ? '\n        avatar: avatar,' : ''}
+        enabled: $_enabled,
+        expandOnFocus: $_expandOnFocus,
+        showClearButton: $_showClear,
+      )''';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: _anchor ? 'Search anchor' : 'Search bar',
+        code:
+            '''
+$kPlaySnippetImport
+
+CustomScrollView(
+  slivers: <Widget>[
+    M3ESliverSearchBar(
+      scrollBehavior: M3ESearchBarScrollBehavior.${_scroll.name},
+      child: $search,
+    ),
+    // content slivers…
+  ],
+);''',
+      ),
+    ];
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Variant',
+        children: <Widget>[
+          PlayEnumChoice<_Mode>(
+            label: 'Widget',
+            value: _mode,
+            values: _Mode.values,
+            labelOf: (_Mode v) => switch (v) {
+              _Mode.anchor => 'search anchor (opens a view)',
+              _Mode.bar => 'search bar only',
+            },
+            onChanged: (_Mode v) => setState(() => _mode = v),
+          ),
+          if (_anchor) ...<Widget>[
+            PlayEnumChoice<M3ESearchViewStyle>(
+              label: 'View style',
+              value: _style,
+              values: M3ESearchViewStyle.values,
+              labelOf: (M3ESearchViewStyle v) => v.name,
+              onChanged: (M3ESearchViewStyle v) => setState(() => _style = v),
+            ),
+            PlayEnumChoice<_Layout>(
+              label: 'View layout',
+              value: _layout,
+              values: _Layout.values,
+              labelOf: (_Layout v) => switch (v) {
+                _Layout.auto => 'auto (full screen below 600dp)',
+                _Layout.fullScreen => 'full screen',
+                _Layout.docked => 'docked',
+              },
+              onChanged: (_Layout v) => setState(() => _layout = v),
+            ),
+          ],
+          PlayEnumChoice<M3ESearchBarScrollBehavior>(
+            label: 'Scroll behavior',
+            value: _scroll,
+            values: M3ESearchBarScrollBehavior.values,
+            labelOf: (M3ESearchBarScrollBehavior v) => v.name,
+            onChanged: (M3ESearchBarScrollBehavior v) {
+              setState(() => _scroll = v);
+            },
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          PlayTextField(
+            label: 'Hint',
+            value: _hint,
+            onChanged: (String v) => setState(() => _hint = v),
+          ),
+          PlayEnumChoice<_Leading>(
+            label: 'Leading',
+            value: _leading,
+            values: _Leading.values,
+            labelOf: (_Leading v) => v.name,
+            onChanged: (_Leading v) => setState(() => _leading = v),
+          ),
+          PlayEnumChoice<_Trailing>(
+            label: 'Trailing',
+            value: _trailing,
+            values: _Trailing.values,
+            labelOf: (_Trailing v) => switch (v) {
+              _Trailing.none => 'none',
+              _Trailing.one => 'one action',
+              _Trailing.two => 'two actions',
+              _Trailing.avatar => 'avatar',
+              _Trailing.iconAvatar => 'action + avatar',
+            },
+            onChanged: (_Trailing v) => setState(() => _trailing = v),
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Behavior',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'Enabled',
+            value: _enabled,
+            onChanged: (bool v) => setState(() => _enabled = v),
+          ),
+          PlaySwitchItem(
+            label: 'Clear button',
+            description: _anchor ? 'In the open search view' : 'In the bar',
+            value: _showClear,
+            onChanged: (bool v) => setState(() => _showClear = v),
+          ),
+          if (!_anchor)
+            PlaySwitchItem(
+              label: 'Expand on focus',
+              value: _expandOnFocus,
+              onChanged: (bool v) => setState(() => _expandOnFocus = v),
+            ),
+        ],
+      ),
+    ];
   }
 }

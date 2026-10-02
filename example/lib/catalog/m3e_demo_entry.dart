@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../widgets/playground/playground.dart';
 import 'm3e_demo_section.dart';
 
 /// One component row in a section list and its playground builder.
@@ -30,6 +31,6 @@ class M3EDemoEntry {
   /// Parent gallery section.
   final M3EDemoSection section;
 
-  /// Builds the playground body (no chrome).
-  final WidgetBuilder playgroundBuilder;
+  /// Builds the playground shown on the entry's preview screen.
+  final PlaygroundWidget Function(BuildContext context) playgroundBuilder;
 }

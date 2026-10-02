@@ -1,24 +1,23 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
+import '../../../widgets/playground/controls/play_slider.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Live playground for [M3ENavigationRail].
-class NavigationRailPlayground extends StatefulWidget {
+class NavigationRailPlayground extends PlaygroundWidget {
   /// Creates the navigation rail playground.
   const NavigationRailPlayground({super.key});
 
   @override
-  State<NavigationRailPlayground> createState() =>
+  PlaygroundState<NavigationRailPlayground> createState() =>
       _NavigationRailPlaygroundState();
 }
 
-class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
-  M3ENavigationRailType _type = M3ENavigationRailType.expanded;
+class _NavigationRailPlaygroundState
+    extends PlaygroundState<NavigationRailPlayground> {
+  M3ENavigationRailType _type = M3ENavigationRailType.collapsed;
   M3ENavigationRailModality _modality = M3ENavigationRailModality.standard;
   M3ENavigationRailAlignment _alignment = M3ENavigationRailAlignment.top;
   M3ENavigationRailLabelBehavior _labelBehavior =
@@ -26,234 +25,47 @@ class _NavigationRailPlaygroundState extends State<NavigationRailPlayground> {
   bool _showFab = true;
   bool _showDivider = false;
   bool _hideWhenCollapsed = false;
+  bool _sectionHeaders = false;
+  bool _shortItems = false;
+  bool _badges = true;
+  bool _customWidth = false;
+  double _expandedWidth = 256;
+  int _index = 0;
 
-  static const List<M3ENavigationRailSection> _sections =
-      <M3ENavigationRailSection>[
-        M3ENavigationRailSection(
-          destinations: <M3ENavigationRailDestination>[
-            M3ENavigationRailDestination(
-              icon: Icon(M3EIcons.home),
-              label: 'Home',
-            ),
-            M3ENavigationRailDestination(
-              icon: Icon(M3EIcons.search),
-              label: 'Search',
-            ),
-            M3ENavigationRailDestination(
-              icon: Icon(M3EIcons.calendar_today),
-              label: 'Agenda',
-              badgeCount: 3,
-            ),
-            M3ENavigationRailDestination(
-              icon: Icon(M3EIcons.edit),
-              label: 'Drafts',
-            ),
-          ],
-        ),
+  M3ENavigationRailController _controller = M3ENavigationRailController(
+    expanded: false,
+  );
+
+  static const List<(IconData, String, String)> _main =
+      <(IconData, String, String)>[
+        (M3EIcons.home, 'home', 'Home'),
+        (M3EIcons.search, 'search', 'Search'),
+        (M3EIcons.calendar_today, 'calendar_today', 'Agenda'),
       ];
 
-  List<PlaySnippet> get _snippets {
-    final String fab = _showFab
-        ? '''
-  fab: M3ENavigationRailFabSlot(
-    icon: const Icon(M3EIcons.add),
-    label: 'Compose',
-    onPressed: () {},
-  ),'''
-        : '';
-    final bool modal = _modality == M3ENavigationRailModality.modal;
-    final String opener = modal
-        ? '''
-final M3ENavigationRailController controller =
-    M3ENavigationRailController(expanded: false);
+  static const List<(IconData, String, String)> _more =
+      <(IconData, String, String)>[
+        (M3EIcons.edit, 'edit', 'Drafts'),
+        (M3EIcons.archive, 'archive', 'Archive'),
+      ];
 
-M3EButton(
-  onPressed: controller.expand,
-  child: const Text('Open navigation'),
-);
+  bool get _modal => _modality == M3ENavigationRailModality.modal;
 
-'''
-        : '';
-    final String controllerArg = modal ? '\n  controller: controller,' : '';
-    final String sample =
-        '''
-${opener}M3ENavigationRail(
-  sections: const <M3ENavigationRailSection>[
-    M3ENavigationRailSection(
-      destinations: <M3ENavigationRailDestination>[
-        M3ENavigationRailDestination(
-          icon: Icon(M3EIcons.home),
-          label: 'Home',
-        ),
-        M3ENavigationRailDestination(
-          icon: Icon(M3EIcons.search),
-          label: 'Search',
-        ),
-      ],
-    ),
-  ],
-  selectedIndex: 0,
-  onDestinationSelected: (int i) {},
-  expandTooltip: 'Expand',
-  collapseTooltip: 'Collapse',
-  type: M3ENavigationRailType.${_type.name},
-  modality: M3ENavigationRailModality.${_modality.name},
-  alignment: M3ENavigationRailAlignment.${_alignment.name},
-  labelBehavior: M3ENavigationRailLabelBehavior.${_labelBehavior.name},
-  showDivider: $_showDivider,
-  hideWhenCollapsed: $_hideWhenCollapsed,$controllerArg$fab
-);''';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: 'Navigation rail',
-        code: '$kPlaySnippetImport\n$sample',
-      ),
-    ];
+  /// The rail can show its collapsed form.
+  bool get _canCollapse => _type != M3ENavigationRailType.alwaysExpand;
+
+  /// The rail can show its expanded form.
+  bool get _canExpand => _type != M3ENavigationRailType.alwaysCollapse;
+
+  bool get _startsExpanded =>
+      _type == M3ENavigationRailType.expanded ||
+      _type == M3ENavigationRailType.alwaysExpand;
+
+  void _resetController() {
+    final M3ENavigationRailController old = _controller;
+    _controller = M3ENavigationRailController(expanded: _startsExpanded);
+    WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
   }
-
-  void _openDemo() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return _NavigationRailDemoHost(
-            sections: _sections,
-            type: _type,
-            modality: _modality,
-            alignment: _alignment,
-            labelBehavior: _labelBehavior,
-            showFab: _showFab,
-            showDivider: _showDivider,
-            hideWhenCollapsed: _hideWhenCollapsed,
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Navigation rail demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Opens a full screen with the rail beside the page, the way '
-                'an app uses it. Expand it and switch destinations to review '
-                'the indicator.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: const Text('Open navigation rail demo'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Appearance',
-          children: <Widget>[
-            PlayEnumMenu<M3ENavigationRailType>(
-              label: 'Type',
-              value: _type,
-              values: M3ENavigationRailType.values,
-              labelOf: (M3ENavigationRailType v) => v.name,
-              onChanged: (M3ENavigationRailType v) {
-                setState(() => _type = v);
-              },
-            ),
-            PlayEnumMenu<M3ENavigationRailModality>(
-              label: 'Modality',
-              value: _modality,
-              values: M3ENavigationRailModality.values,
-              labelOf: (M3ENavigationRailModality v) => v.name,
-              onChanged: (M3ENavigationRailModality v) {
-                setState(() => _modality = v);
-              },
-            ),
-            PlayEnumMenu<M3ENavigationRailAlignment>(
-              label: 'Alignment',
-              value: _alignment,
-              values: M3ENavigationRailAlignment.values,
-              labelOf: (M3ENavigationRailAlignment v) => v.name,
-              onChanged: (M3ENavigationRailAlignment v) {
-                setState(() => _alignment = v);
-              },
-            ),
-            PlayEnumMenu<M3ENavigationRailLabelBehavior>(
-              label: 'Labels',
-              value: _labelBehavior,
-              values: M3ENavigationRailLabelBehavior.values,
-              labelOf: (M3ENavigationRailLabelBehavior v) => v.name,
-              onChanged: (M3ENavigationRailLabelBehavior v) {
-                setState(() => _labelBehavior = v);
-              },
-            ),
-            PlaySwitch(
-              label: 'Show FAB',
-              value: _showFab,
-              onChanged: (bool v) => setState(() => _showFab = v),
-            ),
-            PlaySwitch(
-              label: 'Divider',
-              value: _showDivider,
-              onChanged: (bool v) => setState(() => _showDivider = v),
-            ),
-            PlaySwitch(
-              label: 'Hide when collapsed',
-              value: _hideWhenCollapsed,
-              onChanged: (bool v) => setState(() => _hideWhenCollapsed = v),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _NavigationRailDemoHost extends StatefulWidget {
-  const _NavigationRailDemoHost({
-    required this.sections,
-    required this.type,
-    required this.modality,
-    required this.alignment,
-    required this.labelBehavior,
-    required this.showFab,
-    required this.showDivider,
-    required this.hideWhenCollapsed,
-  });
-
-  final List<M3ENavigationRailSection> sections;
-  final M3ENavigationRailType type;
-  final M3ENavigationRailModality modality;
-  final M3ENavigationRailAlignment alignment;
-  final M3ENavigationRailLabelBehavior labelBehavior;
-  final bool showFab;
-  final bool showDivider;
-  final bool hideWhenCollapsed;
-
-  @override
-  State<_NavigationRailDemoHost> createState() =>
-      _NavigationRailDemoHostState();
-}
-
-class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
-  int _index = 0;
-  late final M3ENavigationRailController _controller =
-      M3ENavigationRailController(
-        expanded:
-            widget.type == M3ENavigationRailType.expanded ||
-            widget.type == M3ENavigationRailType.alwaysExpand,
-      );
 
   @override
   void dispose() {
@@ -261,82 +73,267 @@ class _NavigationRailDemoHostState extends State<_NavigationRailDemoHost> {
     super.dispose();
   }
 
-  M3ENavigationRailDestination get _destination {
-    return widget.sections
-        .expand((M3ENavigationRailSection section) => section.destinations)
-        .elementAt(_index);
+  List<M3ENavigationRailSection> get _sections {
+    M3ENavigationRailDestination destination(
+      (IconData, String, String) entry, {
+      int? badge,
+    }) {
+      return M3ENavigationRailDestination(
+        icon: Icon(entry.$1),
+        label: entry.$3,
+        badgeCount: _badges ? badge : null,
+        short: _shortItems,
+      );
+    }
+
+    return <M3ENavigationRailSection>[
+      M3ENavigationRailSection(
+        header: _sectionHeaders ? const Text('Mail') : null,
+        destinations: <M3ENavigationRailDestination>[
+          destination(_main[0]),
+          destination(_main[1]),
+          destination(_main[2], badge: 3),
+        ],
+      ),
+      M3ENavigationRailSection(
+        header: _sectionHeaders ? const Text('Labels') : null,
+        destinations: <M3ENavigationRailDestination>[
+          for (final (IconData, String, String) entry in _more)
+            destination(entry),
+        ],
+      ),
+    ];
+  }
+
+  String get _title =>
+      <(IconData, String, String)>[..._main, ..._more][_index].$3;
+
+  @override
+  Widget buildPreview(BuildContext context) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final (IconData icon, String _, String _) = <(IconData, String, String)>[
+      ..._main,
+      ..._more,
+    ][_index];
+    return Icon(icon, size: 48, color: theme.colorScheme.primary);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ENavigationRailDestination destination = _destination;
-    return ColoredBox(
-      color: theme.colorScheme.surface,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          M3ENavigationRail(
-            sections: widget.sections,
-            selectedIndex: _index,
-            onDestinationSelected: (int i) => setState(() => _index = i),
-            type: widget.type,
-            modality: widget.modality,
-            alignment: widget.alignment,
-            labelBehavior: widget.labelBehavior,
-            showDivider: widget.showDivider,
-            hideWhenCollapsed: widget.hideWhenCollapsed,
-            controller: _controller,
-            fab: widget.showFab
-                ? M3ENavigationRailFabSlot(
-                    icon: const Icon(M3EIcons.add),
-                    label: 'Compose',
-                    onPressed: () {},
-                  )
-                : null,
-          ),
-          Expanded(
-            child: ColoredBox(
-              color: theme.colorScheme.surfaceContainerHigh,
-              child: Column(
-                children: <Widget>[
-                  M3EAppBar.top(
-                    titleText: destination.label,
-                    leading: M3EIconButton(
-                      variant: M3EIconButtonVariant.standard,
-                      icon: const Icon(M3EIcons.arrow_back),
-                      tooltip: 'Back',
-                      onPressed: () => Navigator.of(context).maybePop(),
-                    ),
-                  ),
-                  if (widget.modality == M3ENavigationRailModality.modal)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: M3EButton(
-                          onPressed: _controller.expand,
-                          child: const Text('Open navigation'),
-                        ),
-                      ),
-                    ),
-                  Expanded(
-                    child: Center(
-                      child: IconTheme(
-                        data: IconThemeData(
-                          size: 48,
-                          color: theme.colorScheme.primary,
-                        ),
-                        child: destination.icon,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+  PlaygroundSlots buildSlots(BuildContext context, PlaygroundChrome chrome) {
+    return PlaygroundSlots(
+      appBar: M3EAppBar.top(
+        titleText: _title,
+        leading: chrome.leading,
+        actions: <Widget>[
+          if (_modal)
+            M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
+              icon: const Icon(M3EIcons.menu),
+              tooltip: 'Open navigation',
+              onPressed: _controller.expand,
             ),
+          ...chrome.trailingActions,
+        ],
+      ),
+      startPane: M3ENavigationRail(
+        // Type and modality only apply when the rail is created.
+        key: ValueKey<String>('$_type-$_modality'),
+        sections: _sections,
+        selectedIndex: _index,
+        onDestinationSelected: (int i) => setState(() => _index = i),
+        type: _type,
+        modality: _modality,
+        alignment: _alignment,
+        labelBehavior: _labelBehavior,
+        showDivider: _showDivider,
+        hideWhenCollapsed: _canCollapse && _hideWhenCollapsed,
+        expandedWidth: _canExpand && _customWidth ? _expandedWidth : null,
+        controller: _controller,
+        fab: _showFab
+            ? M3ENavigationRailFabSlot(
+                icon: const Icon(M3EIcons.add),
+                label: 'Compose',
+                onPressed: () {},
+              )
+            : null,
+      ),
+    );
+  }
+
+  @override
+  List<PlaySnippet> get snippets {
+    final StringBuffer args = StringBuffer()
+      ..writeln('  type: M3ENavigationRailType.${_type.name},')
+      ..writeln('  modality: M3ENavigationRailModality.${_modality.name},')
+      ..writeln('  alignment: M3ENavigationRailAlignment.${_alignment.name},');
+    if (_canCollapse) {
+      args
+        ..writeln(
+          '  labelBehavior: '
+          'M3ENavigationRailLabelBehavior.${_labelBehavior.name},',
+        )
+        ..writeln('  hideWhenCollapsed: $_hideWhenCollapsed,');
+    }
+    if (_canExpand && _customWidth) {
+      args.writeln('  expandedWidth: ${_expandedWidth.round()},');
+    }
+    args.writeln('  showDivider: $_showDivider,');
+    if (_modal) {
+      args.writeln('  controller: controller, // controller.expand() opens it');
+    }
+    if (_showFab) {
+      args.writeln(
+        '  fab: M3ENavigationRailFabSlot(\n'
+        '    icon: const Icon(M3EIcons.add),\n'
+        "    label: 'Compose',\n"
+        '    onPressed: () {},\n'
+        '  ),',
+      );
+    }
+    final String header = _sectionHeaders
+        ? "\n      header: Text('Mail'),"
+        : '';
+    final String badge = _badges ? ', badgeCount: 3' : '';
+    final String short = _shortItems ? ', short: true' : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Navigation rail',
+        code:
+            '''
+$kPlaySnippetImport
+
+Row(
+  children: <Widget>[
+    M3ENavigationRail(
+  sections: const <M3ENavigationRailSection>[
+    M3ENavigationRailSection($header
+      destinations: <M3ENavigationRailDestination>[
+        M3ENavigationRailDestination(icon: Icon(M3EIcons.home), label: 'Home'$short),
+        M3ENavigationRailDestination(icon: Icon(M3EIcons.calendar_today), label: 'Agenda'$badge$short),
+      ],
+    ),
+  ],
+  selectedIndex: $_index,
+  onDestinationSelected: (int index) {},
+$args    ),
+    Expanded(child: content),
+  ],
+);''',
+      ),
+    ];
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Variant',
+        children: <Widget>[
+          PlayEnumChoice<M3ENavigationRailType>(
+            label: 'Type',
+            value: _type,
+            values: M3ENavigationRailType.values,
+            labelOf: (M3ENavigationRailType v) => v.name,
+            onChanged: (M3ENavigationRailType v) {
+              setState(() {
+                _type = v;
+                _resetController();
+              });
+            },
+          ),
+          PlayEnumChoice<M3ENavigationRailModality>(
+            label: 'Modality',
+            value: _modality,
+            values: M3ENavigationRailModality.values,
+            labelOf: (M3ENavigationRailModality v) => v.name,
+            onChanged: (M3ENavigationRailModality v) {
+              setState(() {
+                _modality = v;
+                _resetController();
+              });
+            },
+          ),
+          PlayEnumChoice<M3ENavigationRailAlignment>(
+            label: 'Destination alignment',
+            value: _alignment,
+            values: M3ENavigationRailAlignment.values,
+            labelOf: (M3ENavigationRailAlignment v) => v.name,
+            onChanged: (M3ENavigationRailAlignment v) {
+              setState(() => _alignment = v);
+            },
           ),
         ],
       ),
-    );
+      PlayControlGroup(
+        title: 'Collapsed and expanded',
+        children: <Widget>[
+          if (_canCollapse) ...<Widget>[
+            PlayEnumChoice<M3ENavigationRailLabelBehavior>(
+              label: 'Collapsed labels',
+              value: _labelBehavior,
+              values: M3ENavigationRailLabelBehavior.values,
+              labelOf: (M3ENavigationRailLabelBehavior v) => v.name,
+              onChanged: (M3ENavigationRailLabelBehavior v) {
+                setState(() => _labelBehavior = v);
+              },
+            ),
+            PlaySwitchItem(
+              label: 'Hide when collapsed',
+              value: _hideWhenCollapsed,
+              onChanged: (bool v) => setState(() => _hideWhenCollapsed = v),
+            ),
+          ],
+          if (_canExpand) ...<Widget>[
+            PlaySwitchItem(
+              label: 'Custom expanded width',
+              value: _customWidth,
+              onChanged: (bool v) => setState(() => _customWidth = v),
+            ),
+            if (_customWidth)
+              PlaySlider(
+                label: 'Expanded width',
+                value: _expandedWidth,
+                min: 220,
+                max: 360,
+                divisions: 14,
+                onChanged: (double v) => setState(() => _expandedWidth = v),
+              ),
+          ],
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'FAB',
+            value: _showFab,
+            onChanged: (bool v) => setState(() => _showFab = v),
+          ),
+          PlaySwitchItem(
+            label: 'Section headers',
+            value: _sectionHeaders,
+            onChanged: (bool v) => setState(() => _sectionHeaders = v),
+          ),
+          PlaySwitchItem(
+            label: 'Badges',
+            description: 'A count on Agenda',
+            value: _badges,
+            onChanged: (bool v) => setState(() => _badges = v),
+          ),
+          PlaySwitchItem(
+            label: 'Short items',
+            description: '56dp destinations instead of 64dp',
+            value: _shortItems,
+            onChanged: (bool v) => setState(() => _shortItems = v),
+          ),
+          PlaySwitchItem(
+            label: 'Divider',
+            description: 'Line on the content edge',
+            value: _showDivider,
+            onChanged: (bool v) => setState(() => _showDivider = v),
+          ),
+        ],
+      ),
+    ];
   }
 }

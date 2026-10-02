@@ -1,25 +1,22 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_slider.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Live playground for [M3ENavigationBar].
-class NavigationBarPlayground extends StatefulWidget {
+class NavigationBarPlayground extends PlaygroundWidget {
   /// Creates the navigation bar playground.
   const NavigationBarPlayground({super.key});
 
   @override
-  State<NavigationBarPlayground> createState() =>
+  PlaygroundState<NavigationBarPlayground> createState() =>
       _NavigationBarPlaygroundState();
 }
 
-class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
+class _NavigationBarPlaygroundState
+    extends PlaygroundState<NavigationBarPlayground> {
   M3ENavBarLabelBehavior _labelBehavior = M3ENavBarLabelBehavior.alwaysShow;
   M3ENavBarIconBehavior _iconBehavior = M3ENavBarIconBehavior.alwaysShow;
   bool _autoLayout = false;
@@ -32,170 +29,211 @@ class _NavigationBarPlaygroundState extends State<NavigationBarPlayground> {
   M3ENavBarShapeFamily _shape = M3ENavBarShapeFamily.square;
   M3ENavBarDensity _density = M3ENavBarDensity.regular;
   M3ENavBarIndicatorStyle _indicator = M3ENavBarIndicatorStyle.pill;
+  double _count = 4;
   bool _badges = true;
   bool _hideOnScroll = false;
+  int _index = 0;
+
+  static const List<(IconData, String, String)> _entries =
+      <(IconData, String, String)>[
+        (M3EIcons.home, 'home', 'Home'),
+        (M3EIcons.search, 'search', 'Browse'),
+        (M3EIcons.radio, 'radio', 'Radio'),
+        (M3EIcons.library_music, 'library_music', 'Library'),
+        (M3EIcons.person, 'person', 'Profile'),
+      ];
+
+  int get _destinationCount => _count.round();
+
+  /// Wide-layout options apply when the bar can lay out wide.
+  bool get _canBeWide => _autoLayout || _layout == M3ENavBarLayout.wide;
+
+  /// Hiding both labels and icons leaves nothing to show.
+  List<M3ENavBarIconBehavior> get _iconBehaviors => <M3ENavBarIconBehavior>[
+    for (final M3ENavBarIconBehavior v in M3ENavBarIconBehavior.values)
+      if (_labelBehavior != M3ENavBarLabelBehavior.alwaysHide ||
+          v != M3ENavBarIconBehavior.alwaysHide)
+        v,
+  ];
 
   List<M3ENavigationBarDestination> get _destinations {
     return <M3ENavigationBarDestination>[
-      const M3ENavigationBarDestination(
-        icon: Icon(M3EIcons.home),
-        label: 'Home',
-      ),
-      M3ENavigationBarDestination(
-        icon: const Icon(M3EIcons.search),
-        label: 'Browse',
-        badgeDot: _badges,
-      ),
-      M3ENavigationBarDestination(
-        icon: const Icon(M3EIcons.radio),
-        label: 'Radio',
-        badgeCount: _badges ? 3 : null,
-      ),
-      const M3ENavigationBarDestination(
-        icon: Icon(M3EIcons.library_music),
-        label: 'Library',
-      ),
+      for (int i = 0; i < _destinationCount; i++)
+        M3ENavigationBarDestination(
+          icon: Icon(_entries[i].$1),
+          label: _entries[i].$3,
+          badgeDot: _badges && i == 1,
+          badgeCount: _badges && i == 2 ? 3 : null,
+        ),
     ];
   }
 
-  List<PlaySnippet> get _snippets {
-    final String destinations = _badges
-        ? '''
-  destinations: const <M3ENavigationBarDestination>[
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.search),
-      label: 'Browse',
-      badgeDot: true,
-    ),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.radio),
-      label: 'Radio',
-      badgeCount: 3,
-    ),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.library_music),
-      label: 'Library',
-    ),
-  ],'''
-        : '''
-  destinations: const <M3ENavigationBarDestination>[
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.home), label: 'Home'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.search), label: 'Browse'),
-    M3ENavigationBarDestination(icon: Icon(M3EIcons.radio), label: 'Radio'),
-    M3ENavigationBarDestination(
-      icon: Icon(M3EIcons.library_music),
-      label: 'Library',
-    ),
-  ],''';
-    final String breakpointLine = _customBreakpoint
-        ? '\n  wideBreakpoint: ${_wideBreakpoint.round()},'
-        : '';
-    final String hideLine = _hideOnScroll
-        ? '\n  hideOnScroll: true,\n  scrollController: scrollController,'
-        : '';
-    final String sample =
-        '''
-M3ENavigationBar(
-$destinations
-  selectedIndex: 0,
-  onDestinationSelected: (int i) {},
-  autoLayout: $_autoLayout,
-  layout: M3ENavBarLayout.${_layout.name},
-  alignment: M3ENavBarAlignment.${_alignment.name},
-  wideDestinationWidth: ${_wideDestinationWidth.round()},$breakpointLine
-  labelBehavior: M3ENavBarLabelBehavior.${_labelBehavior.name},
-  iconBehavior: M3ENavBarIconBehavior.${_iconBehavior.name},
-  size: M3ENavBarSize.${_size.name},
-  shapeFamily: M3ENavBarShapeFamily.${_shape.name},
-  density: M3ENavBarDensity.${_density.name},
-  indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},$hideLine
-);''';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: 'Navigation bar',
-        code: '$kPlaySnippetImport\n$sample',
-      ),
-    ];
+  @override
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    final String title = _entries[_index.clamp(0, _destinationCount - 1)].$3;
+    return M3EList.scrollable(
+      controller: PrimaryScrollController.of(context),
+      variant: M3ECardVariant.filled,
+      listPadding: padding,
+      itemCount: 24,
+      itemBuilder: (BuildContext context, int index) {
+        return M3EListItem(
+          headline: '$title ${index + 1}',
+          supportingText: _hideOnScroll
+              ? 'Scroll to hide and show the bar'
+              : 'Tap the active destination to return to the top',
+        );
+      },
+    );
   }
 
-  void _openDemo() {
-    final List<M3ENavigationBarDestination> destinations = _destinations;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return _NavigationBarDemoHost(
-            destinations: destinations,
-            autoLayout: _autoLayout,
-            layout: _layout,
-            alignment: _alignment,
-            wideDestinationWidth: _wideDestinationWidth,
-            wideBreakpoint: _customBreakpoint ? _wideBreakpoint : null,
-            labelBehavior: _labelBehavior,
-            iconBehavior: _iconBehavior,
-            size: _size,
-            shapeFamily: _shape,
-            density: _density,
-            indicatorStyle: _indicator,
-            hideOnScroll: _hideOnScroll,
-          );
+  @override
+  PlaygroundSlots buildSlots(BuildContext context, PlaygroundChrome chrome) {
+    final ScrollController scroll = PrimaryScrollController.of(context);
+    final M3ENavBarIconBehavior iconBehavior =
+        _iconBehaviors.contains(_iconBehavior)
+        ? _iconBehavior
+        : M3ENavBarIconBehavior.alwaysShow;
+    return PlaygroundSlots(
+      bottomNavigationBar: M3ENavigationBar(
+        destinations: _destinations,
+        selectedIndex: _index.clamp(0, _destinationCount - 1),
+        onDestinationSelected: (int i) {
+          if (i == _index && scroll.hasClients) {
+            scroll.animateTo(
+              0,
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOut,
+            );
+          }
+          setState(() => _index = i);
         },
+        autoLayout: _autoLayout,
+        layout: _layout,
+        alignment: _alignment,
+        wideDestinationWidth: _wideDestinationWidth,
+        wideBreakpoint: _autoLayout && _customBreakpoint
+            ? _wideBreakpoint
+            : null,
+        labelBehavior: _labelBehavior,
+        iconBehavior: iconBehavior,
+        size: _size,
+        shapeFamily: _shape,
+        density: _density,
+        indicatorStyle: _indicator,
+        hideOnScroll: _hideOnScroll,
+        scrollController: _hideOnScroll ? scroll : null,
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Navigation bar demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Opens a full screen with the bar along the bottom. Tap the '
-                'active destination to scroll the list to the top. Turn on '
-                'hide on scroll to slide the bar away.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: const Text('Open navigation bar demo'),
-              ),
-            ],
+  List<PlaySnippet> get snippets {
+    final StringBuffer destinations = StringBuffer();
+    for (int i = 0; i < _destinationCount; i++) {
+      final String badge = !_badges
+          ? ''
+          : i == 1
+          ? ', badgeDot: true'
+          : i == 2
+          ? ', badgeCount: 3'
+          : '';
+      destinations.writeln(
+        '    M3ENavigationBarDestination(icon: Icon(M3EIcons.'
+        "${_entries[i].$2}), label: '${_entries[i].$3}'$badge),",
+      );
+    }
+    final StringBuffer args = StringBuffer()
+      ..writeln('  autoLayout: $_autoLayout,');
+    if (_autoLayout) {
+      if (_customBreakpoint) {
+        args.writeln('  wideBreakpoint: ${_wideBreakpoint.round()},');
+      }
+    } else {
+      args.writeln('  layout: M3ENavBarLayout.${_layout.name},');
+    }
+    if (_canBeWide) {
+      args
+        ..writeln('  alignment: M3ENavBarAlignment.${_alignment.name},')
+        ..writeln('  wideDestinationWidth: ${_wideDestinationWidth.round()},');
+    }
+    args
+      ..writeln(
+        '  labelBehavior: M3ENavBarLabelBehavior.${_labelBehavior.name},',
+      )
+      ..writeln('  iconBehavior: M3ENavBarIconBehavior.${_iconBehavior.name},')
+      ..writeln('  size: M3ENavBarSize.${_size.name},')
+      ..writeln('  shapeFamily: M3ENavBarShapeFamily.${_shape.name},')
+      ..writeln('  density: M3ENavBarDensity.${_density.name},')
+      ..writeln(
+        '  indicatorStyle: M3ENavBarIndicatorStyle.${_indicator.name},',
+      );
+    if (_hideOnScroll) {
+      args
+        ..writeln('  hideOnScroll: true,')
+        ..writeln('  scrollController: scrollController,');
+    }
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Navigation bar',
+        code:
+            '''
+$kPlaySnippetImport
+
+Scaffold(
+  body: content,
+  bottomNavigationBar: M3ENavigationBar(
+  destinations: const <M3ENavigationBarDestination>[
+$destinations  ],
+  selectedIndex: $_index,
+  onDestinationSelected: (int index) {},
+$args  ),
+);''',
+      ),
+    ];
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Layout',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'Auto layout',
+            description: 'Wide at or above the breakpoint',
+            value: _autoLayout,
+            onChanged: (bool v) => setState(() => _autoLayout = v),
           ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Layout',
-          children: <Widget>[
-            PlaySwitch(
-              label: 'Auto layout',
-              value: _autoLayout,
-              onChanged: (bool v) => setState(() => _autoLayout = v),
+          if (_autoLayout)
+            PlaySwitchItem(
+              label: 'Custom breakpoint',
+              value: _customBreakpoint,
+              onChanged: (bool v) => setState(() => _customBreakpoint = v),
             ),
-            PlayEnumSegmented<M3ENavBarLayout>(
+          if (_autoLayout && _customBreakpoint)
+            PlaySlider(
+              label: 'Wide breakpoint',
+              value: _wideBreakpoint,
+              min: 200,
+              max: 1000,
+              divisions: 40,
+              onChanged: (double v) => setState(() => _wideBreakpoint = v),
+            ),
+          if (!_autoLayout)
+            PlayEnumChoice<M3ENavBarLayout>(
               label: 'Layout',
               value: _layout,
               values: M3ENavBarLayout.values,
               labelOf: (M3ENavBarLayout v) => v.name,
-              onChanged: (M3ENavBarLayout v) {
-                setState(() {
-                  _layout = v;
-                  // layout is ignored while autoLayout is on
-                  _autoLayout = false;
-                });
-              },
+              onChanged: (M3ENavBarLayout v) => setState(() => _layout = v),
             ),
-            PlayEnumSegmented<M3ENavBarAlignment>(
-              label: 'Alignment',
+          if (_canBeWide) ...<Widget>[
+            PlayEnumChoice<M3ENavBarAlignment>(
+              label: 'Wide alignment',
               value: _alignment,
               values: M3ENavBarAlignment.values,
               labelOf: (M3ENavBarAlignment v) => v.name,
@@ -213,195 +251,88 @@ $destinations
                 setState(() => _wideDestinationWidth = v);
               },
             ),
-            PlaySwitch(
-              label: 'Custom breakpoint',
-              value: _customBreakpoint,
-              onChanged: (bool v) => setState(() => _customBreakpoint = v),
-            ),
-            if (_customBreakpoint)
-              PlaySlider(
-                label: 'Wide breakpoint',
-                value: _wideBreakpoint,
-                min: 200,
-                max: 1000,
-                divisions: 40,
-                onChanged: (double v) {
-                  setState(() => _wideBreakpoint = v);
-                },
-              ),
           ],
-        ),
-        PlayControlPanel(
-          title: 'Appearance',
-          children: <Widget>[
-            PlayEnumMenu<M3ENavBarLabelBehavior>(
-              label: 'Labels',
-              value: _labelBehavior,
-              values: M3ENavBarLabelBehavior.values,
-              labelOf: (M3ENavBarLabelBehavior v) => v.name,
-              onChanged: (M3ENavBarLabelBehavior v) {
-                setState(() => _labelBehavior = v);
-              },
-            ),
-            PlayEnumMenu<M3ENavBarIconBehavior>(
-              label: 'Icons',
-              value: _iconBehavior,
-              values: M3ENavBarIconBehavior.values,
-              labelOf: (M3ENavBarIconBehavior v) => v.name,
-              onChanged: (M3ENavBarIconBehavior v) {
-                setState(() => _iconBehavior = v);
-              },
-            ),
-            PlayEnumSegmented<M3ENavBarSize>(
-              label: 'Size',
-              value: _size,
-              values: M3ENavBarSize.values,
-              labelOf: (M3ENavBarSize v) => v.name,
-              onChanged: (M3ENavBarSize v) => setState(() => _size = v),
-            ),
-            PlayEnumSegmented<M3ENavBarShapeFamily>(
-              label: 'Shape',
-              value: _shape,
-              values: M3ENavBarShapeFamily.values,
-              labelOf: (M3ENavBarShapeFamily v) => v.name,
-              onChanged: (M3ENavBarShapeFamily v) {
-                setState(() => _shape = v);
-              },
-            ),
-            PlayEnumSegmented<M3ENavBarDensity>(
-              label: 'Density',
-              value: _density,
-              values: M3ENavBarDensity.values,
-              labelOf: (M3ENavBarDensity v) => v.name,
-              onChanged: (M3ENavBarDensity v) {
-                setState(() => _density = v);
-              },
-            ),
-            PlayEnumMenu<M3ENavBarIndicatorStyle>(
-              label: 'Indicator',
-              value: _indicator,
-              values: M3ENavBarIndicatorStyle.values,
-              labelOf: (M3ENavBarIndicatorStyle v) => v.name,
-              onChanged: (M3ENavBarIndicatorStyle v) {
-                setState(() => _indicator = v);
-              },
-            ),
-            PlaySwitch(
-              label: 'Badges',
-              value: _badges,
-              onChanged: (bool v) => setState(() => _badges = v),
-            ),
-            PlaySwitch(
-              label: 'Hide on scroll',
-              value: _hideOnScroll,
-              onChanged: (bool v) => setState(() => _hideOnScroll = v),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _NavigationBarDemoHost extends StatefulWidget {
-  const _NavigationBarDemoHost({
-    required this.destinations,
-    required this.autoLayout,
-    required this.layout,
-    required this.alignment,
-    required this.wideDestinationWidth,
-    required this.wideBreakpoint,
-    required this.labelBehavior,
-    required this.iconBehavior,
-    required this.size,
-    required this.shapeFamily,
-    required this.density,
-    required this.indicatorStyle,
-    required this.hideOnScroll,
-  });
-
-  final List<M3ENavigationBarDestination> destinations;
-  final bool autoLayout;
-  final M3ENavBarLayout layout;
-  final M3ENavBarAlignment alignment;
-  final double wideDestinationWidth;
-  final double? wideBreakpoint;
-  final M3ENavBarLabelBehavior labelBehavior;
-  final M3ENavBarIconBehavior iconBehavior;
-  final M3ENavBarSize size;
-  final M3ENavBarShapeFamily shapeFamily;
-  final M3ENavBarDensity density;
-  final M3ENavBarIndicatorStyle indicatorStyle;
-  final bool hideOnScroll;
-
-  @override
-  State<_NavigationBarDemoHost> createState() => _NavigationBarDemoHostState();
-}
-
-class _NavigationBarDemoHostState extends State<_NavigationBarDemoHost> {
-  int _index = 0;
-  final ScrollController _scroll = ScrollController();
-
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ENavigationBarDestination destination = widget.destinations[_index];
-    final String title = destination.label ?? 'Destination';
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: M3EAppBar.top(
-        titleText: title,
-        leading: M3EIconButton(
-          variant: M3EIconButtonVariant.standard,
-          icon: const Icon(M3EIcons.arrow_back),
-          tooltip: 'Back',
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
+        ],
       ),
-      body: M3EList.scrollable(
-        controller: _scroll,
-        itemCount: 24,
-        listPadding: const EdgeInsets.all(16),
-        itemBuilder: (BuildContext context, int index) {
-          return M3EListItem(
-            headline: '$title ${index + 1}',
-            supportingText: 'Tap the active destination to return to the top',
-          );
-        },
+      PlayControlGroup(
+        title: 'Appearance',
+        children: <Widget>[
+          PlayEnumChoice<M3ENavBarSize>(
+            label: 'Size',
+            value: _size,
+            values: M3ENavBarSize.values,
+            labelOf: (M3ENavBarSize v) => v.name,
+            onChanged: (M3ENavBarSize v) => setState(() => _size = v),
+          ),
+          PlayEnumChoice<M3ENavBarShapeFamily>(
+            label: 'Shape',
+            value: _shape,
+            values: M3ENavBarShapeFamily.values,
+            labelOf: (M3ENavBarShapeFamily v) => v.name,
+            onChanged: (M3ENavBarShapeFamily v) => setState(() => _shape = v),
+          ),
+          PlayEnumChoice<M3ENavBarDensity>(
+            label: 'Density',
+            value: _density,
+            values: M3ENavBarDensity.values,
+            labelOf: (M3ENavBarDensity v) => v.name,
+            onChanged: (M3ENavBarDensity v) => setState(() => _density = v),
+          ),
+          PlayEnumChoice<M3ENavBarIndicatorStyle>(
+            label: 'Indicator',
+            value: _indicator,
+            values: M3ENavBarIndicatorStyle.values,
+            labelOf: (M3ENavBarIndicatorStyle v) => v.name,
+            onChanged: (M3ENavBarIndicatorStyle v) {
+              setState(() => _indicator = v);
+            },
+          ),
+          PlayEnumChoice<M3ENavBarLabelBehavior>(
+            label: 'Labels',
+            value: _labelBehavior,
+            values: M3ENavBarLabelBehavior.values,
+            labelOf: (M3ENavBarLabelBehavior v) => v.name,
+            onChanged: (M3ENavBarLabelBehavior v) {
+              setState(() => _labelBehavior = v);
+            },
+          ),
+          PlayEnumChoice<M3ENavBarIconBehavior>(
+            label: 'Icons',
+            value: _iconBehaviors.contains(_iconBehavior)
+                ? _iconBehavior
+                : M3ENavBarIconBehavior.alwaysShow,
+            values: _iconBehaviors,
+            labelOf: (M3ENavBarIconBehavior v) => v.name,
+            onChanged: (M3ENavBarIconBehavior v) {
+              setState(() => _iconBehavior = v);
+            },
+          ),
+        ],
       ),
-      bottomNavigationBar: M3ENavigationBar(
-        destinations: widget.destinations,
-        selectedIndex: _index,
-        onDestinationSelected: (int i) {
-          if (i == _index && _scroll.hasClients) {
-            _scroll.animateTo(
-              0,
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOut,
-            );
-          }
-          setState(() => _index = i);
-        },
-        autoLayout: widget.autoLayout,
-        layout: widget.layout,
-        alignment: widget.alignment,
-        wideDestinationWidth: widget.wideDestinationWidth,
-        wideBreakpoint: widget.wideBreakpoint,
-        labelBehavior: widget.labelBehavior,
-        iconBehavior: widget.iconBehavior,
-        size: widget.size,
-        shapeFamily: widget.shapeFamily,
-        density: widget.density,
-        indicatorStyle: widget.indicatorStyle,
-        hideOnScroll: widget.hideOnScroll,
-        scrollController: _scroll,
+      PlayControlGroup(
+        title: 'Destinations',
+        children: <Widget>[
+          PlaySlider(
+            label: 'Count',
+            value: _count,
+            min: 3,
+            max: _entries.length.toDouble(),
+            divisions: _entries.length - 3,
+            onChanged: (double v) => setState(() => _count = v),
+          ),
+          PlaySwitchItem(
+            label: 'Badges',
+            description: 'A dot on Browse and a count on Radio',
+            value: _badges,
+            onChanged: (bool v) => setState(() => _badges = v),
+          ),
+          PlaySwitchItem(
+            label: 'Hide on scroll',
+            value: _hideOnScroll,
+            onChanged: (bool v) => setState(() => _hideOnScroll = v),
+          ),
+        ],
       ),
-    );
+    ];
   }
 }

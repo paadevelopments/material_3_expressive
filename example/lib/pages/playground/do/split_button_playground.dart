@@ -1,31 +1,39 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
+
+/// Where the trailing menu entries come from.
+enum _MenuSource { items, m3eMenu }
 
 /// Live playground for [M3ESplitButton].
-class SplitButtonPlayground extends StatefulWidget {
+class SplitButtonPlayground extends PlaygroundWidget {
   /// Creates the split button playground.
   const SplitButtonPlayground({super.key});
 
   @override
-  State<SplitButtonPlayground> createState() => _SplitButtonPlaygroundState();
+  PlaygroundState<SplitButtonPlayground> createState() =>
+      _SplitButtonPlaygroundState();
 }
 
-class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
+class _SplitButtonPlaygroundState
+    extends PlaygroundState<SplitButtonPlayground> {
   M3EButtonStyle _style = M3EButtonStyle.filled;
   M3EButtonSize _size = M3EButtonSize.sm;
   M3EButtonShape _shape = M3EButtonShape.round;
-  M3ESplitButtonMenuStyle _menuStyle = M3ESplitButtonMenuStyle.popup;
   M3ESplitButtonTrailingAlignment _trailingAlignment =
       M3ESplitButtonTrailingAlignment.opticalCenter;
+  _MenuSource _source = _MenuSource.items;
+  M3ESplitButtonMenuStyle _menuStyle = M3ESplitButtonMenuStyle.popup;
+  M3ESplitButtonSelectionMode _selectionMode =
+      M3ESplitButtonSelectionMode.single;
   bool _enabled = true;
+  bool _leadingIcon = true;
+  bool _tooltips = false;
+  bool _trackSelection = true;
+  bool _gradient = false;
   String _label = 'Save';
   String? _selected;
 
@@ -44,58 +52,59 @@ class _SplitButtonPlaygroundState extends State<SplitButtonPlayground> {
     M3EButtonStyle.outlined,
   ];
 
-  List<PlaySnippet> get _snippets {
-    final String pressed = _enabled ? '() {}' : 'null';
-    final String selected = _selected == null
-        ? 'null'
-        : playDartString(_selected!);
-    final String onSelected = _enabled ? '(String value) {}' : 'null';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: 'Split button',
-        code:
-            '''
-$kPlaySnippetImport
-M3ESplitButton<String>(
-  label: ${playDartString(_label)},
-  leadingIcon: M3EIcons.save,
-  style: M3EButtonStyle.${_style.name},
-  size: M3EButtonSize.${_size.name},
-  shape: M3EButtonShape.${_shape.name},
-  enabled: $_enabled,
-  selectedValue: $selected,
-  decoration: M3ESplitButtonDecoration(
-    menuStyle: M3ESplitButtonMenuStyle.${_menuStyle.name},
-  ),
-  onPressed: $pressed,
-  onSelected: $onSelected,
-  items: const <M3ESplitButtonItem<String>>[
-    M3ESplitButtonItem<String>(
-      value: 'draft',
-      child: Text('Save draft'),
-    ),
-    M3ESplitButtonItem<String>(
-      value: 'copy',
-      child: Text('Save a copy'),
-    ),
-  ],
-);''',
-      ),
-      PlaySnippet(
-        label: 'Custom M3E menu',
-        code:
-            '''
-$kPlaySnippetImport
-M3ESplitButton<String>(
-  label: 'Share',
-  leadingIcon: M3EIcons.share,
-  style: M3EButtonStyle.${_style.name},
-  size: M3EButtonSize.${_size.name},
-  shape: M3EButtonShape.${_shape.name},
-  enabled: $_enabled,
-  items: null,
-  onPressed: $pressed,
-  m3eMenuBuilder: (BuildContext context) {
+  static const List<M3ESplitButtonItem<String>> _items =
+      <M3ESplitButtonItem<String>>[
+        M3ESplitButtonItem<String>(value: 'draft', child: Text('Save draft')),
+        M3ESplitButtonItem<String>(value: 'copy', child: Text('Save a copy')),
+        M3ESplitButtonItem<String>(value: 'pdf', child: Text('Export PDF')),
+      ];
+
+  /// Menu styles the current source supports.
+  List<M3ESplitButtonMenuStyle> get _menuStyles => _source == _MenuSource.items
+      ? M3ESplitButtonMenuStyle.values
+      : const <M3ESplitButtonMenuStyle>[
+          M3ESplitButtonMenuStyle.popup,
+          M3ESplitButtonMenuStyle.native,
+        ];
+
+  bool get _bottomSheet =>
+      _source == _MenuSource.items &&
+      _menuStyle == M3ESplitButtonMenuStyle.bottomSheet;
+
+  bool get _multi =>
+      _bottomSheet && _selectionMode == M3ESplitButtonSelectionMode.multiple;
+
+  M3ESplitButtonDecoration get _decoration {
+    return M3ESplitButtonDecoration(
+      menuStyle: _menuStyle,
+      bottomSheetDecoration: _bottomSheet
+          ? M3ESplitButtonBottomSheetDecoration(selectionMode: _selectionMode)
+          : null,
+      backgroundGradient: _gradient
+          ? WidgetStateProperty.all(
+              const LinearGradient(
+                colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
+              ),
+            )
+          : null,
+      foregroundGradient: _gradient
+          ? WidgetStateProperty.all(
+              const LinearGradient(
+                colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
+              ),
+            )
+          : null,
+      outlineGradient: _gradient
+          ? WidgetStateProperty.all(
+              const LinearGradient(
+                colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
+              ),
+            )
+          : null,
+    );
+  }
+
+  List<M3EMenuNode> _m3eMenu(BuildContext context) {
     return <M3EMenuNode>[
       const M3EMenuEntry(
         label: 'Email',
@@ -110,187 +119,243 @@ M3ESplitButton<String>(
         ],
       ),
     ];
-  },
-  onSelected: $onSelected,
-);''',
+  }
+
+  @override
+  Widget buildPreview(BuildContext context) {
+    final bool items = _source == _MenuSource.items;
+    return M3ESplitButton<String>(
+      label: _label,
+      leadingIcon: _leadingIcon ? M3EIcons.save : null,
+      style: _style,
+      size: _size,
+      shape: _shape,
+      trailingAlignment: _trailingAlignment,
+      leadingTooltip: _tooltips ? _label : null,
+      trailingTooltip: _tooltips ? 'More options' : null,
+      enabled: _enabled,
+      selectedValue: items && _trackSelection && !_multi ? _selected : null,
+      decoration: _decoration,
+      onPressed: _enabled ? () {} : null,
+      onSelected: _enabled
+          ? (String value) => setState(() => _selected = value)
+          : null,
+      onMultiSelected: _multi ? (Set<String> values) {} : null,
+      items: items ? _items : null,
+      m3eMenuBuilder: items ? null : _m3eMenu,
+    );
+  }
+
+  @override
+  List<PlaySnippet> get snippets {
+    final bool items = _source == _MenuSource.items;
+    final StringBuffer args = StringBuffer()
+      ..writeln('  label: ${playDartString(_label)},');
+    if (_leadingIcon) {
+      args.writeln('  leadingIcon: M3EIcons.save,');
+    }
+    args
+      ..writeln('  style: M3EButtonStyle.${_style.name},')
+      ..writeln('  size: M3EButtonSize.${_size.name},')
+      ..writeln('  shape: M3EButtonShape.${_shape.name},')
+      ..writeln(
+        '  trailingAlignment: '
+        'M3ESplitButtonTrailingAlignment.${_trailingAlignment.name},',
+      )
+      ..writeln('  enabled: $_enabled,');
+    if (_tooltips) {
+      args
+        ..writeln('  leadingTooltip: ${playDartString(_label)},')
+        ..writeln("  trailingTooltip: 'More options',");
+    }
+    args
+      ..writeln('  decoration: M3ESplitButtonDecoration(')
+      ..writeln('    menuStyle: M3ESplitButtonMenuStyle.${_menuStyle.name},');
+    if (_bottomSheet) {
+      args.writeln(
+        '    bottomSheetDecoration: M3ESplitButtonBottomSheetDecoration(\n'
+        '      selectionMode: '
+        'M3ESplitButtonSelectionMode.${_selectionMode.name},\n'
+        '    ),',
+      );
+    }
+    if (_gradient) {
+      args.writeln(
+        '    backgroundGradient: WidgetStateProperty.all(gradient),',
+      );
+    }
+    args
+      ..writeln('  ),')
+      ..writeln('  onPressed: () {},')
+      ..writeln('  onSelected: (String value) {},');
+    if (_multi) {
+      args.writeln('  onMultiSelected: (Set<String> values) {},');
+    }
+    if (items) {
+      if (_trackSelection && !_multi) {
+        args.writeln(
+          '  selectedValue: '
+          '${_selected == null ? 'null' : playDartString(_selected!)},',
+        );
+      }
+      args.writeln(
+        '  items: const <M3ESplitButtonItem<String>>[\n'
+        "    M3ESplitButtonItem<String>(value: 'draft', "
+        "child: Text('Save draft')),\n"
+        "    M3ESplitButtonItem<String>(value: 'copy', "
+        "child: Text('Save a copy')),\n"
+        "    M3ESplitButtonItem<String>(value: 'pdf', "
+        "child: Text('Export PDF')),\n"
+        '  ],',
+      );
+    } else {
+      args.writeln(
+        '  items: null,\n'
+        '  m3eMenuBuilder: (BuildContext context) => <M3EMenuNode>[\n'
+        "    const M3EMenuEntry(label: 'Email', value: 'email'),\n"
+        '    M3EMenuSubmenu(\n'
+        "      label: 'More',\n"
+        '      children: const <M3EMenuNode>[\n'
+        "        M3EMenuEntry(label: 'Message', value: 'message'),\n"
+        '      ],\n'
+        '    ),\n'
+        '  ],',
+      );
+    }
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Split button',
+        code: '$kPlaySnippetImport\n\nM3ESplitButton<String>(\n$args);',
       ),
     ];
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Split button',
-          child: M3ESplitButton<String>(
-            label: _label,
-            leadingIcon: M3EIcons.save,
-            style: _style,
-            size: _size,
-            shape: _shape,
-            trailingAlignment: _trailingAlignment,
-            enabled: _enabled,
-            selectedValue: _selected,
-            decoration: M3ESplitButtonDecoration(menuStyle: _menuStyle),
-            onPressed: _enabled ? () {} : null,
-            onSelected: _enabled
-                ? (String value) => setState(() => _selected = value)
-                : null,
-            items: const <M3ESplitButtonItem<String>>[
-              M3ESplitButtonItem<String>(
-                value: 'draft',
-                child: Text('Save draft'),
-              ),
-              M3ESplitButtonItem<String>(
-                value: 'copy',
-                child: Text('Save a copy'),
-              ),
-            ],
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Appearance',
+        children: <Widget>[
+          PlayEnumChoice<M3EButtonStyle>(
+            label: 'Style',
+            value: _style,
+            values: _styles,
+            labelOf: (M3EButtonStyle v) => v.name,
+            onChanged: (M3EButtonStyle v) => setState(() => _style = v),
           ),
-        ),
-        PlayPreviewCard(
-          label: 'Custom M3E menu',
-          child: M3ESplitButton<String>(
-            label: 'Share',
-            leadingIcon: M3EIcons.share,
-            style: _style,
-            size: _size,
-            shape: _shape,
-            trailingAlignment: _trailingAlignment,
-            enabled: _enabled,
-            items: null,
-            onPressed: _enabled ? () {} : null,
-            m3eMenuBuilder: (BuildContext context) {
-              return <M3EMenuNode>[
-                const M3EMenuEntry(
-                  label: 'Email',
-                  leading: Icon(M3EIcons.mail),
-                  value: 'email',
-                ),
-                M3EMenuSubmenu(
-                  label: 'More',
-                  children: const <M3EMenuNode>[
-                    M3EMenuEntry(label: 'Message', value: 'message'),
-                    M3EMenuEntry(label: 'QR code', value: 'qr'),
-                  ],
-                ),
-              ];
+          PlayEnumChoice<M3EButtonSize>(
+            label: 'Size',
+            value: _size,
+            values: _sizes,
+            labelOf: (M3EButtonSize v) => v.name,
+            onChanged: (M3EButtonSize v) => setState(() => _size = v),
+          ),
+          PlayEnumChoice<M3EButtonShape>(
+            label: 'Shape',
+            value: _shape,
+            values: M3EButtonShape.values,
+            labelOf: (M3EButtonShape v) => v.name,
+            onChanged: (M3EButtonShape v) => setState(() => _shape = v),
+          ),
+          PlayEnumChoice<M3ESplitButtonTrailingAlignment>(
+            label: 'Trailing icon alignment',
+            value: _trailingAlignment,
+            values: M3ESplitButtonTrailingAlignment.values,
+            labelOf: (M3ESplitButtonTrailingAlignment v) => switch (v) {
+              M3ESplitButtonTrailingAlignment.opticalCenter => 'optical',
+              M3ESplitButtonTrailingAlignment.geometricCenter => 'geometric',
             },
-            onSelected: _enabled
-                ? (String value) => setState(() => _selected = value)
-                : null,
+            onChanged: (M3ESplitButtonTrailingAlignment v) {
+              setState(() => _trailingAlignment = v);
+            },
           ),
-        ),
-        PlayPreviewCard(
-          label: 'Gradient fill',
-          child: M3ESplitButton<String>(
-            label: 'Save',
-            leadingIcon: M3EIcons.save,
-            style: M3EButtonStyle.filled,
-            size: _size,
-            shape: _shape,
-            enabled: _enabled,
-            decoration: M3ESplitButtonDecoration(
-              menuStyle: _menuStyle,
-              backgroundGradient: WidgetStateProperty.all(
-                const LinearGradient(
-                  colors: <Color>[Color(0xFF6750A4), Color(0xFF9A82DB)],
-                ),
-              ),
-              foregroundGradient: WidgetStateProperty.all(
-                const LinearGradient(
-                  colors: <Color>[Color(0xFFFFFFFF), Color(0xFFEADDFF)],
-                ),
-              ),
-              outlineGradient: WidgetStateProperty.all(
-                const LinearGradient(
-                  colors: <Color>[Color(0xFF4F378B), Color(0xFFD0BCFF)],
-                ),
-              ),
-            ),
-            onPressed: _enabled ? () {} : null,
-            onSelected: _enabled
-                ? (String value) => setState(() => _selected = value)
-                : null,
-            items: const <M3ESplitButtonItem<String>>[
-              M3ESplitButtonItem<String>(
-                value: 'draft',
-                child: Text('Save draft'),
-              ),
-              M3ESplitButtonItem<String>(
-                value: 'copy',
-                child: Text('Save a copy'),
-              ),
-            ],
+          PlaySwitchItem(
+            label: 'Gradient fill',
+            description: 'Background, foreground and outline gradients',
+            value: _gradient,
+            onChanged: (bool v) => setState(() => _gradient = v),
           ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Appearance',
-          children: <Widget>[
-            PlayEnumMenu<M3EButtonStyle>(
-              label: 'Style',
-              value: _style,
-              values: _styles,
-              labelOf: (M3EButtonStyle v) => v.name,
-              onChanged: (M3EButtonStyle v) => setState(() => _style = v),
-            ),
-            PlayEnumMenu<M3EButtonSize>(
-              label: 'Size',
-              value: _size,
-              values: _sizes,
-              labelOf: (M3EButtonSize v) => v.name,
-              onChanged: (M3EButtonSize v) => setState(() => _size = v),
-            ),
-            PlayEnumSegmented<M3EButtonShape>(
-              label: 'Shape',
-              value: _shape,
-              values: M3EButtonShape.values,
-              labelOf: (M3EButtonShape v) => v.name,
-              onChanged: (M3EButtonShape v) => setState(() => _shape = v),
-            ),
-            PlayEnumMenu<M3ESplitButtonMenuStyle>(
-              label: 'Menu style',
-              value: _menuStyle,
-              values: M3ESplitButtonMenuStyle.values,
-              labelOf: (M3ESplitButtonMenuStyle v) => v.name,
-              onChanged: (M3ESplitButtonMenuStyle v) {
-                setState(() => _menuStyle = v);
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          PlayTextField(
+            label: 'Label',
+            value: _label,
+            onChanged: (String v) => setState(() => _label = v),
+          ),
+          PlaySwitchItem(
+            label: 'Leading icon',
+            value: _leadingIcon,
+            onChanged: (bool v) => setState(() => _leadingIcon = v),
+          ),
+          PlaySwitchItem(
+            label: 'Tooltips',
+            description: 'On the leading and trailing segments',
+            value: _tooltips,
+            onChanged: (bool v) => setState(() => _tooltips = v),
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Menu',
+        children: <Widget>[
+          PlayEnumChoice<_MenuSource>(
+            label: 'Entries',
+            value: _source,
+            values: _MenuSource.values,
+            labelOf: (_MenuSource v) => switch (v) {
+              _MenuSource.items => 'items',
+              _MenuSource.m3eMenu => 'M3E menu',
+            },
+            onChanged: (_MenuSource v) {
+              setState(() {
+                _source = v;
+                if (!_menuStyles.contains(_menuStyle)) {
+                  _menuStyle = M3ESplitButtonMenuStyle.popup;
+                }
+              });
+            },
+          ),
+          PlayEnumChoice<M3ESplitButtonMenuStyle>(
+            label: 'Menu style',
+            value: _menuStyle,
+            values: _menuStyles,
+            labelOf: (M3ESplitButtonMenuStyle v) => v.name,
+            onChanged: (M3ESplitButtonMenuStyle v) {
+              setState(() => _menuStyle = v);
+            },
+          ),
+          if (_bottomSheet)
+            PlayEnumChoice<M3ESplitButtonSelectionMode>(
+              label: 'Selection mode',
+              value: _selectionMode,
+              values: M3ESplitButtonSelectionMode.values,
+              labelOf: (M3ESplitButtonSelectionMode v) => v.name,
+              onChanged: (M3ESplitButtonSelectionMode v) {
+                setState(() => _selectionMode = v);
               },
             ),
-            PlayEnumSegmented<M3ESplitButtonTrailingAlignment>(
-              label: 'Trailing align',
-              value: _trailingAlignment,
-              values: M3ESplitButtonTrailingAlignment.values,
-              labelOf: (M3ESplitButtonTrailingAlignment v) => switch (v) {
-                M3ESplitButtonTrailingAlignment.opticalCenter => 'Optical',
-                M3ESplitButtonTrailingAlignment.geometricCenter => 'Center',
-              },
-              onChanged: (M3ESplitButtonTrailingAlignment v) {
-                setState(() => _trailingAlignment = v);
-              },
+          if (_source == _MenuSource.items && !_multi)
+            PlaySwitchItem(
+              label: 'Track selection',
+              description: 'Marks the last chosen entry',
+              value: _trackSelection,
+              onChanged: (bool v) => setState(() => _trackSelection = v),
             ),
-          ],
-        ),
-        PlayControlPanel(
-          title: 'Content',
-          children: <Widget>[
-            PlayTextField(
-              label: 'Label',
-              value: _label,
-              onChanged: (String v) => setState(() => _label = v),
-            ),
-            PlaySwitch(
-              label: 'Enabled',
-              value: _enabled,
-              onChanged: (bool v) => setState(() => _enabled = v),
-            ),
-          ],
-        ),
-      ],
-    );
+        ],
+      ),
+      PlayControlGroup(
+        title: 'State',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'Enabled',
+            value: _enabled,
+            onChanged: (bool v) => setState(() => _enabled = v),
+          ),
+        ],
+      ),
+    ];
   }
 }
