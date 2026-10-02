@@ -8,13 +8,15 @@ import '../../../foundations/foundations.dart';
 import '../styles/m3e_list_reorder_state.dart';
 import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_reorder_exclude.dart';
+import 'm3e_list_reorder_placeholder.dart';
 import 'm3e_list_reorder_session_scope.dart';
 
 /// Spring-driven reorderable list.
 ///
 /// Layout slots stay fixed while dragging: the dragged row becomes an invisible
 /// spacer, a floating proxy follows the pointer, and neighbors spring-shift to
-/// open the destination gap. On drop the proxy eases into that gap, then the
+/// open the destination gap. A placeholder fill marks that gap and
+/// spring-follows it between slots. On drop the proxy eases into that gap, then the
 /// order changes.
 class M3EListReorderHost extends StatefulWidget {
   /// Creates a reorder host.
@@ -99,6 +101,7 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
   final ValueNotifier<bool> _sessionActive = ValueNotifier<bool>(false);
   late final SingleMotionController _lift;
   late final SingleMotionController _settle;
+  late final SingleMotionController _placeholder;
   final GlobalKey _stackKey = GlobalKey();
   final Map<int, GlobalKey> _keys = <int, GlobalKey>{};
   final Map<int, SingleMotionController> _offsets =
@@ -142,6 +145,10 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
       motion: _motion(M3EMotion.expressiveSpatialDefault),
       vsync: this,
     )..addListener(_onMotion);
+    _placeholder = SingleMotionController(
+      motion: _motion(M3EMotion.expressiveSpatialDefault),
+      vsync: this,
+    );
   }
 
   void _onMotion() {
@@ -163,6 +170,7 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     _sessionActive.dispose();
     _lift.dispose();
     _settle.dispose();
+    _placeholder.dispose();
     for (final SingleMotionController c in _offsets.values) {
       c.dispose();
     }
@@ -325,6 +333,9 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     _settle
       ..stop()
       ..value = 0;
+    _placeholder
+      ..stop()
+      ..value = _slotOrigins[index].dy;
     _retarget(index);
   }
 
@@ -359,6 +370,9 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
 
   void _retarget(int from) {
     final int to = _targetIndex ?? from;
+    if (to < _slotOrigins.length) {
+      _placeholder.animateTo(_slotOrigins[to].dy);
+    }
     for (var i = 0; i < widget.itemCount && i < _slotOrigins.length; i++) {
       final double target = _retargetOffset(i, from, to);
       if (_offsetGoals[i] == target) {
@@ -431,6 +445,7 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
     _dropFrom = null;
     _dropTo = null;
     _settle.stop();
+    _placeholder.stop();
     for (final SingleMotionController offset in _offsets.values) {
       offset
         ..stop()
@@ -552,7 +567,19 @@ class _M3EListReorderHostState extends State<M3EListReorderHost>
       child: Stack(
         key: _stackKey,
         clipBehavior: Clip.none,
-        children: <Widget>[list, if (_dragIndex != null) _buildProxy(context)],
+        children: <Widget>[
+          // Beneath the list so shifting neighbors cover it as the gap opens.
+          if (_dragIndex != null)
+            M3EListReorderPlaceholder(
+              top: _placeholder,
+              left: _slotOrigins.isEmpty ? _dragOrigin.dx : _slotOrigins[0].dx,
+              size: _dragSize,
+              opacity: _lift.value.clamp(0.0, 1.0),
+              reorderState: widget.reorderState,
+            ),
+          list,
+          if (_dragIndex != null) _buildProxy(context),
+        ],
       ),
     );
   }
