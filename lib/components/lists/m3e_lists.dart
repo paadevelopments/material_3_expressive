@@ -448,15 +448,18 @@ class M3EListItem extends StatelessWidget {
       context: context,
       trailing: trailing,
     );
+    final VoidCallback? reveal = overflow?.onReveal;
     if (trailingOverride == null &&
         resolvedTrailing == null &&
-        overflow != null &&
+        reveal != null &&
         index != null) {
       return M3EListKeyTarget(
         index: index,
-        onActivate: overflow.onReveal,
+        // After a leading selection action (slot 1).
+        slot: 2,
+        onActivate: reveal,
         child: GestureDetector(
-          onTap: overflow.onReveal,
+          onTap: reveal,
           child: const Icon(M3EIcons.more_vert),
         ),
       );

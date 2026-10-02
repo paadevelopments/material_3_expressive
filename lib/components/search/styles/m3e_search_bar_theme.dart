@@ -5,42 +5,71 @@ import 'package:material_3_expressive/components/search/m3e_search_bar.dart'
     show M3ESearchBar;
 import 'package:material_3_expressive/material_3_expressive.dart'
     show M3ESearchBar;
+import 'package:material_ui/material_ui.dart'
+    show InkSparkle, InteractiveInkFeatureFactory;
 
 import '../../../foundations/foundations.dart';
 
 /// Theme values for [M3ESearchBar].
+///
+/// Defaults follow the M3 Expressive "Search - Bar" token set (contained).
 @immutable
 class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   /// M3ESearchBarTheme.
+  ///
+  /// [horizontalPadding], [restingExpandPadding], and
+  /// [noLeadingHintExtraPadding] are legacy aliases. When set they map onto
+  /// [leadingSpace] / [trailingSpace], [unfocusedMargin] / [focusedMargin],
+  /// and [noActionsLeadingSpace].
   const M3ESearchBarTheme({
-    this.elevation = 0,
-    this.horizontalPadding = 8,
+    this.elevation = M3EElevation.level0,
+    double? horizontalPadding,
     this.iconSize = 24,
     this.selectionOpacity = 0.4,
     this.disabledOpacity = M3EStateOpacity.disabledContent,
     this.minWidth = 360,
-    this.maxWidth = double.infinity,
+    this.maxWidth = 720,
     this.minHeight = 56,
-    this.restingExpandPadding = 8,
+    double? restingExpandPadding,
     this.expandOnFocus = true,
-    this.focusExpandSpring = M3EMotion.expressiveSpatialPress,
-    this.noLeadingHintExtraPadding = 12,
-    this.pressedOverlayOpacity = 0.1,
-    this.hoveredOverlayOpacity = 0.08,
-  });
+    this.focusExpandSpring = M3EMotion.expressiveSpatialDefault,
+    double? noLeadingHintExtraPadding,
+    this.pressedOverlayOpacity = M3EStateOpacity.pressed,
+    this.hoveredOverlayOpacity = M3EStateOpacity.hover,
+    double unfocusedMargin = 24,
+    double focusedMargin = 12,
+    double leadingSpace = 4,
+    double trailingSpace = 4,
+    double noActionsLeadingSpace = 16,
+    this.noActionsTrailingSpace = 16,
+    this.iconLabelGap = 4,
+    this.trailingActionsLeadingSpace = 4,
+    this.trailingActionsGap = 0,
+    this.tapTargetSize = 48,
+    this.avatarSize = 30,
+    this.avatarTargetSize = 48,
+    this.avatarShape = const CircleBorder(),
+    this.focusIndicatorThickness = 3,
+    this.focusIndicatorOffset = 2,
+    this.splashFactory = InkSparkle.splashFactory,
+  }) : unfocusedMargin = restingExpandPadding ?? unfocusedMargin,
+       focusedMargin = restingExpandPadding == null
+           ? focusedMargin
+           : restingExpandPadding / 2,
+       leadingSpace = horizontalPadding ?? leadingSpace,
+       trailingSpace = horizontalPadding ?? trailingSpace,
+       noActionsLeadingSpace = noLeadingHintExtraPadding == null
+           ? noActionsLeadingSpace
+           : (horizontalPadding ?? leadingSpace) + noLeadingHintExtraPadding;
 
   /// defaults.
 
   static const M3ESearchBarTheme defaults = M3ESearchBarTheme();
 
-  /// elevation.
-
+  /// Container elevation. Level 0: no shadow by default.
   final double elevation;
 
-  /// horizontalPadding.
-  final double horizontalPadding;
-
-  /// iconSize.
+  /// Leading / trailing icon glyph size (24).
   final double iconSize;
 
   /// selectionOpacity.
@@ -49,35 +78,83 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   /// disabledOpacity.
   final double disabledOpacity;
 
-  /// minWidth.
+  /// Container min width (360).
   final double minWidth;
 
-  /// maxWidth.
+  /// Container max width (720).
   final double maxWidth;
 
-  /// minHeight.
+  /// Container height (56).
   final double minHeight;
 
-  /// restingExpandPadding.
-  final double restingExpandPadding;
-
-  /// expandOnFocus.
+  /// Whether the bar widens on focus ([unfocusedMargin] → [focusedMargin]).
   final bool expandOnFocus;
 
-  /// Spring for the minor expand/collapse inset on focus.
-  ///
-  /// Defaults to [M3EMotion.expressiveSpatialPress] (380 / 0.55) — same
-  /// bouncy spatial recipe as the floating toolbar.
+  /// Spring for the 24 → 12 margin change on focus.
   final M3ESpring focusExpandSpring;
 
-  /// noLeadingHintExtraPadding.
-  final double noLeadingHintExtraPadding;
-
-  /// pressedOverlayOpacity.
+  /// Pressed state layer opacity on on-surface (0.1).
   final double pressedOverlayOpacity;
 
-  /// hoveredOverlayOpacity.
+  /// Hovered state layer opacity on on-surface (0.08).
   final double hoveredOverlayOpacity;
+
+  /// Side margin around the bar while unfocused (24).
+  final double unfocusedMargin;
+
+  /// Side margin around the bar while focused (12).
+  final double focusedMargin;
+
+  /// Container edge → leading tap target (4).
+  final double leadingSpace;
+
+  /// Last trailing tap target → container edge (4).
+  final double trailingSpace;
+
+  /// Container edge → label when there is no leading action (16).
+  final double noActionsLeadingSpace;
+
+  /// Label → container edge when there are no trailing actions (16).
+  final double noActionsTrailingSpace;
+
+  /// Leading tap target → label (4).
+  final double iconLabelGap;
+
+  /// Label → first trailing tap target (4).
+  final double trailingActionsLeadingSpace;
+
+  /// Gap between trailing tap targets (0).
+  final double trailingActionsGap;
+
+  /// Leading / trailing icon tap target (48).
+  final double tapTargetSize;
+
+  /// Avatar diameter (30).
+  final double avatarSize;
+
+  /// Avatar tap target (48).
+  final double avatarTargetSize;
+
+  /// Avatar shape (circle).
+  final ShapeBorder avatarShape;
+
+  /// Focus indicator thickness (3).
+  final double focusIndicatorThickness;
+
+  /// Focus indicator offset from the container (2).
+  final double focusIndicatorOffset;
+
+  /// Pressed ripple. Defaults to the package sparkle.
+  final InteractiveInkFeatureFactory splashFactory;
+
+  /// Legacy alias of [leadingSpace].
+  double get horizontalPadding => leadingSpace;
+
+  /// Legacy alias of [unfocusedMargin].
+  double get restingExpandPadding => unfocusedMargin;
+
+  /// Legacy alias: [noActionsLeadingSpace] minus [leadingSpace].
+  double get noLeadingHintExtraPadding => noActionsLeadingSpace - leadingSpace;
 
   /// constraints.
 
@@ -90,7 +167,7 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
         );
   }
 
-  /// backgroundColor.
+  /// Container color: surface container high.
 
   Color backgroundColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
 
@@ -98,24 +175,32 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
 
   Color shadowColor(M3EColorScheme scheme) => scheme.shadow;
 
-  /// surfaceTintColor.
+  /// Container surface tint layer color: primary.
 
-  Color surfaceTintColor(M3EColorScheme scheme) => const Color(0x00000000);
+  Color surfaceTintColor(M3EColorScheme scheme) => scheme.primary;
 
-  /// leadingIconColor.
+  /// Leading icon color: on surface.
 
   Color leadingIconColor(M3EColorScheme scheme) => scheme.onSurface;
 
-  /// trailingIconColor.
+  /// Trailing icon color: on surface variant.
 
   Color trailingIconColor(M3EColorScheme scheme) => scheme.onSurfaceVariant;
 
-  /// textStyle.
+  /// Focus indicator color: secondary.
+
+  Color focusIndicatorColor(M3EColorScheme scheme) => scheme.secondary;
+
+  /// State layer base color (hover / pressed): on surface.
+
+  Color stateLayerColor(M3EColorScheme scheme) => scheme.onSurface;
+
+  /// Input text: body large, on surface.
 
   TextStyle textStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurface);
 
-  /// hintStyle.
+  /// Supporting (hinted) text: body large, on surface variant.
 
   TextStyle hintStyle(M3ETypeScale type, M3EColorScheme scheme) =>
       type.bodyLarge.copyWith(color: scheme.onSurfaceVariant);
@@ -129,13 +214,30 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
   Color selectionColor(M3EColorScheme scheme) =>
       scheme.primary.withValues(alpha: selectionOpacity);
 
-  /// padding.
+  /// Container padding: [leadingSpace] start, [trailingSpace] end.
 
   EdgeInsetsGeometry padding({EdgeInsetsGeometry? override}) {
-    return override ?? EdgeInsets.symmetric(horizontal: horizontalPadding);
+    return override ??
+        EdgeInsetsDirectional.only(start: leadingSpace, end: trailingSpace);
   }
 
-  /// shape.
+  /// Label insets inside [padding] for the given actions.
+  ///
+  /// With actions: [iconLabelGap] / [trailingActionsLeadingSpace]. Without:
+  /// the remainder up to [noActionsLeadingSpace] / [noActionsTrailingSpace].
+  EdgeInsetsDirectional labelPadding({
+    required bool hasLeading,
+    required bool hasTrailing,
+  }) {
+    return EdgeInsetsDirectional.only(
+      start: hasLeading ? iconLabelGap : noActionsLeadingSpace - leadingSpace,
+      end: hasTrailing
+          ? trailingActionsLeadingSpace
+          : noActionsTrailingSpace - trailingSpace,
+    );
+  }
+
+  /// Container shape: fully rounded.
 
   ShapeBorder shape({ShapeBorder? override}) => override ?? M3EShapes.stadium;
 
@@ -204,10 +306,10 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
       return resolved;
     }
     if (states.contains(WidgetState.pressed)) {
-      return scheme.onSurface.withValues(alpha: pressedOverlayOpacity);
+      return stateLayerColor(scheme).withValues(alpha: pressedOverlayOpacity);
     }
     if (states.contains(WidgetState.hovered)) {
-      return scheme.onSurface.withValues(alpha: hoveredOverlayOpacity);
+      return stateLayerColor(scheme).withValues(alpha: hoveredOverlayOpacity);
     }
     return null;
   }
@@ -256,25 +358,66 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     double? noLeadingHintExtraPadding,
     double? pressedOverlayOpacity,
     double? hoveredOverlayOpacity,
+    double? unfocusedMargin,
+    double? focusedMargin,
+    double? leadingSpace,
+    double? trailingSpace,
+    double? noActionsLeadingSpace,
+    double? noActionsTrailingSpace,
+    double? iconLabelGap,
+    double? trailingActionsLeadingSpace,
+    double? trailingActionsGap,
+    double? tapTargetSize,
+    double? avatarSize,
+    double? avatarTargetSize,
+    ShapeBorder? avatarShape,
+    double? focusIndicatorThickness,
+    double? focusIndicatorOffset,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
+    final double lead = leadingSpace ?? horizontalPadding ?? this.leadingSpace;
     return M3ESearchBarTheme(
       elevation: elevation ?? this.elevation,
-      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       iconSize: iconSize ?? this.iconSize,
       selectionOpacity: selectionOpacity ?? this.selectionOpacity,
       disabledOpacity: disabledOpacity ?? this.disabledOpacity,
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
-      restingExpandPadding: restingExpandPadding ?? this.restingExpandPadding,
       expandOnFocus: expandOnFocus ?? this.expandOnFocus,
       focusExpandSpring: focusExpandSpring ?? this.focusExpandSpring,
-      noLeadingHintExtraPadding:
-          noLeadingHintExtraPadding ?? this.noLeadingHintExtraPadding,
       pressedOverlayOpacity:
           pressedOverlayOpacity ?? this.pressedOverlayOpacity,
       hoveredOverlayOpacity:
           hoveredOverlayOpacity ?? this.hoveredOverlayOpacity,
+      unfocusedMargin:
+          unfocusedMargin ?? restingExpandPadding ?? this.unfocusedMargin,
+      focusedMargin:
+          focusedMargin ??
+          (restingExpandPadding == null
+              ? this.focusedMargin
+              : restingExpandPadding / 2),
+      leadingSpace: lead,
+      trailingSpace: trailingSpace ?? horizontalPadding ?? this.trailingSpace,
+      noActionsLeadingSpace:
+          noActionsLeadingSpace ??
+          (noLeadingHintExtraPadding == null
+              ? this.noActionsLeadingSpace
+              : lead + noLeadingHintExtraPadding),
+      noActionsTrailingSpace:
+          noActionsTrailingSpace ?? this.noActionsTrailingSpace,
+      iconLabelGap: iconLabelGap ?? this.iconLabelGap,
+      trailingActionsLeadingSpace:
+          trailingActionsLeadingSpace ?? this.trailingActionsLeadingSpace,
+      trailingActionsGap: trailingActionsGap ?? this.trailingActionsGap,
+      tapTargetSize: tapTargetSize ?? this.tapTargetSize,
+      avatarSize: avatarSize ?? this.avatarSize,
+      avatarTargetSize: avatarTargetSize ?? this.avatarTargetSize,
+      avatarShape: avatarShape ?? this.avatarShape,
+      focusIndicatorThickness:
+          focusIndicatorThickness ?? this.focusIndicatorThickness,
+      focusIndicatorOffset: focusIndicatorOffset ?? this.focusIndicatorOffset,
+      splashFactory: splashFactory ?? this.splashFactory,
     );
   }
 
@@ -283,47 +426,69 @@ class M3ESearchBarTheme extends M3EThemeExtension<M3ESearchBarTheme> {
     if (other is! M3ESearchBarTheme) {
       return this;
     }
+    final bool first = t < 0.5;
     return M3ESearchBarTheme(
-      elevation: _lerpDouble(elevation, other.elevation, t)!,
-      horizontalPadding: _lerpDouble(
-        horizontalPadding,
-        other.horizontalPadding,
-        t,
-      )!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      selectionOpacity: _lerpDouble(
-        selectionOpacity,
-        other.selectionOpacity,
-        t,
-      )!,
-      disabledOpacity: _lerpDouble(disabledOpacity, other.disabledOpacity, t)!,
-      minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
-      maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,
-      minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
-      restingExpandPadding: _lerpDouble(
-        restingExpandPadding,
-        other.restingExpandPadding,
-        t,
-      )!,
-      expandOnFocus: t < 0.5 ? expandOnFocus : other.expandOnFocus,
-      focusExpandSpring: t < 0.5 ? focusExpandSpring : other.focusExpandSpring,
-      noLeadingHintExtraPadding: _lerpDouble(
-        noLeadingHintExtraPadding,
-        other.noLeadingHintExtraPadding,
-        t,
-      )!,
-      pressedOverlayOpacity: _lerpDouble(
+      elevation: _lerp(elevation, other.elevation, t),
+      iconSize: _lerp(iconSize, other.iconSize, t),
+      selectionOpacity: _lerp(selectionOpacity, other.selectionOpacity, t),
+      disabledOpacity: _lerp(disabledOpacity, other.disabledOpacity, t),
+      minWidth: _lerp(minWidth, other.minWidth, t),
+      maxWidth: _lerp(maxWidth, other.maxWidth, t),
+      minHeight: _lerp(minHeight, other.minHeight, t),
+      expandOnFocus: first ? expandOnFocus : other.expandOnFocus,
+      focusExpandSpring: first ? focusExpandSpring : other.focusExpandSpring,
+      pressedOverlayOpacity: _lerp(
         pressedOverlayOpacity,
         other.pressedOverlayOpacity,
         t,
-      )!,
-      hoveredOverlayOpacity: _lerpDouble(
+      ),
+      hoveredOverlayOpacity: _lerp(
         hoveredOverlayOpacity,
         other.hoveredOverlayOpacity,
         t,
-      )!,
+      ),
+      unfocusedMargin: _lerp(unfocusedMargin, other.unfocusedMargin, t),
+      focusedMargin: _lerp(focusedMargin, other.focusedMargin, t),
+      leadingSpace: _lerp(leadingSpace, other.leadingSpace, t),
+      trailingSpace: _lerp(trailingSpace, other.trailingSpace, t),
+      noActionsLeadingSpace: _lerp(
+        noActionsLeadingSpace,
+        other.noActionsLeadingSpace,
+        t,
+      ),
+      noActionsTrailingSpace: _lerp(
+        noActionsTrailingSpace,
+        other.noActionsTrailingSpace,
+        t,
+      ),
+      iconLabelGap: _lerp(iconLabelGap, other.iconLabelGap, t),
+      trailingActionsLeadingSpace: _lerp(
+        trailingActionsLeadingSpace,
+        other.trailingActionsLeadingSpace,
+        t,
+      ),
+      trailingActionsGap: _lerp(
+        trailingActionsGap,
+        other.trailingActionsGap,
+        t,
+      ),
+      tapTargetSize: _lerp(tapTargetSize, other.tapTargetSize, t),
+      avatarSize: _lerp(avatarSize, other.avatarSize, t),
+      avatarTargetSize: _lerp(avatarTargetSize, other.avatarTargetSize, t),
+      avatarShape: first ? avatarShape : other.avatarShape,
+      focusIndicatorThickness: _lerp(
+        focusIndicatorThickness,
+        other.focusIndicatorThickness,
+        t,
+      ),
+      focusIndicatorOffset: _lerp(
+        focusIndicatorOffset,
+        other.focusIndicatorOffset,
+        t,
+      ),
+      splashFactory: first ? splashFactory : other.splashFactory,
     );
   }
 
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
+  double _lerp(double a, double b, double t) => a + (b - a) * t;
 }

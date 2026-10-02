@@ -79,6 +79,7 @@ Future<void> _m3esearchbarLaysOutAtDefaultHeightWithoutOverflow(
 Future<void> _m3esearchbarAppliesHintInsetOnlyWithoutLeading(
   WidgetTester tester,
 ) async {
+  // 4 container padding + 12 label inset = 16 without actions.
   const double extraInset = 12;
 
   await tester.pumpWidget(
@@ -90,7 +91,7 @@ Future<void> _m3esearchbarAppliesHintInsetOnlyWithoutLeading(
   );
   expect(
     withoutLeading.contentPadding,
-    const EdgeInsetsDirectional.only(start: extraInset),
+    const EdgeInsetsDirectional.only(start: extraInset, end: extraInset),
   );
 
   await tester.pumpWidget(
@@ -105,7 +106,11 @@ Future<void> _m3esearchbarAppliesHintInsetOnlyWithoutLeading(
   final M3ESearchBarInput withLeading = tester.widget<M3ESearchBarInput>(
     find.byType(M3ESearchBarInput),
   );
-  expect(withLeading.contentPadding, EdgeInsetsDirectional.zero);
+  // Leading tap target → label gap is 4.
+  expect(
+    withLeading.contentPadding,
+    const EdgeInsetsDirectional.only(start: 4, end: extraInset),
+  );
 }
 
 Future<void> _disabledM3esearchbarAppliesReducedOpacity(
@@ -420,7 +425,8 @@ Future<void> _m3esearchbarExpandsHorizontallyOnFocus(
 
   final double widthFocused = tester.getSize(barMaterial).width;
   expect(widthFocused, greaterThan(widthBefore));
-  expect(widthFocused - widthBefore, closeTo(8, 0.1));
+  // Margins 24 → 12 on each side.
+  expect(widthFocused - widthBefore, closeTo(24, 0.1));
 
   focusNode.unfocus();
   await tester.pumpAndSettle();

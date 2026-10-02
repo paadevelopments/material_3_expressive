@@ -37,6 +37,7 @@ extension _M3EListBuild on _M3EListState {
     Widget list = M3EListKeyboardGroup(
       itemCount: widget.itemCount,
       semanticsLabel: widget.semanticsLabel,
+      sliver: _isSliver,
       child: _layout(context),
     );
     if (widget.selection || widget.reorder) {
@@ -60,13 +61,18 @@ extension _M3EListBuild on _M3EListState {
     if (widget.itemCount != 0 || empty == null) {
       return null;
     }
-    return _margin(empty);
+    return _margin(_isSliver ? SliverToBoxAdapter(child: empty) : empty);
   }
+
+  bool get _isSliver => widget._layout == _M3EListLayout.sliver;
 
   Widget _margin(Widget child) {
     final EdgeInsetsGeometry? margin = widget.margin;
     if (margin == null) {
       return child;
+    }
+    if (_isSliver) {
+      return SliverPadding(padding: margin, sliver: child);
     }
     return Padding(padding: margin, child: child);
   }

@@ -15,23 +15,25 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
       states: states,
     );
     final M3EIconButtonTheme iconButtonTheme = theme.iconButtonTheme;
+    final List<Widget> trailingSource = _trailingSource();
+    assert(
+      (widget.trailing?.length ?? 0) <= (widget.avatar == null ? 2 : 1),
+      'M3ESearchBar: use at most two trailing icons, or one with an avatar.',
+    );
     final double actionIconSize = _resolveActionIconSize(
       iconButtonTheme: iconButtonTheme,
-      trailing: widget.trailing,
+      barTheme: barTheme,
+      trailing: trailingSource,
       leading: widget.leading,
     );
-    final double actionSlotWidth = _resolveActionSlotWidth(
-      iconButtonTheme: iconButtonTheme,
-      trailing: widget.trailing,
-      leading: widget.leading,
-    );
+    final bool hasTrailing = trailingSource.isNotEmpty || widget.avatar != null;
     return _buildBarShell(
       styles: styles,
       textDirection: textDirection,
       barTheme: barTheme,
       scheme: scheme,
       actionIconSize: actionIconSize,
-      actionSlotWidth: actionSlotWidth,
+      trailingSource: trailingSource,
       input: M3ESearchBarInput(
         controller: _controller,
         focusNode: _focusNode,
@@ -57,14 +59,33 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
         contextMenuBuilder: widget.contextMenuBuilder,
         smartDashesType: widget.smartDashesType,
         smartQuotesType: widget.smartQuotesType,
-        contentPadding: widget.leading == null
-            ? EdgeInsetsDirectional.only(
-                start: barTheme.noLeadingHintExtraPadding,
-              )
-            : EdgeInsetsDirectional.zero,
+        contentPadding: barTheme.labelPadding(
+          hasLeading: widget.leading != null,
+          hasTrailing: hasTrailing,
+        ),
       ),
       idleHintStyle: styles.hintStyle,
     );
+  }
+
+  bool get _clearVisible =>
+      widget.showClearButton &&
+      widget.enabled &&
+      !widget.readOnly &&
+      _controller.text.isNotEmpty;
+
+  /// Trailing actions before the avatar; clear (X) leads while visible.
+  List<Widget> _trailingSource() {
+    return <Widget>[
+      if (_clearVisible)
+        M3EIconButton(
+          variant: M3EIconButtonVariant.standard,
+          icon: const Icon(M3EIcons.close),
+          tooltip: M3ESearchConstants.clearButtonTooltip,
+          onPressed: _controller.clear,
+        ),
+      ...?widget.trailing,
+    ];
   }
 
   Widget _buildBarShell({
@@ -73,21 +94,20 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required M3ESearchBarTheme barTheme,
     required M3EColorScheme scheme,
     required double actionIconSize,
-    required double actionSlotWidth,
+    required List<Widget> trailingSource,
     required Widget input,
     required TextStyle idleHintStyle,
   }) {
     final Widget? leading = _buildLeading(
       barTheme: barTheme,
       scheme: scheme,
-      actionSlotWidth: actionSlotWidth,
       actionIconSize: actionIconSize,
       compact: false,
     );
-    final List<Widget>? trailing = _buildTrailing(
+    final List<Widget> trailing = _buildTrailing(
       barTheme: barTheme,
       scheme: scheme,
-      actionSlotWidth: actionSlotWidth,
+      source: trailingSource,
       actionIconSize: actionIconSize,
       compact: false,
     );
@@ -103,13 +123,11 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
       leading: leading == null
           ? null
           : (idleGrouped ? ExcludeFocus(child: leading) : leading),
-      trailing: trailing == null
-          ? null
-          : (idleGrouped
-                ? trailing
-                      .map((Widget action) => ExcludeFocus(child: action))
-                      .toList()
-                : trailing),
+      trailing: idleGrouped
+          ? trailing
+                .map((Widget action) => ExcludeFocus(child: action))
+                .toList()
+          : trailing,
       input: input,
     );
 
@@ -119,16 +137,35 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
       barTheme: barTheme,
       scheme: scheme,
       actionIconSize: actionIconSize,
+      trailingSource: trailingSource,
       idleHintStyle: idleHintStyle,
       editingRow: editingRow,
       idleGrouped: idleGrouped,
     );
 
     // Ring hugs the bar itself, so it tracks the expand-on-focus inset.
-    return M3EFocusRing(
+    final Widget ring = M3EFocusRing(
       focused: _showFocusRing,
       radius: _barFocusRingRadius(styles.shape, barTheme),
-      child: _buildBarMaterial(styles: styles, content: content),
+      color: widget.focusIndicatorColor ?? barTheme.focusIndicatorColor(scheme),
+      width: barTheme.focusIndicatorThickness,
+      gap: barTheme.focusIndicatorOffset,
+      child: _buildBarMaterial(
+        styles: styles,
+        barTheme: barTheme,
+        content: content,
+      ),
+    );
+    _surface = M3ESearchAnchorScope.maybeOf(context);
+    if (_surface == null) {
+      return ring;
+    }
+    return Builder(
+      builder: (BuildContext surfaceContext) {
+        _surfaceContext = surfaceContext;
+        _surface!.context = surfaceContext;
+        return ring;
+      },
     );
   }
 
@@ -138,6 +175,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required M3ESearchBarTheme barTheme,
     required M3EColorScheme scheme,
     required double actionIconSize,
+    required List<Widget> trailingSource,
     required TextStyle idleHintStyle,
     required Widget editingRow,
     required bool idleGrouped,
@@ -158,6 +196,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
                     barTheme: barTheme,
                     scheme: scheme,
                     actionIconSize: actionIconSize,
+                    trailingSource: trailingSource,
                     idleHintStyle: idleHintStyle,
                   ),
                 ),
@@ -168,8 +207,16 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     );
   }
 
+  MouseCursor _barCursor() {
+    if (!widget.enabled) {
+      return SystemMouseCursors.basic;
+    }
+    return widget.readOnly ? SystemMouseCursors.click : SystemMouseCursors.text;
+  }
+
   Widget _buildBarMaterial({
     required _BarResolvedStyles styles,
+    required M3ESearchBarTheme barTheme,
     required Widget content,
   }) {
     return Opacity(
@@ -188,6 +235,8 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
             child: InkWell(
               onTap: _handleTap,
               canRequestFocus: false,
+              mouseCursor: _barCursor(),
+              splashFactory: barTheme.splashFactory,
               overlayColor: styles.overlay == null
                   ? null
                   : WidgetStatePropertyAll<Color?>(styles.overlay),
@@ -227,6 +276,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     required M3ESearchBarTheme barTheme,
     required M3EColorScheme scheme,
     required double actionIconSize,
+    required List<Widget> trailingSource,
     required TextStyle idleHintStyle,
   }) {
     // Compact leading/trailing (no tap-target slot) so optical center matches
@@ -234,20 +284,23 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
     final Widget? leading = _buildLeading(
       barTheme: barTheme,
       scheme: scheme,
-      actionSlotWidth: actionIconSize,
       actionIconSize: actionIconSize,
       compact: true,
     );
-    final List<Widget>? trailing = _buildTrailing(
+    final List<Widget> trailing = _buildTrailing(
       barTheme: barTheme,
       scheme: scheme,
-      actionSlotWidth: actionIconSize,
+      source: trailingSource,
       actionIconSize: actionIconSize,
       compact: true,
     );
-    final double leadingGap = leading != null ? barTheme.horizontalPadding : 0;
-    final double trailingGap = trailing != null && trailing.isNotEmpty
-        ? barTheme.horizontalPadding
+    // Same glyph → label distance as the slotted layout.
+    final double slotInset = (barTheme.tapTargetSize - actionIconSize) / 2;
+    final double leadingGap = leading != null
+        ? slotInset + barTheme.iconLabelGap
+        : 0;
+    final double trailingGap = trailing.isNotEmpty
+        ? slotInset + barTheme.trailingActionsLeadingSpace
         : 0;
 
     return Align(
@@ -263,7 +316,9 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               child: Padding(
                 padding: leading == null
                     ? EdgeInsetsDirectional.only(
-                        start: barTheme.noLeadingHintExtraPadding,
+                        start:
+                            barTheme.noActionsLeadingSpace -
+                            barTheme.leadingSpace,
                       )
                     : EdgeInsets.zero,
                 child: Text(
@@ -276,7 +331,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
             ),
             if (trailingGap > 0) SizedBox(width: trailingGap),
           ],
-          ...?trailing,
+          ...trailing,
         ],
       ),
     );
@@ -285,7 +340,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
   Widget _buildEditingRow({
     required TextDirection textDirection,
     required Widget? leading,
-    required List<Widget>? trailing,
+    required List<Widget> trailing,
     required Widget input,
   }) {
     return Row(
@@ -293,7 +348,7 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
       children: <Widget>[
         ?leading,
         Expanded(child: input),
-        ...?trailing,
+        ...trailing,
       ],
     );
   }
@@ -351,36 +406,41 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
   Widget? _buildLeading({
     required M3ESearchBarTheme barTheme,
     required M3EColorScheme scheme,
-    required double actionSlotWidth,
     required double actionIconSize,
     required bool compact,
   }) {
-    if (widget.leading == null) {
+    final Widget? source = widget.leading;
+    if (source == null) {
       return null;
     }
-    final Widget child = widget.leading is M3EIconButton
-        ? widget.leading!
+    final Widget child = source is M3EIconButton
+        ? source
         : IconTheme.merge(
             data: IconThemeData(
               color: barTheme.leadingIconColor(scheme),
               size: actionIconSize,
             ),
-            child: widget.leading!,
+            // A plain icon is decorative (non-functional search icon).
+            child: source is Icon ? ExcludeSemantics(child: source) : source,
           );
     if (compact) {
       return child;
     }
-    return _wrapActionSlot(width: actionSlotWidth, child: child);
+    return _wrapActionSlot(width: _slotWidth(source, barTheme), child: child);
   }
 
-  List<Widget>? _buildTrailing({
+  List<Widget> _buildTrailing({
     required M3ESearchBarTheme barTheme,
     required M3EColorScheme scheme,
-    required double actionSlotWidth,
+    required List<Widget> source,
     required double actionIconSize,
     required bool compact,
   }) {
-    return widget.trailing?.map((Widget action) {
+    final actions = <Widget>[];
+    for (final action in source) {
+      if (actions.isNotEmpty && !compact && barTheme.trailingActionsGap > 0) {
+        actions.add(SizedBox(width: barTheme.trailingActionsGap));
+      }
       final Widget child = action is M3EIconButton
           ? action
           : IconTheme.merge(
@@ -390,11 +450,46 @@ extension _M3ESearchBarContentBuild on _M3ESearchBarState {
               ),
               child: action,
             );
-      if (compact) {
-        return child;
+      actions.add(
+        compact
+            ? child
+            : _wrapActionSlot(
+                width: _slotWidth(action, barTheme),
+                child: child,
+              ),
+      );
+    }
+    final avatar = widget.avatar;
+    if (avatar != null) {
+      if (actions.isNotEmpty && !compact && barTheme.trailingActionsGap > 0) {
+        actions.add(SizedBox(width: barTheme.trailingActionsGap));
       }
-      return _wrapActionSlot(width: actionSlotWidth, child: child);
-    }).toList();
+      final Widget clipped = SizedBox.square(
+        dimension: barTheme.avatarSize,
+        child: ClipPath(
+          clipper: ShapeBorderClipper(
+            shape: barTheme.avatarShape,
+            textDirection: Directionality.maybeOf(context),
+          ),
+          child: avatar,
+        ),
+      );
+      actions.add(
+        compact
+            ? clipped
+            : _wrapActionSlot(width: barTheme.avatarTargetSize, child: clipped),
+      );
+    }
+    return actions;
+  }
+
+  double _slotWidth(Widget action, M3ESearchBarTheme barTheme) {
+    if (action is M3EIconButton) {
+      return M3ETheme.of(context).iconButtonTheme
+          .target(action.size, action.width)
+          .width;
+    }
+    return barTheme.tapTargetSize;
   }
 }
 

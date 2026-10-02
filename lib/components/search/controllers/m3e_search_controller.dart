@@ -86,3 +86,6 @@ typedef M3ESearchSuggestionsBuilder = FutureOr<Iterable<Widget>> Function(
 
 /// Signature for laying out suggestion widgets in the search view.
 typedef M3ESearchViewBuilder = Widget Function(Iterable<Widget> suggestions);
+
+/// Signature for the screen reader text sent when results change.
+typedef M3ESearchAnnouncementBuilder = String Function(int count);

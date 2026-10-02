@@ -2,65 +2,27 @@ part of '../m3e_search_bar.dart';
 
 double _resolveActionIconSize({
   required M3EIconButtonTheme iconButtonTheme,
+  required M3ESearchBarTheme barTheme,
   required Iterable<Widget>? trailing,
   required Widget? leading,
 }) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
+  final Widget? referenceAction = trailing != null && trailing.isNotEmpty
+      ? trailing.last
+      : leading;
   if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.iconSize(button.size);
+    return iconButtonTheme.iconSize(referenceAction.size);
   }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    if (icon.size != null) {
-      return icon.size!;
-    }
+  if (referenceAction is Icon && referenceAction.size != null) {
+    return referenceAction.size!;
   }
-  return iconButtonTheme.iconSize(M3EIconButtonSize.sm);
+  return barTheme.iconSize;
 }
 
-Widget? _resolveReferenceAction({
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  if (trailing != null && trailing.isNotEmpty) {
-    return trailing.last;
-  }
-  return leading;
-}
-
-double _resolveActionSlotWidth({
-  required M3EIconButtonTheme iconButtonTheme,
-  required Iterable<Widget>? trailing,
-  required Widget? leading,
-}) {
-  final Widget? referenceAction = _resolveReferenceAction(
-    trailing: trailing,
-    leading: leading,
-  );
-  if (referenceAction is M3EIconButton) {
-    final M3EIconButton button = referenceAction;
-    return iconButtonTheme.target(button.size, button.width).width;
-  }
-  if (referenceAction is Icon) {
-    final Icon icon = referenceAction;
-    return icon.size ??
-        iconButtonTheme
-            .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-            .width;
-  }
-  return iconButtonTheme
-      .target(M3EIconButtonSize.sm, M3EIconButtonWidth.defaultWidth)
-      .width;
-}
-
+/// Square tap target; heightFactor keeps it from stretching the bar.
 Widget _wrapActionSlot({required double width, required Widget child}) {
   return SizedBox(
     width: width,
-    child: Center(child: child),
+    child: Center(heightFactor: 1, child: child),
   );
 }
 
@@ -183,7 +145,23 @@ class M3ESearchBarInput extends StatefulWidget {
   State<M3ESearchBarInput> createState() => _M3ESearchBarInputState();
 }
 
-class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
+class _M3ESearchBarInputState extends State<M3ESearchBarInput>
+    implements TextSelectionGestureDetectorBuilderDelegate {
+  final GlobalKey<EditableTextState> _editableKey =
+      GlobalKey<EditableTextState>();
+  late final TextSelectionGestureDetectorBuilder _selectionBuilder =
+      TextSelectionGestureDetectorBuilder(delegate: this);
+  bool _showSelectionHandles = false;
+
+  @override
+  GlobalKey<EditableTextState> get editableTextKey => _editableKey;
+
+  @override
+  bool get forcePressEnabled => defaultTargetPlatform == TargetPlatform.iOS;
+
+  @override
+  bool get selectionEnabled => widget.enabled;
+
   @override
   void initState() {
     super.initState();
@@ -206,6 +184,56 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
   }
 
   void _handleTextChange() => setState(() {});
+
+  /// Touch selections show handles; keyboard and mouse selections do not.
+  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    if (!_selectionBuilder.shouldShowSelectionToolbar ||
+        !_selectionBuilder.shouldShowSelectionHandles) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.keyboard || !widget.enabled) {
+      return false;
+    }
+    if (widget.readOnly && widget.controller.selection.isCollapsed) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.stylusHandwriting) {
+      return true;
+    }
+    return widget.controller.text.isNotEmpty;
+  }
+
+  void _handleSelectionChanged(
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  ) {
+    final bool show = _shouldShowSelectionHandles(cause);
+    if (show != _showSelectionHandles) {
+      setState(() => _showSelectionHandles = show);
+    }
+    if (cause == SelectionChangedCause.longPress) {
+      _editableKey.currentState?.bringIntoView(selection.extent);
+    }
+    final bool desktop = switch (defaultTargetPlatform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => true,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS => false,
+    };
+    if (desktop && cause == SelectionChangedCause.drag) {
+      _editableKey.currentState?.hideToolbar();
+    }
+  }
+
+  /// Tapping the caret handle toggles the toolbar.
+  void _handleSelectionHandleTapped() {
+    if (widget.controller.selection.isCollapsed) {
+      _editableKey.currentState?.toggleToolbar();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +261,10 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
                 // (soft keyboard flash when SearchAnchor opens the view).
                 child: AbsorbPointer(
                   absorbing: widget.readOnly || !widget.enabled,
-                  child: _buildEditableText(),
+                  child: _selectionBuilder.buildGestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    child: _buildEditableText(),
+                  ),
                 ),
               ),
             ),
@@ -271,6 +302,7 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
 
   Widget _buildEditableText() {
     return EditableText(
+      key: _editableKey,
       controller: widget.controller,
       focusNode: widget.focusNode,
       readOnly: widget.readOnly || !widget.enabled,
@@ -284,10 +316,16 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
       backgroundCursorColor: widget.cursorColor.withValues(alpha: 0.4),
       selectionColor: widget.selectionColor,
       textCapitalization: widget.textCapitalization,
-      textInputAction: widget.textInputAction,
+      // Enter executes the search; the field unfocuses and keeps the query.
+      textInputAction: widget.textInputAction ?? TextInputAction.search,
       keyboardType: widget.keyboardType,
       scrollPadding: widget.scrollPadding,
       contextMenuBuilder: widget.contextMenuBuilder,
+      selectionControls: m3eSearchSelectionControls(defaultTargetPlatform),
+      showSelectionHandles: _showSelectionHandles,
+      onSelectionChanged: _handleSelectionChanged,
+      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      rendererIgnoresPointer: true,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
     );

@@ -53,11 +53,17 @@ class M3EListExpandableTheme {
   /// defaultIconPadding.
   static const EdgeInsets defaultIconPadding = EdgeInsets.all(8);
 
-  /// Side length of the square behind the trailing expand icon.
+  /// Width of the pill behind the trailing expand icon.
   ///
-  /// The box stays this size when collapsed or expanded; only the fill is
-  /// shown while expanded. Set to `0` to disable the chrome entirely.
+  /// Matches the narrow small icon button (32 x 40). The box stays this size
+  /// when collapsed or expanded; only the fill is shown while expanded. Set to
+  /// `0` to disable the chrome entirely.
   static const double defaultExpandedIconBackgroundSize = 32;
+
+  /// Height of the pill behind the trailing expand icon.
+  ///
+  /// Matches the narrow small icon button (32 x 40).
+  static const double defaultExpandedIconBackgroundHeight = 40;
 
   /// defaultIconRotationAngle.
   static const double defaultIconRotationAngle = math.pi;
@@ -81,7 +87,11 @@ class M3EListExpandableTheme {
     this.bodyPadding = defaultBodyPadding,
     this.iconPadding = defaultIconPadding,
     this.expandedIconBackgroundSize = defaultExpandedIconBackgroundSize,
+    this.expandedIconBackgroundHeight = defaultExpandedIconBackgroundHeight,
     this.expandedIconBackground,
+    this.expandedStateFill = true,
+    this.expandedStateColor,
+    this.roundSublistBottom = true,
     this.iconRotationAngle = defaultIconRotationAngle,
     this.expandTooltip = defaultExpandTooltip,
     this.collapseTooltip = defaultCollapseTooltip,
@@ -122,16 +132,37 @@ class M3EListExpandableTheme {
   /// iconPadding.
   final EdgeInsetsGeometry iconPadding;
 
-  /// Side length of the square behind the trailing expand icon.
+  /// Width of the pill behind the trailing expand icon.
   ///
   /// Size is stable across expand and collapse; only the fill toggles.
   /// Set to `0` to disable.
   final double expandedIconBackgroundSize;
 
-  /// Fill for the expanded trailing-icon chrome.
+  /// Height of the pill behind the trailing expand icon.
+  final double expandedIconBackgroundHeight;
+
+  /// Fill for the expanded trailing-icon chrome. The chrome has no fill at
+  /// rest.
   ///
   /// When null, resolves to [M3EColorScheme.surfaceContainer].
   final Color? expandedIconBackground;
+
+  /// Whether an expanded row and its sublist switch to [expandedStateColor].
+  ///
+  /// When false, they keep the rest fill.
+  final bool expandedStateFill;
+
+  /// Fill for an expanded row and its sublist when [expandedStateFill] is on.
+  ///
+  /// When null, resolves to [M3EColorScheme.surfaceContainerHigh].
+  final Color? expandedStateColor;
+
+  /// Whether the last row of a sublist expansion always takes the outer
+  /// bottom corners, like the last row of a standalone list.
+  ///
+  /// When false, it does so only when its parent row is the last row, and
+  /// otherwise keeps the inner radius to sit flush with the main list.
+  final bool roundSublistBottom;
 
   /// iconRotationAngle.
   final double iconRotationAngle;
@@ -159,6 +190,10 @@ class M3EListExpandableTheme {
   Color resolvedExpandedIconBackground(M3EColorScheme scheme) =>
       expandedIconBackground ?? scheme.surfaceContainer;
 
+  /// Expanded row and sublist fill.
+  Color resolvedExpandedStateColor(M3EColorScheme scheme) =>
+      expandedStateColor ?? scheme.surfaceContainerHigh;
+
   /// copyWith.
 
   M3EListExpandableTheme copyWith({
@@ -172,7 +207,11 @@ class M3EListExpandableTheme {
     EdgeInsetsGeometry? bodyPadding,
     EdgeInsetsGeometry? iconPadding,
     double? expandedIconBackgroundSize,
+    double? expandedIconBackgroundHeight,
     Color? expandedIconBackground,
+    bool? expandedStateFill,
+    Color? expandedStateColor,
+    bool? roundSublistBottom,
     double? iconRotationAngle,
     String? expandTooltip,
     String? collapseTooltip,
@@ -192,8 +231,13 @@ class M3EListExpandableTheme {
       iconPadding: iconPadding ?? this.iconPadding,
       expandedIconBackgroundSize:
           expandedIconBackgroundSize ?? this.expandedIconBackgroundSize,
+      expandedIconBackgroundHeight:
+          expandedIconBackgroundHeight ?? this.expandedIconBackgroundHeight,
       expandedIconBackground:
           expandedIconBackground ?? this.expandedIconBackground,
+      expandedStateFill: expandedStateFill ?? this.expandedStateFill,
+      expandedStateColor: expandedStateColor ?? this.expandedStateColor,
+      roundSublistBottom: roundSublistBottom ?? this.roundSublistBottom,
       iconRotationAngle: iconRotationAngle ?? this.iconRotationAngle,
       expandTooltip: expandTooltip ?? this.expandTooltip,
       collapseTooltip: collapseTooltip ?? this.collapseTooltip,

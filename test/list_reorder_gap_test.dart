@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/components/lists/components/m3e_card_list_item.dart';
 import 'package:material_3_expressive/components/lists/components/m3e_expandable_sublist.dart';
 import 'package:material_3_expressive/components/lists/components/m3e_list_drag_proxy_scope.dart';
+import 'package:material_3_expressive/components/lists/components/m3e_list_reorder_placeholder.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,6 +26,77 @@ void main() {
     'header-to-sublist gap survives reorder support',
     _expandableSublistGapSurvivesReorder,
   );
+  testWidgets(
+    'destination slot fill follows the drag target and clears on drop',
+    _placeholderFillsDestinationSlot,
+  );
+}
+
+Future<void> _placeholderFillsDestinationSlot(WidgetTester tester) async {
+  final items = <String>['A', 'B', 'C'];
+  await pumpList(
+    tester,
+    StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return M3EList(
+          reorder: true,
+          onReorder: (int oldIndex, int newIndex) {
+            setState(() {
+              final String item = items.removeAt(oldIndex);
+              items.insert(newIndex, item);
+            });
+          },
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) =>
+              M3EListItem(headline: items[index]),
+        );
+      },
+    ),
+  );
+
+  Rect cardRect(String label) => tester.getRect(
+    find
+        .ancestor(of: find.text(label), matching: find.byType(M3ECardListItem))
+        .first,
+  );
+  final Finder fill = find.descendant(
+    of: find.byType(M3EListReorderPlaceholder),
+    matching: find.byType(DecoratedBox),
+  );
+
+  final Rect a = cardRect('A');
+  final Rect c = cardRect('C');
+  expect(find.byType(M3EListReorderPlaceholder), findsNothing);
+
+  final TestGesture gesture = await tester.startGesture(a.center);
+  await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+  await tester.pumpAndSettle();
+
+  expect(tester.getRect(fill), a, reason: 'fill starts in the source slot');
+
+  await gesture.moveTo(c.center);
+  await tester.pumpAndSettle();
+
+  final Rect target = tester.getRect(fill);
+  expect(
+    target.top,
+    moreOrLessEquals(c.top, epsilon: 0.5),
+    reason: 'fill moves to the destination slot',
+  );
+  expect(target.size, a.size, reason: 'fill matches the dragged row size');
+
+  final DecoratedBox box = tester.widget<DecoratedBox>(fill);
+  final M3EThemeData theme = M3ETheme.of(tester.element(fill));
+  expect(
+    (box.decoration as BoxDecoration).color,
+    M3EListReorderState.defaults.resolvedPlaceholderColor(theme.colorScheme),
+  );
+
+  await gesture.up();
+  await tester.pumpAndSettle();
+
+  expect(find.byType(M3EListReorderPlaceholder), findsNothing);
+  expect(items, <String>['B', 'C', 'A']);
 }
 
 Future<void> _draggedProxyExcludesGap(WidgetTester tester) async {

@@ -1,27 +1,23 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_slider.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 enum _CardScreen { card, collection, transform }
 
 /// Live playground for [M3ECard] and [M3ECardGroup].
-class CardsPlayground extends StatefulWidget {
+class CardsPlayground extends PlaygroundWidget {
   /// Creates the cards playground.
   const CardsPlayground({super.key});
 
   @override
-  State<CardsPlayground> createState() => _CardsPlaygroundState();
+  PlaygroundState<CardsPlayground> createState() => _CardsPlaygroundState();
 }
 
-class _CardsPlaygroundState extends State<CardsPlayground> {
+class _CardsPlaygroundState extends PlaygroundState<CardsPlayground> {
   _CardScreen _screen = _CardScreen.card;
   M3ECardVariant _variant = M3ECardVariant.elevated;
   M3ECardOverflowAlignment _overflowAlignment = M3ECardOverflowAlignment.topEnd;
@@ -53,7 +49,8 @@ class _CardsPlaygroundState extends State<CardsPlayground> {
   String _subhead = 'Subhead';
   String _body = 'Supporting text for the card body.';
 
-  List<PlaySnippet> get _snippets {
+  @override
+  List<PlaySnippet> get snippets {
     final String pressed = _tappable ? '() {}' : 'null';
     final String sample = switch (_screen) {
       _CardScreen.card =>
@@ -104,44 +101,43 @@ M3ECard(
     ];
   }
 
-  void _openPreview() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return _CardPreviewPage(
-            screen: _screen,
-            variant: _variant,
-            overflowAlignment: _overflowAlignment,
-            tappable: _tappable,
-            enabled: _enabled,
-            semanticLink: _semanticLink,
-            showMedia: _showMedia,
-            mediaAbove: _mediaAbove,
-            mediaDecorative: _mediaDecorative,
-            contentOnMedia: _contentOnMedia,
-            overlayPlate: _overlayPlate,
-            dividerAfterMedia: _dividerAfterMedia,
-            dividerAfterText: _dividerAfterText,
-            mediaDividerSpan: _mediaDividerSpan,
-            textDividerSpan: _textDividerSpan,
-            showActions: _showActions,
-            showOverflow: _showOverflow,
-            showSubhead: _showSubhead,
-            dragged: _dragged,
-            expanded: _expanded,
-            capHeight: _capHeight,
-            adaptOrientation: _adaptOrientation,
-            swipe: _swipe,
-            swipeMode: _swipeMode,
-            leadingSwipe: _leadingSwipe,
-            trailingSwipe: _trailingSwipe,
-            maxHeight: _maxHeight,
-            title: _title,
-            subhead: _subhead,
-            body: _body,
-          );
-        },
-      ),
+  @override
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    return _CardPreviewPage(
+      padding: padding,
+      screen: _screen,
+      variant: _variant,
+      overflowAlignment: _overflowAlignment,
+      tappable: _tappable,
+      enabled: _enabled,
+      semanticLink: _semanticLink,
+      showMedia: _showMedia,
+      mediaAbove: _mediaAbove,
+      mediaDecorative: _mediaDecorative,
+      contentOnMedia: _contentOnMedia,
+      overlayPlate: _overlayPlate,
+      dividerAfterMedia: _dividerAfterMedia,
+      dividerAfterText: _dividerAfterText,
+      mediaDividerSpan: _mediaDividerSpan,
+      textDividerSpan: _textDividerSpan,
+      showActions: _showActions,
+      showOverflow: _showOverflow,
+      showSubhead: _showSubhead,
+      dragged: _dragged,
+      expanded: _expanded,
+      capHeight: _capHeight,
+      adaptOrientation: _adaptOrientation,
+      swipe: _swipe,
+      swipeMode: _swipeMode,
+      leadingSwipe: _leadingSwipe,
+      trailingSwipe: _trailingSwipe,
+      maxHeight: _maxHeight,
+      title: _title,
+      subhead: _subhead,
+      body: _body,
     );
   }
 
@@ -168,13 +164,13 @@ M3ECard(
 
   List<Widget> _swipeControls() {
     return <Widget>[
-      PlaySwitch(
+      PlaySwitchItem(
         label: 'Swipe',
         value: _swipe,
         onChanged: (bool value) => setState(() => _swipe = value),
       ),
       if (_swipe) ...<Widget>[
-        PlayEnumSegmented<M3ECardSwipeMode>(
+        PlayEnumChoice<M3ECardSwipeMode>(
           label: 'Swipe behavior',
           value: _swipeMode,
           values: M3ECardSwipeMode.values,
@@ -182,12 +178,12 @@ M3ECard(
           onChanged: (M3ECardSwipeMode value) =>
               setState(() => _swipeMode = value),
         ),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Left action',
           value: _leadingSwipe,
           onChanged: (bool value) => setState(() => _leadingSwipe = value),
         ),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Right action',
           value: _trailingSwipe,
           onChanged: (bool value) => setState(() => _trailingSwipe = value),
@@ -198,11 +194,11 @@ M3ECard(
 
   List<Widget> get _panels {
     return <Widget>[
-      PlayControlPanel(
-        title: 'Preview',
+      PlayControlGroup(
+        title: 'Variant',
         children: <Widget>[
-          PlayEnumSegmented<_CardScreen>(
-            label: 'Screen',
+          PlayEnumChoice<_CardScreen>(
+            label: 'Preview',
             value: _screen,
             values: _CardScreen.values,
             labelOf: (_CardScreen value) => value.name,
@@ -227,37 +223,37 @@ M3ECard(
   }
 
   Widget _appearancePanel({required bool cardStates}) {
-    return PlayControlPanel(
+    return PlayControlGroup(
       title: 'Appearance',
       children: <Widget>[
         _variantControl(),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Enabled',
           value: _enabled,
           onChanged: (bool value) => setState(() => _enabled = value),
         ),
         if (cardStates) ...<Widget>[
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Tappable',
             value: _tappable,
             onChanged: (bool value) => setState(() => _tappable = value),
           ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Link role',
             value: _semanticLink,
             onChanged: (bool value) => setState(() => _semanticLink = value),
           ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Dragged',
             value: _dragged,
             onChanged: (bool value) => setState(() => _dragged = value),
           ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Expanded',
             value: _expanded,
             onChanged: (bool value) => setState(() => _expanded = value),
           ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Cap height',
             value: _capHeight,
             onChanged: (bool value) => setState(() => _capHeight = value),
@@ -277,7 +273,7 @@ M3ECard(
   }
 
   Widget _contentPanel() {
-    return PlayControlPanel(
+    return PlayControlGroup(
       title: 'Content',
       children: <Widget>[
         PlayTextField(
@@ -285,7 +281,7 @@ M3ECard(
           value: _title,
           onChanged: (String value) => setState(() => _title = value),
         ),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Subhead',
           value: _showSubhead,
           onChanged: (bool value) => setState(() => _showSubhead = value),
@@ -301,42 +297,42 @@ M3ECard(
           value: _body,
           onChanged: (String value) => setState(() => _body = value),
         ),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Media',
           value: _showMedia,
           onChanged: (bool value) => setState(() => _showMedia = value),
         ),
         if (_showMedia) ...<Widget>[
           if (!_contentOnMedia)
-            PlaySwitch(
+            PlaySwitchItem(
               label: 'Media above text',
               value: _mediaAbove,
               onChanged: (bool value) => setState(() => _mediaAbove = value),
             ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Decorative media',
             value: _mediaDecorative,
             onChanged: (bool value) => setState(() => _mediaDecorative = value),
           ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Content on media',
             value: _contentOnMedia,
             onChanged: (bool value) => setState(() => _contentOnMedia = value),
           ),
           if (_contentOnMedia)
-            PlaySwitch(
+            PlaySwitchItem(
               label: 'Overlay plate',
               value: _overlayPlate,
               onChanged: (bool value) => setState(() => _overlayPlate = value),
             ),
-          PlaySwitch(
+          PlaySwitchItem(
             label: 'Divider after media',
             value: _dividerAfterMedia,
             onChanged: (bool value) =>
                 setState(() => _dividerAfterMedia = value),
           ),
           if (_dividerAfterMedia)
-            PlayEnumMenu<M3ECardDividerSpan>(
+            PlayEnumChoice<M3ECardDividerSpan>(
               label: 'Media divider',
               value: _mediaDividerSpan,
               values: M3ECardDividerSpan.values,
@@ -345,13 +341,13 @@ M3ECard(
                   setState(() => _mediaDividerSpan = value),
             ),
         ],
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Divider after text',
           value: _dividerAfterText,
           onChanged: (bool value) => setState(() => _dividerAfterText = value),
         ),
         if (_dividerAfterText)
-          PlayEnumMenu<M3ECardDividerSpan>(
+          PlayEnumChoice<M3ECardDividerSpan>(
             label: 'Text divider',
             value: _textDividerSpan,
             values: M3ECardDividerSpan.values,
@@ -364,21 +360,21 @@ M3ECard(
   }
 
   Widget _actionsPanel({required bool swipe}) {
-    return PlayControlPanel(
+    return PlayControlGroup(
       title: 'Actions',
       children: <Widget>[
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Action button',
           value: _showActions,
           onChanged: (bool value) => setState(() => _showActions = value),
         ),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Overflow',
           value: _showOverflow,
           onChanged: (bool value) => setState(() => _showOverflow = value),
         ),
         if (_showOverflow)
-          PlayEnumMenu<M3ECardOverflowAlignment>(
+          PlayEnumChoice<M3ECardOverflowAlignment>(
             label: 'Overflow alignment',
             value: _overflowAlignment,
             values: M3ECardOverflowAlignment.values,
@@ -392,17 +388,17 @@ M3ECard(
   }
 
   Widget _collectionPanel() {
-    return PlayControlPanel(
+    return PlayControlGroup(
       title: 'Collection',
       children: <Widget>[
         _variantControl(),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Enabled',
           value: _enabled,
           onChanged: (bool value) => setState(() => _enabled = value),
         ),
         ..._swipeControls(),
-        PlaySwitch(
+        PlaySwitchItem(
           label: 'Adapt orientation',
           value: _adaptOrientation,
           onChanged: (bool value) => setState(() => _adaptOrientation = value),
@@ -412,7 +408,7 @@ M3ECard(
   }
 
   Widget _variantControl() {
-    return PlayEnumSegmented<M3ECardVariant>(
+    return PlayEnumChoice<M3ECardVariant>(
       label: 'Variant',
       value: _variant,
       values: M3ECardVariant.values,
@@ -422,35 +418,7 @@ M3ECard(
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Card preview',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Card and transform open one card. Collection opens a list '
-                'on a narrow window and a grid on a wide window.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openPreview,
-                child: const Text('Open card preview'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: _panels,
-    );
-  }
+  List<Widget> buildControls(BuildContext context) => _panels;
 }
 
 class _OverflowMenu extends StatelessWidget {
@@ -484,6 +452,7 @@ class _OverflowMenu extends StatelessWidget {
 
 class _CardPreviewPage extends StatefulWidget {
   const _CardPreviewPage({
+    required this.padding,
     required this.screen,
     required this.variant,
     required this.overflowAlignment,
@@ -516,6 +485,7 @@ class _CardPreviewPage extends StatefulWidget {
     required this.body,
   });
 
+  final EdgeInsets padding;
   final _CardScreen screen;
   final M3ECardVariant variant;
   final M3ECardOverflowAlignment overflowAlignment;
@@ -732,11 +702,6 @@ class _CardPreviewPageState extends State<_CardPreviewPage> {
   @override
   Widget build(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
-    final String title = switch (widget.screen) {
-      _CardScreen.card => 'Card',
-      _CardScreen.collection => 'Collection',
-      _CardScreen.transform => 'Container transform',
-    };
     final Widget body = switch (widget.screen) {
       _CardScreen.card || _CardScreen.transform => Align(
         alignment: Alignment.topCenter,
@@ -839,39 +804,23 @@ class _CardPreviewPageState extends State<_CardPreviewPage> {
         },
       ),
     };
-    // Scaffold.appBar (not a plain Column) so the app bar's elevation
-    // shadow paints above the scrolled-under list instead of being painted
-    // over by it — a Column just stacks siblings in tree order, so the
-    // list immediately below would otherwise cover the shadow that's meant
-    // to overlap it.
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: M3EAppBar.top(
-        titleText: title,
-        leading: M3EIconButton(
-          variant: M3EIconButtonVariant.standard,
-          icon: const Icon(M3EIcons.arrow_back),
-          tooltip: 'Back',
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          if (widget.screen != _CardScreen.collection) ...<Widget>[
-            Text(
-              _target == null
-                  ? 'Tap the card, the action, or the overflow.'
-                  : 'Last tap: $_target',
-              style: theme.typeScale.bodyMedium.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+    return ListView(
+      primary: true,
+      padding: widget.padding,
+      children: <Widget>[
+        if (widget.screen != _CardScreen.collection) ...<Widget>[
+          Text(
+            _target == null
+                ? 'Tap the card, the action, or the overflow.'
+                : 'Last tap: $_target',
+            style: theme.typeScale.bodyMedium.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 12),
-          ],
-          body,
+          ),
+          const SizedBox(height: 12),
         ],
-      ),
+        body,
+      ],
     );
   }
 }

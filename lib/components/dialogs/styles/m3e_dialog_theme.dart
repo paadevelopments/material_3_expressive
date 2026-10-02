@@ -1,8 +1,12 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import 'm3e_dialog_appearance.dart';
+import 'm3e_full_screen_dialog_theme.dart';
 
 /// Theme values for `M3EDialog`.
+///
+/// Defaults follow the M3 "Dialog - Basic" and "Dialog - Full screen" specs.
 @immutable
 class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   /// M3EDialogTheme.
@@ -18,7 +22,7 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     this.gapBeforeActions = 24,
     this.actionGap = 8,
     this.selectionItemHeight = 56,
-    this.fullScreenHeaderHeight = 64,
+    this.fullScreenHeaderHeight = 56,
     this.headerEdgeGap = 4,
     this.closeButtonPadding = const EdgeInsets.all(12),
     this.headerActionGap = 16,
@@ -26,6 +30,16 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     this.resizeToAvoidBottomInset = true,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.elevation = M3EElevation.level3,
+    this.cornerRadius = 28,
+    this.dividerThickness = 1,
+    this.stackedActionGap = 8,
+    this.compactBreakpoint = 600,
+    this.customPositionMargin = 56,
+    this.enterSpring = M3EMotion.spatialDefault,
+    this.fadeSpring = M3EMotion.effectsDefault,
+    this.appearance = const M3EDialogAppearance(),
+    this.fullScreen = const M3EFullScreenDialogTheme(),
   });
 
   /// defaults.
@@ -39,46 +53,46 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   /// maxWidth.
   final double maxWidth;
 
-  /// padding.
+  /// Container padding: 24 on every side.
   final EdgeInsets padding;
 
-  /// screenMargin.
+  /// Screen margin around centred dialogs on compact screens.
   final EdgeInsets screenMargin;
 
-  /// entranceScale.
+  /// Start scale of the enter transition.
   final double entranceScale;
 
-  /// iconSize.
+  /// Hero icon size (24).
   final double iconSize;
 
-  /// gapAfterIcon.
+  /// Gap between icon and headline (16).
   final double gapAfterIcon;
 
-  /// gapAfterTitle.
+  /// Gap between headline and body (16).
   final double gapAfterTitle;
 
-  /// gapBeforeActions.
+  /// Gap between body and actions (24).
   final double gapBeforeActions;
 
-  /// actionGap.
+  /// Gap between side-by-side actions (8).
   final double actionGap;
 
   /// Height of each selectable row in selection dialogs.
   final double selectionItemHeight;
 
-  /// fullScreenHeaderHeight.
+  /// Full-screen header height (56).
   final double fullScreenHeaderHeight;
 
-  /// headerEdgeGap.
+  /// Gap before the 48dp close target, so the icon sits 16 from the edge.
   final double headerEdgeGap;
 
-  /// closeButtonPadding.
+  /// Legacy: no longer applied. The close action is an `M3EIconButton`.
   final EdgeInsets closeButtonPadding;
 
-  /// headerActionGap.
+  /// Gap after the trailing header action.
   final double headerActionGap;
 
-  /// scrimOpacity.
+  /// Scrim opacity (0.32).
   final double scrimOpacity;
 
   /// Whether dialog hosts pad with keyboard view insets.
@@ -90,19 +104,48 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
   /// Curve for keyboard / inset padding animation.
   final Curve insetAnimationCurve;
 
-  /// The borderRadius.
+  /// Basic container elevation (level 3).
+  final double elevation;
 
-  BorderRadius get borderRadius => M3EShapes.radiusExtraLarge;
+  /// Basic container corner radius (28).
+  final double cornerRadius;
 
-  /// containerColor.
+  /// Divider thickness (1).
+  final double dividerThickness;
 
-  Color containerColor(M3EColorScheme scheme) => scheme.surfaceContainerHigh;
+  /// Gap between stacked actions.
+  final double stackedActionGap;
 
-  /// fullScreenBackground.
+  /// Widths below this are compact (600). Adaptive dialogs go full-screen.
+  final double compactBreakpoint;
 
-  Color fullScreenBackground(M3EColorScheme scheme) => scheme.surface;
+  /// Edge margin for custom-positioned dialogs on medium and wider (56).
+  final double customPositionMargin;
 
-  /// scrimColor.
+  /// Spatial spring for the enter / exit scale.
+  final M3ESpring enterSpring;
+
+  /// Effects spring for the enter / exit fade.
+  final M3ESpring fadeSpring;
+
+  /// Basic dialog colors, type and action states.
+  final M3EDialogAppearance appearance;
+
+  /// Full-screen dialog tokens.
+  final M3EFullScreenDialogTheme fullScreen;
+
+  /// Basic container radius.
+  BorderRadius get borderRadius => BorderRadius.circular(cornerRadius);
+
+  /// Basic container color.
+  Color containerColor(M3EColorScheme scheme) =>
+      appearance.resolveContainer(scheme);
+
+  /// Full-screen container color.
+  Color fullScreenBackground(M3EColorScheme scheme) =>
+      fullScreen.resolveContainer(scheme);
+
+  /// Scrim color.
 
   Color scrimColor(M3EColorScheme scheme) =>
       scheme.scrim.withValues(alpha: scrimOpacity);
@@ -128,6 +171,16 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     bool? resizeToAvoidBottomInset,
     Duration? insetAnimationDuration,
     Curve? insetAnimationCurve,
+    double? elevation,
+    double? cornerRadius,
+    double? dividerThickness,
+    double? stackedActionGap,
+    double? compactBreakpoint,
+    double? customPositionMargin,
+    M3ESpring? enterSpring,
+    M3ESpring? fadeSpring,
+    M3EDialogAppearance? appearance,
+    M3EFullScreenDialogTheme? fullScreen,
   }) {
     return M3EDialogTheme(
       minWidth: minWidth ?? this.minWidth,
@@ -152,6 +205,16 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
       insetAnimationDuration:
           insetAnimationDuration ?? this.insetAnimationDuration,
       insetAnimationCurve: insetAnimationCurve ?? this.insetAnimationCurve,
+      elevation: elevation ?? this.elevation,
+      cornerRadius: cornerRadius ?? this.cornerRadius,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
+      stackedActionGap: stackedActionGap ?? this.stackedActionGap,
+      compactBreakpoint: compactBreakpoint ?? this.compactBreakpoint,
+      customPositionMargin: customPositionMargin ?? this.customPositionMargin,
+      enterSpring: enterSpring ?? this.enterSpring,
+      fadeSpring: fadeSpring ?? this.fadeSpring,
+      appearance: appearance ?? this.appearance,
+      fullScreen: fullScreen ?? this.fullScreen,
     );
   }
 
@@ -160,6 +223,33 @@ class M3EDialogTheme extends M3EThemeExtension<M3EDialogTheme> {
     if (other is! M3EDialogTheme) {
       return this;
     }
+    return _lerpBase(other, t).copyWith(
+      elevation: _lerpDouble(elevation, other.elevation, t),
+      cornerRadius: _lerpDouble(cornerRadius, other.cornerRadius, t),
+      dividerThickness: _lerpDouble(
+        dividerThickness,
+        other.dividerThickness,
+        t,
+      ),
+      stackedActionGap: _lerpDouble(
+        stackedActionGap,
+        other.stackedActionGap,
+        t,
+      ),
+      compactBreakpoint: t < 0.5 ? compactBreakpoint : other.compactBreakpoint,
+      customPositionMargin: _lerpDouble(
+        customPositionMargin,
+        other.customPositionMargin,
+        t,
+      ),
+      enterSpring: t < 0.5 ? enterSpring : other.enterSpring,
+      fadeSpring: t < 0.5 ? fadeSpring : other.fadeSpring,
+      appearance: appearance.lerp(other.appearance, t),
+      fullScreen: fullScreen.lerp(other.fullScreen, t),
+    );
+  }
+
+  M3EDialogTheme _lerpBase(M3EDialogTheme other, double t) {
     return M3EDialogTheme(
       minWidth: _lerpDouble(minWidth, other.minWidth, t)!,
       maxWidth: _lerpDouble(maxWidth, other.maxWidth, t)!,

@@ -96,8 +96,10 @@ extension _M3EExpandableItemBody on _M3EExpandableItemState {
     required double translationY,
     required bool isEntirelyTappable,
   }) {
+    // Follow the target state, not the spring: the spring settles toward 1
+    // slowly, which would keep the body out of focus traversal meanwhile.
     return ExcludeFocus(
-      excluding: progress < 1.0,
+      excluding: !widget.isExpanded,
       child: SizedBox(
         height: bodyHeight,
         child: SingleChildScrollView(
@@ -306,6 +308,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
           builder: (BuildContext context, Widget? _) {
             return M3EExpandableSublist(
               progress: _expandCtrl.value,
+              expanded: widget.isExpanded,
               style: d,
               topGap: widget.expanded!.topGap,
               child: M3EListReorderExclude(
@@ -320,14 +323,13 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
                   itemCount: 0,
                   onToggleSelection: (_) {},
                   child: M3EExpandableNestScope(
-                    closeBottom: isLast,
+                    closeBottom: isLast || d.roundSublistBottom,
                     outerRadius: d.outerRadius,
                     rowIndex: widget.index,
-                    surfaceColor:
-                        d.color ??
-                        M3ETheme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                    surfaceColor: _expandedStateFill(
+                      d,
+                      M3ETheme.of(context).colorScheme,
+                    ),
                     variant: widget.nestVariant,
                     child: widget.expanded!.child,
                   ),
@@ -453,26 +455,29 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
     required Widget child,
   }) {
     final BorderRadius radius = animatedRadius ?? _buildEffectiveRadius();
-    final fill =
-        m3eSelectionFill(context, widget.index) ??
-        d.color ??
-        scheme.surfaceContainerHighest;
+    final Color? selectionFill = m3eSelectionFill(context, widget.index);
     final Widget card = MouseRegion(
       onEnter: (_) => _setHovered(true),
       onExit: (_) => _setHovered(false),
-      child: M3EListRowSurface(
-        index: widget.index,
-        radius: radius,
-        color: fill,
-        border: d.border,
-        elevation: d.elevation,
-        hovered: _hovered,
-        pressed: _isPressed,
-        focused: _focused,
-        dragged: M3EListDragProxyScope.maybeOf(context) != null,
-        onTap: cardPress,
-        onStateChanged: cardHandlesTap ? _handleCardStateChanged : null,
-        mouseCursor: cardHandlesTap ? SystemMouseCursors.click : null,
+      child: AnimatedBuilder(
+        animation: _expandCtrl,
+        builder: (BuildContext context, Widget? child) {
+          return M3EListRowSurface(
+            index: widget.index,
+            radius: radius,
+            color: selectionFill ?? _expandedStateFill(d, scheme),
+            border: d.border,
+            elevation: d.elevation,
+            hovered: _hovered,
+            pressed: _isPressed,
+            focused: _focused,
+            dragged: M3EListDragProxyScope.maybeOf(context) != null,
+            onTap: cardPress,
+            onStateChanged: cardHandlesTap ? _handleCardStateChanged : null,
+            mouseCursor: cardHandlesTap ? SystemMouseCursors.click : null,
+            child: child!,
+          );
+        },
         child: child,
       ),
     );
@@ -485,6 +490,17 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
       color: scheme.secondary,
       child: card,
     );
+  }
+
+  /// Row / sublist fill: the rest color, blended toward the expanded-state
+  /// color with expand progress when [M3EExpandableStyle.expandedStateFill].
+  Color _expandedStateFill(M3EExpandableStyle d, M3EColorScheme scheme) {
+    final Color rest = d.color ?? scheme.surfaceContainerHighest;
+    if (!d.expandedStateFill) {
+      return rest;
+    }
+    final Color expanded = d.expandedStateColor ?? scheme.surfaceContainerHigh;
+    return Color.lerp(rest, expanded, _expandCtrl.value.clamp(0.0, 1.0))!;
   }
 
   Widget _buildHeader(
@@ -565,18 +581,24 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
     final Widget rotated = Transform.rotate(angle: angle, child: icon);
     final Widget iconWidget;
     if (d.expandedIconBackgroundSize > 0) {
-      final double size = d.expandedIconBackgroundSize;
+      // Narrow icon-button pill: no fill at rest, filled when expanded.
+      final double width = d.expandedIconBackgroundSize;
+      final double height = d.expandedIconBackgroundHeight;
       final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
-      final Color fill = isExpanded
-          ? (d.expandedIconBackground ?? scheme.surfaceContainer)
-          : (d.expandedIconBackground ?? scheme.surface);
+      final Color expandedFill =
+          d.expandedIconBackground ?? scheme.surfaceContainer;
+      final Color fill = Color.lerp(
+        expandedFill.withValues(alpha: 0),
+        expandedFill,
+        progress.clamp(0.0, 1.0),
+      )!;
       iconWidget = SizedBox(
-        width: size,
-        height: size,
+        width: width,
+        height: height,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(size / 2),
+            borderRadius: BorderRadius.circular(math.min(width, height) / 2),
           ),
           child: Center(child: rotated),
         ),
@@ -586,7 +608,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
     }
 
     if (d.tapIconToToggle) {
-      return _buildInteractionWrapper(
+      final Widget button = _buildInteractionWrapper(
         d,
         onTap: onToggle,
         isHeader: true,
@@ -595,6 +617,16 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
         isExpanded: isExpanded,
         tooltip: tooltip,
         child: iconWidget,
+      );
+      if (M3EListKeyboardGroup.maybeOf(context) == null) {
+        return button;
+      }
+      // Arrow-reachable row action instead of its own Tab stop.
+      return M3EListKeyTarget(
+        index: widget.index,
+        slot: 2,
+        onActivate: onToggle,
+        child: ExcludeFocus(child: button),
       );
     }
     return ExcludeSemantics(child: iconWidget);

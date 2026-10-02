@@ -20,9 +20,6 @@ class M3EListItemScope extends InheritedWidget {
   static M3EListItemScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<M3EListItemScope>();
 
-  /// isEmbedded.
-  static bool isEmbedded(BuildContext context) => maybeOf(context) != null;
-
   @override
   bool updateShouldNotify(M3EListItemScope oldWidget) =>
       padsChild != oldWidget.padsChild;

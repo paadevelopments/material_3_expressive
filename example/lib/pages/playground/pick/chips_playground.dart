@@ -1,67 +1,99 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Live playground for [M3EChip].
-class ChipsPlayground extends StatefulWidget {
+class ChipsPlayground extends PlaygroundWidget {
   /// Creates the chips playground.
   const ChipsPlayground({super.key});
 
   @override
-  State<ChipsPlayground> createState() => _ChipsPlaygroundState();
+  PlaygroundState<ChipsPlayground> createState() => _ChipsPlaygroundState();
 }
 
-class _ChipsPlaygroundState extends State<ChipsPlayground> {
+class _ChipsPlaygroundState extends PlaygroundState<ChipsPlayground> {
   M3EChipType _type = M3EChipType.assist;
+  String _label = 'Chip';
   bool _selected = false;
   bool _elevated = false;
-  bool _showLeading = true;
+  bool _leading = true;
+  bool _avatar = true;
+  bool _trailing = false;
+  bool _removable = true;
   bool _enabled = true;
-  String _label = 'Chip';
+  bool _removed = false;
 
-  VoidCallback? get _onPressed => _enabled
-      ? () {
-          if (_type == M3EChipType.filter) {
-            setState(() => _selected = !_selected);
-          }
-        }
-      : null;
+  /// Filter and input chips carry a selected state.
+  bool get _selectable =>
+      _type == M3EChipType.filter || _type == M3EChipType.input;
 
-  VoidCallback? get _onDeleted =>
-      _enabled && _type == M3EChipType.input ? () {} : null;
+  bool get _isInput => _type == M3EChipType.input;
 
-  List<PlaySnippet> get _snippets {
-    final String leading = _showLeading && _type != M3EChipType.input
-        ? '\n  leading: const Icon(M3EIcons.edit),'
-        : '';
-    final String avatar = _type == M3EChipType.input
-        ? '\n  avatar: const Icon(M3EIcons.person),'
-        : '';
-    final String trailing = _type == M3EChipType.filter
-        ? '\n  trailing: const Icon(M3EIcons.check),'
-        : '';
-    final String deleted = _onDeleted != null ? '\n  onDeleted: () {},' : '';
-    final String pressed = _onPressed != null ? '() {}' : 'null';
+  bool get _hasAvatar => _isInput && _avatar;
+
+  /// A leading icon is ignored when an avatar is set.
+  bool get _canLead => !_hasAvatar;
+
+  @override
+  Widget buildPreview(BuildContext context) {
+    if (_removed) {
+      return M3EButton.tonal(
+        onPressed: () => setState(() => _removed = false),
+        child: const Text('Restore chip'),
+      );
+    }
+    return M3EChip(
+      label: _label,
+      type: _type,
+      selected: _selectable && _selected,
+      elevated: _elevated,
+      leading: _canLead && _leading ? const Icon(M3EIcons.edit) : null,
+      avatar: _hasAvatar ? const Icon(M3EIcons.person) : null,
+      trailing: _trailing ? const Icon(M3EIcons.expand_more) : null,
+      onPressed: _enabled
+          ? () {
+              if (_selectable) {
+                setState(() => _selected = !_selected);
+              }
+            }
+          : null,
+      onDeleted: _enabled && _isInput && _removable
+          ? () => setState(() => _removed = true)
+          : null,
+    );
+  }
+
+  @override
+  List<PlaySnippet> get snippets {
+    final StringBuffer args = StringBuffer()
+      ..writeln('  label: ${playDartString(_label)},')
+      ..writeln('  type: M3EChipType.${_type.name},');
+    if (_selectable) {
+      args.writeln('  selected: $_selected,');
+    }
+    if (_elevated) {
+      args.writeln('  elevated: true,');
+    }
+    if (_canLead && _leading) {
+      args.writeln('  leading: const Icon(M3EIcons.edit),');
+    }
+    if (_hasAvatar) {
+      args.writeln('  avatar: const Icon(M3EIcons.person),');
+    }
+    if (_trailing) {
+      args.writeln('  trailing: const Icon(M3EIcons.expand_more),');
+    }
+    args.writeln('  onPressed: ${_enabled ? '() {}' : 'null'},');
+    if (_enabled && _isInput && _removable) {
+      args.writeln('  onDeleted: () {},');
+    }
     return <PlaySnippet>[
       PlaySnippet(
-        label: 'Selected type',
-        code:
-            '''
-$kPlaySnippetImport
-
-M3EChip(
-  label: ${playDartString(_label)},
-  type: M3EChipType.${_type.name},
-  selected: $_selected,
-  elevated: $_elevated,$leading$avatar$trailing
-  onPressed: $pressed,$deleted
-);''',
+        label: 'Chip',
+        code: '$kPlaySnippetImport\n\nM3EChip(\n$args);',
       ),
       const PlaySnippet(
         label: 'Chip group',
@@ -70,24 +102,13 @@ M3EChip(
 $kPlaySnippetImport
 
 M3EChipGroup(
+  groupLabel: 'Filters',
   child: Wrap(
     spacing: 8,
     runSpacing: 8,
-    children: [
+    children: <Widget>[
       M3EChip(label: 'Assist', onPressed: () {}),
-      M3EChip(
-        label: 'Filter',
-        type: M3EChipType.filter,
-        trailing: Icon(M3EIcons.check),
-        onPressed: () {},
-      ),
-      M3EChip(
-        label: 'Input',
-        type: M3EChipType.input,
-        avatar: Icon(M3EIcons.person),
-        onPressed: () {},
-        onDeleted: () {},
-      ),
+      M3EChip(label: 'Filter', type: M3EChipType.filter, onPressed: () {}),
     ],
   ),
 );''',
@@ -96,102 +117,78 @@ M3EChipGroup(
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Selected type',
-          child: M3EChip(
-            label: _label,
-            type: _type,
-            selected: _selected,
-            elevated: _elevated,
-            leading: _showLeading && _type != M3EChipType.input
-                ? const Icon(M3EIcons.edit)
-                : null,
-            avatar: _type == M3EChipType.input
-                ? const Icon(M3EIcons.person)
-                : null,
-            trailing: _type == M3EChipType.filter
-                ? const Icon(M3EIcons.check)
-                : null,
-            onPressed: _onPressed,
-            onDeleted: _onDeleted,
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Appearance',
+        children: <Widget>[
+          PlayEnumChoice<M3EChipType>(
+            label: 'Type',
+            value: _type,
+            values: M3EChipType.values,
+            labelOf: (M3EChipType v) => v.name,
+            onChanged: (M3EChipType v) => setState(() => _type = v),
           ),
-        ),
-        PlayPreviewCard(
-          label: 'All types',
-          child: M3EChipGroup(
-            groupLabel: 'Chips',
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                for (final M3EChipType type in M3EChipType.values)
-                  M3EChip(
-                    label: type.name,
-                    type: type,
-                    selected: type == M3EChipType.filter && _selected,
-                    elevated: _elevated,
-                    leading: _showLeading && type != M3EChipType.input
-                        ? const Icon(M3EIcons.tag)
-                        : null,
-                    avatar: type == M3EChipType.input
-                        ? const Icon(M3EIcons.person)
-                        : null,
-                    trailing: type == M3EChipType.filter
-                        ? const Icon(M3EIcons.check)
-                        : null,
-                    onPressed: _enabled ? () {} : null,
-                    onDeleted: type == M3EChipType.input && _enabled
-                        ? () {}
-                        : null,
-                  ),
-              ],
-            ),
+          PlaySwitchItem(
+            label: 'Elevated',
+            description: 'Elevated container instead of an outline',
+            value: _elevated,
+            onChanged: (bool v) => setState(() => _elevated = v),
           ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Appearance',
-          children: <Widget>[
-            PlayEnumMenu<M3EChipType>(
-              label: 'Type',
-              value: _type,
-              values: M3EChipType.values,
-              labelOf: (M3EChipType v) => v.name,
-              onChanged: (M3EChipType v) => setState(() => _type = v),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          PlayTextField(
+            label: 'Label',
+            value: _label,
+            onChanged: (String v) => setState(() => _label = v),
+          ),
+          if (_isInput)
+            PlaySwitchItem(
+              label: 'Avatar',
+              description: 'Replaces the leading icon',
+              value: _avatar,
+              onChanged: (bool v) => setState(() => _avatar = v),
             ),
-            PlayTextField(
-              label: 'Label',
-              value: _label,
-              onChanged: (String v) => setState(() => _label = v),
-            ),
-            PlaySwitch(
+          if (_canLead)
+            PlaySwitchItem(
               label: 'Leading icon',
-              value: _showLeading,
-              onChanged: (bool v) => setState(() => _showLeading = v),
+              value: _leading,
+              onChanged: (bool v) => setState(() => _leading = v),
             ),
-            PlaySwitch(
-              label: 'Elevated',
-              value: _elevated,
-              onChanged: (bool v) => setState(() => _elevated = v),
-            ),
-            PlaySwitch(
+          PlaySwitchItem(
+            label: 'Trailing icon',
+            value: _trailing,
+            onChanged: (bool v) => setState(() => _trailing = v),
+          ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'State',
+        children: <Widget>[
+          if (_selectable)
+            PlaySwitchItem(
               label: 'Selected',
+              description: 'Pressing the chip also toggles it',
               value: _selected,
               onChanged: (bool v) => setState(() => _selected = v),
             ),
-            PlaySwitch(
-              label: 'Enabled',
-              value: _enabled,
-              onChanged: (bool v) => setState(() => _enabled = v),
+          if (_isInput)
+            PlaySwitchItem(
+              label: 'Removable',
+              description: 'Remove icon; Backspace or Delete also removes',
+              value: _removable,
+              onChanged: (bool v) => setState(() => _removable = v),
             ),
-          ],
-        ),
-      ],
-    );
+          PlaySwitchItem(
+            label: 'Enabled',
+            value: _enabled,
+            onChanged: (bool v) => setState(() => _enabled = v),
+          ),
+        ],
+      ),
+    ];
   }
 }

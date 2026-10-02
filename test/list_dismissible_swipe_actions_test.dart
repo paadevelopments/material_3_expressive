@@ -9,6 +9,20 @@ void main() {
   registerDismissibleFullDismissTests();
 }
 
+/// Moves in small steps like a real swipe, so the drag wins the gesture arena
+/// over the row's tap and still receives the full distance.
+Future<void> _swipeBy(
+  WidgetTester tester,
+  TestGesture gesture,
+  double dx,
+) async {
+  const steps = 5;
+  for (var i = 0; i < steps; i++) {
+    await gesture.moveBy(Offset(dx / steps, 0));
+    await tester.pump();
+  }
+}
+
 void registerDismissiblePreviewSnapTests() {
   testWidgets('dismissible action preview snaps open and closes on card tap', (
     WidgetTester tester,
@@ -49,7 +63,7 @@ void registerDismissiblePreviewSnapTests() {
     final Offset start = tester.getCenter(find.text('Item 0'));
     final TestGesture gesture = await tester.startGesture(start);
     // Drag left past 35% of actions width (~(56+56+8*3)=184 → 0.35≈64).
-    await gesture.moveBy(const Offset(-100, 0));
+    await _swipeBy(tester, gesture, -100);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -71,7 +85,7 @@ void registerDismissiblePreviewSnapTests() {
     final TestGesture open = await tester.startGesture(
       tester.getCenter(find.text('Item 0')),
     );
-    await open.moveBy(const Offset(-100, 0));
+    await _swipeBy(tester, open, -100);
     await tester.pump();
     await open.up();
     await tester.pumpAndSettle();
@@ -137,7 +151,7 @@ Future<void> _openActionPreviewThenAttemptReorder(WidgetTester tester) async {
   final TestGesture open = await tester.startGesture(
     tester.getCenter(find.text('A')),
   );
-  await open.moveBy(const Offset(-100, 0));
+  await _swipeBy(tester, open, -100);
   await tester.pump();
   await open.up();
   await tester.pumpAndSettle();
@@ -203,7 +217,7 @@ void registerDismissibleFullDismissTests() {
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.text('Only')),
     );
-    await gesture.moveBy(const Offset(120, 0));
+    await _swipeBy(tester, gesture, 120);
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();

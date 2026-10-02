@@ -1,201 +1,289 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../foundations/foundations.dart';
+import '../enums/m3e_text_field_slot_alignment.dart';
+import '../enums/m3e_text_field_variant.dart';
+import '../models/m3e_text_field_colors.dart';
+import '../models/m3e_text_field_states.dart';
+import 'm3e_text_field_color_theme.dart';
 
 /// Theme values for `M3ETextField`.
+///
+/// Defaults match the Material 3 text field spec for both variants.
 @immutable
 class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
   /// M3ETextFieldTheme.
   const M3ETextFieldTheme({
-    this.minHeight = 56,
-    this.contentHeight = 48,
-    this.contentVerticalPadding = 4,
-    this.labelRestingOffset = 12,
-    this.horizontalPadding = const EdgeInsets.symmetric(horizontal: 16),
+    this.containerHeight = 56,
+    this.verticalPadding = 8,
+    this.horizontalPadding = 16,
+    this.iconEdgePadding = 12,
     this.iconSize = 24,
-    this.iconGap = 12,
-    this.labelFloatingTopPadding = 8,
-    this.labelRestingTopPadding = 16,
-    this.labelBottomPadding = 2,
-    this.selectionOpacity = 0.4,
-    this.supportingTextPadding = const EdgeInsets.only(
-      left: 16,
-      top: 4,
-      right: 16,
+    this.iconTextGap = 16,
+    this.notchPadding = 4,
+    this.supportingTopPadding = 4,
+    this.supportingHorizontalPadding = 16,
+    this.supportingCounterGap = 16,
+    this.density = 0,
+    this.densityStep = 4,
+    this.constraints,
+    this.filledShape = const BorderRadius.vertical(
+      top: Radius.circular(M3EShapes.extraSmall),
     ),
+    this.outlinedShape = M3EShapes.radiusExtraSmall,
+    this.activeIndicatorWidth = 1,
+    this.focusActiveIndicatorWidth = 2,
+    this.outlineWidth = 1,
+    this.focusOutlineWidth = 3,
+    this.focusRingWidth = 3,
+    this.focusRingGap = 2,
+    this.selectionOpacity = 0.4,
+    this.labelSpring = M3EMotion.spatialFast,
+    this.effectsSpring = M3EMotion.effectsFast,
+    this.inputTextStyle,
+    this.labelTextStyle,
+    this.floatingLabelTextStyle,
+    this.supportingTextStyle,
+    this.colors = const M3ETextFieldColorTheme(),
+    this.iconAlignment = M3ETextFieldSlotAlignment.center,
+    this.affixAlignment = M3ETextFieldSlotAlignment.firstLine,
   });
 
   /// defaults.
-
   static const M3ETextFieldTheme defaults = M3ETextFieldTheme();
 
-  /// minHeight.
+  /// Container height (and target size) at density 0.
+  final double containerHeight;
 
-  final double minHeight;
+  /// Filled top/bottom padding around the floating label and input.
+  final double verticalPadding;
 
-  /// Minimum height of the label + input area. The area grows with the value.
-  final double contentHeight;
+  /// Start/end padding on a side without an icon.
+  final double horizontalPadding;
 
-  /// Breathing room around the input so multi-line values clear the outline.
-  final double contentVerticalPadding;
+  /// Edge to leading/trailing icon padding.
+  final double iconEdgePadding;
 
-  /// labelRestingOffset.
-  final double labelRestingOffset;
-
-  /// horizontalPadding.
-  final EdgeInsets horizontalPadding;
-
-  /// iconSize.
+  /// Leading/trailing icon (and image) size.
   final double iconSize;
 
-  /// iconGap.
-  final double iconGap;
+  /// Icon to label/input padding.
+  final double iconTextGap;
 
-  /// labelFloatingTopPadding.
-  final double labelFloatingTopPadding;
+  /// Outlined notch padding on each side of the floating label.
+  final double notchPadding;
 
-  /// labelRestingTopPadding.
-  final double labelRestingTopPadding;
+  /// Container to supporting text / counter padding.
+  final double supportingTopPadding;
 
-  /// labelBottomPadding.
-  final double labelBottomPadding;
+  /// Supporting text / counter start and end inset.
+  final double supportingHorizontalPadding;
 
-  /// selectionOpacity.
+  /// Supporting text to counter gap.
+  final double supportingCounterGap;
+
+  /// Default density, from 0 (spec) down to -3. Not dense by default.
+  final int density;
+
+  /// Height removed per density step.
+  final double densityStep;
+
+  /// Optional width bounds for medium and expanded layouts.
+  final BoxConstraints? constraints;
+
+  /// Filled container shape: rounded top, square bottom.
+  final BorderRadius filledShape;
+
+  /// Outlined container shape.
+  final BorderRadius outlinedShape;
+
+  /// Filled active indicator height.
+  final double activeIndicatorWidth;
+
+  /// Filled focused active indicator height.
+  final double focusActiveIndicatorWidth;
+
+  /// Outlined outline width.
+  final double outlineWidth;
+
+  /// Outlined focused outline width.
+  final double focusOutlineWidth;
+
+  /// Keyboard focus ring thickness.
+  final double focusRingWidth;
+
+  /// Gap between the container and the keyboard focus ring.
+  final double focusRingGap;
+
+  /// Text selection highlight opacity (primary).
   final double selectionOpacity;
 
-  /// supportingTextPadding.
-  final EdgeInsets supportingTextPadding;
+  /// Spatial spring for the label moving between rest and float.
+  final M3ESpring labelSpring;
 
-  /// Height reserved above the input for the floating label.
-  ///
-  /// Reserved whether or not the label has floated, so focus never changes the
-  /// field's height.
-  double labelSlotHeight(M3ETypeScale type) {
-    final TextStyle style = type.bodySmall;
-    final double fontSize = style.fontSize ?? 12;
-    return fontSize * (style.height ?? 1) + labelBottomPadding;
+  /// Effects spring for colors, stroke width and the outline notch.
+  final M3ESpring effectsSpring;
+
+  /// Input text style. Default: body large.
+  final TextStyle? inputTextStyle;
+
+  /// Label style in an empty field. Default: body large.
+  final TextStyle? labelTextStyle;
+
+  /// Label style in a populated or focused field. Default: body small.
+  final TextStyle? floatingLabelTextStyle;
+
+  /// Supporting text and counter style. Default: body small.
+  final TextStyle? supportingTextStyle;
+
+  /// Color tokens.
+  final M3ETextFieldColorTheme colors;
+
+  /// Leading/trailing icon position in multi-line fields. Default: centered,
+  /// per the spec's "icon alignment: vertically centered".
+  final M3ETextFieldSlotAlignment iconAlignment;
+
+  /// Prefix/suffix text position in multi-line fields. Default: first line.
+  final M3ETextFieldSlotAlignment affixAlignment;
+
+  /// [density] clamped to the supported range.
+  static int clampDensity(int density) => density.clamp(-3, 0);
+
+  /// Height change per side for [density] (zero or negative).
+  double densityOffset(int density) => clampDensity(density) * densityStep / 2;
+
+  /// Container height for [density].
+  double heightFor(int density) => containerHeight + densityOffset(density) * 2;
+
+  /// Filled top/bottom padding for [density].
+  double verticalPaddingFor(int density) =>
+      verticalPadding + densityOffset(density);
+
+  /// Width of an icon slot (edge padding on both sides of the icon).
+  double get iconSlotWidth => iconSize + iconEdgePadding * 2;
+
+  /// Text side padding next to an icon slot.
+  double get iconSlotTextPadding => iconTextGap - iconEdgePadding;
+
+  /// Container shape for [variant].
+  BorderRadius shapeFor(M3ETextFieldVariant variant) =>
+      variant == M3ETextFieldVariant.outlined ? outlinedShape : filledShape;
+
+  /// Resolved input style.
+  TextStyle resolveInputStyle(M3ETypeScale type) =>
+      inputTextStyle ?? type.bodyLarge;
+
+  /// Resolved resting label style.
+  TextStyle resolveLabelStyle(M3ETypeScale type) =>
+      labelTextStyle ?? type.bodyLarge;
+
+  /// Resolved floating label style.
+  TextStyle resolveFloatingLabelStyle(M3ETypeScale type) =>
+      floatingLabelTextStyle ?? type.bodySmall;
+
+  /// Resolved supporting text style.
+  TextStyle resolveSupportingStyle(M3ETypeScale type) =>
+      supportingTextStyle ?? type.bodySmall;
+
+  /// Line height of [style] in logical pixels.
+  static double lineHeightOf(TextStyle style) =>
+      (style.fontSize ?? 14) * (style.height ?? 1);
+
+  /// Stroke width for [variant] in [states].
+  double strokeWidthFor(
+    M3ETextFieldVariant variant,
+    M3ETextFieldStates states,
+  ) {
+    final bool focused = states.isFocused;
+    if (variant == M3ETextFieldVariant.outlined) {
+      return focused ? focusOutlineWidth : outlineWidth;
+    }
+    return focused ? focusActiveIndicatorWidth : activeIndicatorWidth;
   }
 
-  /// accentColor.
-
-  Color accentColor(
+  /// Resolves the palette for [variant] in [states].
+  M3ETextFieldColors resolveColors(
     M3EColorScheme scheme, {
-    required bool enabled,
-    required bool hasError,
+    required M3ETextFieldVariant variant,
+    required M3ETextFieldStates states,
   }) {
-    if (!enabled) {
-      return M3EColorUtils.withOpacity(scheme.onSurface, 0.38);
-    }
-    return hasError ? scheme.error : scheme.primary;
-  }
-
-  /// Container fill and shape, without the indicator or outline.
-  ///
-  /// Paired with [borderDecoration] as a foreground decoration so the focused
-  /// stroke width never changes the field's size.
-  BoxDecoration backgroundDecoration(
-    M3EColorScheme scheme, {
-    required bool outlined,
-  }) {
-    if (outlined) {
-      return const BoxDecoration(borderRadius: M3EShapes.radiusExtraSmall);
-    }
-    return BoxDecoration(
-      color: scheme.surfaceContainerHighest,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-    );
-  }
-
-  /// Indicator or outline only, for painting over the container.
-  BoxDecoration borderDecoration(
-    M3EColorScheme scheme, {
-    required Color accent,
-    required bool outlined,
-    required bool focused,
-    required bool hasError,
-  }) {
-    final Color color = focused || hasError
-        ? accent
-        : (outlined ? scheme.outline : scheme.onSurfaceVariant);
-    final double width = focused ? 2 : 1;
-    if (outlined) {
-      return BoxDecoration(
-        borderRadius: M3EShapes.radiusExtraSmall,
-        border: Border.all(color: color, width: width),
-      );
-    }
-    return BoxDecoration(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-      border: Border(
-        bottom: BorderSide(color: color, width: width),
-      ),
-    );
-  }
-
-  /// Fill and border in one decoration.
-  ///
-  /// The field itself paints [backgroundDecoration] and [borderDecoration]
-  /// separately so focus cannot resize it.
-  BoxDecoration decoration(
-    M3EColorScheme scheme, {
-    required Color accent,
-    required bool outlined,
-    required bool focused,
-    required bool hasError,
-  }) {
-    if (outlined) {
-      return BoxDecoration(
-        borderRadius: M3EShapes.radiusExtraSmall,
-        border: Border.all(
-          color: focused || hasError ? accent : scheme.outline,
-          width: focused ? 2 : 1,
-        ),
-      );
-    }
-    return BoxDecoration(
-      color: scheme.surfaceContainerHighest,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-      border: Border(
-        bottom: BorderSide(
-          color: focused || hasError ? accent : scheme.onSurfaceVariant,
-          width: focused ? 2 : 1,
-        ),
-      ),
+    return colors.resolve(
+      scheme,
+      outlined: variant == M3ETextFieldVariant.outlined,
+      states: states,
+      strokeWidth: strokeWidthFor(variant, states),
     );
   }
 
   @override
   M3ETextFieldTheme copyWith({
-    double? minHeight,
-    double? contentHeight,
-    double? contentVerticalPadding,
-    double? labelRestingOffset,
-    EdgeInsets? horizontalPadding,
+    double? containerHeight,
+    double? verticalPadding,
+    double? horizontalPadding,
+    double? iconEdgePadding,
     double? iconSize,
-    double? iconGap,
-    double? labelFloatingTopPadding,
-    double? labelRestingTopPadding,
-    double? labelBottomPadding,
+    double? iconTextGap,
+    double? notchPadding,
+    double? supportingTopPadding,
+    double? supportingHorizontalPadding,
+    double? supportingCounterGap,
+    int? density,
+    double? densityStep,
+    BoxConstraints? constraints,
+    BorderRadius? filledShape,
+    BorderRadius? outlinedShape,
+    double? activeIndicatorWidth,
+    double? focusActiveIndicatorWidth,
+    double? outlineWidth,
+    double? focusOutlineWidth,
+    double? focusRingWidth,
+    double? focusRingGap,
     double? selectionOpacity,
-    EdgeInsets? supportingTextPadding,
+    M3ESpring? labelSpring,
+    M3ESpring? effectsSpring,
+    TextStyle? inputTextStyle,
+    TextStyle? labelTextStyle,
+    TextStyle? floatingLabelTextStyle,
+    TextStyle? supportingTextStyle,
+    M3ETextFieldColorTheme? colors,
+    M3ETextFieldSlotAlignment? iconAlignment,
+    M3ETextFieldSlotAlignment? affixAlignment,
   }) {
     return M3ETextFieldTheme(
-      minHeight: minHeight ?? this.minHeight,
-      contentHeight: contentHeight ?? this.contentHeight,
-      contentVerticalPadding:
-          contentVerticalPadding ?? this.contentVerticalPadding,
-      labelRestingOffset: labelRestingOffset ?? this.labelRestingOffset,
+      containerHeight: containerHeight ?? this.containerHeight,
+      verticalPadding: verticalPadding ?? this.verticalPadding,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      iconEdgePadding: iconEdgePadding ?? this.iconEdgePadding,
       iconSize: iconSize ?? this.iconSize,
-      iconGap: iconGap ?? this.iconGap,
-      labelFloatingTopPadding:
-          labelFloatingTopPadding ?? this.labelFloatingTopPadding,
-      labelRestingTopPadding:
-          labelRestingTopPadding ?? this.labelRestingTopPadding,
-      labelBottomPadding: labelBottomPadding ?? this.labelBottomPadding,
+      iconTextGap: iconTextGap ?? this.iconTextGap,
+      notchPadding: notchPadding ?? this.notchPadding,
+      supportingTopPadding: supportingTopPadding ?? this.supportingTopPadding,
+      supportingHorizontalPadding:
+          supportingHorizontalPadding ?? this.supportingHorizontalPadding,
+      supportingCounterGap: supportingCounterGap ?? this.supportingCounterGap,
+      density: density ?? this.density,
+      densityStep: densityStep ?? this.densityStep,
+      constraints: constraints ?? this.constraints,
+      filledShape: filledShape ?? this.filledShape,
+      outlinedShape: outlinedShape ?? this.outlinedShape,
+      activeIndicatorWidth: activeIndicatorWidth ?? this.activeIndicatorWidth,
+      focusActiveIndicatorWidth:
+          focusActiveIndicatorWidth ?? this.focusActiveIndicatorWidth,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      focusOutlineWidth: focusOutlineWidth ?? this.focusOutlineWidth,
+      focusRingWidth: focusRingWidth ?? this.focusRingWidth,
+      focusRingGap: focusRingGap ?? this.focusRingGap,
       selectionOpacity: selectionOpacity ?? this.selectionOpacity,
-      supportingTextPadding:
-          supportingTextPadding ?? this.supportingTextPadding,
+      labelSpring: labelSpring ?? this.labelSpring,
+      effectsSpring: effectsSpring ?? this.effectsSpring,
+      inputTextStyle: inputTextStyle ?? this.inputTextStyle,
+      labelTextStyle: labelTextStyle ?? this.labelTextStyle,
+      floatingLabelTextStyle:
+          floatingLabelTextStyle ?? this.floatingLabelTextStyle,
+      supportingTextStyle: supportingTextStyle ?? this.supportingTextStyle,
+      colors: colors ?? this.colors,
+      iconAlignment: iconAlignment ?? this.iconAlignment,
+      affixAlignment: affixAlignment ?? this.affixAlignment,
     );
   }
 
@@ -204,53 +292,35 @@ class M3ETextFieldTheme extends M3EThemeExtension<M3ETextFieldTheme> {
     if (other is! M3ETextFieldTheme) {
       return this;
     }
-    return M3ETextFieldTheme(
-      minHeight: _lerpDouble(minHeight, other.minHeight, t)!,
-      contentHeight: _lerpDouble(contentHeight, other.contentHeight, t)!,
-      contentVerticalPadding: _lerpDouble(
-        contentVerticalPadding,
-        other.contentVerticalPadding,
-        t,
-      )!,
-      labelRestingOffset: _lerpDouble(
-        labelRestingOffset,
-        other.labelRestingOffset,
-        t,
-      )!,
-      horizontalPadding: EdgeInsets.lerp(
-        horizontalPadding,
-        other.horizontalPadding,
-        t,
-      )!,
-      iconSize: _lerpDouble(iconSize, other.iconSize, t)!,
-      iconGap: _lerpDouble(iconGap, other.iconGap, t)!,
-      labelFloatingTopPadding: _lerpDouble(
-        labelFloatingTopPadding,
-        other.labelFloatingTopPadding,
-        t,
-      )!,
-      labelRestingTopPadding: _lerpDouble(
-        labelRestingTopPadding,
-        other.labelRestingTopPadding,
-        t,
-      )!,
-      labelBottomPadding: _lerpDouble(
-        labelBottomPadding,
-        other.labelBottomPadding,
-        t,
-      )!,
-      selectionOpacity: _lerpDouble(
-        selectionOpacity,
-        other.selectionOpacity,
-        t,
-      )!,
-      supportingTextPadding: EdgeInsets.lerp(
-        supportingTextPadding,
-        other.supportingTextPadding,
-        t,
-      )!,
+    final M3ETextFieldTheme b = t < 0.5 ? this : other;
+    double l(double Function(M3ETextFieldTheme x) f) =>
+        f(this) + (f(other) - f(this)) * t;
+    return b.copyWith(
+      containerHeight: l((M3ETextFieldTheme x) => x.containerHeight),
+      verticalPadding: l((M3ETextFieldTheme x) => x.verticalPadding),
+      horizontalPadding: l((M3ETextFieldTheme x) => x.horizontalPadding),
+      iconEdgePadding: l((M3ETextFieldTheme x) => x.iconEdgePadding),
+      iconSize: l((M3ETextFieldTheme x) => x.iconSize),
+      iconTextGap: l((M3ETextFieldTheme x) => x.iconTextGap),
+      notchPadding: l((M3ETextFieldTheme x) => x.notchPadding),
+      supportingTopPadding: l((M3ETextFieldTheme x) => x.supportingTopPadding),
+      supportingHorizontalPadding: l(
+        (M3ETextFieldTheme x) => x.supportingHorizontalPadding,
+      ),
+      supportingCounterGap: l((M3ETextFieldTheme x) => x.supportingCounterGap),
+      densityStep: l((M3ETextFieldTheme x) => x.densityStep),
+      filledShape: BorderRadius.lerp(filledShape, other.filledShape, t),
+      outlinedShape: BorderRadius.lerp(outlinedShape, other.outlinedShape, t),
+      activeIndicatorWidth: l((M3ETextFieldTheme x) => x.activeIndicatorWidth),
+      focusActiveIndicatorWidth: l(
+        (M3ETextFieldTheme x) => x.focusActiveIndicatorWidth,
+      ),
+      outlineWidth: l((M3ETextFieldTheme x) => x.outlineWidth),
+      focusOutlineWidth: l((M3ETextFieldTheme x) => x.focusOutlineWidth),
+      focusRingWidth: l((M3ETextFieldTheme x) => x.focusRingWidth),
+      focusRingGap: l((M3ETextFieldTheme x) => x.focusRingGap),
+      selectionOpacity: l((M3ETextFieldTheme x) => x.selectionOpacity),
+      colors: colors.lerp(other.colors, t),
     );
   }
-
-  double? _lerpDouble(double a, double b, double t) => a + (b - a) * t;
 }

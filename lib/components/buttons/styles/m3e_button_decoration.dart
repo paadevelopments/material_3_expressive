@@ -253,6 +253,50 @@ class M3EButtonDecoration {
     );
   }
 
+  /// Returns this with every non-null field of [other] applied on top.
+  M3EButtonDecoration merge(M3EButtonDecoration? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      backgroundColor: other.backgroundColor,
+      foregroundColor: other.foregroundColor,
+      shadowColor: other.shadowColor,
+      elevation: other.elevation,
+      side: other.side,
+      mouseCursor: other.mouseCursor,
+      overlayColor: other.overlayColor,
+      surfaceTintColor: other.surfaceTintColor,
+      iconSize: other.iconSize,
+      iconAlignment: other.iconAlignment,
+      textStyle: other.textStyle,
+      padding: other.padding,
+      minimumSize: other.minimumSize,
+      fixedSize: other.fixedSize,
+      maximumSize: other.maximumSize,
+      visualDensity: other.visualDensity,
+      tapTargetSize: other.tapTargetSize,
+      animationDuration: other.animationDuration,
+      enableFeedback: other.enableFeedback,
+      alignment: other.alignment,
+      splashFactory: other.splashFactory,
+      backgroundBuilder: other.backgroundBuilder,
+      backgroundGradient: other.backgroundGradient,
+      foregroundGradient: other.foregroundGradient,
+      overlayGradient: other.overlayGradient,
+      outlineGradient: other.outlineGradient,
+      foregroundBuilder: other.foregroundBuilder,
+      motion: other.motion,
+      haptic: other.haptic,
+      borderRadius: other.borderRadius,
+      hoveredRadius: other.hoveredRadius,
+      pressedRadius: other.pressedRadius,
+      selectedRadius: other.selectedRadius,
+      unselectedRadius: other.unselectedRadius,
+      connectedInnerRadius: other.connectedInnerRadius,
+    );
+  }
+
   /// copyWith.
 
   M3EButtonDecoration copyWith({

@@ -2,298 +2,487 @@ part of 'm3e_search_view.dart';
 
 extension _M3ESearchViewContentBuild on _M3ESearchViewContentState {
   Widget _buildSearchView(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[_progress, _fade, _swap, _back]),
+      builder: (BuildContext context, Widget? child) => _buildFrame(),
+    );
+  }
+
+  Widget _buildFrame() {
     final theme = M3ETheme.of(context);
     final viewTheme = theme.searchViewTheme;
     final scheme = theme.colorScheme;
-    final _ViewResolvedStyles styles = _resolveViewStyles(
+    final M3ESearchViewStyle style = _route.viewStyle ?? viewTheme.style;
+    final _ViewGeometry g = _resolveGeometry(
+      screen: MediaQuery.sizeOf(context),
+      viewTheme: viewTheme,
+      style: style,
+    );
+    final _ViewStyles s = _resolveViewStyles(
       theme: theme,
       viewTheme: viewTheme,
       scheme: scheme,
+      style: style,
+      fullScreen: g.fullScreen,
     );
-    final double minWidth = math.min(
-      styles.constraints.minWidth,
-      _viewRect.width,
-    );
-    final double minHeight = math.min(
-      styles.constraints.minHeight,
-      _viewRect.height,
-    );
-    final double headerBlockHeight =
-        styles.headerHeight ??
-        (widget.showFullScreenView
-            ? M3ESearchConstants.fullScreenBarHeight
-            : theme.searchBarTheme.minHeight);
-    final bool showBody = _viewRect.height > headerBlockHeight + 1;
-    return _buildViewSurface(
-      styles: styles,
-      minWidth: minWidth,
-      minHeight: minHeight,
-      showBody: showBody,
-      headerBar: _buildHeaderBar(
-        theme: theme,
-        styles: styles,
-        defaultLeading: M3EIconButton(
-          variant: M3EIconButtonVariant.standard,
-          icon: const Icon(M3EIcons.arrow_back),
-          tooltip: M3ESearchConstants.backButtonTooltip,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        defaultTrailing: <Widget>[
-          if (widget.searchController.text.isNotEmpty)
-            M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: const Icon(M3EIcons.close),
-              tooltip: M3ESearchConstants.clearButtonTooltip,
-              onPressed: widget.searchController.clear,
+    final Widget surface = g.fullScreen
+        ? _buildFullScreen(g: g, s: s, style: style, viewTheme: viewTheme)
+        : _buildDocked(g: g, s: s, style: style);
+    return Stack(
+      children: <Widget>[
+        if (!g.fullScreen)
+          Positioned.fill(
+            child: _buildScrim(
+              _route.scrimColor ?? viewTheme.scrimColor(scheme),
             ),
-        ],
+          ),
+        Positioned.fromRect(
+          rect: g.rect,
+          child: Transform(
+            transform: _backTransform(g.rect, viewTheme),
+            child: CallbackShortcuts(
+              bindings: <ShortcutActivator, VoidCallback>{
+                const SingleActivator(LogicalKeyboardKey.escape): _close,
+              },
+              child: surface,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Scrim behind the docked layout; a tap dismisses the view.
+  Widget _buildScrim(Color color) {
+    final double opacity = clampDouble(_fade.value, 0, 1);
+    return ExcludeSemantics(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _close,
+        child: ColoredBox(color: color.withValues(alpha: color.a * opacity)),
       ),
     );
   }
 
-  Widget _buildViewSurface({
-    required _ViewResolvedStyles styles,
-    required double minWidth,
-    required double minHeight,
-    required bool showBody,
-    required Widget headerBar,
+  Widget _buildFullScreen({
+    required _ViewGeometry g,
+    required _ViewStyles s,
+    required M3ESearchViewStyle style,
+    required M3ESearchViewTheme viewTheme,
   }) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Transform.translate(
-        offset: _viewRect.topLeft,
+    final contained = style == M3ESearchViewStyle.contained;
+    final double top = M3ESafeArea.topOf(context) * g.t;
+    final double headerHeight = lerpDouble(
+      g.begin.height,
+      s.headerHeight,
+      g.t,
+    )!;
+    final double start = contained ? viewTheme.containedLeadingMargin * g.t : 0;
+    final double end = contained ? viewTheme.containedTrailingMargin * g.t : 0;
+    // Contained: the 56 bar sits in a 72 header (8 above and below).
+    final double vertical = contained
+        ? viewTheme.containedFullScreenBarVerticalPadding * g.t
+        : 0;
+    final double inset = contained
+        ? viewTheme.containedFullScreenResultsInset
+        : viewTheme.dividedResultsInset;
+    final double backRadius =
+        viewTheme.cornerRadius * clampDouble(_back.value, 0, 1);
+    final double radius =
+        lerpDouble(g.begin.height / 2, s.radius, g.t)! + backRadius;
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(height: top),
+        SafeArea(
+          top: false,
+          bottom: false,
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              start,
+              vertical,
+              end,
+              vertical,
+            ),
+            child: _buildHeader(s: s, style: style, height: headerHeight),
+          ),
+        ),
+        if (!contained) _buildDivider(s),
+        Expanded(
+          child: _fadeIn(
+            _buildResults(
+              padding: EdgeInsets.fromLTRB(
+                inset,
+                0,
+                inset,
+                M3ESafeArea.overlayBottomOf(context),
+              ),
+              shrinkWrap: false,
+            ),
+          ),
+        ),
+      ],
+    );
+    return _buildSurface(
+      s: s,
+      color: Color.lerp(s.barColor, s.background, g.t)!,
+      elevation: s.elevation * g.t,
+      radius: radius,
+      child: _fitColumn(
+        column: column,
+        height: g.rect.height,
+        needed: top + headerHeight + vertical * 2 + (contained ? 0 : 1),
+      ),
+    );
+  }
+
+  Widget _buildDocked({
+    required _ViewGeometry g,
+    required _ViewStyles s,
+    required M3ESearchViewStyle style,
+  }) {
+    final M3ESearchViewTheme viewTheme = M3ETheme.of(context).searchViewTheme;
+    final double headerHeight = lerpDouble(
+      g.begin.height,
+      s.headerHeight,
+      g.t,
+    )!;
+    final Widget docked = style == M3ESearchViewStyle.contained
+        ? _buildContainedDocked(
+            g: g,
+            s: s,
+            viewTheme: viewTheme,
+            headerHeight: headerHeight,
+          )
+        : _buildDividedDocked(
+            g: g,
+            s: s,
+            viewTheme: viewTheme,
+            headerHeight: headerHeight,
+          );
+    return Padding(padding: s.padding, child: docked);
+  }
+
+  Widget _buildContainedDocked({
+    required _ViewGeometry g,
+    required _ViewStyles s,
+    required M3ESearchViewTheme viewTheme,
+    required double headerHeight,
+  }) {
+    final double gap = viewTheme.dockedBarResultsGap * g.t;
+    final Widget results = _buildSurface(
+      s: s,
+      color: s.background,
+      elevation: s.elevation,
+      radius: s.radius,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          viewTheme.dockedResultsInset,
+          0,
+          viewTheme.dockedResultsInset,
+          viewTheme.dockedResultsBottomPadding,
+        ),
+        child: _buildResults(
+          padding: EdgeInsets.zero,
+          shrinkWrap: s.shrinkWrap,
+        ),
+      ),
+    );
+    final column = Column(
+      mainAxisSize: s.shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _buildHeader(
+          s: s,
+          style: M3ESearchViewStyle.contained,
+          height: headerHeight,
+        ),
+        SizedBox(height: gap),
+        Flexible(
+          fit: s.shrinkWrap ? FlexFit.loose : FlexFit.tight,
+          child: _fadeIn(results),
+        ),
+      ],
+    );
+    return _fitColumn(
+      column: column,
+      height: g.rect.height,
+      needed: headerHeight + gap,
+      shrinkWrap: s.shrinkWrap,
+    );
+  }
+
+  Widget _buildDividedDocked({
+    required _ViewGeometry g,
+    required _ViewStyles s,
+    required M3ESearchViewTheme viewTheme,
+    required double headerHeight,
+  }) {
+    final double pad = viewTheme.dividedDockedListPadding;
+    final column = Column(
+      mainAxisSize: s.shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _buildHeader(
+          s: s,
+          style: M3ESearchViewStyle.divided,
+          height: headerHeight,
+        ),
+        _buildDivider(s),
+        Flexible(
+          fit: s.shrinkWrap ? FlexFit.loose : FlexFit.tight,
+          child: _fadeIn(
+            _buildResults(
+              padding: EdgeInsets.symmetric(
+                horizontal: viewTheme.dividedResultsInset,
+                vertical: pad,
+              ),
+              shrinkWrap: s.shrinkWrap,
+            ),
+          ),
+        ),
+      ],
+    );
+    return _buildSurface(
+      s: s,
+      color: Color.lerp(s.barColor, s.background, g.t)!,
+      elevation: s.elevation * g.t,
+      radius: lerpDouble(g.begin.height / 2, s.radius, g.t)!,
+      child: _fitColumn(
+        column: column,
+        height: g.rect.height,
+        needed: headerHeight + 1,
+        shrinkWrap: s.shrinkWrap,
+      ),
+    );
+  }
+
+  /// Sizes [column] to the surface; grows it when the spring is mid-way.
+  Widget _fitColumn({
+    required Column column,
+    required double height,
+    required double needed,
+    bool shrinkWrap = false,
+  }) {
+    final double max = math.max(height, needed);
+    if (shrinkWrap) {
+      return Align(
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minWidth: minWidth,
-            maxWidth: _viewRect.width,
-            minHeight: minHeight,
-            maxHeight: _viewRect.height,
+            minHeight: math.min(needed, max),
+            maxHeight: max,
           ),
-          child: Padding(
-            padding: widget.showFullScreenView
-                ? EdgeInsets.zero
-                : styles.padding,
-            child: Material(
-              clipBehavior: Clip.antiAlias,
-              shape: styles.shape,
-              color: styles.background,
-              surfaceTintColor: styles.surfaceTint,
-              elevation: styles.elevation,
-              child: CallbackShortcuts(
-                bindings: <ShortcutActivator, VoidCallback>{
-                  const SingleActivator(LogicalKeyboardKey.escape): () {
-                    Navigator.of(context).maybePop();
-                  },
-                },
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
-                  minWidth: 0,
-                  fit: OverflowBoxFit.deferToChild,
-                  child: FadeTransition(
-                    opacity: _viewIconsFadeCurve,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: widget.topPadding),
-                          child: SafeArea(
-                            top: false,
-                            bottom: false,
-                            child: widget.showFullScreenView
-                                ? Padding(
-                                    padding: styles.fullScreenHeaderPadding,
-                                    child: headerBar,
-                                  )
-                                : headerBar,
-                          ),
-                        ),
-                        if (showBody &&
-                            (!styles.shrinkWrap ||
-                                minHeight > 0 ||
-                                widget.showFullScreenView ||
-                                _suggestions.isNotEmpty))
-                          ..._buildBodySlivers(styles),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: column,
         ),
-      ),
-    );
-  }
-
-  List<Widget> _buildBodySlivers(_ViewResolvedStyles styles) {
-    return <Widget>[
-      FadeTransition(
-        opacity: _viewDividerFadeCurve,
-        child: M3EDivider(color: styles.dividerColor),
-      ),
-      Flexible(
-        fit: styles.shrinkWrap && !widget.showFullScreenView
-            ? FlexFit.loose
-            : FlexFit.tight,
-        child: FadeTransition(
-          opacity: _viewListFadeCurve,
-          child: widget.viewBuilder == null
-              ? MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: ListView(
-                    padding: EdgeInsets.only(
-                      bottom: M3ESafeArea.overlayBottomOf(context),
-                    ),
-                    shrinkWrap: styles.shrinkWrap,
-                    children: _suggestions.toList(),
-                  ),
-                )
-              : widget.viewBuilder!(_suggestions),
-        ),
-      ),
-    ];
-  }
-
-  Widget _buildHeaderBar({
-    required M3EThemeData theme,
-    required _ViewResolvedStyles styles,
-    required Widget defaultLeading,
-    required List<Widget> defaultTrailing,
-  }) {
-    if (widget.showFullScreenView) {
-      return M3ESearchBar(
-        focusNode: _viewFocusNode,
-        expandOnFocus: false,
-        leading: widget.viewLeading ?? defaultLeading,
-        trailing: widget.viewTrailing ?? defaultTrailing,
-        hintText: widget.viewHintText,
-        controller: widget.searchController,
-        onEscape: () => Navigator.of(context).maybePop(),
-        onChanged: (String value) {
-          widget.viewOnChanged?.call(value);
-          _updateSuggestions();
-        },
-        onSubmitted: widget.viewOnSubmitted,
-        textCapitalization: widget.textCapitalization,
-        textInputAction: widget.textInputAction,
-        keyboardType: widget.keyboardType,
-        smartDashesType: widget.smartDashesType,
-        smartQuotesType: widget.smartQuotesType,
       );
     }
-    return M3ESearchBar(
-      focusNode: _viewFocusNode,
-      expandOnFocus: false,
-      constraints: styles.headerConstraints,
-      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(styles.barPadding),
-      leading: widget.viewLeading ?? defaultLeading,
-      trailing: widget.viewTrailing ?? defaultTrailing,
-      hintText: widget.viewHintText,
-      backgroundColor: const WidgetStatePropertyAll<Color>(Color(0x00000000)),
-      overlayColor: const WidgetStatePropertyAll<Color>(Color(0x00000000)),
-      elevation: const WidgetStatePropertyAll<double>(0),
-      textStyle: WidgetStatePropertyAll<TextStyle>(styles.textStyle),
-      hintStyle: WidgetStatePropertyAll<TextStyle>(styles.hintStyle),
-      controller: widget.searchController,
-      onEscape: () => Navigator.of(context).maybePop(),
-      onChanged: (String value) {
-        widget.viewOnChanged?.call(value);
-        _updateSuggestions();
-      },
-      onSubmitted: widget.viewOnSubmitted,
-      textCapitalization: widget.textCapitalization,
-      textInputAction: widget.textInputAction,
-      keyboardType: widget.keyboardType,
-      smartDashesType: widget.smartDashesType,
-      smartQuotesType: widget.smartQuotesType,
+    return ClipRect(
+      child: OverflowBox(
+        alignment: Alignment.topCenter,
+        minHeight: max,
+        maxHeight: max,
+        child: column,
+      ),
     );
   }
 
-  _ViewResolvedStyles _resolveViewStyles({
+  Widget _buildSurface({
+    required _ViewStyles s,
+    required Color color,
+    required double elevation,
+    required double radius,
+    required Widget child,
+  }) {
+    OutlinedBorder shape =
+        s.shape ??
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(math.max(0, radius)),
+        );
+    if (s.side != null) {
+      shape = shape.copyWith(side: s.side);
+    }
+    return Material(
+      color: color,
+      surfaceTintColor: s.surfaceTint,
+      elevation: elevation,
+      shape: shape,
+      clipBehavior: Clip.antiAlias,
+      child: child,
+    );
+  }
+
+  Widget _fadeIn(Widget child) {
+    return Opacity(opacity: clampDouble(_fade.value, 0, 1), child: child);
+  }
+
+  Widget _buildDivider(_ViewStyles s) {
+    return _fadeIn(M3EDivider(color: s.dividerColor));
+  }
+
+  Widget _buildHeader({
+    required _ViewStyles s,
+    required M3ESearchViewStyle style,
+    required double height,
+  }) {
+    final contained = style == M3ESearchViewStyle.contained;
+    final EdgeInsetsGeometry? barPadding = _route.viewBarPadding;
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.arrowDown): _focusFirstResult,
+      },
+      child: M3ESearchBar(
+        focusNode: _viewFocusNode,
+        expandOnFocus: false,
+        constraints: BoxConstraints.tightFor(height: height),
+        padding: barPadding == null
+            ? null
+            : WidgetStatePropertyAll<EdgeInsetsGeometry>(barPadding),
+        leading:
+            _route.viewLeading ??
+            M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
+              icon: const Icon(M3EIcons.arrow_back),
+              tooltip: M3ESearchConstants.backButtonTooltip,
+              onPressed: _close,
+            ),
+        trailing: _route.viewTrailing,
+        showClearButton: _route.showViewClearButton,
+        hintText: _route.viewHintText,
+        backgroundColor: WidgetStatePropertyAll<Color>(
+          contained ? s.barColor : const Color(0x00000000),
+        ),
+        overlayColor: contained
+            ? null
+            : const WidgetStatePropertyAll<Color>(Color(0x00000000)),
+        elevation: const WidgetStatePropertyAll<double>(0),
+        textStyle: WidgetStatePropertyAll<TextStyle>(s.textStyle),
+        hintStyle: WidgetStatePropertyAll<TextStyle>(s.hintStyle),
+        controller: _route.searchController,
+        onEscape: _close,
+        onChanged: (String value) {
+          _route.viewOnChanged?.call(value);
+          _updateSuggestions();
+        },
+        onSubmitted: _route.viewOnSubmitted,
+        textCapitalization: _route.textCapitalization,
+        textInputAction: _route.textInputAction,
+        keyboardType: _route.keyboardType,
+        smartDashesType: _route.smartDashesType,
+        smartQuotesType: _route.smartQuotesType,
+      ),
+    );
+  }
+
+  /// Results list; arrows move between items, up from the first returns to
+  /// the field.
+  Widget _buildResults({
+    required EdgeInsets padding,
+    required bool shrinkWrap,
+  }) {
+    final M3ESearchViewBuilder? builder = _route.viewBuilder;
+    final Widget list = builder == null
+        ? MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ListView(
+              padding: padding,
+              shrinkWrap: shrinkWrap,
+              children: _suggestions.toList(),
+            ),
+          )
+        : builder(_suggestions);
+    return Focus(
+      focusNode: _resultsNode,
+      child: CallbackShortcuts(
+        bindings: <ShortcutActivator, VoidCallback>{
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
+              _moveResult(1),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+              _moveResult(-1),
+        },
+        child: FocusTraversalGroup(child: list),
+      ),
+    );
+  }
+
+  _ViewStyles _resolveViewStyles({
     required M3EThemeData theme,
     required M3ESearchViewTheme viewTheme,
     required M3EColorScheme scheme,
+    required M3ESearchViewStyle style,
+    required bool fullScreen,
   }) {
-    final Color background = widget.showFullScreenView
-        ? (widget.viewBackgroundColor ??
-              viewTheme.fullScreenBackgroundColor(scheme))
-        : (widget.viewBackgroundColor ?? viewTheme.backgroundColor(scheme));
-    final Color surfaceTint = widget.showFullScreenView
-        ? (widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme))
-        : (widget.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme));
-    final double elevation = widget.showFullScreenView
-        ? (widget.viewElevation ?? 0)
-        : (widget.viewElevation ?? viewTheme.elevation);
-    OutlinedBorder shape =
-        widget.viewShape ??
-        (widget.showFullScreenView
-            ? viewTheme.fullScreenShape() as OutlinedBorder
-            : viewTheme.dockedShape(viewTheme.cornerRadius) as OutlinedBorder);
-    if (widget.viewSide != null) {
-      shape = shape.copyWith(side: widget.viewSide);
-    }
-    final double? headerHeight =
-        widget.viewHeaderHeight ??
-        (widget.showFullScreenView ? viewTheme.headerHeight : null);
-    return _ViewResolvedStyles(
-      background: background,
-      surfaceTint: surfaceTint,
-      elevation: elevation,
-      shape: shape,
-      dividerColor: widget.dividerColor ?? Colors.transparent,
-      headerHeight: headerHeight,
-      headerConstraints: headerHeight == null
-          ? null
-          : BoxConstraints.tightFor(height: headerHeight),
+    final contained = style == M3ESearchViewStyle.contained;
+    final Color background = switch ((contained, fullScreen)) {
+      (true, true) => viewTheme.containedBackgroundColor(scheme),
+      (true, false) => viewTheme.containedContainerColor(scheme),
+      (false, true) => viewTheme.fullScreenBackgroundColor(scheme),
+      (false, false) => viewTheme.backgroundColor(scheme),
+    };
+    final double elevation = contained
+        ? viewTheme.containedElevation
+        : (fullScreen ? M3EElevation.level0 : viewTheme.elevation);
+    final double headerHeight = contained
+        ? viewTheme.containedBarHeight
+        : (fullScreen
+              ? viewTheme.headerHeight
+              : viewTheme.dividedDockedHeaderHeight);
+    final double radius = fullScreen
+        ? viewTheme.fullScreenRadius
+        : (contained ? viewTheme.dockedResultsRadius : viewTheme.cornerRadius);
+    return _ViewStyles(
+      barColor: theme.searchBarTheme.backgroundColor(scheme),
+      background: _route.viewBackgroundColor ?? background,
+      surfaceTint:
+          _route.viewSurfaceTintColor ?? viewTheme.surfaceTintColor(scheme),
+      elevation: _route.viewElevation ?? elevation,
+      shape: _route.viewShape,
+      side: _route.viewSide,
+      radius: radius,
+      dividerColor: _route.dividerColor ?? viewTheme.dividerColor(scheme),
+      headerHeight: _route.viewHeaderHeight ?? headerHeight,
       textStyle:
-          widget.viewHeaderTextStyle ??
+          _route.viewHeaderTextStyle ??
           viewTheme.headerTextStyle(theme.typeScale, scheme),
       hintStyle:
-          widget.viewHeaderHintStyle ??
-          widget.viewHeaderTextStyle ??
+          _route.viewHeaderHintStyle ??
+          _route.viewHeaderTextStyle ??
           viewTheme.headerHintStyle(theme.typeScale, scheme),
-      padding: widget.viewPadding ?? EdgeInsets.zero,
-      barPadding: widget.viewBarPadding ?? viewTheme.barPadding(),
-      fullScreenHeaderPadding: viewTheme.fullScreenHeaderPadding(),
-      constraints: widget.viewConstraints ?? viewTheme.constraints(),
-      shrinkWrap: widget.shrinkWrap ?? viewTheme.shrinkWrap,
+      padding: _route.viewPadding ?? EdgeInsets.zero,
+      shrinkWrap: _route.shrinkWrap ?? viewTheme.shrinkWrap,
     );
   }
 }
 
-class _ViewResolvedStyles {
-  const _ViewResolvedStyles({
+class _ViewStyles {
+  const _ViewStyles({
+    required this.barColor,
     required this.background,
     required this.surfaceTint,
     required this.elevation,
     required this.shape,
+    required this.side,
+    required this.radius,
     required this.dividerColor,
     required this.headerHeight,
-    required this.headerConstraints,
     required this.textStyle,
     required this.hintStyle,
     required this.padding,
-    required this.barPadding,
-    required this.fullScreenHeaderPadding,
-    required this.constraints,
     required this.shrinkWrap,
   });
 
+  final Color barColor;
   final Color background;
   final Color surfaceTint;
   final double elevation;
-  final OutlinedBorder shape;
+  final OutlinedBorder? shape;
+  final BorderSide? side;
+  final double radius;
   final Color dividerColor;
-  final double? headerHeight;
-  final BoxConstraints? headerConstraints;
+  final double headerHeight;
   final TextStyle textStyle;
   final TextStyle hintStyle;
   final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry barPadding;
-  final EdgeInsetsGeometry fullScreenHeaderPadding;
-  final BoxConstraints constraints;
   final bool shrinkWrap;
 }

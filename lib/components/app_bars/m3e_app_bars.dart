@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../foundations/foundations.dart';
 import '../search/controllers/m3e_search_controller.dart';
+import '../search/enums/m3e_search_enums.dart';
 import '../search/m3e_search_anchor.dart';
 import '../tooltips/m3e_tooltips.dart';
 import 'components/m3e_app_bar_semantics.dart';

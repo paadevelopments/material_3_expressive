@@ -46,3 +46,7 @@ abstract final class M3ESearchConstants {
   /// backButtonTooltip.
   static const String backButtonTooltip = 'Back';
 }
+
+/// Default screen reader text when suggestions or results change.
+String m3eSearchResultsAnnouncement(int count) =>
+    count == 1 ? '1 result available' : '$count results available';

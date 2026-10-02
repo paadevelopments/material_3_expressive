@@ -1,148 +1,36 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
+import '../../../widgets/playground/controls/play_slider.dart';
+import '../../../widgets/playground/controls/play_text_field.dart';
+import '../../../widgets/playground/playground.dart';
 
-/// Live playground for [M3ESelection], adapted from [SelectionDemoPage].
-class SelectionPlayground extends StatefulWidget {
+/// Idle (nothing selected) bar shown by the selection app bar.
+enum _IdleBar { search, top }
+
+/// Live playground for [M3ESelection] and [M3ESelectionAppBar].
+class SelectionPlayground extends PlaygroundWidget {
   /// Creates the selection playground.
   const SelectionPlayground({super.key});
 
   @override
-  State<SelectionPlayground> createState() => _SelectionPlaygroundState();
+  PlaygroundState<SelectionPlayground> createState() =>
+      _SelectionPlaygroundState();
 }
 
-class _SelectionPlaygroundState extends State<SelectionPlayground> {
-  bool _dismissible = false;
-  bool _showSelectAll = true;
-  bool _customHighlight = false;
-
-  List<PlaySnippet> get _snippets {
-    final String body = _dismissible
-        ? 'M3EList.scrollable(itemCount: items.length, itemBuilder: itemBuilder)'
-        : 'M3EList.scrollable(itemCount: items.length, itemBuilder: itemBuilder)';
-    final String selectedColor = _customHighlight
-        ? '\n  selectedColor: const Color(0xFF4CAF50),'
-        : '';
-    return <PlaySnippet>[
-      PlaySnippet(
-        label: 'Selection',
-        code:
-            '''
-$kPlaySnippetImport
-
-M3ESelection(
-  controller: selection,
-  itemCount: items.length,$selectedColor
-  appBar: M3ESelectionAppBar(
-    showSelectAll: $_showSelectAll,
-    idle: M3EAppBar.search(
-      searchController: search,
-      suggestionsBuilder: (BuildContext context, M3ESearchController c) {
-        return const <Widget>[];
-      },
-      barHintText: 'Search items',
-    ),
-    actions: <Widget>[
-      M3EIconButton(
-        variant: M3EIconButtonVariant.standard,
-        icon: const Icon(M3EIcons.delete),
-        onPressed: () {},
-      ),
-    ],
-  ),
-  body: $body,
-);''',
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'Selection demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Long-press a row or tap a leading avatar to enter selection '
-                'mode. System back clears selection first.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return _SelectionDemoHost(
-                          dismissible: _dismissible,
-                          showSelectAll: _showSelectAll,
-                          customHighlight: _customHighlight,
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Open selection demo'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Demo options',
-          children: <Widget>[
-            PlaySwitch(
-              label: 'Dismissible list',
-              value: _dismissible,
-              onChanged: (bool v) => setState(() => _dismissible = v),
-            ),
-            PlaySwitch(
-              label: 'Show select all',
-              value: _showSelectAll,
-              onChanged: (bool v) => setState(() => _showSelectAll = v),
-            ),
-            PlaySwitch(
-              label: 'Custom highlight',
-              value: _customHighlight,
-              onChanged: (bool v) => setState(() => _customHighlight = v),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SelectionDemoHost extends StatefulWidget {
-  const _SelectionDemoHost({
-    required this.dismissible,
-    required this.showSelectAll,
-    required this.customHighlight,
-  });
-
-  final bool dismissible;
-  final bool showSelectAll;
-  final bool customHighlight;
-
-  @override
-  State<_SelectionDemoHost> createState() => _SelectionDemoHostState();
-}
-
-class _SelectionDemoHostState extends State<_SelectionDemoHost> {
+class _SelectionPlaygroundState extends PlaygroundState<SelectionPlayground> {
   final M3ESelectionController _selection = M3ESelectionController();
-  late final M3ESearchController _search;
+  final M3ESearchController _search = M3ESearchController();
+
+  _IdleBar _idle = _IdleBar.search;
+  bool _showSelectAll = true;
+  String _selectAllLabel = 'Select all';
+  double _actionCount = 2;
+  bool _customHighlight = false;
+  bool _dismissible = false;
+  bool _selectedIcon = true;
+  M3EHapticFeedback _haptic = M3EHapticFeedback.medium;
 
   static const List<({String title, String subtitle})> _items =
       <({String title, String subtitle})>[
@@ -156,10 +44,15 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
         (title: 'Selection patterns', subtitle: 'Multi-select with app bar'),
       ];
 
+  static const List<(IconData, String)> _actions = <(IconData, String)>[
+    (M3EIcons.archive, 'Archive'),
+    (M3EIcons.delete, 'Delete'),
+    (M3EIcons.share, 'Share'),
+  ];
+
   @override
   void initState() {
     super.initState();
-    _search = M3ESearchController();
     _selection.addListener(_onSelection);
   }
 
@@ -182,39 +75,6 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
     };
   }
 
-  Widget _leading(BuildContext context, int index) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3EColorScheme scheme = theme.colorScheme;
-    return CircleAvatar(
-      backgroundColor: _avatarColor(index, scheme),
-      foregroundColor: scheme.onPrimary,
-      child: Text(
-        _items[index].title.substring(0, 1),
-        style: theme.typeScale.titleMedium.copyWith(color: scheme.onPrimary),
-      ),
-    );
-  }
-
-  Widget _item(BuildContext context, int index) {
-    final ({String title, String subtitle}) item = _items[index];
-    return M3EListItem(
-      headline: item.title,
-      supportingText: item.subtitle,
-      leading: _leading(context, index),
-      swipe: widget.dismissible
-          ? M3EListItemSwipe(
-              onDismiss: (DismissDirection direction) async {
-                M3ESnackbar.show(
-                  context,
-                  message: 'Dismissed ${_items[index].title}',
-                );
-                return true;
-              },
-            )
-          : null,
-    );
-  }
-
   void _onTap(int index) {
     if (_selection.isSelectionMode) {
       _selection.toggle(index);
@@ -224,63 +84,70 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
   }
 
   void _onLongPress(int index) {
-    M3EHaptics.trigger(M3EHapticFeedback.medium);
+    M3EHaptics.trigger(_haptic);
     if (!_selection.isSelected(index)) {
       _selection.select(index);
     }
   }
 
-  static const EdgeInsets _listPadding = EdgeInsets.symmetric(
-    horizontal: 16,
-    vertical: 8,
-  );
-
-  Widget _body(M3EThemeData theme) {
-    if (widget.dismissible) {
-      return M3EList.scrollable(
-        selection: true,
-        selectionState: const M3EListSelectionState(
-          selectedIcon: Icon(M3EIcons.check_circle),
+  Widget _item(BuildContext context, int index) {
+    final M3EThemeData theme = M3ETheme.of(context);
+    final M3EColorScheme scheme = theme.colorScheme;
+    return M3EListItem(
+      headline: _items[index].title,
+      supportingText: _items[index].subtitle,
+      leading: CircleAvatar(
+        backgroundColor: _avatarColor(index, scheme),
+        child: Text(
+          _items[index].title.substring(0, 1),
+          style: theme.typeScale.titleMedium.copyWith(color: scheme.onPrimary),
         ),
-        itemCount: _items.length,
-        listPadding: _listPadding,
-        onTap: _onTap,
-        onLongPress: _onLongPress,
-        dismissStyle: M3EDismissibleListStyle(
-          background: Container(
-            color: theme.colorScheme.success,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Icon(M3EIcons.check, color: theme.colorScheme.onSurface),
-          ),
-          secondaryBackground: Container(
-            color: theme.colorScheme.danger,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Icon(M3EIcons.close, color: theme.colorScheme.onSurface),
-          ),
-        ),
-        itemBuilder: _item,
-      );
-    }
-    return M3EList.scrollable(
-      color: theme.colorScheme.surfaceContainerHighest,
-      selection: true,
-      selectionState: const M3EListSelectionState(
-        selectedIcon: Icon(M3EIcons.check_circle),
       ),
-      itemCount: _items.length,
-      listPadding: _listPadding,
-      onTap: _onTap,
-      onLongPress: _onLongPress,
-      haptic: M3EHapticFeedback.medium,
-      itemBuilder: _item,
+      swipe: _dismissible
+          ? M3EListItemSwipe(
+              onDismiss: (DismissDirection direction) async {
+                M3ESnackbar.show(
+                  context,
+                  message: 'Dismissed ${_items[index].title}',
+                );
+                return false;
+              },
+            )
+          : null,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
     final M3EThemeData theme = M3ETheme.of(context);
+    Widget list = M3EList.scrollable(
+      controller: PrimaryScrollController.of(context),
+      color: theme.colorScheme.surfaceContainerHighest,
+      selection: true,
+      selectionState: _selectedIcon
+          ? const M3EListSelectionState(
+              selectedIcon: Icon(M3EIcons.check_circle),
+            )
+          : null,
+      itemCount: _items.length,
+      listPadding: padding,
+      onTap: _onTap,
+      onLongPress: _onLongPress,
+      itemBuilder: _item,
+    );
+    if (_customHighlight) {
+      list = M3ETheme(
+        data: theme.copyWith(
+          selectionTheme: theme.selectionTheme.copyWith(
+            highlightColor: theme.colorScheme.tertiaryContainer,
+          ),
+        ),
+        child: list,
+      );
+    }
     return PopScope(
       canPop: !_selection.isSelectionMode,
       onPopInvokedWithResult: (bool didPop, Object? result) {
@@ -288,43 +155,184 @@ class _SelectionDemoHostState extends State<_SelectionDemoHost> {
           _selection.clear();
         }
       },
-      child: M3ESelection(
-        backgroundColor: theme.colorScheme.surface,
+      child: M3ESelectionScope(
         controller: _selection,
         itemCount: _items.length,
-        selectedColor: widget.customHighlight ? Colors.green : null,
-        appBar: M3ESelectionAppBar(
-          showSelectAll: widget.showSelectAll,
-          idle: M3EAppBar.search(
-            searchController: _search,
-            suggestionsBuilder: (BuildContext context, M3ESearchController c) {
-              return const <Widget>[];
-            },
-            barHintText: 'Search items',
-            leading: M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: const Icon(M3EIcons.arrow_back),
-              onPressed: () => Navigator.of(context).maybePop(),
-              tooltip: 'Back',
-            ),
-          ),
-          actions: <Widget>[
-            M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: const Icon(M3EIcons.archive),
-              onPressed: () {},
-              tooltip: 'Archive',
-            ),
-            M3EIconButton(
-              variant: M3EIconButtonVariant.standard,
-              icon: const Icon(M3EIcons.delete),
-              onPressed: () {},
-              tooltip: 'Delete',
-            ),
-          ],
-        ),
-        body: Padding(padding: EdgeInsets.only(top: 8), child: _body(theme)),
+        child: list,
       ),
     );
+  }
+
+  @override
+  PlaygroundSlots buildSlots(BuildContext context, PlaygroundChrome chrome) {
+    final PreferredSizeWidget idle = switch (_idle) {
+      _IdleBar.search => M3EAppBar.search(
+        searchController: _search,
+        suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+          return const <Widget>[];
+        },
+        barHintText: 'Search items',
+        leading: chrome.leading,
+        actions: chrome.trailingActions,
+      ),
+      _IdleBar.top => M3EAppBar.top(
+        titleText: 'Inbox',
+        leading: chrome.leading,
+        actions: chrome.trailingActions,
+      ),
+    };
+    return PlaygroundSlots(
+      header: M3ESelectionAppBar(
+        controller: _selection,
+        itemCount: _items.length,
+        showSelectAll: _showSelectAll,
+        selectAllLabel: _selectAllLabel,
+        idle: idle,
+        actions: <Widget>[
+          for (final (IconData icon, String label) in _actions.take(
+            _actionCount.round(),
+          ))
+            M3EIconButton(
+              variant: M3EIconButtonVariant.standard,
+              icon: Icon(icon),
+              tooltip: label,
+              onPressed: () => M3ESnackbar.show(
+                context,
+                message: '$label ${_selection.selectedCount} items',
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  List<PlaySnippet> get snippets {
+    final StringBuffer actions = StringBuffer();
+    for (final (IconData _, String label) in _actions.take(
+      _actionCount.round(),
+    )) {
+      actions.writeln(
+        '      M3EIconButton(\n'
+        '        icon: const Icon(M3EIcons.${label.toLowerCase()}),\n'
+        "        tooltip: '$label',\n"
+        '        onPressed: () {},\n'
+        '      ),',
+      );
+    }
+    final String idle = _idle == _IdleBar.search
+        ? 'M3EAppBar.search(\n'
+              '      searchController: search,\n'
+              '      suggestionsBuilder: (context, controller) => [],\n'
+              "      barHintText: 'Search items',\n"
+              '    )'
+        : "M3EAppBar.top(titleText: 'Inbox')";
+    final String highlight = _customHighlight
+        ? '  selectedColor: scheme.tertiaryContainer,\n'
+        : '';
+    final String selectAll = _showSelectAll
+        ? "    selectAllLabel: ${playDartString(_selectAllLabel)},\n"
+        : '';
+    return <PlaySnippet>[
+      PlaySnippet(
+        label: 'Selection',
+        code:
+            '''
+$kPlaySnippetImport
+
+PopScope(
+  canPop: !selection.isSelectionMode,
+  onPopInvokedWithResult: (didPop, _) {
+    if (!didPop) selection.clear();
+  },
+  child: M3ESelection(
+  controller: selection,
+  itemCount: items.length,
+$highlight  appBar: M3ESelectionAppBar(
+    showSelectAll: $_showSelectAll,
+$selectAll    idle: $idle,
+    actions: <Widget>[
+$actions    ],
+  ),
+  body: M3EList.scrollable(
+    selection: true,
+    itemCount: items.length,
+    onTap: (index) => selection.toggle(index),
+    onLongPress: (index) => selection.select(index),
+    itemBuilder: itemBuilder,
+  ),
+  ),
+);''',
+      ),
+    ];
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'App bar',
+        children: <Widget>[
+          PlayEnumChoice<_IdleBar>(
+            label: 'Idle bar',
+            value: _idle,
+            values: _IdleBar.values,
+            labelOf: (_IdleBar v) => switch (v) {
+              _IdleBar.search => 'search app bar',
+              _IdleBar.top => 'top app bar',
+            },
+            onChanged: (_IdleBar v) => setState(() => _idle = v),
+          ),
+          PlaySlider(
+            label: 'Contextual actions',
+            value: _actionCount,
+            max: _actions.length.toDouble(),
+            divisions: _actions.length,
+            onChanged: (double v) => setState(() => _actionCount = v),
+          ),
+          PlaySwitchItem(
+            label: 'Select all',
+            description: 'Row with a select-all checkbox while selecting',
+            value: _showSelectAll,
+            onChanged: (bool v) => setState(() => _showSelectAll = v),
+          ),
+          if (_showSelectAll)
+            PlayTextField(
+              label: 'Select all label',
+              value: _selectAllLabel,
+              onChanged: (String v) => setState(() => _selectAllLabel = v),
+            ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'List',
+        children: <Widget>[
+          PlaySwitchItem(
+            label: 'Custom highlight',
+            description: 'Tertiary container for selected rows',
+            value: _customHighlight,
+            onChanged: (bool v) => setState(() => _customHighlight = v),
+          ),
+          PlaySwitchItem(
+            label: 'Selected icon',
+            description: 'Check icon replaces the avatar',
+            value: _selectedIcon,
+            onChanged: (bool v) => setState(() => _selectedIcon = v),
+          ),
+          PlaySwitchItem(
+            label: 'Swipe to dismiss',
+            value: _dismissible,
+            onChanged: (bool v) => setState(() => _dismissible = v),
+          ),
+          PlayEnumChoice<M3EHapticFeedback>(
+            label: 'Long-press haptic',
+            value: _haptic,
+            values: M3EHapticFeedback.values,
+            labelOf: (M3EHapticFeedback v) => v.name,
+            onChanged: (M3EHapticFeedback v) => setState(() => _haptic = v),
+          ),
+        ],
+      ),
+    ];
   }
 }

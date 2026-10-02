@@ -1,21 +1,17 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../widgets/playground/control_panel.dart';
-import '../../../widgets/playground/controls/play_enum_menu.dart';
-import '../../../widgets/playground/controls/play_enum_segmented.dart';
-import '../../../widgets/playground/controls/play_switch.dart';
+import '../../../widgets/playground/controls/play_enum_choice.dart';
 import '../../../widgets/playground/controls/play_text_field.dart';
-import '../../../widgets/playground/play_preview_card.dart';
-import '../../../widgets/playground/playground_body.dart';
+import '../../../widgets/playground/playground.dart';
 
 /// Live playground for [M3EAppBar] variants.
-class AppBarsPlayground extends StatefulWidget {
+class AppBarsPlayground extends PlaygroundWidget {
   /// Creates the app bars playground.
   const AppBarsPlayground({super.key});
 
   @override
-  State<AppBarsPlayground> createState() => _AppBarsPlaygroundState();
+  PlaygroundState<AppBarsPlayground> createState() => _AppBarsPlaygroundState();
 }
 
 enum _AppBarKind { top, search, bottom, sliver }
@@ -24,7 +20,7 @@ enum _SearchArrangement { outside, inside, twoTrailing }
 
 enum _Flexibility { expanded, collapsed }
 
-class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
+class _AppBarsPlaygroundState extends PlaygroundState<AppBarsPlayground> {
   _AppBarKind _kind = _AppBarKind.top;
   M3EAppBarDensity _density = M3EAppBarDensity.regular;
   M3EAppBarShapeFamily _shape = M3EAppBarShapeFamily.square;
@@ -43,7 +39,8 @@ class _AppBarsPlaygroundState extends State<AppBarsPlayground> {
 
   bool get _canFlex => _variant != M3EAppBarVariant.small;
 
-  List<PlaySnippet> get _snippets {
+  @override
+  List<PlaySnippet> get snippets {
     final String controllerSetup = !_useController
         ? ''
         : '''
@@ -130,240 +127,10 @@ $controllerArg  titleText: ${playDartString(_title)},
     ];
   }
 
-  void _openDemo() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return _AppBarDemoHost(
-            kind: _kind,
-            density: _density,
-            shape: _shape,
-            variant: _variant,
-            centerTitle: _centerTitle,
-            safeArea: _safeArea,
-            title: _title,
-            subtitle: _subtitle,
-            imageTitle: _imageTitle,
-            filledAction: _filledAction,
-            hideMode: _hideMode,
-            searchArrangement: _searchArrangement,
-            wrapActions: _wrapActions,
-            startExpanded: !_canFlex || _flexibility == _Flexibility.expanded,
-            useController: _useController,
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    return PlaygroundBody(
-      previews: <Widget>[
-        PlayPreviewCard(
-          label: 'App bar demo',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Opens a full screen for the selected app bar. Scrolling any '
-                'variant switches the bar to the scrolled surface and '
-                'elevation, and scrolling back to the top restores them. '
-                'Set flexibility and the controller here, then open the demo.',
-                style: theme.typeScale.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              M3EButton(
-                onPressed: _openDemo,
-                child: const Text('Open app bar demo'),
-              ),
-            ],
-          ),
-        ),
-      ],
-      snippets: _snippets,
-      controls: <Widget>[
-        PlayControlPanel(
-          title: 'Variant',
-          children: <Widget>[
-            PlayEnumMenu<_AppBarKind>(
-              label: 'Kind',
-              value: _kind,
-              values: _AppBarKind.values,
-              labelOf: (_AppBarKind v) => v.name,
-              onChanged: (_AppBarKind v) => setState(() => _kind = v),
-            ),
-            PlayEnumSegmented<M3EAppBarVariant>(
-              label: 'Variant',
-              value: _variant,
-              values: M3EAppBarVariant.values,
-              labelOf: _variantLabel,
-              onChanged: (M3EAppBarVariant v) {
-                setState(() => _variant = v);
-              },
-            ),
-            if (_canFlex)
-              PlayEnumSegmented<_Flexibility>(
-                label: 'Flexibility',
-                value: _flexibility,
-                values: _Flexibility.values,
-                labelOf: (_Flexibility v) => v.name,
-                onChanged: (_Flexibility v) {
-                  setState(() => _flexibility = v);
-                },
-              ),
-            PlayEnumSegmented<M3EAppBarHideMode>(
-              label: 'Hide on scroll',
-              value: _hideMode,
-              values: M3EAppBarHideMode.values,
-              labelOf: (M3EAppBarHideMode v) => v.name,
-              onChanged: (M3EAppBarHideMode v) {
-                setState(() => _hideMode = v);
-              },
-            ),
-          ],
-        ),
-        PlayControlPanel(
-          title: 'Controller',
-          children: <Widget>[
-            PlaySwitch(
-              label: 'Controller',
-              value: _useController,
-              onChanged: (bool v) => setState(() => _useController = v),
-            ),
-          ],
-        ),
-        PlayControlPanel(
-          title: 'Appearance',
-          children: <Widget>[
-            PlayEnumSegmented<M3EAppBarDensity>(
-              label: 'Density',
-              value: _density,
-              values: M3EAppBarDensity.values,
-              labelOf: (M3EAppBarDensity v) => v.name,
-              onChanged: (M3EAppBarDensity v) {
-                setState(() => _density = v);
-              },
-            ),
-            PlayEnumSegmented<M3EAppBarShapeFamily>(
-              label: 'Shape',
-              value: _shape,
-              values: M3EAppBarShapeFamily.values,
-              labelOf: (M3EAppBarShapeFamily v) => v.name,
-              onChanged: (M3EAppBarShapeFamily v) {
-                setState(() => _shape = v);
-              },
-            ),
-            PlaySwitch(
-              label: 'Center title',
-              value: _centerTitle,
-              onChanged: (bool v) => setState(() => _centerTitle = v),
-            ),
-            PlaySwitch(
-              label: 'Safe area',
-              value: _safeArea,
-              onChanged: (bool v) => setState(() => _safeArea = v),
-            ),
-            PlaySwitch(
-              label: 'Subtitle',
-              value: _subtitle,
-              onChanged: (bool v) => setState(() => _subtitle = v),
-            ),
-            if (_kind == _AppBarKind.top)
-              PlaySwitch(
-                label: 'Image title',
-                value: _imageTitle,
-                onChanged: (bool v) => setState(() => _imageTitle = v),
-              ),
-            PlaySwitch(
-              label: 'Filled trailing action',
-              value: _filledAction,
-              onChanged: (bool v) => setState(() => _filledAction = v),
-            ),
-            if (_kind == _AppBarKind.search) ...<Widget>[
-              PlayEnumMenu<_SearchArrangement>(
-                label: 'Search arrangement',
-                value: _searchArrangement,
-                values: _SearchArrangement.values,
-                labelOf: (_SearchArrangement v) => v.name,
-                onChanged: (_SearchArrangement v) {
-                  setState(() => _searchArrangement = v);
-                },
-              ),
-              PlaySwitch(
-                label: 'Wrap actions',
-                value: _wrapActions,
-                onChanged: (bool v) => setState(() => _wrapActions = v),
-              ),
-            ],
-            PlayTextField(
-              label: 'Title',
-              value: _title,
-              onChanged: (String v) => setState(() => _title = v),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  String _variantLabel(M3EAppBarVariant variant) {
-    return switch (variant) {
-      M3EAppBarVariant.small => 'small',
-      M3EAppBarVariant.mediumFlexible => 'medium flexible',
-      M3EAppBarVariant.largeFlexible => 'large flexible',
-      M3EAppBarVariant.medium => 'medium baseline',
-      M3EAppBarVariant.large => 'large baseline',
-    };
-  }
-}
-
-class _AppBarDemoHost extends StatefulWidget {
-  const _AppBarDemoHost({
-    required this.kind,
-    required this.density,
-    required this.shape,
-    required this.variant,
-    required this.centerTitle,
-    required this.safeArea,
-    required this.title,
-    required this.subtitle,
-    required this.imageTitle,
-    required this.filledAction,
-    required this.hideMode,
-    required this.searchArrangement,
-    required this.wrapActions,
-    required this.startExpanded,
-    required this.useController,
-  });
-
-  final _AppBarKind kind;
-  final M3EAppBarDensity density;
-  final M3EAppBarShapeFamily shape;
-  final M3EAppBarVariant variant;
-  final bool centerTitle;
-  final bool safeArea;
-  final String title;
-  final bool subtitle;
-  final bool imageTitle;
-  final bool filledAction;
-  final M3EAppBarHideMode hideMode;
-  final _SearchArrangement searchArrangement;
-  final bool wrapActions;
-  final bool startExpanded;
-  final bool useController;
-
-  @override
-  State<_AppBarDemoHost> createState() => _AppBarDemoHostState();
-}
-
-class _AppBarDemoHostState extends State<_AppBarDemoHost> {
   final M3ESearchController _searchController = M3ESearchController();
   M3EAppBarController? _appBarController;
   int _manual = 2;
+  String? _startKey;
 
   static const List<String> _suggestions = <String>[
     'Inbox',
@@ -373,56 +140,65 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.useController) {
-      _appBarController = M3EAppBarController();
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      _applyStart();
-    });
-  }
-
-  Future<void> _applyStart() async {
-    if (widget.startExpanded || widget.variant == M3EAppBarVariant.small) {
-      return;
-    }
-    final M3EAppBarController? controller = _appBarController;
-    if (controller != null) {
-      await controller.collapse();
-      return;
-    }
-    final ScrollController? primary = PrimaryScrollController.maybeOf(context);
-    if (primary == null || !primary.hasClients) {
-      return;
-    }
-    final M3EAppBarMetrics metrics = M3ETheme.of(context).appBarTheme
-        .metrics(widget.density);
-    final double expanded = metrics.expandedHeight(
-      widget.variant,
-      hasSubtitle: widget.subtitle,
-    );
-    final double target = expanded - metrics.collapsedHeight;
-    primary.jumpTo(target.clamp(0, primary.position.maxScrollExtent));
-  }
-
-  @override
   void dispose() {
     _searchController.dispose();
     _appBarController?.dispose();
     super.dispose();
   }
 
-  Widget _backButton() {
-    return M3EIconButton(
-      variant: M3EIconButtonVariant.standard,
-      icon: const Icon(M3EIcons.arrow_back),
-      tooltip: 'Back',
-      onPressed: () => Navigator.of(context).maybePop(),
-    );
+  /// Hide mode has no effect on a bar that is not at the top.
+  bool get _canHide => _kind != _AppBarKind.bottom;
+
+  /// A bar that hides on scroll needs the content to run behind it.
+  bool get _hidesOnScroll => _canHide && _hideMode != M3EAppBarHideMode.none;
+
+  bool get _startExpanded => !_canFlex || _flexibility == _Flexibility.expanded;
+
+  void _setUseController(bool value) {
+    setState(() {
+      _useController = value;
+      final M3EAppBarController? old = _appBarController;
+      _appBarController = value ? M3EAppBarController() : null;
+      if (old != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
+      }
+    });
+  }
+
+  /// Collapses a flexible bar once it is built with "collapsed" picked.
+  void _scheduleStart(BuildContext context) {
+    final String key = '$_kind-$_variant-$_flexibility-$_useController';
+    if (key == _startKey) {
+      return;
+    }
+    _startKey = key;
+    if (_startExpanded) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !context.mounted) {
+        return;
+      }
+      final M3EAppBarController? controller = _appBarController;
+      if (controller != null) {
+        await controller.collapse();
+        return;
+      }
+      final ScrollController? primary = PrimaryScrollController.maybeOf(
+        context,
+      );
+      if (primary == null || !primary.hasClients) {
+        return;
+      }
+      final M3EAppBarMetrics metrics = M3ETheme.of(context).appBarTheme
+          .metrics(_density);
+      final double expanded = metrics.expandedHeight(
+        _variant,
+        hasSubtitle: _subtitle,
+      );
+      final double target = expanded - metrics.collapsedHeight;
+      primary.jumpTo(target.clamp(0, primary.position.maxScrollExtent));
+    });
   }
 
   Widget _action(IconData icon, {bool filled = false}) {
@@ -436,7 +212,10 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
     );
   }
 
-  Widget _imageTitle() {
+  Widget? _imageTitleWidget(BuildContext context) {
+    if (!_imageTitle || _kind == _AppBarKind.search) {
+      return null;
+    }
     final M3EThemeData theme = M3ETheme.of(context);
     final double size = theme.appBarTheme.avatarSize;
     return Container(
@@ -449,10 +228,11 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
     );
   }
 
-  List<Widget> _trailing() {
+  List<Widget> _trailing(PlaygroundChrome chrome) {
     return <Widget>[
-      if (widget.filledAction) _action(M3EIcons.edit, filled: true),
+      if (_filledAction) _action(M3EIcons.edit, filled: true),
       _action(M3EIcons.search),
+      ...chrome.trailingActions,
     ];
   }
 
@@ -475,205 +255,326 @@ class _AppBarDemoHostState extends State<_AppBarDemoHost> {
     );
   }
 
-  Widget _messages() {
+  Widget _messages(BuildContext context) {
     return M3EList(
       color: M3ETheme.of(context).colorScheme.surfaceContainerHighest,
       itemCount: 24,
       itemBuilder: (BuildContext context, int index) {
         return M3EListItem(
           headline: 'Message ${index + 1}',
-          supportingText: widget.title,
+          supportingText: _title,
           leading: const Icon(M3EIcons.mail),
         );
       },
     );
   }
 
-  Widget _scrollPage() {
-    return ListView(
-      children: <Widget>[
-        Padding(padding: const EdgeInsets.all(16), child: _messages()),
-      ],
-    );
-  }
+  String? get _subtitleText => _subtitle ? 'New messages' : null;
 
-  Widget? _titleWidget() {
-    if (widget.imageTitle) {
-      return _imageTitle();
-    }
-    return null;
-  }
-
-  String? get _subtitleText => widget.subtitle ? 'New messages' : null;
-
-  Widget _screen(Widget page) {
-    final M3EAppBarController? controller = _appBarController;
-    if (controller == null) {
-      return page;
-    }
-    return Stack(
-      children: <Widget>[
-        page,
-        M3EToolbar.floating(
-          alignment: Alignment.bottomCenter,
-          safeArea: false,
-          activeIndex: _manual,
-          onActiveIndexChanged: (int index) {
-            setState(() => _manual = index);
-            switch (index) {
-              case 0:
-                controller.show();
-              case 1:
-                controller.hide();
-              default:
-                controller.followScroll();
-            }
-          },
-          actions: <M3EToolbarItem>[
-            M3EToolbarAction(
-              icon: M3EIcons.visibility,
-              label: 'Show',
-              tooltip: 'Show',
-              onPressed: controller.show,
-            ),
-            M3EToolbarAction(
-              icon: M3EIcons.visibility_off,
-              label: 'Hide',
-              tooltip: 'Hide',
-              onPressed: controller.hide,
-            ),
-            M3EToolbarAction(
-              icon: M3EIcons.autorenew,
-              label: 'Auto',
-              tooltip: 'Auto',
-              onPressed: controller.followScroll,
-            ),
-          ],
+  /// Floating show / hide / auto toolbar driving the bar controller.
+  Widget _controllerToolbar(M3EAppBarController controller) {
+    return M3EToolbar.floating(
+      alignment: Alignment.bottomCenter,
+      safeArea: true,
+      activeIndex: _manual,
+      onActiveIndexChanged: (int index) {
+        setState(() => _manual = index);
+        switch (index) {
+          case 0:
+            controller.show();
+          case 1:
+            controller.hide();
+          default:
+            controller.followScroll();
+        }
+      },
+      actions: <M3EToolbarItem>[
+        M3EToolbarAction(
+          icon: M3EIcons.visibility,
+          label: 'Show',
+          tooltip: 'Show',
+          onPressed: controller.show,
+        ),
+        M3EToolbarAction(
+          icon: M3EIcons.visibility_off,
+          label: 'Hide',
+          tooltip: 'Hide',
+          onPressed: controller.hide,
+        ),
+        M3EToolbarAction(
+          icon: M3EIcons.autorenew,
+          label: 'Auto',
+          tooltip: 'Auto',
+          onPressed: controller.followScroll,
         ),
       ],
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final M3EThemeData theme = M3ETheme.of(context);
-    final Widget? image = _titleWidget();
-    final M3EAppBarController? controller = _appBarController;
-    final Widget page = switch (widget.kind) {
-      _AppBarKind.top => Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        // Lets the list run behind the bar so hide / collapse on scroll
-        // moves the bar's edge exactly with the content.
-        extendBodyBehindAppBar: true,
-        appBar: M3EAppBar.top(
-          controller: controller,
-          title: image,
-          titleText: image == null ? widget.title : null,
-          subtitleText: _subtitleText,
-          centerTitle: widget.centerTitle,
-          variant: widget.variant,
-          hideMode: widget.hideMode,
-          density: widget.density,
-          shapeFamily: widget.shape,
-          safeArea: widget.safeArea,
-          leading: _backButton(),
-          actions: _trailing(),
-        ),
-        body: _scrollPage(),
-      ),
-      _AppBarKind.search => Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        // Lets the list run behind the bar so hide / collapse on scroll
-        // moves the bar's edge exactly with the content.
-        extendBodyBehindAppBar: true,
-        appBar: M3EAppBar.search(
-          controller: controller,
-          searchController: _searchController,
-          barHintText: 'Search mail',
-          variant: widget.variant,
-          hideMode: widget.hideMode,
-          density: widget.density,
-          shapeFamily: widget.shape,
-          centerTitle: widget.centerTitle,
-          wrapActions: widget.wrapActions,
-          safeArea: widget.safeArea,
-          leading: widget.searchArrangement == _SearchArrangement.inside
-              ? null
-              : _backButton(),
-          barLeading: widget.searchArrangement == _SearchArrangement.inside
-              ? const Icon(M3EIcons.menu)
-              : null,
-          barTrailing: widget.searchArrangement == _SearchArrangement.inside
-              ? <Widget>[const Icon(M3EIcons.mic)]
-              : null,
-          actions: widget.searchArrangement == _SearchArrangement.twoTrailing
-              ? <Widget>[
-                  _action(M3EIcons.account_circle),
-                  _action(M3EIcons.more_vert),
-                ]
-              : <Widget>[_action(M3EIcons.account_circle)],
-          suggestionsBuilder: _buildSuggestions,
-        ),
-        body: _scrollPage(),
-      ),
-      _AppBarKind.bottom => Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        // Lets the list run behind the bar so hide / collapse on scroll
-        // moves the bar's edge exactly with the content.
-        extendBodyBehindAppBar: true,
-        appBar: M3EAppBar.top(
-          controller: controller,
-          titleText: widget.title,
-          subtitleText: _subtitleText,
-          centerTitle: widget.centerTitle,
-          variant: widget.variant,
-          hideMode: widget.hideMode,
-          density: widget.density,
-          shapeFamily: widget.shape,
-          safeArea: widget.safeArea,
-          leading: _backButton(),
-          actions: _trailing(),
-        ),
-        body: _scrollPage(),
-        bottomNavigationBar: M3EAppBar.bottom(
-          safeArea: widget.safeArea,
-          actions: <Widget>[
-            _action(M3EIcons.menu),
-            _action(M3EIcons.search),
-            _action(M3EIcons.edit),
-          ],
-          floatingActionButton: M3EFab(
-            icon: const Icon(M3EIcons.add),
-            size: M3EFabSize.small,
-            onPressed: () {},
-          ),
-        ),
-      ),
-      _AppBarKind.sliver => Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: CustomScrollView(
+  Widget buildPreview(BuildContext context) => const SizedBox.shrink();
+
+  @override
+  Widget buildPreviewScroll(BuildContext context, EdgeInsets padding) {
+    _scheduleStart(context);
+    final Widget page;
+    if (_kind == _AppBarKind.sliver) {
+      final Widget? image = _imageTitleWidget(context);
+      // The sliver bar sits first in the scroll view, below the banner.
+      page = Padding(
+        padding: EdgeInsets.only(top: padding.top - 16),
+        child: CustomScrollView(
+          primary: true,
           slivers: <Widget>[
             M3EAppBar.sliver(
-              controller: controller,
+              controller: _appBarController,
               title: image,
-              titleText: image == null ? widget.title : null,
+              titleText: image == null ? _title : null,
               subtitleText: _subtitleText,
-              centerTitle: widget.centerTitle,
-              density: widget.density,
-              shapeFamily: widget.shape,
-              variant: widget.variant,
-              hideMode: widget.hideMode,
-              leading: _backButton(),
-              actions: _trailing(),
+              centerTitle: _centerTitle,
+              density: _density,
+              shapeFamily: _shape,
+              variant: _variant,
+              hideMode: _hideMode,
+              actions: _trailing(const PlaygroundChrome()),
             ),
             SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverToBoxAdapter(child: _messages()),
+              padding: padding.copyWith(top: 16),
+              sliver: SliverToBoxAdapter(child: _messages(context)),
             ),
           ],
         ),
+      );
+    } else {
+      page = ListView(
+        primary: true,
+        padding: padding,
+        children: <Widget>[_messages(context)],
+      );
+    }
+    final M3EAppBarController? controller = _appBarController;
+    if (controller == null) {
+      return page;
+    }
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(child: page),
+        _controllerToolbar(controller),
+      ],
+    );
+  }
+
+  @override
+  PlaygroundSlots buildSlots(BuildContext context, PlaygroundChrome chrome) {
+    final Widget? image = _imageTitleWidget(context);
+    final M3EAppBarController? controller = _appBarController;
+    switch (_kind) {
+      case _AppBarKind.sliver:
+        return const PlaygroundSlots();
+      case _AppBarKind.search:
+        final bool inside = _searchArrangement == _SearchArrangement.inside;
+        return PlaygroundSlots(
+          extendBodyBehindAppBar: _hidesOnScroll,
+          appBar: M3EAppBar.search(
+            controller: controller,
+            searchController: _searchController,
+            barHintText: 'Search mail',
+            variant: _variant,
+            hideMode: _hideMode,
+            density: _density,
+            shapeFamily: _shape,
+            centerTitle: _centerTitle,
+            wrapActions: _wrapActions,
+            safeArea: _safeArea,
+            leading: inside ? null : chrome.leading,
+            barLeading: inside ? const Icon(M3EIcons.menu) : null,
+            barTrailing: inside ? <Widget>[const Icon(M3EIcons.mic)] : null,
+            actions: <Widget>[
+              _action(M3EIcons.account_circle),
+              if (_searchArrangement == _SearchArrangement.twoTrailing)
+                _action(M3EIcons.more_vert),
+              ...chrome.trailingActions,
+            ],
+            suggestionsBuilder: _buildSuggestions,
+          ),
+        );
+      case _AppBarKind.top:
+      case _AppBarKind.bottom:
+        final bool bottom = _kind == _AppBarKind.bottom;
+        return PlaygroundSlots(
+          extendBodyBehindAppBar: _hidesOnScroll,
+          appBar: M3EAppBar.top(
+            controller: controller,
+            title: bottom ? null : image,
+            titleText: bottom || image == null ? _title : null,
+            subtitleText: _subtitleText,
+            centerTitle: _centerTitle,
+            variant: _variant,
+            hideMode: _hideMode,
+            density: _density,
+            shapeFamily: _shape,
+            safeArea: _safeArea,
+            leading: chrome.leading,
+            actions: _trailing(chrome),
+          ),
+          bottomNavigationBar: bottom
+              ? M3EAppBar.bottom(
+                  safeArea: _safeArea,
+                  actions: <Widget>[
+                    _action(M3EIcons.menu),
+                    _action(M3EIcons.search),
+                    _action(M3EIcons.edit),
+                  ],
+                  floatingActionButton: M3EFab(
+                    icon: const Icon(M3EIcons.add),
+                    size: M3EFabSize.small,
+                    onPressed: () {},
+                  ),
+                )
+              : null,
+        );
+    }
+  }
+
+  @override
+  List<Widget> buildControls(BuildContext context) {
+    return <Widget>[
+      PlayControlGroup(
+        title: 'Variant',
+        children: <Widget>[
+          PlayEnumChoice<_AppBarKind>(
+            label: 'Kind',
+            value: _kind,
+            values: _AppBarKind.values,
+            labelOf: (_AppBarKind v) => switch (v) {
+              _AppBarKind.top => 'top',
+              _AppBarKind.search => 'search',
+              _AppBarKind.bottom => 'top + bottom',
+              _AppBarKind.sliver => 'sliver',
+            },
+            onChanged: (_AppBarKind v) => setState(() => _kind = v),
+          ),
+          PlayEnumChoice<M3EAppBarVariant>(
+            label: 'Size',
+            value: _variant,
+            values: M3EAppBarVariant.values,
+            labelOf: _variantLabel,
+            onChanged: (M3EAppBarVariant v) => setState(() => _variant = v),
+          ),
+          if (_canFlex)
+            PlayEnumChoice<_Flexibility>(
+              label: 'Start',
+              value: _flexibility,
+              values: _Flexibility.values,
+              labelOf: (_Flexibility v) => v.name,
+              onChanged: (_Flexibility v) => setState(() => _flexibility = v),
+            ),
+          if (_canHide)
+            PlayEnumChoice<M3EAppBarHideMode>(
+              label: 'Hide on scroll',
+              value: _hideMode,
+              values: M3EAppBarHideMode.values,
+              labelOf: (M3EAppBarHideMode v) => v.name,
+              onChanged: (M3EAppBarHideMode v) => setState(() => _hideMode = v),
+            ),
+          PlaySwitchItem(
+            label: 'Controller',
+            description: 'A toolbar shows, hides or follows scroll',
+            value: _useController,
+            onChanged: _setUseController,
+          ),
+        ],
       ),
+      PlayControlGroup(
+        title: 'Appearance',
+        children: <Widget>[
+          PlayEnumChoice<M3EAppBarDensity>(
+            label: 'Density',
+            value: _density,
+            values: M3EAppBarDensity.values,
+            labelOf: (M3EAppBarDensity v) => v.name,
+            onChanged: (M3EAppBarDensity v) => setState(() => _density = v),
+          ),
+          PlayEnumChoice<M3EAppBarShapeFamily>(
+            label: 'Shape',
+            value: _shape,
+            values: M3EAppBarShapeFamily.values,
+            labelOf: (M3EAppBarShapeFamily v) => v.name,
+            onChanged: (M3EAppBarShapeFamily v) => setState(() => _shape = v),
+          ),
+          PlaySwitchItem(
+            label: 'Center title',
+            value: _centerTitle,
+            onChanged: (bool v) => setState(() => _centerTitle = v),
+          ),
+          if (_kind != _AppBarKind.sliver)
+            PlaySwitchItem(
+              label: 'Safe area',
+              value: _safeArea,
+              onChanged: (bool v) => setState(() => _safeArea = v),
+            ),
+        ],
+      ),
+      PlayControlGroup(
+        title: 'Content',
+        children: <Widget>[
+          if (_kind != _AppBarKind.search) ...<Widget>[
+            PlayTextField(
+              label: 'Title',
+              value: _title,
+              onChanged: (String v) => setState(() => _title = v),
+            ),
+            PlaySwitchItem(
+              label: 'Subtitle',
+              value: _subtitle,
+              onChanged: (bool v) => setState(() => _subtitle = v),
+            ),
+          ],
+          if (_kind == _AppBarKind.top || _kind == _AppBarKind.sliver)
+            PlaySwitchItem(
+              label: 'Image title',
+              description: 'An avatar in place of the title text',
+              value: _imageTitle,
+              onChanged: (bool v) => setState(() => _imageTitle = v),
+            ),
+          if (_kind != _AppBarKind.search)
+            PlaySwitchItem(
+              label: 'Filled trailing action',
+              value: _filledAction,
+              onChanged: (bool v) => setState(() => _filledAction = v),
+            ),
+          if (_kind == _AppBarKind.search) ...<Widget>[
+            PlayEnumChoice<_SearchArrangement>(
+              label: 'Search arrangement',
+              value: _searchArrangement,
+              values: _SearchArrangement.values,
+              labelOf: (_SearchArrangement v) => switch (v) {
+                _SearchArrangement.outside => 'icons outside the bar',
+                _SearchArrangement.inside => 'icons inside the bar',
+                _SearchArrangement.twoTrailing => 'two trailing actions',
+              },
+              onChanged: (_SearchArrangement v) {
+                setState(() => _searchArrangement = v);
+              },
+            ),
+            PlaySwitchItem(
+              label: 'Wrap actions',
+              value: _wrapActions,
+              onChanged: (bool v) => setState(() => _wrapActions = v),
+            ),
+          ],
+        ],
+      ),
+    ];
+  }
+
+  String _variantLabel(M3EAppBarVariant variant) {
+    return switch (variant) {
+      M3EAppBarVariant.small => 'small',
+      M3EAppBarVariant.mediumFlexible => 'medium flexible',
+      M3EAppBarVariant.largeFlexible => 'large flexible',
+      M3EAppBarVariant.medium => 'medium baseline',
+      M3EAppBarVariant.large => 'large baseline',
     };
-    return _screen(page);
   }
 }

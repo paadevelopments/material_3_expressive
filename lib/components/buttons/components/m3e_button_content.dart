@@ -47,7 +47,7 @@ extension _M3EButtonContent on _M3EButtonState {
   })
   _resolveShapes(M3EButtonMeasurements m) {
     final fullyRound = BorderRadius.circular(m.height / 2);
-    final explicitBorderRadius = widget.decorationBorderRadius;
+    final explicitBorderRadius = _decoration?.borderRadius;
     final tokenPressed = _buttonTheme.pressedRadius(widget.size);
     final defaultShape = explicitBorderRadius != null
         ? BorderRadius.circular(explicitBorderRadius)
@@ -55,7 +55,7 @@ extension _M3EButtonContent on _M3EButtonState {
         ? fullyRound
         : BorderRadius.circular(_buttonTheme.squareRadius(widget.size));
 
-    final explicitPressed = widget.decorationPressedRadius;
+    final explicitPressed = _decoration?.pressedRadius;
     final pressedShape = explicitPressed != null
         ? BorderRadius.circular(explicitPressed)
         : explicitBorderRadius != null
@@ -63,7 +63,7 @@ extension _M3EButtonContent on _M3EButtonState {
         : BorderRadius.circular(tokenPressed);
 
     // Spec: hover keeps resting shape; only press morphs unless overridden.
-    final explicitHovered = widget.decoration?.hoveredRadius;
+    final explicitHovered = _decoration?.hoveredRadius;
     final hoveredShape = explicitHovered != null
         ? BorderRadius.circular(explicitHovered)
         : defaultShape;
@@ -151,7 +151,7 @@ extension _M3EButtonContent on _M3EButtonState {
       ),
     );
 
-    final dec = widget.decoration;
+    final dec = _decoration;
     final hasDecorationSize =
         dec?.fixedSize != null ||
         dec?.minimumSize != null ||
@@ -176,8 +176,7 @@ extension _M3EButtonContent on _M3EButtonState {
             icon: widget.icon!,
             label: widget.label!,
             size: widget.size,
-            iconAlignment:
-                widget.decoration?.iconAlignment ?? IconAlignment.start,
+            iconAlignment: _decoration?.iconAlignment ?? IconAlignment.start,
           )
         : widget.child ?? const SizedBox.shrink();
     if (widget.semanticLabel != null) {
@@ -185,26 +184,27 @@ extension _M3EButtonContent on _M3EButtonState {
     }
 
     final style = baseStyle.copyWith(
-      padding: widget.decoration?.padding != null
-          ? WidgetStateProperty.all<EdgeInsetsGeometry>(
-              widget.decoration!.padding!,
-            )
+      padding: _decoration?.padding != null
+          ? WidgetStateProperty.all<EdgeInsetsGeometry>(_decoration!.padding!)
           : WidgetStateProperty.all<EdgeInsetsGeometry>(internalPadding),
       shape: WidgetStateProperty.all<OutlinedBorder>(
         RoundedRectangleBorder(borderRadius: animatedRadius),
       ),
-      backgroundBuilder: m3eGradientSurfaceBuilder(
-        clipRadius: animatedRadius,
-        backgroundGradient: widget.decoration?.backgroundGradient,
-        overlayGradient: widget.decoration?.overlayGradient,
-        outlineGradient: widget.decoration?.outlineGradient,
-        outlineSide: widget.decoration?.side,
-        explicitBuilder: widget.decoration?.backgroundBuilder,
+      backgroundBuilder: _withStateLayer(
+        animatedRadius,
+        m3eGradientSurfaceBuilder(
+          clipRadius: animatedRadius,
+          backgroundGradient: _decoration?.backgroundGradient,
+          overlayGradient: _decoration?.overlayGradient,
+          outlineGradient: _decoration?.outlineGradient,
+          outlineSide: _decoration?.side,
+          explicitBuilder: _decoration?.backgroundBuilder,
+        ),
       ),
       foregroundBuilder: m3eGradientForegroundBuilder(
         clipRadius: animatedRadius,
-        gradient: widget.decoration?.foregroundGradient,
-        explicitBuilder: widget.decoration?.foregroundBuilder,
+        gradient: _decoration?.foregroundGradient,
+        explicitBuilder: _decoration?.foregroundBuilder,
       ),
     );
 
@@ -223,7 +223,7 @@ extension _M3EButtonContent on _M3EButtonState {
       return null;
     }
     return () {
-      M3EHaptics.trigger(widget.decoration?.haptic ?? M3EHapticFeedback.none);
+      M3EHaptics.trigger(_decoration?.haptic ?? M3EHapticFeedback.none);
       // Pointer taps hide rings in the press listener. Take focus here so the
       // next Tab continues from this button without painting a ring.
       effectiveFocusNode.requestFocus();
@@ -302,7 +302,7 @@ extension _M3EButtonContent on _M3EButtonState {
   }
 
   Widget _wrapButtonChrome(Widget button) {
-    final dec = widget.decoration;
+    final dec = _decoration;
     Color inkSplashColor = _selectionForegroundColor();
     if (dec?.foregroundColor != null) {
       inkSplashColor =

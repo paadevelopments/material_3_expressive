@@ -59,6 +59,165 @@ void main() {
     'expandable reorder collapses then restores expansion',
     _expandableReorderRestores,
   );
+  testWidgets(
+    'expanded row and sublist use the expanded-state fill',
+    _expandedStateFill,
+  );
+  testWidgets(
+    'expanded-state fill can be disabled or overridden',
+    _expandedStateFillOptOutAndOverride,
+  );
+  testWidgets(
+    'trailing chrome is an unfilled narrow pill at rest',
+    _trailingChromeNarrowPill,
+  );
+  testWidgets(
+    'sublist last row rounds its bottom unless opted out',
+    _sublistBottomRounding,
+  );
+}
+
+Future<void> _sublistBottomRounding(WidgetTester tester) async {
+  const double outer = 16;
+  const double inner = 4;
+
+  Future<double> lastNestBottom(M3EExpandableStyle style) async {
+    await pumpList(
+      tester,
+      _dataList(
+        expandStyle: style,
+        initiallyExpanded: const <int>{0},
+        data: <M3EExpandableData>[
+          M3EExpandableData(
+            title: 'Middle parent',
+            expanded: M3EExpandableExpanded.list(
+              M3EList(
+                embedded: true,
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) =>
+                    M3EListItem(headline: 'Nest $index'),
+              ),
+            ),
+          ),
+          const M3EExpandableData(
+            title: 'Last',
+            expanded: M3EExpandableExpanded.content(Text('Last body')),
+          ),
+        ],
+      ),
+    );
+    return tester
+        .widget<M3ECard>(
+          find
+              .ancestor(of: find.text('Nest 1'), matching: find.byType(M3ECard))
+              .first,
+        )
+        .borderRadius!
+        .bottomLeft
+        .x;
+  }
+
+  expect(
+    await lastNestBottom(const M3EExpandableStyle()),
+    moreOrLessEquals(outer, epsilon: 0.01),
+  );
+  expect(
+    await lastNestBottom(const M3EExpandableStyle(roundSublistBottom: false)),
+    moreOrLessEquals(inner, epsilon: 0.01),
+  );
+}
+
+List<M3EExpandableData> _parentWithChildren() => <M3EExpandableData>[
+  M3EExpandableData(
+    title: 'Parent',
+    expanded: M3EExpandableExpanded.list(
+      M3EList(
+        embedded: true,
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) =>
+            const M3EListItem(headline: 'Child'),
+      ),
+    ),
+  ),
+];
+
+Color? _headerFill(WidgetTester tester) => tester
+    .widget<M3EListRowSurface>(
+      find
+          .ancestor(
+            of: find.text('Parent'),
+            matching: find.byType(M3EListRowSurface),
+          )
+          .first,
+    )
+    .color;
+
+Future<void> _expandedStateFill(WidgetTester tester) async {
+  await pumpList(tester, _dataList(data: _parentWithChildren()));
+  final M3EColorScheme scheme = M3ETheme.of(tester.element(find.text('Parent')))
+      .colorScheme;
+
+  expect(_headerFill(tester), scheme.surfaceContainerHighest);
+
+  await tester.tap(find.text('Parent'));
+  await tester.pumpAndSettle();
+
+  expect(_headerFill(tester), scheme.surfaceContainerHigh);
+  expect(rowColor(tester, 'Child'), scheme.surfaceContainerHigh);
+
+  await tester.tap(find.text('Parent'));
+  await tester.pumpAndSettle();
+  expect(_headerFill(tester), scheme.surfaceContainerHighest);
+}
+
+Future<void> _expandedStateFillOptOutAndOverride(WidgetTester tester) async {
+  await pumpList(
+    tester,
+    _dataList(
+      data: _parentWithChildren(),
+      initiallyExpanded: const <int>{0},
+      expandStyle: const M3EExpandableStyle(expandedStateFill: false),
+    ),
+  );
+  final M3EColorScheme scheme = M3ETheme.of(tester.element(find.text('Parent')))
+      .colorScheme;
+  expect(_headerFill(tester), scheme.surfaceContainerHighest);
+  expect(rowColor(tester, 'Child'), scheme.surfaceContainerHighest);
+
+  const override = Color(0xFFFFE0B2);
+  await pumpList(
+    tester,
+    _dataList(
+      data: _parentWithChildren(),
+      initiallyExpanded: const <int>{0},
+      expandStyle: const M3EExpandableStyle(expandedStateColor: override),
+    ),
+  );
+  expect(_headerFill(tester), override);
+  expect(rowColor(tester, 'Child'), override);
+}
+
+Future<void> _trailingChromeNarrowPill(WidgetTester tester) async {
+  await pumpList(tester, _dataList(data: _parentWithChildren()));
+  final Finder chrome = find
+      .ancestor(
+        of: find.byIcon(M3EIcons.expand_more_rounded),
+        matching: find.byType(DecoratedBox),
+      )
+      .first;
+  Color chromeColor() =>
+      (tester.widget<DecoratedBox>(chrome).decoration as BoxDecoration).color!;
+
+  expect(tester.getSize(chrome), const Size(32, 40));
+  expect(chromeColor().a, 0, reason: 'no fill at rest');
+
+  await tester.tap(find.text('Parent'));
+  await tester.pumpAndSettle();
+
+  final M3EColorScheme scheme = M3ETheme.of(tester.element(find.text('Parent')))
+      .colorScheme;
+  expect(chromeColor(), scheme.surfaceContainer);
+  expect(tester.getSize(chrome), const Size(32, 40));
 }
 
 Future<void> _expandableSublist(WidgetTester tester) async {
