@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart'
@@ -16,6 +17,7 @@ import 'components/m3e_search_anchor_scope.dart';
 import 'models/m3e_search_anchor_surface.dart';
 import 'res/m3e_search_constants.dart';
 import 'styles/m3e_search_bar_theme.dart';
+import 'utils/m3e_search_selection_controls.dart';
 import 'utils/m3e_search_spring.dart';
 
 part 'components/m3e_search_bar_input.dart';

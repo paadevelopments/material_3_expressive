@@ -145,7 +145,23 @@ class M3ESearchBarInput extends StatefulWidget {
   State<M3ESearchBarInput> createState() => _M3ESearchBarInputState();
 }
 
-class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
+class _M3ESearchBarInputState extends State<M3ESearchBarInput>
+    implements TextSelectionGestureDetectorBuilderDelegate {
+  final GlobalKey<EditableTextState> _editableKey =
+      GlobalKey<EditableTextState>();
+  late final TextSelectionGestureDetectorBuilder _selectionBuilder =
+      TextSelectionGestureDetectorBuilder(delegate: this);
+  bool _showSelectionHandles = false;
+
+  @override
+  GlobalKey<EditableTextState> get editableTextKey => _editableKey;
+
+  @override
+  bool get forcePressEnabled => defaultTargetPlatform == TargetPlatform.iOS;
+
+  @override
+  bool get selectionEnabled => widget.enabled;
+
   @override
   void initState() {
     super.initState();
@@ -168,6 +184,56 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
   }
 
   void _handleTextChange() => setState(() {});
+
+  /// Touch selections show handles; keyboard and mouse selections do not.
+  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    if (!_selectionBuilder.shouldShowSelectionToolbar ||
+        !_selectionBuilder.shouldShowSelectionHandles) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.keyboard || !widget.enabled) {
+      return false;
+    }
+    if (widget.readOnly && widget.controller.selection.isCollapsed) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.stylusHandwriting) {
+      return true;
+    }
+    return widget.controller.text.isNotEmpty;
+  }
+
+  void _handleSelectionChanged(
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  ) {
+    final bool show = _shouldShowSelectionHandles(cause);
+    if (show != _showSelectionHandles) {
+      setState(() => _showSelectionHandles = show);
+    }
+    if (cause == SelectionChangedCause.longPress) {
+      _editableKey.currentState?.bringIntoView(selection.extent);
+    }
+    final bool desktop = switch (defaultTargetPlatform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => true,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS => false,
+    };
+    if (desktop && cause == SelectionChangedCause.drag) {
+      _editableKey.currentState?.hideToolbar();
+    }
+  }
+
+  /// Tapping the caret handle toggles the toolbar.
+  void _handleSelectionHandleTapped() {
+    if (widget.controller.selection.isCollapsed) {
+      _editableKey.currentState?.toggleToolbar();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +261,10 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
                 // (soft keyboard flash when SearchAnchor opens the view).
                 child: AbsorbPointer(
                   absorbing: widget.readOnly || !widget.enabled,
-                  child: _buildEditableText(),
+                  child: _selectionBuilder.buildGestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    child: _buildEditableText(),
+                  ),
                 ),
               ),
             ),
@@ -233,6 +302,7 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
 
   Widget _buildEditableText() {
     return EditableText(
+      key: _editableKey,
       controller: widget.controller,
       focusNode: widget.focusNode,
       readOnly: widget.readOnly || !widget.enabled,
@@ -251,6 +321,11 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput> {
       keyboardType: widget.keyboardType,
       scrollPadding: widget.scrollPadding,
       contextMenuBuilder: widget.contextMenuBuilder,
+      selectionControls: m3eSearchSelectionControls(defaultTargetPlatform),
+      showSelectionHandles: _showSelectionHandles,
+      onSelectionChanged: _handleSelectionChanged,
+      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      rendererIgnoresPointer: true,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
     );

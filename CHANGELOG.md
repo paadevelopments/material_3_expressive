@@ -59,6 +59,9 @@
 
 * **Text fields (web):** typing works again after a focused field changes
   password visibility, read-only or keyboard type and is refocused.
+* **Text fields, search:** touch selection (tap, long-press, drag) now shows
+  the selection handles. The search input now supports long-press and drag
+  selection.
 * **Lists:** `M3EList.sliver` no longer throws in a `CustomScrollView`.
 
 ## 1.1.4

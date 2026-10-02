@@ -458,6 +458,9 @@ extension _M3ETextFieldBuild on _M3ETextFieldState {
           selectionControls: m3eTextFieldSelectionControls(
             defaultTargetPlatform,
           ),
+          showSelectionHandles: _showSelectionHandles,
+          onSelectionChanged: _handleSelectionChanged,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
           contextMenuBuilder: widget.contextMenuBuilder,
           autofillClient: _autofillClient,
           rendererIgnoresPointer: true,

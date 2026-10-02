@@ -299,6 +299,7 @@ class _M3ETextFieldState extends State<M3ETextField>
   bool _focused = false;
   bool _hovered = false;
   bool _showFocusRing = false;
+  bool _showSelectionHandles = false;
   double? _floatTarget;
   M3ETextFieldColors? _fromColors;
   M3ETextFieldColors? _toColors;
@@ -464,6 +465,56 @@ class _M3ETextFieldState extends State<M3ETextField>
   }
 
   void _handleTap() => widget.onTap?.call();
+
+  /// Touch selections show handles; keyboard and mouse selections do not.
+  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+    if (!_selectionBuilder.shouldShowSelectionToolbar ||
+        !_selectionBuilder.shouldShowSelectionHandles) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.keyboard || !widget.enabled) {
+      return false;
+    }
+    if (widget.readOnly && _controller.selection.isCollapsed) {
+      return false;
+    }
+    if (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.stylusHandwriting) {
+      return true;
+    }
+    return _controller.text.isNotEmpty;
+  }
+
+  void _handleSelectionChanged(
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  ) {
+    final bool show = _shouldShowSelectionHandles(cause);
+    if (show != _showSelectionHandles) {
+      setState(() => _showSelectionHandles = show);
+    }
+    if (cause == SelectionChangedCause.longPress) {
+      _editableKey.currentState?.bringIntoView(selection.extent);
+    }
+    final bool desktop = switch (defaultTargetPlatform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => true,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS => false,
+    };
+    if (desktop && cause == SelectionChangedCause.drag) {
+      _editableKey.currentState?.hideToolbar();
+    }
+  }
+
+  /// Tapping the caret handle toggles the toolbar.
+  void _handleSelectionHandleTapped() {
+    if (_controller.selection.isCollapsed) {
+      _editableKey.currentState?.toggleToolbar();
+    }
+  }
 
   void _updateHover({required bool hovered}) {
     if (_hovered == hovered) {
