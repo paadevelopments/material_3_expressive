@@ -110,25 +110,21 @@ through this package). Prefer those APIs rather than a local duplicate.
 
 Summary of updates since 1.1.4 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Search** — **56** pill bar on **surface container high**, **24** from its
-  pane and **12** once focused (spring), **360–720** wide. Optional avatar
-  (**30** in a **48** target) and a clear action. The focus ring is
-  **secondary**, **3** thick. The view is contained (default) or divided,
-  full-screen below **600**, otherwise docked with a scrim. It springs out of
-  the bar, supports predictive back, moves through results with the arrow
-  keys, and announces when results change. `M3ESliverSearchBar` scrolls away
-  and comes back when you scroll toward the top.
-- **Text fields** — filled and outlined fields are **56** tall, with a **4**
-  corner. The label springs between the middle and the top, and the outlined
-  label sits in a notch. Focus is **primary**: a **2** line on filled, a **3**
-  outline on outlined. Errors are **error** and show an error icon. Adds
-  prefix and suffix text, a placeholder, a character counter, required and
-  read-only fields, clear and password buttons, and opt-in density. Text
-  fields can be multi-line (`maxLines: null` grows without a limit) or a text
-  area, and icons and prefix/suffix text can align to the first line, center
-  or bottom. The focus ring is **secondary**, **3** thick. Tab skips disabled
-  fields.
-
+- **Search** — spec pill bar, contained or divided view (full-screen below
+  **600**, docked above) and `M3ESliverSearchBar`.
+- **Text fields** — spec filled and outlined fields with prefix/suffix,
+  counter, clear and password buttons, density and multi-line alignment.
+- **Dialogs** — spec basic and full-screen dialogs, spring motion, focus trap,
+  `M3EDialogController` and `M3EDialog.showAdaptive`.
+- **Bottom sheets** — spec sheets with preset heights, `.standard`,
+  full-screen expansion, `M3EBottomSheetController` and `.showAdaptive`.
+- **Side sheets** — spec modal, standard and detached sheets,
+  `M3ESideSheetLayout` and `M3ESideSheetController`.
+- **Buttons** — `M3EButtonDecorationScope` and live state layers.
+- **Lists** — expanded-row fill, single Tab stop with arrow keys, and a
+  working `M3EList.sliver`.
+- **Breaking** — `M3ESideSheetTheme` and `M3ETextFieldTheme` were rebuilt
+  (see the changelog for migration).
 
 ## Installation
 
