@@ -275,6 +275,7 @@ $controllerArg  titleText: ${playDartString(_title)},
   Widget _controllerToolbar(M3EAppBarController controller) {
     return M3EToolbar.floating(
       alignment: Alignment.bottomCenter,
+      safeArea: true,
       activeIndex: _manual,
       onActiveIndexChanged: (int index) {
         setState(() => _manual = index);
