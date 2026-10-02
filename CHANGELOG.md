@@ -239,6 +239,16 @@
   `backgroundDecoration()`, `borderDecoration()` and `decoration()`. Colors are
   now set per state with `colors: M3ETextFieldColorTheme(...)`, or resolved with
   `resolveColors()`.
+* **Lists:** the expandable trailing icon sits in a **32 x 40** narrow pill with
+  no fill at rest and **surface container** when expanded
+  (`expandedIconBackgroundHeight` sets the height). An expanded row and its
+  sublist now fill with **surface container high** as they open;
+  `expandedStateColor` overrides it and `expandedStateFill: false` keeps the
+  rest fill. Both are on `M3EExpandableStyle` and `M3EListExpandableTheme`.
+* **Lists:** a sublist expansion's last row now always takes the **16** outer
+  bottom corners, like a standalone list's last row. Set
+  `roundSublistBottom: false` to round it only under the last parent row and
+  otherwise keep the **4** inner radius, as before.
 
 ### Fixed
 

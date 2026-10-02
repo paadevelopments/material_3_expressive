@@ -22,8 +22,8 @@ M3ECardPosition calculateCardPosition(int index, int total) => total == 1
 ///
 /// When [embedded] is true, items use [innerRadius] by default so the list can
 /// sit under another card row. Set [closeBottom] when the parent expandable is
-/// last/single so the nested last (or single) row uses [outerRadius] on the
-/// bottom corners.
+/// last/single, or rounds its sublist bottom, so the nested last (or single)
+/// row uses [outerRadius] on the bottom corners.
 BorderRadius calculateCardRadius({
   required M3ECardPosition position,
   required double outerRadius,

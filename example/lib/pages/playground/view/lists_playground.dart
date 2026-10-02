@@ -30,6 +30,8 @@ class _ListsPlaygroundState extends State<ListsPlayground> {
   bool _singleSelect = false;
   bool _doubleTapTrigger = false;
   bool _useSublist = true;
+  bool _expandedStateFill = true;
+  bool _roundSublistBottom = true;
   bool _showSelectedIcon = true;
   bool _baseline = false;
   bool _containerTransform = false;
@@ -102,7 +104,7 @@ M3EList(
 );''',
       _ListKind.expandable =>
         '''
-M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}
+M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: true,\n  onReorder: (int a, int b) {},' : ''}${_expandedStateFill && _roundSublistBottom ? '' : '\n  expandStyle: const M3EExpandableStyle(${_expandedStateFill ? '' : 'expandedStateFill: false'}${!_expandedStateFill && !_roundSublistBottom ? ', ' : ''}${_roundSublistBottom ? '' : 'roundSublistBottom: false'}),'}
   itemCount: 1,
   itemBuilder: (BuildContext context, int index) {
     return M3EListItem(
@@ -149,6 +151,8 @@ M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: tr
             singleSelect: _singleSelect,
             doubleTapTrigger: _doubleTapTrigger,
             useSublist: _useSublist,
+            expandedStateFill: _expandedStateFill,
+            roundSublistBottom: _roundSublistBottom,
             showSelectedIcon: _showSelectedIcon,
             baseline: _baseline,
             listStyle: _style,
@@ -284,6 +288,18 @@ M3EList(${_selection ? '\n  selection: true,' : ''}${_reorder ? '\n  reorder: tr
                 value: _useSublist,
                 onChanged: (bool v) => setState(() => _useSublist = v),
               ),
+              PlaySwitch(
+                label: 'Expanded state fill',
+                value: _expandedStateFill,
+                onChanged: (bool v) => setState(() => _expandedStateFill = v),
+              ),
+              if (_useSublist)
+                PlaySwitch(
+                  label: 'Round sublist bottom',
+                  value: _roundSublistBottom,
+                  onChanged: (bool v) =>
+                      setState(() => _roundSublistBottom = v),
+                ),
             ],
           ],
         ),
@@ -386,6 +402,8 @@ class _ListDemoHost extends StatefulWidget {
     required this.singleSelect,
     required this.doubleTapTrigger,
     required this.useSublist,
+    required this.expandedStateFill,
+    required this.roundSublistBottom,
     required this.showSelectedIcon,
     required this.baseline,
     required this.listStyle,
@@ -408,6 +426,8 @@ class _ListDemoHost extends StatefulWidget {
   final bool singleSelect;
   final bool doubleTapTrigger;
   final bool useSublist;
+  final bool expandedStateFill;
+  final bool roundSublistBottom;
   final bool showSelectedIcon;
   final bool baseline;
   final M3EListStyle listStyle;
@@ -558,6 +578,8 @@ class _ListDemoHostState extends State<_ListDemoHost> {
         supporting: widget.supporting,
         showLeading: widget.showLeading,
         useSublist: widget.useSublist,
+        expandedStateFill: widget.expandedStateFill,
+        roundSublistBottom: widget.roundSublistBottom,
         containerTransform: widget.containerTransform,
         transformController: _transformController,
         selection: widget.selection,
@@ -839,6 +861,8 @@ class _ExpandablePreview extends StatelessWidget {
     required this.supporting,
     required this.showLeading,
     required this.useSublist,
+    required this.expandedStateFill,
+    required this.roundSublistBottom,
     required this.containerTransform,
     required this.transformController,
     required this.selection,
@@ -856,6 +880,8 @@ class _ExpandablePreview extends StatelessWidget {
   final String supporting;
   final bool showLeading;
   final bool useSublist;
+  final bool expandedStateFill;
+  final bool roundSublistBottom;
   final bool containerTransform;
   final M3EExpandableListController transformController;
   final bool selection;
@@ -933,6 +959,14 @@ class _ExpandablePreview extends StatelessWidget {
       for (final String id in order) _section(context, id),
     ];
     final Widget list = M3EList(
+      expandStyle: expandedStateFill && roundSublistBottom
+          ? null
+          : M3EExpandableStyle.fromTheme(
+              M3ETheme.of(context).listTheme.expandable,
+            ).copyWith(
+              expandedStateFill: expandedStateFill,
+              roundSublistBottom: roundSublistBottom,
+            ),
       expandController: transformController,
       initiallyExpanded: initiallyExpanded,
       onExpansionChanged: onExpansionChanged,

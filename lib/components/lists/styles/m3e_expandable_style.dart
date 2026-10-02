@@ -57,16 +57,41 @@ class M3EExpandableStyle {
   /// Expand icon padding.
   final EdgeInsetsGeometry iconPadding;
 
-  /// Side length of the square behind the trailing expand icon.
+  /// Width of the pill behind the trailing expand icon.
   ///
   /// Size is stable across expand and collapse; only the fill toggles.
   /// Defaults to [M3EListExpandableTheme.defaultExpandedIconBackgroundSize].
   final double expandedIconBackgroundSize;
 
-  /// Fill for the expanded trailing-icon chrome.
+  /// Height of the pill behind the trailing expand icon.
   ///
-  /// When null, resolves to [M3EColorScheme.surfaceContainerLowest].
+  /// Defaults to [M3EListExpandableTheme.defaultExpandedIconBackgroundHeight].
+  final double expandedIconBackgroundHeight;
+
+  /// Fill for the expanded trailing-icon chrome. The chrome has no fill at
+  /// rest.
+  ///
+  /// When null, resolves to [M3EColorScheme.surfaceContainer].
   final Color? expandedIconBackground;
+
+  // ── Expanded state ──
+
+  /// Whether an expanded row and its sublist switch to [expandedStateColor].
+  ///
+  /// When false, they keep the rest fill ([color]).
+  final bool expandedStateFill;
+
+  /// Fill for an expanded row and its sublist when [expandedStateFill] is on.
+  ///
+  /// When null, resolves to [M3EColorScheme.surfaceContainerHigh].
+  final Color? expandedStateColor;
+
+  /// Whether the last row of a sublist expansion always takes the outer
+  /// bottom corners, like the last row of a standalone list.
+  ///
+  /// When false, it does so only when its parent row is the last row, and
+  /// otherwise keeps the inner radius to sit flush with the main list.
+  final bool roundSublistBottom;
 
   /// Icon rotation angle in clockwise radians.
   final double iconRotationAngle;
@@ -147,7 +172,12 @@ class M3EExpandableStyle {
     this.iconPadding = M3EListExpandableTheme.defaultIconPadding,
     this.expandedIconBackgroundSize =
         M3EListExpandableTheme.defaultExpandedIconBackgroundSize,
+    this.expandedIconBackgroundHeight =
+        M3EListExpandableTheme.defaultExpandedIconBackgroundHeight,
     this.expandedIconBackground,
+    this.expandedStateFill = true,
+    this.expandedStateColor,
+    this.roundSublistBottom = true,
     this.iconRotationAngle = M3EListExpandableTheme.defaultIconRotationAngle,
     this.expandIcon = const Icon(M3EIcons.expand_more_rounded),
     this.collapseIcon = const Icon(M3EIcons.expand_more_rounded),
@@ -179,7 +209,11 @@ class M3EExpandableStyle {
       titleSubtitleGap: theme.titleSubtitleGap,
       iconPadding: theme.iconPadding,
       expandedIconBackgroundSize: theme.expandedIconBackgroundSize,
+      expandedIconBackgroundHeight: theme.expandedIconBackgroundHeight,
       expandedIconBackground: theme.expandedIconBackground,
+      expandedStateFill: theme.expandedStateFill,
+      expandedStateColor: theme.expandedStateColor,
+      roundSublistBottom: theme.roundSublistBottom,
       iconRotationAngle: theme.iconRotationAngle,
       expandTooltip: theme.expandTooltip,
       collapseTooltip: theme.collapseTooltip,
@@ -203,7 +237,11 @@ class M3EExpandableStyle {
     EdgeInsetsGeometry? margin,
     EdgeInsetsGeometry? iconPadding,
     double? expandedIconBackgroundSize,
+    double? expandedIconBackgroundHeight,
     Color? expandedIconBackground,
+    bool? expandedStateFill,
+    Color? expandedStateColor,
+    bool? roundSublistBottom,
     double? iconRotationAngle,
     Widget? expandIcon,
     Widget? collapseIcon,
@@ -240,8 +278,13 @@ class M3EExpandableStyle {
       iconPadding: iconPadding ?? this.iconPadding,
       expandedIconBackgroundSize:
           expandedIconBackgroundSize ?? this.expandedIconBackgroundSize,
+      expandedIconBackgroundHeight:
+          expandedIconBackgroundHeight ?? this.expandedIconBackgroundHeight,
       expandedIconBackground:
           expandedIconBackground ?? this.expandedIconBackground,
+      expandedStateFill: expandedStateFill ?? this.expandedStateFill,
+      expandedStateColor: expandedStateColor ?? this.expandedStateColor,
+      roundSublistBottom: roundSublistBottom ?? this.roundSublistBottom,
       iconRotationAngle: iconRotationAngle ?? this.iconRotationAngle,
       expandIcon: expandIcon ?? this.expandIcon,
       collapseIcon: collapseIcon ?? this.collapseIcon,
@@ -282,7 +325,11 @@ class M3EExpandableStyle {
           margin == other.margin &&
           iconPadding == other.iconPadding &&
           expandedIconBackgroundSize == other.expandedIconBackgroundSize &&
+          expandedIconBackgroundHeight == other.expandedIconBackgroundHeight &&
           expandedIconBackground == other.expandedIconBackground &&
+          expandedStateFill == other.expandedStateFill &&
+          expandedStateColor == other.expandedStateColor &&
+          roundSublistBottom == other.roundSublistBottom &&
           iconRotationAngle == other.iconRotationAngle &&
           expandIcon == other.expandIcon &&
           collapseIcon == other.collapseIcon &&
@@ -319,7 +366,11 @@ class M3EExpandableStyle {
     margin,
     iconPadding,
     expandedIconBackgroundSize,
+    expandedIconBackgroundHeight,
     expandedIconBackground,
+    expandedStateFill,
+    expandedStateColor,
+    roundSublistBottom,
     iconRotationAngle,
     expandIcon,
     collapseIcon,

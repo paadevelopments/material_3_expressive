@@ -1074,7 +1074,10 @@ M3EListItem(
 One list. List-level fields set the variant, selection, and reorder. Each
 `M3EListItem` can opt into `swipe`, `expanded`, and `transform`. A sub-list
 expansion is its own nested `M3EList`, which inherits the parent corner join,
-fill, and variant. Use `.scrollable` for a lazy list and `.sliver` inside a
+fill, and variant. An expanded row and its sub-list switch to **surface
+container high** (`expandedStateColor`, or `expandedStateFill: false` to opt
+out on `M3EExpandableStyle`), and the sub-list's last row takes the outer
+bottom corners (`roundSublistBottom: false` keeps it flush). Use `.scrollable` for a lazy list and `.sliver` inside a
 `CustomScrollView` (slivers keep selection and do not reorder). Resting
 corners (`M3EListStyle.segmented`, the default, vs `.standard`) are set on
 `M3EListTheme`, like other component styling.

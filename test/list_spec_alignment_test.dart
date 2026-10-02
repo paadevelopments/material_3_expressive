@@ -94,7 +94,7 @@ Future<void> _expandableHeaderRoundsOnHoverAndKeepsOneTrailingIcon(
         )
         .first,
   );
-  expect(pill.size, const Size(32, 32));
+  expect(pill.size, const Size(32, 40));
   expect(_radius(tester, 'Row 1').topLeft.x, 4);
 
   final TestGesture hover = await tester.createGesture(
@@ -302,7 +302,8 @@ Future<void> _expandedSubListJoinsTheParentCornersAndFill(
     tester,
     M3EList(
       color: fill,
-      expandStyle: const M3EExpandableStyle(),
+      // Keep the rest fill when expanded so the sublist inherits [fill].
+      expandStyle: const M3EExpandableStyle(expandedStateFill: false),
       initiallyExpanded: const <int>{0},
       itemCount: 1,
       itemBuilder: (BuildContext context, int index) {
