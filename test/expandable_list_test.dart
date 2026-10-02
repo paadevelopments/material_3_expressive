@@ -190,7 +190,7 @@ void registerExpandableListSingleExpandTests() {
 }
 
 void registerExpandableSublistTabTraversalTests() {
-  testWidgets('expanded sublist participates in Tab traversal after header', (
+  testWidgets('expanded sublist rows are reached by arrows, not Tab', (
     WidgetTester tester,
   ) async {
     final taps = <String>[];
@@ -199,23 +199,27 @@ void registerExpandableSublistTabTraversalTests() {
     expect(find.text('Nested 0'), findsOneWidget);
     expect(find.text('Nested 1'), findsOneWidget);
 
-    // Header, then nested rows (dropdown-style reading order).
+    // The list is one Tab stop: Tab lands on the header and never on a
+    // nested row.
     expect(primaryFocus?.nextFocus(), isTrue);
     await tester.pumpAndSettle();
     expect(_focusInNestedList(), isFalse);
+    final FocusNode? header = primaryFocus;
 
-    expect(primaryFocus?.nextFocus(), isTrue);
+    // Nothing else on screen takes focus, so Tab has nowhere to go.
+    primaryFocus?.nextFocus();
+    await tester.pumpAndSettle();
+    expect(_focusInNestedList(), isFalse);
+
+    // Back on the header, arrows step into the sublist.
+    header!.requestFocus();
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(_focusInNestedList(), isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(taps, <String>['nested-0']);
-
-    expect(primaryFocus?.nextFocus(), isTrue);
-    await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(taps, <String>['nested-0', 'nested-1']);
   });
 
   testWidgets('arrow keys walk an expanded sublist between headers', (

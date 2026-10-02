@@ -463,7 +463,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
             onTap: selectionTap,
             onDoubleTap: onDoubleTap,
           );
-    final VoidCallback? onPressed = _foregroundPress(boundPress);
+    final VoidCallback? onPressed = _foregroundPress(slotPos, boundPress);
     final suppressHover = _suppressCardHover;
     final BorderRadius radius =
         m3eSelectionRadius(context, slotPos, outerRadius: style.outerRadius) ??
@@ -556,8 +556,21 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
     return () => features.onToggleSelection(slotPos);
   }
 
-  VoidCallback? _foregroundPress(VoidCallback? boundPress) {
-    if (!isActionPreviewOpen && boundPress == null) {
+  VoidCallback? _foregroundPress(int slotPos, VoidCallback? boundPress) {
+    if (_collapsingCount > 0 && !isActionPreviewOpen) {
+      return null;
+    }
+    // Without a tap of its own the row reveals its actions or does nothing;
+    // either way it stays focusable for the keyboard.
+    final VoidCallback press = boundPress ?? _revealFor(slotPos) ?? () {};
+    return () => isActionPreviewOpen ? closeActionPreview() : press();
+  }
+
+  /// Toggles the action preview, or null when the row has no actions.
+  VoidCallback? _revealFor(int slotPos) {
+    final bool leading = actionsFor(slotPos, swipingRight: true).isNotEmpty;
+    final bool trailing = actionsFor(slotPos, swipingRight: false).isNotEmpty;
+    if (!leading && !trailing) {
       return null;
     }
     return () {
@@ -565,26 +578,12 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
         closeActionPreview();
         return;
       }
-      boundPress?.call();
+      _revealIndex(slotPos, leading: leading && !trailing);
     };
   }
 
   Widget _swipeOverflow(int slotPos, Widget child) {
-    final bool leading = actionsFor(slotPos, swipingRight: true).isNotEmpty;
-    final bool trailing = actionsFor(slotPos, swipingRight: false).isNotEmpty;
-    if (!leading && !trailing) {
-      return child;
-    }
-    return M3EListSwipeOverflow(
-      onReveal: () {
-        if (isActionPreviewOpen) {
-          closeActionPreview();
-          return;
-        }
-        _revealIndex(slotPos, leading: leading && !trailing);
-      },
-      child: child,
-    );
+    return M3EListSwipeOverflow(onReveal: _revealFor(slotPos), child: child);
   }
 
   Widget _buildForegroundM3ECard(

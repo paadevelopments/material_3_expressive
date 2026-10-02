@@ -46,9 +46,17 @@ class M3EExpandableSublist extends StatelessWidget {
     required this.child,
     required this.progress,
     required this.style,
+    this.expanded,
     this.topGap,
     super.key,
   });
+
+  /// Whether the parent is expanded (the animation's target).
+  ///
+  /// When set, rows take focus as soon as the parent starts expanding and
+  /// drop it as soon as it starts collapsing, so keyboard arrows reach them
+  /// while the spring settles. When null, rows take focus only once fully
+  /// revealed.
 
   /// Nested list widget (typically a card-backed list).
   final Widget child;
@@ -58,6 +66,9 @@ class M3EExpandableSublist extends StatelessWidget {
 
   /// Expandable decoration (default gap when [topGap] is null).
   final M3EExpandableStyle style;
+
+  /// Target expansion state; see the constructor.
+  final bool? expanded;
 
   /// Override for the gap above the nested list; defaults to
   /// [M3EExpandableStyle.gap].
@@ -70,8 +81,9 @@ class M3EExpandableSublist extends StatelessWidget {
     final double t = progress.clamp(0.0, 1.2);
     final double heightFactor = progress <= 0 ? 0.0 : t.clamp(0.0, 1.0);
     final double gap = topGap ?? style.gap;
-    // Match dropdown panel items: only fully revealed rows are Tab stops.
-    final bool excludeFocus = heightFactor < 1.0;
+    final bool excludeFocus = expanded != null
+        ? !expanded!
+        : heightFactor < 1.0;
     final bool collapsed = heightFactor <= 0;
 
     return ExcludeFocus(

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -40,8 +43,11 @@ class M3EListKeyboardRegistration {
 
 /// Arrow-key list navigation.
 ///
-/// Tab enters on the selected row, or the first row. Arrows move and wrap.
-/// Space and Enter activate the focused target.
+/// The list, including nested sublists, is a single Tab stop: Tab enters on
+/// the last-focused row, else the selected row, else the first row, and Tab
+/// or Shift+Tab from any row leaves the list. Arrows move between rows, row
+/// actions, and sublist rows, and wrap. Space and Enter activate the focused
+/// target.
 class M3EListKeyboardGroup extends StatefulWidget {
   /// Creates a list keyboard group.
   const M3EListKeyboardGroup({
@@ -108,7 +114,11 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
       <M3EListKeyboardRegistration>[];
   final Map<int, _M3EListKeyboardGroupState> _nests =
       <int, _M3EListKeyboardGroupState>{};
-  FocusNode? _pinned;
+
+  /// Last-focused member anywhere in this tree. Only used on the root group.
+  FocusNode? _roving;
+  bool _syncQueued = false;
+  bool _syncSoonQueued = false;
   _M3EListKeyboardGroupState? _parent;
   int? _nestIndex;
   late final M3EListKeyboardBinding _binding = M3EListKeyboardBinding._(this);
@@ -173,24 +183,83 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
       ..addListener(_onMemberFocus);
     final registration = M3EListKeyboardRegistration._(this, node, index, slot);
     _members.add(registration);
+    _root._queueTabStopSync();
     return registration;
   }
 
   void _remove(M3EListKeyboardRegistration registration) {
     registration.node.removeListener(_onMemberFocus);
     _members.remove(registration);
-    if (_pinned == registration.node) {
-      _pinned = null;
+    final _M3EListKeyboardGroupState root = _root;
+    if (root._roving == registration.node) {
+      root._roving = null;
     }
     registration.node.dispose();
+    root._queueTabStopSync();
   }
 
   void _onMemberFocus() {
-    final bool inside = _members.any(
-      (M3EListKeyboardRegistration member) => member.node.hasFocus,
-    );
-    if (!inside && _pinned != null) {
-      setState(() => _pinned = null);
+    for (final M3EListKeyboardRegistration member in _members) {
+      if (member.node.hasPrimaryFocus) {
+        _root._roving = member.node;
+        break;
+      }
+    }
+    // Runs inside FocusManager's change pass; flipping skipTraversal there
+    // would mutate the set it is iterating.
+    _root._queueTabStopSyncSoon();
+  }
+
+  /// Outermost group of this list tree.
+  _M3EListKeyboardGroupState get _root {
+    var group = this;
+    while (group._parent != null) {
+      group = group._parent!;
+    }
+    return group;
+  }
+
+  /// This group and every nested group below it.
+  Iterable<_M3EListKeyboardGroupState> _tree() sync* {
+    yield this;
+    for (final _M3EListKeyboardGroupState nest in _nests.values) {
+      yield* nest._tree();
+    }
+  }
+
+  void _queueTabStopSyncSoon() {
+    if (_syncSoonQueued) {
+      return;
+    }
+    _syncSoonQueued = true;
+    scheduleMicrotask(() {
+      _syncSoonQueued = false;
+      if (mounted) {
+        _syncTabStops();
+      }
+    });
+  }
+
+  void _queueTabStopSync() {
+    if (_syncQueued) {
+      return;
+    }
+    _syncQueued = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _syncQueued = false;
+      if (mounted) {
+        _syncTabStops();
+      }
+    });
+  }
+
+  /// Leaves only the entry node in Tab order across the whole tree.
+  void _syncTabStops() {
+    final FocusNode? entry = _entryNode();
+    for (final _M3EListKeyboardGroupState group in _tree()) {
+      for (final M3EListKeyboardRegistration member in group._members) {
+        member.node.skipTraversal = member.node != entry;
+      }
     }
   }
 
@@ -212,29 +281,13 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
     return false;
   }
 
-  bool _isTabStop(FocusNode node) {
-    final List<M3EListKeyboardRegistration> rows = _ordered()
-        .where((M3EListKeyboardRegistration member) => member.slot == 0)
-        .toList();
-    if (_parent != null) {
-      return rows.any(
-        (M3EListKeyboardRegistration member) => member.node == node,
-      );
-    }
-    if (rows.isEmpty) {
-      return false;
-    }
-    if (rows.first.node == node || rows.last.node == node) {
-      return true;
-    }
-    final FocusNode? entry = _entryNode();
-    return entry != null && entry == node;
-  }
+  bool _isTabStop(FocusNode node) => _root._entryNode() == node;
 
   List<M3EListKeyboardRegistration> _ordered() {
     final List<M3EListKeyboardRegistration> rows =
         _members.where((M3EListKeyboardRegistration member) {
-          return member.enabled;
+          // Skip registrations whose node is not mounted in a Focus widget.
+          return member.enabled && member.node.context != null;
         }).toList()..sort((
           M3EListKeyboardRegistration a,
           M3EListKeyboardRegistration b,
@@ -258,31 +311,28 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
     return sorted.first;
   }
 
+  /// The tree's single Tab stop: the last-focused member while it can still
+  /// take focus, else the selected row, else the first row. Root group only.
   FocusNode? _entryNode() {
+    final FocusNode? roving = _roving;
+    if (roving != null &&
+        roving.canRequestFocus &&
+        _tree().any(
+          (_M3EListKeyboardGroupState group) => group._ordered().any(
+            (M3EListKeyboardRegistration member) => member.node == roving,
+          ),
+        )) {
+      return roving;
+    }
     final List<M3EListKeyboardRegistration> ordered = _ordered();
     if (ordered.isEmpty) {
       return null;
-    }
-    final FocusNode? pinned = _pinnedEntry(ordered);
-    if (pinned != null) {
-      return pinned;
     }
     final FocusNode? selected = _selectedEntry(ordered);
     if (selected != null) {
       return selected;
     }
     return ordered.first.node;
-  }
-
-  FocusNode? _pinnedEntry(List<M3EListKeyboardRegistration> ordered) {
-    if (_pinned == null) {
-      return null;
-    }
-    final bool stillPresent = ordered.any(
-      (M3EListKeyboardRegistration member) =>
-          member.node == _pinned && member.slot == 0,
-    );
-    return stillPresent ? _pinned : null;
   }
 
   FocusNode? _selectedEntry(List<M3EListKeyboardRegistration> ordered) {
@@ -303,7 +353,9 @@ class _M3EListKeyboardGroupState extends State<M3EListKeyboardGroup> {
   void _movePrevious() => _move(-1);
 
   void _focusMember(M3EListKeyboardRegistration member) {
-    setState(() => _pinned = member.node);
+    _root
+      .._roving = member.node
+      .._syncTabStops();
     member.node.requestFocus();
   }
 

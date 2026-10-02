@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../foundations/foundations.dart';
 import '../../selection/components/m3e_selection_flip.dart';
 import '../components/m3e_list_feature_scope.dart';
+import '../components/m3e_list_key_target.dart';
+import '../components/m3e_list_keyboard.dart';
 import '../components/m3e_list_trailing_override.dart';
 import '../enums/m3e_list_selection_enums.dart';
 
@@ -44,12 +46,21 @@ Widget? m3eResolveListLeading({
       ? () => scope.onToggleSelection(index)
       : null;
 
-  return M3ESelectionFlip(
+  final Widget flip = M3ESelectionFlip(
     selected: selected,
     selectedChild: selectedIcon,
     duration: scope.selectionState.iconFlipDuration,
     onTap: onIconTap,
     child: child,
+  );
+  if (onIconTap == null || M3EListKeyboardGroup.maybeOf(context) == null) {
+    return flip;
+  }
+  // Arrow-reachable row action instead of its own Tab stop.
+  return M3EListKeyTarget(
+    index: index,
+    onActivate: onIconTap,
+    child: ExcludeFocus(child: flip),
   );
 }
 

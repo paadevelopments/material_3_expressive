@@ -96,8 +96,10 @@ extension _M3EExpandableItemBody on _M3EExpandableItemState {
     required double translationY,
     required bool isEntirelyTappable,
   }) {
+    // Follow the target state, not the spring: the spring settles toward 1
+    // slowly, which would keep the body out of focus traversal meanwhile.
     return ExcludeFocus(
-      excluding: progress < 1.0,
+      excluding: !widget.isExpanded,
       child: SizedBox(
         height: bodyHeight,
         child: SingleChildScrollView(
@@ -306,6 +308,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
           builder: (BuildContext context, Widget? _) {
             return M3EExpandableSublist(
               progress: _expandCtrl.value,
+              expanded: widget.isExpanded,
               style: d,
               topGap: widget.expanded!.topGap,
               child: M3EListReorderExclude(
@@ -605,7 +608,7 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
     }
 
     if (d.tapIconToToggle) {
-      return _buildInteractionWrapper(
+      final Widget button = _buildInteractionWrapper(
         d,
         onTap: onToggle,
         isHeader: true,
@@ -614,6 +617,16 @@ extension _M3EExpandableItemHeader on _M3EExpandableItemState {
         isExpanded: isExpanded,
         tooltip: tooltip,
         child: iconWidget,
+      );
+      if (M3EListKeyboardGroup.maybeOf(context) == null) {
+        return button;
+      }
+      // Arrow-reachable row action instead of its own Tab stop.
+      return M3EListKeyTarget(
+        index: widget.index,
+        slot: 2,
+        onActivate: onToggle,
+        child: ExcludeFocus(child: button),
       );
     }
     return ExcludeSemantics(child: iconWidget);

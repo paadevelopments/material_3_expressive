@@ -1119,6 +1119,8 @@ M3EList.scrollable(
 );
 ```
 
+Keyboard: Tab enters on the last-focused row and leaves from any row. Arrows move through rows, row actions, and sub-list rows, and wrap. Space or Enter activates.
+
 #### M3ESelection
 
 Multi-select host with an optional app bar and any list as the body. Back

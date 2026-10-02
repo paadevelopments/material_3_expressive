@@ -85,6 +85,10 @@ extension _M3EExpandableItemInteraction on _M3EExpandableItemState {
         onTap();
       },
       focusNode: focusNode,
+      // Registered list toggles share the list's single Tab stop.
+      skipTraversal: focusNode != null && focusNode == _toggleRegistration?.node
+          ? !_toggleRegistration!.tabStop
+          : null,
       mouseCursor: SystemMouseCursors.click,
       materialInk: true,
       onStateChanged: isHeader

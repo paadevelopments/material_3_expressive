@@ -249,6 +249,17 @@
   bottom corners, like a standalone list's last row. Set
   `roundSublistBottom: false` to round it only under the last parent row and
   otherwise keep the **4** inner radius, as before.
+* **Lists:** keyboard focus treats the whole list, including sublists, as one
+  Tab stop. Tab enters on the last-focused row (else the selected row, else the
+  first) and Tab or Shift+Tab leaves from any row. Arrows move through rows,
+  sub-rows, and row actions. Expandable headers, the leading selection icon,
+  and the tap-to-toggle expand icon are no longer separate Tab stops; the
+  icons are arrow-reachable row actions. Widgets inside an open expanded body
+  stay on Tab. A sublist (or expanded body) joins the arrow order as soon as
+  its row starts expanding, not only after the spring settles.
+* **Lists:** a dismissible row without `onTap` now has a default tap: it
+  reveals the row's swipe actions, or does nothing when there are none. The
+  row is focusable either way, so it shows the keyboard focus ring.
 
 ### Fixed
 

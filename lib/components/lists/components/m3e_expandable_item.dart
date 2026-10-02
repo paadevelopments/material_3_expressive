@@ -24,6 +24,8 @@ import 'm3e_list_drag_proxy_scope.dart';
 import 'm3e_list_feature_scope.dart';
 import 'm3e_list_focus_ring.dart';
 import 'm3e_list_item_scope.dart';
+import 'm3e_list_key_target.dart';
+import 'm3e_list_keyboard.dart';
 import 'm3e_list_reorder_exclude.dart';
 import 'm3e_list_row_surface.dart';
 import 'm3e_list_trailing_override.dart';
@@ -138,8 +140,16 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   bool _isPressed = false;
   bool _hovered = false;
 
+  /// Fallback toggle node when the item is not inside a list keyboard group.
+  final FocusNode _ownToggleFocusNode = FocusNode();
+
+  /// Toggle node registered with the list keyboard group, so a header that
+  /// owns its own tap target joins the list's arrow order and single Tab stop.
+  M3EListKeyboardRegistration? _toggleRegistration;
+
   /// Node of the item's single toggle target (whole card or header row).
-  final FocusNode _toggleFocusNode = FocusNode();
+  FocusNode get _toggleFocusNode =>
+      _toggleRegistration?.node ?? _ownToggleFocusNode;
   bool _focused = false;
 
   double? _collapsedHeight;
@@ -154,7 +164,7 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
 
     _expandCtrl = SingleMotionController(motion: motion, vsync: this)
       ..value = widget.isExpanded ? 1.0 : 0.0;
-    _toggleFocusNode.addListener(_handleToggleFocusChanged);
+    _ownToggleFocusNode.addListener(_handleToggleFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _reportAnchor());
     FocusManager.instance.addHighlightModeListener(_handleHighlightModeChanged);
     M3EFocusInteraction.instance.addListener(_handleToggleFocusChanged);
@@ -172,8 +182,34 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncToggleRegistration();
+  }
+
+  void _syncToggleRegistration() {
+    final M3EListKeyboardBinding? binding =
+        M3EListDragProxyScope.maybeOf(context) != null
+        ? null
+        : M3EListKeyboardGroup.maybeOf(context);
+    final M3EListKeyboardRegistration? current = _toggleRegistration;
+    if (current != null && (binding == null || current.index != widget.index)) {
+      current.node.removeListener(_handleToggleFocusChanged);
+      current.dispose();
+      _toggleRegistration = null;
+    }
+    if (_toggleRegistration == null && binding != null) {
+      _toggleRegistration = binding.register(index: widget.index)
+        ..node.addListener(_handleToggleFocusChanged);
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant M3EExpandableItem oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != widget.index) {
+      _syncToggleRegistration();
+    }
 
     _reportAnchor();
     if (oldWidget.isExpanded != widget.isExpanded) {
@@ -224,9 +260,12 @@ class _M3EExpandableItemState extends State<M3EExpandableItem>
     FocusManager.instance.removeHighlightModeListener(
       _handleHighlightModeChanged,
     );
-    _toggleFocusNode
+    _ownToggleFocusNode
       ..removeListener(_handleToggleFocusChanged)
       ..dispose();
+    _toggleRegistration?.node.removeListener(_handleToggleFocusChanged);
+    _toggleRegistration?.dispose();
+    _toggleRegistration = null;
     _expandCtrl.dispose();
     super.dispose();
   }
