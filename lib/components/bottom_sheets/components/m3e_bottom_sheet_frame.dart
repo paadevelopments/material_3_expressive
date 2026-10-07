@@ -416,7 +416,18 @@ class _M3EBottomSheetFrameState extends State<M3EBottomSheetFrame>
       return;
     }
     if (!_dragging && _value != M3EBottomSheetValue.hidden) {
-      _settleTo(next.resolve(_value), spring: _theme.layoutSpring);
+      // While the route is exiting, the sheet travels down. Content or system
+      // bar changes can still re-resolve the detents, and settling the new
+      // height here would pull the sheet back up mid-exit (a visible bounce).
+      final AnimationStatus? routeStatus = ModalRoute.of(context)
+          ?.animation
+          ?.status;
+      final bool exiting =
+          routeStatus == AnimationStatus.reverse ||
+          routeStatus == AnimationStatus.dismissed;
+      if (!exiting) {
+        _settleTo(next.resolve(_value), spring: _theme.layoutSpring);
+      }
     }
   }
 

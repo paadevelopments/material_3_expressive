@@ -34,6 +34,10 @@ void main() {
   testWidgets('showAdaptive swaps to a side sheet at 840dp', _adaptive);
   testWidgets('inner list grows the sheet before scrolling', _scrollHandOff);
   testWidgets('predictive back shrinks the sheet', _predictiveBack);
+  testWidgets(
+    'content resize during exit does not bounce the sheet up',
+    _exitResizeNoBounce,
+  );
 }
 
 Future<BuildContext> _pump(
@@ -430,6 +434,51 @@ Future<void> _predictiveBack(WidgetTester tester) async {
   await send('commitBackGesture');
   await tester.pumpAndSettle();
   expect(closed, isTrue);
+}
+
+Future<void> _exitResizeNoBounce(WidgetTester tester) async {
+  final BuildContext context = await _pump(tester, const Size(400, 800));
+  final height = ValueNotifier<double>(100);
+  addTearDown(height.dispose);
+  M3EBottomSheet.show<void>(
+    context,
+    builder: (_) => ValueListenableBuilder<double>(
+      valueListenable: height,
+      builder: (BuildContext context, double value, Widget? child) =>
+          SizedBox(height: value, child: child),
+      child: const Text('Body'),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  // Start the exit through the normal pop path (same as the back button).
+  Navigator.of(tester.element(_surface)).pop();
+  await tester.pump();
+
+  // Resize the content while the sheet is on its way out. Re-resolving the
+  // detents must not re-settle the sheet height mid-exit.
+  height.value = 700;
+
+  // Sample the exit trajectory: the sheet travels down, so its top edge must
+  // never move back up.
+  final tops = <double>[tester.getRect(_surface).top];
+  for (var i = 0; i < 24; i++) {
+    await tester.pump(const Duration(milliseconds: 16));
+    if (_surface.evaluate().isEmpty) {
+      break;
+    }
+    tops.add(tester.getRect(_surface).top);
+  }
+  for (var i = 1; i < tops.length; i++) {
+    expect(
+      tops[i],
+      greaterThanOrEqualTo(tops[i - 1] - 0.5),
+      reason:
+          'sheet must keep exiting, not bounce up '
+          '(frame $i: ${tops[i - 1]} -> ${tops[i]})',
+    );
+  }
+  await tester.pumpAndSettle();
 }
 
 Future<void> _fullWidth(WidgetTester tester) async {
