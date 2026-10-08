@@ -17,8 +17,7 @@ MIT License — additional copyright holders
 
 Copyright (c) 2025 Emily Moonstone
   Upstream: https://github.com/EmilyMoonstone/material_3_expressive
-  Used for: icon_button_m3e, navigation_bar_m3e, navigation_rail_m3e,
-            progress_indicator_m3e, loading_indicator_m3e (Dart wrapper)
+  Used for: progress_indicator_m3e, loading_indicator_m3e (Dart wrapper)
   Local paths include:
     lib/components/icon_buttons/
     lib/components/navigation_bar/
@@ -27,31 +26,11 @@ Copyright (c) 2025 Emily Moonstone
     lib/components/loading_indicator/components/m3e_expressive_loading_indicator.dart
     (wrapper only; see Apache 2.0 notice below for Android-derived portions)
 
-Copyright (c) 2026 Mudit Purohit
-  Upstream: https://github.com/Mudit200408/m3e_buttons
-  Used for: buttons, split buttons, toggle button group
-  Local paths include:
-    lib/components/buttons/
-    lib/components/split_buttons/
-    lib/components/toggle_button_group/
-
 Copyright (c) 2024 Mudit Purohit
   Upstream: https://github.com/Mudit200408/m3e_dropdown_menu
   Used for: dropdown menus
   Local paths include:
     lib/components/dropdown_menus/
-
-Copyright (c) 2026 Mudit Purohit
-  Upstream: https://github.com/Mudit200408/m3e_expandable
-  Used for: expandable list item
-  Local paths include:
-    lib/components/lists/components/m3e_expandable_item.dart
-
-Copyright (c) 2025 Álvaro N
-  Upstream: https://github.com/alvaronp/expressive-refresh
-  Used for: refresh indicator
-  Local paths include:
-    lib/components/refresh_indicator/m3e_refresh_indicator.dart
 
 Copyright (c) 2024 Paa <paa.code.me@gmail.com>
   Upstream: https://github.com/paadevelopments/m3_carousel
