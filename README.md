@@ -106,25 +106,15 @@ imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.5
+## What's new in 1.1.6
 
-Summary of updates since 1.1.4 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.5 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Search** — spec pill bar, contained or divided view (full-screen below
-  **600**, docked above) and `M3ESliverSearchBar`.
-- **Text fields** — spec filled and outlined fields with prefix/suffix,
-  counter, clear and password buttons, density and multi-line alignment.
-- **Dialogs** — spec basic and full-screen dialogs, spring motion, focus trap,
-  `M3EDialogController` and `M3EDialog.showAdaptive`.
-- **Bottom sheets** — spec sheets with preset heights, `.standard`,
-  full-screen expansion, `M3EBottomSheetController` and `.showAdaptive`.
-- **Side sheets** — spec modal, standard and detached sheets,
-  `M3ESideSheetLayout` and `M3ESideSheetController`.
-- **Buttons** — `M3EButtonDecorationScope` and live state layers.
-- **Lists** — expanded-row fill, single Tab stop with arrow keys, and a
-  working `M3EList.sliver`.
-- **Breaking** — `M3ESideSheetTheme` and `M3ETextFieldTheme` were rebuilt
-  (see the changelog for migration).
+- **Carousel** — `M3ECarouselScrim.gradient` for a scrim that fades in under
+  the text.
+- **Sliders** — inner stop dots now match the end stops in size and color.
+- **Bottom sheets** — a closing sheet no longer bounces back up.
+- **Dependencies** — `material_ui` raised to `^1.6.0`.
 
 ## Installation
 
