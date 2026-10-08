@@ -6,6 +6,10 @@
 * **Carousel:** added `M3ECarouselScrim.gradient`. By default it fades from
   transparent at the top to **60%** `colorScheme.scrim` at the bottom, under
   the text; pass `gradient` for a custom one. `opacity` fades the whole layer.
+* **Sliders:** inner tick marks now default to **4dp**, the same size as the
+  end stop indicators (`M3ESliderTheme.tickSize`, was **2dp**). They are also
+  drawn at full strength (`tickOpacity` **1**, was **0.38**), and inactive
+  ticks use `onSecondaryContainer` like the end stops.
 
 ### Fixed
 

@@ -46,11 +46,15 @@ abstract final class M3ESliderTokens {
 
   static const double stopIndicatorSize = 4;
 
-  /// tickSize.
-  static const double tickSize = 2;
+  /// Diameter of the inner discrete tick marks.
+  ///
+  /// Matches [stopIndicatorSize] so inner and end markers read as one set.
+  static const double tickSize = stopIndicatorSize;
 
   /// Opacity of discrete tick marks on the track.
-  static const double tickOpacity = 0.38;
+  ///
+  /// Full strength so inner ticks match the end stop indicators.
+  static const double tickOpacity = 1;
 
   /// stopIndicatorTrailingSpace.
   static const double stopIndicatorTrailingSpace = 4;
