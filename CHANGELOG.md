@@ -1,43 +1,34 @@
+## 1.1.6
+
+### Changed
+
+* Raise `material_ui` to `^1.6.0`.
+
+### Fixed
+
+* **Bottom sheets:** a sheet no longer bounces back up when its content or the
+  system bars change size while it is closing. Detent changes are not
+  re-settled while the route exits
+  ([#28](https://github.com/paadevelopments/material_3_expressive/pull/28),
+  thanks @StillMisty).
+
 ## 1.1.5
 
 ### Changed
 
-* **Search:** spec **56** pill bar on **surface container high**, **360–720**
-  wide, with optional `avatar` and `showClearButton`; spring focus inset and
-  **secondary** focus ring. The view is `M3ESearchViewStyle.contained`
-  (default) or `.divided`, full-screen below **600** and docked above, with a
-  morph from the bar, predictive back, arrow-key results and result
-  announcements. Added `M3ESliverSearchBar`.
-* **Text fields:** spec filled and outlined fields (**56** tall, **4**
-  corner), spring label, notched outline, state colors and focus ring. Added
-  `prefixText`, `suffixText`, `placeholder`, `isRequired`, `maxLength`
-  counter, `readOnly`, `minLines`, `supportingTextOnFocusOnly`, `density`,
-  `showClearButton`, `showPasswordToggle`, `iconAlignment` and
-  `affixAlignment` (`M3ETextFieldSlotAlignment`). `maxLines` is now `int?`
-  (`null` grows without limit).
-* **Dialogs:** spec basic dialogs with pinned headline and actions, stacked
-  actions, `leadingAction`, `subhead` and `titleMaxLines`; spring open/close,
-  focus trap, `onDismissRequest`, `position` (`M3EDialogPosition`) and
-  `M3EDialogController` with discard confirmation. `M3EFullScreenDialog` has a
-  **56** header, `bottomActions` and `contentHeadline`.
-  `M3EDialog.showAdaptive` / `M3EAdaptiveDialog` switch at **600**.
-* **Bottom sheets:** spec container, margins, drag handle and scrim; preset
-  heights (`M3EBottomSheetValue`), spring snapping, keyboard and accessibility
-  handle actions, predictive back and system bar icons.
-  Added `M3EBottomSheet.standard`, `expandToFullScreen`,
-  `M3EBottomSheetController` and `M3EBottomSheet.showAdaptive`. Defaults:
-  `handleVerticalPadding` **22** (was **16**), `dismissVelocity` **700** (was
-  **200**, now moves one height).
-* **Side sheets:** spec modal, standard and `detached` sheets (**256** wide,
-  **16** modal corners, **64** header); spring open/close, predictive back,
-  system bar icons and dialog semantics. Added `M3ESideSheetLayout`
-  (adaptive at **600**) and `M3ESideSheetController`.
-* **Buttons:** added `M3EButtonDecorationScope`. State layers now follow live
-  hover, focus and press states.
-* **Lists:** expandable rows fill **surface container high** with a **32 x
-  40** trailing pill; sublist last rows take the outer corners
-  (`roundSublistBottom`). The whole list is one Tab stop with arrow-key
-  navigation. Dismissible rows without `onTap` reveal their swipe actions.
+* **Search:** spec pill bar, contained or divided view and `M3ESliverSearchBar`.
+* **Text fields:** spec filled and outlined fields with new slots, counter,
+  clear and password buttons; `maxLines` is now `int?`.
+* **Dialogs:** spec basic and full-screen dialogs, spring motion, focus trap,
+  `M3EDialogController` and `M3EDialog.showAdaptive`.
+* **Bottom sheets:** spec sheets with preset heights, `.standard`,
+  `M3EBottomSheetController` and `.showAdaptive`; new `handleVerticalPadding`
+  and `dismissVelocity` defaults.
+* **Side sheets:** spec modal, standard and detached sheets,
+  `M3ESideSheetLayout` and `M3ESideSheetController`.
+* **Buttons:** `M3EButtonDecorationScope` and live state layers.
+* **Lists:** expandable row fill, sublist corners and single Tab stop with
+  arrow keys.
 * **Breaking — side sheets:** `M3ESideSheetTheme` was rebuilt.
   `cornerRadius` → `modalCornerRadius`; `headerPadding` → `horizontalPadding`,
   `startPaddingWithIcon`, `headerVerticalPadding`, `topElementsGap`;
@@ -57,11 +48,8 @@
 
 ### Fixed
 
-* **Text fields (web):** typing works again after a focused field changes
-  password visibility, read-only or keyboard type and is refocused.
-* **Text fields, search:** touch selection (tap, long-press, drag) now shows
-  the selection handles. The search input now supports long-press and drag
-  selection.
+* **Text fields (web):** typing works after refocusing a reconfigured field.
+* **Text fields, search:** touch selection shows the selection handles.
 * **Lists:** `M3EList.sliver` no longer throws in a `CustomScrollView`.
 
 ## 1.1.4
@@ -98,47 +86,3 @@
 * **Focus and interaction:** pointer input hides keyboard focus rings until
   the next Tab or arrow key; no hover flashes while scrolling; plain tooltips
   ignore the pointer.
-
-## 1.1.3
-
-### Changed
-
-* **Menus:** vertical and baseline menus with spec sizes and full keyboard
-  support.
-* **Toolbars:** floating `alignment` and `screenOffset`.
-* **Overlays:** `M3EOverlayHistory` closes open popups on back before the
-  route pops.
-* **Navigation:** selection pills scale in place with springs.
-* **Dividers, chips, switches, radio buttons, checkboxes, snackbars,
-  tooltips, progress indicators:** aligned to spec sizes, colors, focus rings
-  and semantics; `M3EChipGroup`, `M3ERadioGroup`, `M3ESnackbarController`,
-  `M3ETooltipController` and `M3ETooltipPlacement` added.
-* **Loading indicator:** per-instance sizes, shape and colors.
-* **Split buttons, segmented buttons, buttons, icon buttons, button
-  groups:** aligned to M3E size, color and shape tokens.
-* **FAB, extended FAB, FAB menu:** controllers, container transforms, focus
-  rings and disabled colors added.
-* Raise Flutter SDK to `>=3.47.0` and `material_ui` to `^1.4.0` (Dart SDK
-  `^3.13.0`).
-* **Breaking — badges:** `defaultOffset` is replaced by `smallOffset` /
-  `largeOffset`; default `maxCount` is **999**; `label` is preferred over
-  `count`.
-* **Breaking — loading indicator:** `elevation` is removed (widget, theme and
-  shadow).
-* **Breaking — FAB menus:** require **2–6** items; `itemHorizontalPadding`
-  and the old gaps are replaced by the new theme paddings.
-* **Breaking — extended FABs:** new `M3EExtendedFabSize` (default `small`);
-  a label is required (no icon-only).
-* **Breaking — FABs:** `M3EFabSize.medium` is now **80dp**; use
-  `M3EFabSize.regular` for the old 56dp size.
-* **Breaking — buttons:** toggle selection moves into `M3EButton`
-  (`isSelected`, `selectedIcon`, `selectedLabel`); `M3EToggleButton`,
-  `M3EToggleButtonDecoration` and `M3EToggleButtonTheme` are removed.
-* **Breaking — button groups:** module renamed `toggle_button_group` →
-  `button_group`; `toggleButtonGroupTheme` → `buttonGroupTheme`; decoration
-  uses `M3EButtonDecoration`; `M3EButtonGroupItemKind` and
-  `M3EButtonGroupAction.iconButton` are removed (use `minWidth`).
-* **Breaking — button group density:** `M3EButtonGroupDensity` is now
-  `regular` / `comfortable` / `compact` / `dense` and changes container
-  height.
-* **Breaking — icon buttons:** default `variant` is now `filled`.
