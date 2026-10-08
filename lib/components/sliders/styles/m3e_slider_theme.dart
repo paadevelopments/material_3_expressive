@@ -255,7 +255,7 @@ class M3ESliderTheme extends M3EThemeExtension<M3ESliderTheme> {
         ? M3EColorUtils.withOpacity(scheme.onPrimary, tickOpacity)
         : M3EColorUtils.withOpacity(scheme.onInverseSurface, tickOpacity);
     final Color inactiveTick = enabled
-        ? M3EColorUtils.withOpacity(scheme.onSurfaceVariant, tickOpacity)
+        ? M3EColorUtils.withOpacity(scheme.onSecondaryContainer, tickOpacity)
         : M3EColorUtils.withOpacity(scheme.onSurface, tickOpacity);
     return M3ESliderColors(
       thumb: active(scheme.primary),

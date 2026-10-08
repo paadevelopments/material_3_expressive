@@ -89,7 +89,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.5.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.6.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -106,25 +106,15 @@ imports to `package:material_ui/material_ui.dart`. Flutter **3.47.0 or newer**
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.1.5
+## What's new in 1.1.6
 
-Summary of updates since 1.1.4 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.1.5 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Search** — spec pill bar, contained or divided view (full-screen below
-  **600**, docked above) and `M3ESliverSearchBar`.
-- **Text fields** — spec filled and outlined fields with prefix/suffix,
-  counter, clear and password buttons, density and multi-line alignment.
-- **Dialogs** — spec basic and full-screen dialogs, spring motion, focus trap,
-  `M3EDialogController` and `M3EDialog.showAdaptive`.
-- **Bottom sheets** — spec sheets with preset heights, `.standard`,
-  full-screen expansion, `M3EBottomSheetController` and `.showAdaptive`.
-- **Side sheets** — spec modal, standard and detached sheets,
-  `M3ESideSheetLayout` and `M3ESideSheetController`.
-- **Buttons** — `M3EButtonDecorationScope` and live state layers.
-- **Lists** — expanded-row fill, single Tab stop with arrow keys, and a
-  working `M3EList.sliver`.
-- **Breaking** — `M3ESideSheetTheme` and `M3ETextFieldTheme` were rebuilt
-  (see the changelog for migration).
+- **Carousel** — `M3ECarouselScrim.gradient` for a scrim that fades in under
+  the text.
+- **Sliders** — inner stop dots now match the end stops in size and color.
+- **Bottom sheets** — a closing sheet no longer bounces back up.
+- **Dependencies** — `material_ui` raised to `^1.6.0`.
 
 ## Installation
 
@@ -132,7 +122,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.1.5
+  material_3_expressive: ^1.1.6
 ```
 
 Then fetch it:
@@ -757,6 +747,7 @@ M3ECarousel(
       M3ECarouselItem(
         image: Image.network(url, fit: BoxFit.cover),
         title: const Text('Title'),
+        showScrim: const M3ECarouselScrim.gradient(), // fades under the text
         onTap: () {},
       ),
   ],
@@ -1341,17 +1332,9 @@ implementations. Thanks to the original authors:
 
 | Author | Components | Source |
 | ------ | ---------- | ------ |
-| [Mudit Purohit](https://github.com/Mudit200408) | Buttons, split buttons, button groups | [m3e_buttons](https://github.com/Mudit200408/m3e_buttons) |
 | [Mudit Purohit](https://github.com/Mudit200408) | Dropdown menus | [m3e_dropdown_menu](https://github.com/Mudit200408/m3e_dropdown_menu) |
-| [Mudit Purohit](https://github.com/Mudit200408) | Expandable lists | [m3e_expandable](https://github.com/Mudit200408/m3e_expandable) |
-| [Emily](https://github.com/EmilyMoonstone) | Icon buttons | [icon_button_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e) |
-| [Emily](https://github.com/EmilyMoonstone) | Navigation bar | [navigation_bar_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e) |
-| [Emily](https://github.com/EmilyMoonstone) | Navigation rail | [navigation_rail_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e) |
 | [Emily](https://github.com/EmilyMoonstone) | Loading indicator (Flutter package) | [loading_indicator_m3e](https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e) |
-| [The Android Open Source Project](https://source.android.com/) | Loading indicator (Compose reference) | [`LoadingIndicator.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/LoadingIndicator.kt) |
-| [The Android Open Source Project](https://source.android.com/) | Slider / RangeSlider / VerticalSlider (Compose reference, `material3:1.4.0-alpha01`) | [`Slider.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/Slider.kt) / [`SliderTokens.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/SliderTokens.kt) |
 | [The Android Open Source Project](https://source.android.com/) | Linear / circular wavy progress (Compose reference) | [`LinearWavyProgressIndicator`](https://developer.android.com/reference/kotlin/androidx/compose/material3/LinearWavyProgressIndicator.composable) / [`CircularWavyProgressIndicator`](https://developer.android.com/reference/kotlin/androidx/compose/material3/CircularWavyProgressIndicator.composable) |
-| [The Android Open Source Project](https://source.android.com/) | Floating / docked toolbars (Compose reference, `material3:1.4.0-alpha01`) | [`FloatingToolbar.kt`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/FloatingToolbar.kt) / [`FlexibleBottomAppBar`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/AppBar.kt) / [`DockedToolbarTokens`](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens/DockedToolbarTokens.kt) |
 | [The Flutter Authors](https://github.com/flutter/flutter) | Carousel view layout (`CarouselView`) | Flutter SDK / [m3_carousel](https://pub.dev/packages/m3_carousel) |
 | [pub.dev](https://pub.dev/) | Spring motion (`motor`), expressive morph polygons (`material_new_shapes`), dynamic color (`dynamic_color`) | See [Dependencies](#dependencies) |
 

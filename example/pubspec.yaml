@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   material_3_expressive:
     path: ../
-  material_ui: ^1.5.0
+  material_ui: ^1.6.0
 
 dev_dependencies:
   integration_test:
