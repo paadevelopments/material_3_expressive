@@ -757,6 +757,7 @@ M3ECarousel(
       M3ECarouselItem(
         image: Image.network(url, fit: BoxFit.cover),
         title: const Text('Title'),
+        showScrim: const M3ECarouselScrim.gradient(), // fades under the text
         onTap: () {},
       ),
   ],

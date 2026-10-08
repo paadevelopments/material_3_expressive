@@ -348,6 +348,7 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
             picture: metadata.picture,
             labels: metadata.labels,
             scrim: metadata.scrim,
+            scrimColor: metadata.scheme.scrim,
             carousel: metadata.carousel,
             restWidth: restWidth,
             restHeight: restHeight,
@@ -410,6 +411,7 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
     required Widget picture,
     required Widget labels,
     required M3ECarouselScrim? scrim,
+    required Color scrimColor,
     required M3ECarouselTheme carousel,
     required double restWidth,
     required double restHeight,
@@ -440,7 +442,7 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
         ),
       if (scrim != null)
         Positioned.fill(
-          child: IgnorePointer(child: ColoredBox(color: scrim.paintColor)),
+          child: IgnorePointer(child: _buildScrimLayer(scrim, scrimColor)),
         ),
       Positioned.fill(
         child: IgnorePointer(
@@ -452,6 +454,18 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
       ),
       _buildItemInkWellLayer(index: index, item: item, enabled: enabled),
     ];
+  }
+
+  /// Solid or gradient scrim between the picture and the text.
+  Widget _buildScrimLayer(M3ECarouselScrim scrim, Color scrimColor) {
+    if (!scrim.isGradient) {
+      return ColoredBox(color: scrim.paintColor);
+    }
+    final Widget gradient = DecoratedBox(
+      decoration: BoxDecoration(gradient: scrim.resolveGradient(scrimColor)),
+    );
+    final double opacity = scrim.opacity.clamp(0, 1).toDouble();
+    return opacity < 1 ? Opacity(opacity: opacity, child: gradient) : gradient;
   }
 
   /// Full-screen picture layer that shifts with scroll instead of resizing.

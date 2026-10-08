@@ -3,6 +3,9 @@
 ### Changed
 
 * Raise `material_ui` to `^1.6.0`.
+* **Carousel:** added `M3ECarouselScrim.gradient`. By default it fades from
+  transparent at the top to **60%** `colorScheme.scrim` at the bottom, under
+  the text; pass `gradient` for a custom one. `opacity` fades the whole layer.
 
 ### Fixed
 

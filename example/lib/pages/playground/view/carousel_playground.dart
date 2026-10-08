@@ -26,7 +26,7 @@ class _CarouselPlaygroundState extends PlaygroundState<CarouselPlayground> {
   bool _showAll = true;
   bool _header = false;
   bool _showTitles = true;
-  bool _scrim = true;
+  _ScrimKind _scrim = _ScrimKind.gradient;
   bool _transform = true;
   bool _customRadius = false;
   double _radius = 28;
@@ -58,14 +58,14 @@ class _CarouselPlaygroundState extends PlaygroundState<CarouselPlayground> {
     super.dispose();
   }
 
-  List<M3ECarouselType> _types(BuildContext context) {
-    final bool landscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    return <M3ECarouselType>[
-      for (final M3ECarouselType type in M3ECarouselType.values)
-        if (!landscape || type != M3ECarouselType.fullScreen) type,
-    ];
-  }
+  M3ECarouselScrim? get _itemScrim => switch (_scrim) {
+    _ScrimKind.none => null,
+    _ScrimKind.solid => const M3ECarouselScrim(
+      color: Color(0xFF000000),
+      opacity: 0.45,
+    ),
+    _ScrimKind.gradient => const M3ECarouselScrim.gradient(),
+  };
 
   Widget _carousel(BuildContext context) {
     final M3EThemeData theme = M3ETheme.of(context);
@@ -107,12 +107,7 @@ class _CarouselPlaygroundState extends PlaygroundState<CarouselPlayground> {
                 ? Text('P${i + 1}', style: bodyStyle)
                 : null,
             aspectRatio: i.isEven ? 16 / 9 : 9 / 16,
-            showScrim: _scrim
-                ? const M3ECarouselScrim(
-                    color: Color(0xFF000000),
-                    opacity: 0.45,
-                  )
-                : null,
+            showScrim: _itemScrim,
             onTap: () {},
             transform: _transform && i == 0
                 ? _CarouselDestination(title: _images[i].title)
@@ -210,9 +205,16 @@ class _CarouselPlaygroundState extends PlaygroundState<CarouselPlayground> {
         ? "      title: const Text('Android'),\n"
               "      subtitle: const Text('Photo'),\n"
         : '';
-    final String scrim = _scrim
-        ? '      showScrim: const M3ECarouselScrim(opacity: 0.45),\n'
-        : '';
+    final String scrim = switch (_scrim) {
+      _ScrimKind.none => '',
+      _ScrimKind.solid =>
+        '      showScrim: const M3ECarouselScrim(\n'
+            '        color: Color(0xFF000000),\n'
+            '        opacity: 0.45,\n'
+            '      ),\n',
+      _ScrimKind.gradient =>
+        '      showScrim: const M3ECarouselScrim.gradient(),\n',
+    };
     final String transform = _transform
         ? '      transform: const DetailPage(),\n'
         : '';
@@ -239,15 +241,14 @@ $titles$scrim$transform      onTap: () {},
 
   @override
   List<Widget> buildControls(BuildContext context) {
-    final List<M3ECarouselType> types = _types(context);
     return <Widget>[
       PlayControlGroup(
         title: 'Layout',
         children: <Widget>[
           PlayEnumChoice<M3ECarouselType>(
             label: 'Type',
-            value: types.contains(_type) ? _type : M3ECarouselType.hero,
-            values: types,
+            value: _type,
+            values: M3ECarouselType.values,
             labelOf: (M3ECarouselType v) => v.name,
             onChanged: (M3ECarouselType v) => setState(() => _type = v),
           ),
@@ -322,11 +323,12 @@ $titles$scrim$transform      onTap: () {},
             value: _showTitles,
             onChanged: (bool v) => setState(() => _showTitles = v),
           ),
-          PlaySwitchItem(
+          PlayEnumChoice<_ScrimKind>(
             label: 'Scrim',
-            description: 'Darkens images under the text',
             value: _scrim,
-            onChanged: (bool v) => setState(() => _scrim = v),
+            values: _ScrimKind.values,
+            labelOf: (_ScrimKind v) => v.name,
+            onChanged: (_ScrimKind v) => setState(() => _scrim = v),
           ),
           PlaySwitchItem(
             label: 'Container transform',
@@ -357,6 +359,9 @@ $titles$scrim$transform      onTap: () {},
     ];
   }
 }
+
+/// Scrim presets for the playground items.
+enum _ScrimKind { none, solid, gradient }
 
 class _CarouselDestination extends StatelessWidget {
   const _CarouselDestination({required this.title});
