@@ -23,6 +23,7 @@ assets/
 docs/
 specs/
 example-app-web-release-build.md
+pre-publish-processes.md
 
 # Vendored custom-lint plugin. Tracked in git, omitted from the published archive.
 tools/
