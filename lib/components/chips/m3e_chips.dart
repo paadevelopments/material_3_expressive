@@ -475,11 +475,13 @@ class _M3EChipState extends State<M3EChip> {
           ),
           SizedBox(width: chipTheme.iconLabelGap),
         ],
-        Text(
-          widget.label,
-          style: theme.typeScale.labelLarge.copyWith(color: labelColor),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Flexible(
+          child: Text(
+            widget.label,
+            style: theme.typeScale.labelLarge.copyWith(color: labelColor),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         if (widget.trailing != null) ...<Widget>[
           SizedBox(width: chipTheme.iconLabelGap),
