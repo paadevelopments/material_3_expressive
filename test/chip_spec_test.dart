@@ -1,5 +1,6 @@
 import 'dart:ui' show CheckedState;
 
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -30,6 +31,14 @@ void _registerChipLayoutTests() {
   testWidgets(
     'text chip is 32 tall with 16 padding',
     _textChipIs32TallWith16Padding,
+  );
+  testWidgets(
+    'long labels truncate with an ellipsis inside a bounded wrap',
+    _longLabelsTruncateWithAnEllipsisInsideABoundedWrap,
+  );
+  testWidgets(
+    'long labels keep their intrinsic width in an unbounded scroll',
+    _longLabelsKeepTheirIntrinsicWidthInAnUnboundedScroll,
   );
   testWidgets(
     'input chip with both actions is at least 88 wide',
@@ -252,6 +261,50 @@ Future<void> _textChipIs32TallWith16Padding(WidgetTester tester) async {
   final ring = tester.widget<M3EFocusRing>(find.byType(M3EFocusRing));
   expect(ring.width, 3);
   expect(ring.gap, 2);
+}
+
+Future<void> _longLabelsTruncateWithAnEllipsisInsideABoundedWrap(
+  WidgetTester tester,
+) async {
+  const label = 'A very long chip label that should truncate with an ellipsis';
+  await tester.pumpWidget(
+    _host(
+      const SizedBox(
+        width: 200,
+        child: Wrap(
+          children: <Widget>[M3EChip(label: label, onPressed: _noop)],
+        ),
+      ),
+    ),
+  );
+
+  expect(tester.takeException(), isNull);
+  final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
+  expect(
+    paragraph.size.width,
+    lessThan(paragraph.getMaxIntrinsicWidth(double.infinity)),
+  );
+  expect(tester.getSize(find.byType(M3EChip)).width, lessThanOrEqualTo(200));
+}
+
+Future<void> _longLabelsKeepTheirIntrinsicWidthInAnUnboundedScroll(
+  WidgetTester tester,
+) async {
+  const label = 'A very long chip label that should truncate with an ellipsis';
+  await tester.pumpWidget(
+    _host(
+      const SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: <Widget>[M3EChip(label: label, onPressed: _noop)],
+        ),
+      ),
+    ),
+  );
+
+  expect(tester.takeException(), isNull);
+  final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
+  expect(paragraph.size.width, paragraph.getMaxIntrinsicWidth(double.infinity));
 }
 
 Future<void> _inputChipWithBothActionsIsAtLeast88Wide(
