@@ -509,10 +509,7 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
         onPointerDown: (_) => _dismissDxAcc = 0,
         onPointerMove: (PointerMoveEvent event) =>
             _onSwipeItemPointerMove(context, slot, event),
-        onPointerUp: (PointerUpEvent event) => _onForegroundDragEnd(
-          context,
-          DragEndDetails(primaryVelocity: event.delta.dx),
-        ),
+        onPointerUp: (_) => _onForegroundDragEnd(context, DragEndDetails()),
         onPointerCancel: (_) => _onForegroundDragEnd(context, DragEndDetails()),
         child: _swipeOverflow(slotPos, swipeItemBuilder(context, slotPos)),
       ),
@@ -538,7 +535,8 @@ mixin M3EDismissibleCardBuildMixin<T extends StatefulWidget>
       DragUpdateDetails(
         globalPosition: event.position,
         localPosition: event.localPosition,
-        delta: event.delta,
+        // Horizontal-only: a primaryDelta requires the cross axis to be 0.
+        delta: Offset(event.delta.dx, 0),
         primaryDelta: event.delta.dx,
       ),
     );

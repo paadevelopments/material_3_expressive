@@ -63,6 +63,38 @@ void main() {
     'M3ESearchBarTheme overrides container color',
     _m3esearchbarthemeOverridesContainerColor,
   );
+  testWidgets(
+    'read-only M3ESearchBar fires onTap once per tap',
+    (WidgetTester tester) => _searchBarFiresOnTapOnce(tester, readOnly: true),
+  );
+  testWidgets(
+    'editable M3ESearchBar fires onTap once per tap',
+    (WidgetTester tester) => _searchBarFiresOnTapOnce(tester, readOnly: false),
+  );
+}
+
+Future<void> _searchBarFiresOnTapOnce(
+  WidgetTester tester, {
+  required bool readOnly,
+}) async {
+  var taps = 0;
+  await tester.pumpWidget(
+    _host(
+      SizedBox(
+        width: 420,
+        child: M3ESearchBar(
+          hintText: 'Search',
+          readOnly: readOnly,
+          onTap: () => taps++,
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.byType(M3ESearchBar));
+  await tester.pumpAndSettle();
+  expect(taps, 1);
 }
 
 Future<void> _m3esearchbarLaysOutAtDefaultHeightWithoutOverflow(

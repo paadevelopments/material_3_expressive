@@ -254,7 +254,11 @@ class _M3ESearchBarInputState extends State<M3ESearchBarInput>
               ),
             Listener(
               behavior: HitTestBehavior.translucent,
-              onPointerDown: (_) => widget.onTap?.call(),
+              // Read-only bars get their tap from the bar's InkWell instead;
+              // firing here too would call onTap twice.
+              onPointerDown: widget.readOnly
+                  ? null
+                  : (_) => widget.onTap?.call(),
               child: CallbackShortcuts(
                 bindings: _shortcutBindings(),
                 // Read-only anchors must not take the text-input client on tap

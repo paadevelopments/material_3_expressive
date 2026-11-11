@@ -7,6 +7,7 @@ void main() {
   registerDismissiblePreviewSnapTests();
   registerDismissibleReorderBlockedTests();
   registerDismissibleFullDismissTests();
+  registerExpandableSwipeDiagonalTests();
 }
 
 /// Moves in small steps like a real swipe, so the drag wins the gesture arena
@@ -222,5 +223,42 @@ void registerDismissibleFullDismissTests() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(dismissed, isTrue);
+  });
+}
+
+void registerExpandableSwipeDiagonalTests() {
+  testWidgets('expandable swipe row tolerates a diagonal drag', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF6750A4)),
+        home: Scaffold(
+          body: M3EList(
+            itemCount: 1,
+            itemBuilder: (BuildContext context, int index) {
+              return const M3EListItem(
+                headline: 'Expandable',
+                expanded: M3EExpandableExpanded.content(Text('Hello')),
+                swipe: M3EListItemSwipe(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Expandable')),
+    );
+    // Mostly horizontal with a vertical component, like a real finger.
+    for (var i = 0; i < 6; i++) {
+      await gesture.moveBy(const Offset(-20, 3));
+      await tester.pump();
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
