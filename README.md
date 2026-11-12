@@ -89,7 +89,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.8.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.11.0`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -115,24 +115,15 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.2.0
+## What's new in 1.2.1
 
-Summary of updates since 1.1.7 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.2.0 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Dependencies** — `material_ui` raised to `^1.8.0`. If you import both
-  packages and use `RoundedPolygon` or `CornerRounding`, add
-  `hide CornerRounding, RoundedPolygon` to the `material_ui` import.
-- **Buttons** — an `M3EButton` with only an `icon` or only a `label` renders
-  that content.
-- **Button group, segmented buttons** — nothing takes focus on mount unless an
-  action sets `autofocus`. Icon-only overflow menu items use their
-  `semanticLabel` or `tooltip` as the title, and tapping a connected group no
-  longer shifts its gaps.
-- **Search** — the view field takes focus as soon as the view starts opening.
-- **Date pickers** — `autofocus` on `M3EInputDatePickerFormField` focuses the
-  field.
-- **Theme** — iOS status bar text now contrasts correctly with the theme and
-  with scrims.
+- **Dependencies** — `material_ui` raised to `^1.11.0`.
+- **Lists** — swiping an expandable `M3EListItem` that has `swipe` no longer
+  throws an assertion when the drag is not perfectly horizontal.
+- **Search** — a read-only `M3ESearchBar` (such as `M3ESearchAnchor.bar`)
+  calls `onTap` once per tap instead of twice.
 
 ## Installation
 
@@ -140,7 +131,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.2.0
+  material_3_expressive: ^1.2.1
 ```
 
 Then fetch it:
