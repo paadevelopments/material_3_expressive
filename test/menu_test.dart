@@ -15,6 +15,39 @@ Widget _host(Widget child) {
   );
 }
 
+/// Hosts [child] in a nested [Navigator] that is offset from the screen
+/// origin, mirroring a page modal / sheet: the inner overlay does not share the
+/// root overlay's origin.
+Widget _nestedNavigatorHost(Widget child) {
+  return M3EMaterialApp(
+    data: M3EThemeData.light(),
+    home: MediaQuery(
+      data: const MediaQueryData(size: Size(800, 600)),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          width: 400,
+          height: 300,
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (_, _, _) => Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: child,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Future<void> _settleSpring(WidgetTester tester) async {
   // Expressive spatial springs can overshoot; settle fully like dropdown tests.
   await tester.pump();
@@ -68,6 +101,10 @@ void main() {
   testWidgets(
     'grouped menus keep a gap when they do not scroll',
     _groupedMenusKeepGapWhenNotScrolling,
+  );
+  testWidgets(
+    'menu anchors to the root overlay inside a nested Navigator',
+    _menuAnchorsInsideNestedNavigator,
   );
 }
 
@@ -539,4 +576,28 @@ Future<void> _groupedMenusKeepGapWhenNotScrolling(WidgetTester tester) async {
 
   expect(find.text('One'), findsOneWidget);
   expect(find.byType(M3EMenuDividerWidget), findsNothing);
+}
+
+Future<void> _menuAnchorsInsideNestedNavigator(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _nestedNavigatorHost(
+      M3EMenu(
+        anchorBuilder: (BuildContext context, VoidCallback open) {
+          return TextButton(onPressed: open, child: const Text('Open'));
+        },
+        children: const <M3EMenuNode>[M3EMenuEntry(label: 'One')],
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('Open'));
+  await _settleSpring(tester);
+
+  final Rect anchor = tester.getRect(find.text('Open'));
+  final Rect item = tester.getRect(find.text('One'));
+  // Anchoring to the inner Navigator's overlay would place the menu at the
+  // nested overlay's local coordinates, far above/left of the actual button.
+  expect(item.top, greaterThan(anchor.bottom));
+  expect(item.left, greaterThanOrEqualTo(anchor.left));
+  expect(item.right, lessThan(800));
 }
