@@ -183,6 +183,10 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   /// Per-index item boxes for pulse measuring.
   final Map<int, RenderBox> _itemBoxes = <int, RenderBox>{};
 
+  /// Per-index content boundaries (no ink layer) for transform snapshots.
+  final Map<int, RenderRepaintBoundary> _itemContentBoundaries =
+      <int, RenderRepaintBoundary>{};
+
   /// Item hidden while its container transform is open, and that transform.
   int? _transformHiddenIndex;
   M3ECardContainerTransformHandle<void>? _transformHiddenHandle;

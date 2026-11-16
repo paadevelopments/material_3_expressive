@@ -12,6 +12,13 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
       return;
     }
 
+    // Open the transform right away; the tap pulse plays underneath it.
+    final M3ECarouselItem item = _itemAt(index);
+    final Widget? destination = item.transform;
+    if (destination != null && item.enabled) {
+      _openItemTransform(index, destination);
+    }
+
     setState(() {
       _activeIndex = index;
       _snapshotVisibleNeighbors(index, _viewportBox);
@@ -27,19 +34,9 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
         _rightVisibleNeighborIndex = null;
       });
     }
-    final M3ECarouselItem item = _itemAt(index);
-    final Widget? destination = item.transform;
-    if (destination != null && item.enabled && mounted) {
-      _openItemTransform(index, destination);
-    }
   }
 
-  Future<void> _openItemTransform(int index, Widget destination) async {
-    // The pulse's last tick dirties the item; snapshot it once it has painted.
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) {
-      return;
-    }
+  void _openItemTransform(int index, Widget destination) {
     RenderBox? box = _itemBoxes[index];
     if (box == null || !box.hasSize || !box.attached) {
       final RenderObject? object = _itemFocus[index].context
@@ -56,8 +53,6 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
     final radius = widget.shape is RoundedRectangleBorder
         ? (widget.shape! as RoundedRectangleBorder).borderRadius as BorderRadius
         : BorderRadius.zero;
-    // The anchor's child is the item's RepaintBoundary (no GlobalKey).
-    final RenderObject? content = box is RenderProxyBox ? box.child : null;
     final M3ECardContainerTransformHandle<void> handle =
         M3ECardContainerTransform.show<void>(
           context: context,
@@ -65,7 +60,8 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
           originRadius: radius.topLeft.x,
           originColor: theme.colorScheme.surface,
           builder: (BuildContext context) => destination,
-          originBoundary: content is RenderRepaintBoundary ? content : null,
+          // Picture, scrim and labels only: no hover or press overlay.
+          originBoundary: _itemContentBoundaries[index],
         );
     setState(() {
       _transformHiddenIndex = index;

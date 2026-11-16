@@ -42,6 +42,10 @@ void _registerFabMenuOpenTests() {
     'item transform return keeps menu open and item visible',
     _itemTransformReturnKeepsMenuOpenAndItemVisible,
   );
+  testWidgets(
+    'closeOnItemTap toggles closing after a plain item tap',
+    _closeOnItemTapTogglesClosing,
+  );
 }
 
 void _registerFabMenuLayoutTests() {
@@ -286,6 +290,43 @@ Future<void> _itemTransformReturnKeepsMenuOpenAndItemVisible(
   expect(find.text('Image'), findsOneWidget);
   expect(find.byIcon(Icons.image), findsOneWidget);
   expect(itemHidden(), isFalse);
+}
+
+Future<void> _closeOnItemTapTogglesClosing(WidgetTester tester) async {
+  for (final close in <bool>[true, false]) {
+    final controller = M3EFabMenuController();
+    var pressed = 0;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(),
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: M3EFabMenu(
+              key: ValueKey<bool>(close),
+              controller: controller,
+              closeOnItemTap: close,
+              items: <M3EFabMenuItem>[
+                M3EFabMenuItem(
+                  icon: const Icon(Icons.mic),
+                  label: 'Audio',
+                  onPressed: () => pressed++,
+                ),
+                const M3EFabMenuItem(icon: Icon(Icons.image), label: 'Image'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(M3EFab));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Audio'));
+    await tester.pumpAndSettle();
+    expect(pressed, 1);
+    expect(controller.isOpen, !close);
+    controller.dispose();
+  }
 }
 
 Widget _composeDestination(BuildContext context) {

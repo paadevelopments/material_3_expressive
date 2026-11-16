@@ -43,6 +43,7 @@ class M3EFabMenu extends StatefulWidget {
     this.position = M3EFabMenuPosition.right,
     this.decoration,
     this.controller,
+    this.closeOnItemTap = true,
     super.key,
   }) : assert(
          items.length >= 2 && items.length <= 6,
@@ -78,6 +79,12 @@ class M3EFabMenu extends StatefulWidget {
 
   /// Optional controller for programmatic open / close.
   final M3EFabMenuController? controller;
+
+  /// Whether tapping an item closes the menu after its `onPressed` runs.
+  ///
+  /// Items with an `openBuilder` always keep the menu open, so their
+  /// container transform returns to the item.
+  final bool closeOnItemTap;
 
   @override
   State<M3EFabMenu> createState() => _M3EFabMenuState();
@@ -384,7 +391,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       return;
     }
     item.onPressed?.call();
-    if (mounted) {
+    if (mounted && widget.closeOnItemTap) {
       _close();
     }
   }

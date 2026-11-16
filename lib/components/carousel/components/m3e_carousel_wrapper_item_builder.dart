@@ -425,34 +425,46 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
     required ({double width, double height, double left, double top}) content,
   }) {
     return <Widget>[
-      if (fullscreenParallax)
-        _buildParallaxPictureLayer(
-          index: index,
-          restWidth: restWidth,
-          restHeight: restHeight,
-          pulseBudget: pulseBudget,
-          position: position,
-          picture: picture,
-          enabled: enabled,
-          carousel: carousel,
-        )
-      else
-        _buildPinnedPictureLayer(
-          picture: picture,
-          enabled: enabled,
-          carousel: carousel,
-          content: content,
-          frame: frame,
-        ),
-      if (scrim != null)
-        Positioned.fill(
-          child: IgnorePointer(child: _buildScrimLayer(scrim, scrimColor)),
-        ),
       Positioned.fill(
-        child: IgnorePointer(
-          child: Opacity(
-            opacity: enabled ? 1 : carousel.disabledOpacity,
-            child: labels,
+        child: _CarouselContentBoundary(
+          index: index,
+          boundaries: _itemContentBoundaries,
+          child: Stack(
+            children: <Widget>[
+              if (fullscreenParallax)
+                _buildParallaxPictureLayer(
+                  index: index,
+                  restWidth: restWidth,
+                  restHeight: restHeight,
+                  pulseBudget: pulseBudget,
+                  position: position,
+                  picture: picture,
+                  enabled: enabled,
+                  carousel: carousel,
+                )
+              else
+                _buildPinnedPictureLayer(
+                  picture: picture,
+                  enabled: enabled,
+                  carousel: carousel,
+                  content: content,
+                  frame: frame,
+                ),
+              if (scrim != null)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: _buildScrimLayer(scrim, scrimColor),
+                  ),
+                ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: enabled ? 1 : carousel.disabledOpacity,
+                    child: labels,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -288,6 +288,11 @@ class _M3EExtendedFabState extends State<M3EExtendedFab>
       scrimColor: widget.transformScrimColor,
       builder: openBuilder,
       originBoundaryKey: _contentBoundaryKey,
+      // Resting shadow: the button lands un-hovered once the route pops.
+      originShadows: M3EElevation.shadows(
+        widget.elevation ?? extendedTheme.elevation(hovered: false),
+        shadowColor: theme.colorScheme.shadow,
+      ),
     );
     _transformHandle = handle;
     setState(() {});

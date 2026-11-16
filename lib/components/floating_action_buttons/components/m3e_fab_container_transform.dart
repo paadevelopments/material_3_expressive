@@ -27,7 +27,7 @@ class _M3EFabTransformSnapshot {
 }
 
 /// Captures [key]'s [RenderRepaintBoundary] for the cross-fade, or null when
-/// it has no painted layer yet.
+/// it has not painted yet.
 _M3EFabTransformSnapshot? _captureOriginSnapshot(
   BuildContext context,
   GlobalKey? key,
@@ -37,24 +37,36 @@ _M3EFabTransformSnapshot? _captureOriginSnapshot(
   if (object is! RenderRepaintBoundary ||
       !object.attached ||
       !object.hasSize ||
-      object.size.isEmpty ||
-      object.layer == null) {
+      object.size.isEmpty) {
     return null;
   }
-  // toImageSync asserts a clean layer in debug; skip the snapshot instead.
-  var needsPaint = false;
-  assert(() {
-    needsPaint = object.debugNeedsPaint;
-    return true;
-  }(), 'Reads debugNeedsPaint only in debug builds.');
-  if (needsPaint) {
+  // Last painted layer: no wait for a pending repaint (e.g. a tap pulse).
+  final ContainerLayer? layer = object.layer;
+  final Size size = object.size;
+  final Rect painted = MatrixUtils.transformRect(
+    object.getTransformTo(null),
+    Offset.zero & size,
+  );
+  if (layer is! OffsetLayer || painted.width <= 0) {
     return null;
   }
-  final ui.Image image = object.toImageSync(
+  final ui.Image image = layer.toImageSync(
+    Offset.zero & size,
     pixelRatio: MediaQuery.devicePixelRatioOf(context),
   );
-  final Offset topLeft = object.localToGlobal(Offset.zero) - origin.topLeft;
-  return _M3EFabTransformSnapshot(image, topLeft & object.size);
+  // Undo a press scale about the origin center so the snapshot lands where
+  // the content rests once the press settles.
+  final double scale = painted.width / size.width;
+  final Offset center =
+      origin.center + (painted.center - origin.center) / scale;
+  return _M3EFabTransformSnapshot(
+    image,
+    Rect.fromCenter(
+      center: center - origin.topLeft,
+      width: size.width,
+      height: size.height,
+    ),
+  );
 }
 
 /// Handle for an in-flight FAB container transform.
@@ -88,6 +100,7 @@ class M3EFabContainerTransform {
     Color? openColor,
     M3ESpring motion = M3EMotion.expressiveSpatialDefault,
     GlobalKey? originBoundaryKey,
+    List<BoxShadow> originShadows = const <BoxShadow>[],
   }) {
     final Color schemeScrim =
         scrimColor ??
@@ -100,6 +113,7 @@ class M3EFabContainerTransform {
 
     route = _M3EFabContainerTransformPageRoute<T>(
       snapshot: _captureOriginSnapshot(context, originBoundaryKey, origin),
+      originShadows: originShadows,
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -155,6 +169,7 @@ class M3EFabContainerTransformScope extends InheritedWidget {
 class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
   _M3EFabContainerTransformPageRoute({
     required this.snapshot,
+    required this.originShadows,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -166,6 +181,7 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
   });
 
   final _M3EFabTransformSnapshot? snapshot;
+  final List<BoxShadow> originShadows;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -204,6 +220,7 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
   ) {
     return _M3EFabContainerTransformHost<T>(
       snapshot: snapshot,
+      originShadows: originShadows,
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -229,6 +246,7 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
 class _M3EFabContainerTransformHost<T> extends StatefulWidget {
   const _M3EFabContainerTransformHost({
     required this.snapshot,
+    required this.originShadows,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -240,6 +258,7 @@ class _M3EFabContainerTransformHost<T> extends StatefulWidget {
   });
 
   final _M3EFabTransformSnapshot? snapshot;
+  final List<BoxShadow> originShadows;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -365,24 +384,30 @@ class _M3EFabContainerTransformHostState<T>
               top: rect.top,
               width: rect.width,
               height: rect.height,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: ColoredBox(
-                  color: fill,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      if (!_contentVisible)
-                        const SizedBox.expand()
-                      else
-                        Opacity(
-                          opacity: Curves.easeOut.transform(
-                            ((t - 0.4) / 0.6).clamp(0.0, 1.0),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  boxShadow: _originShadows(t),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: ColoredBox(
+                    color: fill,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        if (!_contentVisible)
+                          const SizedBox.expand()
+                        else
+                          Opacity(
+                            opacity: Curves.easeOut.transform(
+                              ((t - 0.4) / 0.6).clamp(0.0, 1.0),
+                            ),
+                            child: _destination,
                           ),
-                          child: _destination,
-                        ),
-                      ?_originContent(t),
-                    ],
+                        ?_originContent(t),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -393,14 +418,31 @@ class _M3EFabContainerTransformHostState<T>
     );
   }
 
+  /// Origin resting shadow, fading with the origin content so the landing
+  /// container matches the button it hands back to.
+  List<BoxShadow>? _originShadows(double t) {
+    final double k = _originOpacity(t);
+    if (k <= 0 || widget.originShadows.isEmpty) {
+      return null;
+    }
+    return <BoxShadow>[
+      for (final BoxShadow shadow in widget.originShadows)
+        shadow.copyWith(
+          color: shadow.color.withValues(alpha: shadow.color.a * k),
+        ),
+    ];
+  }
+
+  double _originOpacity(double t) =>
+      1 - Curves.easeOut.transform((t / _originFadeEnd).clamp(0.0, 1.0));
+
   /// Origin content cross-fading out as the container grows (in on close).
   Widget? _originContent(double t) {
     final _M3EFabTransformSnapshot? snapshot = widget.snapshot;
     if (snapshot == null || t >= _originFadeEnd) {
       return null;
     }
-    final double opacity =
-        1 - Curves.easeOut.transform((t / _originFadeEnd).clamp(0.0, 1.0));
+    final double opacity = _originOpacity(t);
     return Positioned(
       left: snapshot.rect.left,
       top: snapshot.rect.top,

@@ -270,6 +270,11 @@ class _M3EFabState extends State<M3EFab>
       scrimColor: widget.transformScrimColor,
       builder: openBuilder,
       originBoundaryKey: _contentBoundaryKey,
+      // Resting shadow: the button lands un-hovered once the route pops.
+      originShadows: M3EElevation.shadows(
+        widget.elevation ?? M3EElevation.level3,
+        shadowColor: theme.colorScheme.shadow,
+      ),
     );
     _transformHandle = handle;
     setState(() {});

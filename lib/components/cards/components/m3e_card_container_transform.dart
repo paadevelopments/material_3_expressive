@@ -24,8 +24,7 @@ class _M3ECardTransformSnapshot {
   final Rect rect;
 }
 
-/// Captures [object] for the cross-fade, or null when it has no painted layer
-/// yet.
+/// Captures [object] for the cross-fade, or null when it has not painted yet.
 _M3ECardTransformSnapshot? _captureOriginSnapshot(
   BuildContext context,
   RenderRepaintBoundary? object,
@@ -34,20 +33,16 @@ _M3ECardTransformSnapshot? _captureOriginSnapshot(
   if (object == null ||
       !object.attached ||
       !object.hasSize ||
-      object.size.isEmpty ||
-      object.layer == null) {
+      object.size.isEmpty) {
     return null;
   }
-  // toImageSync asserts a clean layer in debug; skip the snapshot instead.
-  var needsPaint = false;
-  assert(() {
-    needsPaint = object.debugNeedsPaint;
-    return true;
-  }(), 'Reads debugNeedsPaint only in debug builds.');
-  if (needsPaint) {
+  // Last painted layer: no wait for a pending repaint (e.g. a tap pulse).
+  final ContainerLayer? layer = object.layer;
+  if (layer is! OffsetLayer) {
     return null;
   }
-  final ui.Image image = object.toImageSync(
+  final ui.Image image = layer.toImageSync(
+    Offset.zero & object.size,
     pixelRatio: MediaQuery.devicePixelRatioOf(context),
   );
   final Offset topLeft = object.localToGlobal(Offset.zero) - origin.topLeft;
