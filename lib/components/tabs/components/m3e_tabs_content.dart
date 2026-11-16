@@ -60,7 +60,8 @@ extension _M3ETabsContent on _M3ETabsState {
         ?badgeIcon,
         if (badgeIcon != null && label != null)
           SizedBox(width: theme.inlineIconLabelGap),
-        if (label != null) _labeled(theme, tab, label, inlineBadge),
+        if (label != null)
+          Flexible(child: _labeled(theme, tab, label, inlineBadge)),
         if (label == null && inlineBadge) _badge(tab, inline: true),
       ],
     );
