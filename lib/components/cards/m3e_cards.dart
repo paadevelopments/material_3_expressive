@@ -31,6 +31,7 @@ export 'styles/m3e_card_theme.dart';
 
 part 'components/m3e_card_content.dart';
 part 'components/m3e_card_swipe.dart';
+part 'components/m3e_card_transform.dart';
 
 const double _kSwipeReveal = 80;
 
@@ -283,6 +284,7 @@ class _M3ECardState extends State<M3ECard>
   bool _dismissPending = false;
   int _swipeEpoch = 0;
   bool _transformOpen = false;
+  final GlobalKey _contentBoundaryKey = GlobalKey();
   void Function([Object? result])? _closeTransform;
   late final SingleMotionController _swipeMotion;
   FocusNode? _ownedFocus;
@@ -347,54 +349,8 @@ class _M3ECardState extends State<M3ECard>
   bool get isTransformOpen => _transformOpen;
 
   @override
-  Future<T?> openTransform<T extends Object?>({WidgetBuilder? builder}) async {
-    final WidgetBuilder? openBuilder = builder ?? widget.openBuilder;
-    if (openBuilder == null || _transformOpen) {
-      return null;
-    }
-    final RenderObject? renderObject = context.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) {
-      return null;
-    }
-    final M3EThemeData theme = M3ETheme.of(context);
-    final M3ECardTheme cardTheme = theme.cardTheme;
-    final BorderRadius radius = widget.borderRadius ?? cardTheme.borderRadius;
-    final Rect origin =
-        renderObject.localToGlobal(Offset.zero) & renderObject.size;
-    final Color originColor =
-        widget.color ??
-        cardTheme.containerColorFor(
-          theme.colorScheme,
-          widget.variant,
-          enabled: widget.enabled,
-        );
-    final M3ECardContainerTransformHandle<T> handle =
-        M3ECardContainerTransform.show<T>(
-          context: context,
-          origin: origin,
-          originRadius: radius.topLeft.x,
-          originColor: originColor,
-          builder: openBuilder,
-          scrimColor: cardTheme.resolveTransformScrim(theme.colorScheme),
-          openColor: widget.color == null
-              ? cardTheme.resolveTransformOpenColor(theme.colorScheme)
-              : null,
-          endRadius: cardTheme.transformEndRadius,
-          contentFadeStart: cardTheme.transformContentFadeStart,
-          contentVisibleAt: cardTheme.transformContentVisibleAt,
-          motion: cardTheme.transformSpring,
-        );
-    _closeTransform = ([Object? result]) => handle.close(result as T?);
-    setState(() => _transformOpen = true);
-    widget.controller?.refresh();
-    final T? result = await handle.future;
-    _closeTransform = null;
-    if (mounted) {
-      setState(() => _transformOpen = false);
-      widget.controller?.refresh();
-    }
-    return result;
-  }
+  Future<T?> openTransform<T extends Object?>({WidgetBuilder? builder}) =>
+      _openTransform<T>(builder: builder);
 
   @override
   void closeTransform() => _closeTransform?.call();
@@ -460,6 +416,8 @@ class _M3ECardState extends State<M3ECard>
         child: framed,
       );
     }
+    // Hidden while the container transform stands in for the card.
+    framed = Opacity(opacity: _transformOpen ? 0 : 1, child: framed);
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
@@ -593,6 +551,8 @@ class _M3ECardState extends State<M3ECard>
       );
     }
     content = _limitHeight(content, cardTheme);
+    // Container-transform snapshot: content only, no state layer.
+    content = RepaintBoundary(key: _contentBoundaryKey, child: content);
     content = _withInteractionFill(scheme, cardTheme, state, content);
 
     Widget surface = AnimatedContainer(

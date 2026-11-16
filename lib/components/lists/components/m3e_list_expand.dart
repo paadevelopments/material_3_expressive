@@ -57,35 +57,56 @@ extension _M3EListExpand on _M3EListState {
     required M3EListCardListTheme cardList,
     bool suppressOwnGap = false,
   }) {
-    return M3EExpandableItem(
-      index: index,
-      totalCount: widget.itemCount,
-      isExpanded: _expandedIndices.contains(index),
-      headerBuilder: (BuildContext context, int i, double progress) =>
-          _expandHeaderAt(i),
-      bodyBuilder: (BuildContext context, int i, double progress) {
-        return _expandBody(context, i, progress, decoration);
-      },
-      expanded: expanded,
-      decoration: decoration,
-      expandMotion: expandMotion,
-      collapseMotion: collapseMotion,
-      nestVariant: _variant(context, cardList),
-      // Reorder rows get their trailing gap from the reorder host instead
-      // (see `_reorder`), so it sits detached from the dragged card. The
-      // decoration's own gap still separates a header from its own nested
-      // sublist (M3EExpandableSublist), and must stay intact.
-      trailingGap: suppressOwnGap ? 0 : null,
-      onToggle: () => _handleExpandToggle(
-        index,
-        expanded,
-        allowMultiple,
-        decoration.haptic,
+    // Hidden while the container transform stands in for the item.
+    return Opacity(
+      opacity: _transformHiddenIndex == index ? 0 : 1,
+      child: M3EExpandableItem(
+        index: index,
+        totalCount: widget.itemCount,
+        isExpanded: _expandedIndices.contains(index),
+        headerBuilder: (BuildContext context, int i, double progress) =>
+            _transformContentBoundary(context, i, _expandHeaderAt(i)),
+        bodyBuilder: (BuildContext context, int i, double progress) {
+          return _expandBody(context, i, progress, decoration);
+        },
+        expanded: expanded,
+        decoration: decoration,
+        expandMotion: expandMotion,
+        collapseMotion: collapseMotion,
+        nestVariant: _variant(context, cardList),
+        // Reorder rows get their trailing gap from the reorder host instead
+        // (see `_reorder`), so it sits detached from the dragged card. The
+        // decoration's own gap still separates a header from its own nested
+        // sublist (M3EExpandableSublist), and must stay intact.
+        trailingGap: suppressOwnGap ? 0 : null,
+        onToggle: () => _handleExpandToggle(
+          index,
+          expanded,
+          allowMultiple,
+          decoration.haptic,
+        ),
+        onTransform: () => openTransform(index),
+        onTransformAnchor: (BuildContext anchor) {
+          _transformAnchors[index] = anchor;
+        },
       ),
-      onTransform: () => openTransform(index),
-      onTransformAnchor: (BuildContext anchor) {
-        _transformAnchors[index] = anchor;
-      },
+    );
+  }
+
+  /// Container-transform snapshot: header content only, no state layer.
+  ///
+  /// Skipped inside the reorder drag proxy so the key is never duplicated.
+  Widget _transformContentBoundary(
+    BuildContext context,
+    int index,
+    Widget header,
+  ) {
+    if (M3EListDragProxyScope.maybeOf(context) != null) {
+      return header;
+    }
+    return RepaintBoundary(
+      key: _transformContentKeys.putIfAbsent(index, GlobalKey.new),
+      child: header,
     );
   }
 
@@ -206,13 +227,34 @@ extension _M3EListExpand on _M3EListState {
           originRadius: theme.listTheme.cardList.outerRadius,
           originColor: theme.colorScheme.surfaceContainerHighest,
           builder: (BuildContext context) => destination,
+          originBoundary:
+              _transformContentKeys[index]?.currentContext?.findRenderObject()
+                  as RenderRepaintBoundary?,
         );
     _transformHandle = handle;
+    setState(() {
+      _transformHiddenIndex = index;
+      _transformHiddenHandle = handle;
+    });
     handle.future.whenComplete(() {
       if (identical(_transformHandle, handle)) {
         _transformHandle = null;
       }
+      _showTransformItem(handle);
     });
+  }
+
+  /// Shows the item again once [handle]'s transform has closed.
+  void _showTransformItem(M3ECardContainerTransformHandle<void> handle) {
+    if (!identical(_transformHiddenHandle, handle)) {
+      return;
+    }
+    _transformHiddenHandle = null;
+    if (mounted) {
+      setState(() => _transformHiddenIndex = null);
+    } else {
+      _transformHiddenIndex = null;
+    }
   }
 
   /// Reverses the open container transform.

@@ -183,6 +183,10 @@ class _M3ECarouselWrapperState extends State<M3ECarouselWrapper>
   /// Per-index item boxes for pulse measuring.
   final Map<int, RenderBox> _itemBoxes = <int, RenderBox>{};
 
+  /// Item hidden while its container transform is open, and that transform.
+  int? _transformHiddenIndex;
+  M3ECardContainerTransformHandle<void>? _transformHiddenHandle;
+
   /// Viewport box for neighbor visibility checks (no [GlobalKey] — those can
   /// reparent under [Theme] rebuilds and corrupt the weighted sliver).
   RenderBox? _viewportBox;

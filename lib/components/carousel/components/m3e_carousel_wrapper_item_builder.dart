@@ -73,49 +73,53 @@ extension _M3ECarouselWrapperItemBuilder on _M3ECarouselWrapperState {
     final M3EThemeData theme = M3ETheme.of(context);
     final bool compact = MediaQuery.sizeOf(context).width < 600;
 
-    return _CarouselItemAnchor(
-      index: index,
-      onRegister: _registerItemBox,
-      onUnregister: _unregisterItemBox,
-      child: RepaintBoundary(
-        // Content is laid out once at (max slot + pulse overflow) and stays
-        // pinned in resting coordinates. Only the clip rect animates.
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final double gap = widget.trailingGap;
-            final double restWidth = math.max(
-              0,
-              constraints.maxWidth - (_vertical ? 0 : gap),
-            );
-            final double restHeight = math.max(
-              0,
-              constraints.maxHeight - (_vertical ? gap : 0),
-            );
-            _rememberRest(index, Size(restWidth, restHeight));
-            final ScrollPosition position = Scrollable.of(context).position;
-            return Padding(
-              padding: EdgeInsets.only(
-                right: _vertical ? 0 : gap,
-                bottom: _vertical ? gap : 0,
-              ),
-              child: _buildPulsedChildFrame(
-                index: index,
-                isActive: isActive,
-                isLeftNeighbor: isLeftNeighbor,
-                isRightNeighbor: isRightNeighbor,
-                edgeDelta: edgeDelta,
-                restWidth: restWidth,
-                restHeight: restHeight,
-                stableInner: stableInner,
-                pulseBudget: pulseBudget,
-                finalRadius: finalRadius,
-                clipBehavior: clipBehavior,
-                theme: theme,
-                compact: compact,
-                position: position,
-              ),
-            );
-          },
+    // Hidden while the container transform stands in for the item.
+    return Opacity(
+      opacity: _transformHiddenIndex == index ? 0 : 1,
+      child: _CarouselItemAnchor(
+        index: index,
+        onRegister: _registerItemBox,
+        onUnregister: _unregisterItemBox,
+        child: RepaintBoundary(
+          // Content is laid out once at (max slot + pulse overflow) and stays
+          // pinned in resting coordinates. Only the clip rect animates.
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final double gap = widget.trailingGap;
+              final double restWidth = math.max(
+                0,
+                constraints.maxWidth - (_vertical ? 0 : gap),
+              );
+              final double restHeight = math.max(
+                0,
+                constraints.maxHeight - (_vertical ? gap : 0),
+              );
+              _rememberRest(index, Size(restWidth, restHeight));
+              final ScrollPosition position = Scrollable.of(context).position;
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: _vertical ? 0 : gap,
+                  bottom: _vertical ? gap : 0,
+                ),
+                child: _buildPulsedChildFrame(
+                  index: index,
+                  isActive: isActive,
+                  isLeftNeighbor: isLeftNeighbor,
+                  isRightNeighbor: isRightNeighbor,
+                  edgeDelta: edgeDelta,
+                  restWidth: restWidth,
+                  restHeight: restHeight,
+                  stableInner: stableInner,
+                  pulseBudget: pulseBudget,
+                  finalRadius: finalRadius,
+                  clipBehavior: clipBehavior,
+                  theme: theme,
+                  compact: compact,
+                  position: position,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -10,18 +10,31 @@ extension _M3ECarouselHeader on _M3ECarouselState {
     }
     final Rect origin = box.localToGlobal(Offset.zero) & box.size;
     final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
-    M3ECardContainerTransform.show<void>(
-      context: context,
-      origin: origin,
-      originRadius: theme.radiusFor(widget.type),
-      originColor: scheme.surface,
-      builder: (BuildContext context) {
-        return M3ECarouselShowAll(
-          header: widget.header,
-          children: widget.children,
+    final M3ECardContainerTransformHandle<void> handle =
+        M3ECardContainerTransform.show<void>(
+          context: context,
+          origin: origin,
+          originRadius: theme.radiusFor(widget.type),
+          originColor: scheme.surface,
+          builder: (BuildContext context) {
+            return M3ECarouselShowAll(
+              header: widget.header,
+              children: widget.children,
+            );
+          },
+          originBoundary:
+              _trackContentKey.currentContext?.findRenderObject()
+                  as RenderRepaintBoundary?,
         );
-      },
-    );
+    _setShowAllOpen(true);
+    handle.future.whenComplete(() => _setShowAllOpen(false));
+  }
+
+  void _setShowAllOpen(bool open) {
+    if (!mounted) {
+      return;
+    }
+    setState(() => _showAllOpen = open);
   }
 
   Widget _header(M3ECarouselTheme theme) {

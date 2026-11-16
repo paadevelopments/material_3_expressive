@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -135,6 +136,7 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
   bool _transformInteractive = false;
   bool _transformFrameQueued = false;
   M3ECardContainerTransformHandle<void>? _transformHandle;
+  final GlobalKey _contentBoundaryKey = GlobalKey();
   double _originRadius = 0;
   Color _originColor = const Color(0x00000000);
   ValueNotifier<bool>? _reorderSession;
@@ -263,11 +265,18 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
           contentFadeStart: cardTheme.transformContentFadeStart,
           contentVisibleAt: cardTheme.transformContentVisibleAt,
           motion: cardTheme.transformSpring,
+          originBoundary:
+              _contentBoundaryKey.currentContext?.findRenderObject()
+                  as RenderRepaintBoundary?,
         );
-    _transformHandle = handle;
+    setState(() => _transformHandle = handle);
     handle.future.whenComplete(() {
       if (identical(_transformHandle, handle)) {
-        _transformHandle = null;
+        if (mounted) {
+          setState(() => _transformHandle = null);
+        } else {
+          _transformHandle = null;
+        }
       }
     });
   }
@@ -371,6 +380,8 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
       inset: itemTheme.focusIndicatorInset,
       child: card,
     );
+    // Hidden while the container transform stands in for the row.
+    card = Opacity(opacity: _transformHandle != null ? 0 : 1, child: card);
     return _wrapSemantics(card);
   }
 
@@ -425,6 +436,8 @@ class _M3EListRowSurfaceState extends State<M3EListRowSurface> {
         child: child,
       );
     }
+    // Container-transform snapshot: row content only, no state layer.
+    child = RepaintBoundary(key: _contentBoundaryKey, child: child);
     return M3ECard(
       variant: paintContainer ? widget.variant : M3ECardVariant.filled,
       borderRadius: radius,

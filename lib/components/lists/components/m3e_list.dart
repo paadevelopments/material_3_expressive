@@ -299,6 +299,13 @@ class _M3EListState extends State<M3EList>
   late Set<int> _expandedIndices;
   final Map<int, BuildContext> _transformAnchors = <int, BuildContext>{};
   M3ECardContainerTransformHandle<void>? _transformHandle;
+
+  /// Header content boundaries snapshotted by the container transform.
+  final Map<int, GlobalKey> _transformContentKeys = <int, GlobalKey>{};
+
+  /// Item hidden while its container transform is open, and that transform.
+  int? _transformHiddenIndex;
+  M3ECardContainerTransformHandle<void>? _transformHiddenHandle;
   int? _collapsedForReorder;
   bool _snapCollapse = false;
   bool _embeddedActive = false;

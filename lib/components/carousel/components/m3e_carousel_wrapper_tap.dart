@@ -34,7 +34,12 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
     }
   }
 
-  void _openItemTransform(int index, Widget destination) {
+  Future<void> _openItemTransform(int index, Widget destination) async {
+    // The pulse's last tick dirties the item; snapshot it once it has painted.
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) {
+      return;
+    }
     RenderBox? box = _itemBoxes[index];
     if (box == null || !box.hasSize || !box.attached) {
       final RenderObject? object = _itemFocus[index].context
@@ -51,12 +56,34 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
     final radius = widget.shape is RoundedRectangleBorder
         ? (widget.shape! as RoundedRectangleBorder).borderRadius as BorderRadius
         : BorderRadius.zero;
-    M3ECardContainerTransform.show<void>(
-      context: context,
-      origin: origin,
-      originRadius: radius.topLeft.x,
-      originColor: theme.colorScheme.surface,
-      builder: (BuildContext context) => destination,
-    );
+    // The anchor's child is the item's RepaintBoundary (no GlobalKey).
+    final RenderObject? content = box is RenderProxyBox ? box.child : null;
+    final M3ECardContainerTransformHandle<void> handle =
+        M3ECardContainerTransform.show<void>(
+          context: context,
+          origin: origin,
+          originRadius: radius.topLeft.x,
+          originColor: theme.colorScheme.surface,
+          builder: (BuildContext context) => destination,
+          originBoundary: content is RenderRepaintBoundary ? content : null,
+        );
+    setState(() {
+      _transformHiddenIndex = index;
+      _transformHiddenHandle = handle;
+    });
+    handle.future.whenComplete(() => _showTransformItem(handle));
+  }
+
+  /// Shows the item again once [handle]'s transform has closed.
+  void _showTransformItem(M3ECardContainerTransformHandle<void> handle) {
+    if (!identical(_transformHiddenHandle, handle)) {
+      return;
+    }
+    _transformHiddenHandle = null;
+    if (mounted) {
+      setState(() => _transformHiddenIndex = null);
+    } else {
+      _transformHiddenIndex = null;
+    }
   }
 }

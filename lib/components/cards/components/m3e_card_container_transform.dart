@@ -1,5 +1,7 @@
+import 'dart:ui' as ui show Image;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
@@ -11,6 +13,46 @@ SpringMotion _cardSpringMotion(M3ESpring spring) =>
       stiffness: spring.stiffness,
       damping: spring.damping,
     );
+
+/// Pixels of the origin content painted inside the morphing container.
+class _M3ECardTransformSnapshot {
+  const _M3ECardTransformSnapshot(this.image, this.rect);
+
+  final ui.Image image;
+
+  /// Snapshot bounds relative to the origin rect's top-left.
+  final Rect rect;
+}
+
+/// Captures [object] for the cross-fade, or null when it has no painted layer
+/// yet.
+_M3ECardTransformSnapshot? _captureOriginSnapshot(
+  BuildContext context,
+  RenderRepaintBoundary? object,
+  Rect origin,
+) {
+  if (object == null ||
+      !object.attached ||
+      !object.hasSize ||
+      object.size.isEmpty ||
+      object.layer == null) {
+    return null;
+  }
+  // toImageSync asserts a clean layer in debug; skip the snapshot instead.
+  var needsPaint = false;
+  assert(() {
+    needsPaint = object.debugNeedsPaint;
+    return true;
+  }(), 'Reads debugNeedsPaint only in debug builds.');
+  if (needsPaint) {
+    return null;
+  }
+  final ui.Image image = object.toImageSync(
+    pixelRatio: MediaQuery.devicePixelRatioOf(context),
+  );
+  final Offset topLeft = object.localToGlobal(Offset.zero) - origin.topLeft;
+  return _M3ECardTransformSnapshot(image, topLeft & object.size);
+}
 
 /// Handle for an in-flight card container transform.
 class M3ECardContainerTransformHandle<T extends Object?> {
@@ -30,6 +72,10 @@ class M3ECardContainerTransform {
   M3ECardContainerTransform._();
 
   /// Morphs from [origin] into a full-screen destination built by [builder].
+  ///
+  /// When [originBoundary] is the render object of a [RepaintBoundary] around
+  /// the origin's content, that content cross-fades out as the container grows
+  /// and back in as it returns.
   static M3ECardContainerTransformHandle<T> show<T extends Object?>({
     required BuildContext context,
     required Rect origin,
@@ -42,6 +88,7 @@ class M3ECardContainerTransform {
     double contentFadeStart = 0.4,
     double contentVisibleAt = 0.55,
     M3ESpring motion = M3EMotion.expressiveSpatialDefault,
+    RenderRepaintBoundary? originBoundary,
   }) {
     final M3ECardTheme theme = M3ETheme.of(context).cardTheme;
     final M3EColorScheme scheme = M3ETheme.of(context).colorScheme;
@@ -53,6 +100,7 @@ class M3ECardContainerTransform {
     void Function([T? result])? requestClose;
 
     route = _M3ECardContainerTransformPageRoute<T>(
+      snapshot: _captureOriginSnapshot(context, originBoundary, origin),
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -108,6 +156,7 @@ class M3ECardContainerTransformScope extends InheritedWidget {
 
 class _M3ECardContainerTransformPageRoute<T> extends PageRoute<T> {
   _M3ECardContainerTransformPageRoute({
+    required this.snapshot,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -121,6 +170,7 @@ class _M3ECardContainerTransformPageRoute<T> extends PageRoute<T> {
     required this.onCloseReady,
   });
 
+  final _M3ECardTransformSnapshot? snapshot;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -161,6 +211,7 @@ class _M3ECardContainerTransformPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     return _M3ECardContainerTransformHost<T>(
+      snapshot: snapshot,
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -188,6 +239,7 @@ class _M3ECardContainerTransformPageRoute<T> extends PageRoute<T> {
 
 class _M3ECardContainerTransformHost<T> extends StatefulWidget {
   const _M3ECardContainerTransformHost({
+    required this.snapshot,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -201,6 +253,7 @@ class _M3ECardContainerTransformHost<T> extends StatefulWidget {
     required this.onCloseReady,
   });
 
+  final _M3ECardTransformSnapshot? snapshot;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -227,6 +280,9 @@ class _M3ECardContainerTransformHostState<T>
   bool _allowPop = false;
   T? _pendingResult;
 
+  /// Built once so spring ticks do not rebuild the destination every frame.
+  late final Widget _destination = Builder(builder: widget.builder);
+
   @override
   void initState() {
     super.initState();
@@ -252,6 +308,7 @@ class _M3ECardContainerTransformHostState<T>
   @override
   void dispose() {
     _progress.dispose();
+    widget.snapshot?.image.dispose();
     super.dispose();
   }
 
@@ -330,16 +387,46 @@ class _M3ECardContainerTransformHostState<T>
                 borderRadius: BorderRadius.circular(radius),
                 child: ColoredBox(
                   color: fill,
-                  child: !_contentVisible
-                      ? const SizedBox.expand()
-                      : Opacity(
-                          opacity: contentOpacity,
-                          child: Builder(builder: widget.builder),
-                        ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      if (!_contentVisible)
+                        const SizedBox.expand()
+                      else
+                        Opacity(opacity: contentOpacity, child: _destination),
+                      ?_originContent(t),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Origin content cross-fading out as the container grows (in on close).
+  Widget? _originContent(double t) {
+    final _M3ECardTransformSnapshot? snapshot = widget.snapshot;
+    final double fadeEnd = widget.contentFadeStart.clamp(0.01, 1.0);
+    if (snapshot == null || t >= fadeEnd) {
+      return null;
+    }
+    final double opacity =
+        1 - Curves.easeOut.transform((t / fadeEnd).clamp(0.0, 1.0));
+    return Positioned(
+      left: snapshot.rect.left,
+      top: snapshot.rect.top,
+      width: snapshot.rect.width,
+      height: snapshot.rect.height,
+      child: IgnorePointer(
+        child: RawImage(
+          image: snapshot.image,
+          width: snapshot.rect.width,
+          height: snapshot.rect.height,
+          fit: BoxFit.fill,
+          opacity: AlwaysStoppedAnimation<double>(opacity),
         ),
       ),
     );

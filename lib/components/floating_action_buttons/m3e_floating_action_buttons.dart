@@ -121,6 +121,7 @@ class _M3EFabState extends State<M3EFab>
     with TickerProviderStateMixin
     implements M3EFabControllerClient {
   final GlobalKey _originKey = GlobalKey();
+  final GlobalKey _contentBoundaryKey = GlobalKey();
   FocusNode? _ownedFocusNode;
 
   late SingleMotionController _appearCtrl;
@@ -268,6 +269,7 @@ class _M3EFabState extends State<M3EFab>
       openColor: widget.openColor,
       scrimColor: widget.transformScrimColor,
       builder: openBuilder,
+      originBoundaryKey: _contentBoundaryKey,
     );
     _transformHandle = handle;
     setState(() {});
@@ -508,6 +510,8 @@ class _M3EFabState extends State<M3EFab>
         child: content,
       );
     }
+    // Container-transform snapshot: content only, no state layer.
+    content = RepaintBoundary(key: _contentBoundaryKey, child: content);
     if (m3eUsesGradientOverlay(widget.decoration?.overlayGradient)) {
       return m3eResolveGradientOverlay(
         clipRadius: borderRadius,
