@@ -42,6 +42,10 @@ void _registerSplitNavigationTests() {
     'system back closes the popup menu before the route',
     _systemBackClosesThePopupMenuBeforeTheRoute,
   );
+  testWidgets(
+    'popup menu anchors inside a nested Navigator',
+    _popupMenuAnchorsInsideNestedNavigator,
+  );
 }
 
 void _pressedInnerRadiiMatchHovered() {
@@ -200,4 +204,66 @@ Widget _systemBackRoute() {
       ),
     ),
   );
+}
+
+Future<void> _popupMenuAnchorsInsideNestedNavigator(WidgetTester tester) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: M3ETheme(
+        data: M3EThemeData.light(),
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800, 600)),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              width: 400,
+              height: 300,
+              child: Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  return PageRouteBuilder<void>(
+                    settings: settings,
+                    pageBuilder: (_, _, _) => Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: SizedBox(
+                          height: 48,
+                          child: M3ESplitButton<String>(
+                            label: 'Save',
+                            onPressed: () {},
+                            onSelected: (_) {},
+                            items: const <M3ESplitButtonItem<String>>[
+                              M3ESplitButtonItem(
+                                value: 'a',
+                                child: Text('Archive'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final Rect trailing = tester.getRect(
+    find.byIcon(M3EIcons.keyboard_arrow_down),
+  );
+  await tester.tap(find.byIcon(M3EIcons.keyboard_arrow_down));
+  await tester.pump();
+  await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+  expect(find.byType(M3EMenuPopup<String>), findsOneWidget);
+  final Rect item = tester.getRect(find.text('Archive'));
+  // Anchoring to the inner Navigator's overlay would open the menu near the
+  // nested overlay's origin instead of under the trailing segment.
+  expect(item.top, greaterThan(trailing.bottom));
+  expect(item.left, greaterThan(0));
 }
