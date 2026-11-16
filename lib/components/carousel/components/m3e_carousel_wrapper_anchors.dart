@@ -144,3 +144,67 @@ class _RenderCarouselItemAnchor extends RenderProxyBox {
     _registerIfReady();
   }
 }
+
+/// Registers an item's content boundary (picture, scrim, labels; no ink
+/// layer) for container-transform snapshots without a [GlobalKey].
+class _CarouselContentBoundary extends SingleChildRenderObjectWidget {
+  const _CarouselContentBoundary({
+    required this.index,
+    required this.boundaries,
+    required Widget child,
+  }) : super(child: child);
+
+  final int index;
+  final Map<int, RenderRepaintBoundary> boundaries;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCarouselContentBoundary(index, boundaries);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderCarouselContentBoundary renderObject,
+  ) {
+    renderObject.index = index;
+  }
+}
+
+class _RenderCarouselContentBoundary extends RenderRepaintBoundary {
+  _RenderCarouselContentBoundary(this._index, this._boundaries);
+
+  int _index;
+  final Map<int, RenderRepaintBoundary> _boundaries;
+
+  int get index => _index;
+
+  set index(int value) {
+    if (_index == value) {
+      return;
+    }
+    _unregister();
+    _index = value;
+    if (attached) {
+      _boundaries[_index] = this;
+    }
+  }
+
+  void _unregister() {
+    if (identical(_boundaries[_index], this)) {
+      _boundaries.remove(_index);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _boundaries[_index] = this;
+  }
+
+  @override
+  void detach() {
+    _unregister();
+    super.detach();
+  }
+}

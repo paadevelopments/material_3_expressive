@@ -29,7 +29,7 @@ void main() {
   testWidgets('swipe steps unless free scroll snaps', _snapDefaults);
   testWidgets('arrow key moves to the next item', _keyboardMove);
   testWidgets('show all opens the vertical list', _showAll);
-  testWidgets('item transform opens after the tap pulse', _itemTransform);
+  testWidgets('item transform opens on tap', _itemTransform);
   testWidgets('show all morphs the carousel into the list', _carouselTransform);
 }
 

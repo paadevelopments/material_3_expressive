@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:material_3_expressive/components/carousel/components/m3e_carousel_wrapper.dart';
 import 'package:material_3_expressive/foundations/foundations.dart';
 import 'package:material_ui/material_ui.dart';
@@ -180,6 +181,12 @@ class _M3ECarouselState extends State<M3ECarousel> {
   M3ECarouselController? _ownedController;
   final GlobalKey _trackKey = GlobalKey();
 
+  /// Track snapshotted by the "Show all" container transform.
+  final GlobalKey _trackContentKey = GlobalKey();
+
+  /// Track hidden while the "Show all" container transform is open.
+  bool _showAllOpen = false;
+
   M3ECarouselController get _controller =>
       widget.controller ?? _ownedController!;
 
@@ -273,42 +280,50 @@ class _M3ECarouselState extends State<M3ECarousel> {
             final Widget track = _gestureLayer(
               KeyedSubtree(
                 key: _trackKey,
-                child: Padding(
-                  padding: container,
-                  child: M3ECarouselWrapper(
-                    controller: _controller,
-                    freeScroll: freeScroll,
-                    itemSnapping: freeScroll,
-                    consumeMaxWeight: false,
-                    scrollDirection: _axis,
-                    padding: _itemPadding(theme, reducedMotion),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        widget.childElementBorderRadius ??
-                            theme.radiusFor(widget.type),
+                // Hidden while the "Show all" transform stands in for it.
+                child: Opacity(
+                  opacity: _showAllOpen ? 0 : 1,
+                  child: RepaintBoundary(
+                    key: _trackContentKey,
+                    child: Padding(
+                      padding: container,
+                      child: M3ECarouselWrapper(
+                        controller: _controller,
+                        freeScroll: freeScroll,
+                        itemSnapping: freeScroll,
+                        consumeMaxWeight: false,
+                        scrollDirection: _axis,
+                        padding: _itemPadding(theme, reducedMotion),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            widget.childElementBorderRadius ??
+                                theme.radiusFor(widget.type),
+                          ),
+                        ),
+                        onTap: widget.onTap,
+                        onChange: widget.onChange,
+                        haptic: widget.haptic,
+                        flexWeights: varied == null && itemExtent == null
+                            ? layoutWeight
+                            : null,
+                        itemExtent: varied == null ? itemExtent : null,
+                        itemExtents: varied,
+                        leadingInset: _leadingGap(theme),
+                        shrinkExtent:
+                            widget.type == M3ECarouselType.uncontained ||
+                                widget.type ==
+                                    M3ECarouselType.uncontainedMultiAspect
+                            ? widget.uncontainedShrinkExtent
+                            : 0,
+                        scaleItems:
+                            widget.type == M3ECarouselType.uncontained ||
+                            widget.type ==
+                                M3ECarouselType.uncontainedMultiAspect,
+                        reducedMotion: reduced,
+                        fixedPulseDelta: widget.fixedPulseDelta,
+                        children: widget.children,
                       ),
                     ),
-                    onTap: widget.onTap,
-                    onChange: widget.onChange,
-                    haptic: widget.haptic,
-                    flexWeights: varied == null && itemExtent == null
-                        ? layoutWeight
-                        : null,
-                    itemExtent: varied == null ? itemExtent : null,
-                    itemExtents: varied,
-                    leadingInset: _leadingGap(theme),
-                    shrinkExtent:
-                        widget.type == M3ECarouselType.uncontained ||
-                            widget.type ==
-                                M3ECarouselType.uncontainedMultiAspect
-                        ? widget.uncontainedShrinkExtent
-                        : 0,
-                    scaleItems:
-                        widget.type == M3ECarouselType.uncontained ||
-                        widget.type == M3ECarouselType.uncontainedMultiAspect,
-                    reducedMotion: reduced,
-                    fixedPulseDelta: widget.fixedPulseDelta,
-                    children: widget.children,
                   ),
                 ),
               ),

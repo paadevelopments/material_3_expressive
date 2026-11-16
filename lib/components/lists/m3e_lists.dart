@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../foundations/foundations.dart';
@@ -8,6 +9,7 @@ import 'components/m3e_expandable_expanded.dart';
 import 'components/m3e_expandable_item.dart';
 import 'components/m3e_expandable_nest_scope.dart';
 import 'components/m3e_expandable_snap_collapse.dart';
+import 'components/m3e_list_drag_proxy_scope.dart';
 import 'components/m3e_list_feature_host.dart';
 import 'components/m3e_list_feature_scope.dart';
 import 'components/m3e_list_interaction.dart';

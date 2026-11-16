@@ -115,15 +115,23 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.2.1
+## What's new in 1.2.2
 
-Summary of updates since 1.2.0 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.2.1 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Dependencies** — `material_ui` raised to `^1.11.0`.
-- **Lists** — swiping an expandable `M3EListItem` that has `swipe` no longer
-  throws an assertion when the drag is not perfectly horizontal.
-- **Search** — a read-only `M3ESearchBar` (such as `M3ESearchAnchor.bar`)
-  calls `onTap` once per tap instead of twice.
+- **Menus, split buttons** — popups opened inside a nested `Navigator` (such
+  as a page modal or modal sheet) now open at their anchor instead of offset
+  from it.
+- **Dropdown menus** — long selection chip labels truncate with an ellipsis
+  instead of overflowing.
+- **Container transforms** — FAB, extended FAB, FAB menu, card, list,
+  carousel item and carousel "Show all" transforms fade the origin's content
+  out and back in instead of landing as a blank shape, and build the
+  destination once.
+- **FAB menu** — an item with an `openBuilder` keeps the menu open so the
+  transform returns to it. New `closeOnItemTap` (default `true`) controls
+  whether other items close the menu.
+- **Carousel** — an item's transform opens on tap instead of after the pulse.
 
 ## Installation
 
@@ -131,7 +139,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.2.1
+  material_3_expressive: ^1.2.2
 ```
 
 Then fetch it:
@@ -462,13 +470,15 @@ Keyboard: Tab, then Space or Enter.
 #### M3EFabMenu
 
 Speed-dial menu of **2–6** items. The trigger morphs into a **56** close
-button, and back closes the menu before the route. Customize it on
-`M3EFabMenuTheme`.
+button, and back closes the menu before the route. Tapping an item closes the
+menu unless `closeOnItemTap` is false; an item with an `openBuilder` keeps it
+open. Customize it on `M3EFabMenuTheme`.
 
 ```dart
 M3EFabMenu(
   expandIcon: const Icon(M3EIcons.add),
   collapseIcon: const Icon(M3EIcons.close),
+  closeOnItemTap: true, // false keeps the menu open after a tap
   items: [
     M3EFabMenuItem(icon: const Icon(M3EIcons.edit), label: 'Note', onPressed: () {}),
     M3EFabMenuItem(icon: const Icon(M3EIcons.schedule), label: 'Reminder', onPressed: () {}),

@@ -12,6 +12,13 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
       return;
     }
 
+    // Open the transform right away; the tap pulse plays underneath it.
+    final M3ECarouselItem item = _itemAt(index);
+    final Widget? destination = item.transform;
+    if (destination != null && item.enabled) {
+      _openItemTransform(index, destination);
+    }
+
     setState(() {
       _activeIndex = index;
       _snapshotVisibleNeighbors(index, _viewportBox);
@@ -26,11 +33,6 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
         _leftVisibleNeighborIndex = null;
         _rightVisibleNeighborIndex = null;
       });
-    }
-    final M3ECarouselItem item = _itemAt(index);
-    final Widget? destination = item.transform;
-    if (destination != null && item.enabled && mounted) {
-      _openItemTransform(index, destination);
     }
   }
 
@@ -51,12 +53,33 @@ extension _M3ECarouselWrapperTap on _M3ECarouselWrapperState {
     final radius = widget.shape is RoundedRectangleBorder
         ? (widget.shape! as RoundedRectangleBorder).borderRadius as BorderRadius
         : BorderRadius.zero;
-    M3ECardContainerTransform.show<void>(
-      context: context,
-      origin: origin,
-      originRadius: radius.topLeft.x,
-      originColor: theme.colorScheme.surface,
-      builder: (BuildContext context) => destination,
-    );
+    final M3ECardContainerTransformHandle<void> handle =
+        M3ECardContainerTransform.show<void>(
+          context: context,
+          origin: origin,
+          originRadius: radius.topLeft.x,
+          originColor: theme.colorScheme.surface,
+          builder: (BuildContext context) => destination,
+          // Picture, scrim and labels only: no hover or press overlay.
+          originBoundary: _itemContentBoundaries[index],
+        );
+    setState(() {
+      _transformHiddenIndex = index;
+      _transformHiddenHandle = handle;
+    });
+    handle.future.whenComplete(() => _showTransformItem(handle));
+  }
+
+  /// Shows the item again once [handle]'s transform has closed.
+  void _showTransformItem(M3ECardContainerTransformHandle<void> handle) {
+    if (!identical(_transformHiddenHandle, handle)) {
+      return;
+    }
+    _transformHiddenHandle = null;
+    if (mounted) {
+      setState(() => _transformHiddenIndex = null);
+    } else {
+      _transformHiddenIndex = null;
+    }
   }
 }

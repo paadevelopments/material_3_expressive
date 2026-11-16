@@ -43,6 +43,7 @@ class M3EFabMenu extends StatefulWidget {
     this.position = M3EFabMenuPosition.right,
     this.decoration,
     this.controller,
+    this.closeOnItemTap = true,
     super.key,
   }) : assert(
          items.length >= 2 && items.length <= 6,
@@ -79,6 +80,12 @@ class M3EFabMenu extends StatefulWidget {
   /// Optional controller for programmatic open / close.
   final M3EFabMenuController? controller;
 
+  /// Whether tapping an item closes the menu after its `onPressed` runs.
+  ///
+  /// Items with an `openBuilder` always keep the menu open, so their
+  /// container transform returns to the item.
+  final bool closeOnItemTap;
+
   @override
   State<M3EFabMenu> createState() => _M3EFabMenuState();
 }
@@ -94,6 +101,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   late List<SingleMotionController> _itemCtrls;
   late List<bool> _itemVisible;
   late List<GlobalKey> _itemKeys;
+  late List<GlobalKey> _itemContentKeys;
   final GlobalKey _itemsStackKey = GlobalKey();
 
   final ValueNotifier<int?> _focusedItemIndex = ValueNotifier<int?>(null);
@@ -107,6 +115,9 @@ class _M3EFabMenuState extends State<M3EFabMenu>
   bool _open = false;
   M3EOverlayHistory? _overlayHistory;
   M3EFabContainerTransformHandle<dynamic>? _transformHandle;
+
+  /// Item hidden while its container transform is open.
+  int? _transformItemIndex;
 
   SpringMotion _springMotion(M3ESpring spring) =>
       const MaterialSpringMotion.expressiveSpatialDefault().copyWith(
@@ -146,6 +157,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       widget.items.length,
       (_) => GlobalKey(),
     );
+    _itemContentKeys = _newKeys(widget.items.length);
     _fabShapeCtrl = SingleMotionController(
       motion: _springMotion(M3EFabMenuTheme.defaults.fabShapeSpring),
       vsync: this,
@@ -178,6 +190,7 @@ class _M3EFabMenuState extends State<M3EFabMenu>
         widget.items.length,
         (_) => GlobalKey(),
       );
+      _itemContentKeys = _newKeys(widget.items.length);
       _focusedItemIndex.value = null;
       if (_open) {
         for (final SingleMotionController c in _itemCtrls) {
@@ -219,6 +232,9 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       (_) => SingleMotionController(motion: motion, vsync: this),
     );
   }
+
+  static List<GlobalKey> _newKeys(int count) =>
+      List<GlobalKey>.generate(count, (_) => GlobalKey());
 
   void _disposeItemControllers() {
     for (final SingleMotionController c in _itemCtrls) {
@@ -300,7 +316,10 @@ class _M3EFabMenuState extends State<M3EFabMenu>
     _focusedItemIndex.value = null;
     _closeFocusNode.unfocus();
     _portal.hide();
-    setState(() => _open = false);
+    setState(() {
+      _open = false;
+      _transformItemIndex = null;
+    });
     widget.controller?.updateOpen(open: false);
     _fabShapeCtrl
       ..motion = _fabShapeMotion
@@ -353,20 +372,26 @@ class _M3EFabMenuState extends State<M3EFabMenu>
       openColor: item.openColor,
       scrimColor: item.transformScrimColor,
       builder: item.openBuilder!,
+      originBoundaryKey: _itemContentKeys[index],
     );
     _transformHandle = handle;
+    setState(() => _transformItemIndex = index);
     item.onPressed?.call();
     await handle.future;
     _transformHandle = null;
+    if (mounted) {
+      setState(() => _transformItemIndex = null);
+    }
   }
 
   Future<void> _onItemTap(M3EFabMenuItem item, int index) async {
     if (item.openBuilder != null) {
+      // Menu stays open so the transform returns to its item.
       await _openItemTransform(item, index);
-    } else {
-      item.onPressed?.call();
+      return;
     }
-    if (mounted) {
+    item.onPressed?.call();
+    if (mounted && widget.closeOnItemTap) {
       _close();
     }
   }

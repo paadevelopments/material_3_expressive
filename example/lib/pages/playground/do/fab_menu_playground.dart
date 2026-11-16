@@ -22,6 +22,7 @@ class _FabMenuPlaygroundState extends PlaygroundState<FabMenuPlayground> {
   bool _customIcons = false;
   bool _useTransform = false;
   bool _gradient = false;
+  bool _closeOnItemTap = true;
 
   static const List<(IconData, String, String)> _entries =
       <(IconData, String, String)>[
@@ -113,6 +114,7 @@ class _FabMenuPlaygroundState extends PlaygroundState<FabMenuPlayground> {
               outlineGradient: WidgetStateProperty.all(_outline),
             )
           : null,
+      closeOnItemTap: _closeOnItemTap,
       items: _items,
     );
     return PlaygroundSlots(
@@ -153,6 +155,7 @@ class _FabMenuPlaygroundState extends PlaygroundState<FabMenuPlayground> {
         ? '  icon: const Icon(M3EIcons.edit),\n'
               '  closeIcon: const Icon(M3EIcons.expand_more),\n'
         : '';
+    final String closeOnTap = '  closeOnItemTap: $_closeOnItemTap,\n';
     final String decoration = _gradient
         ? '  decoration: M3EFabDecoration(\n'
               '    backgroundGradient: WidgetStateProperty.all(gradient),\n'
@@ -172,7 +175,7 @@ M3EFabMenu(
   position: M3EFabMenuPosition.${_position.name},
   size: M3EFabSize.${_size.name},
   color: M3EFabColor.${_color.name},
-$icons$decoration  items: <M3EFabMenuItem>[
+$icons$decoration$closeOnTap  items: <M3EFabMenuItem>[
 $items  ],
 );''',
       ),
@@ -230,6 +233,12 @@ $items  ],
             max: _entries.length.toDouble(),
             divisions: _entries.length - 2,
             onChanged: (double v) => setState(() => _itemCount = v),
+          ),
+          PlaySwitchItem(
+            label: 'Close on item tap',
+            description: 'Close the menu after an item is tapped',
+            value: _closeOnItemTap,
+            onChanged: (bool v) => setState(() => _closeOnItemTap = v),
           ),
           PlaySwitchItem(
             label: 'Container transform',

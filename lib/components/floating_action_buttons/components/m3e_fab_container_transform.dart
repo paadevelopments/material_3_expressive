@@ -1,5 +1,7 @@
+import 'dart:ui' as ui show Image;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:motor/motor.dart';
 
@@ -10,6 +12,62 @@ SpringMotion _fabSpringMotion(M3ESpring spring) =>
       stiffness: spring.stiffness,
       damping: spring.damping,
     );
+
+/// Origin content fades out by this progress (and back in on close).
+const double _originFadeEnd = 0.4;
+
+/// Pixels of the origin content painted inside the morphing container.
+class _M3EFabTransformSnapshot {
+  const _M3EFabTransformSnapshot(this.image, this.rect);
+
+  final ui.Image image;
+
+  /// Snapshot bounds relative to the origin rect's top-left.
+  final Rect rect;
+}
+
+/// Captures [key]'s [RenderRepaintBoundary] for the cross-fade, or null when
+/// it has not painted yet.
+_M3EFabTransformSnapshot? _captureOriginSnapshot(
+  BuildContext context,
+  GlobalKey? key,
+  Rect origin,
+) {
+  final RenderObject? object = key?.currentContext?.findRenderObject();
+  if (object is! RenderRepaintBoundary ||
+      !object.attached ||
+      !object.hasSize ||
+      object.size.isEmpty) {
+    return null;
+  }
+  // Last painted layer: no wait for a pending repaint (e.g. a tap pulse).
+  final ContainerLayer? layer = object.layer;
+  final Size size = object.size;
+  final Rect painted = MatrixUtils.transformRect(
+    object.getTransformTo(null),
+    Offset.zero & size,
+  );
+  if (layer is! OffsetLayer || painted.width <= 0) {
+    return null;
+  }
+  final ui.Image image = layer.toImageSync(
+    Offset.zero & size,
+    pixelRatio: MediaQuery.devicePixelRatioOf(context),
+  );
+  // Undo a press scale about the origin center so the snapshot lands where
+  // the content rests once the press settles.
+  final double scale = painted.width / size.width;
+  final Offset center =
+      origin.center + (painted.center - origin.center) / scale;
+  return _M3EFabTransformSnapshot(
+    image,
+    Rect.fromCenter(
+      center: center - origin.topLeft,
+      width: size.width,
+      height: size.height,
+    ),
+  );
+}
 
 /// Handle for an in-flight FAB container transform.
 class M3EFabContainerTransformHandle<T extends Object?> {
@@ -41,6 +99,8 @@ class M3EFabContainerTransform {
     Color? scrimColor,
     Color? openColor,
     M3ESpring motion = M3EMotion.expressiveSpatialDefault,
+    GlobalKey? originBoundaryKey,
+    List<BoxShadow> originShadows = const <BoxShadow>[],
   }) {
     final Color schemeScrim =
         scrimColor ??
@@ -52,6 +112,8 @@ class M3EFabContainerTransform {
     void Function([T? result])? requestClose;
 
     route = _M3EFabContainerTransformPageRoute<T>(
+      snapshot: _captureOriginSnapshot(context, originBoundaryKey, origin),
+      originShadows: originShadows,
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -106,6 +168,8 @@ class M3EFabContainerTransformScope extends InheritedWidget {
 
 class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
   _M3EFabContainerTransformPageRoute({
+    required this.snapshot,
+    required this.originShadows,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -116,6 +180,8 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
     required this.onCloseReady,
   });
 
+  final _M3EFabTransformSnapshot? snapshot;
+  final List<BoxShadow> originShadows;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -153,6 +219,8 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     return _M3EFabContainerTransformHost<T>(
+      snapshot: snapshot,
+      originShadows: originShadows,
       origin: origin,
       originRadius: originRadius,
       originColor: originColor,
@@ -177,6 +245,8 @@ class _M3EFabContainerTransformPageRoute<T> extends PageRoute<T> {
 
 class _M3EFabContainerTransformHost<T> extends StatefulWidget {
   const _M3EFabContainerTransformHost({
+    required this.snapshot,
+    required this.originShadows,
     required this.origin,
     required this.originRadius,
     required this.originColor,
@@ -187,6 +257,8 @@ class _M3EFabContainerTransformHost<T> extends StatefulWidget {
     required this.onCloseReady,
   });
 
+  final _M3EFabTransformSnapshot? snapshot;
+  final List<BoxShadow> originShadows;
   final Rect origin;
   final double originRadius;
   final Color originColor;
@@ -210,6 +282,9 @@ class _M3EFabContainerTransformHostState<T>
   bool _allowPop = false;
   T? _pendingResult;
 
+  /// Built once so spring ticks do not rebuild the destination every frame.
+  late final Widget _destination = Builder(builder: widget.builder);
+
   @override
   void initState() {
     super.initState();
@@ -232,6 +307,7 @@ class _M3EFabContainerTransformHostState<T>
   @override
   void dispose() {
     _progress.dispose();
+    widget.snapshot?.image.dispose();
     super.dispose();
   }
 
@@ -308,22 +384,77 @@ class _M3EFabContainerTransformHostState<T>
               top: rect.top,
               width: rect.width,
               height: rect.height,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: ColoredBox(
-                  color: fill,
-                  child: !_contentVisible
-                      ? const SizedBox.expand()
-                      : Opacity(
-                          opacity: Curves.easeOut.transform(
-                            ((t - 0.4) / 0.6).clamp(0.0, 1.0),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  boxShadow: _originShadows(t),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: ColoredBox(
+                    color: fill,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        if (!_contentVisible)
+                          const SizedBox.expand()
+                        else
+                          Opacity(
+                            opacity: Curves.easeOut.transform(
+                              ((t - 0.4) / 0.6).clamp(0.0, 1.0),
+                            ),
+                            child: _destination,
                           ),
-                          child: Builder(builder: widget.builder),
-                        ),
+                        ?_originContent(t),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Origin resting shadow, fading with the origin content so the landing
+  /// container matches the button it hands back to.
+  List<BoxShadow>? _originShadows(double t) {
+    final double k = _originOpacity(t);
+    if (k <= 0 || widget.originShadows.isEmpty) {
+      return null;
+    }
+    return <BoxShadow>[
+      for (final BoxShadow shadow in widget.originShadows)
+        shadow.copyWith(
+          color: shadow.color.withValues(alpha: shadow.color.a * k),
+        ),
+    ];
+  }
+
+  double _originOpacity(double t) =>
+      1 - Curves.easeOut.transform((t / _originFadeEnd).clamp(0.0, 1.0));
+
+  /// Origin content cross-fading out as the container grows (in on close).
+  Widget? _originContent(double t) {
+    final _M3EFabTransformSnapshot? snapshot = widget.snapshot;
+    if (snapshot == null || t >= _originFadeEnd) {
+      return null;
+    }
+    final double opacity = _originOpacity(t);
+    return Positioned(
+      left: snapshot.rect.left,
+      top: snapshot.rect.top,
+      width: snapshot.rect.width,
+      height: snapshot.rect.height,
+      child: IgnorePointer(
+        child: RawImage(
+          image: snapshot.image,
+          width: snapshot.rect.width,
+          height: snapshot.rect.height,
+          fit: BoxFit.fill,
+          opacity: AlwaysStoppedAnimation<double>(opacity),
         ),
       ),
     );

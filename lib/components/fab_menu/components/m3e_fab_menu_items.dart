@@ -130,7 +130,7 @@ class _M3EFabMenuItems {
         onStateChanged: (M3EInteractionState state) =>
             menu._setItemFocused(index, state.focused),
         builder: (BuildContext context, M3EInteractionState state) {
-          return _itemBody(theme, item, scheme, state);
+          return _itemBody(theme, item, index, scheme, state);
         },
       ),
     );
@@ -154,23 +154,26 @@ class _M3EFabMenuItems {
     );
     return Align(
       alignment: edge,
-      child: KeyedSubtree(
-        key: menu._itemKeys[index],
-        child: _itemOutline(
-          fabMenuTheme,
-          Material(
-            color: fill == null ? containerColor : const Color(0x00000000),
-            elevation: fabMenuTheme.itemElevation,
-            shadowColor: scheme.shadow,
-            surfaceTintColor: const Color(0x00000000),
-            shape: const StadiumBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: fill == null
-                ? body
-                : DecoratedBox(
-                    decoration: BoxDecoration(gradient: fill),
-                    child: body,
-                  ),
+      child: Opacity(
+        opacity: menu._transformItemIndex == index ? 0 : 1,
+        child: KeyedSubtree(
+          key: menu._itemKeys[index],
+          child: _itemOutline(
+            fabMenuTheme,
+            Material(
+              color: fill == null ? containerColor : const Color(0x00000000),
+              elevation: fabMenuTheme.itemElevation,
+              shadowColor: scheme.shadow,
+              surfaceTintColor: const Color(0x00000000),
+              shape: const StadiumBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: fill == null
+                  ? body
+                  : DecoratedBox(
+                      decoration: BoxDecoration(gradient: fill),
+                      child: body,
+                    ),
+            ),
           ),
         ),
       ),
@@ -195,6 +198,7 @@ class _M3EFabMenuItems {
   Widget _itemBody(
     M3EThemeData theme,
     M3EFabMenuItem item,
+    int index,
     M3EColorScheme scheme,
     M3EInteractionState state,
   ) {
@@ -243,7 +247,11 @@ class _M3EFabMenuItems {
             start: fabMenuTheme.itemLeading,
             end: fabMenuTheme.itemTrailing,
           ),
-          child: content,
+          // Container-transform snapshot: content only, no state layer.
+          child: RepaintBoundary(
+            key: menu._itemContentKeys[index],
+            child: content,
+          ),
         ),
       ),
     );

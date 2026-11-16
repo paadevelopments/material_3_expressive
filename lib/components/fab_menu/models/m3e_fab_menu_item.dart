@@ -19,10 +19,14 @@ class M3EFabMenuItem {
   /// Visible label; also used as the button semantic label.
   final String label;
 
-  /// Tap callback. Invoked before the menu closes when [openBuilder] is null.
+  /// Tap callback. When [openBuilder] is null, the menu closes after it runs
+  /// unless `M3EFabMenu.closeOnItemTap` is false.
   final VoidCallback? onPressed;
 
   /// When set, tap opens a container transform to this destination.
+  ///
+  /// The menu stays open while the destination is shown and after it closes,
+  /// so the transform returns to this item.
   final WidgetBuilder? openBuilder;
 
   /// Destination fill color for the container transform.
