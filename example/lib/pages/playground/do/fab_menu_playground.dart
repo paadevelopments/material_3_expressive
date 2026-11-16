@@ -155,9 +155,7 @@ class _FabMenuPlaygroundState extends PlaygroundState<FabMenuPlayground> {
         ? '  icon: const Icon(M3EIcons.edit),\n'
               '  closeIcon: const Icon(M3EIcons.expand_more),\n'
         : '';
-    final String closeOnTap = _closeOnItemTap
-        ? ''
-        : '  closeOnItemTap: false,\n';
+    final String closeOnTap = '  closeOnItemTap: $_closeOnItemTap,\n';
     final String decoration = _gradient
         ? '  decoration: M3EFabDecoration(\n'
               '    backgroundGradient: WidgetStateProperty.all(gradient),\n'

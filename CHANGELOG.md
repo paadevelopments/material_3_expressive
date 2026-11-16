@@ -1,7 +1,36 @@
 ## 1.2.2
 
+### Added
+
+* **FAB menu:** `M3EFabMenu.closeOnItemTap` (default `true`) controls whether
+  tapping an item without an `openBuilder` closes the menu.
+* **Cards:** `M3ECardContainerTransform.show` takes an optional
+  `originBoundary` (the `RenderRepaintBoundary` around the origin's content)
+  that cross-fades out as the container grows and back in as it returns.
+
+### Changed
+
+* **FAB menu:** an item with an `openBuilder` keeps the menu open, so its
+  container transform returns to the item
+  ([#43](https://github.com/paadevelopments/material_3_expressive/issues/43),
+  thanks @allasca).
+* **Carousel:** an item with a `transform` opens it on tap; the tap pulse
+  plays underneath instead of finishing first.
+* **Container transforms:** the destination is built once instead of on every
+  animation frame.
+
 ### Fixed
 
+* **Container transforms (FAB, extended FAB, FAB menu, cards, list rows,
+  expandable lists, carousel items and "Show all"):** the origin's content
+  cross-fades out as the container grows and back in as it returns, and the
+  origin is hidden while the transform is open. The container no longer lands
+  as a blank shape over the origin
+  ([#43](https://github.com/paadevelopments/material_3_expressive/issues/43)).
+* **FAB, extended FAB:** the closing transform lands with the button's resting
+  shadow, and the icon lands where it rests after a press.
+* **Carousel:** an item's closing transform no longer shows a stale hover
+  highlight.
 * **Menus, split buttons:** popups opened inside a nested `Navigator` (such as
   a page modal or modal sheet) now anchor to their trigger instead of opening
   offset from it; the anchor is measured against the root overlay that hosts
