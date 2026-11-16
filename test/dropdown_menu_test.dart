@@ -8,13 +8,15 @@ const List<M3EDropdownItem<String>> _items = <M3EDropdownItem<String>>[
   M3EDropdownItem(label: 'Material 3', value: 'm3'),
 ];
 
-Widget _host(Widget child) {
+Widget _host(Widget child, {double width = 320}) {
   return M3EMaterialApp(
     data: M3EThemeData.light(),
     home: Scaffold(
       body: MediaQuery(
         data: const MediaQueryData(size: Size(800, 600)),
-        child: Center(child: SizedBox(width: 320, child: child)),
+        child: Center(
+          child: SizedBox(width: width, child: child),
+        ),
       ),
     ),
   );
@@ -38,6 +40,12 @@ void main() {
     'M3EDropdownMenu single select replaces prior selection',
     _m3edropdownmenuSingleSelectReplacesPriorSelection,
   );
+
+  testWidgets(
+    'long selected labels fit in a narrow dropdown',
+    _longSelectedLabelsFitInNarrowDropdown,
+  );
+
   testWidgets(
     'M3EDropdownMenu limit blocks extra multi selections',
     _m3edropdownmenuLimitBlocksExtraMultiSelections,
@@ -140,6 +148,40 @@ Future<void> _m3edropdownmenuSingleSelectReplacesPriorSelection(
 
   expect(selected, hasLength(1));
   expect(selected.first.value, 'm3');
+}
+
+Future<void> _longSelectedLabelsFitInNarrowDropdown(WidgetTester tester) async {
+  const label = 'Turn off notifications for this conversation';
+  List<M3EDropdownItem<String>>? selected;
+
+  await tester.pumpWidget(
+    _host(
+      M3EDropdownMenu<String>(
+        singleSelect: true,
+        items: const <M3EDropdownItem<String>>[
+          M3EDropdownItem(label: label, value: 'mute', selected: true),
+        ],
+        onSelectionChanged: (items) => selected = items,
+      ),
+      width: 220,
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  final removeIcon = find.byIcon(Icons.close);
+  final dropdown = find.byType(M3EDropdownMenu<String>);
+  expect(removeIcon, findsOneWidget);
+  expect(
+    tester.getRect(removeIcon).right,
+    lessThanOrEqualTo(tester.getRect(dropdown).right),
+  );
+
+  await tester.tap(removeIcon);
+  await tester.pumpAndSettle();
+
+  expect(selected, isEmpty);
+  expect(find.text(label), findsNothing);
 }
 
 Future<void> _m3edropdownmenuLimitBlocksExtraMultiSelections(
