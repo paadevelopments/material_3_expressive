@@ -1,20 +1,23 @@
-## 1.2.1
-
-### Changed
-
-* Raise `material_ui` to `^1.11.0`.
+## 1.2.2
 
 ### Fixed
 
-* **Lists:** swiping an expandable `M3EListItem` that has `swipe` no longer
-  throws a `DragUpdateDetails` assertion when the drag is not perfectly
-  horizontal
-  ([#41](https://github.com/paadevelopments/material_3_expressive/issues/41),
-  thanks @Stefichen5).
-* **Search:** a read-only `M3ESearchBar` (such as `M3ESearchAnchor.bar`) calls
-  `onTap` once per tap instead of twice
-  ([#42](https://github.com/paadevelopments/material_3_expressive/issues/42),
-  thanks @saicharanrajana).
+* **Menus, split buttons:** popups opened inside a nested `Navigator` (such as
+  a page modal or modal sheet) now anchor to their trigger instead of opening
+  offset from it; the anchor is measured against the root overlay that hosts
+  the popup
+  ([#44](https://github.com/paadevelopments/material_3_expressive/pull/44),
+  thanks @StillMisty).
+* **Dropdown menus:** long selection chip labels truncate with an ellipsis
+  instead of overflowing
+  ([#45](https://github.com/paadevelopments/material_3_expressive/pull/45),
+  thanks @SafalFrom2050).
+
+## 1.2.1
+
+* Raise `material_ui` to `^1.11.0`.
+* **Lists:** swiping an expandable `M3EListItem` no longer throws a `DragUpdateDetails` assertion on non-horizontal drags ([#41](https://github.com/paadevelopments/material_3_expressive/issues/41), thanks @Stefichen5).
+* **Search:** read-only `M3ESearchBar` calls `onTap` once per tap ([#42](https://github.com/paadevelopments/material_3_expressive/issues/42), thanks @saicharanrajana).
 
 ## 1.2.0
 
@@ -26,9 +29,3 @@
 * **Date pickers:** `M3EInputDatePickerFormField` honors `autofocus` ([#37](https://github.com/paadevelopments/material_3_expressive/pull/37), thanks @StillMisty).
 * **Theme:** correct iOS `statusBarBrightness` in `M3EMaterialApp` and `M3EScrimSystemUi` ([#40](https://github.com/paadevelopments/material_3_expressive/pull/40)).
 * **Example:** iOS runner targets iOS 15.0.
-
-## 1.1.7
-
-* Raise `material_ui` to `^1.7.0`.
-* **Bottom sheets, side sheets:** predictive back works with an `onDismissRequest` guard and no longer resets content state ([#31](https://github.com/paadevelopments/material_3_expressive/pull/31), [#32](https://github.com/paadevelopments/material_3_expressive/pull/32), thanks @StillMisty).
-* **Chips:** long labels truncate with an ellipsis in bounded layouts ([#30](https://github.com/paadevelopments/material_3_expressive/pull/30), thanks @StillMisty).

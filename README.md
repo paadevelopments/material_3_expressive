@@ -115,15 +115,15 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.2.1
+## What's new in 1.2.2
 
-Summary of updates since 1.2.0 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.2.1 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Dependencies** — `material_ui` raised to `^1.11.0`.
-- **Lists** — swiping an expandable `M3EListItem` that has `swipe` no longer
-  throws an assertion when the drag is not perfectly horizontal.
-- **Search** — a read-only `M3ESearchBar` (such as `M3ESearchAnchor.bar`)
-  calls `onTap` once per tap instead of twice.
+- **Menus, split buttons** — popups opened inside a nested `Navigator` (such
+  as a page modal or modal sheet) now open at their anchor instead of offset
+  from it.
+- **Dropdown menus** — long selection chip labels truncate with an ellipsis
+  instead of overflowing.
 
 ## Installation
 
@@ -131,7 +131,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.2.1
+  material_3_expressive: ^1.2.2
 ```
 
 Then fetch it:
