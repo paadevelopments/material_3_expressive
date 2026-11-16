@@ -273,9 +273,10 @@ class M3ETextField extends StatefulWidget {
 class _M3ETextFieldState extends State<M3ETextField>
     with TickerProviderStateMixin
     implements TextSelectionGestureDetectorBuilderDelegate {
-  late final TextEditingController _controller =
-      widget.controller ?? TextEditingController();
-  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
+  late TextEditingController _controller;
+  late bool _ownsController;
+  late FocusNode _focusNode;
+  late bool _ownsFocusNode;
   final GlobalKey<EditableTextState> _editableKey =
       GlobalKey<EditableTextState>();
   late final M3ETextFieldAutofillClient _autofillClient =
@@ -317,11 +318,23 @@ class _M3ETextFieldState extends State<M3ETextField>
   @override
   void initState() {
     super.initState();
+    _attachController(widget.controller);
+    _attachFocusNode(widget.focusNode);
     _focused = _focusNode.hasFocus;
     _focusNode.addListener(_handleFocusChange);
     _controller.addListener(_handleTextChange);
     FocusManager.instance.addHighlightModeListener(_handleHighlightModeChange);
     M3EFocusInteraction.instance.addListener(_handleFocusInteractionChanged);
+  }
+
+  void _attachController(TextEditingController? external) {
+    _ownsController = external == null;
+    _controller = external ?? TextEditingController();
+  }
+
+  void _attachFocusNode(FocusNode? external) {
+    _ownsFocusNode = external == null;
+    _focusNode = external ?? FocusNode();
   }
 
   @override
@@ -333,6 +346,24 @@ class _M3ETextFieldState extends State<M3ETextField>
   @override
   void didUpdateWidget(M3ETextField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _controller.removeListener(_handleTextChange);
+      if (_ownsController) {
+        _controller.dispose();
+      }
+      _attachController(widget.controller);
+      _controller.addListener(_handleTextChange);
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      _focusNode.removeListener(_handleFocusChange);
+      if (_ownsFocusNode) {
+        _focusNode.dispose();
+      }
+      _attachFocusNode(widget.focusNode);
+      _focusNode.addListener(_handleFocusChange);
+      _focused = _focusNode.hasFocus;
+      _showFocusRing = M3EFocusRing.shouldShow(_focusNode, context);
+    }
     if (oldWidget.obscureText != widget.obscureText ||
         oldWidget.showPasswordToggle != widget.showPasswordToggle) {
       _obscured = widget.obscureText;
@@ -350,10 +381,10 @@ class _M3ETextFieldState extends State<M3ETextField>
     _controller.removeListener(_handleTextChange);
     _labelMotion.dispose();
     _effectsMotion.dispose();
-    if (widget.focusNode == null) {
+    if (_ownsFocusNode) {
       _focusNode.dispose();
     }
-    if (widget.controller == null) {
+    if (_ownsController) {
       _controller.dispose();
     }
     super.dispose();
