@@ -20,6 +20,7 @@ void main() {
   testWidgets('stacked primary badge stays inside the bar', _badgeInsideBar);
   testWidgets('scroll-away list sits in the same scroll view', _scrollAwayList);
   testWidgets('fixed tabs ellipsize labels that do not fit', _fixedLongLabels);
+  testWidgets('stacked long labels keep one line in a 64 bar', _stackedLong);
 }
 
 Future<void> _heights(WidgetTester tester) async {
@@ -343,6 +344,47 @@ Future<void> _fixedLongLabels(WidgetTester tester) async {
 
   expect(tester.takeException(), isNull);
   expect(find.text('Notifications'), findsOneWidget);
+}
+
+Future<void> _stackedLong(WidgetTester tester) async {
+  Future<void> pump(List<M3ETab> tabs) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 300,
+              child: M3ETabs(
+                scrollable: false,
+                selectedIndex: 0,
+                onTabSelected: (_) {},
+                tabs: tabs,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(M3ETabs)).height, 64);
+  }
+
+  await pump(const <M3ETab>[
+    M3ETab(label: 'Conversations', icon: Icon(M3EIcons.home)),
+    M3ETab(label: 'Notifications', icon: Icon(M3EIcons.star_outline)),
+    M3ETab(label: 'Archived items', icon: Icon(M3EIcons.home)),
+  ]);
+  await pump(const <M3ETab>[
+    M3ETab(
+      label: 'Conversations',
+      icon: Icon(M3EIcons.home),
+      badgeDot: true,
+      badgeInline: true,
+    ),
+    M3ETab(label: 'Notifications', icon: Icon(M3EIcons.star_outline)),
+    M3ETab(label: 'Archived items', icon: Icon(M3EIcons.home)),
+  ]);
 }
 
 Widget _bar(

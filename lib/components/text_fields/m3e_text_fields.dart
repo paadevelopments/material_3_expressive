@@ -275,8 +275,11 @@ class _M3ETextFieldState extends State<M3ETextField>
     implements TextSelectionGestureDetectorBuilderDelegate {
   late TextEditingController _controller;
   late bool _ownsController;
-  late FocusNode _focusNode;
-  late bool _ownsFocusNode;
+  // Created on first use and kept until dispose, so a focus node swap never
+  // disposes a node mid-update.
+  FocusNode? _ownFocusNode;
+  FocusNode get _focusNode =>
+      widget.focusNode ?? (_ownFocusNode ??= FocusNode());
   final GlobalKey<EditableTextState> _editableKey =
       GlobalKey<EditableTextState>();
   late final M3ETextFieldAutofillClient _autofillClient =
@@ -319,7 +322,6 @@ class _M3ETextFieldState extends State<M3ETextField>
   void initState() {
     super.initState();
     _attachController(widget.controller);
-    _attachFocusNode(widget.focusNode);
     _focused = _focusNode.hasFocus;
     _focusNode.addListener(_handleFocusChange);
     _controller.addListener(_handleTextChange);
@@ -327,14 +329,18 @@ class _M3ETextFieldState extends State<M3ETextField>
     M3EFocusInteraction.instance.addListener(_handleFocusInteractionChanged);
   }
 
-  void _attachController(TextEditingController? external) {
+  /// Uses [external], or an own controller seeded with [seed] so text,
+  /// selection and composing carry over when a passed-in one is removed.
+  void _attachController(
+    TextEditingController? external, {
+    TextEditingValue? seed,
+  }) {
     _ownsController = external == null;
-    _controller = external ?? TextEditingController();
-  }
-
-  void _attachFocusNode(FocusNode? external) {
-    _ownsFocusNode = external == null;
-    _focusNode = external ?? FocusNode();
+    _controller =
+        external ??
+        (seed == null
+            ? TextEditingController()
+            : TextEditingController.fromValue(seed));
   }
 
   @override
@@ -351,15 +357,13 @@ class _M3ETextFieldState extends State<M3ETextField>
       if (_ownsController) {
         _controller.dispose();
       }
-      _attachController(widget.controller);
+      _attachController(widget.controller, seed: oldWidget.controller?.value);
       _controller.addListener(_handleTextChange);
     }
     if (oldWidget.focusNode != widget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
-      if (_ownsFocusNode) {
-        _focusNode.dispose();
-      }
-      _attachFocusNode(widget.focusNode);
+      (oldWidget.focusNode ?? _ownFocusNode)?.removeListener(
+        _handleFocusChange,
+      );
       _focusNode.addListener(_handleFocusChange);
       _focused = _focusNode.hasFocus;
       _showFocusRing = M3EFocusRing.shouldShow(_focusNode, context);
@@ -381,9 +385,7 @@ class _M3ETextFieldState extends State<M3ETextField>
     _controller.removeListener(_handleTextChange);
     _labelMotion.dispose();
     _effectsMotion.dispose();
-    if (_ownsFocusNode) {
-      _focusNode.dispose();
-    }
+    _ownFocusNode?.dispose();
     if (_ownsController) {
       _controller.dispose();
     }

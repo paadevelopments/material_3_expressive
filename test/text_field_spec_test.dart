@@ -63,6 +63,84 @@ void main() {
   testWidgets('icons and affixes follow slot alignment', _slotAlignment);
   testWidgets('controller swap shows the new controller text', _controllerSwap);
   testWidgets('focus node swap moves focus to the new node', _focusNodeSwap);
+  testWidgets('removing a controller keeps its text', _controllerToOwn);
+  testWidgets('own controller gives way to a passed-in one', _ownToController);
+  testWidgets('own focus node gives way to a passed-in one', _ownToFocusNode);
+  testWidgets('removing a focus node leaves it usable', _focusNodeToOwn);
+}
+
+Future<void> _controllerToOwn(WidgetTester tester) async {
+  final external = TextEditingController(text: 'ext');
+  addTearDown(external.dispose);
+
+  await tester.pumpWidget(_app(M3ETextField(controller: external)));
+  await tester.pumpAndSettle();
+
+  await tester.pumpWidget(_app(const M3ETextField()));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+  expect(find.text('ext'), findsOneWidget);
+
+  final TextEditingController own = tester
+      .widget<EditableText>(find.byType(EditableText))
+      .controller;
+  expect(own, isNot(same(external)));
+  await tester.enterText(find.byType(EditableText), 'typed');
+  await tester.pump();
+  expect(own.text, 'typed');
+  expect(external.text, 'ext');
+}
+
+Future<void> _ownToController(WidgetTester tester) async {
+  final external = TextEditingController(text: 'passed');
+  addTearDown(external.dispose);
+
+  await tester.pumpWidget(_app(const M3ETextField()));
+  await tester.enterText(find.byType(EditableText), 'own');
+  await tester.pumpAndSettle();
+
+  await tester.pumpWidget(_app(M3ETextField(controller: external)));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+  expect(find.text('passed'), findsOneWidget);
+  expect(find.text('own'), findsNothing);
+}
+
+Future<void> _ownToFocusNode(WidgetTester tester) async {
+  final external = FocusNode(debugLabel: 'external');
+  addTearDown(external.dispose);
+
+  await tester.pumpWidget(_app(const M3ETextField()));
+  await tester.showKeyboard(find.byType(EditableText));
+  await tester.pumpAndSettle();
+
+  await tester.pumpWidget(_app(M3ETextField(focusNode: external)));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+
+  external.requestFocus();
+  await tester.pump();
+  expect(external.hasFocus, isTrue);
+}
+
+Future<void> _focusNodeToOwn(WidgetTester tester) async {
+  final external = FocusNode(debugLabel: 'external');
+  addTearDown(external.dispose);
+
+  await tester.pumpWidget(_app(M3ETextField(focusNode: external)));
+  await tester.pumpAndSettle();
+  await tester.pumpWidget(_app(const M3ETextField()));
+  await tester.pumpAndSettle();
+  await tester.pumpWidget(_app(const SizedBox()));
+  await tester.pumpAndSettle();
+  expect(tester.takeException(), isNull);
+
+  await tester.pumpWidget(
+    _app(Focus(focusNode: external, child: const SizedBox())),
+  );
+  external.requestFocus();
+  await tester.pump();
+  expect(external.hasFocus, isTrue);
 }
 
 Future<void> _controllerSwap(WidgetTester tester) async {

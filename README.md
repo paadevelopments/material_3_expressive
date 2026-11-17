@@ -89,7 +89,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.11.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.11.1`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -115,23 +115,21 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.2.2
+## What's new in 1.2.3
 
-Summary of updates since 1.2.1 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+Summary of updates since 1.2.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Menus, split buttons** — popups opened inside a nested `Navigator` (such
-  as a page modal or modal sheet) now open at their anchor instead of offset
-  from it.
-- **Dropdown menus** — long selection chip labels truncate with an ellipsis
-  instead of overflowing.
-- **Container transforms** — FAB, extended FAB, FAB menu, card, list,
-  carousel item and carousel "Show all" transforms fade the origin's content
-  out and back in instead of landing as a blank shape, and build the
-  destination once.
-- **FAB menu** — an item with an `openBuilder` keeps the menu open so the
-  transform returns to it. New `closeOnItemTap` (default `true`) controls
-  whether other items close the menu.
-- **Carousel** — an item's transform opens on tap instead of after the pulse.
+- **Dependencies** — `material_ui` raised to `^1.11.1`.
+- **Icon buttons** — semantics report the enabled state, and selection only
+  for toggle buttons.
+- **Search** — suggestions from an older query no longer replace the list for
+  a newer one.
+- **Text fields** — `M3ETextField` follows a new `controller` or `focusNode`
+  given at runtime, and keeps its text when a passed-in controller is removed.
+- **Sliders** — discrete `M3ERangeSlider` thumbs stay inside the range and no
+  longer snap past each other.
+- **Tabs** — fixed tab labels too long for their slot truncate with an
+  ellipsis, and primary tabs with an icon keep the label to one line.
 
 ## Installation
 
@@ -139,7 +137,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.2.2
+  material_3_expressive: ^1.2.3
 ```
 
 Then fetch it:

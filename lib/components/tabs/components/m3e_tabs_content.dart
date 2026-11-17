@@ -22,11 +22,18 @@ extension _M3ETabsContent on _M3ETabsState {
             data: IconThemeData(color: color, size: theme.iconSize),
             child: tab.icon!,
           );
+    final bool stack =
+        widget.variant == M3ETabsVariant.primary &&
+        icon != null &&
+        tab.label != null;
     final Widget? label = tab.label == null
         ? null
         : Text(
             tab.label!,
-            maxLines: theme.labelMaxLines,
+            // The 64 bar fits one label line under the icon.
+            maxLines: stack
+                ? math.min(theme.labelMaxLines, 1)
+                : theme.labelMaxLines,
             overflow: TextOverflow.ellipsis,
             style: theme.labelStyle(
               data.typeScale,
@@ -36,10 +43,6 @@ extension _M3ETabsContent on _M3ETabsState {
               interacting: interacting,
             ),
           );
-    final bool stack =
-        widget.variant == M3ETabsVariant.primary &&
-        icon != null &&
-        label != null;
     final bool inlineBadge = _inlineBadge(tab);
     final Widget? badgeIcon = icon == null || inlineBadge
         ? icon
@@ -50,7 +53,7 @@ extension _M3ETabsContent on _M3ETabsState {
         children: <Widget>[
           badgeIcon!,
           SizedBox(height: theme.stackedIconLabelGap),
-          _labeled(theme, tab, label, inlineBadge),
+          _labeled(theme, tab, label!, inlineBadge),
         ],
       );
     }
