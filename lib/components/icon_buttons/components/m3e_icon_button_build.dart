@@ -60,7 +60,8 @@ extension _M3EIconButtonBuild on _M3EIconButtonState {
     final layout = widget.inflateHitTarget ? sizes.target : sizes.visual;
     Widget result = Semantics(
       button: true,
-      selected: selected,
+      enabled: widget.onPressed != null,
+      selected: isToggle ? selected : null,
       label: widget.semanticLabel ?? widget.tooltip,
       child: SizedBox(
         width: layout.width,
