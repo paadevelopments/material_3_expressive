@@ -369,7 +369,7 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
     final double clampedRaw = thumb == _M3ERangeThumb.start
         ? raw.clamp(widget.min, widget.values.end)
         : raw.clamp(widget.values.start, widget.max);
-    final double next = widget.divisions != null
+    final double snapped = widget.divisions != null
         ? M3ESliderMath.snap(
             clampedRaw,
             widget.min,
@@ -377,6 +377,14 @@ class _M3ERangeSliderState extends State<M3ERangeSlider>
             widget.divisions,
           )
         : clampedRaw;
+    // Snapping rounds to the nearest division, which can land on the far side
+    // of the other thumb (for example 0.6 snapped to 1/5 steps) or a hair past
+    // the range end. Keep the moved thumb inside both bounds.
+    final double next =
+        (thumb == _M3ERangeThumb.start
+                ? math.min(snapped, widget.values.end)
+                : math.max(snapped, widget.values.start))
+            .clamp(widget.min, widget.max);
     final updated = thumb == _M3ERangeThumb.start
         ? M3ESliderRange(next, widget.values.end)
         : M3ESliderRange(widget.values.start, next);

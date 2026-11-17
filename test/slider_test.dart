@@ -34,6 +34,10 @@ void main() {
     _dotspacingPadsOuterEdgeOfEndStopsFromTrackEnds,
   );
   testWidgets('range thumbs cannot cross', _rangeThumbsCannotCross);
+  testWidgets(
+    'discrete range thumbs never cross or leave min and max',
+    _discreteRangeThumbsStayOrdered,
+  );
   testWidgets('vertical drag updates value', _verticalDragUpdatesValue);
   testWidgets(
     'vertical min is at bottom and max at top',
@@ -249,6 +253,38 @@ Future<void> _rangeThumbsCannotCross(WidgetTester tester) async {
 
   expect(values.start, lessThanOrEqualTo(values.end));
   expect(values.start, closeTo(0.6, 0.05));
+}
+
+Future<void> _discreteRangeThumbsStayOrdered(WidgetTester tester) async {
+  var values = const M3ESliderRange(0.4, 0.6);
+  await tester.pumpWidget(
+    StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return _host(
+          SizedBox(
+            width: 200,
+            height: 48,
+            child: M3ERangeSlider(
+              values: values,
+              divisions: 5,
+              onChanged: (M3ESliderRange v) => setState(() => values = v),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+
+  // Drag the start thumb past the end thumb. Snapping 0.6 to five divisions
+  // yields 0.6000000000000001, so the moving thumb used to cross the static
+  // one and trip M3ESliderRange's `start <= end` assert.
+  final Offset topLeft = tester.getTopLeft(find.byType(M3ERangeSlider));
+  await tester.dragFrom(topLeft + const Offset(80, 24), const Offset(120, 0));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(values.start, lessThanOrEqualTo(values.end));
+  expect(values.end, inInclusiveRange(0.0, 1.0));
 }
 
 Future<void> _verticalDragUpdatesValue(WidgetTester tester) async {
