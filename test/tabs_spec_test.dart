@@ -19,6 +19,7 @@ void main() {
   testWidgets('sliver tabs scroll away', _sliver);
   testWidgets('stacked primary badge stays inside the bar', _badgeInsideBar);
   testWidgets('scroll-away list sits in the same scroll view', _scrollAwayList);
+  testWidgets('fixed tabs ellipsize labels that do not fit', _fixedLongLabels);
 }
 
 Future<void> _heights(WidgetTester tester) async {
@@ -314,6 +315,34 @@ Future<void> _scrollAwayList(WidgetTester tester) async {
 
 Widget _scrollAwayItem(BuildContext context, int index) {
   return M3EListItem(headline: 'Item ${index + 1}');
+}
+
+Future<void> _fixedLongLabels(WidgetTester tester) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 300,
+            child: M3ETabs(
+              scrollable: false,
+              selectedIndex: 0,
+              onTabSelected: (_) {},
+              tabs: const <M3ETab>[
+                M3ETab(label: 'Conversations'),
+                M3ETab(label: 'Notifications'),
+                M3ETab(label: 'Archived items'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Notifications'), findsOneWidget);
 }
 
 Widget _bar(
