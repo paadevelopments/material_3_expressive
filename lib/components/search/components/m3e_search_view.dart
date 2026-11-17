@@ -199,12 +199,14 @@ class _M3ESearchViewContentState extends State<M3ESearchViewContent>
   }
 
   Future<void> _updateSuggestions() async {
-    _searchValue = _route.searchController.text;
+    final String query = _route.searchController.text;
+    _searchValue = query;
     final Iterable<Widget> suggestions = await _route.suggestionsBuilder(
       context,
       _route.searchController,
     );
-    if (!mounted) {
+    if (!mounted || query != _route.searchController.text) {
+      // A newer keystroke owns the list now; drop this stale answer.
       return;
     }
     setState(() => _suggestions = suggestions);

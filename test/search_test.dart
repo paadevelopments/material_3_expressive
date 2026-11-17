@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -71,6 +73,53 @@ void main() {
     'editable M3ESearchBar fires onTap once per tap',
     (WidgetTester tester) => _searchBarFiresOnTapOnce(tester, readOnly: false),
   );
+  testWidgets(
+    'slow suggestions for an older query do not replace newer results',
+    _staleSuggestionsLose,
+  );
+}
+
+Future<void> _staleSuggestionsLose(WidgetTester tester) async {
+  final controller = M3ESearchController();
+  addTearDown(controller.dispose);
+  final pending = <String, Completer<Iterable<Widget>>>{};
+
+  await tester.pumpWidget(
+    _host(
+      SizedBox(
+        width: 420,
+        child: M3ESearchAnchor.bar(
+          searchController: controller,
+          isFullScreen: false,
+          barHintText: 'Find',
+          suggestionsBuilder: (BuildContext context, M3ESearchController c) {
+            if (c.text.isEmpty) {
+              return const <Widget>[];
+            }
+            return (pending[c.text] ??= Completer<Iterable<Widget>>()).future;
+          },
+        ),
+      ),
+    ),
+  );
+
+  controller.openView();
+  await tester.pumpAndSettle();
+
+  final Finder field = find.byType(EditableText).last;
+  await tester.enterText(field, 'a');
+  await tester.pump();
+  await tester.enterText(field, 'ab');
+  await tester.pump();
+
+  // The newer query resolves first; the older one afterwards.
+  pending['ab']!.complete(<Widget>[const Text('Result ab')]);
+  await tester.pump();
+  pending['a']!.complete(<Widget>[const Text('Result a')]);
+  await tester.pump();
+
+  expect(find.text('Result a'), findsNothing);
+  expect(find.text('Result ab'), findsOneWidget);
 }
 
 Future<void> _searchBarFiresOnTapOnce(
