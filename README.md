@@ -115,11 +115,28 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
+## Migrating to `cupertino_ui`
+
+This package uses [`cupertino_ui`](https://pub.dev/packages/cupertino_ui) `^1.1.7`
+for Cupertino widgets (`CupertinoApp`, `CupertinoButton`, the iOS text
+selection controls, and the rest of the Cupertino library). **Do not import**
+`package:flutter/cupertino.dart`.
+
+```dart
+import 'package:cupertino_ui/cupertino_ui.dart';
+```
+
+Apps that still import `package:flutter/cupertino.dart` should switch those
+imports to `package:cupertino_ui/cupertino_ui.dart`. Like `material_ui`, it
+needs Flutter **3.47.0 or newer** (Dart **3.13.0+**).
+
 ## What's new in 1.2.3
 
 Summary of updates since 1.2.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
 
-- **Dependencies** — `material_ui` raised to `^1.11.1`.
+- **Dependencies** — `material_ui` raised to `^1.11.1`; Cupertino widgets
+  now come from [`cupertino_ui`](https://pub.dev/packages/cupertino_ui)
+  `^1.1.7` instead of `package:flutter/cupertino.dart`.
 - **Icon buttons** — semantics report the enabled state, and selection only
   for toggle buttons.
 - **Search** — suggestions from an older query no longer replace the list for
@@ -160,6 +177,7 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 | ------- | -------------------- |
 | [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures |
 | [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
+| [`cupertino_ui`](https://pub.dev/packages/cupertino_ui) | Official Cupertino widget library (iOS text selection handles for `M3ETextField` and search) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`); `ColorScheme.harmonized` / `Color.harmonizeWith` (2.x, `material_ui`) |
 | [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and selection indicators |

@@ -28,6 +28,7 @@ environment:
 
 dependencies:
   collection: ^1.19.1
+  cupertino_ui: ^1.1.7
   dynamic_color: ^2.1.0
   flutter:
     sdk: flutter

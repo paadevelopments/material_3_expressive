@@ -3,6 +3,9 @@
 ### Changed
 
 * Raise `material_ui` to `^1.11.1`.
+* Add [`cupertino_ui`](https://pub.dev/packages/cupertino_ui) `^1.1.7`;
+  Cupertino imports now use `package:cupertino_ui/cupertino_ui.dart` instead
+  of `package:flutter/cupertino.dart`.
 
 ### Fixed
 
