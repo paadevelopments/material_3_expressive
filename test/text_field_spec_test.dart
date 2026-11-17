@@ -61,6 +61,50 @@ void main() {
   testWidgets('required label and affix labels', _requiredAndAffixes);
   testWidgets('null maxLines grows without a limit', _unlimitedLines);
   testWidgets('icons and affixes follow slot alignment', _slotAlignment);
+  testWidgets('controller swap shows the new controller text', _controllerSwap);
+  testWidgets('focus node swap moves focus to the new node', _focusNodeSwap);
+}
+
+Future<void> _controllerSwap(WidgetTester tester) async {
+  final first = TextEditingController(text: 'first');
+  final second = TextEditingController(text: 'second');
+  addTearDown(first.dispose);
+  addTearDown(second.dispose);
+
+  await tester.pumpWidget(_app(M3ETextField(controller: first)));
+  await tester.pumpAndSettle();
+  expect(find.text('first'), findsOneWidget);
+
+  await tester.pumpWidget(_app(M3ETextField(controller: second)));
+  await tester.pumpAndSettle();
+
+  expect(find.text('first'), findsNothing);
+  expect(find.text('second'), findsOneWidget);
+  expect(
+    tester.widget<EditableText>(find.byType(EditableText)).controller,
+    second,
+  );
+}
+
+Future<void> _focusNodeSwap(WidgetTester tester) async {
+  final first = FocusNode(debugLabel: 'first');
+  final second = FocusNode(debugLabel: 'second');
+  addTearDown(first.dispose);
+  addTearDown(second.dispose);
+
+  await tester.pumpWidget(_app(M3ETextField(focusNode: first)));
+  await tester.pumpAndSettle();
+
+  await tester.pumpWidget(_app(M3ETextField(focusNode: second)));
+  await tester.pumpAndSettle();
+  second.requestFocus();
+  await tester.pump();
+
+  expect(second.hasFocus, isTrue);
+  expect(
+    tester.widget<EditableText>(find.byType(EditableText)).focusNode,
+    second,
+  );
 }
 
 Future<void> _filledMeasurements(WidgetTester tester) async {
