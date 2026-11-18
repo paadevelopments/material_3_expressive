@@ -89,7 +89,7 @@ flutter run
 
 ## Migrating to `material_ui`
 
-This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.11.0`
+This package uses [`material_ui`](https://pub.dev/packages/material_ui) `^1.11.1`
 for Material widgets (`MaterialApp`, `ThemeData`, `ColorScheme`, and the rest of
 the Material library). **Do not import** `package:flutter/material.dart`.
 
@@ -115,23 +115,38 @@ import 'package:material_ui/material_ui.dart' hide CornerRounding, RoundedPolygo
 [`dynamic_color`](https://pub.dev/packages/dynamic_color) `^2.1.0` (re-exported
 through this package). Prefer those APIs rather than a local duplicate.
 
-## What's new in 1.2.2
+## Migrating to `cupertino_ui`
 
-Summary of updates since 1.2.1 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+This package uses [`cupertino_ui`](https://pub.dev/packages/cupertino_ui) `^1.1.7`
+for Cupertino widgets (`CupertinoApp`, `CupertinoButton`, the iOS text
+selection controls, and the rest of the Cupertino library). **Do not import**
+`package:flutter/cupertino.dart`.
 
-- **Menus, split buttons** — popups opened inside a nested `Navigator` (such
-  as a page modal or modal sheet) now open at their anchor instead of offset
-  from it.
-- **Dropdown menus** — long selection chip labels truncate with an ellipsis
-  instead of overflowing.
-- **Container transforms** — FAB, extended FAB, FAB menu, card, list,
-  carousel item and carousel "Show all" transforms fade the origin's content
-  out and back in instead of landing as a blank shape, and build the
-  destination once.
-- **FAB menu** — an item with an `openBuilder` keeps the menu open so the
-  transform returns to it. New `closeOnItemTap` (default `true`) controls
-  whether other items close the menu.
-- **Carousel** — an item's transform opens on tap instead of after the pulse.
+```dart
+import 'package:cupertino_ui/cupertino_ui.dart';
+```
+
+Apps that still import `package:flutter/cupertino.dart` should switch those
+imports to `package:cupertino_ui/cupertino_ui.dart`. Like `material_ui`, it
+needs Flutter **3.47.0 or newer** (Dart **3.13.0+**).
+
+## What's new in 1.2.3
+
+Summary of updates since 1.2.2 (details in [`CHANGELOG.md`](CHANGELOG.md)):
+
+- **Dependencies** — `material_ui` raised to `^1.11.1`; Cupertino widgets
+  now come from [`cupertino_ui`](https://pub.dev/packages/cupertino_ui)
+  `^1.1.7` instead of `package:flutter/cupertino.dart`.
+- **Icon buttons** — semantics report the enabled state, and selection only
+  for toggle buttons.
+- **Search** — suggestions from an older query no longer replace the list for
+  a newer one.
+- **Text fields** — `M3ETextField` follows a new `controller` or `focusNode`
+  given at runtime, and keeps its text when a passed-in controller is removed.
+- **Sliders** — discrete `M3ERangeSlider` thumbs stay inside the range and no
+  longer snap past each other.
+- **Tabs** — fixed tab labels too long for their slot truncate with an
+  ellipsis, and primary tabs with an icon keep the label to one line.
 
 ## Installation
 
@@ -139,7 +154,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  material_3_expressive: ^1.2.2
+  material_3_expressive: ^1.2.3
 ```
 
 Then fetch it:
@@ -162,6 +177,7 @@ External packages declared in [`pubspec.yaml`](pubspec.yaml):
 | ------- | -------------------- |
 | [`flutter`](https://api.flutter.dev/) | SDK — widgets, painting, gestures |
 | [`material_ui`](https://pub.dev/packages/material_ui) | Official Material widget library (`MaterialApp`, `ThemeData`, `ColorScheme`) |
+| [`cupertino_ui`](https://pub.dev/packages/cupertino_ui) | Official Cupertino widget library (iOS text selection handles for `M3ETextField` and search) |
 | [`collection`](https://pub.dev/packages/collection) | Small collection helpers used by component logic |
 | [`dynamic_color`](https://pub.dev/packages/dynamic_color) | Platform dynamic / Material You seed colors for `M3EMaterialApp` (`dynamicColoring`); `ColorScheme.harmonized` / `Color.harmonizeWith` (2.x, `material_ui`) |
 | [`motor`](https://pub.dev/packages/motor) | Unified motion API — physics springs and curves that drive expressive morphs and selection indicators |
