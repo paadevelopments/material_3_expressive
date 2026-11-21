@@ -58,6 +58,14 @@ void main() {
     'outside tap closes the dropdown without activating the page',
     _outsideTapClosesDropdownWithoutActivatingPage,
   );
+  testWidgets(
+    'M3EDropdownMenu removes its global focus listeners on dispose',
+    _m3edropdownmenuRemovesGlobalFocusListenersOnDispose,
+  );
+  testWidgets(
+    'M3EDropdownMenu detaches from a caller-owned controller on dispose',
+    _m3edropdownmenuDetachesFromCallerOwnedControllerOnDispose,
+  );
 }
 
 Future<void> _m3edropdownmenuRendersFieldWithHintText(
@@ -362,4 +370,51 @@ Future<void> _outsideTapClosesDropdownWithoutActivatingPage(
   expect(behindTapped, isFalse);
   expect(find.text('Dart'), findsNothing);
   expect(find.text('Behind'), findsOneWidget);
+}
+
+Future<void> _m3edropdownmenuRemovesGlobalFocusListenersOnDispose(
+  WidgetTester tester,
+) async {
+  // The menu registers on the `M3EFocusInteraction` singleton while mounted
+  // and must detach on dispose; otherwise the singleton keeps the State ->
+  // FocusNode -> popped route element tree alive for the process lifetime.
+  expect(M3EFocusInteraction.instance.hasListeners, isFalse);
+
+  await tester.pumpWidget(
+    _host(
+      const M3EDropdownMenu<String>(
+        items: _items,
+        fieldStyle: M3EDropdownFieldStyle(hintText: 'Choose framework'),
+      ),
+    ),
+  );
+  expect(M3EFocusInteraction.instance.hasListeners, isTrue);
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump();
+
+  expect(M3EFocusInteraction.instance.hasListeners, isFalse);
+}
+
+Future<void> _m3edropdownmenuDetachesFromCallerOwnedControllerOnDispose(
+  WidgetTester tester,
+) async {
+  final controller = M3EDropdownController<String>();
+  addTearDown(controller.dispose);
+
+  await tester.pumpWidget(
+    _host(
+      M3EDropdownMenu<String>(
+        items: _items,
+        controller: controller,
+        fieldStyle: const M3EDropdownFieldStyle(hintText: 'Choose framework'),
+      ),
+    ),
+  );
+  expect(controller.hasListeners, isTrue);
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump();
+
+  expect(controller.hasListeners, isFalse);
 }
