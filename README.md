@@ -1347,6 +1347,19 @@ export PATH="$PWD/.fvm/flutter_sdk/bin:$PATH"
 dart run custom_lint
 ```
 
+### Docs for AI coding agents
+
+Point your agent at
+[`llms.txt`](https://paadevelopments.github.io/material_3_expressive/llms.txt)
+(index) or
+[`llms-full.txt`](https://paadevelopments.github.io/material_3_expressive/llms-full.txt)
+(every component, plus a Flutter to M3E migration table). Both are generated
+from this README by `tools/llms/generate_llms.dart`:
+
+```bash
+dart run tools/llms/generate_llms.dart
+```
+
 ## Support
 
 If this package helps your project:
