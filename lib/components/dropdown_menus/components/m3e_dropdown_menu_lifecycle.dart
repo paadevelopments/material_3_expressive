@@ -55,18 +55,6 @@ extension _M3EDropdownMenuLifecycle<T> on _M3EDropdownMenuState<T> {
     });
   }
 
-  void _onFocusHighlightModeChanged(FocusHighlightMode mode) {
-    _syncFieldFocusRing();
-  }
-
-  /// Keeps the field ring in sync with keyboard focus highlight state.
-  void _syncFieldFocusRing() {
-    if (!mounted) {
-      return;
-    }
-    _focusRingNotifier.value = M3EFocusRing.shouldShow(_focusNode, context);
-  }
-
   void _listenBackButton() {
     if (!widget.closeOnBackButton) {
       return;
@@ -167,25 +155,6 @@ extension _M3EDropdownMenuLifecycle<T> on _M3EDropdownMenuState<T> {
         _isLoading = false;
         _loadingNotifier.value = false;
       }
-    }
-  }
-
-  void _onControllerChanged() {
-    _formFieldKey.currentState?.didChange(_controller.selectedItems);
-
-    if (_controller.isOpen && !_portalController.isShowing) {
-      _open();
-    } else if (!_controller.isOpen && _portalController.isShowing) {
-      _close();
-    }
-  }
-
-  void _onExpandAnimationTick() {
-    if (!_controller.isOpen && _expandCtrl.value <= 0.01 && mounted) {
-      if (_portalController.isShowing) {
-        _portalController.hide();
-      }
-      _openingShowOnTop = null;
     }
   }
 
