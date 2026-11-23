@@ -80,3 +80,13 @@ only as the user approved in that step.
 - Do not add `// ignore` comments or `analysis_options` suppressions.
 - Do not change any logical behavior.
 - Re-run steps 3 to 5 until they all report no issues.
+
+## 7. Regenerate LLM docs
+
+Rebuild `docs/llms.txt` and `docs/llms-full.txt` from `README.md` and
+`tools/llms/migration.md`. Do not edit the generated files by hand. If a
+component was added or renamed, update `tools/llms/migration.md` first.
+
+```bash
+.fvm/flutter_sdk/bin/dart run tools/llms/generate_llms.dart
+```

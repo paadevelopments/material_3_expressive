@@ -116,6 +116,14 @@ Ensure Jekyll does not process the folder:
 test -f docs/.nojekyll || touch docs/.nojekyll
 ```
 
+Regenerate the LLM docs (`docs/llms.txt`, `docs/llms-full.txt`). Flutter does
+not emit them, so they normally survive the build, but regenerating keeps them
+in step with `README.md`:
+
+```bash
+.fvm/flutter_sdk/bin/dart run tools/llms/generate_llms.dart
+```
+
 ## Step E — Verification
 
 Run from the repository root:
@@ -133,6 +141,10 @@ fi
 
 # GitHub Pages marker
 test -f docs/.nojekyll
+
+# LLM docs present
+test -f docs/llms.txt
+test -f docs/llms-full.txt
 
 # Project static analysis
 .fvm/flutter_sdk/bin/dart analyze
@@ -159,7 +171,7 @@ the build locally to run it.
 From the repository root, when `docs/index.web-release.html` already exists:
 
 ```bash
-cd example && ../.fvm/flutter_sdk/bin/flutter build web --release --base-href /material_3_expressive/ --output ../docs && cd .. && cp docs/index.web-release.html docs/index.html && (test -f docs/.nojekyll || touch docs/.nojekyll)
+cd example && ../.fvm/flutter_sdk/bin/flutter build web --release --base-href /material_3_expressive/ --output ../docs && cd .. && cp docs/index.web-release.html docs/index.html && (test -f docs/.nojekyll || touch docs/.nojekyll) && .fvm/flutter_sdk/bin/dart run tools/llms/generate_llms.dart
 ```
 
 Then run the Step E verification commands above. Stop there — do not host the

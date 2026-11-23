@@ -1,0 +1,77 @@
+# Material 3 Expressive
+
+> Flutter UI library (v1.2.3) implementing the Material 3 Expressive component set as direct `M3E*` widgets from one import: `package:material_3_expressive/material_3_expressive.dart`.
+
+A faithful Flutter implementation of the [Material 3](https://m3.material.io/components) **Expressive** component set.
+
+Install: `flutter pub add material_3_expressive`.
+
+Setup: wrap the app in `M3EMaterialApp(data: M3EThemeData.light(seedColor: ...), home: ...)`, or wrap a subtree in `M3ETheme(data: ..., child: ...)`. Read tokens with `M3ETheme.of(context)`. Each component is customized through its `M3E*Theme` field on `M3EThemeData`.
+
+## Docs
+
+- [Full reference](https://paadevelopments.github.io/material_3_expressive/llms-full.txt): install, theming, every component with a snippet, and a Flutter to M3E migration table
+- [README](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md): the same docs on GitHub
+- [Live demo](https://paadevelopments.github.io/material_3_expressive/): gallery app built from `example/`
+- [pub.dev](https://pub.dev/packages/material_3_expressive): package page and API reference
+
+## Actions
+
+- [M3EButton](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ebutton): Text button in five sizes with a press shape morph and the sparkle ripple.
+- [M3EIconButton](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eiconbutton): Icon-only button in filled (default), tonal, outlined and standard variants.
+- [M3EFab](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3efab): Floating action button in `small` 40, `regular` 56, `medium` 80 (default) and `large` 96.
+- [M3EExtendedFab](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eextendedfab): FAB with a required label, in `small` 56 (default), `medium` 80 and `large` 96.
+- [M3EFabMenu](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3efabmenu): Speed-dial menu of 2–6 items.
+- [M3EButtonGroup](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ebuttongroup): Standard or connected group of `M3EButton` actions with single or multi selection.
+- [M3ESegmentedButton](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3esegmentedbutton): Outlined single or multi-select control with 2–5 segments, 40 tall with a 48 target, and a 1 outline border.
+- [M3ESplitButton](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3esplitbutton): A primary action and a menu trigger, 2 apart.
+
+## Selection
+
+- [M3ECheckbox](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3echeckbox): Checkbox with an 18 box, 2 corners, a 40 state layer and a 48 target, with optional `tristate` and `label`.
+- [M3ERadio](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eradio): Radio with a 20 icon, a 40 state layer and a 48 target.
+- [M3ESwitch](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eswitch): Switch with a 52×32 track.
+- [M3EChip](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3echip): Assist, filter, input and suggestion chips, 32 tall with 8 corners.
+- [M3EDropdownMenu](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3edropdownmenu): Dropdown for one or many values, with optional search, a selection `limit` and async items (`.future`).
+- [M3ESlider](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eslider): Value or range slider, also centered, wavy and vertical.
+- [M3EDatePicker](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3edatepicker): Inline calendar (`M3ECalendarDatePicker`) and dialogs for one date or a range, with a year grid and text input.
+- [M3ETimePicker](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3etimepicker): Dialog and inline dial (256) for a time of day.
+
+## Containment
+
+- [M3ECard](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ecard): Elevated, filled and outlined card with 16 content padding and a secondary 3 focus ring.
+- [M3ECarousel](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ecarousel): Multi-browse, uncontained, multi-aspect, hero and full-screen carousels, horizontal or vertical (`axis`).
+- [M3EListItem](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3elistitem): List row with a headline, supporting text, and leading and trailing slots.
+- [M3EList](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3elist): The list widget, with segmented (default) or standard corners.
+- [M3ESelection](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eselection): Multi-select host: an `M3ESelectionAppBar` swaps its `idle` bar for a contextual bar with a count, select-all and `actions` while rows are selected, over any list body.
+- [M3EDivider](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3edivider): 1 outline variant line, full width unless `inset` or `outerMargin` is set, horizontal or vertical.
+- [M3EDialog](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3edialog): Basic and full-screen dialogs.
+- [M3EBottomSheet](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ebottomsheet): Modal and standard bottom sheets, full width up to 640, on surface container low, with 28 top corners and a 32×4 drag handle.
+- [M3ESideSheet](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3esidesheet): Modal and standard side sheets on the end edge, 256 wide (up to 400).
+
+## Navigation
+
+- [M3EAppBar](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eappbar): Top, search, sliver and bottom app bars.
+- [M3ETabs](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3etabs): Primary and secondary tab bars, 48 tall (64 for primary icon and label), with a 3 (primary) or 2 (secondary) indicator.
+- [M3ENavigationBar](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3enavigationbar): Bottom navigation with a selection pill that scales in place.
+- [M3ENavigationRail](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3enavigationrail): Vertical navigation, 96 wide collapsed (80 narrow) and 220–360 expanded, with an optional FAB slot.
+- [M3ENavigationDrawer](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3enavigationdrawer): Standard (default) or modal drawer, 360 wide with 16 end corners.
+- [M3EToolbar](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3etoolbar): Floating (default) or docked toolbar, 64 tall.
+- [M3EMenu](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3emenu): Vertical and baseline menus, 112–280 wide with 48 entries, plus groups, submenus and multi-select.
+
+## Feedback
+
+- [M3EBadge](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3ebadge): A 6 dot or a label badge (at least 16) in error and on error, drawn over its child without moving it.
+- [M3EProgressIndicator](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eprogressindicator): Circular and linear progress, flat or wavy, determinate or indeterminate.
+- [M3ELoadingIndicator](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3eloadingindicator): Indeterminate morphing shape, 48 outer and 38 active by default, plain or `contained`.
+- [M3ERefreshIndicator](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3erefreshindicator): Pull-to-refresh for scrollables that shows a contained `M3ELoadingIndicator`.
+- [M3ETooltip](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3etooltip): Plain tooltip (up to 200 wide, above the target) or rich tooltip (up to 320, with a title and actions).
+- [M3ESnackbar](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3esnackbar): Short message at the bottom, at least 48 tall and up to 600 wide, with an optional action and close button.
+- [M3ETextField](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3etextfield): Filled or outlined field, 56 tall with 4 corners, and a label that springs between the middle and the top.
+- [M3ESearchBar / M3ESearchAnchor / M3ESliverSearchBar](https://github.com/paadevelopments/material_3_expressive/blob/main/README.md#m3esearchbar--m3esearchanchor--m3esliversearchbar): 56 pill search bar on surface container high, 24 from its pane and 12 when focused, and a search view (contained or divided) that is full-screen below 600 and docked above.
+
+## Optional
+
+- [Changelog](https://github.com/paadevelopments/material_3_expressive/blob/main/CHANGELOG.md): recent changes and migrations
+
+Generated from README.md by tools/llms/generate_llms.dart. Do not edit by hand.
